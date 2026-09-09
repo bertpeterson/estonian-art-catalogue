@@ -1,0 +1,11 @@
+SELECT ?a ?aLabel ?birth ?death (COUNT(DISTINCT ?w) AS ?n) WHERE {
+  ?a wdt:P31 wd:Q5 .
+  { ?a wdt:P27 wd:Q191 } UNION { ?a wdt:P172 wd:Q189531 } UNION { ?a wdt:P27 wd:Q83376 }
+  ?a wdt:P106 ?occ .
+  VALUES ?occ { wd:Q1028181 wd:Q1281618 wd:Q1925963 wd:Q11569986 wd:Q33231 wd:Q3391743 wd:Q483501 wd:Q644687 wd:Q10862983 }
+  OPTIONAL { ?a wdt:P569 ?birth } OPTIONAL { ?a wdt:P570 ?death }
+  OPTIONAL { ?w wdt:P170 ?a . ?w wdt:P31/wdt:P279* wd:Q838948 }
+  SERVICE wikibase:label { bd:serviceParam wikibase:language "en,et". }
+}
+GROUP BY ?a ?aLabel ?birth ?death
+ORDER BY DESC(?n)

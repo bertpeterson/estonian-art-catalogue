@@ -1,0 +1,38 @@
+# Scraped source pages — large, re-derivable by re-running the harvest scripts
+data/cache/
+data/dkcache/
+data/cca_cache/
+
+# Raw per-source harvest dumps (inputs to data/merge.py, not outputs)
+data/records.json
+data/records_pre_hygiene.json
+data/records_pre_mass.json
+data/mass_records.json
+data/scope_records.json
+data/scope_todo.json
+data/dk_records.json
+data/dk_list.json
+data/dk_list2.json
+data/harvest.json
+data/harvest2.json
+data/ekm_all_list.json
+
+# Scratch pages saved while working out selectors, and run logs
+data/*.html
+data/*.log
+data/*.txt
+
+# OS / editor
+.DS_Store
+
+# One-off probes and raw query responses kept only while working
+data/pg.json
+data/pg3.json
+data/rs.json
+data/t.rdf
+data/q0.json
+data/q1.json
+data/probe2.py
+data/mass_todo.json
+data/coll_samples.json
+type-specimen.html

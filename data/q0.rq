@@ -1,0 +1,7 @@
+SELECT ?m ?mLabel ?n WHERE {
+  ?m wdt:P17 wd:Q191 .
+  ?m wdt:P31/wdt:P279* wd:Q33506 .
+  OPTIONAL { SELECT ?m (COUNT(?w) AS ?n) WHERE { ?w wdt:P195 ?m } GROUP BY ?m }
+  SERVICE wikibase:label { bd:serviceParam wikibase:language "en,et". }
+}
+ORDER BY DESC(?n) LIMIT 40
