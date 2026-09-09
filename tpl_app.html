@@ -1,0 +1,1074 @@
+<script>
+(function(){
+  "use strict";
+  // repeated strings ship once in DATA.vocab and are referenced by index; rehydrate them
+  (function decode(){
+    const V = DATA.vocab; if (!V) return;
+    for (const f of Object.keys(V)){
+      const table = V[f];
+      for (const w of DATA.works){
+        const i = w[f];
+        if (typeof i === "number") w[f] = table[i];
+      }
+    }
+    delete DATA.vocab;
+    // row keys are the inventory number stripped of punctuation; only synthetic ones ship
+    for (const w of DATA.works)
+      if (!w.k) w.k = (w.nu || "").toUpperCase().replace(/[^A-Z0-9:]/g, "") || null;
+  })();
+  let LANG = "en";
+  // the host may stamp data-theme itself; remember it so "auto" can hand control back
+  const HOST_THEME = document.documentElement.getAttribute("data-theme");
+  let THEME = "auto";
+  function applyTheme(){
+    const root = document.documentElement;
+    if (THEME === "auto"){
+      if (HOST_THEME) root.setAttribute("data-theme", HOST_THEME);
+      else root.removeAttribute("data-theme");
+    } else root.setAttribute("data-theme", THEME);
+    for (const t of ["auto","light","dark"])
+      $("th-"+t).setAttribute("aria-pressed", THEME === t);
+  }
+  function setTheme(t, push){
+    THEME = ["light","dark"].includes(t) ? t : "auto";
+    try { localStorage.setItem("ekr:theme", THEME); } catch(e){}
+    applyTheme();
+    if (push !== false) pushHash(true);
+  }
+  const T = (k, v) => {
+    let s = (I18N[LANG === "en" ? "EN" : "ET"][k]) ?? k;
+    if (v) for (const p in v) s = s.split("{"+p+"}").join(v[p]);
+    return s;
+  };
+  const musName = m => LANG === "en" ? (I18N.MUSEUM_EN[m] || m) : m;
+  const bioFor = ar => {
+    const en = ar.ben, et = ar.b;
+    if (LANG === "en") return en ? {t:en, s:ar.bens, alt:false} : (et ? {t:et, s:ar.bs, alt:true} : {t:"", s:null, alt:false});
+    return et ? {t:et, s:ar.bs, alt:false} : (en ? {t:en, s:ar.bens, alt:true} : {t:"", s:null, alt:false});
+  };
+  const catName = c => LANG === "en" ? (I18N.CAT_EN[c] || c) : c;
+  const medName = e => LANG === "en" ? e : (I18N.MEDIUM_ET[e] || e);
+  const techName = w => LANG === "en" ? (w.tc || w.tce) : (w.tce || w.tc);
+  const matName  = w => LANG === "en" ? (w.m  || w.me)  : (w.me  || w.m);
+  function dateLabel(w){
+    if (!w.yl) return "";
+    if (LANG !== "en") return w.yl;
+    let s = w.yl;
+    for (const k in I18N.DATEWORD_EN) s = s.split(k).join(I18N.DATEWORD_EN[k]);
+    return s.replace(/(\d{4})\.\s*s\b/g, "$1s").replace(/\s{2,}/g," ").trim();
+  }
+  const esc = s => String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+  const A = DATA.artists, W = DATA.works;
+  const decOf = w => w.y == null ? "und" : Math.floor(w.y/10)*10;
+
+  const MUS = {
+    "Eesti Kunstimuuseum":"EKM","Tartu Kunstimuuseum":"TKM","Eesti Ajaloomuuseum":"AM",
+    "Eesti Kunstiakadeemia muuseum":"EKA","Eesti Arhitektuurimuuseum":"EAM",
+    "Tartu Ülikooli kunstimuuseum":"TÜKM","Dr. Fr. R. Kreutzwaldi Memoriaalmuuseum":"KRM",
+    "Eesti Spordi- ja Olümpiamuuseum":"ESOM","Tallinna Linnamuuseum":"TLM",
+    "Narva Muuseum":"NLM","Eesti Rahva Muuseum":"ERM","Uue Kunsti Muuseum":"UKM",
+    "Eesti Teatri- ja Muusikamuuseum":"TMM","Viljandi Muuseum":"VM",
+    "Eesti Kaasaegse Kunsti Muuseum":"EKKM","Veneetsia biennaal, Eesti paviljon":"VEN","Saaremaa Muuseum":"SM","Virumaa Muuseumid":"VIRU",
+    "Eesti Maaelumuuseumid SA, Eesti Põllumajandusmuuseum":"EPM",
+    "Eesti Maaelumuuseumid SA, C. R. Jakobsoni Talumuuseum":"JAK",
+    "Hiiumaa Muuseumid":"HIIU","Haapsalu ja Läänemaa Muuseumid":"HLM","Pärnu Muuseum":"PM"};
+  const abbr = m => MUS[m] || (m||"").slice(0,4).toUpperCase();
+
+  const PERIODS = [[1700,1917,"Tsaariaeg","Imperial Russia"],[1918,1939,"Vabariik","First Republic"],
+                   [1940,1990,"Okupatsioon","Occupation"],[1991,2099,"Taasiseseisvus","Independence"]];
+  const periodLabel = d => PERIODS.filter(p=>p[1]>=d && p[0]<=d+9)
+    .map(p => LANG === "en" ? I18N.PERIOD_EN[p[2]] : I18N.PERIOD_ET[p[2]]).join("  →  ");
+  const blurbFor = d => LANG === "en" ? (BLURBS[d] || "") : (I18N.BLURB_ET[d] || BLURBS[d] || "");
+
+  const BLURBS = {
+    1840:"Julie Hagen-Schwarz trains in Dresden and Italy — the first professionally schooled woman artist from Estonia.",
+    1850:"Art here is still Baltic-German and academic. In 1855 Johann Köler, a peasant's son, enters the St Petersburg Academy.",
+    1860:"The Awakening begins. Köler paints Estonians as subjects worth painting, and runs the movement's politics from the imperial capital.",
+    1870:"Köler and Weizenberg work in St Petersburg and Rome. The first professional Estonian art is made abroad, for a nation with no state.",
+    1880:"Weizenberg cuts Linda, mother of Kalevipoeg, in marble: the national epic enters academic sculpture.",
+    1890:"Düsseldorf and Munich displace St Petersburg as the training ground. The Awakening generation reaches maturity.",
+    1900:"Noor-Eesti sets the terms — “let us be Estonians, but let us also become Europeans” (Gustav Suits). Paris, and the 1905 revolution.",
+    1910:"Konrad Mägi's colour and Ado Vabbe's line arrive together. The Republic is declared in 1918, in the middle of a war.",
+    1920:"The Pallas school opens in Tartu in 1919; the Group of Estonian Artists brings constructivism back from Paris and Riga.",
+    1930:"Wiiralt engraves Paris from the inside. At home, a state-sponsored national classicism.",
+    1940:"Occupation, war, the 1941 and 1949 deportations, flight to Sweden. The generation splits between exile and the camps.",
+    1950:"Socialist realism is compulsory. Abstraction survives privately in Tartu studios and in Sooster's prison notebooks.",
+    1960:"The Thaw. ANK'64 in Tallinn, op art, surrealism, and the first exhibitions that are not about labour.",
+    1970:"SOUP'69 and geometric abstraction. Lapin, Vint and Runge treat print, design and architecture as a single practice.",
+    1980:"Stagnation and hyperrealism above ground; performance and installation in private courtyards.",
+    1990:"Independence, the Soros Centre, and video. Estonian art joins the international circuit almost overnight.",
+    2000:"Venice becomes the measure. A generation works between Tallinn, Berlin and Amsterdam.",
+    2010:"Post-internet and the archive. e-Estonia turns into subject matter.",
+    2020:"Ceramics, ecology and myth; Karlson's wolves fill a deconsecrated Venetian church."
+  };
+
+  const surnameOf = n => { const c = n.replace(/\([^)]*\)?/g," ").replace(/[()]/g," ").trim(); return (c || n.trim()).split(/\s+/).pop(); };
+  const DECPOS = {};
+  let DECC = null;
+  function decTable(){
+    if (DECC) return DECC;
+    DECADES.forEach((d,i) => DECPOS[d] = i);
+    DECC = A.map(() => DECADES.map(() => 0));
+    for (const w of W){
+      if (w.y == null) continue;
+      const p = DECPOS[Math.floor(w.y/10)*10];
+      if (p !== undefined) DECC[w.a][p]++;
+    }
+    return DECC;
+  }
+  const decCounts = idx => decTable()[idx];
+  function spark(counts, w, h){
+    const max = Math.max(1, ...counts), bw = w/counts.length;
+    const bars = counts.map((c,i)=>{
+      if (!c) return "";
+      const bh = Math.max(1.5, (c/max)*h);
+      return `<rect x="${(i*bw).toFixed(2)}" y="${(h-bh).toFixed(2)}" width="${Math.max(0.9,bw-0.9).toFixed(2)}" height="${bh.toFixed(2)}"/>`;
+    }).join("");
+    return `<svg class="spark" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" preserveAspectRatio="none" aria-hidden="true" fill="currentColor">${bars}</svg>`;
+  }
+
+  // span whatever the data actually covers, rather than a range assumed up front
+  const DECADES = (() => {
+    const ys = W.map(w=>w.y).filter(y=>y!=null);
+    const lo = Math.floor(Math.min(...ys)/10)*10, hi = Math.floor(Math.max(...ys)/10)*10;
+    const out = []; for (let d=lo; d<=hi; d+=10) out.push(d);
+    return out;
+  })();
+
+  const MEDIA = [...new Set(W.map(w=>w.e))].sort((a,b)=>
+    W.filter(w=>w.e===b).length - W.filter(w=>w.e===a).length);
+  const MUSEUMS = [...new Set(W.map(w=>w.mu))].sort((a,b)=>
+    W.filter(w=>w.mu===b).length - W.filter(w=>w.mu===a).length);
+  const CATS = [...new Set(W.map(w=>w.c).filter(Boolean))].sort((a,b)=>
+    W.filter(w=>w.c===b).length - W.filter(w=>w.c===a).length);
+  const SRCS = [["muis","MuIS"],["ekm","EKM Digital"],["ekmmuis","Both"],["ekkm","EKKM"],["cca","CCA / Venice"]];
+  const NOORIGIN = "\u0000none";
+  const originsOf = w => { const f = A[w.a].aff; return f ? [f] : [NOORIGIN]; };
+  const ORIGINS = (() => {
+    const m = new Map();
+    for (const w of W) for (const o of originsOf(w)) m.set(o, (m.get(o)||0)+1);
+    return [...m.entries()].sort((x,y)=> (x[0]===NOORIGIN)-(y[0]===NOORIGIN) || y[1]-x[1]).map(x=>x[0]);
+  })();
+  const SRCLAB = {muis:"muis", ekm:"digi", ekmmuis:"both", cca:"cca", ekkm:"ekkm"};
+  const SRCFULL = {muis:"catalogued in MuIS only", ekm:"catalogued in the EKM Digital Collection only", ekmmuis:"in both catalogues, merged on inventory number", cca:"Estonian Centre for Contemporary Art", ekkm:"Contemporary Art Museum of Estonia"};
+  const stag = s => s==="ed" ? '<span class="tag">ed</span>' : s==="ekm" ? '<span class="tag">EKM</span>' : '<span class="tag">MuIS</span>';
+
+  const state = {group:"decade", decOrder:"earliest", artOrder:"az", q:"",
+                 decade:null, media:new Set(), museums:new Set(), cats:new Set(), srcs:new Set(),
+                 artist:null, letter:null, idxOpen:false, idxQ:"", idxLimit:120, showEarly:false, origins:new Set(), sort:"year", year:null, gLimit:50, from:null, to:null, undOnly:false, open:null, expand:new Set()};
+  const LIMIT_DEC = 50, LIMIT_ART = 18;
+  const slug = s => (s||"").normalize("NFKD").replace(/[\u0300-\u036f]/g,"")
+      .toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"");
+  const SRCKEYS = ["muis","ekm","ekmmuis","ekkm","cca"];
+  let applying = false;
+
+  function stateToHash(){
+    const p = new URLSearchParams();
+    if (LANG !== "en") p.set("lang", LANG);
+    if (THEME !== "auto") p.set("theme", THEME);
+    if (state.group !== "decade") p.set("group", state.group);
+    const ord = state.group === "decade" ? state.decOrder : state.artOrder;
+    if (ord !== "earliest" && ord !== "az") p.set("order", ord);
+    if (state.sort !== "year") p.set("sort", state.sort);
+    if (state.q) p.set("q", state.q);
+    if (state.artist !== null) p.set("artist", slug(A[state.artist].n));
+    if (state.decade !== null) p.set("decade", state.decade);
+    if (state.year !== null) p.set("year", state.year);
+    if (state.from !== null) p.set("from", state.from);
+    if (state.to !== null) p.set("to", state.to);
+    if (state.undOnly) p.set("undated", "1");
+    state.media.forEach(v => p.append("medium", slug(v)));
+    state.museums.forEach(v => p.append("museum", abbr(v).toLowerCase()));
+    state.cats.forEach(v => p.append("cat", slug(v)));
+    state.srcs.forEach(v => p.append("src", v));
+    state.origins.forEach(v => p.append("origin", v===NOORIGIN?"none":v));
+    if (state.open) p.set("open", state.open);
+    if (state.idxOpen) p.set("index", state.letter || "all");
+    return p.toString();
+  }
+  function pushHash(replace){
+    if (applying) return;
+    const h = stateToHash();
+    try { history[replace ? "replaceState" : "pushState"](null, "",
+      location.pathname + location.search + (h ? "#" + h : "")); } catch(e){
+      try { location.hash = h; } catch(e2){}
+    }
+    saveLast(h); refreshShare();
+  }
+  function hashToState(){
+    const p = new URLSearchParams(location.hash.replace(/^#/, ""));
+    LANG = p.get("lang") === "en" ? "en" : (p.get("lang") === "et" ? "et" : LANG);
+    const th = p.get("theme");
+    if (th === "light" || th === "dark" || th === "auto") THEME = th;
+    state.group    = p.get("group") === "artist" ? "artist" : "decade";
+    const ord      = p.get("order");
+    state.decOrder = ord === "latest" ? "latest" : "earliest";
+    state.artOrder = ord === "birth"  ? "birth"  : "az";
+    state.sort     = KEYS[p.get("sort")] ? p.get("sort") : "year";
+    state.q        = p.get("q") || "";
+    const as = p.get("artist");
+    const ai = as ? A.findIndex(x => slug(x.n) === as) : -1;
+    state.artist = ai >= 0 ? ai : null;
+    const d = p.get("decade");
+    state.decade = d ? (d === "und" ? "und" : (isFinite(+d) ? +d : null)) : null;
+    const yr = p.get("year");
+    state.year = yr && isFinite(+yr) ? +yr : null;
+    const nOrNull = v => (v && isFinite(+v)) ? +v : null;
+    state.from = nOrNull(p.get("from"));
+    state.to   = nOrNull(p.get("to"));
+    state.undOnly = p.get("undated") === "1";
+    const g = k => p.getAll(k);
+    state.media   = new Set(MEDIA.filter(m => g("medium").includes(slug(m))));
+    state.museums = new Set(MUSEUMS.filter(m => g("museum").includes(abbr(m).toLowerCase())));
+    state.cats    = new Set(CATS.filter(c => g("cat").includes(slug(c))));
+    state.srcs    = new Set(SRCKEYS.filter(s => g("src").includes(s)));
+    state.origins = new Set(ORIGINS.filter(o => g("origin").includes(o===NOORIGIN?"none":o)));
+    state.open    = p.get("open") || null;
+    const ix = p.get("index");
+    state.idxOpen = !!ix;
+    state.letter  = (ix && ix !== "all") ? ix.toUpperCase() : null;
+    state.expand.clear();
+  }
+
+  const $ = id => document.getElementById(id);
+  const reg = $("register");
+
+  const hay = w => (w._h || (w._h = [w.t, A[w.a].n, w.tce, w.tc, w.me, w.m, w.ee, w.e, w.nu, w.mu, w.co, w.d, w.yl, w.c]
+      .filter(Boolean).join(" ").toLowerCase()));
+  // 34k haystacks cost ~1s to build; do it in idle slices after first paint so the
+  // first keystroke does not pay for all of them at once
+  (function warmSearch(){
+    let i = 0;
+    const step = deadline => {
+      const end = Math.min(W.length, i + 4000);
+      while (i < end) hay(W[i++]);
+      if (i < W.length) schedule();
+    };
+    const schedule = () => (window.requestIdleCallback || (f => setTimeout(f, 60)))(step);
+    schedule();
+  })();
+  const matchText = w => !state.q || hay(w).includes(state.q.toLowerCase());
+  const baseSet = () => W.filter(w => matchText(w)
+      && (state.media.size===0 || state.media.has(w.e))
+      && (state.museums.size===0 || state.museums.has(w.mu))
+      && (state.cats.size===0 || state.cats.has(w.c))
+      && (state.srcs.size===0 || state.srcs.has(w.s))
+      && (state.origins.size===0 || originsOf(w).some(o=>state.origins.has(o)))
+      && (state.artist===null || w.a===state.artist)
+      && (state.undOnly ? w.y===null
+          : ((state.from===null || (w.y!==null && w.y>=state.from))
+          && (state.to===null   || (w.y!==null && w.y<=state.to)))));
+  const baseSetIgnoringYears = () => W.filter(w => matchText(w)
+      && (state.media.size===0 || state.media.has(w.e))
+      && (state.museums.size===0 || state.museums.has(w.mu))
+      && (state.cats.size===0 || state.cats.has(w.c))
+      && (state.srcs.size===0 || state.srcs.has(w.s))
+      && (state.artist===null || w.a===state.artist));
+  const fullSet = () => baseSet().filter(w => (state.decade===null || decOf(w)===state.decade)
+                                          && (state.year===null || w.y===state.year));
+
+  function renderBars(){
+    const set = baseSet(), counts = {}; DECADES.forEach(d=>counts[d]=0); counts.und = 0;
+    set.forEach(w => { const d = decOf(w); if (d in counts) counts[d]++; });
+    const max = Math.max(1, ...DECADES.map(d=>counts[d]));
+    const cell = (key, lab, title, cls) => {
+      const c = counts[key], h = c ? Math.round(6 + (Math.min(c,max)/max)*66) : 2;
+      return `<button class="bar-btn ${cls||""}" data-dec="${key}" aria-pressed="${state.decade===key}" title="${title} — ${c===1?T('oneworkc'):T('nworks',{n:c})}">
+        <span class="bar-n">${c||""}</span><span class="bar-fill" style="height:${h}px"></span><span class="bar-lab">${lab}</span></button>`;
+    };
+    // group the decade bars by century so 1830s and 1930s can never be read as the same "30"
+    const cents = [];
+    DECADES.forEach(d => {
+      const c = Math.floor(d/100);
+      if (!cents.length || cents[cents.length-1].c !== c) cents.push({c, ds:[]});
+      cents[cents.length-1].ds.push(d);
+    });
+    // the earliest centuries hold a handful of works but claim as much width as the
+    // 20th century's tens of thousands — fold them into one band unless asked to open
+    const totalDated = DECADES.reduce((s,d)=>s+counts[d],0);
+    let lead = 0;
+    while (lead < cents.length - 1 &&
+           cents[lead].ds.reduce((s,d)=>s+counts[d],0) < totalDated * 0.01) lead++;
+    const foldable = lead >= 2;
+    const early = foldable ? cents.slice(0, lead) : [];
+    const rest  = foldable ? cents.slice(lead) : cents;
+    const earlyTotal = early.reduce((s,g)=>s+g.ds.reduce((t,d)=>t+counts[d],0),0);
+    const earlyLabel = early.length
+      ? T("earlyband",{a: early[0].c+1, b: early[early.length-1].c+1}) : "";
+    const centHTML = g =>
+      `<div class="cent" style="flex:${g.ds.length}">
+         <div class="cent-bars">${g.ds.map(d => cell(d, String(d).slice(2), d+"s")).join("")}</div>
+         <div class="cent-lab"><span class="cl-full">${esc(T("century",{n:g.c+1}))}</span><span class="cl-abbr">${g.c+1}.</span></div>
+       </div>`;
+    const earlyFolded = `<div class="cent early" style="flex:0 0 118px">
+         <div class="cent-bars">
+           <button class="early-btn" id="early-toggle" title="${esc(T("earlyexpand"))} — ${earlyTotal===1?T('oneworkc'):T('nworks',{n:earlyTotal})}">
+             <span class="bar-n">${earlyTotal||""}</span>
+             <span class="early-fill" style="height:${earlyTotal?Math.max(3,Math.round(6+(Math.min(earlyTotal,max)/max)*66)):2}px"></span>
+             <span class="early-lab">${esc(earlyLabel)}</span>
+           </button>
+         </div>
+         <div class="cent-lab">&nbsp;</div>
+       </div>`;
+    const earlyOpen = early.map(centHTML).join("")
+      + `<div class="cent" style="flex:0 0 26px"><div class="cent-bars"></div>
+           <button class="cent-collapse" id="early-toggle" title="${esc(T("earlycollapse"))}">‹‹</button></div>`;
+    $("bars").innerHTML =
+      (foldable ? (state.showEarly ? earlyOpen : earlyFolded) : "")
+      + rest.map(centHTML).join("")
+      + `<div class="cent nd" style="flex:1">
+           <div class="cent-bars">${cell("und",T("nd"),T("undated"),"undated")}</div>
+           <div class="cent-lab" title="Undated — works whose record carries no dating">&nbsp;</div>
+         </div>`;
+    $("histo-hint").textContent = state.decade===null ? T("selectdecade")
+      : (state.decade==="und" ? T("undatedonly") : T("filteredto",{x:state.decade+"s"}));
+  }
+
+  const YEARS = (() => { const ys = W.map(w=>w.y).filter(y=>y!=null); 
+    return {min: Math.min(...ys), max: Math.max(...ys)}; })();
+  function fillYearSelects(){
+    const opts = (sel, blank) => {
+      let o = `<option value="">${blank}</option>`;
+      for (let y = YEARS.min; y <= YEARS.max; y++) o += `<option value="${y}">${y}</option>`;
+      $(sel).innerHTML = o;
+    };
+    opts("yr-from", T("earliestopt")); opts("yr-to", T("latestopt"));
+  }
+  function renderYearRange(){
+    $("yr-from").value = state.from == null ? "" : state.from;
+    $("yr-to").value   = state.to   == null ? "" : state.to;
+    $("yr-from").disabled = $("yr-to").disabled = state.undOnly;
+    const u = $("yr-undated");
+    u.setAttribute("aria-pressed", state.undOnly);
+    const undN = baseSetIgnoringYears().filter(w=>w.y===null).length;
+    $("yr-und-n").textContent = undN;
+    const set = fullSet();
+    const ys = set.map(w=>w.y).filter(y=>y!=null);
+    $("yr-info").textContent = state.undOnly ? T("undatedonlyshort")
+      : ys.length ? T("inview",{a:Math.min(...ys),b:Math.max(...ys)}) : "";
+  }
+
+  function renderActiveFilters(){
+    const el = $("activefilters"); if (!el) return;
+    const chips = [];
+    const add = (label, clear) => chips.push({label, clear});
+    if (state.artist !== null) add(A[state.artist].n, () => state.artist = null);
+    if (state.decade !== null) add(state.decade === "und" ? T("undated") : state.decade + "s",
+                                   () => { state.decade = null; state.year = null; });
+    if (state.year !== null) add(String(state.year), () => state.year = null);
+    if (state.undOnly) add(T("undated"), () => state.undOnly = false);
+    else if (state.from !== null || state.to !== null)
+      add(`${state.from ?? YEARS.min}–${state.to ?? YEARS.max}`, () => { state.from = null; state.to = null; });
+    state.media.forEach(v => add(medName(v), () => state.media.delete(v)));
+    state.museums.forEach(v => add(abbr(v), () => state.museums.delete(v)));
+    state.cats.forEach(v => add(catName(v), () => state.cats.delete(v)));
+    state.srcs.forEach(v => add(SRCLAB[v] || v, () => state.srcs.delete(v)));
+    state.origins.forEach(v => add(v===NOORIGIN?T("originunknown"):v, () => state.origins.delete(v)));
+    if (state.q) add(`“${state.q}”`, () => { state.q = ""; $("q").value = ""; });
+    ACTIVE = chips;
+    el.innerHTML = chips.length
+      ? chips.map((c, i) => `<button class="af" data-af="${i}" title="${esc(T("removefilter"))}">${esc(c.label)}<span>×</span></button>`).join("")
+      : `<span class="af-none">${esc(T("nofilters",{n:W.length.toLocaleString("en")}))}</span>`;
+    const n = chips.length;
+    $("filters-toggle").textContent = $("filterpanel").hidden
+      ? (n ? T("showfiltersn",{n}) : T("showfilters")) : T("hidefilters");
+  }
+  let ACTIVE = [];
+
+  const cmpStr = (x,y) => String(x||"").localeCompare(String(y||""), "et");
+  const KEYS = {
+    year:   w => w.y == null ? Infinity : w.y,
+    artist: w => A[w.a].n,
+    title:  w => w.t,
+    medium: w => w.e,
+    museum: w => w.mu
+  };
+  function sortRows(items, desc){
+    const k = KEYS[state.sort] || KEYS.year;
+    const numeric = state.sort === "year";
+    return items.slice().sort((a,b) => {
+      let r = numeric ? (k(a)-k(b)) : cmpStr(k(a), k(b));
+      if (desc) r = -r;
+      if (state.sort === "year"){
+        const ua = a.y == null, ub = b.y == null;
+        if (ua !== ub) return ua ? 1 : -1;
+      }
+      return r || (a.y||0)-(b.y||0) || cmpStr(a.t, b.t) || cmpStr(A[a.a].n, A[b.a].n);
+    });
+  }
+
+  let AI = null;
+  function artistIndexData(){
+    if (AI) return AI;
+    const items = A.map((ar,i)=>({i, n:ar.n, s:surnameOf(ar.n), c:ar.c||0,
+                                  l:(ar.l&&(ar.l[0]||ar.l[1]))?`${ar.l[0]}–${ar.l[1]||""}`:"", sp:decCounts(i)}))
+                   .filter(x=>x.c>0)
+                   .sort((x,y)=>x.s.localeCompare(y.s,"et"));
+    const letters = [];
+    items.forEach(x=>{ const L = x.s[0].toUpperCase(); if (!letters.includes(L)) letters.push(L); });
+    AI = {items, letters};
+    return AI;
+  }
+  function renderArtistIndex(){
+    const {items, letters} = artistIndexData();
+    $("ai-rail").innerHTML = letters.map(L =>
+      `<button class="ai-l" data-letter="${esc(L)}" aria-pressed="${state.letter===L}">${esc(L)}</button>`).join("");
+    const t = $("ai-toggle");
+    t.textContent = state.idxOpen ? T("hideindex") : T("showall",{n:items.length.toLocaleString("en")});
+    t.setAttribute("aria-expanded", state.idxOpen);
+    const body = $("ai-body");
+    body.hidden = !state.idxOpen;
+    if (!state.idxOpen){ body.innerHTML = ""; return; }
+    let show = state.letter ? items.filter(x=>x.s[0].toUpperCase()===state.letter) : items;
+    if (state.idxQ){
+      const q = state.idxQ.toLowerCase();
+      show = show.filter(x => x.n.toLowerCase().includes(q));
+    }
+    const total = show.length;
+    show = show.slice(0, state.idxLimit);
+    let cur = "", out = `<div class="ai-count">${esc(T("idxcount",{n:total.toLocaleString("en")}))}</div>`;
+    if (!total) out += `<div class="ai-count">${esc(T("idxnone"))}</div>`;
+    show.forEach(x=>{
+      const L = x.s[0].toUpperCase();
+      if (L !== cur){ cur = L; out += `<div class="ai-letter" id="ai-${esc(L)}">${esc(L)}</div>`; }
+      out += `<button class="ai-item" data-artist="${x.i}">
+        <span><span class="ai-nm">${esc(x.n)}</span><br><span class="ai-dt">${esc(x.l||"")}</span></span>
+        <span class="ai-rt">${spark(x.sp, 74, 17)}<span class="ai-n">${x.c}</span></span>
+      </button>`;
+    });
+    if (total > show.length)
+      out += `<button class="more" id="more-index" style="grid-column:1/-1;margin-top:10px">${esc(T("moreindex",{n:(total-show.length).toLocaleString("en")}))}</button>`;
+    body.innerHTML = out;
+  }
+
+  function renderMono(){
+    const el = $("mono");
+    if (state.artist === null){ el.innerHTML = ""; return; }
+    const ar = A[state.artist], mine = W.filter(w=>w.a===state.artist);
+    const shown = fullSet().length;
+    const life = (ar.l&&(ar.l[0]||ar.l[1])) ? `${ar.l[0]}–${ar.l[1]||""}` : "";
+    const counts = decCounts(state.artist);
+    const nz = counts.map((c,i)=>c?i:-1).filter(i=>i>=0);
+    const first = nz.length ? DECADES[nz[0]] : null, last = nz.length ? DECADES[nz[nz.length-1]] : null;
+    const med = {};
+    mine.forEach(w=>{ med[w.e] = (med[w.e]||0)+1; });
+    const medl = Object.entries(med).sort((x,y)=>y[1]-x[1]).slice(0,6)
+      .map(([k,v])=>`${esc(medName(k))} <b>${v}</b>`).join(" · ");
+    const und = mine.filter(w=>w.y==null).length;
+    const bio = bioFor(ar);
+    el.innerHTML = `<section class="mono">
+      <div>
+        <button class="mono-back" id="mono-back">${esc(T("allartists",{n:artistIndexData().items.length.toLocaleString("en")}))}</button>
+        <h2>${esc(ar.n)}</h2>
+        <div class="mono-dates">${esc(life)}${ar.ls?stag(ar.ls):""}</div>
+        <p class="mono-bio${bio.t.length>420?" clamp":""}" id="mono-bio">${esc(bio.t)}${bio.s?stag(bio.s):""}${bio.alt?`<span class="tag">${esc(T("biofallback"))}</span>`:""}</p>
+        ${bio.t.length>420?`<button class="bio-more" id="bio-more">${esc(T("readbio"))}</button>`:""}
+        <div class="mono-links">
+          ${ar.ai?`<a class="permalink" href="https://digikogu.ekm.ee/authors/author_id-${esc(ar.ai)}" target="_blank" rel="noopener">${esc(T("d_artistrec"))}</a>`:""}
+        </div>
+      </div>
+      <div class="mono-side">
+        <div class="mono-fig">${mine.length}</div>
+        <div class="mono-figlab">${esc(T("worksinregister"))}${shown!==mine.length?` · ${esc(T("shown",{n:shown}))}`:""}</div>
+        <div class="mono-tl">
+          ${spark(counts, 300, 44)}
+          <div class="mono-axis"><span>${DECADES[0]}s</span><span>${esc(first?(first===last?T("activeone",{a:first+"s"}):T("active",{a:first+"s",b:last+"s"})):T("undatedonlyartist"))}</span><span>${DECADES[DECADES.length-1]}s</span></div>
+        </div>
+        <div class="mono-med">${medl}${und?` · ${esc(T("undated"))} <b>${und}</b>`:""}</div>
+      </div>
+    </section>`;
+  }
+
+  function renderFacets(){
+    const scoped = W.filter(w => matchText(w) && (state.decade===null || decOf(w)===state.decade)
+                            && (state.artist===null || w.a===state.artist));
+    const pass = (w, skip) =>
+        (skip==="med" || state.media.size===0   || state.media.has(w.e))
+     && (skip==="mus" || state.museums.size===0 || state.museums.has(w.mu))
+     && (skip==="cat" || state.cats.size===0    || state.cats.has(w.c))
+     && (skip==="src" || state.srcs.size===0    || state.srcs.has(w.s))
+     && (skip==="org" || state.origins.size===0 || originsOf(w).some(o=>state.origins.has(o)));
+    // one tally pass per facet group, instead of one full scan per chip
+    const tally = (attr, key) => {
+      const m = new Map();
+      for (const w of scoped){
+        if (!pass(w, attr)) continue;
+        const v = key(w);
+        if (v == null) continue;
+        m.set(v, (m.get(v) || 0) + 1);
+      }
+      return m;
+    };
+    const counts = {
+      med: tally("med", w => w.e),
+      mus: tally("mus", w => w.mu),
+      cat: tally("cat", w => w.c),
+      src: tally("src", w => w.s),
+      org: (() => { const m=new Map();
+        for (const w of scoped){ if(!pass(w,"org")) continue;
+          for (const o of originsOf(w)) m.set(o,(m.get(o)||0)+1); }
+        return m; })()
+    };
+    const chips = (el, list, attr, sel, lab, title) => {
+      $(el).innerHTML = list.map(v => {
+        const key = Array.isArray(v) ? v[0] : v, text = Array.isArray(v) ? v[1] : lab(v);
+        const c = counts[attr].get(key) || 0;
+        if (!c && !sel.has(key)) return "";
+        return `<button class="chip" data-${attr}="${esc(key)}" aria-pressed="${sel.has(key)}" title="${esc(title?title(v):text)}">${esc(text)}<span>${c}</span></button>`;
+      }).join("");
+    };
+    chips("f-med", MEDIA,    "med", state.media,   v=>medName(v));
+    chips("f-mus", MUSEUMS,  "mus", state.museums, v=>abbr(v), v=>musName(v));
+    chips("f-cat", CATS,     "cat", state.cats,    v=>catName(v));
+    chips("f-src", SRCS,     "src", state.srcs,    v=>v);
+    chips("f-org", ORIGINS,  "org", state.origins,  v=> v===NOORIGIN ? T("originunknown") : v);
+  }
+
+  const sub = w => {
+    const tc = (techName(w)||"").trim();
+    if (tc && tc.toLowerCase() !== String(w.e||"").toLowerCase()) return tc;
+    return (w.ee && w.ee.toLowerCase() !== String(w.e||"").toLowerCase()) ? w.ee : (matName(w) || "");
+  };
+
+  function rowHTML(w, showArtist){
+    const id = w.k, open = state.open === id, ar = A[w.a];
+    const yr = w.y == null ? `<span class="r-year und">${esc(T("nd"))}</span>`
+      : `<span class="r-year" title="${esc(dateLabel(w) || w.y)}${w.dsrc==="title"?" — date taken from the end of the title; the museum's dating field is empty":""}">${esc(dateLabel(w) || w.y)}${w.dsrc==="title"?"*":""}</span>`;
+    const art = (showArtist && state.artist===null) ? `<span class="r-artist">${esc(ar.n)}</span>` : `<span class="r-artist"></span>`;
+    let detail = "";
+    if (open){
+      const life = (ar.l[0] || ar.l[1]) ? `${ar.l[0]}–${ar.l[1] || ""}` : "";
+      detail = `<div class="detail">
+        <div>${w.n>1 && w.mem ? `<div class="members">
+            <div class="mem-head">${esc(T("memhead",{n:w.n}))}</div>
+            <div class="mem-list">${w.mem.map(m => `<div class="mem-row">
+                <span class="mem-num" title="${esc(m[0])}">${esc(m[0]||"—")}</span>
+                <span class="mem-tech" title="${esc(m[1])}">${esc(m[1]||"")}</span>
+                <span>${m[3]?`<a href="https://www.muis.ee/museaalview/${esc(m[3])}" target="_blank" rel="noopener">MuIS</a>`:""}${m[3]&&m[4]?" · ":""}${m[4]?`<a href="https://digikogu.ekm.ee/ekm/search/oid-${esc(m[4])}/" target="_blank" rel="noopener">EKM</a>`:""}</span>
+              </div>`).join("")}</div></div>` : ""}
+          ${w.d ? `<div class="d-note"><span class="d-nolabel">${w.s==="cca"?esc(T("d_desc_cca"))+" · "+esc(T("inenglish")):w.s==="ekkm"?esc(T("d_desc_ekkm"))+" · "+esc(T("inenglish")):esc(T("d_desc"))+" · "+esc(T("estonianprose"))}</span>${esc(w.d)}</div>`
+                   : `<div class="d-note"><span class="d-nolabel">${esc(T("d_desc"))}</span><em style="color:var(--grey-4)">${esc(T("d_nodesc"))}</em></div>`}
+          <div class="d-v" style="margin-top:16px;display:flex;flex-wrap:wrap;gap:18px">
+            ${w.mi?`<a class="permalink" href="https://www.muis.ee/museaalview/${esc(w.mi)}" target="_blank" rel="noopener">${esc(T("d_recmuis"))}</a>`:""}
+            ${w.oi?`<a class="permalink" href="https://digikogu.ekm.ee/ekm/search/oid-${esc(w.oi)}/" target="_blank" rel="noopener">${esc(T("d_recekm"))}</a>`:""}
+            ${w.url?`<a class="permalink" href="${esc(w.url)}" target="_blank" rel="noopener">${esc(T("d_recsource"))}</a>`:""}
+          </div>
+        </div>
+        <div class="d-side">
+          <div class="d-k">${esc(T("d_artist"))}</div><div class="d-v">${esc(ar.n)} <em>${esc(life)}</em>${stag(ar.ls)}${ar.ai?` <a class="permalink" style="margin-left:8px" href="https://digikogu.ekm.ee/authors/author_id-${esc(ar.ai)}" target="_blank" rel="noopener">EKM artist record ↗</a>`:""}</div>
+          <div class="d-k">${esc(T("d_dating"))}</div><div class="d-v">${
+            w.yl ? esc(dateLabel(w)) + (w.dsrc==="title" ? ` <em>${esc(T("d_fromtitle"))}</em>` : "")
+                 : `<em>${esc(T("d_nodate",{n:ar.n,l:(ar.l[0]||"?")+"–"+(ar.l[1]||"")}))}</em>`}</div>
+          <div class="d-k">${esc(T("d_technique"))}</div><div class="d-v">${techName(w)?esc(techName(w)):"—"}</div>
+          <div class="d-k">${esc(T("d_material"))}</div><div class="d-v">${matName(w)?esc(matName(w)):"—"}</div>
+          ${w.dm?`<div class="d-k">${esc(T("d_dimensions"))}</div><div class="d-v">${esc(w.dm)}</div>`:""}
+          ${w.c?`<div class="d-k">${esc(T("d_category"))}</div><div class="d-v">${esc(catName(w.c))}</div>`:""}
+          <div class="d-k">${esc(w.kind==="shown"?T("venue"):T("d_collection"))}</div><div class="d-v">${esc(w.co||"")}<br><em>${esc(musName(w.mu))}</em></div>
+          <div class="d-k">${esc(T("kind"))}</div><div class="d-v">${esc(w.kind==="shown"?T("shown"):T("held"))}</div>
+          <div class="d-k">${esc(T("d_number"))}</div><div class="d-v" style="font-family:var(--mono);font-size:.78rem">${esc(w.nu||"")}</div>
+          ${ar.wdesc?`<div class="d-k">${esc(T("d_origin"))}</div><div class="d-v">${esc(ar.wdesc)}${ar.qid?` <a class="permalink" href="https://www.wikidata.org/wiki/${esc(ar.qid)}" target="_blank" rel="noopener">${esc(T("d_wd"))}</a>`:""}</div>`:""}
+          ${ar.cit?`<div class="d-k">${esc(T("d_cit"))}</div><div class="d-v"><em>${esc(ar.cit.join(" · "))}</em>${ar.born?`<br><em>${esc(T("d_born"))}: ${esc(ar.born)}</em>`:""}</div>`:""}
+          <div class="d-bio">${esc(bioFor(ar).t)}${bioFor(ar).s?stag(bioFor(ar).s):""}${bioFor(ar).alt?`<span class="tag">${esc(T("biofallback"))}</span>`:""}</div>
+          ${state.artist===null?`<button class="showartist" data-artist="${w.a}">All ${ar.c} works by ${esc(ar.n)} →</button>`:""}
+        </div></div>`;
+    }
+    return `<div class="row" data-open="${open}">
+      <button class="row-btn" data-id="${esc(id)}" aria-expanded="${open}">
+        ${yr}
+        <span class="r-title" title="${esc(w.t)}">${esc(w.t)}${w.n>1?`<span class="src-tag" title="${w.n} catalogued objects share this title and date — sheets, impressions or parts">×${w.n}</span>`:""}</span>
+        ${art}
+        <span class="r-med" title="${esc(sub(w))}">${esc(medName(w.e))}</span>
+        <span class="r-coll" title="${esc(musName(w.mu))} · ${esc(w.nu||"")}">${esc(abbr(w.mu))}<span class="src-tag">${esc(SRCLAB[w.s]||w.s)}</span></span>
+      </button>${detail}</div>`;
+  }
+
+  function groupHTML(key, gutter, items, showArtist){
+    const LIMIT = state.group === "decade" ? LIMIT_DEC : LIMIT_ART;
+    const gk = String(key);                       // dataset values are always strings
+    const n = items.length, exp = state.expand.has(gk);
+    const shown = exp ? items : items.slice(0, LIMIT);
+    const divide = state.group === "decade" && state.sort === "year"
+                   && state.year === null && gk !== "und";
+    const more = (!exp && n > LIMIT)
+      ? `<button class="more" data-exp="${esc(gk)}">${esc(T("showallentries",{n}))}</button>` : "";
+    return `<section class="group" id="grp-${esc(key)}">
+      <div class="gutter">${gutter}<div class="g-count">${n} ${esc(n===1?T("entry"):T("entries"))}</div></div>
+      <div class="rows">${(() => {
+        if (!divide) return shown.map(w=>rowHTML(w, showArtist)).join("");
+        let last = null, out = "";
+        const yearTally = new Map();
+        for (const x of items) yearTally.set(x.y, (yearTally.get(x.y) || 0) + 1);
+        shown.forEach(w => {
+          if (w.y !== last){
+            last = w.y;
+            const c = yearTally.get(w.y) || 0;
+            out += `<div class="yr-div"><b>${w.y==null?"n.d.":w.y}</b><span>${esc(c===1?T("oneworkc"):T("nworks",{n:c}))}</span></div>`;
+          }
+          out += rowHTML(w, showArtist);
+        });
+        return out;
+      })()}${more}</div>
+    </section>`;
+  }
+
+  function render(){
+    const set = fullSet();
+    $("stat-w").textContent = W.length.toLocaleString("en");
+    $("stat-a").textContent = A.filter(x=>x.c>0).length;
+    $("stat-m").textContent = new Set(W.filter(w=>w.kind!=="shown").map(w=>w.mu)).size;
+
+    const scope = [];
+    if (state.artist!==null) scope.push(A[state.artist].n);
+    if (state.undOnly) scope.push(T("undated"));
+    else if (state.from !== null || state.to !== null)
+      scope.push(`${state.from ?? YEARS.min}–${state.to ?? YEARS.max}`);
+    if (state.q) scope.push(`“${state.q}”`);
+    if (state.decade!==null) scope.push(state.decade==="und" ? T("undated") : (state.year!==null ? String(state.year) : state.decade+"s"));
+    if (state.media.size) scope.push([...state.media].map(medName).join(" + "));
+    if (state.museums.size) scope.push([...state.museums].map(abbr).join(" + "));
+    if (state.cats.size) scope.push([...state.cats].map(catName).join(" + "));
+    if (state.srcs.size) scope.push([...state.srcs].map(s=>SRCLAB[s]||s).join(" + "));
+    if (state.origins.size) scope.push([...state.origins].map(o=>o===NOORIGIN?T("originunknown"):o).join(" + "));
+    $("countline").textContent = T("ofworks",{a:set.length,b:W.length}) +
+      (scope.length ? " · " + scope.join(" · ") : " · " + T("complete"));
+
+    if (!set.length){ reg.innerHTML = `<p class="empty">${esc(T("noresults"))}</p>`; return; }
+
+    let html = "";
+    const BASE = baseSet();          // hoisted: was recomputed once per decade
+    if (state.group === "decade" || state.artist !== null){
+      const asc = state.decOrder === "earliest";
+      let keys = [...new Set(set.map(decOf))].filter(k=>k!=="und").sort((a,b)=>asc?a-b:b-a);
+      if (set.some(w=>w.y==null)) keys.push("und");
+      html = keys.map(d => {
+        let items = sortRows(set.filter(w=>decOf(w)===d), !asc);
+        if (d === "und" && state.sort === "year"){
+          // no dates to sort by — order by when the artist worked, which is known for all of them
+          const birth = i => +(A[i].l[0] || 9999);
+          items = items.slice().sort((x,y) => birth(x.a)-birth(y.a)
+            || cmpStr(A[x.a].n, A[y.a].n) || cmpStr(x.t, y.t));
+        }
+        const yearBlock = (() => {
+          if (d === "und"){
+            const pool = BASE.filter(w => w.y == null);
+            const byArtist = {};
+            pool.forEach(w => { byArtist[w.a] = (byArtist[w.a]||0)+1; });
+            const list = Object.entries(byArtist)
+              .sort((x,y) => y[1]-x[1] || cmpStr(A[x[0]].n, A[y[0]].n)).slice(0, 14);
+            const max = Math.max(1, ...list.map(x=>x[1]));
+            return `<div class="gy"><div class="gy-h">${esc(T("mostbyartist"))}</div>` +
+              list.map(([i, n]) => `<button class="gy-row" data-artist="${i}" title="${esc(A[i].n)} · ${n===1?T('oneworkc'):T('nworks',{n})}">
+                  <span class="gy-y" style="width:auto">${esc(A[i].n.split(" ").length>1 ? A[i].n[0]+". "+A[i].n.split(" ").pop() : A[i].n)}</span>
+                  <span class="gy-track"><span class="gy-bar" style="width:${Math.round((n/max)*100)}%"></span></span>
+                  <span class="gy-n">${n}</span></button>`).join("") + `</div>`;
+          }
+          const pool = BASE.filter(w => decOf(w) === d);
+          const c = {}; for (let y=d; y<d+10; y++) c[y]=0;
+          pool.forEach(w => { if (w.y!=null && c[w.y]!==undefined) c[w.y]++; });
+          const max = Math.max(1, ...Object.values(c));
+          return `<div class="gy"><div class="gy-h">${esc(state.year!==null?T("yearshowing",{y:state.year}):T("byyear"))}</div>` +
+            Array.from({length:10}, (_, i) => {
+              const y = d+i, n = c[y], on = state.year === y;
+              if (!n) return `<div class="gy-row gy-empty"><span class="gy-y">${y}</span><span class="gy-track"></span><span class="gy-n">·</span></div>`;
+              return `<button class="gy-row" data-gyear="${y}" aria-pressed="${on}" title="${n===1?T('oneworkc'):T('nworks',{n})} · ${y}">
+                <span class="gy-y">${y}</span>
+                <span class="gy-track"><span class="gy-bar" style="width:${Math.round((n/max)*100)}%"></span></span>
+                <span class="gy-n">${n}</span></button>`;
+            }).join("") + `</div>`;
+        })();
+        const gutter = d==="und"
+          ? `<span class="g-num" style="font-size:2rem">n.d.</span>
+             <div class="g-period">${esc(T("undated"))}</div>
+             <p class="g-blurb">${esc(T("undatedblurb"))}</p>${yearBlock}`
+          : `<span class="g-num">${d}<span style="font-size:.55em">s</span></span>
+             <div class="g-period">${esc(periodLabel(d))}</div>
+             <p class="g-blurb">${esc(blurbFor(d))}</p>${yearBlock}`;
+        return groupHTML(d, gutter, items, true);
+      }).join("");
+    } else {
+      const surname = n => n.trim().split(" ").pop();
+      const birth = i => +(A[i].l[0]||9999);
+      const idxs = [...new Set(set.map(w=>w.a))].sort((x,y)=>
+        state.artOrder==="az" ? surname(A[x].n).localeCompare(surname(A[y].n),"et")
+                              : (birth(x)-birth(y)) || surname(A[x].n).localeCompare(surname(A[y].n),"et"));
+      const shownIdxs = idxs.slice(0, state.gLimit);
+      html = shownIdxs.map(i => {
+        const ar = A[i];
+        const items = sortRows(set.filter(w=>w.a===i), false);
+        const life = (ar.l[0]||ar.l[1]) ? `${ar.l[0]}–${ar.l[1]||""}` : "dates unrecorded";
+        const gutter = `<span class="g-name">${esc(ar.n)}</span>
+          <div class="g-dates">${esc(life)}${stag(ar.ls)}</div>
+          <div style="margin-top:9px;color:var(--bar)">${spark(decCounts(i), 200, 22)}</div>
+          <p class="g-blurb">${esc(bioFor(ar).t)}</p>
+          <button class="showartist" data-artist="${i}">Open artist →</button>`;
+        return groupHTML("a"+i, gutter, items, false);
+      }).join("");
+      if (idxs.length > shownIdxs.length)
+        html += `<button class="more" id="more-artists" style="margin-top:18px">${esc(T("moreartists",{n:idxs.length-shownIdxs.length}))}</button>`;
+    }
+    reg.innerHTML = html;
+  }
+  const renderAll = () => { renderBars(); renderYearRange(); renderFacets(); renderActiveFilters(); renderArtistIndex(); renderMono(); render(); };
+
+  function selectArtist(i){
+    state.artist = i; state.open = null; state.expand.clear();
+    state.decade = null; state.idxOpen = false; state.letter = null;
+    renderAll(); pushHash();
+    window.scrollTo({top: 0, behavior: matchMedia("(prefers-reduced-motion:reduce)").matches?"auto":"smooth"});
+  }
+  document.addEventListener("click", e => {
+    const b = e.target.closest("[data-artist]");
+    if (b){ e.preventDefault(); selectArtist(+b.dataset.artist); }
+  });
+  $("ai-toggle").addEventListener("click", () => {
+    state.idxOpen = !state.idxOpen; state.idxLimit = 120; renderArtistIndex(); pushHash(true);
+  });
+  $("ai-body").addEventListener("click", e => {
+    if (e.target.closest("#more-index")){ state.idxLimit += 300; renderArtistIndex(); }
+  });
+  let iq = null;
+  $("ai-q").addEventListener("input", e => {
+    clearTimeout(iq);
+    iq = setTimeout(() => {
+      state.idxQ = e.target.value.trim(); state.idxLimit = 120;
+      if (state.idxQ && !state.idxOpen) state.idxOpen = true;
+      renderArtistIndex();
+    }, 140);
+  });
+  $("ai-rail").addEventListener("click", e => {
+    const b = e.target.closest(".ai-l"); if (!b) return;
+    const L = b.dataset.letter;
+    state.letter = state.letter === L ? null : L; state.idxLimit = 120;
+    if (state.letter) state.idxOpen = true;
+    renderArtistIndex(); pushHash(true);
+    if (state.letter) $("aidx" in window ? "aidx" : "ai-body").scrollIntoView({behavior: matchMedia("(prefers-reduced-motion:reduce)").matches?"auto":"smooth", block:"nearest"});
+  });
+  document.addEventListener("click", e => {
+    if (e.target.closest("#bio-more")){
+      const p = $("mono-bio"), b = e.target.closest("#bio-more");
+      const open = p.classList.toggle("clamp");
+      b.textContent = open ? T("readbio") : T("showless");
+      return;
+    }
+    if (e.target.closest("#mono-back")){
+      state.artist = null; state.open = null; state.expand.clear();
+      state.idxOpen = true; renderAll(); pushHash();
+      $("ai-body").scrollIntoView({behavior: matchMedia("(prefers-reduced-motion:reduce)").matches?"auto":"smooth", block:"start"});
+    }
+  });
+
+  reg.addEventListener("click", e => {
+    if (e.target.closest("#more-artists")){ state.gLimit += 100; render(); return; }
+    const mb = e.target.closest(".more");
+    if (mb){ state.expand.add(String(mb.dataset.exp)); render(); return; }
+    const b = e.target.closest(".row-btn"); if (!b) return;
+    const id = b.dataset.id;
+    state.open = state.open === id ? null : id;
+    render(); pushHash();
+    if (state.open){
+      const el = reg.querySelector(`.row-btn[data-id="${CSS.escape(id)}"]`);
+      if (el) el.focus({preventScroll:true});
+    }
+  });
+
+  function yrChanged(){
+    const f = $("yr-from").value, t = $("yr-to").value;
+    state.from = f === "" ? null : +f;
+    state.to   = t === "" ? null : +t;
+    if (state.from !== null && state.to !== null && state.from > state.to){
+      const s = state.from; state.from = state.to; state.to = s;
+    }
+    state.open = null; state.expand.clear(); renderAll(); pushHash();
+  }
+  $("yr-from").addEventListener("change", yrChanged);
+  $("yr-to").addEventListener("change", yrChanged);
+  $("yr-undated").addEventListener("click", () => {
+    state.undOnly = !state.undOnly;
+    if (state.undOnly){ state.from = state.to = null; state.decade = null; state.year = null; }
+    state.open = null; state.expand.clear(); renderAll(); pushHash();
+  });
+  $("yr-reset").addEventListener("click", () => {
+    state.from = state.to = null; state.undOnly = false;
+    state.open = null; state.expand.clear(); renderAll(); pushHash();
+  });
+
+  reg.addEventListener("click", e => {
+    const b = e.target.closest("[data-gyear]"); if (!b) return;
+    e.stopPropagation();
+    const y = +b.dataset.gyear;
+    state.year = state.year === y ? null : y;
+    state.open = null; state.expand.clear();
+    renderAll(); pushHash();
+  }, true);
+
+  $("filters-toggle").addEventListener("click", () => {
+    const p = $("filterpanel");
+    p.hidden = !p.hidden;
+    $("filters-toggle").setAttribute("aria-expanded", !p.hidden);
+    renderActiveFilters();
+  });
+  $("activefilters").addEventListener("click", e => {
+    const b = e.target.closest(".af"); if (!b) return;
+    const c = ACTIVE[+b.dataset.af]; if (!c) return;
+    c.clear();
+    state.open = null; state.expand.clear();
+    renderAll(); pushHash();
+  });
+
+  $("bars").addEventListener("click", e => {
+    if (e.target.closest("#early-toggle")){ state.showEarly = !state.showEarly; renderBars(); return; }
+    const b = e.target.closest(".bar-btn"); if (!b) return;
+    const raw = b.dataset.dec, d = raw === "und" ? "und" : +raw;
+    state.decade = state.decade === d ? null : d;
+    state.year = null;
+    state.open = null; state.expand.clear();
+    if (state.decade !== null) setGroup("decade");
+    renderAll(); pushHash();
+    if (state.decade !== null){
+      const t = document.getElementById("grp-" + state.decade);
+      if (t) t.scrollIntoView({behavior: matchMedia("(prefers-reduced-motion:reduce)").matches?"auto":"smooth", block:"start"});
+    }
+  });
+
+  function facetClick(el, key, set){
+    const b = el.target.closest(".chip"); if (!b) return;
+    const v = b.dataset[key]; if (v == null) return;
+    set.has(v) ? set.delete(v) : set.add(v);
+    state.open = null; state.expand.clear(); renderAll(); pushHash();
+  }
+  $("f-med").addEventListener("click", e => facetClick(e, "med", state.media));
+  $("f-mus").addEventListener("click", e => facetClick(e, "mus", state.museums));
+  $("f-cat").addEventListener("click", e => facetClick(e, "cat", state.cats));
+  $("f-src").addEventListener("click", e => facetClick(e, "src", state.srcs));
+  $("f-org").addEventListener("click", e => facetClick(e, "org", state.origins));
+
+  let t = null;
+  $("q").addEventListener("input", e => {
+    clearTimeout(t);
+    t = setTimeout(() => { state.q = e.target.value.trim(); state.open = null; state.expand.clear(); renderAll(); pushHash(true); }, 160);
+  });
+
+  function setGroup(g){
+    state.group = g;
+    $("g-decade").setAttribute("aria-pressed", g==="decade");
+    $("g-artist").setAttribute("aria-pressed", g==="artist");
+    syncOrder();
+  }
+  function syncOrder(){
+    const a = $("o-asc"), b = $("o-desc");
+    if (state.group === "decade"){
+      a.textContent = T("earliest"); b.textContent = T("latest");
+      a.setAttribute("aria-pressed", state.decOrder==="earliest");
+      b.setAttribute("aria-pressed", state.decOrder==="latest");
+    } else {
+      a.textContent = T("az"); b.textContent = T("bybirth");
+      a.setAttribute("aria-pressed", state.artOrder==="az");
+      b.setAttribute("aria-pressed", state.artOrder==="birth");
+    }
+  }
+  $("sortby").addEventListener("change", e => {
+    state.sort = e.target.value; state.expand.clear(); render(); pushHash();
+  });
+  $("g-decade").addEventListener("click", () => { setGroup("decade"); state.expand.clear(); render(); pushHash(); });
+  $("g-artist").addEventListener("click", () => { setGroup("artist"); state.expand.clear(); state.gLimit=50; render(); pushHash(); });
+  $("o-asc").addEventListener("click", () => { state.group==="decade" ? state.decOrder="earliest" : state.artOrder="az"; syncOrder(); render(); pushHash(); });
+  $("o-desc").addEventListener("click", () => { state.group==="decade" ? state.decOrder="latest" : state.artOrder="birth"; syncOrder(); render(); pushHash(); });
+  $("reset").addEventListener("click", () => {
+    state.q=""; state.decade=null; state.media.clear(); state.museums.clear(); state.cats.clear(); state.srcs.clear(); state.origins.clear();
+    state.artist=null; state.letter=null; state.idxOpen=false; state.sort="year"; state.year=null; state.from=null; state.to=null; state.undOnly=false; $("sortby").value="year";
+    state.open=null; state.expand.clear(); state.decOrder="earliest"; state.artOrder="az";
+    $("q").value=""; setGroup("decade"); renderAll(); pushHash(); window.scrollTo({top:0,behavior:"auto"});
+  });
+
+  const EMBEDDED = (() => { try { return window.self !== window.top; } catch(e){ return true; } })();
+  const LS = "ekr:lastview";
+  function saveLast(hash){ try { localStorage.setItem(LS, hash || ""); } catch(e){} }
+  function loadLast(){ try { return localStorage.getItem(LS) || ""; } catch(e){ return ""; } }
+
+  // Inside a Claude artifact the page runs on <artifact-id>.<something>.claudeusercontent.com,
+  // and that address carries single-use frame tokens that are useless (and unwise) to share.
+  // The artifact id is the first hostname label, so rebuild the public link from it.
+  const BUILD = "2026-09-09d";
+  function frameId(host){
+    if (!/\.claudeusercontent\.com$/i.test(host || "")) return null;
+    const first = String(host).split(".")[0];
+    return /^[0-9a-f]{8}-[0-9a-f-]{20,}$/i.test(first) ? first : null;
+  }
+  function shareURL(loc, hash){
+    loc = loc || location;
+    const h = hash === undefined ? stateToHash() : hash;
+    const frag = h ? "#" + h : "";
+    const id = frameId(loc.hostname);
+    if (id) return { url: "https://claude.ai/code/artifact/" + id + frag, rewritten: true, ok: true };
+    const base = String(loc.href || "").split("#")[0];
+    const embeddedButUnknown = EMBEDDED && /claudeusercontent|\/_f\//i.test(base);
+    return { url: base + frag, rewritten: false, ok: !embeddedButUnknown };
+  }
+  window.__shareURL = shareURL;
+  window.__build = BUILD;
+
+  function refreshShare(){
+    const bar = $("sharebar");
+    if (!bar || !bar.classList.contains("on")) return;
+    const r = shareURL();
+    $("shareurl").value = r.url;
+    const stamp = ` <b>build ${BUILD}</b>`;
+    $("sharenote").innerHTML = (
+      r.rewritten
+        ? `<b>Public link to this artifact.</b> Tested: Claude's viewer does <b>not</b> reopen on the view after the <b>#</b> — it runs this page in a sandbox that never receives that part of the address, so the link above opens the register at the top. It is still the right link to send. To get back to <i>this</i> view: press Back, or reload and use <b>Restore last view</b>. Deep links work in full only in the standalone file.`
+        : !r.ok
+          ? `<b>Could not rebuild a public link.</b> This page is embedded and its address carries sandbox tokens, so the link above is not safe to share. Use <b>Restore last view</b>, or open the standalone file, where the address bar carries the view directly.`
+          : EMBEDDED
+            ? `<b>This page is embedded.</b> Copy the address above rather than the browser's address bar, which may show the container instead.`
+            : `<b>Address bar carries this view.</b> Copy it, bookmark it, or press Back to step through what you clicked.`
+    ) + stamp;
+  }
+
+  $("share").addEventListener("click", () => {
+    const bar = $("sharebar");
+    bar.classList.toggle("on");
+    $("share").textContent = bar.classList.contains("on") ? T("hidelink") : T("linkview");
+    refreshShare();
+  });
+  $("sharecopy").addEventListener("click", async () => {
+    const inp = $("shareurl"), btn = $("sharecopy");
+    try { await navigator.clipboard.writeText(inp.value); btn.textContent = T("copied"); }
+    catch(e){ inp.select(); inp.setSelectionRange(0, 99999); btn.textContent = "⌘C"; }
+    setTimeout(() => { btn.textContent = T("copy"); }, 2200);
+  });
+
+  function applyLang(){
+    document.documentElement.lang = LANG;
+    document.title = T("doctitle");
+    document.querySelectorAll("[data-i18n]").forEach(el => { el.textContent = T(el.dataset.i18n); });
+    document.querySelectorAll("[data-i18n-html]").forEach(el => { el.innerHTML = I18N[LANG === "en" ? "HTML_EN" : "HTML_ET"][el.dataset.i18nHtml] || ""; });
+    $("q").placeholder = T("searchph");
+    applyTheme();
+    $("ai-q").placeholder = T("idxsearch");
+    const ys = W.map(w=>w.y).filter(y=>y!=null);
+    const sub = document.querySelector(".mast-sub");
+    if (sub) sub.textContent = T("sub").replace(/\d{4}\s*[–-]\s*\d{4}/, `${Math.min(...ys)}–${Math.max(...ys)}`);
+    $("lang-et").setAttribute("aria-pressed", LANG === "et");
+    $("lang-en").setAttribute("aria-pressed", LANG === "en");
+    $("built").textContent = DATA.meta.built;
+    $("srcsplit").textContent = LANG === "en"
+      ? `${DATA.meta.dated_from_title} works carry a date the cataloguer wrote at the end of the title rather than in the dating field; those are marked with an asterisk. ${DATA.meta.objects.toLocaleString("en")} catalogued objects → ${DATA.meta.works.toLocaleString("en")} works (identical title + date + artist collapsed): ${DATA.meta.muis.toLocaleString("en")} from MuIS, ${DATA.meta.ekm.toLocaleString("en")} from the EKM Digital Collection, ${DATA.meta.both.toLocaleString("en")} in both, merged on inventory number.`
+      : `${DATA.meta.dated_from_title} teosel on dateering kirjutatud pealkirja lõppu, mitte dateeringuvälja; need on tähistatud tärniga. ${DATA.meta.objects.toLocaleString("et")} museaali → ${DATA.meta.works.toLocaleString("et")} teost (sama pealkiri + dateering + autor koondatud): ${DATA.meta.muis.toLocaleString("et")} MuIS-ist, ${DATA.meta.ekm.toLocaleString("et")} EKM Digitaalkogust, ${DATA.meta.both.toLocaleString("et")} mõlemast, ühendatud tulmenumbri järgi.`;
+    const un = $("undated-note");
+    if (un) un.textContent = LANG === "en"
+      ? `${DATA.meta.undated} of ${DATA.meta.works.toLocaleString("en")} records carry no dating; they sit in their own group rather than being guessed into a decade.`
+      : `${DATA.meta.undated} kirjet ${DATA.meta.works.toLocaleString("et")}-st on dateerimata; need on omaette rühmas, mitte kümnendisse ära arvatud.`;
+    fillYearSelects();
+    renderYearRange();
+    syncOrder();
+  }
+  function setLang(l, push){
+    LANG = (l === "en") ? "en" : "et";
+    try { localStorage.setItem("ekr:lang", LANG); } catch(e){}
+    AI = null;
+    applyLang(); renderAll();
+    if (push !== false) pushHash(true);
+  }
+  $("lang-et").addEventListener("click", () => setLang("et"));
+  $("th-auto").addEventListener("click", () => setTheme("auto"));
+  $("th-light").addEventListener("click", () => setTheme("light"));
+  $("th-dark").addEventListener("click", () => setTheme("dark"));
+  $("lang-en").addEventListener("click", () => setLang("en"));
+
+  function applyURL(scroll){
+    applying = true;
+    fillYearSelects();
+    hashToState();
+    applyLang();
+    $("q").value = state.q;
+    $("sortby").value = state.sort;
+    renderYearRange();
+    setGroup(state.group);
+    renderAll();
+    applying = false;
+    if (scroll && state.open){
+      const el = document.querySelector(`.row-btn[data-id="${CSS.escape(state.open)}"]`);
+      if (el) el.scrollIntoView({behavior:"auto", block:"center"});
+    }
+  }
+  // ---------- keyboard navigation ----------
+  const isTyping = el => !!el && (/^(input|textarea|select)$/i.test(el.tagName) || el.isContentEditable);
+  const visibleRows = () => [...document.querySelectorAll(".row-btn")];
+  function moveCursor(delta, absolute){
+    const rows = visibleRows(); if (!rows.length) return;
+    const cur = rows.indexOf(document.activeElement);
+    let next;
+    if (absolute === "first") next = 0;
+    else if (absolute === "last") next = rows.length - 1;
+    else next = cur < 0 ? (delta > 0 ? 0 : rows.length - 1) : Math.min(rows.length-1, Math.max(0, cur + delta));
+    const el = rows[next];
+    el.focus({preventScroll:true});
+    el.scrollIntoView({block:"nearest", behavior:"auto"});
+    document.querySelectorAll('.row[data-cursor="true"]').forEach(r => r.removeAttribute("data-cursor"));
+    el.closest(".row").setAttribute("data-cursor", "true");
+  }
+  function toggleKeyHelp(force){
+    const p = $("keyhelp");
+    p.hidden = force === undefined ? !p.hidden : !force;
+    $("keys").textContent = p.hidden ? T("keys") : T("hidekeys");
+  }
+  $("keys").addEventListener("click", () => toggleKeyHelp());
+
+  document.addEventListener("keydown", e => {
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    if (isTyping(document.activeElement)){
+      if (e.key === "Escape"){ document.activeElement.blur(); }
+      return;
+    }
+    switch (e.key){
+      case "/":
+        e.preventDefault(); $("q").focus(); $("q").select(); break;
+      case "j": case "ArrowDown":
+        e.preventDefault(); moveCursor(1); break;
+      case "k": case "ArrowUp":
+        e.preventDefault(); moveCursor(-1); break;
+      case "Home":
+        e.preventDefault(); moveCursor(0, "first"); break;
+      case "End":
+        e.preventDefault(); moveCursor(0, "last"); break;
+      case "o": {
+        const b = document.activeElement.closest && document.activeElement.closest(".row-btn");
+        if (b){ const w = W.find(x => x.k === b.dataset.id); if (w){ e.preventDefault(); selectArtist(w.a); } }
+        break;
+      }
+      case "f":
+        e.preventDefault(); $("filters-toggle").click(); break;
+      case "a":
+        e.preventDefault(); $("ai-toggle").click(); break;
+      case "?":
+        e.preventDefault(); toggleKeyHelp(); break;
+      case "Escape":
+        if (!$("keyhelp").hidden){ toggleKeyHelp(false); }
+        else if (state.open){ state.open = null; render(); pushHash(); }
+        else if (state.q){ state.q = ""; $("q").value = ""; renderAll(); pushHash(); }
+        break;
+    }
+  });
+
+  try { const saved = localStorage.getItem("ekr:lang"); if (saved === "en" || saved === "et") LANG = saved; } catch(e){}
+  try { const st = localStorage.getItem("ekr:theme"); if (st === "light" || st === "dark") THEME = st; } catch(e){}
+  window.addEventListener("popstate", () => applyURL(false));
+  applyURL(true);
+
+  if (!location.hash.replace(/^#/, "") && loadLast()){
+    const last = loadLast();
+    const b = document.createElement("button");
+    b.className = "restore";
+    b.textContent = T("restore");
+    b.title = "#" + last;
+    b.addEventListener("click", () => {
+      try { history.replaceState(null, "", location.pathname + location.search + "#" + last); }
+      catch(e){ location.hash = last; }
+      applyURL(true); b.remove();
+    });
+    $("countline").before(b);
+  }
+
+
+})();
+</script>
