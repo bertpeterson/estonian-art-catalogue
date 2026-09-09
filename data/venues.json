@@ -1,0 +1,333 @@
+[
+ {
+  "n": "Kumu Kunstimuuseum",
+  "en": "Kumu Art Museum",
+  "city": "Tallinn",
+  "type": "museum",
+  "url": "https://kumu.ekm.ee",
+  "holder": "Eesti Kunstimuuseum",
+  "operator": "Eesti Kunstimuuseum",
+  "collection_of": "Eesti Kunstimuuseum"
+ },
+ {
+  "n": "Kadrioru Kunstimuuseum",
+  "en": "Kadriorg Art Museum",
+  "city": "Tallinn",
+  "type": "museum",
+  "url": "https://kadriorumuuseum.ekm.ee",
+  "holder": "Eesti Kunstimuuseum",
+  "operator": "Eesti Kunstimuuseum",
+  "collection_of": "Eesti Kunstimuuseum"
+ },
+ {
+  "n": "Mikkeli Muuseum",
+  "en": "Mikkel Museum",
+  "city": "Tallinn",
+  "type": "museum",
+  "url": "https://mikkelimuuseum.ekm.ee",
+  "holder": "Eesti Kunstimuuseum",
+  "operator": "Eesti Kunstimuuseum",
+  "collection_of": "Eesti Kunstimuuseum"
+ },
+ {
+  "n": "Niguliste Muuseum",
+  "en": "Niguliste Museum",
+  "city": "Tallinn",
+  "type": "museum",
+  "url": "https://nigulistemuuseum.ekm.ee",
+  "holder": "Eesti Kunstimuuseum",
+  "operator": "Eesti Kunstimuuseum",
+  "collection_of": "Eesti Kunstimuuseum"
+ },
+ {
+  "n": "Adamson-Ericu Muuseum",
+  "en": "Adamson-Eric Museum",
+  "city": "Tallinn",
+  "type": "museum",
+  "url": "https://adamson-eric.ekm.ee",
+  "holder": "Eesti Kunstimuuseum",
+  "operator": "Eesti Kunstimuuseum",
+  "collection_of": "Eesti Kunstimuuseum"
+ },
+ {
+  "n": "Eesti Kaasaegse Kunsti Muuseum",
+  "en": "Contemporary Art Museum of Estonia",
+  "city": "Tallinn",
+  "type": "museum",
+  "url": "https://www.ekkm.ee",
+  "holder": "Eesti Kaasaegse Kunsti Muuseum",
+  "works": 35
+ },
+ {
+  "n": "Tallinna Kunstihoone",
+  "en": "Tallinn Art Hall",
+  "city": "Tallinn",
+  "type": "kunstihoone",
+  "url": "https://kunstihoone.ee"
+ },
+ {
+  "n": "Kai Kunstikeskus",
+  "en": "Kai Art Center",
+  "city": "Tallinn",
+  "type": "kunstihoone",
+  "url": "https://kai.center"
+ },
+ {
+  "n": "Fotografiska Tallinn",
+  "en": "Fotografiska Tallinn",
+  "city": "Tallinn",
+  "type": "kunstihoone",
+  "url": "https://tallinn.fotografiska.com"
+ },
+ {
+  "n": "Eesti Arhitektuurimuuseum",
+  "en": "Museum of Estonian Architecture",
+  "city": "Tallinn",
+  "type": "museum",
+  "url": "https://arhitektuurimuuseum.ee",
+  "holder": "Eesti Arhitektuurimuuseum",
+  "works": 64
+ },
+ {
+  "n": "Eesti Tarbekunsti- ja Disainimuuseum",
+  "en": "Estonian Museum of Applied Art and Design",
+  "city": "Tallinn",
+  "type": "museum",
+  "url": "https://etdm.ee"
+ },
+ {
+  "n": "Temnikova & Kasela",
+  "en": "Temnikova & Kasela",
+  "city": "Tallinn",
+  "type": "gallery",
+  "url": "https://temnikova.ee"
+ },
+ {
+  "n": "Vaal Galerii",
+  "en": "Vaal Gallery",
+  "city": "Tallinn",
+  "type": "gallery",
+  "url": "https://vaal.ee"
+ },
+ {
+  "n": "Haus Galerii",
+  "en": "Haus Gallery",
+  "city": "Tallinn",
+  "type": "gallery",
+  "url": "https://haus.ee"
+ },
+ {
+  "n": "Draakoni Galerii",
+  "en": "Draakon Gallery",
+  "city": "Tallinn",
+  "type": "gallery",
+  "url": "https://galerii.eaa.ee/draakon",
+  "operator": "Eesti Kunstnike Liit"
+ },
+ {
+  "n": "Hobusepea Galerii",
+  "en": "Hobusepea Gallery",
+  "city": "Tallinn",
+  "type": "gallery",
+  "url": "https://galerii.eaa.ee/hobusepea",
+  "operator": "Eesti Kunstnike Liit"
+ },
+ {
+  "n": "A-Galerii",
+  "en": "A-Gallery",
+  "city": "Tallinn",
+  "type": "applied",
+  "url": "https://www.agalerii.ee",
+  "note": "Author jewellery"
+ },
+ {
+  "n": "Vabaduse Galerii",
+  "en": "Vabaduse Gallery",
+  "city": "Tallinn",
+  "type": "gallery",
+  "url": "https://galerii.eaa.ee/vabaduse",
+  "operator": "Eesti Kunstnike Liit"
+ },
+ {
+  "n": "Tartu Kunstimuuseum",
+  "en": "Tartu Art Museum",
+  "city": "Tartu",
+  "type": "museum",
+  "url": "https://tartmus.ee",
+  "holder": "Tartu Kunstimuuseum",
+  "works": 7757
+ },
+ {
+  "n": "Tartu Kunstimaja",
+  "en": "Tartu Art House",
+  "city": "Tartu",
+  "type": "kunstihoone",
+  "url": "https://kunstimaja.ee"
+ },
+ {
+  "n": "Kogo Galerii",
+  "en": "Kogo Gallery",
+  "city": "Tartu",
+  "type": "gallery",
+  "url": "https://kogogallery.ee"
+ },
+ {
+  "n": "Tartu Ülikooli Kunstimuuseum",
+  "en": "University of Tartu Art Museum",
+  "city": "Tartu",
+  "type": "museum",
+  "url": "https://muuseum.ut.ee",
+  "holder": "Tartu Ülikooli kunstimuuseum",
+  "works": 10
+ },
+ {
+  "n": "Pärnu Uue Kunsti Muuseum",
+  "en": "Pärnu Museum of New Art",
+  "city": "Pärnu",
+  "type": "museum",
+  "url": "https://mona.ee",
+  "holder": "Uue Kunsti Muuseum",
+  "works": 1
+ },
+ {
+  "n": "Pärnu Muuseum",
+  "en": "Pärnu Museum",
+  "city": "Pärnu",
+  "type": "museum",
+  "url": "https://parnumuuseum.ee",
+  "holder": "Pärnu Muuseum",
+  "works": 1107
+ },
+ {
+  "n": "Narva Muuseum",
+  "en": "Narva Museum",
+  "city": "Narva",
+  "type": "museum",
+  "url": "https://narvamuuseum.ee",
+  "holder": "Narva Muuseum",
+  "works": 1106
+ },
+ {
+  "n": "Viinistu Kunstimuuseum",
+  "en": "Viinistu Art Museum",
+  "city": "Viinistu",
+  "type": "museum",
+  "url": "https://viinistu.ee"
+ },
+ {
+  "n": "Haapsalu ja Läänemaa Muuseumid",
+  "en": "Haapsalu and Läänemaa Museums",
+  "city": "Haapsalu",
+  "type": "museum",
+  "url": "https://salm.ee",
+  "holder": "Haapsalu ja Läänemaa Muuseumid",
+  "works": 375
+ },
+ {
+  "n": "Viljandi Muuseum",
+  "en": "Viljandi Museum",
+  "city": "Viljandi",
+  "type": "museum",
+  "url": "https://www.muuseum.viljandimaa.ee",
+  "holder": "Viljandi Muuseum",
+  "works": 796
+ },
+ {
+  "n": "Virumaa Muuseumid",
+  "en": "Virumaa Museums",
+  "city": "Rakvere",
+  "type": "museum",
+  "url": "https://svm.ee",
+  "holder": "Virumaa Muuseumid",
+  "works": 2274
+ },
+ {
+  "n": "Saaremaa Muuseum",
+  "en": "Saaremaa Museum",
+  "city": "Kuressaare",
+  "type": "museum",
+  "url": "https://saaremaamuuseum.ee",
+  "holder": "Saaremaa Muuseum",
+  "works": 1
+ },
+ {
+  "n": "Hiiumaa Muuseumid",
+  "en": "Hiiumaa Museums",
+  "city": "Kärdla",
+  "type": "museum",
+  "url": "https://muuseum.hiiumaa.ee",
+  "holder": "Hiiumaa Muuseumid",
+  "works": 740
+ },
+ {
+  "n": "Eesti Ajaloomuuseum",
+  "en": "Estonian History Museum",
+  "city": "Tallinn",
+  "type": "museum",
+  "url": "https://ajaloomuuseum.ee",
+  "holder": "Eesti Ajaloomuuseum",
+  "works": 1549
+ },
+ {
+  "n": "Eesti Rahva Muuseum",
+  "en": "Estonian National Museum",
+  "city": "Tartu",
+  "type": "museum",
+  "url": "https://erm.ee",
+  "holder": "Eesti Rahva Muuseum",
+  "works": 28
+ },
+ {
+  "n": "Tallinna Linnamuuseum",
+  "en": "Tallinn City Museum",
+  "city": "Tallinn",
+  "type": "museum",
+  "url": "https://linnamuuseum.ee",
+  "holder": "Tallinna Linnamuuseum",
+  "works": 9
+ },
+ {
+  "n": "Eesti Kunstiakadeemia galerii",
+  "en": "Estonian Academy of Arts Gallery",
+  "city": "Tallinn",
+  "type": "gallery",
+  "url": "https://www.artun.ee"
+ },
+ {
+  "n": "Okapi Galerii",
+  "en": "Okapi Gallery",
+  "city": "Tallinn",
+  "type": "gallery",
+  "url": "https://okapi.ee"
+ },
+ {
+  "n": "Tallinna Linnagalerii",
+  "en": "Tallinn City Gallery",
+  "city": "Tallinn",
+  "type": "gallery",
+  "url": "https://kunstihoone.ee/programm/linnagalerii",
+  "operator": "Tallinna Kunstihoone"
+ },
+ {
+  "n": "Pärnu Linnagalerii",
+  "en": "Pärnu City Gallery",
+  "city": "Pärnu",
+  "type": "gallery",
+  "url": "https://linnagalerii.ee"
+ },
+ {
+  "n": "Kondase Keskus",
+  "en": "Kondas Centre",
+  "city": "Viljandi",
+  "type": "museum",
+  "url": "https://www.kondas.ee",
+  "note": "Naive and outsider art"
+ },
+ {
+  "n": "Kõrgem Kunstikool Pallas",
+  "en": "Pallas University of Applied Sciences",
+  "city": "Tartu",
+  "type": "school",
+  "url": "https://www.pallasart.ee"
+ }
+]

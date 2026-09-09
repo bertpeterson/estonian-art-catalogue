@@ -1,6 +1,6 @@
 # Estonian Art Catalogue · Eesti Kunstikataloog
 
-A browsable catalogue of **34,389 artworks** by **2,099 artists** held in **22 Estonian public
+A browsable catalogue of **47,899 artworks** by **3,436 artists** held in **24 Estonian public
 collections**, aggregated from the national museum databases and presented as a static site.
 
 Every record is a real museum object and links back to its source record. Nothing here is
@@ -14,15 +14,15 @@ invented, reconstructed, or filled in by hand.
 
 | Source | Records | What it is |
 |---|---|---|
-| [MuIS](https://www.muis.ee) | 27,636 | Muuseumide Infosüsteem — the shared catalogue of all Estonian museums |
-| [EKM Digital Collection](https://digikogu.ekm.ee) | 10,842 | The Art Museum of Estonia's own database, behind Kumu |
+| [MuIS](https://www.muis.ee) | 27,681 | Muuseumide Infosüsteem — the shared catalogue of all Estonian museums |
+| [EKM Digital Collection](https://digikogu.ekm.ee) | 27,711 | The Art Museum of Estonia's own database, behind Kumu |
 | [CCA Estonia](https://cca.ee) | 58 bios | Centre for Contemporary Art — artist biographies, Venice Biennale archive |
 | [EKKM](https://ekkm.ee) | — | Contemporary Art Museum of Estonia |
-| [Wikidata](https://www.wikidata.org) | 1,054 | Birthplace, dates, and art-historical affiliation for artists |
+| [Wikidata](https://www.wikidata.org) | 1,793 | Birthplace, dates, and art-historical affiliation for artists |
 
-4,147 objects appear in both MuIS and the EKM database and are merged on inventory number
-(MuIS `Number` = digikogu `Tulmenumber` + `Kogunumber`), which is why 45,242 source objects
-collapse to 34,389 works.
+7,551 objects appear in both MuIS and the EKM database and are merged on inventory number
+(MuIS `Number` = digikogu `Tulmenumber` + `Kogunumber`), which is why 61,363 source objects
+collapse to 47,899 works.
 
 **Only attributed works are included.** Anonymous and unattributed objects are excluded by design.
 
@@ -34,9 +34,9 @@ the original entry at its holding institution.
 
 ```
 site/                 the deployable static site (open index.html over HTTP)
-  data/index.json     6.7 MB — everything the list, search and facets need
-  data/detail/<decade>.json  40 shards — descriptions, dimensions, collapsed duplicates
-register.html         the same catalogue as one self-contained 10.8 MB HTML file
+  data/index.json     9.3 MB — everything the list, search and facets need
+  data/detail/<decade>.json  46 shards — descriptions, dimensions, collapsed duplicates
+register.html         the same catalogue as one self-contained 13.6 MB HTML file
 data/data.json        the merged dataset (see Schema below)
 data/*.py             the harvest, enrichment and merge scripts
 tpl_head.html         markup + CSS for the app

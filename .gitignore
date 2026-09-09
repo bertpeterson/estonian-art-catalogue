@@ -36,3 +36,9 @@ data/probe2.py
 data/mass_todo.json
 data/coll_samples.json
 type-specimen.html
+
+# Working backups taken before a re-merge, and venue-list intermediates
+data/data.prev.json
+data/dk_records.backup.json
+data/venues_seed.json
+data/venues_checked.json
