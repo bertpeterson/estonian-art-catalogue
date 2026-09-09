@@ -102,7 +102,13 @@
     2020:"Ceramics, ecology and myth; Karlson's wolves fill a deconsecrated Venetian church."
   };
 
-  const surnameOf = n => { const c = n.replace(/\([^)]*\)?/g," ").replace(/[()]/g," ").trim(); return (c || n.trim()).split(/\s+/).pop(); };
+  // Surname for filing: drop bracketed aliases and any token that is pure punctuation,
+  // so "F. K(nöttner)?" files under K rather than under "?".
+  const surnameOf = n => {
+    const t = n.replace(/\([^)]*\)?/g, " ").replace(/[()]/g, " ")
+               .split(/\s+/).filter(x => /[\p{L}\p{N}]/u.test(x));
+    return t.length ? t[t.length - 1] : n.trim();
+  };
   const DECPOS = {};
   let DECC = null;
   function decTable(){

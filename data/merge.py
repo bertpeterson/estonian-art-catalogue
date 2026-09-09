@@ -7,6 +7,36 @@ def invkey(s):
     s = re.sub(r'[^A-Za-z0-9:]', '', s.upper())
     return s or None
 
+# ---------- artist name hygiene ----------
+# The two catalogues damage names in different, mechanical ways. MuIS marks a
+# mononym or pseudonym with a leading apostrophe ("' Adamson-Eric", "pseud., ' Gori")
+# and sometimes leaves a trailing semicolon; digikogu ships double spaces
+# ("Otto  Krusten") and drops the closing bracket ("Gori ( Vello Agori").
+# Left alone each variant becomes its own artist, splitting one body of work in two.
+def clean_name(n):
+    n = (n or "").strip()
+    n = re.sub(r"^\s*pseud\.?,?\s*", "", n, flags=re.I)   # MuIS pseudonym prefix
+    n = re.sub(r"^'\s*", "", n)                            # MuIS mononym marker
+    n = re.sub(r"\s+", " ", n)                             # digikogu double spaces
+    n = re.sub(r"\(\s+", "(", n)                            # "Gori ( Vello" -> "Gori (Vello"
+    if n.count("(") == n.count(")") + 1: n += ")"          # restore the dropped bracket
+    return n.strip(" ;,").strip()
+
+def fold(n):
+    """Match key for spelling variants of one name: accents folded, German oe/ae/ue
+    collapsed, word order ignored. Deliberately requires the SAME set of words, so
+    'Otto Friedrich von Moeller' and 'Otto Friedrich Theodor von Moeller' stay apart —
+    a missing forename is a question about who someone is, not how it is spelled."""
+    s = clean_name(n).lower()
+    for a, b in (("õ","o"),("ö","o"),("ä","a"),("ü","u"),("š","s"),("ž","z")):
+        s = s.replace(a, b)
+    s = s.replace("oe","o").replace("ae","a").replace("ue","u")
+    s = unicodedata.normalize("NFKD", s).encode("ascii","ignore").decode()
+    key = tuple(sorted(re.findall(r"[a-z0-9]+", s)))
+    # "Dücker (?)" is the museum recording an UNCERTAIN attribution. Folding it into
+    # the plain name would assert an authorship they declined to assert, so keep it apart.
+    return key + ("?",) if "?" in n else key
+
 # ---------- medium inference for digikogu-only records ----------
 KOGU_MED = {"maalikogu":"Painting","graafikakogu":"Print","skulptuurikogu":"Sculpture",
   "joonistuste kogu":"Drawing","joonistustekogu":"Drawing","fotokogu":"Photograph",
@@ -59,6 +89,49 @@ def year_of(d):
 # ---------- load ----------
 MU = json.load(open("records.json", encoding="utf-8"))
 DK = json.load(open("dk_records.json", encoding="utf-8")) if os.path.exists("dk_records.json") else []
+
+# Clean every artist name before anything is keyed on it, then settle on one
+# spelling per person: the variant carrying the most records wins, and among
+# equals the accented form wins, since that is the form the museums intend.
+for r in MU + DK:
+    if r.get("artist"): r["artist"] = clean_name(r["artist"])
+
+_tally = collections.Counter(r["artist"] for r in MU + DK if r.get("artist"))
+
+# A bracket after a name means four different things, and only one of them is a
+# duplicate. "(Vello Agori)" is the real name behind a pseudonym — same person.
+# "(jun.)" and "(sen.)" separate a father from a son, "(1537 - 1612) töökoda" means
+# the workshop of someone rather than the artist, and "(?)" is the museum declining
+# to assert the attribution at all. Only the first may be folded away.
+QUALIFIER = re.compile(r"^\s*(?:jun|sen|jr|sr|juun|noorem|vanem|\?|[\d\s?/.–—-]+)\s*\.?\s*$", re.I)
+def _strip_brackets(n):
+    return re.sub(r"\s+", " ", re.sub(r"\s*\([^)]*\)\s*", " ", n)).strip()
+def bare_of(n):
+    """The name without its alias brackets, or None when a bracket is not an alias."""
+    inners = re.findall(r"\(([^)]*)\)", n)
+    if not inners or any(QUALIFIER.match(i) for i in inners): return None
+    return _strip_brackets(n) or None
+
+_keys = {n: fold(n) for n in _tally}
+_present = set(_keys.values())
+# a bare form is ambiguous if some sibling distinguishes itself from it with jun./sen.
+_ambiguous = {fold(_strip_brackets(n)) for n in _tally
+              if any(QUALIFIER.match(i) for i in re.findall(r"\(([^)]*)\)", n))}
+for n in list(_keys):
+    b = bare_of(n)
+    if b:
+        bk = fold(b)
+        if bk in _present and bk not in _ambiguous: _keys[n] = bk
+
+_variants = collections.defaultdict(list)
+for n, k in _keys.items(): _variants[k].append(n)
+CANON = {}
+for group in _variants.values():
+    best = max(group, key=lambda n: (_tally[n], sum(ord(c) > 127 for c in n), n))
+    for n in group: CANON[n] = best
+MERGED_NAMES = sum(len(g) - 1 for g in _variants.values() if len(g) > 1)
+for r in MU + DK:
+    if r.get("artist"): r["artist"] = CANON.get(r["artist"], r["artist"])
 
 unified = {}       # invkey or synthetic -> record
 def blank():
@@ -286,14 +359,19 @@ def affil(t):
     for pat, lab in AFF:
         if re.search(pat, t): return lab
     return None
+# Look the artist up under the canonical name, then under the name with its alias
+# brackets removed — "Gori (Vello Agori)" is filed in Wikidata as plain "Gori".
+def wd_get(table, name):
+    return table.get(name) or (table.get(_strip_brackets(name)) if "(" in name else None)
+
 for a in artists:
-    w = WD.get(a["n"])
+    w = wd_get(WD, a["n"])
     if not w: continue
     if w.get("cit"): a["cit"] = w["cit"]
     if w.get("qid"): a["qid"] = w["qid"]
     if w.get("born"): a["born"] = w["born"]
 for a in artists:
-    v = WDD.get(a["n"])
+    v = wd_get(WDD, a["n"])
     if not v: continue
     a["wdesc"] = v["desc"]
     if not a.get("qid"): a["qid"] = v.get("qid")
