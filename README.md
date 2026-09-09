@@ -6,7 +6,7 @@ collections**, aggregated from the national museum databases and presented as a 
 Every record is a real museum object and links back to its source record. Nothing here is
 invented, reconstructed, or filled in by hand.
 
-**Live site:** *(set the Pages URL here once Pages is enabled)*
+**Live site:** https://bertpeterson.github.io/estonian-art-catalogue/
 
 ---
 
