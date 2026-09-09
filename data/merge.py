@@ -364,19 +364,57 @@ def affil(t):
 def wd_get(table, name):
     return table.get(name) or (table.get(_strip_brackets(name)) if "(" in name else None)
 
+def yr4(s):
+    m = re.match(r'^(\d{4})', str(s or ""))
+    return int(m.group(1)) if m else None
+
+# Wikidata is matched on the name label alone, and names collide: a 17th-century
+# Tallinn woodcarver and a German biologist born in 1964 are both "Christian
+# Ackermann". The museum's own dates are the anchor — a candidate whose birth year
+# contradicts them is a different person, not a better record.
+def wd_plausible(a, rec):
+    if not rec: return False
+    b = yr4(rec.get("byear"))
+    if b is None:
+        # No structured birth year, but the description usually carries one.
+        # Allow a wide margin: sources genuinely disagree by a few years about when
+        # Clara Peeters was born. A decade-plus apart is a different person.
+        m = re.search(r'\((?:born\s+)?(\d{4})', rec.get("desc") or "")
+        born = (a.get("l") or ["", ""])[0]
+        if m and yr4(born): return abs(int(m.group(1)) - yr4(born)) <= 15
+        return True                                 # nothing to check
+    born, died = (a.get("l") or ["", ""])[:2]
+    mb, md = yr4(born), yr4(died)
+    if mb is not None: return abs(b - mb) <= 3
+    if md is not None: return md - 110 < b < md     # born within a lifetime of dying
+    return True                                     # museum has no dates either
+
+WD_REJECTED = WD_CONFLICT = 0
 for a in artists:
-    w = wd_get(WD, a["n"])
-    if not w: continue
-    if w.get("cit"): a["cit"] = w["cit"]
-    if w.get("qid"): a["qid"] = w["qid"]
-    if w.get("born"): a["born"] = w["born"]
-for a in artists:
-    v = wd_get(WDD, a["n"])
-    if not v: continue
-    a["wdesc"] = v["desc"]
-    if not a.get("qid"): a["qid"] = v.get("qid")
-    f = affil(v["desc"])
-    if f: a["aff"] = f
+    w, v = wd_get(WD, a["n"]), wd_get(WDD, a["n"])
+    if w and not wd_plausible(a, w): w = None; WD_REJECTED += 1
+    if v and not wd_plausible(a, v): v = None; WD_REJECTED += 1
+    # The two passes query independently and can land on different people. If they
+    # disagree and the museum's dates cannot say which is right, we do not know who
+    # this is — better to show nothing than to attach the wrong person's life.
+    if w and v and w.get("qid") and v.get("qid"):
+        wb, vb = yr4(w.get("byear")), yr4(v.get("byear"))
+        # Different people under one name, or one record reporting two birth years
+        # for the same person — either way the identity is not established.
+        if w["qid"] != v["qid"] or (wb and vb and abs(wb - vb) > 3):
+            WD_CONFLICT += 1
+            w = v = None
+    if w:
+        if w.get("cit"): a["cit"] = w["cit"]
+        if w.get("qid"): a["qid"] = w["qid"]
+        if w.get("born"): a["born"] = w["born"]
+    if v:
+        a["wdesc"] = v["desc"]
+        if not a.get("qid"): a["qid"] = v.get("qid")
+        f = affil(v["desc"])
+        if f: a["aff"] = f
+print("  wikidata rejected on date contradiction:", WD_REJECTED)
+print("  wikidata dropped as unresolvable conflict:", WD_CONFLICT)
 
 for w in works: w.setdefault("kind", "held")
 for i, a in enumerate(artists): a["c"] = sum(1 for w in works if w["a"] == i)
