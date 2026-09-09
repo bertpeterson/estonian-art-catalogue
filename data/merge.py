@@ -74,7 +74,10 @@ APPROX = re.compile(r'(?<![A-Za-zÕÄÖÜõäöü])(?:umbes|arvatavasti|on\s+ole
 def year_of(d):
     if not d: return None, None
     s = d.strip()
-    ys = [int(x) for x in re.findall(r'\b(1[3-9]\d\d|20[0-4]\d)\b', s)]
+    # Not \b after the digits: Estonian writes a decade as "1940ndad" / "1950ndate
+    # keskpaik", and a word boundary fails against the following letter, so the
+    # museum's own decade was being filed as undated. Guard against digits only.
+    ys = [int(x) for x in re.findall(r'(?<!\d)(1[3-9]\d\d|20[0-4]\d)(?!\d)', s)]
     if not ys: return None, s
     lab = APPROX.sub("ca", s)                 # one marker for "approximately"
     lab = re.sub(r'\s*-\s*', "–", lab)         # en dash for ranges
