@@ -96,6 +96,16 @@ h1 em{font-style:italic;font-weight:400}
 .bar-btn[aria-pressed="true"] .bar-lab{border-top:1px solid var(--ink)}
 .bar-n{font-size:.58rem;color:var(--grey-4)}
 .bar-btn.undated .bar-fill{background:repeating-linear-gradient(45deg,var(--bar),var(--bar) 2px,transparent 2px,transparent 5px)}
+/* Expanded: every century's decades are on screen at once, so a 1240px rail carries
+   ~60 ticks at ~20px each. A four-digit count needs more than that, and the counts
+   overlap into illegibility — they retreat to each bar's tooltip, and the century
+   names give way to their numerals, which do fit. */
+.bars.dense .bar-n{display:none}
+.bars.dense .cl-full{display:none}
+.bars.dense .cl-abbr{display:inline}
+.bars.dense{gap:16px}
+.bars.dense .cent-bars{gap:2px}
+.bars.dense .cent-lab{font-size:.62rem;letter-spacing:.08em;color:var(--grey-6)}
 
 .yr-div{display:flex;align-items:baseline;gap:10px;font-family:var(--mono);font-size:.63rem;letter-spacing:.12em;
   color:var(--grey-4);padding:12px 0 4px 12px;margin-left:-12px;border-bottom:1px solid var(--rule)}

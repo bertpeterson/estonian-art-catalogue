@@ -324,6 +324,9 @@
     const earlyOpen = early.map(centHTML).join("")
       + `<div class="cent" style="flex:0 0 26px"><div class="cent-bars"></div>
            <button class="cent-collapse" id="early-toggle" title="${esc(T("earlycollapse"))}">‹‹</button></div>`;
+    // opened out, ~60 decade ticks share the width: the per-bar counts collide with
+    // each other and the century names no longer fit. Mark the dense state for CSS.
+    $("bars").className = "bars" + (foldable && state.showEarly ? " dense" : "");
     $("bars").innerHTML =
       (foldable ? (state.showEarly ? earlyOpen : earlyFolded) : "")
       + rest.map(centHTML).join("")
