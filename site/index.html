@@ -529,6 +529,9 @@ footer a{border-bottom:1px solid var(--rule)}
     if (v) for (const p in v) s = s.split("{"+p+"}").join(v[p]);
     return s;
   };
+  // "21st", not "21th" — and Estonian just wants the ordinal dot
+  const ordN = n => LANG !== "en" ? n + "."
+    : n + (n % 100 >= 11 && n % 100 <= 13 ? "th" : (["th","st","nd","rd"][n % 10] || "th"));
   const musName = m => LANG === "en" ? (I18N.MUSEUM_EN[m] || m) : m;
   const bioFor = ar => {
     const en = ar.ben, et = ar.b;
@@ -779,21 +782,23 @@ footer a{border-bottom:1px solid var(--rule)}
       cents[cents.length-1].ds.push(d);
     });
     // the earliest centuries hold a handful of works but claim as much width as the
-    // 20th century's tens of thousands — fold them into one band unless asked to open
+    // 20th century's tens of thousands — fold them into one band unless asked to open.
+    // Everything before 1800 folds by rule; later centuries only if they are very thin.
     const totalDated = DECADES.reduce((s,d)=>s+counts[d],0);
     let lead = 0;
     while (lead < cents.length - 1 &&
-           cents[lead].ds.reduce((s,d)=>s+counts[d],0) < totalDated * 0.01) lead++;
+           (cents[lead].c <= 17 ||
+            cents[lead].ds.reduce((s,d)=>s+counts[d],0) < totalDated * 0.01)) lead++;
     const foldable = lead >= 2;
     const early = foldable ? cents.slice(0, lead) : [];
     const rest  = foldable ? cents.slice(lead) : cents;
     const earlyTotal = early.reduce((s,g)=>s+g.ds.reduce((t,d)=>t+counts[d],0),0);
     const earlyLabel = early.length
-      ? T("earlyband",{a: early[0].c+1, b: early[early.length-1].c+1}) : "";
+      ? T("earlyband",{a: ordN(early[0].c+1), b: ordN(early[early.length-1].c+1)}) : "";
     const centHTML = g =>
       `<div class="cent" style="flex:${g.ds.length}">
          <div class="cent-bars">${g.ds.map(d => cell(d, String(d).slice(2), d+"s")).join("")}</div>
-         <div class="cent-lab"><span class="cl-full">${esc(T("century",{n:g.c+1}))}</span><span class="cl-abbr">${g.c+1}.</span></div>
+         <div class="cent-lab"><span class="cl-full">${esc(T("century",{n:ordN(g.c+1)}))}</span><span class="cl-abbr">${g.c+1}.</span></div>
        </div>`;
     const earlyFolded = `<div class="cent early" style="flex:0 0 118px">
          <div class="cent-bars">
