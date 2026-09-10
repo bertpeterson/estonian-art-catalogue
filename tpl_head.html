@@ -2,7 +2,7 @@
 <title>Estonian Art Catalogue</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..700;1,6..96,400..600&family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..600&family=Archivo:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..600&family=Archivo:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
 :root{
   --paper:#FFFFFF; --raise:#FAFAFB; --field:#F5F6F8;
@@ -13,8 +13,7 @@
   --fs-lg:1rem;     --fs-xl:1.5rem;  --fs-2xl:2.6rem;
   --ls-label:.13em; --ls-data:.05em;
   --sp-1:6px; --sp-2:11px; --sp-3:18px; --sp-4:30px;
-  --serif:"Bodoni Moda","Didot","Bodoni MT",Georgia,serif;      /* display sizes only */
-  --serif-text:"Newsreader","Iowan Old Style","Palatino",Georgia,serif;  /* reading sizes */
+  --serif-text:"Newsreader","Iowan Old Style","Palatino",Georgia,serif;  /* every serif on the page */
   --sans:"Archivo","Helvetica Neue",Helvetica,Arial,sans-serif;
   --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
 }
@@ -172,7 +171,7 @@ kbd{font-family:var(--mono);font-size:.64rem;border:1px solid var(--rule);backgr
 .group:last-child{border-bottom:0}
 .gutter{position:sticky;top:66px;align-self:start}
 .g-num{font-family:var(--serif-text);font-weight:500;font-size:2.9rem;line-height:1;letter-spacing:-.02em;font-variant-numeric:tabular-nums;display:block}
-.g-name{font-family:var(--serif);font-weight:500;font-size:1.5rem;line-height:1.12;letter-spacing:-.01em;display:block;text-wrap:balance}
+.g-name{font-family:var(--serif-text);font-weight:500;font-size:1.5rem;line-height:1.12;letter-spacing:-.01em;display:block;text-wrap:balance}
 .g-dates{font-family:var(--mono);font-size:.7rem;letter-spacing:.08em;color:var(--grey-6);margin-top:6px}
 .g-period{font-family:var(--mono);font-size:var(--fs-xs);letter-spacing:var(--ls-label);text-transform:uppercase;color:var(--grey-6);margin-top:10px;padding-top:8px;border-top:1px solid var(--rule)}
 .g-blurb{font-size:.82rem;line-height:1.55;color:var(--grey-6);margin-top:10px;max-width:32ch}
@@ -271,7 +270,7 @@ footer a{border-bottom:1px solid var(--rule)}
 .ai-n{font-family:var(--mono);font-size:.66rem;color:var(--grey-6);font-variant-numeric:tabular-nums;min-width:34px;text-align:right}
 .spark{color:var(--bar);display:block}
 .ai-item:hover .spark{color:var(--ink)}
-.ai-letter{grid-column:1/-1;font-family:var(--serif);font-size:1.5rem;line-height:1;
+.ai-letter{grid-column:1/-1;font-family:var(--serif-text);font-size:1.5rem;line-height:1;
   padding:16px 0 5px;border-bottom:1px solid var(--ink);margin-bottom:3px}
 .ai-letter:first-child{padding-top:0}
 
@@ -282,7 +281,7 @@ footer a{border-bottom:1px solid var(--rule)}
   background:none;border:0;border-bottom:1px solid var(--rule);color:var(--grey-6);cursor:pointer;
   padding:2px 0;margin-bottom:18px}
 .mono-back:hover{color:var(--ink);border-bottom-color:var(--ink)}
-.mono h2{font-family:var(--serif);font-weight:500;font-size:clamp(1.9rem,4.4vw,2.9rem);
+.mono h2{font-family:var(--serif-text);font-weight:500;font-size:clamp(1.9rem,4.4vw,2.9rem);
   line-height:1.02;letter-spacing:-.015em;margin:0;text-wrap:balance}
 .mono-dates{font-family:var(--mono);font-size:.74rem;letter-spacing:.08em;color:var(--grey-6);margin-top:9px}
 .mono-bio{font-family:var(--serif-text);font-size:.98rem;line-height:1.62;color:var(--ink-soft);max-width:64ch;margin:15px 0 0}
@@ -338,13 +337,13 @@ footer a{border-bottom:1px solid var(--rule)}
   .cl-full{display:none}
   .cl-abbr{display:inline}
 }
-/* Bodoni thins out on a dark ground — carry a little more weight there */
+/* Serif faces thin out on a dark ground — carry a little more weight there */
 @media (prefers-color-scheme:dark){
   :root:not([data-theme="light"]) .r-title{font-weight:450}
-  :root:not([data-theme="light"]) .mono h2{font-weight:450}
+  :root:not([data-theme="light"]) .mono h2{font-weight:550}
 }
 :root[data-theme="dark"] .r-title{font-weight:450}
-:root[data-theme="dark"] .mono h2{font-weight:450}
+:root[data-theme="dark"] .mono h2{font-weight:550}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 
