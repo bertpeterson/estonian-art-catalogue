@@ -6,7 +6,7 @@ collections**, plus current work from three commercial galleries, aggregated fro
 Every record is a real museum object and links back to its source record. Nothing here is
 invented, reconstructed, or filled in by hand.
 
-**Live site:** https://bertpeterson.github.io/estonian-art-catalogue/
+**Live site (canonical):** https://bertpeterson.github.io/estonian-art-catalogue/
 
 ---
 
@@ -37,7 +37,7 @@ the original entry at its holding institution.
 site/                 the deployable static site (open index.html over HTTP)
   data/index.json     9.3 MB — everything the list, search and facets need
   data/detail/<decade>.json  46 shards — descriptions, dimensions, collapsed duplicates
-register.html         the same catalogue as one self-contained 13.6 MB HTML file
+register.html         a dated snapshot as one self-contained file — see below
 data/data.json        the merged dataset (see Schema below)
 data/*.py             the harvest, enrichment and merge scripts
 tpl_head.html         markup + CSS for the app
@@ -50,6 +50,18 @@ Two things are deliberately **not** committed, because they are large and re-der
 the ~490 MB of cached source pages (`data/cache/`, `data/dkcache/`, `data/cca_cache/`) and the
 raw per-source harvest dumps that `data/merge.py` reads. Re-run the harvest scripts to
 regenerate them; `data/data.json`, the thing everything else is built from, is committed.
+
+## Two builds, and which one is current
+
+`site/` is canonical. It shards its data and fetches on demand, so it has no size
+limit and is rebuilt on every push.
+
+`register.html` is a single self-contained file, published as a Claude Artifact.
+Artifacts cap at 16 MB and cannot fetch anything at runtime, so the whole catalogue
+has to fit in the file — which stopped being possible at around 52,000 works. It is
+now a **dated snapshot**: it says so on its own masthead, in both languages, and
+links to the live site. Rebuild it deliberately with `python3 build_artifact.py`,
+not as part of the normal cycle.
 
 ## Schema
 
