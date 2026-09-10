@@ -15,11 +15,29 @@ sub('(function(){\n  "use strict";','(function(){\n  "use strict";\n  const boot
 sub('  function rowHTML(w, showArtist){',
 '''  const SHARDS = new Map();
   const shardOf = w => w.y != null ? String(Math.floor(w.y/10)*10) : "und";
-  async function loadShard(key){
+  async function loadShard(key, attempt = 0){
     if (SHARDS.has(key)) return SHARDS.get(key);
-    const p = fetch(`data/detail/${key}.json`).then(r => r.ok ? r.json() : {}).catch(() => ({}));
+    // A retry must skip the browser cache: the failure we are retrying is often a
+    // cached 404 or 5xx, and re-requesting the identical URL just returns it again.
+    const url = attempt ? `data/detail/${key}.json?r=${attempt}` : `data/detail/${key}.json`;
+    const p = fetch(url, attempt ? {cache: "reload"} : undefined)
+      .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+      .catch(async () => {
+        // Never cache a failure. The old code stored {} on error, so a single network
+        // blip removed that decade's descriptions and dimensions for the rest of the
+        // session — and the record then said "No description in the record", which is
+        // a false claim about the museum rather than an honest one about the fetch.
+        SHARDS.delete(key);
+        if (attempt < 2){
+          await new Promise(r => setTimeout(r, 400 * (attempt + 1)));
+          return loadShard(key, attempt + 1);
+        }
+        return null;
+      });
     SHARDS.set(key, p);
-    const v = await p; SHARDS.set(key, v); return v;
+    const v = await p;
+    if (v) SHARDS.set(key, v); else SHARDS.delete(key);
+    return v;
   }
   function detailOf(w){
     const s = SHARDS.get(shardOf(w));
