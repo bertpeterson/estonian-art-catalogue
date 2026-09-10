@@ -33,7 +33,14 @@ for old,new,tag in [
   ('${w.d ?','${(detailOf(w)||{}).d ?','desc guard'),
   ('${esc(w.d)}','${esc(detailOf(w).d)}','desc text'),
   ('${w.dm?`<div class="d-k">','${(detailOf(w)||{}).dm?`<div class="d-k">','dims guard'),
-  ('${esc(w.dm)}','${esc(detailOf(w).dm)}','dims text')]:
+  ('${esc(w.dm)}','${esc(detailOf(w).dm)}','dims text'),
+  # source-record links: the ids live in the shard, so read them through detailOf
+  ('${w.mi?`<a class="permalink"','${(detailOf(w)||{}).mi?`<a class="permalink"','muis link guard'),
+  ('museaalview/${esc(w.mi)}','museaalview/${esc(detailOf(w).mi)}','muis link id'),
+  ('${w.oi?`<a class="permalink"','${(detailOf(w)||{}).oi?`<a class="permalink"','ekm link guard'),
+  ('oid-${esc(w.oi)}','oid-${esc(detailOf(w).oi)}','ekm link id'),
+  ('${w.url?`<a class="permalink"','${(detailOf(w)||{}).url?`<a class="permalink"','src link guard'),
+  ('href="${esc(w.url)}"','href="${esc(detailOf(w).url)}"','src link href')]:
     sub(old,new,tag)
 sub('''    const b = e.target.closest(".row-btn"); if (!b) return;
     const id = b.dataset.id;
