@@ -432,6 +432,30 @@ for a in artists:
 print("  wikidata rejected on date contradiction:", WD_REJECTED)
 print("  wikidata dropped as unresolvable conflict:", WD_CONFLICT)
 
+# ---------- commercial galleries ----------
+# These are NOT museum holdings: the work is in private hands or for sale, and the
+# gallery is its current venue rather than an owner with an accession number. They
+# carry kind="gallery" so a visitor can always tell the two apart, and every record
+# links back to the gallery's own page. Prices are deliberately not collected.
+GAL = json.load(open("gallery_records.json", encoding="utf-8")) if os.path.exists("gallery_records.json") else []
+gal_added = 0
+for g in GAL:
+    ai = artist_index(g["artist"])
+    if ai is None or not g.get("title"): continue
+    y = int(g["year"]) if g.get("year") and g["year"].isdigit() else None
+    tech = g.get("tech") or None
+    works.append({"a": ai, "t": g["title"], "y": y,
+        "yl": g.get("year") or None, "dsrc": "gallery" if y else None,
+        "e": infer_med(None, tech, tech), "ee": None,
+        "tc": tech, "tce": tech, "m": None, "me": None,
+        "dm": g.get("dims") or None, "mu": g["gallery"], "co": None,
+        "nu": None, "d": None, "c": None, "s": "gallery", "mi": None, "oi": None,
+        "k": "G" + re.sub(r'[^A-Za-z0-9]', '', g["gid"]), "n": 1,
+        "mem": None, "kind": "gallery", "url": g.get("url")})
+    gal_added += 1
+print("  gallery works added:", gal_added,
+      "from", len({g["gallery"] for g in GAL}), "galleries")
+
 for w in works: w.setdefault("kind", "held")
 for i, a in enumerate(artists): a["c"] = sum(1 for w in works if w["a"] == i)
 
@@ -439,6 +463,8 @@ data = {"meta": {"built": datetime.date.today().isoformat(),
                  "works": len(works), "objects": OBJECTS, "artists": len(artists),
                  "held": sum(1 for w in works if w["kind"]=="held"),
                  "shown": sum(1 for w in works if w["kind"]=="shown"),
+                 "gallery": sum(1 for w in works if w["kind"]=="gallery"),
+                 "galleries": len({w["mu"] for w in works if w["kind"]=="gallery"}),
                  "cca_bios": sum(1 for a in artists if a.get("bens")=="cca"),
                  "with_origin": sum(1 for a in artists if a.get("cit")),
                  "with_aff": sum(1 for a in artists if a.get("aff")),

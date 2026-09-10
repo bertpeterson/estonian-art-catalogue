@@ -1,7 +1,7 @@
 # Estonian Art Catalogue · Eesti Kunstikataloog
 
-A browsable catalogue of **47,899 artworks** by **3,436 artists** held in **24 Estonian public
-collections**, aggregated from the national museum databases and presented as a static site.
+A browsable catalogue of **49,240 artworks** by **3,495 artists** — museum holdings from **24 Estonian public
+collections**, plus current work from three commercial galleries, aggregated from the national museum databases and presented as a static site.
 
 Every record is a real museum object and links back to its source record. Nothing here is
 invented, reconstructed, or filled in by hand.
@@ -18,7 +18,8 @@ invented, reconstructed, or filled in by hand.
 | [EKM Digital Collection](https://digikogu.ekm.ee) | 27,711 | The Art Museum of Estonia's own database, behind Kumu |
 | [CCA Estonia](https://cca.ee) | 58 bios | Centre for Contemporary Art — artist biographies, Venice Biennale archive |
 | [EKKM](https://ekkm.ee) | — | Contemporary Art Museum of Estonia |
-| [Wikidata](https://www.wikidata.org) | 1,793 | Birthplace, dates, and art-historical affiliation for artists |
+| [Wikidata](https://www.wikidata.org) | 1,793 |
+| Haus, Kogo, Temnikova & Kasela | 1,379 | Commercial galleries — current work, metadata only, no prices | Birthplace, dates, and art-historical affiliation for artists |
 
 7,551 objects appear in both MuIS and the EKM database and are merged on inventory number
 (MuIS `Number` = digikogu `Tulmenumber` + `Kogunumber`), which is why 61,363 source objects
@@ -73,6 +74,7 @@ index into the same-named array in `vocab`. So `w.mu == 0` means
 | `co` | collection within the museum *(encoded)* |
 | `c` | EKM collection category *(encoded)* |
 | `s` | source catalogue *(encoded)* |
+| `kind` | `held` in a museum, `gallery` at a commercial gallery, `shown` exhibited |
 | `nu` | inventory number |
 | `d` | description, as recorded by the museum |
 | `dm` | dimensions, as recorded |
