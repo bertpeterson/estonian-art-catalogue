@@ -276,17 +276,19 @@ footer a{border-bottom:1px solid var(--rule)}
 .ai-search{background:var(--field);border:1px solid var(--rule);color:var(--ink);
   font-family:var(--sans);font-size:.8rem;padding:5px 9px;width:180px}
 .ai-search::placeholder{color:var(--grey-4)}
-.ai-count{grid-column:1/-1;font-family:var(--mono);font-size:var(--fs-xs);letter-spacing:var(--ls-label);
+.ai-count{column-span:all;font-family:var(--mono);font-size:var(--fs-xs);letter-spacing:var(--ls-label);
   text-transform:uppercase;color:var(--grey-4);padding-bottom:4px}
+/* An index is read down, not across — dictionaries, phone books and back-of-book
+   indexes all run in columns for that reason. Newspaper columns keep consecutive
+   names vertically adjacent; a grid would put them side by side and make scanning
+   alphabetically a left-right zigzag. */
 .ai-body{margin-top:16px;border-top:1px solid var(--rule-soft);padding-top:14px;
-  display:grid;grid-template-columns:repeat(auto-fill,minmax(268px,1fr));gap:1px 26px}
+  column-width:268px;column-gap:26px}
+.ai-body .ai-item{break-inside:avoid}
 /* Ranked by size, consecutive ranks must sit next to each other. A CSS grid fills
    row-major, so 1-2-3-4 would run across the top and rank 5 would jump back to the
    far left; newspaper columns run them down, which also stacks the counts in a line
    you can compare. A-Z keeps the grid, whose letter dividers span all columns. */
-.ai-body.ranked{display:block;column-width:268px;column-gap:26px}
-.ai-body.ranked .ai-count{column-span:all}
-.ai-body.ranked .ai-item{break-inside:avoid}
 .ai-item{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;width:100%;
   background:none;border:0;border-bottom:1px solid var(--rule-soft);color:inherit;
   text-align:left;padding:7px 4px;cursor:pointer;font-family:inherit}
@@ -297,8 +299,10 @@ footer a{border-bottom:1px solid var(--rule)}
 .ai-n{font-family:var(--mono);font-size:.66rem;color:var(--grey-6);font-variant-numeric:tabular-nums;min-width:34px;text-align:right}
 .spark{color:var(--bar);display:block}
 .ai-item:hover .spark{color:var(--ink)}
-.ai-letter{grid-column:1/-1;font-family:var(--sans);font-weight:600;font-size:1.15rem;
-  letter-spacing:.04em;line-height:1;
+/* the heading sits inline in its column, as in a printed index, and never strands
+   itself at the foot of one */
+.ai-letter{font-family:var(--sans);font-weight:600;font-size:1.15rem;
+  break-after:avoid;break-inside:avoid;letter-spacing:.04em;line-height:1;
   padding:16px 0 5px;border-bottom:1px solid var(--ink);margin-bottom:3px}
 .ai-letter:first-child{padding-top:0}
 
