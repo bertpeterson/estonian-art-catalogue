@@ -242,8 +242,13 @@
   const $ = id => document.getElementById(id);
   const reg = $("register");
 
-  const hay = w => (w._h || (w._h = [w.t, A[w.a].n, w.tce, w.tc, w.me, w.m, w.ee, w.e, w.nu, w.mu, w.co, w.d, w.yl, w.c]
-      .filter(Boolean).join(" ").toLowerCase()));
+  // Fold diacritics on both sides of the comparison: this catalogue is full of
+  // Estonian and Baltic-German names, and is read in English by default, so someone
+  // typing "Poder" or "Kugelgen" on a plain keyboard must still find Põder and
+  // Kügelgen. Folding both the haystack and the query means either spelling works.
+  const defold = s => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  const hay = w => (w._h || (w._h = defold([w.t, A[w.a].n, w.tce, w.tc, w.me, w.m, w.ee, w.e, w.nu, w.mu, w.co, w.d, w.yl, w.c]
+      .filter(Boolean).join(" ").toLowerCase())));
   // 34k haystacks cost ~1s to build; do it in idle slices after first paint so the
   // first keystroke does not pay for all of them at once
   (function warmSearch(){
@@ -256,7 +261,7 @@
     const schedule = () => (window.requestIdleCallback || (f => setTimeout(f, 60)))(step);
     schedule();
   })();
-  const matchText = w => !state.q || hay(w).includes(state.q.toLowerCase());
+  const matchText = w => !state.q || hay(w).includes(defold(state.q.toLowerCase()));
   const baseSet = () => W.filter(w => matchText(w)
       && (state.media.size===0 || state.media.has(w.e))
       && (state.museums.size===0 || state.museums.has(w.mu))
@@ -435,8 +440,8 @@
     if (!state.idxOpen){ body.innerHTML = ""; return; }
     let show = state.letter ? items.filter(x=>x.s[0].toUpperCase()===state.letter) : items;
     if (state.idxQ){
-      const q = state.idxQ.toLowerCase();
-      show = show.filter(x => x.n.toLowerCase().includes(q));
+      const q = defold(state.idxQ.toLowerCase());
+      show = show.filter(x => defold(x.n.toLowerCase()).includes(q));
     }
     // Sorted by size, the alphabet is not the organising idea any more, so the
     // letter dividers go with it — they would break the ranking into meaningless runs.

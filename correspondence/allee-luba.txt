@@ -1,0 +1,39 @@
+Teema: Luba teoste metaandmete kasutamiseks Eesti Kunstikataloogis
+
+Tere!
+
+Olen koostanud avaliku ja mittetulundusliku andmebaasi „Eesti Kunstikataloog“,
+mis koondab praegu 52 085 teost 3 664 kunstnikult. Andmed pärinevad Muuseumide
+Infosüsteemist (MuIS), Eesti Kunstimuuseumi digitaalkogust ning mitme galerii
+avalikest veebilehtedest. Kataloog on tasuta, reklaamivaba ja selle lähtekood
+on avalik.
+
+    https://bertpeterson.github.io/estonian-art-catalogue/
+
+Kirjutan teile enne mis tahes andmete kogumist. Teie robots.txt sisaldab
+ClaudeBot'i keeldu ning õiguste reservatsiooni (ai-train=no) vastavalt
+Euroopa Liidu direktiivi 2019/790 artiklile 4. Olen seda järginud: teie
+lehelt ei ole midagi kogutud ega koguta ilma teie selge nõusolekuta.
+
+Küsin luba lisada kataloogi Allee galerii teoste metaandmed:
+
+    kunstniku nimi, teose pealkiri, valmimisaasta, tehnika ja mõõdud
+
+Ei sooviks kasutada:
+
+    pilte, hindu ega oksjonitulemusi
+
+Iga kirje juures oleks nähtav viide Allee galeriile ja link teie enda lehele,
+nii et kataloog suunaks huvilisi teie juurde, mitte vastupidi. Teosed oleksid
+eristatavad muuseumikogudest — kataloog näitab selgelt, kas teos kuulub
+muuseumikogusse või asub galeriis.
+
+Kui teil on tingimusi — näiteks millised teosed sobivad, kui sageli andmeid
+uuendada või kuidas galeriile viidata — arvestan nendega meeleldi. Samuti
+eemaldan kõik kirjed esimesel soovil, ilma põhjendust küsimata.
+
+Kui eelistate andmeid ise edastada (nt failina), sobib see samuti hästi.
+
+Lugupidamisega
+Bert Peterson
+peterson.bert0621@gmail.com

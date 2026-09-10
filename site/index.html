@@ -56,6 +56,11 @@ h1 em{font-style:italic;font-weight:400}
   background:none;border:0;color:var(--grey-6);padding:5px 11px;cursor:pointer}
 .langsw button + button{border-left:1px solid var(--rule)}
 .langsw button[aria-pressed="true"]{background:var(--invert-bg);color:var(--invert-fg)}
+/* only the frozen single-file snapshot carries this; the hosted site never shows it */
+.snapshot{font-family:var(--mono);font-size:.66rem;letter-spacing:.06em;color:var(--grey-6);
+  border:1px solid var(--rule);padding:8px 11px;margin:14px 0 0;max-width:78ch}
+.snapshot a{color:var(--ink);border-bottom:1px solid var(--rule)}
+.snapshot a:hover{border-bottom-color:var(--ink)}
 .mast-sub{font-family:var(--mono);font-size:var(--fs-sm);letter-spacing:var(--ls-label);text-transform:uppercase;color:var(--grey-6);margin:16px 0 0}
 .mast-stats{display:flex;gap:26px;font-family:var(--mono);font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:var(--grey-6);padding-bottom:6px}
 .mast-stats b{display:block;font-family:var(--serif-text);font-weight:500;font-size:1.6rem;line-height:1.05;letter-spacing:0;color:var(--ink);font-variant-numeric:tabular-nums}
@@ -758,8 +763,13 @@ footer a{border-bottom:1px solid var(--rule)}
   const $ = id => document.getElementById(id);
   const reg = $("register");
 
-  const hay = w => (w._h || (w._h = [w.t, A[w.a].n, w.tce, w.tc, w.me, w.m, w.ee, w.e, w.nu, w.mu, w.co, w.d, w.yl, w.c]
-      .filter(Boolean).join(" ").toLowerCase()));
+  // Fold diacritics on both sides of the comparison: this catalogue is full of
+  // Estonian and Baltic-German names, and is read in English by default, so someone
+  // typing "Poder" or "Kugelgen" on a plain keyboard must still find Põder and
+  // Kügelgen. Folding both the haystack and the query means either spelling works.
+  const defold = s => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  const hay = w => (w._h || (w._h = defold([w.t, A[w.a].n, w.tce, w.tc, w.me, w.m, w.ee, w.e, w.nu, w.mu, w.co, w.d, w.yl, w.c]
+      .filter(Boolean).join(" ").toLowerCase())));
   // 34k haystacks cost ~1s to build; do it in idle slices after first paint so the
   // first keystroke does not pay for all of them at once
   (function warmSearch(){
@@ -772,7 +782,7 @@ footer a{border-bottom:1px solid var(--rule)}
     const schedule = () => (window.requestIdleCallback || (f => setTimeout(f, 60)))(step);
     schedule();
   })();
-  const matchText = w => !state.q || hay(w).includes(state.q.toLowerCase());
+  const matchText = w => !state.q || hay(w).includes(defold(state.q.toLowerCase()));
   const baseSet = () => W.filter(w => matchText(w)
       && (state.media.size===0 || state.media.has(w.e))
       && (state.museums.size===0 || state.museums.has(w.mu))
@@ -951,8 +961,8 @@ footer a{border-bottom:1px solid var(--rule)}
     if (!state.idxOpen){ body.innerHTML = ""; return; }
     let show = state.letter ? items.filter(x=>x.s[0].toUpperCase()===state.letter) : items;
     if (state.idxQ){
-      const q = state.idxQ.toLowerCase();
-      show = show.filter(x => x.n.toLowerCase().includes(q));
+      const q = defold(state.idxQ.toLowerCase());
+      show = show.filter(x => defold(x.n.toLowerCase()).includes(q));
     }
     // Sorted by size, the alphabet is not the organising idea any more, so the
     // letter dividers go with it — they would break the ranking into meaningless runs.
@@ -1099,9 +1109,9 @@ footer a{border-bottom:1px solid var(--rule)}
           ${(detailOf(w)||{}).d ? `<div class="d-note"><span class="d-nolabel">${w.s==="cca"?esc(T("d_desc_cca"))+" · "+esc(T("inenglish")):w.s==="ekkm"?esc(T("d_desc_ekkm"))+" · "+esc(T("inenglish")):esc(T("d_desc"))+" · "+esc(T("estonianprose"))}</span>${esc(detailOf(w).d)}</div>`
                    : `<div class="d-note"><span class="d-nolabel">${esc(T("d_desc"))}</span><em style="color:var(--grey-4)">${esc(T("d_nodesc"))}</em></div>`}
           <div class="d-v" style="margin-top:16px;display:flex;flex-wrap:wrap;gap:18px">
-            ${w.mi?`<a class="permalink" href="https://www.muis.ee/museaalview/${esc(w.mi)}" target="_blank" rel="noopener">${esc(T("d_recmuis"))}</a>`:""}
-            ${w.oi?`<a class="permalink" href="https://digikogu.ekm.ee/ekm/search/oid-${esc(w.oi)}/" target="_blank" rel="noopener">${esc(T("d_recekm"))}</a>`:""}
-            ${w.url?`<a class="permalink" href="${esc(w.url)}" target="_blank" rel="noopener">${esc(T("d_recsource"))}</a>`:""}
+            ${(detailOf(w)||{}).mi?`<a class="permalink" href="https://www.muis.ee/museaalview/${esc(detailOf(w).mi)}" target="_blank" rel="noopener">${esc(T("d_recmuis"))}</a>`:""}
+            ${(detailOf(w)||{}).oi?`<a class="permalink" href="https://digikogu.ekm.ee/ekm/search/oid-${esc(detailOf(w).oi)}/" target="_blank" rel="noopener">${esc(T("d_recekm"))}</a>`:""}
+            ${(detailOf(w)||{}).url?`<a class="permalink" href="${esc(detailOf(w).url)}" target="_blank" rel="noopener">${esc(T("d_recsource"))}</a>`:""}
           </div>
         </div>
         <div class="d-side">
