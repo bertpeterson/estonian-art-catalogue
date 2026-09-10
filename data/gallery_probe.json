@@ -1,0 +1,127 @@
+[
+ {
+  "domain": "galeriipilar.ee",
+  "status": "unreachable"
+ },
+ {
+  "domain": "pilar.ee",
+  "status": "unreachable"
+ },
+ {
+  "domain": "hopgalerii.ee",
+  "url": "https://www.hopgalerii.ee/",
+  "status": "ok",
+  "bytes": 716003,
+  "dims": 0,
+  "nextjs": false,
+  "robots_blocks_all": false
+ },
+ {
+  "domain": "artdepoo.ee",
+  "url": "https://artdepoo.ee",
+  "status": "ok",
+  "bytes": 117215,
+  "dims": 0,
+  "nextjs": false,
+  "robots_blocks_all": false
+ },
+ {
+  "domain": "positiiv.ee",
+  "url": "https://www.positiiv.ee/",
+  "status": "ok",
+  "bytes": 61330,
+  "dims": 0,
+  "nextjs": false,
+  "robots_blocks_all": false
+ },
+ {
+  "domain": "noorusgalerii.ee",
+  "status": "unreachable"
+ },
+ {
+  "domain": "vent.space",
+  "status": "unreachable"
+ },
+ {
+  "domain": "juks.ee",
+  "status": "unreachable"
+ },
+ {
+  "domain": "kastellaanimaja.ee",
+  "status": "unreachable"
+ },
+ {
+  "domain": "sammasgalerii.ee",
+  "status": "unreachable"
+ },
+ {
+  "domain": "tallinnartspace.com",
+  "url": "https://www.tallinnartspace.com/",
+  "status": "ok",
+  "bytes": 55803,
+  "dims": 0,
+  "nextjs": false,
+  "robots_blocks_all": false
+ },
+ {
+  "domain": "rundum.ee",
+  "status": "unreachable"
+ },
+ {
+  "domain": "galeriikaks.ee",
+  "url": "https://www.galeriikaks.ee/",
+  "status": "ok",
+  "bytes": 57137,
+  "dims": 1,
+  "nextjs": false,
+  "robots_blocks_all": false
+ },
+ {
+  "domain": "vaal.ee",
+  "url": "https://www.vaal.ee/",
+  "status": "ok",
+  "bytes": 17037,
+  "dims": 0,
+  "nextjs": false,
+  "robots_blocks_all": false
+ },
+ {
+  "domain": "okapi.ee",
+  "url": "https://okapi.ee",
+  "status": "ok",
+  "bytes": 52976,
+  "dims": 0,
+  "nextjs": false,
+  "robots_blocks_all": false
+ },
+ {
+  "domain": "muu.ee",
+  "status": "unreachable"
+ },
+ {
+  "domain": "artcontainer.ee",
+  "url": "https://artcontainer.ee",
+  "status": "ok",
+  "bytes": 41508,
+  "dims": 0,
+  "nextjs": false,
+  "robots_blocks_all": false
+ },
+ {
+  "domain": "galeriiharuke.ee",
+  "status": "unreachable"
+ },
+ {
+  "domain": "sarv.gallery",
+  "status": "unreachable"
+ },
+ {
+  "domain": "eaa.ee",
+  "url": "https://eaa.ee",
+  "status": "ok",
+  "bytes": 46199,
+  "dims": 0,
+  "nextjs": false,
+  "robots_blocks_all": false
+ }
+]
