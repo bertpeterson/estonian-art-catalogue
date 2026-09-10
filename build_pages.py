@@ -43,7 +43,15 @@ CSS = ("body{margin:0;padding:28px;font:15px/1.55 -apple-system,BlinkMacSystemFo
        "table{border-collapse:collapse;width:100%;font-size:.88rem;margin-top:14px}"
        "th,td{text-align:left;padding:5px 9px 5px 0;border-bottom:1px solid #e3e5e9;vertical-align:top}"
        "th{font-size:.7rem;text-transform:uppercase;letter-spacing:.09em;color:#666;font-weight:500}"
-       "p.bio{max-width:66ch}a.cta{display:inline-block;margin:12px 0}nav{font-size:.85rem;margin-bottom:18px}")
+       "p.bio{max-width:66ch}a.cta{display:inline-block;margin:12px 0}nav{font-size:.85rem;margin-bottom:18px}"
+       # The app offers this as "printable page for this artist", so make that true:
+       # drop the navigation and the call to action, force black on white regardless of
+       # the reader's theme, and keep table rows from splitting across pages.
+       "@media print{body{background:#fff;color:#000;padding:0;max-width:none;font-size:11pt}"
+       "nav,a.cta{display:none}a{color:#000;text-decoration:none}"
+       "th,td{border-color:#999!important}tr{break-inside:avoid}"
+       "thead{display:table-header-group}h1{font-size:16pt}"
+       "table{font-size:9pt}}")
 
 
 def jsonld(a, ws, sl, dates):
