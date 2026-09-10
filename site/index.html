@@ -802,6 +802,13 @@ footer a{border-bottom:1px solid var(--rule)}
     state.idxOpen = !!ix;
     state.letter  = (ix && ix !== "all") ? ix.toUpperCase() : null;
     state.expand.clear();
+    // A shared link carries one record, but each group renders only its first 50 rows,
+    // so anything deeper simply was not on the page and the link showed the catalogue
+    // rather than the thing being shared. Expand whichever group holds it.
+    if (state.open){
+      const w = W.find(x => x.k === state.open);
+      if (w) state.expand.add(String(state.group === "artist" ? w.a : decOf(w)));
+    }
   }
 
   const $ = id => document.getElementById(id);
