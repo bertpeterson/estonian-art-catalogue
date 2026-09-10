@@ -87,3 +87,6 @@ import os
 print("MISSED:",miss if miss else "none")
 print("site/index.html %.0f KB"%(os.path.getsize('site/index.html')/1024))
 PY
+
+# flat exports for reuse (CSV + JSONL), written into site/data/export/
+(cd data && python3 -u validate.py && python3 -u export_csv.py)
