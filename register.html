@@ -265,6 +265,13 @@ footer a{border-bottom:1px solid var(--rule)}
   text-transform:uppercase;color:var(--grey-4);padding-bottom:4px}
 .ai-body{margin-top:16px;border-top:1px solid var(--rule-soft);padding-top:14px;
   display:grid;grid-template-columns:repeat(auto-fill,minmax(268px,1fr));gap:1px 26px}
+/* Ranked by size, consecutive ranks must sit next to each other. A CSS grid fills
+   row-major, so 1-2-3-4 would run across the top and rank 5 would jump back to the
+   far left; newspaper columns run them down, which also stacks the counts in a line
+   you can compare. A-Z keeps the grid, whose letter dividers span all columns. */
+.ai-body.ranked{display:block;column-width:268px;column-gap:26px}
+.ai-body.ranked .ai-count{column-span:all}
+.ai-body.ranked .ai-item{break-inside:avoid}
 .ai-item{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;width:100%;
   background:none;border:0;border-bottom:1px solid var(--rule-soft);color:inherit;
   text-align:left;padding:7px 4px;cursor:pointer;font-family:inherit}
@@ -964,6 +971,7 @@ const I18N={"ET":{"sub":"Kunst Eesti avalikes kogudes · 1577–2026","works":"t
     });
     if (total > show.length)
       out += `<button class="more" id="more-index" style="grid-column:1/-1;margin-top:10px">${esc(T("moreindex",{n:(total-show.length).toLocaleString("en")}))}</button>`;
+    body.className = "ai-body" + (byWorks ? " ranked" : "");
     body.innerHTML = out;
   }
 
