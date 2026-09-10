@@ -30,6 +30,7 @@ def val(w, f):
     return v
 
 e = lambda s: html.escape(str(s or ""), quote=True)
+KIND = {"school": "trained at", "movement": "movement", "member": "member of"}
 by_artist = {}
 for w in W: by_artist.setdefault(w["a"], []).append(w)
 
@@ -59,6 +60,11 @@ def jsonld(a, ws, sl, dates):
     if a.get("qid"): person["sameAs"] = f"https://www.wikidata.org/wiki/{a['qid']}"
     if a.get("wdesc"): person["description"] = a["wdesc"]
     if a.get("aff"): person["nationality"] = a["aff"]
+    for g in a.get("grp", []):
+        kind, label = g.split(":", 1)
+        key = {"school": "alumniOf", "member": "memberOf", "movement": "movement"}[kind]
+        org = {"@type": "Organization", "name": label} if kind != "movement" else label
+        person.setdefault(key, []).append(org)
     works = []
     for w in ws[:50]:
         it = {"@type": "VisualArtwork", "name": w.get("t") or "—",
@@ -113,6 +119,8 @@ for i, a in enumerate(A):
            f"<h1>{e(a['n'])}</h1>"
            f"<p class=\"m\">{e(dates)}{' · ' if dates and a.get('wdesc') else ''}{e(a.get('wdesc') or '')}"
            f"{'<br>' if holders else ''}{e('; '.join(holders[:6]))}</p>"
+           + (f"<p class=\"m\">{e(' · '.join(KIND[g.split(':',1)[0]] + ' ' + g.split(':',1)[1] for g in a.get('grp', [])))}</p>"
+              if a.get("grp") else "")
            + (f"<p class=\"bio\">{e(a.get('b') or a.get('ben') or '')}</p>" if (a.get('b') or a.get('ben')) else "")
            + f"<p><a class=\"cta\" href=\"{BASE}/#artist={sl}\">Browse {len(ws)} works in the catalogue →</a></p>"
            + (f"<p class=\"m\">Showing the first 600 of {len(ws):,} works — "
