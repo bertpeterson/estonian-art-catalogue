@@ -258,6 +258,11 @@ footer a{border-bottom:1px solid var(--rule)}
 .ai-l:hover{color:var(--ink);background:var(--field)}
 .ai-l[aria-pressed="true"]{background:var(--invert-bg);color:var(--invert-fg)}
 .ai-tools{display:flex;align-items:center;gap:12px}
+.ai-sort{display:inline-flex;border:1px solid var(--rule)}
+.ai-sort button{font-family:var(--mono);font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;
+  background:none;border:0;color:var(--grey-6);padding:5px 9px;cursor:pointer;white-space:nowrap}
+.ai-sort button + button{border-left:1px solid var(--rule)}
+.ai-sort button[aria-pressed="true"]{background:var(--invert-bg);color:var(--invert-fg)}
 .ai-search{background:var(--field);border:1px solid var(--rule);color:var(--ink);
   font-family:var(--sans);font-size:.8rem;padding:5px 9px;width:180px}
 .ai-search::placeholder{color:var(--grey-4)}
@@ -271,11 +276,12 @@ footer a{border-bottom:1px solid var(--rule)}
 .ai-item:hover{background:var(--field)}
 .ai-nm{font-size:.86rem;line-height:1.3}
 .ai-dt{font-family:var(--mono);font-size:.62rem;color:var(--grey-4);letter-spacing:.04em}
-.ai-rt{display:flex;align-items:center;gap:9px}
+.ai-rt{display:flex;align-items:center;gap:9px;justify-content:flex-end}
 .ai-n{font-family:var(--mono);font-size:.66rem;color:var(--grey-6);font-variant-numeric:tabular-nums;min-width:34px;text-align:right}
 .spark{color:var(--bar);display:block}
 .ai-item:hover .spark{color:var(--ink)}
-.ai-letter{grid-column:1/-1;font-family:var(--serif-text);font-size:1.5rem;line-height:1;
+.ai-letter{grid-column:1/-1;font-family:var(--sans);font-weight:600;font-size:1.15rem;
+  letter-spacing:.04em;line-height:1;
   padding:16px 0 5px;border-bottom:1px solid var(--ink);margin-bottom:3px}
 .ai-letter:first-child{padding-top:0}
 
@@ -461,6 +467,10 @@ footer a{border-bottom:1px solid var(--rule)}
       <span class="eyebrow" data-i18n="artistindex"></span>
       <div class="ai-rail" id="ai-rail"></div>
       <div class="ai-tools">
+        <div class="ai-sort" role="group" aria-label="Sort artists">
+          <button id="ais-az" aria-pressed="true" data-i18n="sortaz"></button>
+          <button id="ais-works" aria-pressed="false" data-i18n="sortworks"></button>
+        </div>
         <input id="ai-q" class="ai-search" type="search" aria-label="Filter artists">
         <button class="linkbtn" id="ai-toggle" aria-expanded="false" aria-controls="ai-body"></button>
       </div>
@@ -662,7 +672,7 @@ footer a{border-bottom:1px solid var(--rule)}
 
   const state = {group:"decade", decOrder:"earliest", artOrder:"az", q:"",
                  decade:null, media:new Set(), museums:new Set(), cats:new Set(), srcs:new Set(),
-                 artist:null, letter:null, idxOpen:false, idxQ:"", idxLimit:120, showEarly:false, origins:new Set(), sort:"year", year:null, gLimit:50, from:null, to:null, undOnly:false, open:null, expand:new Set()};
+                 artist:null, letter:null, idxOpen:false, idxQ:"", idxLimit:120, idxSort:"az", showEarly:false, origins:new Set(), sort:"year", year:null, gLimit:50, from:null, to:null, undOnly:false, open:null, expand:new Set()};
   const LIMIT_DEC = 50, LIMIT_ART = 18;
   const slug = s => (s||"").normalize("NFKD").replace(/[\u0300-\u036f]/g,"")
       .toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"");
@@ -936,16 +946,22 @@ footer a{border-bottom:1px solid var(--rule)}
       const q = state.idxQ.toLowerCase();
       show = show.filter(x => x.n.toLowerCase().includes(q));
     }
+    // Sorted by size, the alphabet is not the organising idea any more, so the
+    // letter dividers go with it — they would break the ranking into meaningless runs.
+    const byWorks = state.idxSort === "works";
+    if (byWorks) show = show.slice().sort((a,b)=> b.c - a.c || cmpStr(a.s, b.s));
     const total = show.length;
     show = show.slice(0, state.idxLimit);
     let cur = "", out = `<div class="ai-count">${esc(T("idxcount",{n:total.toLocaleString("en")}))}</div>`;
     if (!total) out += `<div class="ai-count">${esc(T("idxnone"))}</div>`;
     show.forEach(x=>{
-      const L = x.s[0].toUpperCase();
-      if (L !== cur){ cur = L; out += `<div class="ai-letter" id="ai-${esc(L)}">${esc(L)}</div>`; }
+      if (!byWorks){
+        const L = x.s[0].toUpperCase();
+        if (L !== cur){ cur = L; out += `<div class="ai-letter" id="ai-${esc(L)}">${esc(L)}</div>`; }
+      }
       out += `<button class="ai-item" data-artist="${x.i}">
         <span><span class="ai-nm">${esc(x.n)}</span><br><span class="ai-dt">${esc(x.l||"")}</span></span>
-        <span class="ai-rt">${spark(x.sp, 74, 17)}<span class="ai-n">${x.c}</span></span>
+        <span class="ai-rt"><span class="ai-n">${x.c}</span></span>
       </button>`;
     });
     if (total > show.length)
@@ -1252,6 +1268,14 @@ footer a{border-bottom:1px solid var(--rule)}
     if (e.target.closest("#more-index")){ state.idxLimit += 300; renderArtistIndex(); }
   });
   let iq = null;
+  const setIdxSort = mode => {
+    state.idxSort = mode; state.idxLimit = 120;
+    $("ais-az").setAttribute("aria-pressed", mode !== "works");
+    $("ais-works").setAttribute("aria-pressed", mode === "works");
+    renderArtistIndex(); pushHash(true);
+  };
+  $("ais-az").addEventListener("click", () => setIdxSort("az"));
+  $("ais-works").addEventListener("click", () => setIdxSort("works"));
   $("ai-q").addEventListener("input", e => {
     clearTimeout(iq);
     iq = setTimeout(() => {
