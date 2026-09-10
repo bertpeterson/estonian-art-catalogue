@@ -3,6 +3,10 @@ data/cache/
 data/dkcache/
 data/cca_cache/
 
+# The compressed harvest in data/raw/ IS committed — see data/unpack.py. The
+# uncompressed working copies below are not.
+!data/raw/
+
 # Raw per-source harvest dumps (inputs to data/merge.py, not outputs)
 data/records.json
 data/records_pre_hygiene.json
