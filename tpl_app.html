@@ -638,6 +638,10 @@
     $("stat-a").textContent = A.filter(x=>x.c>0).length;
     // "held" is the default and is stripped from the data, so it arrives as undefined
     $("stat-m").textContent = new Set(W.filter(w=>(w.kind||"held")==="held").map(w=>w.mu)).size;
+    // galleries are venues, not holders — counted separately, and hidden when there are none
+    const gsites = new Set(W.filter(w=>w.kind==="gallery").map(w=>w.mu));
+    $("stat-g").textContent = gsites.size;
+    $("stat-gwrap").hidden = gsites.size === 0;
 
     const scope = [];
     if (state.artist!==null) scope.push(A[state.artist].n);

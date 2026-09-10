@@ -387,6 +387,7 @@ footer a{border-bottom:1px solid var(--rule)}
         <div><b id="stat-w">0</b><span data-i18n="works"></span></div>
         <div><b id="stat-a">0</b><span data-i18n="artists"></span></div>
         <div><b id="stat-m">0</b><span data-i18n="museums"></span></div>
+        <div id="stat-gwrap" hidden><b id="stat-g">0</b><span data-i18n="galleries"></span></div>
       </div>
     </div>
     <p class="standfirst" data-i18n-html="standfirst"></p>
@@ -1166,6 +1167,10 @@ footer a{border-bottom:1px solid var(--rule)}
     $("stat-a").textContent = A.filter(x=>x.c>0).length;
     // "held" is the default and is stripped from the data, so it arrives as undefined
     $("stat-m").textContent = new Set(W.filter(w=>(w.kind||"held")==="held").map(w=>w.mu)).size;
+    // galleries are venues, not holders — counted separately, and hidden when there are none
+    const gsites = new Set(W.filter(w=>w.kind==="gallery").map(w=>w.mu));
+    $("stat-g").textContent = gsites.size;
+    $("stat-gwrap").hidden = gsites.size === 0;
 
     const scope = [];
     if (state.artist!==null) scope.push(A[state.artist].n);
