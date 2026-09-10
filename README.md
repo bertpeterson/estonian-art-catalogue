@@ -63,6 +63,21 @@ now a **dated snapshot**: it says so on its own masthead, in both languages, and
 links to the live site. Rebuild it deliberately with `python3 build_artifact.py`,
 not as part of the normal cycle.
 
+## Images
+
+Records from the EKM Digital Collection show a thumbnail. It is **hotlinked, never
+copied**: the museum serves the pixels from its own catalogue, so nothing is
+reproduced here, and the figure removes itself if the image ever fails.
+
+Only museum holdings carry images, and only EKM's. MuIS states its metadata is CC0
+but that "usage of digital images may be subject to restrictions", and its endpoint —
+named `pisipilt`, thumbnail — returns the full image, 1.6 MB in the case measured,
+with no size parameter. Hotlinking that tens of thousands of times off a state server
+would be slow to read and rude to the museum. Gallery works carry no images at all.
+
+The URLs were read out of pages already in the local cache, so adding images cost the
+museums no requests.
+
 ## Reusing the data
 
 `data/data.json` is dictionary-encoded and nested, which suits the site and suits
