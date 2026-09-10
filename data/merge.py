@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import json, re, collections, unicodedata, datetime, os
+import json, re, collections, unicodedata, datetime, os, html
 exec(open('build.py',encoding='utf-8').read().split('def esc_ess')[0])   # ESS/TECH/MAT/ED_LIFE/ED_BIO
 
 def invkey(s):
@@ -439,7 +439,11 @@ print("  wikidata dropped as unresolvable conflict:", WD_CONFLICT)
 # links back to the gallery's own page. Prices are deliberately not collected.
 GAL = json.load(open("gallery_records.json", encoding="utf-8")) if os.path.exists("gallery_records.json") else []
 gal_added = 0
+# Each gallery parser decoded its own shortlist of HTML entities, which let
+# "&#8220;" and "&#8221;" through into titles. Decode the lot here instead, once.
 for g in GAL:
+    for f in ("artist", "title", "tech", "dims"):
+        if g.get(f): g[f] = re.sub(r'\s+', ' ', html.unescape(g[f])).strip()
     ai = artist_index(g["artist"])
     if ai is None or not g.get("title"): continue
     y = int(g["year"]) if g.get("year") and g["year"].isdigit() else None
