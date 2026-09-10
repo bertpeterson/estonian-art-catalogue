@@ -173,14 +173,7 @@ h1 em{font-style:italic;font-weight:400}
 .chip span{color:var(--grey-4);margin-left:6px}
 .chip[aria-pressed="true"] span{color:var(--invert-fg);opacity:.6}
 
-.keyhelp{border-bottom:1px solid var(--rule);padding:14px 0}
-.kh-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:7px 26px}
-.kh-grid > div{display:flex;align-items:baseline;gap:9px;font-size:.8rem;color:var(--grey-6)}
-.kh-grid span{color:var(--ink-soft)}
-kbd{font-family:var(--mono);font-size:.64rem;border:1px solid var(--rule);background:var(--field);
-  color:var(--ink);padding:2px 6px;min-width:20px;display:inline-block;text-align:center}
 .row-btn:focus-visible{outline:none;background:var(--field);border-left-color:var(--ink)}
-.row[data-cursor="true"] .row-btn{background:var(--field);border-left-color:var(--ink)}
 .count-line{font-family:var(--mono);font-size:var(--fs-sm);letter-spacing:var(--ls-label);text-transform:uppercase;color:var(--grey-6);padding:12px 0 0}
 .group{display:grid;grid-template-columns:230px 1fr;gap:34px;padding:22px 0;border-bottom:1px solid var(--rule)}
 .group:last-child{border-bottom:0}
@@ -462,7 +455,6 @@ footer a{border-bottom:1px solid var(--rule)}
         <button id="o-desc" aria-pressed="false">Latest</button>
       </div>
     </div>
-    <button class="linkbtn" id="keys" data-i18n="keys"></button>
     <button class="linkbtn" id="share" data-i18n="linkview"></button>
     <button class="linkbtn" id="random" data-i18n="random"></button>
     <button class="linkbtn" id="reset" data-i18n="reset"></button>
@@ -515,21 +507,6 @@ footer a{border-bottom:1px solid var(--rule)}
     </div>
     <div class="ai-body" id="ai-body" hidden></div>
   </section>
-
-  <div class="keyhelp" id="keyhelp" hidden>
-    <div class="kh-grid">
-      <div><kbd>/</kbd><span data-i18n="kh_search"></span></div>
-      <div><kbd>j</kbd> <kbd>↓</kbd><span data-i18n="kh_next"></span></div>
-      <div><kbd>k</kbd> <kbd>↑</kbd><span data-i18n="kh_prev"></span></div>
-      <div><kbd>Enter</kbd><span data-i18n="kh_open"></span></div>
-      <div><kbd>o</kbd><span data-i18n="kh_artist"></span></div>
-      <div><kbd>f</kbd><span data-i18n="kh_filters"></span></div>
-      <div><kbd>a</kbd><span data-i18n="kh_index"></span></div>
-      <div><kbd>Home</kbd> <kbd>End</kbd><span data-i18n="kh_firstlast"></span></div>
-      <div><kbd>Esc</kbd><span data-i18n="kh_esc"></span></div>
-      <div><kbd>?</kbd><span data-i18n="kh_panel"></span></div>
-    </div>
-  </div>
 
   <div id="mono"></div>
   <p class="count-line" id="countline"></p>
