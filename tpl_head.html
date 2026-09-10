@@ -361,6 +361,20 @@ footer a{border-bottom:1px solid var(--rule)}
   .bar-lab{font-size:0;border-top:1px solid var(--rule);padding-top:6px;min-height:1px}
   .cent-lab{padding-top:5px}
 }
+/* Touch targets. WCAG 2.5.8 asks for 24x24 minimum; on a phone the year rows were
+   18px tall, the letter rail 17x17 and the text buttons 19px. Widened only here, so
+   the denser desktop layout is untouched. The histogram bars are the one exception:
+   24 decades across a 375px screen cannot each be 24px wide, so they stay narrow and
+   the century label above them remains the coarse, reliable target. */
+@media (pointer:coarse), (max-width:760px){
+  .gy-row{min-height:32px;padding:6px 3px}
+  .ai-l{min-width:32px;min-height:32px;display:inline-flex;align-items:center;justify-content:center}
+  .linkbtn{min-height:32px;display:inline-flex;align-items:center}
+  .early-btn,.cent-collapse{min-height:32px}
+  /* the language and theme toggles land at 23px — one pixel short of the minimum */
+  .langsw button,.seg button,.ai-sort button{min-height:32px}
+  .af{min-height:32px}   /* the active-filter chips are how a filter gets removed */
+}
 @media (max-width:760px){
   .bar-n{display:none}
   .bars{gap:12px}
