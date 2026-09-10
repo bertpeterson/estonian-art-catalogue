@@ -44,6 +44,10 @@
   const ordN = n => LANG !== "en" ? n + "."
     : n + (n % 100 >= 11 && n % 100 <= 13 ? "th" : (["th","st","nd","rd"][n % 10] || "th"));
   const musName = m => LANG === "en" ? (I18N.MUSEUM_EN[m] || m) : m;
+  // Each holder's own website, verified when data/venues.json was compiled. A record
+  // should be able to send you to the place that holds the work.
+  const SITES = (DATA.meta && DATA.meta.sites) || {};
+  const siteOf = m => SITES[m] || null;
   const bioFor = ar => {
     const en = ar.ben, et = ar.b;
     if (LANG === "en") return en ? {t:en, s:ar.bens, alt:false} : (et ? {t:et, s:ar.bs, alt:true} : {t:"", s:null, alt:false});
@@ -641,7 +645,7 @@
           <div class="d-k">${esc(T("d_material"))}</div><div class="d-v">${matName(w)?esc(matName(w)):"—"}</div>
           ${w.dm?`<div class="d-k">${esc(T("d_dimensions"))}</div><div class="d-v">${esc(w.dm)}</div>`:""}
           ${w.c?`<div class="d-k">${esc(T("d_category"))}</div><div class="d-v">${esc(catName(w.c))}</div>`:""}
-          <div class="d-k">${esc(w.kind==="held"?T("d_collection"):T("venue"))}</div><div class="d-v">${esc(w.co||"")}<br><em>${esc(musName(w.mu))}</em></div>
+          <div class="d-k">${esc(w.kind==="held"?T("d_collection"):T("venue"))}</div><div class="d-v">${esc(w.co||"")}<br><em>${siteOf(w.mu) ? `<a class="permalink" href="${esc(siteOf(w.mu))}" target="_blank" rel="noopener">${esc(musName(w.mu))}</a>` : esc(musName(w.mu))}</em></div>
           <div class="d-k">${esc(T("kind"))}</div><div class="d-v">${esc(T(w.kind==="shown"?"shown":w.kind==="gallery"?"gallery":"held"))}</div>
           ${w.nu ? `<div class="d-k">${esc(T("d_number"))}</div><div class="d-v" style="font-family:var(--mono);font-size:.78rem">${esc(w.nu)}</div>` : ""}
           ${ar.wdesc?`<div class="d-k">${esc(T("d_origin"))}</div><div class="d-v">${esc(ar.wdesc)}${ar.qid?` <a class="permalink" href="https://www.wikidata.org/wiki/${esc(ar.qid)}" target="_blank" rel="noopener">${esc(T("d_wd"))}</a>`:""}</div>`:""}

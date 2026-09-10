@@ -491,6 +491,29 @@ print("  artists with a school/movement/membership:", grp_n)
 for w in works: w.setdefault("kind", "held")
 for i, a in enumerate(artists): a["c"] = sum(1 for w in works if w["a"] == i)
 
+# ---------- where to find the holder ----------
+# data/venues.json was compiled by checking each institution's site returned 200 and
+# reading its page title back as evidence. Map it onto the museums that actually hold
+# work here, and derive each gallery's home page from the records it supplied, so a
+# reader can go from a record to the place that holds it.
+SITES = {}
+try:
+    for v in json.load(open("venues.json", encoding="utf-8")):
+        # several branches share one holder — the entry named for the holder wins,
+        # so "Eesti Kunstimuuseum" links to the foundation and not to whichever of
+        # Kumu, Kadriorg, Mikkel, Niguliste or Adamson-Eric happened to be last.
+        if not (v.get("holder") and v.get("url")): continue
+        if v["holder"] not in SITES or v.get("n") == v["holder"]:
+            SITES[v["holder"]] = v["url"]
+except FileNotFoundError:
+    pass
+for g in GAL:
+    u = g.get("url") or ""
+    m = re.match(r'(https?://[^/?]+)', u)
+    if m and g.get("gallery"): SITES.setdefault(g["gallery"], m.group(1))
+SITES = {k: v for k, v in SITES.items() if k in {w["mu"] for w in works if w.get("mu")}}
+print("  holders with a website:", len(SITES))
+
 data = {"meta": {"built": datetime.date.today().isoformat(),
                  "works": len(works), "objects": OBJECTS, "artists": len(artists),
                  "held": sum(1 for w in works if w["kind"]=="held"),
@@ -537,6 +560,7 @@ for w in data["works"]:
     if w.get("nu") and derive(w["nu"]) == w.get("k"): w.pop("k", None)
 data["vocab"] = vocab
 data["meta"]["encoded"] = DICT_FIELDS
+data["meta"]["sites"] = SITES
 json.dump(data, open("data.json", "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
 print("data.json", os.path.getsize("data.json")//1024, "KB")
 for k, v in data["meta"].items(): print(" ", k, v)
