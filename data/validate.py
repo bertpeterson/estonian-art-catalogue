@@ -57,6 +57,18 @@ for f, table in V.items():
     bad = [w for w in W if isinstance(w.get(f), int) and not (0 <= w[f] < len(table))]
     check(not bad, f"{len(bad)} works index outside vocab['{f}']")
 
+# The README quotes figures from this data. They drifted three times before anyone
+# noticed, so check them here rather than trusting a human to remember.
+import os
+_readme = os.path.join(os.path.dirname(__file__) or ".", "..", "README.md")
+if os.path.exists(_readme):
+    text = open(_readme, encoding="utf-8").read()
+    for label, value in (("works", meta["works"]), ("artists", meta["artists"]),
+                         ("muis", meta["muis"]), ("ekm", meta["ekm"]),
+                         ("both", meta["both"]), ("objects", meta["objects"]),
+                         ("gallery", meta.get("gallery", 0)), ("held", meta.get("held", 0))):
+        check(f"{value:,}" in text, f"README does not quote the current {label} figure ({value:,})", hard=False)
+
 for m in warn: print("  warn:", m)
 for m in fail: print("  FAIL:", m)
 print(f"\n{len(W):,} works, {len(A):,} artists — {'OK' if not fail else str(len(fail))+' problem(s)'}")

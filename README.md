@@ -14,16 +14,16 @@ invented, reconstructed, or filled in by hand.
 
 | Source | Records | What it is |
 |---|---|---|
-| [MuIS](https://www.muis.ee) | 27,681 | Muuseumide Infosüsteem — the shared catalogue of all Estonian museums |
-| [EKM Digital Collection](https://digikogu.ekm.ee) | 27,711 | The Art Museum of Estonia's own database, behind Kumu |
+| [MuIS](https://www.muis.ee) | 27,676 | Muuseumide Infosüsteem — the shared catalogue of all Estonian museums |
+| [EKM Digital Collection](https://digikogu.ekm.ee) | 27,671 | The Art Museum of Estonia's own database, behind Kumu |
 | [CCA Estonia](https://cca.ee) | 58 bios | Centre for Contemporary Art — artist biographies, Venice Biennale archive |
 | [EKKM](https://ekkm.ee) | — | Contemporary Art Museum of Estonia |
-| [Wikidata](https://www.wikidata.org) | 1,793 |
-| Seven commercial galleries | 4,224 | Commercial galleries — current work, metadata only, no prices | Birthplace, dates, and art-historical affiliation for artists |
+| [Wikidata](https://www.wikidata.org) | 1,678 artists | Dates, birthplace, training and art-historical affiliation |
+| Seven commercial galleries | 4,222 | Haus, Vernissage, Temnikova & Kasela, Tütar, Artrovert, Kogo, Ruki — current work, metadata only, never prices |
 
-7,551 objects appear in both MuIS and the EKM database and are merged on inventory number
-(MuIS `Number` = digikogu `Tulmenumber` + `Kogunumber`), which is why 61,363 source objects
-collapse to 47,899 works.
+7,544 objects appear in both MuIS and the EKM database and are merged on inventory number
+(MuIS `Number` = digikogu `Tulmenumber` + `Kogunumber`), which is why 61,309 source objects
+collapse to 52,083 works.
 
 **Only attributed works are included.** Anonymous and unattributed objects are excluded by design.
 
@@ -137,9 +137,37 @@ The site is plain HTML, CSS and JavaScript with no build step and no dependencie
 cd site && python3 -m http.server 8000
 ```
 
+## How this was collected
+
+Museum records come from MuIS and the EKM Digital Collection, fetched per artist and per
+collection and cached locally, then parsed. Requests identified themselves as
+`EstonianArtCatalogue/1.0`, every page was cached so nothing was fetched twice, and part of
+the MuIS harvest used the bulk RDF files it publishes at `/rdf/collection/`. **A refresh
+should go through those bulk files and the OAI interface rather than fetching object pages.**
+
+Gallery records come from each gallery's own public listings — WooCommerce's Store API where
+one exists, otherwise the pages themselves. Prices are never collected, and every record
+links back to the gallery's page. Where a site asked not to be collected from, it was not:
+`alleegalerii.ee` sets `ClaudeBot: Disallow` and an Article 4 reservation, and holds no
+records here.
+
+**Images are deliberately absent.** MuIS states a licence per image, and none of the 31,000
+carry a permissive one — 26,308 are marked *rights undetermined*, 4,905 *protected by
+copyright*. An attempt at hotlinking EKM thumbnails was reverted: their pages lead with a
+related-works carousel, so the images attached to the wrong artworks.
+
 ## Licence
 
 Code: MIT (see `LICENSE`).
 
-Metadata: aggregated from sources that publish under CC0 or equivalent open terms, and shared
-here on the same basis. Attribution to the holding institutions is carried in every record.
+**Data is mixed, and the split is in the data itself.** Records marked `kind: held` —
+47,838 of them, 91.8% — derive from museum metadata published under CC0, which carries no
+restriction on reuse, commercial included. The 4,222 records marked `kind: gallery` come from
+commercial galleries that grant no licence; they are included as a public catalogue of current
+work, and anyone reusing this dataset should decide for themselves whether to keep them. One
+filter on `kind` separates the two.
+
+Attribution to the holding institution is carried in every record, and every record links back
+to its source.
+
+Corrections and removal requests are welcome — open an issue on this repository.
