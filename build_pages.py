@@ -44,6 +44,38 @@ CSS = ("body{margin:0;padding:28px;font:15px/1.55 -apple-system,BlinkMacSystemFo
        "th{font-size:.7rem;text-transform:uppercase;letter-spacing:.09em;color:#666;font-weight:500}"
        "p.bio{max-width:66ch}a.cta{display:inline-block;margin:12px 0}nav{font-size:.85rem;margin-bottom:18px}")
 
+
+def jsonld(a, ws, sl, dates):
+    """schema.org description of the artist and a sample of their works.
+
+    Plain HTML tells a crawler these are words; this tells it they are an artist and
+    artworks, which is what lets an art-specific query match. Only the first 50 works
+    are described — enough to characterise the page without a megabyte of JSON."""
+    life = a.get("l") or ["", ""]
+    person = {"@type": "Person", "name": a["n"], "url": f"{BASE}/a/{sl}.html"}
+    if life[0]: person["birthDate"] = life[0]
+    if life[1]: person["deathDate"] = life[1]
+    if a.get("born"): person["birthPlace"] = {"@type": "Place", "name": a["born"]}
+    if a.get("qid"): person["sameAs"] = f"https://www.wikidata.org/wiki/{a['qid']}"
+    if a.get("wdesc"): person["description"] = a["wdesc"]
+    if a.get("aff"): person["nationality"] = a["aff"]
+    works = []
+    for w in ws[:50]:
+        it = {"@type": "VisualArtwork", "name": w.get("t") or "—",
+              "creator": {"@type": "Person", "name": a["n"]}}
+        if w.get("y"): it["dateCreated"] = str(w["y"])
+        if val(w, "tc") or val(w, "tce"): it["artMedium"] = val(w, "tc") or val(w, "tce")
+        if val(w, "e"): it["artform"] = val(w, "e")
+        if val(w, "mu"): it["holdingArchive"] = {"@type": "Organization", "name": val(w, "mu")}
+        works.append(it)
+    return json.dumps({"@context": "https://schema.org", "@graph": [person,
+        {"@type": "CollectionPage", "name": f"Works by {a['n']}",
+         "url": f"{BASE}/a/{sl}.html", "about": person,
+         "mainEntity": {"@type": "ItemList", "numberOfItems": len(ws),
+                        "itemListElement": [{"@type": "ListItem", "position": i + 1, "item": it}
+                                            for i, it in enumerate(works)]}}]},
+        ensure_ascii=False, separators=(",", ":"))
+
 pages, index_rows = 0, []
 for i, a in enumerate(A):
     ws = by_artist.get(i, [])
@@ -69,6 +101,13 @@ for i, a in enumerate(A):
            f"<title>{e(a['n'])}{' (' + dates + ')' if dates else ''} — Estonian Art Catalogue</title>"
            f"<meta name=\"description\" content=\"{e(desc)}\">"
            f"<link rel=\"canonical\" href=\"{BASE}/a/{sl}.html\">"
+           f"<meta property=\"og:type\" content=\"profile\">"
+           f"<meta property=\"og:title\" content=\"{e(a['n'])}{' (' + dates + ')' if dates else ''}\">"
+           f"<meta property=\"og:description\" content=\"{e(desc)}\">"
+           f"<meta property=\"og:url\" content=\"{BASE}/a/{sl}.html\">"
+           f"<meta property=\"og:site_name\" content=\"Estonian Art Catalogue\">"
+           f"<meta name=\"twitter:card\" content=\"summary\">"
+           f"<script type=\"application/ld+json\">{jsonld(a, ws, sl, dates)}</script>"
            f"<style>{CSS}</style></head><body>"
            f"<nav><a href=\"{BASE}/\">Estonian Art Catalogue</a> › {e(a['n'])}</nav>"
            f"<h1>{e(a['n'])}</h1>"
