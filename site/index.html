@@ -224,6 +224,16 @@ kbd{font-family:var(--mono);font-size:.64rem;border:1px solid var(--rule);backgr
 .src-tag{font-family:var(--mono);font-size:.52rem;letter-spacing:.08em;color:var(--grey-4);border:1px solid var(--rule);padding:0 3px;margin-left:5px;vertical-align:1px}
 
 .detail{padding:2px 0 22px 12px;display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:34px}
+/* Hotlinked museum thumbnail. It can fail — the museum may reorganise or block
+   referrers — so the figure removes itself rather than leaving a broken frame. */
+.d-fig{margin:0 0 16px;max-width:300px}
+/* EKM thumbnails are small (~118px). Never upscale them — width:auto keeps them
+   at natural size and crisp, rather than stretched soft to fill the column. */
+.d-fig img{display:block;width:auto;max-width:100%;height:auto;background:var(--field);
+  border:1px solid var(--rule)}
+.d-fig figcaption{font-family:var(--mono);font-size:.58rem;letter-spacing:.05em;color:var(--grey-4);
+  margin-top:6px;line-height:1.5}
+@media (max-width:860px){ .d-fig{max-width:100%} }
 .d-note{font-family:var(--serif-text);font-size:1rem;line-height:1.62;max-width:64ch;color:var(--ink-soft)}
 .d-nolabel{font-family:var(--mono);font-size:.6rem;letter-spacing:.13em;text-transform:uppercase;color:var(--grey-4);display:block;margin-bottom:6px}
 .d-side{border-top:1px solid var(--rule);padding-top:12px}
@@ -1106,6 +1116,10 @@ footer a{border-bottom:1px solid var(--rule)}
                 <span class="mem-tech" title="${esc(m[1])}">${esc(m[1]||"")}</span>
                 <span>${m[3]?`<a href="https://www.muis.ee/museaalview/${esc(m[3])}" target="_blank" rel="noopener">MuIS</a>`:""}${m[3]&&m[4]?" · ":""}${m[4]?`<a href="https://digikogu.ekm.ee/ekm/search/oid-${esc(m[4])}/" target="_blank" rel="noopener">EKM</a>`:""}</span>
               </div>`).join("")}</div></div>` : ""}
+          ${(detailOf(w)||{}).im ? `<figure class="d-fig"><a href="${esc(detailOf(w).im)}" target="_blank" rel="noopener">`
+             + `<img src="${esc(detailOf(w).im)}" alt="${esc(w.t)}" loading="lazy" decoding="async"`
+             + ` onerror="this.closest('figure').remove()"></a>`
+             + `<figcaption>${esc(T("imgcredit",{m:musName(w.mu)}))}</figcaption></figure>` : ""}
           ${(detailOf(w)||{}).d ? `<div class="d-note"><span class="d-nolabel">${w.s==="cca"?esc(T("d_desc_cca"))+" · "+esc(T("inenglish")):w.s==="ekkm"?esc(T("d_desc_ekkm"))+" · "+esc(T("inenglish")):esc(T("d_desc"))+" · "+esc(T("estonianprose"))}</span>${esc(detailOf(w).d)}</div>`
                    : `<div class="d-note"><span class="d-nolabel">${esc(T("d_desc"))}</span><em style="color:var(--grey-4)">${esc(T("d_nodesc"))}</em></div>`}
           <div class="d-v" style="margin-top:16px;display:flex;flex-wrap:wrap;gap:18px">
