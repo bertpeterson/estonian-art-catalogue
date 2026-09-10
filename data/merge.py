@@ -460,6 +460,34 @@ for g in GAL:
 print("  gallery works added:", gal_added,
       "from", len({g["gallery"] for g in GAL}), "galleries")
 
+# ---------- training, movements, memberships ----------
+# Where an artist trained is a real axis in Estonian art — the Pallas school in Tartu
+# and the academy in Tallinn are different lineages, and Ants Laikmaa's atelier taught
+# a generation before either. Wikidata records it as P69 (educated at), P135 (movement)
+# and P463 (member of); the museums' own biographies name the same things but exist for
+# only 478 artists, against 841 here. Groups with fewer than three artists are dropped:
+# a facet of singletons is noise, not an axis.
+GRP = json.load(open("wd_groups.json", encoding="utf-8")) if os.path.exists("wd_groups.json") else {}
+KIND = {"P69": "school", "P135": "movement", "P463": "member"}
+by_qid = {}
+# A gymnasium is schooling, not art training. Keeping them makes the facet answer a
+# question nobody asked ("who went to secondary school in Tartu") while burying the
+# one it exists for — where a painter learned to paint.
+NOT_ART = re.compile(r'gymnasium|gümnaasium|secondary|high school|realkool|'
+                     r'university of technology|polütehnik', re.I)
+for key, qids in GRP.items():
+    prop, label = key.split("|", 1)
+    if len(qids) < 3 or NOT_ART.search(label): continue
+    for q in qids:
+        by_qid.setdefault(q, []).append((KIND.get(prop, prop), label))
+grp_n = 0
+for a in artists:
+    rows = by_qid.get(a.get("qid") or "")
+    if not rows: continue
+    a["grp"] = sorted({f"{k}:{v}" for k, v in rows})
+    grp_n += 1
+print("  artists with a school/movement/membership:", grp_n)
+
 for w in works: w.setdefault("kind", "held")
 for i, a in enumerate(artists): a["c"] = sum(1 for w in works if w["a"] == i)
 
