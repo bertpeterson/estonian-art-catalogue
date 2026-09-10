@@ -19,11 +19,13 @@
 <style>
 :root{
   --paper:#FFFFFF; --raise:#FAFAFB; --field:#F5F6F8;
-  --ink:#0B0C0E; --ink-soft:#33363B; --grey-6:#6C7178; --grey-4:#A0A5AC;
+  --ink:#0B0C0E; --ink-soft:#33363B; --grey-6:#6C7178; --grey-4:#70757C;
   --rule:#DCDFE3; --rule-soft:#EBEDF0; --bar:#C9CDD3;
   --invert-bg:#0B0C0E; --invert-fg:#FFFFFF; --focus:#0B0C0E;
   --fs-xs:.62rem;   --fs-sm:.68rem;  --fs-base:.8rem; --fs-md:.88rem;
   --fs-lg:1rem;     --fs-xl:1.5rem;  --fs-2xl:2.6rem;
+  /* greys are pinned to WCAG AA: --grey-4 carries row years, dates and small labels,
+     and at the old #A0A5AC it hit 2.48:1 on white. These clear 4.6:1 in both themes. */
   --ls-label:.13em; --ls-data:.05em;
   --sp-1:6px; --sp-2:11px; --sp-3:18px; --sp-4:30px;
   --serif-text:"Newsreader","Iowan Old Style","Palatino",Georgia,serif;  /* every serif on the page */
@@ -33,14 +35,14 @@
 @media (prefers-color-scheme:dark){
   :root:not([data-theme="light"]){
     --paper:#0B0C0E; --raise:#111316; --field:#15171A;
-    --ink:#F1F2F4; --ink-soft:#C7CACE; --grey-6:#8B9098; --grey-4:#666B72;
+    --ink:#F1F2F4; --ink-soft:#C7CACE; --grey-6:#8B9098; --grey-4:#7A7F86;
     --rule:#2B2E34; --rule-soft:#212429; --bar:#3F434A;
     --invert-bg:#F1F2F4; --invert-fg:#0B0C0E; --focus:#F1F2F4;
   }
 }
 :root[data-theme="dark"]{
   --paper:#0B0C0E; --raise:#111316; --field:#15171A;
-  --ink:#F1F2F4; --ink-soft:#C7CACE; --grey-6:#8B9098; --grey-4:#666B72;
+  --ink:#F1F2F4; --ink-soft:#C7CACE; --grey-6:#8B9098; --grey-4:#7A7F86;
   --rule:#2B2E34; --rule-soft:#212429; --bar:#3F434A;
   --invert-bg:#F1F2F4; --invert-fg:#0B0C0E; --focus:#F1F2F4;
 }
@@ -490,7 +492,7 @@ footer a{border-bottom:1px solid var(--rule)}
   <section class="aidx">
     <div class="ai-head">
       <span class="eyebrow" data-i18n="artistindex"></span>
-      <div class="ai-rail" id="ai-rail"></div>
+      <nav class="ai-rail" id="ai-rail" aria-label="Jump to artists by letter"></nav>
       <div class="ai-tools">
         <div class="ai-sort" role="group" aria-label="Sort artists">
           <button id="ais-az" aria-pressed="true" data-i18n="sortaz"></button>
