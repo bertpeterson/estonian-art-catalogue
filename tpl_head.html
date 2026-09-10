@@ -51,6 +51,11 @@ h1 em{font-style:italic;font-weight:400}
   background:none;border:0;color:var(--grey-6);padding:5px 11px;cursor:pointer}
 .langsw button + button{border-left:1px solid var(--rule)}
 .langsw button[aria-pressed="true"]{background:var(--invert-bg);color:var(--invert-fg)}
+/* only the frozen single-file snapshot carries this; the hosted site never shows it */
+.snapshot{font-family:var(--mono);font-size:.66rem;letter-spacing:.06em;color:var(--grey-6);
+  border:1px solid var(--rule);padding:8px 11px;margin:14px 0 0;max-width:78ch}
+.snapshot a{color:var(--ink);border-bottom:1px solid var(--rule)}
+.snapshot a:hover{border-bottom-color:var(--ink)}
 .mast-sub{font-family:var(--mono);font-size:var(--fs-sm);letter-spacing:var(--ls-label);text-transform:uppercase;color:var(--grey-6);margin:16px 0 0}
 .mast-stats{display:flex;gap:26px;font-family:var(--mono);font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:var(--grey-6);padding-bottom:6px}
 .mast-stats b{display:block;font-family:var(--serif-text);font-weight:500;font-size:1.6rem;line-height:1.05;letter-spacing:0;color:var(--ink);font-variant-numeric:tabular-nums}
