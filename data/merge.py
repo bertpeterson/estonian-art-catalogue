@@ -180,7 +180,11 @@ for k, u in unified.items():
 # this — "Otto Dix (?)" sits in their catalogue beside works firmly given to Dix.
 # The catalogue takes attributed work only, and an attribution the holder will not
 # assert is not one, so these come out on the same rule that excludes anonymous work.
-UNCERTAIN = re.compile(r'\(\s*\?\s*\)\s*$')
+# The bracketed form is not the only one — the same doubt is written as a bare
+# trailing "?" ("Magnus Zeller?"). Requiring a capitalised word or a closing bracket
+# before it keeps the one name that genuinely ends in a question mark: the collective
+# Chto delat / What is to be done?, where the "?" follows a lowercase word.
+UNCERTAIN = re.compile(r'(?:\(\s*\?\s*\)|(?:[A-ZÕÄÖÜŠŽ][^\s]*|\))\s*\?)\s*$')
 _before = [u for u in unified.values() if u["artist"] and u["t"]]
 recs = [u for u in _before if not UNCERTAIN.search(u["artist"])]
 DROPPED_UNCERTAIN = len(_before) - len(recs)
