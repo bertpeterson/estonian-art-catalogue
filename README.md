@@ -46,10 +46,18 @@ i18n.json             the EN/ET dictionary
 build_site.py/.sh     rebuilds site/ from data/data.json
 ```
 
-Two things are deliberately **not** committed, because they are large and re-derivable:
-the ~490 MB of cached source pages (`data/cache/`, `data/dkcache/`, `data/cca_cache/`) and the
-raw per-source harvest dumps that `data/merge.py` reads. Re-run the harvest scripts to
-regenerate them; `data/data.json`, the thing everything else is built from, is committed.
+The ~640 MB of cached source pages (`data/cache/`, `data/dkcache/`) are **not** committed —
+they are large and genuinely disposable.
+
+The parsed harvest they produced **is**, gzipped, in `data/raw/` (7.7 MB). That is
+deliberate. `records.json` is the output of 48,655 fetches against MuIS, whose robots.txt
+disallows us; the decision not to re-crawl is what makes that file irreplaceable rather
+than merely inconvenient to lose. From a fresh clone:
+
+    python3 data/unpack.py     # expands data/raw/*.gz into data/
+    ./build_site.sh            # merge, validate, export, build
+
+Everything then rebuilds without fetching anything from anyone.
 
 ## Two builds, and which one is current
 
