@@ -176,7 +176,16 @@ for k, u in unified.items():
     if u["museum"] and "muuseum" not in u["museum"].lower() and "ekm" in u["src"] and "muis" not in u["src"]:
         u["coll"] = (u["coll"] or "") + " · deposit, owner: " + u["museum"]
         u["museum"] = "Eesti Kunstimuuseum"
-recs = [u for u in unified.values() if u["artist"] and u["t"]]
+# A trailing "(?)" is the museum recording that it does not actually know who made
+# this — "Otto Dix (?)" sits in their catalogue beside works firmly given to Dix.
+# The catalogue takes attributed work only, and an attribution the holder will not
+# assert is not one, so these come out on the same rule that excludes anonymous work.
+UNCERTAIN = re.compile(r'\(\s*\?\s*\)\s*$')
+_before = [u for u in unified.values() if u["artist"] and u["t"]]
+recs = [u for u in _before if not UNCERTAIN.search(u["artist"])]
+DROPPED_UNCERTAIN = len(_before) - len(recs)
+print("  dropped as uncertain attribution:", DROPPED_UNCERTAIN,
+      "objects /", len({u["artist"] for u in _before if UNCERTAIN.search(u["artist"])}), "names")
 
 # ---------- artists ----------
 by_artist = collections.defaultdict(list)
