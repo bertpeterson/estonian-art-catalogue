@@ -9,7 +9,7 @@ OUT = "site"
 # the search haystack is built from technique, material, inventory number, collection,
 # category and date label, so moving those out would silently empty those searches.
 # mi/oi/url only ever build the "source record" links in the detail panel.
-DETAIL = {"d", "dm", "mem", "mi", "oi", "url", "im"}
+DETAIL = {"d", "dm", "mem", "mi", "oi", "url"}
 
 d = json.load(open(SRC, encoding="utf-8"))
 W, A = d["works"], d["artists"]
