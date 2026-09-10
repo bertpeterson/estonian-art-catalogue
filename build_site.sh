@@ -40,11 +40,7 @@ for old,new,tag in [
   ('${w.oi?`<a class="permalink"','${(detailOf(w)||{}).oi?`<a class="permalink"','ekm link guard'),
   ('oid-${esc(w.oi)}','oid-${esc(detailOf(w).oi)}','ekm link id'),
   ('${w.url?`<a class="permalink"','${(detailOf(w)||{}).url?`<a class="permalink"','src link guard'),
-  ('href="${esc(w.url)}"','href="${esc(detailOf(w).url)}"','src link href'),
-  # the thumbnail url lives in the shard too
-  ('${w.im ? `<figure','${(detailOf(w)||{}).im ? `<figure','image guard'),
-  ('href="${esc(w.im)}"','href="${esc(detailOf(w).im)}"','image link'),
-  ('src="${esc(w.im)}"','src="${esc(detailOf(w).im)}"','image src')]:
+  ('href="${esc(w.url)}"','href="${esc(detailOf(w).url)}"','src link href')]:
     sub(old,new,tag)
 sub('''    const b = e.target.closest(".row-btn"); if (!b) return;
     const id = b.dataset.id;
