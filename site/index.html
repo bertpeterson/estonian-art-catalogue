@@ -932,7 +932,11 @@ footer a{border-bottom:1px solid var(--rule)}
   }
   let ACTIVE = [];
 
-  const cmpStr = (x,y) => String(x||"").localeCompare(String(y||""), "et");
+  // localeCompare(s, "et") builds a fresh Intl.Collator on every call, and sorting
+  // 52,083 works makes hundreds of thousands of them — it was the single largest cost
+  // in a render. One collator, reused, does the same comparison far more cheaply.
+  const COLL = new Intl.Collator("et");
+  const cmpStr = (x,y) => COLL.compare(String(x||""), String(y||""));
   const KEYS = {
     year:   w => w.y == null ? Infinity : w.y,
     artist: w => A[w.a].n,
@@ -954,13 +958,25 @@ footer a{border-bottom:1px solid var(--rule)}
     });
   }
 
+  // The masthead figures depend only on the loaded data, never on filter state, but
+  // were being recomputed by three full scans of 52,083 works on every render.
+  const STATS = (() => {
+    let artists = 0; const museums = new Set(), galleries = new Set();
+    for (const a of A) if (a.c > 0) artists++;
+    for (const w of W){
+      if ((w.kind || "held") === "held") museums.add(w.mu);
+      else if (w.kind === "gallery") galleries.add(w.mu);
+    }
+    return {artists, museums: museums.size, galleries: galleries.size};
+  })();
+
   let AI = null;
   function artistIndexData(){
     if (AI) return AI;
     const items = A.map((ar,i)=>({i, n:ar.n, s:surnameOf(ar.n), c:ar.c||0,
                                   l:(ar.l&&(ar.l[0]||ar.l[1]))?`${ar.l[0]}–${ar.l[1]||""}`:"", sp:decCounts(i)}))
                    .filter(x=>x.c>0)
-                   .sort((x,y)=>x.s.localeCompare(y.s,"et"));
+                   .sort((x,y)=>COLL.compare(x.s, y.s));
     const letters = [];
     items.forEach(x=>{ const L = x.s[0].toUpperCase(); if (!letters.includes(L)) letters.push(L); });
     AI = {items, letters};
@@ -1194,13 +1210,10 @@ footer a{border-bottom:1px solid var(--rule)}
   function render(){
     const set = fullSet();
     $("stat-w").textContent = W.length.toLocaleString("en");
-    $("stat-a").textContent = A.filter(x=>x.c>0).length;
-    // "held" is the default and is stripped from the data, so it arrives as undefined
-    $("stat-m").textContent = new Set(W.filter(w=>(w.kind||"held")==="held").map(w=>w.mu)).size;
-    // galleries are venues, not holders — counted separately, and hidden when there are none
-    const gsites = new Set(W.filter(w=>w.kind==="gallery").map(w=>w.mu));
-    $("stat-g").textContent = gsites.size;
-    $("stat-gwrap").hidden = gsites.size === 0;
+    $("stat-a").textContent = STATS.artists;
+    $("stat-m").textContent = STATS.museums;
+    $("stat-g").textContent = STATS.galleries;
+    $("stat-gwrap").hidden = STATS.galleries === 0;
 
     const scope = [];
     if (state.artist!==null) scope.push(A[state.artist].n);
@@ -1221,12 +1234,20 @@ footer a{border-bottom:1px solid var(--rule)}
 
     let html = "";
     const BASE = baseSet();          // hoisted: was recomputed once per decade
+    // ...and bucket both by decade in one pass. These were being filtered once per
+    // decade key — 57 keys over 52,083 works, twice, is ~6M comparisons per render.
+    const bucket = arr => {
+      const m = new Map();
+      for (const w of arr){ const k = decOf(w); let a = m.get(k); if (!a) m.set(k, a = []); a.push(w); }
+      return m;
+    };
+    const setByDec = bucket(set), baseByDec = bucket(BASE);
     if (state.group === "decade" || state.artist !== null){
       const asc = state.decOrder === "earliest";
       let keys = [...new Set(set.map(decOf))].filter(k=>k!=="und").sort((a,b)=>asc?a-b:b-a);
       if (set.some(w=>w.y==null)) keys.push("und");
       html = keys.map(d => {
-        let items = sortRows(set.filter(w=>decOf(w)===d), !asc);
+        let items = sortRows((setByDec.get(d) || []).slice(), !asc);
         if (d === "und" && state.sort === "year"){
           // no dates to sort by — order by when the artist worked, which is known for all of them
           const birth = i => +(A[i].l[0] || 9999);
@@ -1235,7 +1256,7 @@ footer a{border-bottom:1px solid var(--rule)}
         }
         const yearBlock = (() => {
           if (d === "und"){
-            const pool = BASE.filter(w => w.y == null);
+            const pool = baseByDec.get("und") || [];
             const byArtist = {};
             pool.forEach(w => { byArtist[w.a] = (byArtist[w.a]||0)+1; });
             const list = Object.entries(byArtist)
@@ -1247,7 +1268,7 @@ footer a{border-bottom:1px solid var(--rule)}
                   <span class="gy-track"><span class="gy-bar" style="width:${Math.round((n/max)*100)}%"></span></span>
                   <span class="gy-n">${n}</span></button>`).join("") + `</div>`;
           }
-          const pool = BASE.filter(w => decOf(w) === d);
+          const pool = baseByDec.get(d) || [];
           const c = {}; for (let y=d; y<d+10; y++) c[y]=0;
           pool.forEach(w => { if (w.y!=null && c[w.y]!==undefined) c[w.y]++; });
           const max = Math.max(1, ...Object.values(c));
@@ -1274,8 +1295,8 @@ footer a{border-bottom:1px solid var(--rule)}
       const surname = n => n.trim().split(" ").pop();
       const birth = i => +(A[i].l[0]||9999);
       const idxs = [...new Set(set.map(w=>w.a))].sort((x,y)=>
-        state.artOrder==="az" ? surname(A[x].n).localeCompare(surname(A[y].n),"et")
-                              : (birth(x)-birth(y)) || surname(A[x].n).localeCompare(surname(A[y].n),"et"));
+        state.artOrder==="az" ? COLL.compare(surname(A[x].n), surname(A[y].n))
+                              : (birth(x)-birth(y)) || COLL.compare(surname(A[x].n), surname(A[y].n)));
       const shownIdxs = idxs.slice(0, state.gLimit);
       html = shownIdxs.map(i => {
         const ar = A[i];
