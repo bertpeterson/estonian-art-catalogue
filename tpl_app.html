@@ -725,9 +725,16 @@
       html = keys.map(d => {
         let items = sortRows((setByDec.get(d) || []).slice(), !asc);
         if (d === "und" && state.sort === "year"){
-          // no dates to sort by — order by when the artist worked, which is known for all of them
+          // Nothing here has a year, but not everything is equally unknown: 174 records
+          // are dated to a century by the museum. Use that where it exists — it beats
+          // the artist-lifetime proxy — and fall back to when the artist worked.
           const birth = i => +(A[i].l[0] || 9999);
-          items = items.slice().sort((x,y) => birth(x.a)-birth(y.a)
+          const centOf = w => {
+            const m = w.yl && (w.yl.match(/(?:sajand:\s*)(\d{1,2})/i) || w.yl.match(/(\d{1,2})\s*\.?\s*saj/i));
+            return m ? (+m[1] - 1) * 100 + 50 : null;   // mid-century, for ordering only
+          };
+          const at = w => centOf(w) ?? birth(w.a);
+          items = items.slice().sort((x,y) => at(x)-at(y)
             || cmpStr(A[x.a].n, A[y.a].n) || cmpStr(x.t, y.t));
         }
         const yearBlock = (() => {
