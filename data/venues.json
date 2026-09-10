@@ -1,5 +1,14 @@
 [
  {
+  "n": "Eesti Kunstimuuseum",
+  "en": "Art Museum of Estonia",
+  "city": "Tallinn",
+  "type": "museum",
+  "url": "https://kunstimuuseum.ekm.ee",
+  "holder": "Eesti Kunstimuuseum",
+  "note": "The foundation itself; Kumu, Kadriorg, Mikkel, Niguliste and Adamson-Eric are its branches"
+ },
+ {
   "n": "Kumu Kunstimuuseum",
   "en": "Kumu Art Museum",
   "city": "Tallinn",
