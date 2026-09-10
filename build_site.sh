@@ -90,3 +90,6 @@ PY
 
 # flat exports for reuse (CSV + JSONL), written into site/data/export/
 (cd data && python3 -u validate.py && python3 -u export_csv.py)
+
+# crawlable artist pages + sitemap (the app itself is a fragment-addressed SPA)
+python3 -u build_pages.py
