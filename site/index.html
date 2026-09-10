@@ -469,6 +469,7 @@ footer a{border-bottom:1px solid var(--rule)}
     </div>
     <button class="linkbtn" id="keys" data-i18n="keys"></button>
     <button class="linkbtn" id="share" data-i18n="linkview"></button>
+    <button class="linkbtn" id="random" data-i18n="random"></button>
     <button class="linkbtn" id="reset" data-i18n="reset"></button>
   </div>
 
@@ -1537,6 +1538,23 @@ footer a{border-bottom:1px solid var(--rule)}
   $("f-src").addEventListener("click", e => facetClick(e, "src", state.srcs));
   $("f-org").addEventListener("click", e => facetClick(e, "org", state.origins));
   $("f-grp").addEventListener("click", e => facetClick(e, "grp", state.groups));
+  // 52,083 works and no way in except knowing what to search for. Picks from whatever
+  // is currently filtered, so it stays inside the view you have set up, and expands the
+  // group holding it so the record is actually on the page.
+  $("random").addEventListener("click", () => {
+    const pool = fullSet();
+    if (!pool.length) return;
+    const w = pool[Math.floor(Math.random() * pool.length)];
+    state.open = w.k;
+    state.expand.add(String(state.group === "artist" ? w.a : decOf(w)));
+    // detailOf/loadShard exist only in the sharded build; the single-file build has
+    // every field already, so guard rather than assume.
+    if (typeof loadShard === "function" && w.h && !detailOf(w))
+      loadShard(shardOf(w)).then(() => { if (state.open === w.k) render(); });
+    render(); pushHash();
+    const row = document.querySelector('.row[data-open="true"]');
+    if (row) row.scrollIntoView({behavior: matchMedia("(prefers-reduced-motion:reduce)").matches ? "auto" : "smooth", block: "center"});
+  });
   $("mono").addEventListener("click", e => {
     const b = e.target.closest("[data-grp]"); if (!b) return;
     state.groups = new Set([b.dataset.grp]); state.artist = null; state.open = null;
