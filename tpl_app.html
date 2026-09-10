@@ -462,7 +462,7 @@
       </button>`;
     });
     if (total > show.length)
-      out += `<button class="more" id="more-index" style="grid-column:1/-1;margin-top:10px">${esc(T("moreindex",{n:(total-show.length).toLocaleString("en")}))}</button>`;
+      out += `<button class="more" id="more-index" style="column-span:all;margin-top:10px">${esc(T("moreindex",{n:(total-show.length).toLocaleString("en")}))}</button>`;
     body.className = "ai-body" + (byWorks ? " ranked" : "");
     body.innerHTML = out;
   }
