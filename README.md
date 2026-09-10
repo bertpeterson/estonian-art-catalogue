@@ -1,6 +1,6 @@
 # Estonian Art Catalogue · Eesti Kunstikataloog
 
-A browsable catalogue of **49,784 artworks** by **3,532 artists** — museum holdings from **24 Estonian public
+A browsable catalogue of **50,190 artworks** by **3,536 artists** — museum holdings from **24 Estonian public
 collections**, plus current work from three commercial galleries, aggregated from the national museum databases and presented as a static site.
 
 Every record is a real museum object and links back to its source record. Nothing here is
@@ -19,7 +19,7 @@ invented, reconstructed, or filled in by hand.
 | [CCA Estonia](https://cca.ee) | 58 bios | Centre for Contemporary Art — artist biographies, Venice Biennale archive |
 | [EKKM](https://ekkm.ee) | — | Contemporary Art Museum of Estonia |
 | [Wikidata](https://www.wikidata.org) | 1,793 |
-| Haus, Kogo, Temnikova & Kasela | 1,923 | Commercial galleries — current work, metadata only, no prices | Birthplace, dates, and art-historical affiliation for artists |
+| Haus, Kogo, Temnikova & Kasela, Tütar | 2,329 | Commercial galleries — current work, metadata only, no prices | Birthplace, dates, and art-historical affiliation for artists |
 
 7,551 objects appear in both MuIS and the EKM database and are merged on inventory number
 (MuIS `Number` = digikogu `Tulmenumber` + `Kogunumber`), which is why 61,363 source objects
