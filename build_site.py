@@ -17,6 +17,15 @@ W, A = d["works"], d["artists"]
 shutil.rmtree(OUT, ignore_errors=True)
 os.makedirs(f"{OUT}/data/detail", exist_ok=True)
 
+# static/ is copied in verbatim. The rmtree above removes everything in site/, so
+# files that must persist — the Search Console verification file, a CNAME for a
+# custom domain — cannot simply be placed there; they live in static/ and land here.
+if os.path.isdir("static"):
+    for name in os.listdir("static"):
+        if name == "README.md": continue
+        shutil.copy2(os.path.join("static", name), os.path.join(OUT, name))
+        print(f"  static -> site/{name}")
+
 def shard_of(w):
     return str(w["y"] // 10 * 10) if w.get("y") is not None else "und"
 
