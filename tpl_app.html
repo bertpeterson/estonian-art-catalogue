@@ -153,6 +153,16 @@
   const SRCS = [["muis","MuIS"],["ekm","EKM Digital"],["ekmmuis","Both"],["ekkm","EKKM"],["cca","CCA / Venice"]];
   const NOORIGIN = "\u0000none";
   const originsOf = w => { const f = A[w.a].aff; return f ? [f] : [NOORIGIN]; };
+  // "school:Pallas" -> ["school", "Pallas"]; an artist can hold several
+  const groupsOf = w => A[w.a].grp || [];
+  const GROUPS = (() => {
+    const m = new Map();
+    for (const w of W) for (const g of groupsOf(w)) m.set(g, (m.get(g)||0)+1);
+    return [...m.entries()].sort((x,y)=> y[1]-x[1]).map(x=>x[0]);
+  })();
+  const grpLabel = g => { const i = g.indexOf(":"); return g.slice(i+1); };
+  const grpKind  = g => T("g_" + g.slice(0, g.indexOf(":")));
+
   const ORIGINS = (() => {
     const m = new Map();
     for (const w of W) for (const o of originsOf(w)) m.set(o, (m.get(o)||0)+1);
@@ -164,7 +174,7 @@
 
   const state = {group:"decade", decOrder:"earliest", artOrder:"az", q:"",
                  decade:null, media:new Set(), museums:new Set(), cats:new Set(), srcs:new Set(),
-                 artist:null, letter:null, idxOpen:false, idxQ:"", idxLimit:120, idxSort:"az", showEarly:false, origins:new Set(), sort:"year", year:null, gLimit:50, from:null, to:null, undOnly:false, open:null, expand:new Set()};
+                 artist:null, letter:null, idxOpen:false, idxQ:"", idxLimit:120, idxSort:"az", showEarly:false, origins:new Set(), groups:new Set(), sort:"year", year:null, gLimit:50, from:null, to:null, undOnly:false, open:null, expand:new Set()};
   const LIMIT_DEC = 50, LIMIT_ART = 18;
   const slug = s => (s||"").normalize("NFKD").replace(/[\u0300-\u036f]/g,"")
       .toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"");
@@ -191,6 +201,7 @@
     state.cats.forEach(v => p.append("cat", slug(v)));
     state.srcs.forEach(v => p.append("src", v));
     state.origins.forEach(v => p.append("origin", v===NOORIGIN?"none":v));
+    state.groups.forEach(v => p.append("grp", v));
     if (state.open) p.set("open", state.open);
     if (state.idxOpen) p.set("index", state.letter || "all");
     return p.toString();
@@ -232,6 +243,7 @@
     state.cats    = new Set(CATS.filter(c => g("cat").includes(slug(c))));
     state.srcs    = new Set(SRCKEYS.filter(s => g("src").includes(s)));
     state.origins = new Set(ORIGINS.filter(o => g("origin").includes(o===NOORIGIN?"none":o)));
+    state.groups  = new Set(GROUPS.filter(x => g("grp").includes(x)));
     state.open    = p.get("open") || null;
     const ix = p.get("index");
     state.idxOpen = !!ix;
@@ -268,6 +280,7 @@
       && (state.cats.size===0 || state.cats.has(w.c))
       && (state.srcs.size===0 || state.srcs.has(w.s))
       && (state.origins.size===0 || originsOf(w).some(o=>state.origins.has(o)))
+      && (state.groups.size===0  || groupsOf(w).some(g=>state.groups.has(g)))
       && (state.artist===null || w.a===state.artist)
       && (state.undOnly ? w.y===null
           : ((state.from===null || (w.y!==null && w.y>=state.from))
@@ -383,6 +396,7 @@
     state.cats.forEach(v => add(catName(v), () => state.cats.delete(v)));
     state.srcs.forEach(v => add(SRCLAB[v] || v, () => state.srcs.delete(v)));
     state.origins.forEach(v => add(v===NOORIGIN?T("originunknown"):v, () => state.origins.delete(v)));
+    state.groups.forEach(v => add(grpLabel(v), () => state.groups.delete(v)));
     if (state.q) add(`“${state.q}”`, () => { state.q = ""; $("q").value = ""; });
     ACTIVE = chips;
     el.innerHTML = chips.length
@@ -503,6 +517,8 @@
         <button class="mono-back" id="mono-back">${esc(T("allartists",{n:artistIndexData().items.length.toLocaleString("en")}))}</button>
         <h2>${esc(ar.n)}</h2>
         <div class="mono-dates">${esc(life)}${ar.ls?stag(ar.ls):""}</div>
+        ${(ar.grp||[]).length ? `<div class="mono-dates">${(ar.grp||[]).map(g =>
+            `<button class="showartist" style="margin:4px 6px 0 0" data-grp="${esc(g)}">${esc(grpKind(g))} ${esc(grpLabel(g))}</button>`).join("")}</div>` : ""}
         <p class="mono-bio${bio.t.length>420?" clamp":""}" id="mono-bio">${esc(bio.t)}${bio.s?stag(bio.s):""}${bio.alt?`<span class="tag">${esc(T("biofallback"))}</span>`:""}</p>
         ${bio.t.length>420?`<button class="bio-more" id="bio-more">${esc(T("readbio"))}</button>`:""}
         <div class="mono-links">
@@ -529,7 +545,8 @@
      && (skip==="mus" || state.museums.size===0 || state.museums.has(w.mu))
      && (skip==="cat" || state.cats.size===0    || state.cats.has(w.c))
      && (skip==="src" || state.srcs.size===0    || state.srcs.has(w.s))
-     && (skip==="org" || state.origins.size===0 || originsOf(w).some(o=>state.origins.has(o)));
+     && (skip==="org" || state.origins.size===0 || originsOf(w).some(o=>state.origins.has(o)))
+     && (skip==="grp" || state.groups.size===0  || groupsOf(w).some(g=>state.groups.has(g)));
     // one tally pass per facet group, instead of one full scan per chip
     const tally = (attr, key) => {
       const m = new Map();
@@ -549,6 +566,10 @@
       org: (() => { const m=new Map();
         for (const w of scoped){ if(!pass(w,"org")) continue;
           for (const o of originsOf(w)) m.set(o,(m.get(o)||0)+1); }
+        return m; })(),
+      grp: (() => { const m=new Map();
+        for (const w of scoped){ if(!pass(w,"grp")) continue;
+          for (const g of groupsOf(w)) m.set(g,(m.get(g)||0)+1); }
         return m; })()
     };
     const chips = (el, list, attr, sel, lab, title) => {
@@ -564,6 +585,7 @@
     chips("f-cat", CATS,     "cat", state.cats,    v=>catName(v));
     chips("f-src", SRCS,     "src", state.srcs,    v=>v);
     chips("f-org", ORIGINS,  "org", state.origins,  v=> v===NOORIGIN ? T("originunknown") : v);
+    chips("f-grp", GROUPS,   "grp", state.groups,   v=> grpLabel(v), v=> grpKind(v) + " " + grpLabel(v));
   }
 
   const sub = w => {
@@ -676,6 +698,7 @@
     if (state.cats.size) scope.push([...state.cats].map(catName).join(" + "));
     if (state.srcs.size) scope.push([...state.srcs].map(s=>SRCLAB[s]||s).join(" + "));
     if (state.origins.size) scope.push([...state.origins].map(o=>o===NOORIGIN?T("originunknown"):o).join(" + "));
+    if (state.groups.size) scope.push([...state.groups].map(grpLabel).join(" + "));
     $("countline").textContent = T("ofworks",{a:set.length,b:W.length}) +
       (scope.length ? " · " + scope.join(" · ") : " · " + T("complete"));
 
@@ -904,6 +927,12 @@
   $("f-cat").addEventListener("click", e => facetClick(e, "cat", state.cats));
   $("f-src").addEventListener("click", e => facetClick(e, "src", state.srcs));
   $("f-org").addEventListener("click", e => facetClick(e, "org", state.origins));
+  $("f-grp").addEventListener("click", e => facetClick(e, "grp", state.groups));
+  $("mono").addEventListener("click", e => {
+    const b = e.target.closest("[data-grp]"); if (!b) return;
+    state.groups = new Set([b.dataset.grp]); state.artist = null; state.open = null;
+    renderAll(); pushHash();
+  });
 
   let t = null;
   $("q").addEventListener("input", e => {
@@ -937,7 +966,7 @@
   $("o-asc").addEventListener("click", () => { state.group==="decade" ? state.decOrder="earliest" : state.artOrder="az"; syncOrder(); render(); pushHash(); });
   $("o-desc").addEventListener("click", () => { state.group==="decade" ? state.decOrder="latest" : state.artOrder="birth"; syncOrder(); render(); pushHash(); });
   $("reset").addEventListener("click", () => {
-    state.q=""; state.decade=null; state.media.clear(); state.museums.clear(); state.cats.clear(); state.srcs.clear(); state.origins.clear();
+    state.q=""; state.decade=null; state.media.clear(); state.museums.clear(); state.cats.clear(); state.srcs.clear(); state.origins.clear(); state.groups.clear();
     state.artist=null; state.letter=null; state.idxOpen=false; state.sort="year"; state.year=null; state.from=null; state.to=null; state.undOnly=false; $("sortby").value="year";
     state.open=null; state.expand.clear(); state.decOrder="earliest"; state.artOrder="az";
     $("q").value=""; setGroup("decade"); renderAll(); pushHash(); window.scrollTo({top:0,behavior:"auto"});
