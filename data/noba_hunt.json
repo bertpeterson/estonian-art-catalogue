@@ -1,0 +1,375 @@
+[
+ {
+  "slug": "ruki-galerii",
+  "domain": "rukigalerii.ee",
+  "url": "https://rukigalerii.ee",
+  "dims": 8,
+  "page": "https://rukigalerii.ee/teosed/eiko-ojala"
+ },
+ {
+  "slug": "post-gallery",
+  "domain": "post.ee",
+  "url": "https://www.omniva.ee/kirjade-jalgimine-ja-kattesaamine/",
+  "dims": 2,
+  "page": "https://www.omniva.ee/kirjade-jalgimine-ja-kattesaamine/"
+ },
+ {
+  "slug": "endla-theater-gallery",
+  "domain": "endla.ee",
+  "url": "https://www.endla.ee/",
+  "dims": 1,
+  "page": "https://www.endla.ee/teater/teatrigalerii/naituste-arhiiv"
+ },
+ {
+  "slug": "1-march-gallery",
+  "domain": "1.ee",
+  "url": "https://1.ee",
+  "dims": 0,
+  "page": "https://1.ee"
+ },
+ {
+  "slug": "a-art-galerii",
+  "domain": null,
+  "dims": 0,
+  "page": null
+ },
+ {
+  "slug": "alma-galerii",
+  "domain": "alma.ee",
+  "url": "https://www.valio.ee/tooted/piimad/",
+  "dims": 0,
+  "page": "https://www.valio.ee/tooted/piimad/"
+ },
+ {
+  "slug": "artdepoo-galerii",
+  "domain": "artdepoo.ee",
+  "url": "https://artdepoo.ee",
+  "dims": 0,
+  "page": "https://artdepoo.ee"
+ },
+ {
+  "slug": "av17-gallery",
+  "domain": null,
+  "dims": 0,
+  "page": null
+ },
+ {
+  "slug": "eka-galerii",
+  "domain": "eka.ee",
+  "url": "https://eka.ee",
+  "dims": 0,
+  "page": "https://eka.ee"
+ },
+ {
+  "slug": "esna-gallery",
+  "domain": "esna.ee",
+  "url": "https://esna.ee",
+  "dims": 0,
+  "page": "https://esna.ee"
+ },
+ {
+  "slug": "fahle-galerii",
+  "domain": "fahle.ee",
+  "url": "https://fahle.ee",
+  "dims": 0,
+  "page": "https://fahle.ee"
+ },
+ {
+  "slug": "fahle-park-galerii",
+  "domain": "fahlepark.ee",
+  "url": "http://www.fausto.ee/",
+  "dims": 0,
+  "page": "http://www.fausto.ee/"
+ },
+ {
+  "slug": "galerii-314",
+  "domain": null,
+  "dims": 0,
+  "page": null
+ },
+ {
+  "slug": "galerii-noorus",
+  "domain": "noorus.ee",
+  "url": "https://noorus.ee",
+  "dims": 0,
+  "page": "https://noorus.ee"
+ },
+ {
+  "slug": "galerii-positiiv",
+  "domain": "positiiv.ee",
+  "url": "https://www.positiiv.ee/",
+  "dims": 0,
+  "page": "https://www.positiiv.ee/"
+ },
+ {
+  "slug": "galerii27",
+  "domain": null,
+  "dims": 0,
+  "page": null
+ },
+ {
+  "slug": "gallery-hoib",
+  "domain": null,
+  "dims": 0,
+  "page": null
+ },
+ {
+  "slug": "gallery-kanal",
+  "domain": "kanal.ee",
+  "url": "https://www.kava.ee/",
+  "dims": 0,
+  "page": "https://www.kava.ee/"
+ },
+ {
+  "slug": "gallery-mihhail",
+  "domain": "mihhail.ee",
+  "url": "https://mihhail.ee",
+  "dims": 0,
+  "page": "https://mihhail.ee"
+ },
+ {
+  "slug": "gallery-no1",
+  "domain": null,
+  "dims": 0,
+  "page": null
+ },
+ {
+  "slug": "gallery-of-the-university-of-tartu-arts-center",
+  "domain": "of.ee",
+  "url": "https://of.ee",
+  "dims": 0,
+  "page": "https://of.ee"
+ },
+ {
+  "slug": "gallery-polendruum",
+  "domain": null,
+  "dims": 0,
+  "page": null
+ },
+ {
+  "slug": "haa-gallery",
+  "domain": null,
+  "dims": 0,
+  "page": null
+ },
+ {
+  "slug": "haapsalu-linnagalerii",
+  "domain": "haapsalu.ee",
+  "url": "https://haapsalu.ee",
+  "dims": 0,
+  "page": "https://haapsalu.ee"
+ },
+ {
+  "slug": "hearts-gallery",
+  "domain": "hearts.ee",
+  "url": "https://heartsfinejewellery.com/",
+  "dims": 0,
+  "page": "https://heartsfinejewellery.com/"
+ },
+ {
+  "slug": "hop-galerii",
+  "domain": "hop.ee",
+  "url": "http://hop.ee/",
+  "dims": 0,
+  "page": "http://hop.ee/"
+ },
+ {
+  "slug": "ingela-s-gallery",
+  "domain": null,
+  "dims": 0,
+  "page": null
+ },
+ {
+  "slug": "jakobis-gallery",
+  "domain": null,
+  "dims": 0,
+  "page": null
+ },
+ {
+  "slug": "karjamaa-galerii-pop-up",
+  "domain": "karjamaa.ee",
+  "url": "https://www.tallinn.ee/et/karjamaapk",
+  "dims": 0,
+  "page": "https://www.tallinn.ee/et/karjamaapk"
+ },
+ {
+  "slug": "kumu-naitusesaalid",
+  "domain": "kumu.ee",
+  "url": "https://muhubrands.com/tootekategooria/brandid/kumu-et/",
+  "dims": 0,
+  "page": "https://muhubrands.com/tootekategooria/brandid/kumu-et/"
+ },
+ {
+  "slug": "kunstihoone-galerii",
+  "domain": "kunstihoone.ee",
+  "url": "https://www.kunstihoone.ee/",
+  "dims": 0,
+  "page": "https://www.kunstihoone.ee/"
+ },
+ {
+  "slug": "kuressaare-town-hall-gallery",
+  "domain": "kuressaare.ee",
+  "url": "https://www.visitsaaremaa.ee/",
+  "dims": 0,
+  "page": "https://www.visitsaaremaa.ee/"
+ },
+ {
+  "slug": "loomelinnaku-valigalerii",
+  "domain": null,
+  "dims": 0,
+  "page": null
+ },
+ {
+  "slug": "loputu-elu-galerii",
+  "domain": null,
+  "dims": 0,
+  "page": null
+ },
+ {
+  "slug": "meno-parkas-gallery",
+  "domain": null,
+  "dims": 0,
+  "page": null
+ },
+ {
+  "slug": "national-gallery-of-art-vilnius",
+  "domain": null,
+  "dims": 0,
+  "page": null
+ },
+ {
+  "slug": "nelja-nurga-galerii",
+  "domain": null,
+  "dims": 0,
+  "page": null
+ },
+ {
+  "slug": "parnu-linnagalerii",
+  "domain": "parnu.ee",
+  "url": "https://parnu.ee",
+  "dims": 0,
+  "page": "https://parnu.ee"
+ },
+ {
+  "slug": "parnu-linnagalerii-kunstnike-maja",
+  "domain": "parnu.ee",
+  "url": "https://parnu.ee",
+  "dims": 0,
+  "page": "https://parnu.ee"
+ },
+ {
+  "slug": "qb-gallery",
+  "domain": null,
+  "dims": 0,
+  "page": null
+ },
+ {
+  "slug": "rakvere-gallery",
+  "domain": "rakvere.ee",
+  "url": "https://rakvere.ee",
+  "dims": 0,
+  "page": "https://rakvere.ee"
+ },
+ {
+  "slug": "ram-galerii",
+  "domain": "ram.ee",
+  "url": "https://uscar.ee/",
+  "dims": 0,
+  "page": "https://uscar.ee/"
+ },
+ {
+  "slug": "rixc-gallery",
+  "domain": null,
+  "dims": 0,
+  "page": null
+ },
+ {
+  "slug": "rt-gallery",
+  "domain": null,
+  "dims": 0,
+  "page": null
+ },
+ {
+  "slug": "solaris-galerii",
+  "domain": null,
+  "dims": 0,
+  "page": null
+ },
+ {
+  "slug": "staapli-3-art-gallery",
+  "domain": null,
+  "dims": 0,
+  "page": null
+ },
+ {
+  "slug": "tallinna-biennaali-galerii",
+  "domain": null,
+  "dims": 0,
+  "page": null
+ },
+ {
+  "slug": "tallinna-linnagalerii",
+  "domain": null,
+  "dims": 0,
+  "page": null
+ },
+ {
+  "slug": "tampere-maja-galerii",
+  "domain": "tamperemaja.ee",
+  "url": "https://ainola.ee/",
+  "dims": 0,
+  "page": "https://ainola.ee/"
+ },
+ {
+  "slug": "tartu-kunstimaja-monumentaalgalerii",
+  "domain": "tartu.ee",
+  "url": "https://tartu.ee/et",
+  "dims": 0,
+  "page": "https://tartu.ee/et"
+ },
+ {
+  "slug": "vabaduse-galerii",
+  "domain": null,
+  "dims": 0,
+  "page": null
+ },
+ {
+  "slug": "vartai-galerii-et",
+  "domain": null,
+  "dims": 0,
+  "page": null
+ },
+ {
+  "slug": "viljandi-linnagalerii",
+  "domain": "viljandi.ee",
+  "url": "https://viljandi.ee",
+  "dims": 0,
+  "page": "https://viljandi.ee"
+ },
+ {
+  "slug": "vilnius-photography-gallery",
+  "domain": null,
+  "dims": 0,
+  "page": null
+ },
+ {
+  "slug": "vitriingalerii",
+  "domain": null,
+  "dims": 0,
+  "page": null
+ },
+ {
+  "slug": "voronja-galerii",
+  "domain": "voronjagalerii.ee",
+  "url": "https://voronjagalerii.ee",
+  "dims": 0,
+  "page": "https://voronjagalerii.ee"
+ },
+ {
+  "slug": "voru-linnagalerii",
+  "domain": "vorulinnagalerii.ee",
+  "url": "https://rouge.ee/",
+  "dims": 0,
+  "page": "https://rouge.ee/"
+ }
+]
