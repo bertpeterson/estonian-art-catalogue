@@ -164,7 +164,7 @@
 
   const state = {group:"decade", decOrder:"earliest", artOrder:"az", q:"",
                  decade:null, media:new Set(), museums:new Set(), cats:new Set(), srcs:new Set(),
-                 artist:null, letter:null, idxOpen:false, idxQ:"", idxLimit:120, showEarly:false, origins:new Set(), sort:"year", year:null, gLimit:50, from:null, to:null, undOnly:false, open:null, expand:new Set()};
+                 artist:null, letter:null, idxOpen:false, idxQ:"", idxLimit:120, idxSort:"az", showEarly:false, origins:new Set(), sort:"year", year:null, gLimit:50, from:null, to:null, undOnly:false, open:null, expand:new Set()};
   const LIMIT_DEC = 50, LIMIT_ART = 18;
   const slug = s => (s||"").normalize("NFKD").replace(/[\u0300-\u036f]/g,"")
       .toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"");
@@ -438,16 +438,22 @@
       const q = state.idxQ.toLowerCase();
       show = show.filter(x => x.n.toLowerCase().includes(q));
     }
+    // Sorted by size, the alphabet is not the organising idea any more, so the
+    // letter dividers go with it — they would break the ranking into meaningless runs.
+    const byWorks = state.idxSort === "works";
+    if (byWorks) show = show.slice().sort((a,b)=> b.c - a.c || cmpStr(a.s, b.s));
     const total = show.length;
     show = show.slice(0, state.idxLimit);
     let cur = "", out = `<div class="ai-count">${esc(T("idxcount",{n:total.toLocaleString("en")}))}</div>`;
     if (!total) out += `<div class="ai-count">${esc(T("idxnone"))}</div>`;
     show.forEach(x=>{
-      const L = x.s[0].toUpperCase();
-      if (L !== cur){ cur = L; out += `<div class="ai-letter" id="ai-${esc(L)}">${esc(L)}</div>`; }
+      if (!byWorks){
+        const L = x.s[0].toUpperCase();
+        if (L !== cur){ cur = L; out += `<div class="ai-letter" id="ai-${esc(L)}">${esc(L)}</div>`; }
+      }
       out += `<button class="ai-item" data-artist="${x.i}">
         <span><span class="ai-nm">${esc(x.n)}</span><br><span class="ai-dt">${esc(x.l||"")}</span></span>
-        <span class="ai-rt">${spark(x.sp, 74, 17)}<span class="ai-n">${x.c}</span></span>
+        <span class="ai-rt"><span class="ai-n">${x.c}</span></span>
       </button>`;
     });
     if (total > show.length)
@@ -741,6 +747,14 @@
     if (e.target.closest("#more-index")){ state.idxLimit += 300; renderArtistIndex(); }
   });
   let iq = null;
+  const setIdxSort = mode => {
+    state.idxSort = mode; state.idxLimit = 120;
+    $("ais-az").setAttribute("aria-pressed", mode !== "works");
+    $("ais-works").setAttribute("aria-pressed", mode === "works");
+    renderArtistIndex(); pushHash(true);
+  };
+  $("ais-az").addEventListener("click", () => setIdxSort("az"));
+  $("ais-works").addEventListener("click", () => setIdxSort("works"));
   $("ai-q").addEventListener("input", e => {
     clearTimeout(iq);
     iq = setTimeout(() => {
