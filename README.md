@@ -63,6 +63,20 @@ now a **dated snapshot**: it says so on its own masthead, in both languages, and
 links to the live site. Rebuild it deliberately with `python3 build_artifact.py`,
 not as part of the normal cycle.
 
+## Reusing the data
+
+`data/data.json` is dictionary-encoded and nested, which suits the site and suits
+nobody else. Flat exports with every value resolved, one row per work:
+
+    site/data/export/works.csv.gz      52,083 rows
+    site/data/export/artists.csv.gz     3,664 rows
+    site/data/export/works.jsonl.gz     one JSON object per line
+
+Rebuild them with `python3 data/export_csv.py`. `data/validate.py` runs the sanity
+checks — no orphan artists, no impossible years, no undecoded HTML entities, no
+Wikidata description contradicting a museum's own dates — and exits non-zero on a
+failure, so a bad merge stops the build rather than shipping.
+
 ## Schema
 
 `data/data.json` has four top-level keys: `meta`, `artists`, `works`, `vocab`.
