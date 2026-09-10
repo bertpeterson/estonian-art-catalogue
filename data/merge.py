@@ -460,6 +460,28 @@ for g in GAL:
 print("  gallery works added:", gal_added,
       "from", len({g["gallery"] for g in GAL}), "galleries")
 
+# ---------- thumbnails ----------
+# Hotlinked, never copied: the museums serve the pixels from their own servers, so
+# nothing is reproduced here. MuIS states its metadata is CC0 but that "usage of
+# digital images may be subject to restrictions", so images are attached ONLY to
+# museum holdings — gallery works get none, since those images are not ours to point
+# at on the same footing. The URLs were read from pages already fetched, so adding
+# them cost the museums no requests.
+IMG = json.load(open("image_urls.json", encoding="utf-8")) if os.path.exists("image_urls.json") else {}
+img_n = 0
+for w in works:
+    if w.get("kind", "held") != "held": continue
+    # EKM only. MuIS's endpoint is called "pisipilt" (thumbnail) but serves the full
+    # image — 1.6 MB for the one measured — and offers no size parameter; their own
+    # page just scales it in the browser. Hotlinking that 26,000 times off a state
+    # server would be slow for the reader and rude to the museum. EKM publishes real
+    # ~3 KB thumbnails, which is what a thumbnail should be.
+    u = None
+    if w.get("oi") and f"ekm:{w['oi']}" in IMG:
+        u = "https://digikogu.ekm.ee" + IMG[f"ekm:{w['oi']}"]
+    if u: w["im"] = u; img_n += 1
+print("  works with a hotlinked thumbnail:", img_n)
+
 for w in works: w.setdefault("kind", "held")
 for i, a in enumerate(artists): a["c"] = sum(1 for w in works if w["a"] == i)
 

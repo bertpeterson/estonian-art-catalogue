@@ -572,6 +572,10 @@
                 <span class="mem-tech" title="${esc(m[1])}">${esc(m[1]||"")}</span>
                 <span>${m[3]?`<a href="https://www.muis.ee/museaalview/${esc(m[3])}" target="_blank" rel="noopener">MuIS</a>`:""}${m[3]&&m[4]?" · ":""}${m[4]?`<a href="https://digikogu.ekm.ee/ekm/search/oid-${esc(m[4])}/" target="_blank" rel="noopener">EKM</a>`:""}</span>
               </div>`).join("")}</div></div>` : ""}
+          ${w.im ? `<figure class="d-fig"><a href="${esc(w.im)}" target="_blank" rel="noopener">`
+             + `<img src="${esc(w.im)}" alt="${esc(w.t)}" loading="lazy" decoding="async"`
+             + ` onerror="this.closest('figure').remove()"></a>`
+             + `<figcaption>${esc(T("imgcredit",{m:musName(w.mu)}))}</figcaption></figure>` : ""}
           ${w.d ? `<div class="d-note"><span class="d-nolabel">${w.s==="cca"?esc(T("d_desc_cca"))+" · "+esc(T("inenglish")):w.s==="ekkm"?esc(T("d_desc_ekkm"))+" · "+esc(T("inenglish")):esc(T("d_desc"))+" · "+esc(T("estonianprose"))}</span>${esc(w.d)}</div>`
                    : `<div class="d-note"><span class="d-nolabel">${esc(T("d_desc"))}</span><em style="color:var(--grey-4)">${esc(T("d_nodesc"))}</em></div>`}
           <div class="d-v" style="margin-top:16px;display:flex;flex-wrap:wrap;gap:18px">
