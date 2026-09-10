@@ -1076,6 +1076,10 @@ footer a{border-bottom:1px solid var(--rule)}
         ${bio.t.length>420?`<button class="bio-more" id="bio-more">${esc(T("readbio"))}</button>`:""}
         <div class="mono-links">
           ${ar.ai?`<a class="permalink" href="https://digikogu.ekm.ee/authors/author_id-${esc(ar.ai)}" target="_blank" rel="noopener">${esc(T("d_artistrec"))}</a>`:""}
+          ${ar.qid?`<a class="permalink" href="https://www.wikidata.org/wiki/${esc(ar.qid)}" target="_blank" rel="noopener">${esc(T("d_wd"))}</a>`:""}
+          <!-- the static page: a stable address to cite or print, which the app's
+               fragment URLs are not, and the only route from app to crawlable page -->
+          <a class="permalink" href="a/${esc(slug(ar.n))}.html">${esc(T("artistpage"))}</a>
         </div>
       </div>
       <div class="mono-side">
