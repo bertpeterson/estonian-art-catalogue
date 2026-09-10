@@ -178,14 +178,7 @@ h1 em{font-style:italic;font-weight:400}
 .chip span{color:var(--grey-4);margin-left:6px}
 .chip[aria-pressed="true"] span{color:var(--invert-fg);opacity:.6}
 
-.keyhelp{border-bottom:1px solid var(--rule);padding:14px 0}
-.kh-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:7px 26px}
-.kh-grid > div{display:flex;align-items:baseline;gap:9px;font-size:.8rem;color:var(--grey-6)}
-.kh-grid span{color:var(--ink-soft)}
-kbd{font-family:var(--mono);font-size:.64rem;border:1px solid var(--rule);background:var(--field);
-  color:var(--ink);padding:2px 6px;min-width:20px;display:inline-block;text-align:center}
 .row-btn:focus-visible{outline:none;background:var(--field);border-left-color:var(--ink)}
-.row[data-cursor="true"] .row-btn{background:var(--field);border-left-color:var(--ink)}
 .count-line{font-family:var(--mono);font-size:var(--fs-sm);letter-spacing:var(--ls-label);text-transform:uppercase;color:var(--grey-6);padding:12px 0 0}
 .group{display:grid;grid-template-columns:230px 1fr;gap:34px;padding:22px 0;border-bottom:1px solid var(--rule)}
 .group:last-child{border-bottom:0}
@@ -467,7 +460,6 @@ footer a{border-bottom:1px solid var(--rule)}
         <button id="o-desc" aria-pressed="false">Latest</button>
       </div>
     </div>
-    <button class="linkbtn" id="keys" data-i18n="keys"></button>
     <button class="linkbtn" id="share" data-i18n="linkview"></button>
     <button class="linkbtn" id="random" data-i18n="random"></button>
     <button class="linkbtn" id="reset" data-i18n="reset"></button>
@@ -520,21 +512,6 @@ footer a{border-bottom:1px solid var(--rule)}
     </div>
     <div class="ai-body" id="ai-body" hidden></div>
   </section>
-
-  <div class="keyhelp" id="keyhelp" hidden>
-    <div class="kh-grid">
-      <div><kbd>/</kbd><span data-i18n="kh_search"></span></div>
-      <div><kbd>j</kbd> <kbd>↓</kbd><span data-i18n="kh_next"></span></div>
-      <div><kbd>k</kbd> <kbd>↑</kbd><span data-i18n="kh_prev"></span></div>
-      <div><kbd>Enter</kbd><span data-i18n="kh_open"></span></div>
-      <div><kbd>o</kbd><span data-i18n="kh_artist"></span></div>
-      <div><kbd>f</kbd><span data-i18n="kh_filters"></span></div>
-      <div><kbd>a</kbd><span data-i18n="kh_index"></span></div>
-      <div><kbd>Home</kbd> <kbd>End</kbd><span data-i18n="kh_firstlast"></span></div>
-      <div><kbd>Esc</kbd><span data-i18n="kh_esc"></span></div>
-      <div><kbd>?</kbd><span data-i18n="kh_panel"></span></div>
-    </div>
-  </div>
 
   <div id="mono"></div>
   <p class="count-line" id="countline"></p>
@@ -1716,60 +1693,19 @@ footer a{border-bottom:1px solid var(--rule)}
   }
   // ---------- keyboard navigation ----------
   const isTyping = el => !!el && (/^(input|textarea|select)$/i.test(el.tagName) || el.isContentEditable);
-  const visibleRows = () => [...document.querySelectorAll(".row-btn")];
-  function moveCursor(delta, absolute){
-    const rows = visibleRows(); if (!rows.length) return;
-    const cur = rows.indexOf(document.activeElement);
-    let next;
-    if (absolute === "first") next = 0;
-    else if (absolute === "last") next = rows.length - 1;
-    else next = cur < 0 ? (delta > 0 ? 0 : rows.length - 1) : Math.min(rows.length-1, Math.max(0, cur + delta));
-    const el = rows[next];
-    el.focus({preventScroll:true});
-    el.scrollIntoView({block:"nearest", behavior:"auto"});
-    document.querySelectorAll('.row[data-cursor="true"]').forEach(r => r.removeAttribute("data-cursor"));
-    el.closest(".row").setAttribute("data-cursor", "true");
-  }
-  function toggleKeyHelp(force){
-    const p = $("keyhelp");
-    p.hidden = force === undefined ? !p.hidden : !force;
-    $("keys").textContent = p.hidden ? T("keys") : T("hidekeys");
-  }
-  $("keys").addEventListener("click", () => toggleKeyHelp());
-
+  // Keyboard navigation removed. Two conventions are kept because they are invisible
+  // and cost nothing: "/" jumps to the search box, Escape backs out of an open record
+  // and then clears the search.
   document.addEventListener("keydown", e => {
     if (e.metaKey || e.ctrlKey || e.altKey) return;
     if (isTyping(document.activeElement)){
-      if (e.key === "Escape"){ document.activeElement.blur(); }
+      if (e.key === "Escape") document.activeElement.blur();
       return;
     }
-    switch (e.key){
-      case "/":
-        e.preventDefault(); $("q").focus(); $("q").select(); break;
-      case "j": case "ArrowDown":
-        e.preventDefault(); moveCursor(1); break;
-      case "k": case "ArrowUp":
-        e.preventDefault(); moveCursor(-1); break;
-      case "Home":
-        e.preventDefault(); moveCursor(0, "first"); break;
-      case "End":
-        e.preventDefault(); moveCursor(0, "last"); break;
-      case "o": {
-        const b = document.activeElement.closest && document.activeElement.closest(".row-btn");
-        if (b){ const w = W.find(x => x.k === b.dataset.id); if (w){ e.preventDefault(); selectArtist(w.a); } }
-        break;
-      }
-      case "f":
-        e.preventDefault(); $("filters-toggle").click(); break;
-      case "a":
-        e.preventDefault(); $("ai-toggle").click(); break;
-      case "?":
-        e.preventDefault(); toggleKeyHelp(); break;
-      case "Escape":
-        if (!$("keyhelp").hidden){ toggleKeyHelp(false); }
-        else if (state.open){ state.open = null; render(); pushHash(); }
-        else if (state.q){ state.q = ""; $("q").value = ""; renderAll(); pushHash(); }
-        break;
+    if (e.key === "/"){ e.preventDefault(); $("q").focus(); $("q").select(); }
+    else if (e.key === "Escape"){
+      if (state.open){ state.open = null; render(); pushHash(); }
+      else if (state.q){ state.q = ""; $("q").value = ""; renderAll(); pushHash(); }
     }
   });
 

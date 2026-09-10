@@ -1124,60 +1124,19 @@
   }
   // ---------- keyboard navigation ----------
   const isTyping = el => !!el && (/^(input|textarea|select)$/i.test(el.tagName) || el.isContentEditable);
-  const visibleRows = () => [...document.querySelectorAll(".row-btn")];
-  function moveCursor(delta, absolute){
-    const rows = visibleRows(); if (!rows.length) return;
-    const cur = rows.indexOf(document.activeElement);
-    let next;
-    if (absolute === "first") next = 0;
-    else if (absolute === "last") next = rows.length - 1;
-    else next = cur < 0 ? (delta > 0 ? 0 : rows.length - 1) : Math.min(rows.length-1, Math.max(0, cur + delta));
-    const el = rows[next];
-    el.focus({preventScroll:true});
-    el.scrollIntoView({block:"nearest", behavior:"auto"});
-    document.querySelectorAll('.row[data-cursor="true"]').forEach(r => r.removeAttribute("data-cursor"));
-    el.closest(".row").setAttribute("data-cursor", "true");
-  }
-  function toggleKeyHelp(force){
-    const p = $("keyhelp");
-    p.hidden = force === undefined ? !p.hidden : !force;
-    $("keys").textContent = p.hidden ? T("keys") : T("hidekeys");
-  }
-  $("keys").addEventListener("click", () => toggleKeyHelp());
-
+  // Keyboard navigation removed. Two conventions are kept because they are invisible
+  // and cost nothing: "/" jumps to the search box, Escape backs out of an open record
+  // and then clears the search.
   document.addEventListener("keydown", e => {
     if (e.metaKey || e.ctrlKey || e.altKey) return;
     if (isTyping(document.activeElement)){
-      if (e.key === "Escape"){ document.activeElement.blur(); }
+      if (e.key === "Escape") document.activeElement.blur();
       return;
     }
-    switch (e.key){
-      case "/":
-        e.preventDefault(); $("q").focus(); $("q").select(); break;
-      case "j": case "ArrowDown":
-        e.preventDefault(); moveCursor(1); break;
-      case "k": case "ArrowUp":
-        e.preventDefault(); moveCursor(-1); break;
-      case "Home":
-        e.preventDefault(); moveCursor(0, "first"); break;
-      case "End":
-        e.preventDefault(); moveCursor(0, "last"); break;
-      case "o": {
-        const b = document.activeElement.closest && document.activeElement.closest(".row-btn");
-        if (b){ const w = W.find(x => x.k === b.dataset.id); if (w){ e.preventDefault(); selectArtist(w.a); } }
-        break;
-      }
-      case "f":
-        e.preventDefault(); $("filters-toggle").click(); break;
-      case "a":
-        e.preventDefault(); $("ai-toggle").click(); break;
-      case "?":
-        e.preventDefault(); toggleKeyHelp(); break;
-      case "Escape":
-        if (!$("keyhelp").hidden){ toggleKeyHelp(false); }
-        else if (state.open){ state.open = null; render(); pushHash(); }
-        else if (state.q){ state.q = ""; $("q").value = ""; renderAll(); pushHash(); }
-        break;
+    if (e.key === "/"){ e.preventDefault(); $("q").focus(); $("q").select(); }
+    else if (e.key === "Escape"){
+      if (state.open){ state.open = null; render(); pushHash(); }
+      else if (state.q){ state.q = ""; $("q").value = ""; renderAll(); pushHash(); }
     }
   });
 
