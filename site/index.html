@@ -910,7 +910,7 @@ footer a{border-bottom:1px solid var(--rule)}
     schedule();
   })();
   const matchText = w => !state.q || hay(w).includes(defold(state.q.toLowerCase()));
-  const inList = w => { const k = listKeys(); return (!k || k.has(w.k)) && (!state.cross || CROSS.has(w.a)); };
+  const inList = w => { const k = listKeys(); return (!k || k.has(w.k)) && (!state.cross || (w.kind === "gallery" && CROSS.has(w.a))); };
   const baseSet = () => W.filter(w => matchText(w) && inList(w)
       && (state.media.size===0 || state.media.has(w.e))
       && (state.museums.size===0 || state.museums.has(w.mu))
@@ -1330,7 +1330,7 @@ footer a{border-bottom:1px solid var(--rule)}
           <div class="d-v" style="margin-top:16px;display:flex;flex-wrap:wrap;gap:18px">
             ${(detailOf(w)||{}).mi?`<a class="permalink" href="https://www.muis.ee/museaalview/${esc(detailOf(w).mi)}" target="_blank" rel="noopener">${esc(T("d_recmuis"))}</a>`:""}
             ${(detailOf(w)||{}).oi?`<a class="permalink" href="https://digikogu.ekm.ee/ekm/search/oid-${esc(detailOf(w).oi)}/" target="_blank" rel="noopener">${esc(T("d_recekm"))}</a>`:""}
-            ${(detailOf(w)||{}).url?`<a class="permalink" href="${esc(detailOf(w).url)}" target="_blank" rel="noopener">${esc(T("d_recsource"))}</a>`:""}
+            ${(detailOf(w)||{}).url?`<a class="permalink" href="${esc(detailOf(w).url)}" target="_blank" rel="noopener">${esc(w.kind === "gallery" ? T("d_gallerylink", {g: musName(w.mu)}) : T("d_recsource"))}</a>`:""}
             ${slBtn(id, "sl-d")}
           </div>
         </div>
@@ -1513,7 +1513,7 @@ footer a{border-bottom:1px solid var(--rule)}
         // In the museums-and-for-sale view the split is the point: how much of the
         // artist a public collection holds against how much is on the market.
         const split = state.cross ? (() => {
-          const held = items.filter(w => (w.kind || "held") === "held").length, sold = items.filter(w => w.kind === "gallery").length;
+          const held = HELD_N.get(i) || 0, sold = items.length;
           return `<div class="g-split">${held.toLocaleString(LANG==="en"?"en":"et")} ${esc(T("cross_held"))} · ${sold} ${esc(T("cross_sold"))}</div>`; })() : "";
         const gutter = `<span class="g-name">${esc(ar.n)}</span>
           <div class="g-dates">${esc(life)}${stag(ar.ls)}</div>${split}
@@ -1602,6 +1602,8 @@ footer a{border-bottom:1px solid var(--rule)}
     W.forEach(w => (w.kind === "gallery" ? sold : held).add(w.a));
     return new Set([...held].filter(i => sold.has(i)));
   })();
+  const HELD_N = (() => { const m = new Map(); W.forEach(w => { if (w.kind !== "gallery") m.set(w.a, (m.get(w.a) || 0) + 1); }); return m; })();
+  const CROSS_WORKS = W.reduce((n, w) => n + (w.kind === "gallery" && CROSS.has(w.a) ? 1 : 0), 0);
   const TOP_ART = (() => {
     const c = new Map(); W.forEach(w => c.set(w.a, (c.get(w.a) || 0) + 1));
     const byName = new Map(A.map((a, i) => [a.n, i]));
@@ -1632,7 +1634,7 @@ footer a{border-bottom:1px solid var(--rule)}
         `<span>${esc(label)}</span><span class="n">${num(n)}</span></button></li>`).join("") + "</ul></div>";
     el.innerHTML =
       col("doors_name",   TOP_ART.map(([i, n]) => [A[i].n, n, "a", i]), "d-names", "ed")
-      + `<p class="door-line"><button data-door="x" data-v="0">${esc(T("doors_cross"))}<span class="n">${num(CROSS.size)} ${esc(T("artists"))}</span><span class="arrow">&rarr;</span></button></p>`;
+      + `<p class="door-line"><button data-door="x" data-v="0">${esc(T("doors_cross"))}<span class="n">${num(CROSS_WORKS)} ${esc(T("works"))} · ${num(CROSS.size)} ${esc(T("artists"))}</span><span class="arrow">&rarr;</span></button></p>`;
     el.hidden = false;
   }
 
@@ -2098,7 +2100,7 @@ footer a{border-bottom:1px solid var(--rule)}
 
   Promise.all([
     fetch("data/index.json?v=1ca00ad2").then(r => r.json()),
-    fetch("data/i18n.json?v=64d77f49").then(r => r.json())
+    fetch("data/i18n.json?v=423a2a9a").then(r => r.json())
   ]).then(([data, i18n]) => boot(data, i18n))
    .catch(err => {
      document.getElementById("register").innerHTML =
