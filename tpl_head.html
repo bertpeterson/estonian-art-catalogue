@@ -42,6 +42,7 @@
   --invert-bg:#F1F2F4; --invert-fg:#0B0C0E; --focus:#F1F2F4;
 }
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.5;
   -webkit-font-smoothing:antialiased;font-optical-sizing:auto;text-rendering:optimizeLegibility}
 /* digits that sit in columns must not jitter */
@@ -402,13 +403,24 @@ footer a{border-bottom:1px solid var(--rule)}
 :root[data-theme="dark"] .r-title{font-weight:450}
 :root[data-theme="dark"] .mono h2{font-weight:550}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
-.doors{border-top:1px solid var(--rule);margin:var(--sp-4) 0 0;padding-top:var(--sp-3);
-  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--sp-4)}
-@media(min-width:1100px){
-  .doors{grid-template-columns:repeat(3,minmax(0,1fr))}
-  .doors .d-names{grid-column:span 2}
-  .doors .d-names ul{columns:2;column-gap:var(--sp-4)}
-  .doors .d-names li{break-inside:avoid}
+.doors{border-top:1px solid var(--rule);margin:var(--sp-4) 0 0;padding-top:var(--sp-3)}
+.doors .d-names ul{columns:2;column-gap:var(--sp-4)} .doors .d-names li{break-inside:avoid}
+@media(min-width:1100px){.doors .d-names ul{columns:3}}
+@media(max-width:760px){.doors .d-names ul{columns:1}}
+/* era band under the histogram: positioned against the decade cells on wide screens,
+   a plain wrapped row where the cells are too narrow to label */
+.eras{position:relative;height:24px;margin-top:6px}
+.era{position:absolute;top:0;height:22px;box-sizing:border-box;padding:4px 2px 0;text-align:left;
+  font-family:var(--mono);font-size:var(--fs-xs);letter-spacing:.04em;text-transform:uppercase;
+  color:var(--grey-6);background:none;border:0;border-top:2px solid var(--rule);cursor:pointer;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.era:hover{color:var(--ink);border-top-color:var(--ink)}
+.era[aria-pressed="true"]{color:var(--ink);border-top-color:var(--ink)}
+.era:focus-visible{outline:2px solid var(--focus);outline-offset:1px}
+@media(max-width:1000px){
+  .eras{height:auto;display:flex;flex-wrap:wrap;gap:4px 14px}
+  .era{position:static!important;width:auto!important;left:auto!important;height:auto;
+    border-top:0;border-bottom:1px solid var(--rule);padding:2px 0;overflow:visible}
 }
 .doors h2{font-family:var(--mono);font-size:var(--fs-sm);letter-spacing:var(--ls-label);
   text-transform:uppercase;color:var(--grey-6);font-weight:400;margin:0 0 var(--sp-2)}
@@ -462,6 +474,7 @@ footer a{border-bottom:1px solid var(--rule)}
       <span class="eyebrow" id="histo-hint">Select a decade to filter</span>
     </div>
     <div class="bars" id="bars"></div>
+    <div class="eras" id="eras"></div>
   </section>
 
   <div class="controls">
@@ -493,6 +506,7 @@ footer a{border-bottom:1px solid var(--rule)}
         <button id="o-desc" aria-pressed="false">Latest</button>
       </div>
     </div>
+    <button class="linkbtn" id="filters-toggle" aria-expanded="false" aria-controls="filterpanel">Show filters</button>
     <button class="linkbtn" id="mylist" aria-pressed="false"></button>
     <button class="linkbtn" id="share" data-i18n="linkview"></button>
     <button class="linkbtn" id="reset" data-i18n="reset"></button>
@@ -507,7 +521,6 @@ footer a{border-bottom:1px solid var(--rule)}
   <div class="filterbar">
     <span class="ctl-label" data-i18n="filters"></span>
     <div class="active-filters" id="activefilters"></div>
-    <button class="linkbtn" id="filters-toggle" aria-expanded="false" aria-controls="filterpanel">Show filters</button>
   </div>
   <div id="filterpanel" hidden>
   <div class="facetbar"><span class="ctl-label" data-i18n="years"></span>
