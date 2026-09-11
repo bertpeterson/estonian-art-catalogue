@@ -123,7 +123,7 @@
     DECADES.forEach((d,i) => DECPOS[d] = i);
     DECC = A.map(() => DECADES.map(() => 0));
     for (const w of W){
-      if (w.y == null) continue;
+      if (w.y == null || w.f) continue;     // a year outside the artist's life is not their activity
       const p = DECPOS[Math.floor(w.y/10)*10];
       if (p !== undefined) DECC[w.a][p]++;
     }
@@ -665,7 +665,9 @@
     const id = w.k, open = state.open === id, ar = A[w.a];
     // A museum that wrote "19. sajand" told us the century; showing "n.d." for it
     // throws that away. 174 records are dated to a century but not to a year.
-    const cy = w.y == null && w.yl ? (w.yl.match(/(?:sajand:\s*)(\d{1,2})/i) || w.yl.match(/(\d{1,2})\s*\.?\s*saj/i)) : null;
+    const cy = w.y == null && w.yl ? (w.yl.match(/(?:sajand:\s*)(\d{1,2})/i) || w.yl.match(/(\d{1,2})\s*\.?\s*saj/i)
+                 || (m => m && Math.floor(+m[1]/100) === Math.floor(+m[2]/100) ? [m[0], String(Math.floor(+m[1]/100) + 1)] : null)
+                    (w.yl.match(/(\d{4})\s*[–-]\s*(\d{4})/))) : null;
     const yr = w.y == null ? `<span class="r-year und" ${cy?`title="${esc(w.yl)}"`:""}>${esc(cy ? T("centshort",{n:ordN(+cy[1])}) : T("nd"))}</span>`
       : `<span class="r-year" title="${esc(dateLabel(w) || w.y)}${w.dsrc==="title"?" — date taken from the end of the title; the museum's dating field is empty":""}">${esc(dateLabel(w) || w.y)}${w.dsrc==="title"?"*":""}</span>`;
     const art = (showArtist && state.artist===null) ? `<span class="r-artist">${esc(ar.n)}</span>` : `<span class="r-artist"></span>`;
@@ -693,7 +695,8 @@
           <div class="d-k">${esc(T("d_artist"))}</div><div class="d-v">${esc(ar.n)} <em>${esc(life)}</em>${stag(ar.ls)}${ar.ai?` <a class="permalink" style="margin-left:8px" href="https://digikogu.ekm.ee/authors/author_id-${esc(ar.ai)}" target="_blank" rel="noopener">EKM artist record ↗</a>`:""}</div>
           <div class="d-k">${esc(T("d_dating"))}</div><div class="d-v">${
             w.yl ? esc(dateLabel(w)) + (w.dsrc==="title" ? ` <em>${esc(T("d_fromtitle"))}</em>` : "")
-                 : `<em>${esc(T("d_nodate",{n:ar.n,l:(ar.l[0]||"?")+"–"+(ar.l[1]||"")}))}</em>`}</div>
+                 : `<em>${esc(T("d_nodate",{n:ar.n,l:(ar.l[0]||"?")+"–"+(ar.l[1]||"")}))}</em>`}${
+            w.f ? `<br><em>${esc(T(w.f === "pre" ? "d_prebirth" : "d_postdeath", {l:(ar.l[0]||"?")+"–"+(ar.l[1]||"")}))}</em>` : ""}</div>
           <div class="d-k">${esc(T("d_technique"))}</div><div class="d-v">${techName(w)?esc(techName(w)):"—"}</div>
           <div class="d-k">${esc(T("d_material"))}</div><div class="d-v">${matName(w)?esc(matName(w)):"—"}</div>
           ${w.dm?`<div class="d-k">${esc(T("d_dimensions"))}</div><div class="d-v">${esc(w.dm)}</div>`:""}

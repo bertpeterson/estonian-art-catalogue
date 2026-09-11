@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="description" content="A catalogue of 51,598 works of art by 3,663 artists in Estonian public collections and galleries, 1440–2026. Museum records from MuIS and the EKM Digital Collection, gallery stock from the galleries' own catalogues; every record links back to its source.">
+<meta name="description" content="A catalogue of 51,793 works of art by 3,663 artists in Estonian public collections and galleries, 1440–2026. Museum records from MuIS and the EKM Digital Collection, gallery stock from the galleries' own catalogues; every record links back to its source.">
 <title>Estonian Art Catalogue</title>
 <link rel="canonical" href="https://museaal.ee/">
 <meta property="og:type" content="website">
@@ -706,7 +706,7 @@ footer a{border-bottom:1px solid var(--rule)}
     DECADES.forEach((d,i) => DECPOS[d] = i);
     DECC = A.map(() => DECADES.map(() => 0));
     for (const w of W){
-      if (w.y == null) continue;
+      if (w.y == null || w.f) continue;     // a year outside the artist's life is not their activity
       const p = DECPOS[Math.floor(w.y/10)*10];
       if (p !== undefined) DECC[w.a][p]++;
     }
@@ -1250,7 +1250,7 @@ footer a{border-bottom:1px solid var(--rule)}
     if (SHARDS.has(key)) return SHARDS.get(key);
     // A retry must skip the browser cache: the failure we are retrying is often a
     // cached 404 or 5xx, and re-requesting the identical URL just returns it again.
-    const url = `data/detail/${key}.json?v=fb6cb12d` + (attempt ? `&r=${attempt}` : "");
+    const url = `data/detail/${key}.json?v=b3654ff3` + (attempt ? `&r=${attempt}` : "");
     const p = fetch(url, attempt ? {cache: "reload"} : undefined)
       .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
       .catch(async () => {
@@ -1279,7 +1279,9 @@ footer a{border-bottom:1px solid var(--rule)}
     const id = w.k, open = state.open === id, ar = A[w.a];
     // A museum that wrote "19. sajand" told us the century; showing "n.d." for it
     // throws that away. 174 records are dated to a century but not to a year.
-    const cy = w.y == null && w.yl ? (w.yl.match(/(?:sajand:\s*)(\d{1,2})/i) || w.yl.match(/(\d{1,2})\s*\.?\s*saj/i)) : null;
+    const cy = w.y == null && w.yl ? (w.yl.match(/(?:sajand:\s*)(\d{1,2})/i) || w.yl.match(/(\d{1,2})\s*\.?\s*saj/i)
+                 || (m => m && Math.floor(+m[1]/100) === Math.floor(+m[2]/100) ? [m[0], String(Math.floor(+m[1]/100) + 1)] : null)
+                    (w.yl.match(/(\d{4})\s*[–-]\s*(\d{4})/))) : null;
     const yr = w.y == null ? `<span class="r-year und" ${cy?`title="${esc(w.yl)}"`:""}>${esc(cy ? T("centshort",{n:ordN(+cy[1])}) : T("nd"))}</span>`
       : `<span class="r-year" title="${esc(dateLabel(w) || w.y)}${w.dsrc==="title"?" — date taken from the end of the title; the museum's dating field is empty":""}">${esc(dateLabel(w) || w.y)}${w.dsrc==="title"?"*":""}</span>`;
     const art = (showArtist && state.artist===null) ? `<span class="r-artist">${esc(ar.n)}</span>` : `<span class="r-artist"></span>`;
@@ -1307,7 +1309,8 @@ footer a{border-bottom:1px solid var(--rule)}
           <div class="d-k">${esc(T("d_artist"))}</div><div class="d-v">${esc(ar.n)} <em>${esc(life)}</em>${stag(ar.ls)}${ar.ai?` <a class="permalink" style="margin-left:8px" href="https://digikogu.ekm.ee/authors/author_id-${esc(ar.ai)}" target="_blank" rel="noopener">EKM artist record ↗</a>`:""}</div>
           <div class="d-k">${esc(T("d_dating"))}</div><div class="d-v">${
             w.yl ? esc(dateLabel(w)) + (w.dsrc==="title" ? ` <em>${esc(T("d_fromtitle"))}</em>` : "")
-                 : `<em>${esc(T("d_nodate",{n:ar.n,l:(ar.l[0]||"?")+"–"+(ar.l[1]||"")}))}</em>`}</div>
+                 : `<em>${esc(T("d_nodate",{n:ar.n,l:(ar.l[0]||"?")+"–"+(ar.l[1]||"")}))}</em>`}${
+            w.f ? `<br><em>${esc(T(w.f === "pre" ? "d_prebirth" : "d_postdeath", {l:(ar.l[0]||"?")+"–"+(ar.l[1]||"")}))}</em>` : ""}</div>
           <div class="d-k">${esc(T("d_technique"))}</div><div class="d-v">${techName(w)?esc(techName(w)):"—"}</div>
           <div class="d-k">${esc(T("d_material"))}</div><div class="d-v">${matName(w)?esc(matName(w)):"—"}</div>
           ${(detailOf(w)||{}).dm?`<div class="d-k">${esc(T("d_dimensions"))}</div><div class="d-v">${esc(detailOf(w).dm)}</div>`:""}
@@ -1998,8 +2001,8 @@ footer a{border-bottom:1px solid var(--rule)}
   }   // end boot
 
   Promise.all([
-    fetch("data/index.json?v=fb6cb12d").then(r => r.json()),
-    fetch("data/i18n.json?v=839e5564").then(r => r.json())
+    fetch("data/index.json?v=b3654ff3").then(r => r.json()),
+    fetch("data/i18n.json?v=f9034b4f").then(r => r.json())
   ]).then(([data, i18n]) => boot(data, i18n))
    .catch(err => {
      document.getElementById("register").innerHTML =
