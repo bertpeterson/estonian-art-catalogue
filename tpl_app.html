@@ -779,7 +779,7 @@
             const max = Math.max(1, ...list.map(x=>x[1]));
             return `<div class="gy"><div class="gy-h">${esc(T("mostbyartist"))}</div>` +
               list.map(([i, n]) => `<button class="gy-row" data-artist="${i}" title="${esc(A[i].n)} · ${n===1?T('oneworkc'):T('nworks',{n})}">
-                  <span class="gy-y" style="width:auto">${esc(A[i].n.split(" ").length>1 ? A[i].n[0]+". "+A[i].n.split(" ").pop() : A[i].n)}</span>
+                  <span class="gy-y" style="width:auto">${esc(A[i].n.split(" ").length>1 ? A[i].n[0]+". "+surnameOf(A[i].n) : A[i].n)}</span>
                   <span class="gy-track"><span class="gy-bar" style="width:${Math.round((n/max)*100)}%"></span></span>
                   <span class="gy-n">${n}</span></button>`).join("") + `</div>`;
           }
@@ -807,7 +807,9 @@
         return groupHTML(d, gutter, items, true);
       }).join("");
     } else {
-      const surname = n => n.trim().split(" ").pop();
+      // The last word is not the surname when the name ends in a bracket -- "Johann
+      // Willinges (1560-1625)" sorted under "(", ahead of every letter. surnameOf skips those.
+      const surname = surnameOf;
       const birth = i => +(A[i].l[0]||9999);
       const idxs = [...new Set(set.map(w=>w.a))].sort((x,y)=>
         state.artOrder==="az" ? COLL.compare(surname(A[x].n), surname(A[y].n))
