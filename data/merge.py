@@ -341,21 +341,6 @@ for r in recs:
 for i, a in enumerate(artists):
     a["c"] = sum(1 for w in works if w["a"] == i)
 
-# A work dated before its artist was born, or after they died, is one of three things:
-# a cataloguing slip in the source (Šiškin's "1478"), a later impression or copy dated
-# by its own making (heliogravures after Tšemesov, printed 1878), or a photograph of
-# the work standing in for it (Wedekind portraits "1997"). The record stays as the
-# museum holds it; the flag lets the page say what it sees, and keeps the year out of
-# the artist's activity span, where a single 1478 would stretch Šiškin to the 1400s.
-def _yr(s):
-    m = re.search(r'\d{4}', str(s or "")); return int(m.group()) if m else None
-FLAGGED = {"pre": 0, "post": 0}
-for w in works:
-    if w["y"] is None: continue
-    b, d = _yr(artists[w["a"]]["l"][0]), _yr(artists[w["a"]]["l"][1])
-    if b and w["y"] < b:        w["f"] = "pre";  FLAGGED["pre"] += 1
-    elif d and w["y"] > d + 1:  w["f"] = "post"; FLAGGED["post"] += 1
-print("  flagged: dated before birth", FLAGGED["pre"], "/ after death", FLAGGED["post"])
 
 
 # ---------- CCA artist biographies, Venice pavilion, EKKM collection ----------
@@ -457,9 +442,26 @@ def wd_plausible(a, rec):
     if md is not None: return md - 110 < b < md     # born within a lifetime of dying
     return True                                     # museum has no dates either
 
-WD_REJECTED = WD_CONFLICT = 0
+# Occupation is the check the name match was missing. Where the museum had no dates,
+# wd_plausible had nothing to say, and a veterinarian with 126 paintings got through.
+# An item whose recorded occupations include nothing artistic is a different person.
+# An item with no occupation recorded is left alone: minor artists often have none.
+WD_OCC = json.load(open("wd_occ.json", encoding="utf-8")) if os.path.exists("wd_occ.json") else {}
+WD_OCC_LAB = json.load(open("wd_occ_labels.json", encoding="utf-8")) if os.path.exists("wd_occ_labels.json") else {}
+ARTY = re.compile(r"artist|painter|engraver|sculptor|designer|scenograph|illustrat|photograph|architect|"
+                  r"print|graphic|ceram|glass|textile|jewel|goldsmith|silversmith|medal|lithograph|"
+                  r"xylograph|draw|draft|draughts|cartoon|caricatur|animat|calligraph|typograph|muralist|"
+                  r"miniatur|portrait|pastel|watercolo|exlibris|carver|restorer|poster|installation|"
+                  r"performance|conceptual|art educator|art teacher|art historian|etcher|potter|enamel|"
+                  r"mosaic|stained|bookbind|tapestry|weaver|woodcut|aquarell|fresco|icon", re.I)
+ARTY_IDS = {q for q, l in WD_OCC_LAB.items() if ARTY.search(l)}
+BAD_QID = {q for q, os_ in WD_OCC.items() if not (set(os_) & ARTY_IDS)}
+
+WD_REJECTED = WD_CONFLICT = WD_NOTARTIST = 0
 for a in artists:
     w, v = wd_get(WD, a["n"]), wd_get(WDD, a["n"])
+    if w and w.get("qid") in BAD_QID: w = None; WD_NOTARTIST += 1
+    if v and v.get("qid") in BAD_QID: v = None; WD_NOTARTIST += 1
     if w and not wd_plausible(a, w): w = None; WD_REJECTED += 1
     if v and not wd_plausible(a, v): v = None; WD_REJECTED += 1
     # The two passes query independently and can land on different people. If they
@@ -482,7 +484,9 @@ for a in artists:
         f = affil(v["desc"])
         if f: a["aff"] = f
 print("  wikidata rejected on date contradiction:", WD_REJECTED)
+print("  wikidata rejected as not an artist:", WD_NOTARTIST)
 print("  wikidata dropped as unresolvable conflict:", WD_CONFLICT)
+
 
 # ---------- commercial galleries ----------
 # These are NOT museum holdings: the work is in private hands or for sale, and the
@@ -565,6 +569,59 @@ for g in GAL:
     if m and g.get("gallery"): SITES.setdefault(g["gallery"], m.group(1))
 SITES = {k: v for k, v in SITES.items() if k in {w["mu"] for w in works if w.get("mu")}}
 print("  holders with a website:", len(SITES))
+
+# Life dates from Wikidata, for artists the museums left undated. Runs last, after the
+# gallery pass has added its artists: 46 of the new matches are gallery-only names. Until now Wikidata's
+# birth year was used only to check a match, never to fill one, and 514 matched
+# artists sat without dates the item plainly carried. Filled only where the museum
+# gave no birth year at all, and tagged "wd" so the page says whose date it is.
+WD_DATES = json.load(open("wd_dates.json", encoding="utf-8")) if os.path.exists("wd_dates.json") else {}
+# wd_dates.py's second pass: artists with no match and no dates, matched on the name
+# with their own work years as the anchor, one candidate or nothing.
+WD_NEW = json.load(open("wd_matches2.json", encoding="utf-8")) if os.path.exists("wd_matches2.json") else {}
+WD_DATED = WD_MATCHED = 0
+for a in artists:
+    if not a.get("qid") and a["n"] in WD_NEW and not (a["l"][0]):
+        m = WD_NEW[a["n"]]
+        a["qid"] = m["qid"]; WD_MATCHED += 1
+        if m.get("desc") and not a.get("wdesc"):
+            a["wdesc"] = m["desc"]
+            f = affil(m["desc"])
+            if f: a["aff"] = f
+        if m.get("byear"):
+            a["l"] = [str(m["byear"]), str(m["dyear"] or "")]; a["ls"] = "wd"; WD_DATED += 1
+    elif a.get("qid") and not a["l"][0]:
+        b, dd = WD_DATES.get(a["qid"], [None, None])
+        if b: a["l"] = [str(b), str(dd or "")]; a["ls"] = "wd"; WD_DATED += 1
+# A Wikidata birth year later than the artist's own earliest work is not a date but a
+# verdict: wrong person. Undo the whole identity, not just the date, before the flags
+# are computed against it.
+WD_UNDONE = 0
+_first = {}
+for w in works:
+    if w["y"]: _first[w["a"]] = min(_first.get(w["a"], 9999), w["y"])
+for i, a in enumerate(artists):
+    if a.get("ls") == "wd" and a["l"][0] and i in _first and _first[i] < int(a["l"][0]):
+        for k in ("qid", "wdesc", "cit", "born", "aff", "grp"): a.pop(k, None)
+        a["l"], a["ls"] = ["", ""], "ed"; WD_UNDONE += 1
+print("  wikidata: newly matched", WD_MATCHED, "/ life dates filled", WD_DATED, "/ undone as wrong person", WD_UNDONE)
+
+# A work dated before its artist was born, or after they died, is one of three things
+# (checked last, once Wikidata has supplied the dates the museums did not):
+# a cataloguing slip in the source (Šiškin's "1478"), a later impression or copy dated
+# by its own making (heliogravures after Tšemesov, printed 1878), or a photograph of
+# the work standing in for it (Wedekind portraits "1997"). The record stays as the
+# museum holds it; the flag lets the page say what it sees, and keeps the year out of
+# the artist's activity span, where a single 1478 would stretch Šiškin to the 1400s.
+def _yr(s):
+    m = re.search(r'\d{4}', str(s or "")); return int(m.group()) if m else None
+FLAGGED = {"pre": 0, "post": 0}
+for w in works:
+    if w["y"] is None: continue
+    b, d = _yr(artists[w["a"]]["l"][0]), _yr(artists[w["a"]]["l"][1])
+    if b and w["y"] < b:        w["f"] = "pre";  FLAGGED["pre"] += 1
+    elif d and w["y"] > d + 1:  w["f"] = "post"; FLAGGED["post"] += 1
+print("  flagged: dated before birth", FLAGGED["pre"], "/ after death", FLAGGED["post"])
 
 data = {"meta": {"built": datetime.date.today().isoformat(),
                  "works": len(works), "objects": OBJECTS, "artists": len(artists),
