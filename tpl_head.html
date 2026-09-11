@@ -249,6 +249,9 @@ h1 em{font-style:italic;font-weight:400}
 
 footer{border-top:1px solid var(--ink);margin-top:10px;padding:30px 0 60px;display:grid;grid-template-columns:repeat(3,1fr);gap:34px}
 footer p{margin:0;font-size:.81rem;line-height:1.6;color:var(--grey-6);max-width:46ch}
+/* the A-Z link is one line; left in a grid cell beside three long notes it sat at
+   the top of a tall row with a void beneath it. It takes a row of its own. */
+footer p:first-child{grid-column:1/-1;max-width:none;margin-bottom:-12px}
 footer b{color:var(--ink);font-weight:500}
 footer a{border-bottom:1px solid var(--rule)}
 
