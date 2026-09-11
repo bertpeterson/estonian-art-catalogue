@@ -1,4 +1,12 @@
 # -*- coding: utf-8 -*-
+"""Every string the interface shows, in both languages.
+
+This file is the source. It writes i18n.json, which the page fetches at load and
+which build_site.sh regenerates on every build -- so an edit made to the JSON is
+overwritten, silently, the next time anyone builds. That happened: the JSON ran
+101 keys and 17 rewritten strings ahead of this file, and wiring the generator
+into the build reverted all of them at once. Edit here, never there.
+"""
 import json
 ET = {
  "sub":"Kunst Eesti avalikes kogudes ja galeriides · 1835–2024",
@@ -13,7 +21,7 @@ ET = {
  "sort":"Järjesta","s_year":"Aasta","s_artist":"Kunstnik","s_title":"Pealkiri","s_medium":"Liik","s_museum":"Muuseum",
  "order":"Suund","earliest":"Varaseim","latest":"Hiliseim","az":"A–Ü","bybirth":"Sünniaasta",
  "linkview":"Link sellele vaatele","hidelink":"Peida link",
- "doctitle":"Eesti kunstikataloog",
+ "doctitle":"Eesti Kunstikataloog",
  "doors_name":"Alusta nimest","doors_period":"Alusta ajajärgust","doors_coll":"Alusta kogust",
  "p_pre":"Enne 1700", "reset":"Lähtesta","copy":"Kopeeri","copied":"Kopeeritud",
  "filters":"Filtrid","years":"Aastad","medium":"Liik","museum":"Muuseum","ekmcat":"EKM kategooria","source":"Allikas",
@@ -22,12 +30,12 @@ ET = {
  "artistindex":"Kunstnike register","showall":"Näita kõiki {n}","hideindex":"Peida register",
  "showfilters":"Näita filtreid","showfiltersn":"Näita filtreid ({n} aktiivset)","hidefilters":"Peida filtrid",
  "nofilters":"puuduvad — kuvatakse kõik {n} teost",
- "ofworks":"{a} teost {b}-st","complete":"kogu register",
+ "ofworks":"{a} teost {b}-st","complete":"kogu kataloog",
  "entries":"kirjet","entry":"kirje","showallentries":"Näita kõiki {n} kirjet",
  "byyear":"Aastate kaupa","yearshowing":"Aasta — kuvatakse {y}","mostbyartist":"Enim, kunstniku järgi",
  "noresults":"Ükski kirje ei vasta.",
  "restore":"Taasta viimane vaade",
- "allartists":"← Kõik {n} kunstnikku","worksinregister":"teost registris","shown":"{n} kuvatud",
+ "allartists":"← Kõik {n} kunstnikku","worksinregister":"teost kataloogis","shown":"eksponeeritud",
  "active":"tegev {a}–{b}","activeone":"tegev {a}","undatedonlyartist":"ainult dateerimata",
  "readbio":"Loe täielikku elulugu","showless":"Näita vähem",
  "d_artist":"Kunstnik","d_dating":"Dateering","d_technique":"Tehnika","d_material":"Materjal",
@@ -37,7 +45,7 @@ ET = {
  "d_nodate":"muuseumi kirjes dateering puudub — {n} oli tegev {l}",
  "d_fromtitle":"— loetud pealkirja lõpust; muuseumi dateeringuväli on tühi",
  "memhead":"{n} museaali sama pealkirja ja dateeringuga — eraldi tulmed, nagu muuseum neid hoiab",
- "century":"{n}. sajand","undatedband":"dateerimata","nd":"dat.",
+ "century":"{n} sajand","undatedband":"dateerimata","nd":"dat.",
  "undatedblurb":"Teosed, mille muuseumikirjes dateering puudub. Neid ei ole kümnendisse ära arvatud — kuid iga nende autori eluaastad on teada, nii et rühm on järjestatud kunstniku tegevusaja järgi, varaseimast alates.",
  "estonianprose":"eesti keeles, nagu muuseum on kirjutanud",
  "work":"teos",
@@ -110,12 +118,12 @@ EN = {
  "artistindex":"Artist index","showall":"Show all {n}","hideindex":"Hide index",
  "showfilters":"Show filters","showfiltersn":"Show filters ({n} active)","hidefilters":"Hide filters",
  "nofilters":"none — showing all {n} works",
- "ofworks":"{a} of {b} works","complete":"complete register",
+ "ofworks":"{a} of {b} works","complete":"complete catalogue",
  "entries":"entries","entry":"entry","showallentries":"Show all {n} entries",
  "byyear":"By year","yearshowing":"Year — showing {y}","mostbyartist":"Most, by artist",
  "noresults":"No entries match that.",
  "restore":"Restore last view",
- "allartists":"← All {n} artists","worksinregister":"works in the register","shown":"{n} shown",
+ "allartists":"← All {n} artists","worksinregister":"works in the catalogue","shown":"exhibited",
  "active":"active {a}–{b}","activeone":"active {a}","undatedonlyartist":"undated only",
  "readbio":"Read full biography","showless":"Show less",
  "d_artist":"Artist","d_dating":"Dating","d_technique":"Technique","d_material":"Material",
@@ -125,7 +133,7 @@ EN = {
  "d_nodate":"no date in the museum record — {n} worked {l}",
  "d_fromtitle":"— read from the end of the title; the museum's dating field is empty",
  "memhead":"{n} catalogued objects under this title & date — separate accessions, as the museum holds them",
- "century":"{n}th century","undatedband":"undated","nd":"n.d.",
+ "century":"{n} century","undatedband":"undated","nd":"n.d.",
  "undatedblurb":"Works whose museum record carries no date. They are kept rather than guessed into a decade — but every one of their artists has known dates, so this group is ordered by when the artist worked, earliest first.",
  "estonianprose":"in Estonian, as the museum wrote it",
  "work":"work",
@@ -179,17 +187,17 @@ EN = {
 HTML_ET = {
  "standfirst":"Iga kirje on tõeline museaal, koondatud kahest kataloogist: <strong>MuIS</strong>, kõigi Eesti muuseumide ühine infosüsteem, ja <strong>EKM Digitaalkogu</strong>, Eesti Kunstimuuseumi oma andmebaas Kumu taga. Iga kirje viitab tagasi oma allikale.",
  "srcline":"Allikad: <a href=\"https://opendata.muis.ee/\" target=\"_blank\" rel=\"noopener\">Muuseumide Infosüsteem (MuIS)</a>, Eesti Kultuuriministeerium, metaandmed CC0 · <a href=\"https://digikogu.ekm.ee/\" target=\"_blank\" rel=\"noopener\">EKM Digitaalkogu</a>, Eesti Kunstimuuseum · kogutud <span id=\"built\"></span><br><span id=\"srcsplit\"></span><br>Museaalide andmed on muuseumide omad, sõna-sõnalt. Kunstnike eluaastad ja elulood on märgistatud allika järgi — <span class=\"tag\">MuIS</span>, <span class=\"tag\">EKM</span> või <span class=\"tag\">ed</span> toimetuse oma. Kümnendite märkused ja ingliskeelsed liigiterminid on toimetuse omad.",
- "foot1":"<b>Kust kirjed pärinevad.</b> Kaks kataloogi, kogutud kunstnike kaupa ja ühendatud tulmenumbri järgi. MuIS on Kultuuriministeeriumi ühine süsteem, mis katab kõik Eesti muuseumid; selle metaandmed on CC0. EKM Digitaalkogu on Eesti Kunstimuuseumi oma andmebaas — sügavam nende kunstnike osas, keda Kumu hoiab. Kirjeldused on jäetud eesti keelde, nagu kataloogija need kirjutas.",
- "foot2":"<b>Mis on toimetuse oma.</b> Kümnendite märkused ja ingliskeelne liigisõnavara on siin kirjutatud. Kunstnike eluaastad ja elulood pärinevad MuIS-ist või EKM Digitaalkogust, kui neil need on, ja on vastavalt märgistatud; ainult <span class=\"tag\">ed</span> märgiga omad on toimetuse kirjutatud. Kõik museaali kirje väljad on muuseumi omad.",
- "foot3":"<b>Mida kuju näitab.</b> Kogud ei ole ajalugu. Tipud on kogumistipud; nüüdiskunsti on vähe, sest installatsioon, video ja performance jõuavad muuseumi nimekirjadesse aeglaselt, ja EKM Digitaalkogu ulatub vaevu üle 2000. aasta. <span id=\"undated-note\"></span>",
+ "foot1":"<b>Kust kirjed pärinevad.</b> Kaks kataloogi, kogutud kunstnike ja kogude kaupa ning ühendatud tulmenumbri järgi. MuIS on Kultuuriministeeriumi ühine süsteem, mis katab kõik Eesti muuseumid; selle metaandmed on CC0. EKM Digitaalkogu on Eesti Kunstimuuseumi oma andmebaas. Kirjeldused on jäetud eesti keelde, nagu kataloogija need kirjutas.",
+ "foot2":"<b>Mis siin on ja mis on toimetuse oma.</b> See kataloog kirjeldab seda, mida Eesti muuseumid <i>hoiavad</i>, mitte ainult eesti kunstnike loomingut: siin on ka baltisaksa maalijaid, väliskunsti ja anonüümseid töid, sest muuseumid hoiavad neid. Kümnendite märkused ja ingliskeelne liigisõnavara on siin kirjutatud. Kunstnike eluaastad ja elulood pärinevad MuIS-ist, EKM Digitaalkogust või Eesti Kaasaegse Kunsti Keskusest ja on allika järgi märgistatud; ainult <span class=\"tag\">ed</span> märgiga omad on toimetuse kirjutatud. Kõik museaali kirje väljad on muuseumi omad.",
+ "foot3":"<b>Mida kuju näitab.</b> Kogud ei ole ajalugu. Tipud on kogumistipud: nõukogude süsteem viis teoseid muuseumikogudesse suures mahus ja see masinavärk lõppes 1991. aasta taasiseseisvumisega — muuseumikogud kahanevad pärast seda järsult ja viimase kahe kümnendi osas peaaegu olematuks. Tõus 2020. aastatesse on vastupidine kallak. Galeriid hoiavad seda, mida nad pole müünud, ja näitavad seda, mida hiljuti eksponeerisid, nii et nende varu kasvab ühtlaselt tänapäeva poole: 2010. aastaga on siin dateeritud seitse teost, 2024. aastaga üle kahesaja. Seepärast on 2020. aastates rohkem teoseid kui lõppenud 2010. aastates — kaks allikat kalduvad vastassuundades, see ei ütle midagi selle kohta, kui palju kunsti tehti. <span id=\"undated-note\"></span>",
  "wordmark":"Eesti Kunstikataloog",
 }
 HTML_EN = {
  "standfirst":"Every record here is a real museum object, compiled from two catalogues: <strong>MuIS</strong>, the shared system of all Estonian museums, and the <strong>EKM Digital Collection</strong>, the Art Museum of Estonia's own database behind Kumu. Every entry links back to its source record.",
  "srcline":"Sources: <a href=\"https://opendata.muis.ee/\" target=\"_blank\" rel=\"noopener\">Muuseumide Infosüsteem (MuIS)</a>, Eesti Kultuuriministeerium, metadata CC0 · <a href=\"https://digikogu.ekm.ee/\" target=\"_blank\" rel=\"noopener\">EKM Digitaalkogu</a>, Eesti Kunstimuuseum · harvested <span id=\"built\"></span><br><span id=\"srcsplit\"></span><br>Object data is the museums' verbatim. Artist dates and biographies are tagged by source — <span class=\"tag\">MuIS</span>, <span class=\"tag\">EKM</span>, or <span class=\"tag\">ed</span> for editorial. Decade notes and English medium terms are editorial.",
- "foot1":"<b>Where the records come from.</b> Two catalogues, harvested per artist and merged on inventory number. MuIS is the Ministry of Culture's shared system, covering every Estonian museum; its metadata is CC0. The EKM Digital Collection is the Art Museum of Estonia's own database — deeper on the artists Kumu holds. Descriptions stay in Estonian, as the cataloguer wrote them.",
- "foot2":"<b>What is editorial.</b> The decade notes and the English medium vocabulary are written here. Artist dates and biographies come from MuIS or the EKM Digital Collection wherever either has them, and are tagged accordingly; only those tagged <span class=\"tag\">ed</span> are editorial. Everything on a work record is the museum's.",
- "foot3":"<b>What the shape shows.</b> Holdings are not history. The peaks are collecting peaks; contemporary work is thin because installation, video and performance enter museum inventories slowly, and the EKM Digital Collection barely reaches past 2000. <span id=\"undated-note\"></span>",
+ "foot1":"<b>Where the records come from.</b> Two catalogues, harvested per artist and per collection and merged on inventory number. MuIS is the Ministry of Culture's shared system, covering every Estonian museum; its metadata is CC0. The EKM Digital Collection is the Art Museum of Estonia's own database. Descriptions stay in Estonian, as the cataloguer wrote them.",
+ "foot2":"<b>What is in it, and what is editorial.</b> This catalogues what Estonian museums <i>hold</i>, not only work by Estonian artists: Baltic German painters, foreign prints and anonymous work are all here, because the museums hold them. Decade notes and the English medium vocabulary are written here. Artist dates and biographies come from MuIS, the EKM Digital Collection or the Estonian Centre for Contemporary Art and are tagged by source; only those tagged <span class=\"tag\">ed</span> are editorial. Everything on a work record is the museum's.",
+ "foot3":"<b>What the shape shows.</b> Holdings are not history. The peaks are collecting peaks: the Soviet system moved work into museum inventories at scale, and that machinery ended with independence in 1991 — museum holdings fall away sharply after it, and thin to almost nothing for the last two decades. The rise into the 2020s is the opposite bias. Galleries keep what they have not sold and show what they showed lately, so their stock climbs steadily toward the present: seven works here are dated 2010, more than two hundred are dated 2024. That is why the 2020s carry more works than the completed 2010s — two sources leaning opposite ways, not a statement about how much art was made. <span id=\"undated-note\"></span>",
  "wordmark":"Estonian Art Catalogue",
 }
 BLURB_ET = {
