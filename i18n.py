@@ -12,7 +12,7 @@ ET = {
  "group":"Rühmita","decade":"Kümnend","artist":"Kunstnik",
  "sort":"Järjesta","s_year":"Aasta","s_artist":"Kunstnik","s_title":"Pealkiri","s_medium":"Liik","s_museum":"Muuseum",
  "order":"Suund","earliest":"Varaseim","latest":"Hiliseim","az":"A–Ü","bybirth":"Sünniaasta",
- "keys":"? Klahvid","hidekeys":"Peida klahvid","linkview":"Link sellele vaatele","hidelink":"Peida link",
+ "linkview":"Link sellele vaatele","hidelink":"Peida link",
  "reset":"Lähtesta","copy":"Kopeeri","copied":"Kopeeritud",
  "filters":"Filtrid","years":"Aastad","medium":"Liik","museum":"Muuseum","ekmcat":"EKM kategooria","source":"Allikas",
  "anyyear":"Kõik aastad","undated":"Dateerimata","earliestopt":"varaseim","latestopt":"hiliseim",
@@ -37,10 +37,6 @@ ET = {
  "memhead":"{n} museaali sama pealkirja ja dateeringuga — eraldi tulmed, nagu muuseum neid hoiab",
  "century":"{n}. sajand","undatedband":"dateerimata","nd":"dat.",
  "undatedblurb":"Teosed, mille muuseumikirjes dateering puudub. Neid ei ole kümnendisse ära arvatud — kuid iga nende autori eluaastad on teada, nii et rühm on järjestatud kunstniku tegevusaja järgi, varaseimast alates.",
- "kh_search":"vii kursor otsingusse","kh_next":"järgmine kirje","kh_prev":"eelmine kirje",
- "kh_open":"ava / sulge kirje","kh_artist":"ava fookuses oleva kirje kunstnik",
- "kh_filters":"näita / peida filtrid","kh_index":"näita / peida kunstnike register",
- "kh_firstlast":"esimene / viimane kirje","kh_esc":"sulge kirje, seejärel tühjenda otsing","kh_panel":"see paneel",
  "estonianprose":"eesti keeles, nagu muuseum on kirjutanud",
 }
 EN = {
@@ -55,7 +51,7 @@ EN = {
  "group":"Group","decade":"Decade","artist":"Artist",
  "sort":"Sort","s_year":"Year","s_artist":"Artist","s_title":"Title","s_medium":"Medium","s_museum":"Museum",
  "order":"Order","earliest":"Earliest","latest":"Latest","az":"A–Z","bybirth":"By birth",
- "keys":"? Keys","hidekeys":"Hide keys","linkview":"Link to this view","hidelink":"Hide link",
+ "linkview":"Link to this view","hidelink":"Hide link",
  "reset":"Reset","copy":"Copy","copied":"Copied",
  "filters":"Filters","years":"Years","medium":"Medium","museum":"Museum","ekmcat":"EKM category","source":"Source",
  "anyyear":"Any year","undated":"Undated","earliestopt":"earliest","latestopt":"latest",
@@ -80,10 +76,6 @@ EN = {
  "memhead":"{n} catalogued objects under this title & date — separate accessions, as the museum holds them",
  "century":"{n}th century","undatedband":"undated","nd":"n.d.",
  "undatedblurb":"Works whose museum record carries no date. They are kept rather than guessed into a decade — but every one of their artists has known dates, so this group is ordered by when the artist worked, earliest first.",
- "kh_search":"focus search","kh_next":"next record","kh_prev":"previous record",
- "kh_open":"open / close record","kh_artist":"open artist of focused record",
- "kh_filters":"show / hide filters","kh_index":"show / hide artist index",
- "kh_firstlast":"first / last record","kh_esc":"close record, then clear search","kh_panel":"this panel",
  "estonianprose":"in Estonian, as the museum wrote it",
 }
 HTML_ET = {
