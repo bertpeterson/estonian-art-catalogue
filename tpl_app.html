@@ -816,15 +816,11 @@
   // landing view -- so the question is not which row comes first but what the first
   // screen is. Three ways in, above the list: a name, a period, a collection. They
   // are the doors people actually arrive with. Any search or filter hides them.
+  // Collections were a third door; the museum facet already does that job.
   const TOP_ART = (() => {
     const c = new Map();
     W.forEach(w => c.set(w.a, (c.get(w.a) || 0) + 1));
     return [...c].sort((x, y) => y[1] - x[1]).slice(0, 12);
-  })();
-  const TOP_MUS = (() => {
-    const c = new Map();
-    W.forEach(w => c.set(w.mu, (c.get(w.mu) || 0) + 1));
-    return [...c].sort((x, y) => y[1] - x[1]).slice(0, 8);
   })();
   // The app already names Estonia's periods for the decade bands. The doors reuse
   // exactly those labels rather than inventing a parallel vocabulary, plus one band
@@ -849,8 +845,7 @@
         `<span>${esc(label)}</span><span class="n">${num(n)}</span></button></li>`).join("") + "</ul></div>";
     el.innerHTML =
       col("doors_name",   TOP_ART.map(([i, n]) => [A[i].n, n, "a", i])) +
-      col("doors_period", DOOR_PERIODS.map((p, i) => [dpLabel(p), PCOUNT[i], "p", i])) +
-      col("doors_coll",   TOP_MUS.map(([m, n]) => [musName(m), n, "m", MUSEUMS.indexOf(m)]));
+      col("doors_period", DOOR_PERIODS.map((p, i) => [dpLabel(p), PCOUNT[i], "p", i]));
     el.hidden = false;
   }
 
@@ -1001,7 +996,6 @@
     if (!b) return;
     const v = +b.dataset.v;
     if (b.dataset.door === "a") state.artist = v;
-    else if (b.dataset.door === "m") state.museums = new Set([MUSEUMS[v]]);
     else { state.from = DOOR_PERIODS[v][0]; state.to = DOOR_PERIODS[v][1]; }
     renderAll(); pushHash();
   });
