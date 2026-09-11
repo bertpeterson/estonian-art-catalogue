@@ -9,7 +9,9 @@ OUT = "site"
 # the search haystack is built from technique, material, inventory number, collection,
 # category and date label, so moving those out would silently empty those searches.
 # mi/oi/url only ever build the "source record" links in the detail panel.
-DETAIL = {"d", "dm", "mem", "mi", "oi", "url"}
+# url stays in the index: a gallery row links to the gallery from the list itself,
+# before any shard is fetched. 4,222 short strings, about 250 KB.
+DETAIL = {"d", "dm", "mem", "mi", "oi"}
 
 d = json.load(open(SRC, encoding="utf-8"))
 W, A = d["works"], d["artists"]

@@ -714,14 +714,18 @@
           ${state.artist===null?`<button class="showartist" data-artist="${w.a}">All ${ar.c} works by ${esc(ar.n)} →</button>`:""}
         </div></div>`;
     }
-    return `<div class="row" data-open="${open}">
+    // A work for sale links to the gallery from the row itself; the record is one
+    // click further and the link was the thing a collector came for.
+    const rl = w.kind === "gallery" && w.url
+      ? `<a class="rl" href="${esc(w.url)}" target="_blank" rel="noopener" title="${esc(T("d_gallerylink", {g: musName(w.mu)}))}">${esc(T("rl_view"))}</a>` : "";
+    return `<div class="row${rl ? " has-link" : ""}" data-open="${open}">
       <button class="row-btn" data-id="${esc(id)}" aria-expanded="${open}">
         ${yr}
         <span class="r-title" title="${esc(w.t)}">${esc(w.t)}${w.n>1?`<span class="src-tag" title="${w.n} catalogued objects share this title and date — sheets, impressions or parts">×${w.n}</span>`:""}</span>
         ${art}
         <span class="r-med" title="${esc(sub(w))}">${esc(medName(w.e))}</span>
         <span class="r-coll" title="${esc(musName(w.mu))} · ${esc(w.nu||"")}">${esc(abbr(w.mu))}<span class="src-tag">${esc(SRCLAB[w.s]||w.s)}</span></span>
-      </button>${slBtn(id)}${detail}</div>`;
+      </button>${rl}${slBtn(id)}${detail}</div>`;
   }
 
   function groupHTML(key, gutter, items, showArtist){

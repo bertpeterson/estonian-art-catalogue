@@ -77,9 +77,7 @@ for old,new,tag in [
   ('${w.mi?`<a class="permalink"','${(detailOf(w)||{}).mi?`<a class="permalink"','muis link guard'),
   ('museaalview/${esc(w.mi)}','museaalview/${esc(detailOf(w).mi)}','muis link id'),
   ('${w.oi?`<a class="permalink"','${(detailOf(w)||{}).oi?`<a class="permalink"','ekm link guard'),
-  ('oid-${esc(w.oi)}','oid-${esc(detailOf(w).oi)}','ekm link id'),
-  ('${w.url?`<a class="permalink"','${(detailOf(w)||{}).url?`<a class="permalink"','src link guard'),
-  ('href="${esc(w.url)}"','href="${esc(detailOf(w).url)}"','src link href')]:
+  ('oid-${esc(w.oi)}','oid-${esc(detailOf(w).oi)}','ekm link id')]:
     sub(old,new,tag)
 sub('''    const b = e.target.closest(".row-btn"); if (!b) return;
     const id = b.dataset.id;
