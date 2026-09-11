@@ -410,7 +410,7 @@ footer a{border-bottom:1px solid var(--rule)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 .doors{border-top:1px solid var(--rule);margin:var(--sp-4) 0 0;padding-top:var(--sp-3)}
 .doors .d-names ul{columns:2;column-gap:var(--sp-4)} .doors .d-names li{break-inside:avoid}
-@media(min-width:1100px){.doors .d-names ul{columns:3}}
+@media(min-width:1100px){.doors .d-names ul{columns:4}}
 @media(max-width:760px){.doors .d-names ul{columns:1}}
 /* era band under the histogram: positioned against the decade cells on wide screens,
    a plain wrapped row where the cells are too narrow to label */
@@ -1497,7 +1497,7 @@ footer a{border-bottom:1px solid var(--rule)}
   // with. A period door and a collection door were here too; the eras now sit under
   // the histogram against the bars they describe, and the museum facet does
   // collections. Any search or filter hides it.
-  // Twelve names, chosen rather than counted. Ranked by holdings, the door read as a
+  // Sixteen names, chosen rather than counted. Ranked by holdings, the door read as a
   // list of the most prolific -- Richard Sagrits above Konrad Mägi, Gori above Köler --
   // which is a fact about museum acquisition, not about Estonian art. These are the
   // artists a history of it cannot leave out, one sculptor among them, in order of
@@ -1505,7 +1505,8 @@ footer a{border-bottom:1px solid var(--rule)}
   // and tagged as such like every other editorial line.
   const CANON = ["Johann Köler", "Amandus Adamson", "Kristjan Raud", "Ants Laikmaa",
                  "Konrad Mägi", "Nikolai Triik", "Ado Vabbe", "Eduard Wiiralt",
-                 "Adamson-Eric", "Karin Luts", "Ülo Sooster", "Leonhard Lapin"];
+                 "Adamson-Eric", "Karin Luts", "Evald Okas", "Ülo Sooster",
+                 "Jüri Arrak", "Raul Meel", "Tõnis Vint", "Leonhard Lapin"];
   const TOP_ART = (() => {
     const c = new Map(); W.forEach(w => c.set(w.a, (c.get(w.a) || 0) + 1));
     const byName = new Map(A.map((a, i) => [a.n, i]));
