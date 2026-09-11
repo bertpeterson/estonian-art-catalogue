@@ -753,6 +753,9 @@
     // The count line and Reset describe and undo a selection; before there is one
     // they only repeat the masthead.
     $("countline").hidden = pristine(); $("reset").hidden = pristine();
+    // The A-Ü rail is the index for the artist-grouped view. On the decade view it was
+    // a third way into artists beside search and the names door.
+    $("aidx").hidden = state.group !== "artist" && !state.idxOpen && state.letter === null;
     const set = fullSet();
     $("stat-w").textContent = W.length.toLocaleString("en");
     $("stat-a").textContent = STATS.artists;
