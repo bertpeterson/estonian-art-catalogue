@@ -6,7 +6,7 @@ biologist attached to a 17th-century woodcarver, "1940ndad" filed as undated,
 "oil on canvas, 150&#21" left by a truncated HTML entity. These are the cheap
 mechanical checks that would have caught them.
 """
-import json, re, sys, collections
+import re, json, re, sys, collections
 
 d = json.load(open("data.json", encoding="utf-8"))
 A, W, V = d["artists"], d["works"], d.get("vocab", {})
@@ -69,6 +69,31 @@ if os.path.exists(_readme):
                          ("gallery", meta.get("gallery", 0)), ("held", meta.get("held", 0))):
         check(f"{value:,}" in text, f"README does not quote the current {label} figure ({value:,})", hard=False)
 
+
+# ---- i18n coverage ---------------------------------------------------------
+# i18n.json is generated from i18n.py, but for a long time build_site.sh only
+# copied it, so the JSON drifted 101 keys ahead of its own source. Regenerating
+# it silently emptied every label that lived only in the copy -- the theme
+# switch read "th_auto", the browser tab read "doctitle". Nothing caught it
+# because a missing key renders as its own name rather than failing.
+#
+# So: every key a template asks for must exist in both languages.
+_tpl = ""
+for f in ("../tpl_app.html", "../tpl_head.html"):
+    if os.path.exists(f): _tpl += open(f, encoding="utf-8").read()
+if _tpl:
+    sys.path.insert(0, "..")
+    import i18n as _i
+    used = (set(re.findall(r'\bT\(\s*"([a-zA-Z0-9_]+)"', _tpl))
+            | set(re.findall(r'data-i18n="([a-zA-Z0-9_]+)"', _tpl)))
+    used = {k for k in used if not k.endswith("_")}   # T("g_" + kind) composes its key
+    usedh = set(re.findall(r'data-i18n-html="([a-zA-Z0-9_]+)"', _tpl))
+    for lang, d in (("ET", _i.ET), ("EN", _i.EN)):
+        for k in sorted(used - set(d)):
+            check(False, f"i18n {lang} has no string for {k!r}, which a template asks for")
+    for lang, d in (("HTML_ET", _i.HTML_ET), ("HTML_EN", _i.HTML_EN)):
+        for k in sorted(usedh - set(d)):
+            check(False, f"i18n {lang} has no block for {k!r}, which a template asks for")
 for m in warn: print("  warn:", m)
 for m in fail: print("  FAIL:", m)
 print(f"\n{len(W):,} works, {len(A):,} artists — {'OK' if not fail else str(len(fail))+' problem(s)'}")
