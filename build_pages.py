@@ -226,7 +226,7 @@ for i, a in enumerate(A):
            + f"<table><thead><tr><th>Year</th><th>Title</th><th>Technique</th><th>Dimensions</th>"
            f"<th>Held by</th></tr></thead><tbody>{rows}</tbody></table>"
            + neighbours(i)
-           + f"<p class=\"m\">Data from MuIS and the EKM Digital Collection. "
+           + f"<p class=\"m\">Museum records from MuIS and the EKM Digital Collection; gallery stock from the galleries' own catalogues. "
            f"<a href=\"{BASE}/\">Full catalogue</a></p></body></html>")
     open(f"{OUT}/{sl}.html", "w", encoding="utf-8").write(doc)
     pages += 1
