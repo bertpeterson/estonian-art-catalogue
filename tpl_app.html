@@ -174,7 +174,8 @@
   })();
   const SRCLAB = {muis:"muis", ekm:"digi", ekmmuis:"both", cca:"cca", ekkm:"ekkm"};
   const SRCFULL = {muis:"catalogued in MuIS only", ekm:"catalogued in the EKM Digital Collection only", ekmmuis:"in both catalogues, merged on inventory number", cca:"Estonian Centre for Contemporary Art", ekkm:"Contemporary Art Museum of Estonia"};
-  const stag = s => s==="ed" ? '<span class="tag">ed</span>' : s==="ekm" ? '<span class="tag">EKM</span>' : '<span class="tag">MuIS</span>';
+  const stag = s => s==="ed" ? '<span class="tag">ed</span>' : s==="ekm" ? '<span class="tag">EKM</span>'
+                  : s==="wd" ? '<span class="tag">Wikidata</span>' : '<span class="tag">MuIS</span>';
 
   const state = {group:"decade", decOrder:"earliest", artOrder:"az", q:"", list:false, shared:null,
                  decade:null, media:new Set(), museums:new Set(), cats:new Set(), srcs:new Set(),
