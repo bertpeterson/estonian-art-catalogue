@@ -44,11 +44,14 @@ CSS = ("body{margin:0;padding:28px;font:15px/1.55 -apple-system,BlinkMacSystemFo
        "th,td{text-align:left;padding:5px 9px 5px 0;border-bottom:1px solid #e3e5e9;vertical-align:top}"
        "th{font-size:.7rem;text-transform:uppercase;letter-spacing:.09em;color:#666;font-weight:500}"
        "p.bio{max-width:66ch}a.cta{display:inline-block;margin:12px 0}nav{font-size:.85rem;margin-bottom:18px}"
+       ".rel{font-size:.85rem;color:#666;margin:6px 0;max-width:80ch;line-height:1.7}"
+       ".rel.nb{margin-top:22px;padding-top:12px;border-top:1px solid #e3e5e9}"
+       "@media(prefers-color-scheme:dark){.rel{color:#8b9098}.rel.nb{border-color:#2b2e34}}"
        # The app offers this as "printable page for this artist", so make that true:
        # drop the navigation and the call to action, force black on white regardless of
        # the reader's theme, and keep table rows from splitting across pages.
        "@media print{body{background:#fff;color:#000;padding:0;max-width:none;font-size:11pt}"
-       "nav,a.cta{display:none}a{color:#000;text-decoration:none}"
+       "nav,a.cta,.rel{display:none}a{color:#000;text-decoration:none}"
        "th,td{border-color:#999!important}tr{break-inside:avoid}"
        "thead{display:table-header-group}h1{font-size:16pt}"
        "table{font-size:9pt}}")
@@ -89,6 +92,92 @@ def jsonld(a, ws, sl, dates):
                         "itemListElement": [{"@type": "ListItem", "position": i + 1, "item": it}
                                             for i, it in enumerate(works)]}}]},
         ensure_ascii=False, separators=(",", ":"))
+
+# ---- related artists -------------------------------------------------------
+# Until now every artist page was an orphan: it linked up to the catalogue and
+# across to the app, never sideways to another artist. That is a dead end for a
+# reader who has just found a name they did not know, and for a crawler it means
+# each page is reachable only from the A-Z index, with no reason to go deeper.
+#
+# Three relations, and every page gets at least one. Alphabetical neighbours are
+# always available and chain all 3,664 pages into a single traversable sequence.
+# A shared school or movement is the strongest link we hold, but only 745 artists
+# carry one. Contemporaries -- nearest in working period within the same
+# collection -- covers the rest.
+LIVE   = [i for i in range(len(A)) if by_artist.get(i)]
+SLUG   = {i: (slug(A[i]["n"]) or f"artist-{i}") for i in LIVE}
+NWORKS = {i: len(by_artist[i]) for i in LIVE}
+
+def period(i):
+    """One year placing an artist in time, for ordering only.
+
+    The median year of their dated works is the most honest single number: it is
+    what the catalogue actually knows. Birth year plus 35 stands in when nothing
+    is dated, which is roughly when a painter's catalogued work begins."""
+    ys = sorted(w["y"] for w in by_artist[i] if w.get("y"))
+    if ys: return ys[len(ys) // 2]
+    m = re.search(r"\d{4}", str((A[i].get("l") or [""])[0] or ""))
+    return int(m.group()) + 35 if m else None
+
+by_grp = {}
+for i in LIVE:
+    for g in A[i].get("grp", []): by_grp.setdefault(g, []).append(i)
+
+# Bucket by the artist's principal holder, ordered by period, so contemporaries
+# are the neighbours in that ordering -- no 3,664-squared comparison needed.
+PERIOD, principal, by_holder = {}, {}, {}
+for i in LIVE:
+    PERIOD[i] = period(i)
+    c = {}
+    for w in by_artist[i]:
+        h = val(w, "mu")
+        if h: c[h] = c.get(h, 0) + 1
+    if c and PERIOD[i]:
+        principal[i] = max(c, key=c.get)
+        by_holder.setdefault(principal[i], []).append(i)
+for h in by_holder:
+    by_holder[h].sort(key=lambda i: PERIOD[i])
+HPOS = {h: {i: n for n, i in enumerate(lst)} for h, lst in by_holder.items()}
+
+ALPHA = sorted(LIVE, key=lambda i: A[i]["n"])
+APOS  = {i: n for n, i in enumerate(ALPHA)}
+
+def link(i):
+    return f'<a href="{BASE}/a/{SLUG[i]}.html">{e(A[i]["n"])}</a>'
+
+def related(i):
+    """Rendered related-artist lines for artist i, or an empty string."""
+    seen, out = {i}, []
+    # Rarest shared group first: "Atelier School of Ants Laikmaa" tells a reader
+    # far more than "Estonian Academy of Arts", which 343 artists share.
+    for g in sorted(A[i].get("grp", []), key=lambda g: len(by_grp[g]))[:2]:
+        peers = [j for j in sorted(by_grp[g], key=lambda j: -NWORKS[j]) if j not in seen][:5]
+        if not peers: continue
+        seen.update(peers)
+        kind, label = g.split(":", 1)
+        lead = {"school": f"Also trained at {label}",
+                "movement": f"Also working in {label}",
+                "member": f"Also in {label}"}[kind]
+        out.append(f'<p class="rel">{e(lead)}: ' + " · ".join(link(j) for j in peers) + "</p>")
+    h = principal.get(i)
+    if h:
+        lst, pos = by_holder[h], HPOS[h][i]
+        near = [lst[n] for n in range(max(0, pos - 6), min(len(lst), pos + 7)) if lst[n] not in seen]
+        near.sort(key=lambda j: (abs(PERIOD[j] - PERIOD[i]), -NWORKS[j]))
+        near = near[:5]
+        if near:
+            seen.update(near)
+            out.append(f'<p class="rel">Contemporaries in {e(h)}: '
+                       + " · ".join(link(j) for j in near) + "</p>")
+    return "".join(out)
+
+def neighbours(i):
+    """Previous and next alphabetically -- the chain that connects every page."""
+    n, parts = APOS[i], []
+    if n > 0:            parts.append("&larr; " + link(ALPHA[n - 1]))
+    parts.append(f'<a href="{BASE}/a/">All artists A&ndash;Z</a>')
+    if n < len(ALPHA) - 1: parts.append(link(ALPHA[n + 1]) + " &rarr;")
+    return '<p class="rel nb">' + " · ".join(parts) + "</p>"
 
 pages, index_rows = 0, []
 for i, a in enumerate(A):
@@ -131,11 +220,13 @@ for i, a in enumerate(A):
               if a.get("grp") else "")
            + (f"<p class=\"bio\">{e(a.get('b') or a.get('ben') or '')}</p>" if (a.get('b') or a.get('ben')) else "")
            + f"<p><a class=\"cta\" href=\"{BASE}/#artist={sl}\">Browse {len(ws)} works in the catalogue →</a></p>"
+           + related(i)
            + (f"<p class=\"m\">Showing the first 600 of {len(ws):,} works — "
               f"<a href=\"{BASE}/#artist={sl}\">see all in the catalogue</a>.</p>" if len(ws) > 600 else "")
            + f"<table><thead><tr><th>Year</th><th>Title</th><th>Technique</th><th>Dimensions</th>"
            f"<th>Held by</th></tr></thead><tbody>{rows}</tbody></table>"
-           f"<p class=\"m\">Data from MuIS and the EKM Digital Collection. "
+           + neighbours(i)
+           + f"<p class=\"m\">Data from MuIS and the EKM Digital Collection. "
            f"<a href=\"{BASE}/\">Full catalogue</a></p></body></html>")
     open(f"{OUT}/{sl}.html", "w", encoding="utf-8").write(doc)
     pages += 1
