@@ -185,9 +185,23 @@ for k, u in unified.items():
 # before it keeps the one name that genuinely ends in a question mark: the collective
 # Chto delat / What is to be done?, where the "?" follows a lowercase word.
 UNCERTAIN = re.compile(r'(?:\(\s*\?\s*\)|(?:[A-ZÕÄÖÜŠŽ][^\s]*|\))\s*\?)\s*$')
+
+# "Tundmatu kunstnik" — literally "unknown artist" — is not a name, it is the absence
+# of one, written into the name field instead of left empty. It arrived as a single
+# artist holding 485 works, which the attributed-only rule never caught because the
+# field was not blank. It comes out on that same rule.
+#
+# The notnames stay. "Püha Lucia legendi meister", "Nürnbergi meister IBK", "Meister B
+# täringuga" look anonymous and are not: a notname is the conventional identifier for
+# a master whose hand is recognised across several works but whose name is lost. That
+# is an attribution, and art history treats it as one.
+ANON = {"tundmatu kunstnik"}
 _before = [u for u in unified.values() if u["artist"] and u["t"]]
-recs = [u for u in _before if not UNCERTAIN.search(u["artist"])]
-DROPPED_UNCERTAIN = len(_before) - len(recs)
+recs = [u for u in _before
+        if not UNCERTAIN.search(u["artist"]) and u["artist"].strip().lower() not in ANON]
+DROPPED_ANON = sum(1 for u in _before if u["artist"].strip().lower() in ANON)
+print("  dropped as unattributed:", DROPPED_ANON, "objects /", len(ANON), "names")
+DROPPED_UNCERTAIN = sum(1 for u in _before if UNCERTAIN.search(u["artist"]))
 print("  dropped as uncertain attribution:", DROPPED_UNCERTAIN,
       "objects /", len({u["artist"] for u in _before if UNCERTAIN.search(u["artist"])}), "names")
 
