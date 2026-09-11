@@ -250,6 +250,74 @@ for r in DK:
 # 1852, digits transposed. Ivan Velts "(1866 - 1826)" died in 1926.
 LIFE_FIX = {"Karl Pavlovitš Brüllov": ["1799", "1852"], "Ivan Augustinovitš Welz": ["1866", "1926"]}
 
+# ---------- one person, two spellings ----------
+# The spelling pass above folds accents and alias brackets. It cannot see that
+# "Johan Köler" and "Johann Köler" are one man, or that "Erich Kügelgen" and "Erich
+# von Kügelgen" are, each with his own page and half his works. The evidence that
+# they are is the birth year: the same year, the same surname, and first names a
+# letter apart or one a subset of the other. Names with a workshop, copy or
+# attribution qualifier never merge -- a workshop is not its master.
+PARTICLE = {"von", "van", "de", "der", "den", "du", "la", "le", "da", "di", "af", "zu", "und", "ja"}
+NEVER = re.compile(r"töökoda|workshop|ateljee|koolkond|järgi|koopia|manner|ring|\?", re.I)
+def _life_of(name, src=False):
+    for life, ls in ((LIFE_FIX.get(name), "ed"), (MU_LIFE.get(name), "muis"), (au_life(AU.get(name, {})), "ekm"),
+                     (DK_LIFE.get(name), "ekm"), (ED_LIFE.get(name), "ed")):
+        if life: return (life, ls) if src else life
+    return (None, None) if src else None
+LIFE_FROM_VARIANT = {}   # the surviving spelling had no dates; the absorbed one did
+def _byear(name):
+    l = _life_of(name); m = re.match(r"^\s*(\d{4})", str(l[0]) if l else "")
+    return int(m.group(1)) if m else None
+def _ftok(t):
+    """fold() returns a sorted tuple of words for whole names; one word folds to one string."""
+    k = fold(t); return k[0] if k else ""
+def _toks(n):
+    n = re.sub(r"\b(sen|jun|jr|sr|vanem|noorem)\.?\b", " ", _strip_brackets(n), flags=re.I)
+    return [_ftok(t) for t in re.findall(r"[^\s.,]+", n) if _ftok(t) and _ftok(t) not in PARTICLE]
+def _close(a, b):
+    """Equal, or one edit apart: Johann/Johan, Vive/Viive, Mathias/Matthias."""
+    if a == b: return True
+    if abs(len(a) - len(b)) > 1 or min(len(a), len(b)) < 3: return False
+    if len(a) == len(b): return sum(x != y for x, y in zip(a, b)) == 1
+    lo, hi = (a, b) if len(a) < len(b) else (b, a)
+    return any(hi[:i] + hi[i+1:] == lo for i in range(len(hi)))
+def _qual(n):
+    """Which generation a name claims: sr, jr, or none. Father and son share a name."""
+    if re.search(r"\b(jun|jr|juun|noorem)\b", n, re.I): return "jr"
+    if re.search(r"\b(sen|sr|vanem)\b", n, re.I): return "sr"
+    return None
+def _same_person(x, y):
+    tx, ty = _toks(x), _toks(y)
+    if len(tx) < 2 or len(ty) < 2 or tx[-1] != ty[-1] or not _close(tx[0], ty[0]): return False
+    if NEVER.search(x) or NEVER.search(y) or _qual(x) != _qual(y): return False
+    lo, hi = (tx, ty) if len(tx) <= len(ty) else (ty, tx)
+    # every token of the shorter name has a close match in the longer, in order
+    j = 0
+    for t in lo:
+        while j < len(hi) and not _close(t, hi[j]): j += 1
+        if j == len(hi): return False
+        j += 1
+    bx, by = _byear(x), _byear(y)
+    if bx and by: return bx == by
+    # no year to check: only when the names are the same length and letter-close
+    return len(tx) == len(ty)
+_bysur = collections.defaultdict(list)
+for n in by_artist: 
+    t = _toks(n)
+    if len(t) >= 2: _bysur[t[-1]].append(n)
+SPELLINGS = []
+for names in _bysur.values():
+    names = sorted(names, key=lambda n: -len(by_artist[n]))
+    for i, big in enumerate(names):
+        if big not in by_artist: continue
+        for small in names[i+1:]:
+            if small in by_artist and _same_person(big, small):
+                for r in by_artist.pop(small): r["artist"] = big; by_artist[big].append(r)
+                if not _life_of(big) and _life_of(small): LIFE_FROM_VARIANT[big] = _life_of(small, src=True)
+                SPELLINGS.append((small, big))
+print("  merged as one person under two spellings:", len(SPELLINGS))
+for small, big in SPELLINGS: print("     %-38s -> %s" % (small, big))
+
 artists, aidx = [], {}
 for name in sorted(by_artist, key=lambda n: (n.split()[-1], n)):
     au = AU.get(name, {})
@@ -257,6 +325,7 @@ for name in sorted(by_artist, key=lambda n: (n.split()[-1], n)):
     if not life: life, ls = au_life(au), "ekm"
     if not life: life, ls = DK_LIFE.get(name), "ekm"
     if not life: life, ls = ED_LIFE.get(name), "ed"
+    if not life and name in LIFE_FROM_VARIANT: life, ls = LIFE_FROM_VARIANT[name]
     if name in LIFE_FIX: life, ls = LIFE_FIX[name], "ed"
     bio, bs = MU_BIO.get(name), "muis"
     if not bio: bio, bs = au_bio(au), "ekm"
