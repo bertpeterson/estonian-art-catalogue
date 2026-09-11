@@ -209,10 +209,25 @@ h1 em{font-style:italic;font-weight:400}
 .g-count{font-family:var(--mono);font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;color:var(--grey-4);margin-top:12px}
 
 .rows{border-top:1px solid var(--ink)}
-.row{border-bottom:1px solid var(--rule-soft)}
+.row{border-bottom:1px solid var(--rule-soft);position:relative}
+/* the shortlist mark: beside the row button (a button cannot hold a button), and a
+   labelled version inside the open record */
+.sl{position:absolute;right:0;top:3px;width:30px;height:28px;display:flex;align-items:center;justify-content:center;
+  border:0;background:none;cursor:pointer;color:var(--grey-4);border-radius:2px;padding:0}
+.sl svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:1.4;stroke-linejoin:round}
+.sl:hover{color:var(--ink);background:var(--field)}
+.sl[aria-pressed="true"]{color:var(--ink)} .sl[aria-pressed="true"] svg{fill:currentColor}
+.sl:focus-visible{outline:2px solid var(--focus);outline-offset:1px}
+.sl.sl-d{position:static;width:auto;height:auto;gap:7px;padding:2px 0;font-family:var(--mono);font-size:.68rem;
+  letter-spacing:.04em;color:var(--grey-6);border-bottom:1px solid var(--rule);border-radius:0;background:none}
+.sl.sl-d:hover{color:var(--ink);border-bottom-color:var(--ink)}
+.listbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px 18px;margin-top:var(--sp-3);padding:10px 0;
+  border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);font-size:var(--fs-base)}
+.listbar b{font-weight:500} .sl-note{color:var(--grey-6);font-size:var(--fs-sm)}
+#mylist[aria-pressed="true"]{color:var(--ink);border-bottom-color:var(--ink)}
 .row-btn{width:100%;text-align:left;background:none;border:0;cursor:pointer;color:inherit;
   display:grid;grid-template-columns:98px minmax(0,1fr) 160px 88px 104px;gap:14px;align-items:baseline;
-  padding:6px 10px 6px 12px;margin-left:-12px;border-left:2px solid transparent;transition:background .12s ease}
+  padding:6px 36px 6px 12px;margin-left:-12px;border-left:2px solid transparent;transition:background .12s ease}
 .row-btn > span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .row-btn:hover{background:var(--field)}
 .row[data-open="true"] .row-btn{border-left-color:var(--ink);background:var(--field)}
@@ -483,6 +498,7 @@ footer a{border-bottom:1px solid var(--rule)}
         <button id="o-desc" aria-pressed="false">Latest</button>
       </div>
     </div>
+    <button class="linkbtn" id="mylist" aria-pressed="false"></button>
     <button class="linkbtn" id="share" data-i18n="linkview"></button>
     <button class="linkbtn" id="reset" data-i18n="reset"></button>
   </div>
@@ -539,6 +555,7 @@ footer a{border-bottom:1px solid var(--rule)}
   <p class="count-line" id="countline"></p>
 
   <section class="doors" id="doors" hidden></section>
+  <div class="listbar" id="listbar" hidden></div>
 
   <main id="register"></main>
 
@@ -731,7 +748,7 @@ footer a{border-bottom:1px solid var(--rule)}
   const SRCFULL = {muis:"catalogued in MuIS only", ekm:"catalogued in the EKM Digital Collection only", ekmmuis:"in both catalogues, merged on inventory number", cca:"Estonian Centre for Contemporary Art", ekkm:"Contemporary Art Museum of Estonia"};
   const stag = s => s==="ed" ? '<span class="tag">ed</span>' : s==="ekm" ? '<span class="tag">EKM</span>' : '<span class="tag">MuIS</span>';
 
-  const state = {group:"decade", decOrder:"earliest", artOrder:"az", q:"",
+  const state = {group:"decade", decOrder:"earliest", artOrder:"az", q:"", list:false, shared:null,
                  decade:null, media:new Set(), museums:new Set(), cats:new Set(), srcs:new Set(),
                  artist:null, letter:null, idxOpen:false, idxQ:"", idxLimit:120, idxSort:"az", showEarly:false, origins:new Set(), groups:new Set(), sort:"year", year:null, gLimit:50, from:null, to:null, undOnly:false, open:null, expand:new Set()};
   const LIMIT_DEC = 50, LIMIT_ART = 18;
@@ -763,7 +780,11 @@ footer a{border-bottom:1px solid var(--rule)}
     state.groups.forEach(v => p.append("grp", v));
     if (state.open) p.set("open", state.open);
     if (state.idxOpen) p.set("index", state.letter || "all");
-    return p.toString();
+    // The list travels as its keys, so "Link to this view" of your own list is a link
+    // anyone can open. An empty list is "mine" -- nothing to carry.
+    if (state.shared) p.set("list", [...state.shared].join(","));
+    else if (state.list) p.set("list", SL.size ? [...SL].join(",") : "mine");
+    return p.toString().replace(/%3A/gi, ":").replace(/%2C/gi, ",");
   }
   function pushHash(replace){
     if (applying) return;
@@ -804,6 +825,16 @@ footer a{border-bottom:1px solid var(--rule)}
     state.origins = new Set(ORIGINS.filter(o => g("origin").includes(o===NOORIGIN?"none":o)));
     state.groups  = new Set(GROUPS.filter(x => g("grp").includes(x)));
     state.open    = p.get("open") || null;
+    // A list in the URL is yours if it matches what this browser holds, and someone
+    // else's otherwise -- shown as a shared list, never merged into yours unasked.
+    state.list = false; state.shared = null;
+    const lv = p.get("list");
+    if (lv === "mine") state.list = true;
+    else if (lv){
+      const ks = lv.split(",").filter(k => KEYSET.has(k));
+      const same = ks.length === SL.size && ks.every(k => SL.has(k));
+      if (same) state.list = true; else state.shared = new Set(ks);
+    }
     const ix = p.get("index");
     state.idxOpen = !!ix;
     state.letter  = (ix && ix !== "all") ? ix.toUpperCase() : null;
@@ -840,7 +871,8 @@ footer a{border-bottom:1px solid var(--rule)}
     schedule();
   })();
   const matchText = w => !state.q || hay(w).includes(defold(state.q.toLowerCase()));
-  const baseSet = () => W.filter(w => matchText(w)
+  const inList = w => { const k = listKeys(); return !k || k.has(w.k); };
+  const baseSet = () => W.filter(w => matchText(w) && inList(w)
       && (state.media.size===0 || state.media.has(w.e))
       && (state.museums.size===0 || state.museums.has(w.mu))
       && (state.cats.size===0 || state.cats.has(w.c))
@@ -851,7 +883,7 @@ footer a{border-bottom:1px solid var(--rule)}
       && (state.undOnly ? w.y===null
           : ((state.from===null || (w.y!==null && w.y>=state.from))
           && (state.to===null   || (w.y!==null && w.y<=state.to)))));
-  const baseSetIgnoringYears = () => W.filter(w => matchText(w)
+  const baseSetIgnoringYears = () => W.filter(w => matchText(w) && inList(w)
       && (state.media.size===0 || state.media.has(w.e))
       && (state.museums.size===0 || state.museums.has(w.mu))
       && (state.cats.size===0 || state.cats.has(w.c))
@@ -964,6 +996,8 @@ footer a{border-bottom:1px solid var(--rule)}
     state.origins.forEach(v => add(v===NOORIGIN?T("originunknown"):v, () => state.origins.delete(v)));
     state.groups.forEach(v => add(grpLabel(v), () => state.groups.delete(v)));
     if (state.q) add(`“${state.q}”`, () => { state.q = ""; $("q").value = ""; });
+    if (state.shared) add(T("sl_shared", {n: state.shared.size}), () => { state.shared = null; });
+    else if (state.list) add(T("mylist"), () => { state.list = false; });
     ACTIVE = chips;
     el.innerHTML = chips.length
       ? chips.map((c, i) => `<button class="af" data-af="${i}" title="${esc(T("removefilter"))}">${esc(c.label)}<span>×</span></button>`).join("")
@@ -1220,6 +1254,7 @@ footer a{border-bottom:1px solid var(--rule)}
             ${(detailOf(w)||{}).mi?`<a class="permalink" href="https://www.muis.ee/museaalview/${esc(detailOf(w).mi)}" target="_blank" rel="noopener">${esc(T("d_recmuis"))}</a>`:""}
             ${(detailOf(w)||{}).oi?`<a class="permalink" href="https://digikogu.ekm.ee/ekm/search/oid-${esc(detailOf(w).oi)}/" target="_blank" rel="noopener">${esc(T("d_recekm"))}</a>`:""}
             ${(detailOf(w)||{}).url?`<a class="permalink" href="${esc(detailOf(w).url)}" target="_blank" rel="noopener">${esc(T("d_recsource"))}</a>`:""}
+            ${slBtn(id, "sl-d")}
           </div>
         </div>
         <div class="d-side">
@@ -1247,7 +1282,7 @@ footer a{border-bottom:1px solid var(--rule)}
         ${art}
         <span class="r-med" title="${esc(sub(w))}">${esc(medName(w.e))}</span>
         <span class="r-coll" title="${esc(musName(w.mu))} · ${esc(w.nu||"")}">${esc(abbr(w.mu))}<span class="src-tag">${esc(SRCLAB[w.s]||w.s)}</span></span>
-      </button>${detail}</div>`;
+      </button>${slBtn(id)}${detail}</div>`;
   }
 
   function groupHTML(key, gutter, items, showArtist){
@@ -1280,7 +1315,7 @@ footer a{border-bottom:1px solid var(--rule)}
   }
 
   function render(){
-    renderDoors();
+    renderDoors(); renderListBar();
     const set = fullSet();
     $("stat-w").textContent = W.length.toLocaleString("en");
     $("stat-a").textContent = STATS.artists;
@@ -1289,6 +1324,8 @@ footer a{border-bottom:1px solid var(--rule)}
     $("stat-gwrap").hidden = STATS.galleries === 0;
 
     const scope = [];
+    if (state.shared) scope.push(T("sl_shared", {n: state.shared.size}));
+    else if (state.list) scope.push(T("mylist"));
     if (state.artist!==null) scope.push(A[state.artist].n);
     if (state.undOnly) scope.push(T("undated"));
     else if (state.from !== null || state.to !== null)
@@ -1417,7 +1454,7 @@ footer a{border-bottom:1px solid var(--rule)}
   const PCOUNT = DOOR_PERIODS.map(([lo, hi]) => W.reduce((n, w) =>
     n + (w.y != null && (lo === null || w.y >= lo) && w.y <= hi ? 1 : 0), 0));
 
-  const pristine = () => !state.q && state.decade === null && state.artist === null
+  const pristine = () => !state.q && !listKeys() && state.decade === null && state.artist === null
     && state.letter === null && state.from === null && state.to === null && state.year === null
     && !state.undOnly && !state.media.size && !state.museums.size && !state.cats.size
     && !state.srcs.size && !state.origins.size && !state.groups.size;
@@ -1433,6 +1470,85 @@ footer a{border-bottom:1px solid var(--rule)}
       col("doors_name",   TOP_ART.map(([i, n]) => [A[i].n, n, "a", i]), "d-names") +
       col("doors_period", DOOR_PERIODS.map((p, i) => [dpLabel(p), PCOUNT[i], "p", i]));
     el.hidden = false;
+  }
+
+  // ---- shortlist ------------------------------------------------------------
+  // A visitor's own list of works, kept in this browser. Every visit used to start
+  // from nothing: a researcher assembling references, or a collector comparing what
+  // is on the market, had nowhere to put a record they meant to come back to. The
+  // list lives in localStorage -- no account, no server; nothing leaves the machine
+  // unless they export it or share a link, and the link carries the keys and nothing
+  // else. Keys are inventory numbers, so a list survives rebuilds of the catalogue.
+  const SL_KEY = "museaal.shortlist";
+  const KEYSET = new Set(W.map(w => w.k));
+  const SL = new Set((() => { try { return JSON.parse(localStorage.getItem(SL_KEY) || "[]"); } catch(e){ return []; } })()
+                     .filter(k => typeof k === "string"));
+  const slSave = () => { try { localStorage.setItem(SL_KEY, JSON.stringify([...SL])); } catch(e){} };
+  // What the register is restricted to: your list, a list someone shared, or nothing.
+  const listKeys = () => state.shared || (state.list ? SL : null);
+  // Detail fields (dimensions, source ids) live in a shard in the sharded build and on
+  // the record itself in the single-file one; read them the same way in both.
+  const det = w => (typeof detailOf === "function" ? (detailOf(w) || {}) : w);
+  const SL_ICON = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 2h8v12l-4-3-4 3z"/></svg>';
+  const slBtn = (k, cls) => {
+    const on = SL.has(k), lab = T(on ? "sl_remove" : "sl_add");
+    return `<button class="sl${cls ? " " + cls : ""}" data-sl="${esc(k)}" aria-pressed="${on}" title="${esc(lab)}" aria-label="${esc(lab)}">`
+         + SL_ICON + (cls ? `<span>${esc(lab)}</span>` : "") + `</button>`;
+  };
+  function slToggle(k){
+    if (SL.has(k)) SL.delete(k); else SL.add(k);
+    slSave();
+    if (listKeys()){ render(); pushHash(true); return; }   // the row leaves or joins the view
+    // Otherwise touch only what changed: a full render is the expensive part of this page.
+    document.querySelectorAll(`.sl[data-sl="${CSS.escape(k)}"]`).forEach(b => {
+      const on = SL.has(k), lab = T(on ? "sl_remove" : "sl_add");
+      b.setAttribute("aria-pressed", on); b.title = lab; b.setAttribute("aria-label", lab);
+      const t = b.querySelector("span"); if (t) t.textContent = lab;
+    });
+    renderListBar();
+  }
+  function renderListBar(){
+    const el = $("listbar"), keys = listKeys();
+    $("mylist").textContent = SL.size ? T("mylist_n", {n: SL.size}) : T("mylist");
+    $("mylist").setAttribute("aria-pressed", !!state.list);
+    if (!keys){ el.hidden = true; el.innerHTML = ""; return; }
+    const n = [...keys].filter(k => KEYSET.has(k)).length;
+    const count = state.shared ? T("sl_shared", {n}) : (n === 1 ? T("sl_one") : T("sl_count", {n}));
+    el.innerHTML = `<b>${esc(count)}</b>`
+      + (state.shared ? `<button class="linkbtn" data-sl-act="adopt">${esc(T("sl_adopt"))}</button>` : "")
+      + (n ? `<button class="linkbtn" data-sl-act="csv">${esc(T("sl_csv"))}</button>`
+           + `<button class="linkbtn" data-sl-act="link">${esc(T("sl_link"))}</button>` : "")
+      + (!state.shared && n ? `<button class="linkbtn" data-sl-act="clear">${esc(T("sl_clear"))}</button>` : "")
+      + `<button class="linkbtn" data-sl-act="close">${esc(T("sl_close"))}</button>`
+      + `<span class="sl-note">${esc(T(n ? (state.shared ? "sl_shared_note" : "sl_kept") : "sl_empty"))}</span>`;
+    el.hidden = false;
+  }
+  async function slCSV(){
+    const keys = listKeys() || SL;
+    const rows = W.filter(w => keys.has(w.k));
+    if (typeof loadShard === "function")   // dimensions and source ids are in the shards
+      await Promise.all([...new Set(rows.filter(w => w.h && !detailOf(w)).map(shardOf))].map(loadShard));
+    const src = w => { const d = det(w);
+      return d.mi ? `https://www.muis.ee/museaalview/${d.mi}`
+           : d.oi ? `https://digikogu.ekm.ee/ekm/search/oid-${d.oi}/` : (d.url || ""); };
+    const q = v => `"${String(v ?? "").replace(/"/g, '""')}"`;
+    const head = ["artist", "title", "year", "technique", "medium", "dimensions", "holder", "inventory_no", "kind", "source"];
+    const lines = [head.join(",")].concat(rows.map(w => [
+      A[w.a].n, w.t, w.y ?? "", techName(w) || "", medName(w.e) || "", det(w).dm || "",
+      musName(w.mu), w.nu || "", w.kind || "held", src(w)].map(q).join(",")));
+    const blob = new Blob(["\ufeff" + lines.join("\r\n")], {type: "text/csv;charset=utf-8"});
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob); a.download = "museaal-list.csv";
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  }
+  const slShareURL = () => location.origin + location.pathname + "#list="
+    + [...(listKeys() || SL)].filter(k => KEYSET.has(k)).join(",");
+  async function slCopyLink(btn){
+    const url = slShareURL(), was = btn.textContent;
+    try { await navigator.clipboard.writeText(url); btn.textContent = T("copied"); }
+    catch(e){ prompt(T("sl_link"), url); return; }   // clipboard refused: let them copy by hand
+    setTimeout(() => { btn.textContent = was; }, 2200);
   }
 
   const renderAll = () => { renderBars(); renderYearRange(); renderFacets(); renderActiveFilters(); renderArtistIndex(); renderMono(); render(); };
@@ -1580,6 +1696,26 @@ footer a{border-bottom:1px solid var(--rule)}
   $("f-src").addEventListener("click", e => facetClick(e, "src", state.srcs));
   $("f-org").addEventListener("click", e => facetClick(e, "org", state.origins));
   $("f-grp").addEventListener("click", e => facetClick(e, "grp", state.groups));
+  $("mylist").addEventListener("click", () => {
+    state.shared = null; state.list = !state.list; state.open = null;
+    renderAll(); pushHash();
+    if (state.list) $("listbar").scrollIntoView({behavior: "auto", block: "start"});
+  });
+  $("listbar").addEventListener("click", e => {
+    const b = e.target.closest("[data-sl-act]"); if (!b) return;
+    const act = b.dataset.slAct;
+    if (act === "csv") slCSV();
+    else if (act === "link") slCopyLink(b);
+    else if (act === "adopt"){ state.shared.forEach(k => SL.add(k)); slSave(); state.shared = null; state.list = true; renderAll(); pushHash(); }
+    else if (act === "clear"){ if (!confirm(T("sl_confirm"))) return; SL.clear(); slSave(); renderAll(); pushHash(); }
+    else if (act === "close"){ state.list = false; state.shared = null; renderAll(); pushHash(); }
+  });
+  // The mark sits beside each row button and inside the open record; neither is
+  // within a .row-btn, so the row handler never sees these clicks.
+  reg.addEventListener("click", e => {
+    const b = e.target.closest(".sl"); if (!b) return;
+    e.stopPropagation(); slToggle(b.dataset.sl);
+  });
   $("doors").addEventListener("click", e => {
     const b = e.target.closest("button[data-door]");
     if (!b) return;
@@ -1629,6 +1765,7 @@ footer a{border-bottom:1px solid var(--rule)}
     state.q=""; state.decade=null; state.media.clear(); state.museums.clear(); state.cats.clear(); state.srcs.clear(); state.origins.clear(); state.groups.clear();
     state.artist=null; state.letter=null; state.idxOpen=false; state.sort="year"; state.year=null; state.from=null; state.to=null; state.undOnly=false; $("sortby").value="year";
     state.open=null; state.expand.clear(); state.decOrder="earliest"; state.artOrder="az";
+    state.list=false; state.shared=null;
     $("q").value=""; setGroup("decade"); renderAll(); pushHash(); window.scrollTo({top:0,behavior:"auto"});
   });
 
@@ -1787,7 +1924,7 @@ footer a{border-bottom:1px solid var(--rule)}
 
   Promise.all([
     fetch("data/index.json?v=fb6cb12d").then(r => r.json()),
-    fetch("data/i18n.json?v=dbf6de91").then(r => r.json())
+    fetch("data/i18n.json?v=322c9a09").then(r => r.json())
   ]).then(([data, i18n]) => boot(data, i18n))
    .catch(err => {
      document.getElementById("register").innerHTML =
