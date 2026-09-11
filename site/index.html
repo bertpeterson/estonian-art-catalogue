@@ -659,6 +659,8 @@ footer a{border-bottom:1px solid var(--rule)}
   const ordN = n => LANG !== "en" ? n + "."
     : n + (n % 100 >= 11 && n % 100 <= 13 ? "th" : (["th","st","nd","rd"][n % 10] || "th"));
   const musName = m => LANG === "en" ? (I18N.MUSEUM_EN[m] || m) : m;
+  // One rule for every count on the page: 51,793 in English, 51 793 in Estonian.
+  const fmt = n => (+n).toLocaleString(LANG === "en" ? "en-GB" : "et-EE");
   // Each holder's own website, verified when data/venues.json was compiled. A record
   // should be able to send you to the place that holds the work.
   const SITES = (DATA.meta && DATA.meta.sites) || {};
@@ -916,7 +918,15 @@ footer a{border-bottom:1px solid var(--rule)}
     const schedule = () => (window.requestIdleCallback || (f => setTimeout(f, 60)))(step);
     schedule();
   })();
-  const matchText = w => !state.q || hay(w).includes(defold(state.q.toLowerCase()));
+  // Every word of the query must appear somewhere in the record, in any order. As a
+  // single substring, "Wiiralt Põrgu" matched nothing, because no record has those
+  // two words adjacent. Terms are split once per query, not once per record.
+  let _qKey = null, _qTerms = [];
+  const qTerms = () => {
+    if (_qKey !== state.q){ _qKey = state.q; _qTerms = defold(state.q.toLowerCase()).split(/\s+/).filter(Boolean); }
+    return _qTerms;
+  };
+  const matchText = w => { const t = qTerms(); if (!t.length) return true; const h = hay(w); return t.every(x => h.includes(x)); };
   const inList = w => { const k = listKeys(); return (!k || k.has(w.k)) && (!state.cross || (w.kind === "gallery" && CROSS.has(w.a))); };
   const baseSet = () => W.filter(w => matchText(w) && inList(w)
       && (state.media.size===0 || state.media.has(w.e))
@@ -1145,15 +1155,15 @@ footer a{border-bottom:1px solid var(--rule)}
     $("ai-rail").innerHTML = letters.map(L =>
       `<button class="ai-l" data-letter="${esc(L)}" aria-pressed="${state.letter===L}">${esc(L)}</button>`).join("");
     const t = $("ai-toggle");
-    t.textContent = state.idxOpen ? T("hideindex") : T("showall",{n:items.length.toLocaleString("en")});
+    t.textContent = state.idxOpen ? T("hideindex") : T("showall",{n:items.length.toLocaleString(LANG === "en" ? "en-GB" : "et-EE")});
     t.setAttribute("aria-expanded", state.idxOpen);
     const body = $("ai-body");
     body.hidden = !state.idxOpen;
     if (!state.idxOpen){ body.innerHTML = ""; return; }
     let show = state.letter ? items.filter(x=>x.s[0].toUpperCase()===state.letter) : items;
     if (state.idxQ){
-      const q = defold(state.idxQ.toLowerCase());
-      show = show.filter(x => defold(x.n.toLowerCase()).includes(q));
+      const terms = defold(state.idxQ.toLowerCase()).split(/\s+/).filter(Boolean);
+      show = show.filter(x => { const n = defold(x.n.toLowerCase()); return terms.every(t => n.includes(t)); });
     }
     // Sorted by size, the alphabet is not the organising idea any more, so the
     // letter dividers go with it — they would break the ranking into meaningless runs.
@@ -1161,7 +1171,7 @@ footer a{border-bottom:1px solid var(--rule)}
     if (byWorks) show = show.slice().sort((a,b)=> b.c - a.c || cmpStr(a.s, b.s));
     const total = show.length;
     show = show.slice(0, state.idxLimit);
-    let cur = "", out = `<div class="ai-count">${esc(T("idxcount",{n:total.toLocaleString("en")}))}</div>`;
+    let cur = "", out = `<div class="ai-count">${esc(T("idxcount",{n:total.toLocaleString(LANG === "en" ? "en-GB" : "et-EE")}))}</div>`;
     if (!total) out += `<div class="ai-count">${esc(T("idxnone"))}</div>`;
     show.forEach(x=>{
       if (!byWorks){
@@ -1174,7 +1184,7 @@ footer a{border-bottom:1px solid var(--rule)}
       </button>`;
     });
     if (total > show.length)
-      out += `<button class="more" id="more-index" style="column-span:all;margin-top:10px">${esc(T("moreindex",{n:(total-show.length).toLocaleString("en")}))}</button>`;
+      out += `<button class="more" id="more-index" style="column-span:all;margin-top:10px">${esc(T("moreindex",{n:(total-show.length).toLocaleString(LANG === "en" ? "en-GB" : "et-EE")}))}</button>`;
     body.className = "ai-body" + (byWorks ? " ranked" : "");
     body.innerHTML = out;
   }
@@ -1196,7 +1206,7 @@ footer a{border-bottom:1px solid var(--rule)}
     const bio = bioFor(ar);
     el.innerHTML = `<section class="mono">
       <div>
-        <button class="mono-back" id="mono-back">${esc(T("allartists",{n:artistIndexData().items.length.toLocaleString("en")}))}</button>
+        <button class="mono-back" id="mono-back">${esc(T("allartists",{n:artistIndexData().items.length.toLocaleString(LANG === "en" ? "en-GB" : "et-EE")}))}</button>
         <h2>${esc(ar.n)}</h2>
         <div class="mono-dates">${esc(life)}${ar.ls?stag(ar.ls):""}</div>
         ${(ar.grp||[]).length ? `<div class="mono-dates">${(ar.grp||[]).map(g =>
@@ -1384,7 +1394,7 @@ footer a{border-bottom:1px solid var(--rule)}
     const divide = state.group === "decade" && state.sort === "year"
                    && state.year === null && gk !== "und";
     const more = (!exp && n > LIMIT)
-      ? `<button class="more" data-exp="${esc(gk)}">${esc(T("showallentries",{n}))}</button>` : "";
+      ? `<button class="more" data-exp="${esc(gk)}">${esc(T("showallentries",{n:fmt(n)}))}</button>` : "";
     return `<section class="group" id="grp-${esc(key)}">
       <div class="gutter">${gutter}<div class="g-count">${n} ${esc(n===1?T("entry"):T("entries"))}</div></div>
       <div class="rows">${(() => {
@@ -1414,10 +1424,10 @@ footer a{border-bottom:1px solid var(--rule)}
     // a third way into artists beside search and the names door.
     $("aidx").hidden = state.group !== "artist" && !state.idxOpen && state.letter === null;
     const set = fullSet();
-    $("stat-w").textContent = W.length.toLocaleString("en");
-    $("stat-a").textContent = STATS.artists;
-    $("stat-m").textContent = STATS.museums;
-    $("stat-g").textContent = STATS.galleries;
+    $("stat-w").textContent = fmt(W.length);
+    $("stat-a").textContent = fmt(STATS.artists);
+    $("stat-m").textContent = fmt(STATS.museums);
+    $("stat-g").textContent = fmt(STATS.galleries);
     $("stat-gwrap").hidden = STATS.galleries === 0;
 
     const scope = [];
@@ -1436,7 +1446,7 @@ footer a{border-bottom:1px solid var(--rule)}
     if (state.srcs.size) scope.push([...state.srcs].map(s=>SRCLAB[s]||s).join(" + "));
     if (state.origins.size) scope.push([...state.origins].map(o=>o===NOORIGIN?T("originunknown"):o).join(" + "));
     if (state.groups.size) scope.push([...state.groups].map(grpLabel).join(" + "));
-    $("countline").textContent = T("ofworks",{a:set.length,b:W.length}) +
+    $("countline").textContent = T("ofworks",{a:fmt(set.length),b:fmt(W.length)}) +
       (scope.length ? " · " + scope.join(" · ") : " · " + T("complete"));
 
     if (!set.length){ reg.innerHTML = `<p class="empty">${esc(T("noresults"))}</p>`; return; }
@@ -1534,7 +1544,7 @@ footer a{border-bottom:1px solid var(--rule)}
         return groupHTML("a"+i, gutter, items, false);
       }).join("");
       if (idxs.length > shownIdxs.length)
-        html += `<button class="more" id="more-artists" style="margin-top:18px">${esc(T("moreartists",{n:idxs.length-shownIdxs.length}))}</button>`;
+        html += `<button class="more" id="more-artists" style="margin-top:18px">${esc(T("moreartists",{n:fmt(idxs.length-shownIdxs.length)}))}</button>`;
     }
     reg.innerHTML = html;
   }
@@ -2046,11 +2056,11 @@ footer a{border-bottom:1px solid var(--rule)}
     $("lang-en").setAttribute("aria-pressed", LANG === "en");
     $("built").textContent = DATA.meta.built;
     $("srcsplit").textContent = LANG === "en"
-      ? `${DATA.meta.dated_from_title} works carry a date the cataloguer wrote at the end of the title rather than in the dating field; those are marked with an asterisk. ${DATA.meta.objects.toLocaleString("en")} catalogued objects → ${DATA.meta.works.toLocaleString("en")} works (identical title + date + artist collapsed): ${DATA.meta.muis.toLocaleString("en")} from MuIS, ${DATA.meta.ekm.toLocaleString("en")} from the EKM Digital Collection, ${DATA.meta.both.toLocaleString("en")} in both, merged on inventory number. A further ${DATA.meta.gallery.toLocaleString("en")} works are the current stock of ${DATA.meta.galleries} galleries, from their own catalogues.`
+      ? `${DATA.meta.dated_from_title} works carry a date the cataloguer wrote at the end of the title rather than in the dating field; those are marked with an asterisk. ${DATA.meta.objects.toLocaleString(LANG === "en" ? "en-GB" : "et-EE")} catalogued objects → ${DATA.meta.works.toLocaleString(LANG === "en" ? "en-GB" : "et-EE")} works (identical title + date + artist collapsed): ${DATA.meta.muis.toLocaleString(LANG === "en" ? "en-GB" : "et-EE")} from MuIS, ${DATA.meta.ekm.toLocaleString(LANG === "en" ? "en-GB" : "et-EE")} from the EKM Digital Collection, ${DATA.meta.both.toLocaleString(LANG === "en" ? "en-GB" : "et-EE")} in both, merged on inventory number. A further ${DATA.meta.gallery.toLocaleString(LANG === "en" ? "en-GB" : "et-EE")} works are the current stock of ${DATA.meta.galleries} galleries, from their own catalogues.`
       : `${DATA.meta.dated_from_title} teosel on dateering kirjutatud pealkirja lõppu, mitte dateeringuvälja; need on tähistatud tärniga. ${DATA.meta.objects.toLocaleString("et")} museaali → ${DATA.meta.works.toLocaleString("et")} teost (sama pealkiri + dateering + autor koondatud): ${DATA.meta.muis.toLocaleString("et")} MuIS-ist, ${DATA.meta.ekm.toLocaleString("et")} EKM Digitaalkogust, ${DATA.meta.both.toLocaleString("et")} mõlemast, ühendatud tulmenumbri järgi. Veel ${DATA.meta.gallery.toLocaleString("et")} teost on ${DATA.meta.galleries} galerii praegune müügivalik, nende endi kataloogidest.`;
     const un = $("undated-note");
     if (un) un.textContent = LANG === "en"
-      ? `${DATA.meta.undated} of ${DATA.meta.works.toLocaleString("en")} records carry no dating; they sit in their own group rather than being guessed into a decade.`
+      ? `${DATA.meta.undated} of ${DATA.meta.works.toLocaleString(LANG === "en" ? "en-GB" : "et-EE")} records carry no dating; they sit in their own group rather than being guessed into a decade.`
       : `${DATA.meta.undated} kirjet ${DATA.meta.works.toLocaleString("et")}-st on dateerimata; need on omaette rühmas, mitte kümnendisse ära arvatud.`;
     fillYearSelects();
     renderYearRange();
