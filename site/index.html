@@ -1497,10 +1497,21 @@ footer a{border-bottom:1px solid var(--rule)}
   // with. A period door and a collection door were here too; the eras now sit under
   // the histogram against the bars they describe, and the museum facet does
   // collections. Any search or filter hides it.
+  // Twelve names, chosen rather than counted. Ranked by holdings, the door read as a
+  // list of the most prolific -- Richard Sagrits above Konrad Mägi, Gori above Köler --
+  // which is a fact about museum acquisition, not about Estonian art. These are the
+  // artists a history of it cannot leave out, one sculptor among them, in order of
+  // birth. Editorial: the one place on the page where a judgement stands in for a count,
+  // and tagged as such like every other editorial line.
+  const CANON = ["Johann Köler", "Amandus Adamson", "Kristjan Raud", "Ants Laikmaa",
+                 "Konrad Mägi", "Nikolai Triik", "Ado Vabbe", "Eduard Wiiralt",
+                 "Adamson-Eric", "Karin Luts", "Ülo Sooster", "Leonhard Lapin"];
   const TOP_ART = (() => {
-    const c = new Map();
-    W.forEach(w => c.set(w.a, (c.get(w.a) || 0) + 1));
-    return [...c].sort((x, y) => y[1] - x[1]).slice(0, 12);
+    const c = new Map(); W.forEach(w => c.set(w.a, (c.get(w.a) || 0) + 1));
+    const byName = new Map(A.map((a, i) => [a.n, i]));
+    const missing = CANON.filter(n => !byName.has(n));
+    if (missing.length) console.warn("canon names not in this build:", missing);
+    return CANON.filter(n => byName.has(n)).map(n => [byName.get(n), c.get(byName.get(n)) || 0]);
   })();
   // The app already names Estonia's periods for the decade bands. The doors reuse
   // exactly those labels rather than inventing a parallel vocabulary, plus one band
@@ -1520,11 +1531,11 @@ footer a{border-bottom:1px solid var(--rule)}
     const el = $("doors");
     if (!pristine()){ el.hidden = true; el.innerHTML = ""; return; }
     const num = n => n.toLocaleString(LANG === "en" ? "en-GB" : "et-EE");
-    const col = (head, items, cls) => `<div class="${cls || ""}"><h2>${esc(T(head))}</h2><ul>` + items.map(
+    const col = (head, items, cls, tag) => `<div class="${cls || ""}"><h2>${esc(T(head))}${tag ? ` <span class="tag">${esc(tag)}</span>` : ""}</h2><ul>` + items.map(
       ([label, n, kind, v]) => `<li><button data-door="${kind}" data-v="${v}">` +
         `<span>${esc(label)}</span><span class="n">${num(n)}</span></button></li>`).join("") + "</ul></div>";
     el.innerHTML =
-      col("doors_name",   TOP_ART.map(([i, n]) => [A[i].n, n, "a", i]), "d-names");
+      col("doors_name",   TOP_ART.map(([i, n]) => [A[i].n, n, "a", i]), "d-names", "ed");
     el.hidden = false;
   }
 
