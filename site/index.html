@@ -218,6 +218,11 @@ h1 em{font-style:italic;font-weight:400}
 .sl:hover{color:var(--ink);background:var(--field)}
 .sl[aria-pressed="true"]{color:var(--ink)} .sl[aria-pressed="true"] svg{fill:currentColor}
 .sl:focus-visible{outline:2px solid var(--focus);outline-offset:1px}
+/* a gallery row's link out, beside the shortlist mark */
+.rl{position:absolute;right:34px;top:3px;height:28px;display:flex;align-items:center;padding:0 7px;border-radius:2px;
+  font-family:var(--mono);font-size:var(--fs-xs);letter-spacing:.1em;text-transform:uppercase;color:var(--grey-6);white-space:nowrap}
+.rl:hover{color:var(--ink);background:var(--field)}
+.row.has-link .row-btn{padding-right:104px}
 .sl.sl-d{position:static;width:auto;height:auto;gap:7px;padding:2px 0;font-family:var(--mono);font-size:.68rem;
   letter-spacing:.04em;color:var(--grey-6);border-bottom:1px solid var(--rule);border-radius:0;background:none}
 .sl.sl-d:hover{color:var(--ink);border-bottom-color:var(--ink)}
@@ -1279,7 +1284,7 @@ footer a{border-bottom:1px solid var(--rule)}
     if (SHARDS.has(key)) return SHARDS.get(key);
     // A retry must skip the browser cache: the failure we are retrying is often a
     // cached 404 or 5xx, and re-requesting the identical URL just returns it again.
-    const url = `data/detail/${key}.json?v=1ca00ad2` + (attempt ? `&r=${attempt}` : "");
+    const url = `data/detail/${key}.json?v=ea26388e` + (attempt ? `&r=${attempt}` : "");
     const p = fetch(url, attempt ? {cache: "reload"} : undefined)
       .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
       .catch(async () => {
@@ -1330,7 +1335,7 @@ footer a{border-bottom:1px solid var(--rule)}
           <div class="d-v" style="margin-top:16px;display:flex;flex-wrap:wrap;gap:18px">
             ${(detailOf(w)||{}).mi?`<a class="permalink" href="https://www.muis.ee/museaalview/${esc(detailOf(w).mi)}" target="_blank" rel="noopener">${esc(T("d_recmuis"))}</a>`:""}
             ${(detailOf(w)||{}).oi?`<a class="permalink" href="https://digikogu.ekm.ee/ekm/search/oid-${esc(detailOf(w).oi)}/" target="_blank" rel="noopener">${esc(T("d_recekm"))}</a>`:""}
-            ${(detailOf(w)||{}).url?`<a class="permalink" href="${esc(detailOf(w).url)}" target="_blank" rel="noopener">${esc(w.kind === "gallery" ? T("d_gallerylink", {g: musName(w.mu)}) : T("d_recsource"))}</a>`:""}
+            ${w.url?`<a class="permalink" href="${esc(w.url)}" target="_blank" rel="noopener">${esc(w.kind === "gallery" ? T("d_gallerylink", {g: musName(w.mu)}) : T("d_recsource"))}</a>`:""}
             ${slBtn(id, "sl-d")}
           </div>
         </div>
@@ -1353,14 +1358,18 @@ footer a{border-bottom:1px solid var(--rule)}
           ${state.artist===null?`<button class="showartist" data-artist="${w.a}">All ${ar.c} works by ${esc(ar.n)} →</button>`:""}
         </div></div>`;
     }
-    return `<div class="row" data-open="${open}">
+    // A work for sale links to the gallery from the row itself; the record is one
+    // click further and the link was the thing a collector came for.
+    const rl = w.kind === "gallery" && w.url
+      ? `<a class="rl" href="${esc(w.url)}" target="_blank" rel="noopener" title="${esc(T("d_gallerylink", {g: musName(w.mu)}))}">${esc(T("rl_view"))}</a>` : "";
+    return `<div class="row${rl ? " has-link" : ""}" data-open="${open}">
       <button class="row-btn" data-id="${esc(id)}" aria-expanded="${open}">
         ${yr}
         <span class="r-title" title="${esc(w.t)}">${esc(w.t)}${w.n>1?`<span class="src-tag" title="${w.n} catalogued objects share this title and date — sheets, impressions or parts">×${w.n}</span>`:""}</span>
         ${art}
         <span class="r-med" title="${esc(sub(w))}">${esc(medName(w.e))}</span>
         <span class="r-coll" title="${esc(musName(w.mu))} · ${esc(w.nu||"")}">${esc(abbr(w.mu))}<span class="src-tag">${esc(SRCLAB[w.s]||w.s)}</span></span>
-      </button>${slBtn(id)}${detail}</div>`;
+      </button>${rl}${slBtn(id)}${detail}</div>`;
   }
 
   function groupHTML(key, gutter, items, showArtist){
@@ -2099,8 +2108,8 @@ footer a{border-bottom:1px solid var(--rule)}
   }   // end boot
 
   Promise.all([
-    fetch("data/index.json?v=1ca00ad2").then(r => r.json()),
-    fetch("data/i18n.json?v=423a2a9a").then(r => r.json())
+    fetch("data/index.json?v=ea26388e").then(r => r.json()),
+    fetch("data/i18n.json?v=32763f26").then(r => r.json())
   ]).then(([data, i18n]) => boot(data, i18n))
    .catch(err => {
      document.getElementById("register").innerHTML =
