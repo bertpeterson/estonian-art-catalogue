@@ -214,6 +214,11 @@ h1 em{font-style:italic;font-weight:400}
 .sl:hover{color:var(--ink);background:var(--field)}
 .sl[aria-pressed="true"]{color:var(--ink)} .sl[aria-pressed="true"] svg{fill:currentColor}
 .sl:focus-visible{outline:2px solid var(--focus);outline-offset:1px}
+/* a gallery row's link out, beside the shortlist mark */
+.rl{position:absolute;right:34px;top:3px;height:28px;display:flex;align-items:center;padding:0 7px;border-radius:2px;
+  font-family:var(--mono);font-size:var(--fs-xs);letter-spacing:.1em;text-transform:uppercase;color:var(--grey-6);white-space:nowrap}
+.rl:hover{color:var(--ink);background:var(--field)}
+.row.has-link .row-btn{padding-right:104px}
 .sl.sl-d{position:static;width:auto;height:auto;gap:7px;padding:2px 0;font-family:var(--mono);font-size:.68rem;
   letter-spacing:.04em;color:var(--grey-6);border-bottom:1px solid var(--rule);border-radius:0;background:none}
 .sl.sl-d:hover{color:var(--ink);border-bottom-color:var(--ink)}
