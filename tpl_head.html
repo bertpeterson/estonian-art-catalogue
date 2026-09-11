@@ -423,7 +423,9 @@ footer a{border-bottom:1px solid var(--rule)}
 .tl-lab:hover{text-decoration:underline} .tl-lab:focus-visible{outline:2px solid var(--focus);outline-offset:1px}
 .tl-d{font-family:var(--mono);font-size:var(--fs-xs);color:var(--grey-4);margin-left:8px;letter-spacing:.03em}
 .tl-track{flex:1;position:relative;height:100%}
-.tl-tick{position:absolute;top:5px;transform:translateX(-50%);font-family:var(--mono);font-size:var(--fs-xs);color:var(--grey-6)}
+.tl-tick{position:absolute;top:2px;transform:translateX(-50%);font-family:var(--mono);font-size:var(--fs-xs);color:var(--grey-6);
+  background:none;border:0;padding:3px 5px;cursor:pointer;border-radius:2px;min-height:22px}
+.tl-tick:hover{color:var(--ink);background:var(--field)} .tl-tick:focus-visible{outline:2px solid var(--focus)}
 .tl-grid{position:absolute;top:26px;bottom:0;border-left:1px solid var(--rule-soft);pointer-events:none}
 .tl-life{position:absolute;top:6px;height:6px;background:var(--bar)}
 .tl-life.living{background:linear-gradient(90deg,var(--bar) 75%,transparent)}
