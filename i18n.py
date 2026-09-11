@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import json
 ET = {
- "sub":"Eesti kunst avalikes kogudes · 1835–2024",
+ "sub":"Kunst Eesti avalikes kogudes ja galeriides · 1835–2024",
  "works":"teost","artists":"kunstnikku","museums":"muuseumi",
  "srcsummary":"Allikad ja meetod",
  "worksperdecade":"Teoseid kümnendite kaupa",
@@ -40,7 +40,7 @@ ET = {
  "estonianprose":"eesti keeles, nagu muuseum on kirjutanud",
 }
 EN = {
- "sub":"Estonian art in public collections · 1835–2024",
+ "sub":"Art in Estonia's public collections and galleries · 1835–2024",
  "works":"works","artists":"artists","museums":"museums",
  "srcsummary":"Sources & method",
  "worksperdecade":"Works per decade",
