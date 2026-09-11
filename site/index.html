@@ -412,6 +412,23 @@ footer a{border-bottom:1px solid var(--rule)}
 .doors .d-names ul{columns:2;column-gap:var(--sp-4)} .doors .d-names li{break-inside:avoid}
 @media(min-width:1100px){.doors .d-names ul{columns:4}}
 @media(max-width:760px){.doors .d-names ul{columns:1}}
+/* timeline: one row per artist, a label column and a track; bars are percentages of
+   the track so the same markup holds at any width */
+.tl{--tl-lab:240px;position:relative;margin-top:var(--sp-3)}
+.tl-axis,.tl-row{display:flex;align-items:center;gap:12px;height:18px}
+.tl-axis{position:sticky;top:62px;z-index:5;height:26px;background:var(--paper);border-bottom:1px solid var(--rule)}
+.tl-lab{flex:0 0 var(--tl-lab);min-width:0;text-align:left;background:none;border:0;padding:0;cursor:pointer;
+  color:var(--ink);font-family:var(--serif-text);font-size:var(--fs-base);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tl-lab:hover{text-decoration:underline} .tl-lab:focus-visible{outline:2px solid var(--focus);outline-offset:1px}
+.tl-d{font-family:var(--mono);font-size:var(--fs-xs);color:var(--grey-4);margin-left:8px;letter-spacing:.03em}
+.tl-track{flex:1;position:relative;height:100%}
+.tl-tick{position:absolute;top:5px;transform:translateX(-50%);font-family:var(--mono);font-size:var(--fs-xs);color:var(--grey-6)}
+.tl-grid{position:absolute;top:26px;bottom:0;border-left:1px solid var(--rule-soft);pointer-events:none}
+.tl-life{position:absolute;top:6px;height:6px;background:var(--bar)}
+.tl-life.living{background:linear-gradient(90deg,var(--bar) 75%,transparent)}
+.tl-act{position:absolute;top:6px;height:6px;background:var(--ink)}
+.tl-note{font-size:var(--fs-sm);color:var(--grey-6);margin-top:14px;max-width:72ch}
+@media(max-width:760px){.tl{--tl-lab:140px}.tl-d{display:none}.tl-axis{position:static}}
 .g-split{font-family:var(--mono);font-size:var(--fs-sm);letter-spacing:var(--ls-data);color:var(--grey-6);margin-top:6px;font-variant-numeric:tabular-nums}
 .door-line{margin:var(--sp-3) 0 0}
 .door-line button{display:inline-flex;align-items:baseline;gap:10px;background:none;border:0;padding:5px 0;
@@ -494,6 +511,7 @@ footer a{border-bottom:1px solid var(--rule)}
       <div class="seg" role="group" aria-label="Group by">
         <button id="g-decade" aria-pressed="true" data-i18n="decade"></button>
         <button id="g-artist" aria-pressed="false" data-i18n="artist"></button>
+        <button id="g-time" aria-pressed="false" data-i18n="timeline"></button>
       </div>
     </div>
     <div class="ctl">
@@ -767,7 +785,7 @@ footer a{border-bottom:1px solid var(--rule)}
   const stag = s => s==="ed" ? '<span class="tag">ed</span>' : s==="ekm" ? '<span class="tag">EKM</span>'
                   : s==="wd" ? '<span class="tag">Wikidata</span>' : '<span class="tag">MuIS</span>';
 
-  const state = {group:"decade", decOrder:"earliest", artOrder:"az", q:"", list:false, shared:null, cross:false,
+  const state = {group:"decade", decOrder:"earliest", artOrder:"az", q:"", list:false, shared:null, cross:false, tlLimit:400,
                  decade:null, media:new Set(), museums:new Set(), cats:new Set(), srcs:new Set(),
                  artist:null, letter:null, idxOpen:false, idxQ:"", idxLimit:120, idxSort:"az", showEarly:false, origins:new Set(), groups:new Set(), sort:"year", year:null, gLimit:50, from:null, to:null, undOnly:false, open:null, expand:new Set()};
   const LIMIT_DEC = 50, LIMIT_ART = 18;
@@ -820,7 +838,7 @@ footer a{border-bottom:1px solid var(--rule)}
     LANG = p.get("lang") === "en" ? "en" : (p.get("lang") === "et" ? "et" : LANG);
     const th = p.get("theme");
     if (th === "light" || th === "dark" || th === "auto") THEME = th;
-    state.group    = p.get("group") === "artist" ? "artist" : "decade";
+    state.group    = ["artist", "timeline"].includes(p.get("group")) ? p.get("group") : "decade";
     const ord      = p.get("order");
     state.decOrder = ord === "latest" ? "latest" : "earliest";
     state.artOrder = ord === "birth"  ? "birth"  : "az";
@@ -1411,6 +1429,7 @@ footer a{border-bottom:1px solid var(--rule)}
       (scope.length ? " · " + scope.join(" · ") : " · " + T("complete"));
 
     if (!set.length){ reg.innerHTML = `<p class="empty">${esc(T("noresults"))}</p>`; return; }
+    if (state.group === "timeline"){ reg.innerHTML = renderTimeline(set); return; }
 
     let html = "";
     const BASE = baseSet();          // hoisted: was recomputed once per decade
@@ -1508,6 +1527,54 @@ footer a{border-bottom:1px solid var(--rule)}
     }
     reg.innerHTML = html;
   }
+  // ---- timeline ---------------------------------------------------------------
+  // One bar per artist with a known birth year, on one axis: birth to death, or to
+  // now. A dark segment inside it marks the years the catalogue holds dated work
+  // from. The decade chart counts works; this draws lives -- who overlapped with whom,
+  // the generation whose Estonian holdings stop in 1944 while the bar carries on
+  // abroad. Every filter applies, so "Trained at: Pallas" draws that generation alone.
+  const SPAN = (() => {                    // first and last dated work per artist
+    const m = new Map();
+    for (const w of W){
+      if (w.y == null || w.f) continue;    // a year outside the artist's life is not their activity
+      const s = m.get(w.a);
+      if (!s) m.set(w.a, [w.y, w.y]); else { if (w.y < s[0]) s[0] = w.y; if (w.y > s[1]) s[1] = w.y; }
+    }
+    return m;
+  })();
+  function renderTimeline(set){
+    const NOW = new Date().getFullYear();
+    const yr = s => { const m = /\d{4}/.exec(s || ""); return m ? +m[0] : null; };
+    const everyone = [...new Set(set.map(w => w.a))];
+    const rows = everyone.map(i => ({i, a: A[i], b: yr(A[i].l[0]), d: yr(A[i].l[1])})).filter(r => r.b);
+    if (!rows.length) return `<p class="empty">${esc(T("tl_none"))}</p>`;
+    rows.sort((x, y) => (state.decOrder === "latest" ? y.b - x.b : x.b - y.b) || COLL.compare(surnameOf(x.a.n), surnameOf(y.a.n)));
+    const lo = Math.floor(Math.min(...rows.map(r => r.b)) / 50) * 50, hi = NOW + 4;
+    const frac = y => (y - lo) / (hi - lo);
+    const pct = y => (frac(y) * 100).toFixed(2) + "%";
+    const num = n => n.toLocaleString(LANG === "en" ? "en-GB" : "et-EE");
+    const ticks = []; for (let y = lo; y <= NOW; y += 50) ticks.push(y);
+    const axis = `<div class="tl-axis"><span class="tl-lab"></span><div class="tl-track">`
+      + ticks.map(y => `<span class="tl-tick" style="left:${pct(y)}">${y}</span>`).join("") + `</div></div>`;
+    const grid = ticks.map(y => `<span class="tl-grid" style="left:calc(var(--tl-lab) + (100% - var(--tl-lab)) * ${frac(y).toFixed(4)})"></span>`).join("");
+    const shown = rows.slice(0, state.tlLimit);
+    const body = shown.map(({i, a, b, d}) => {
+      const end = d || NOW, sp = SPAN.get(i);
+      const life = `<span class="tl-life${d ? "" : " living"}" style="left:${pct(b)};width:${((end - b) / (hi - lo) * 100).toFixed(2)}%"></span>`;
+      const act = sp ? `<span class="tl-act" style="left:${pct(sp[0])};width:${Math.max(0.25, (sp[1] - sp[0]) / (hi - lo) * 100).toFixed(2)}%" title="${esc(T("tl_active", {a: sp[0], b: sp[1]}))}"></span>` : "";
+      return `<div class="tl-row"><button class="tl-lab" data-tl="${i}" title="${esc(a.n)} · ${b}–${d || ""}">${esc(a.n)}<span class="tl-d">${b}–${d || ""}</span></button><div class="tl-track">${life}${act}</div></div>`;
+    }).join("");
+    const more = rows.length > shown.length
+      ? `<button class="more" id="more-tl" style="margin-top:18px">${esc(T("moreartists", {n: num(rows.length - shown.length)}))}</button>` : "";
+    return `<div class="tl">${grid}${axis}${body}</div>${more}`
+      + `<p class="tl-note">${esc(T("tl_note", {n: num(rows.length), u: num(everyone.length - rows.length)}))}</p>`;
+  }
+  reg.addEventListener("click", e => {
+    const b = e.target.closest("[data-tl]");
+    if (b){ setGroup("artist"); selectArtist(+b.dataset.tl); return; }
+    if (e.target.closest("#more-tl")){ state.tlLimit += 400; render(); }
+  });
+
   // ---- landing doors --------------------------------------------------------
   // The register opened grouped by decade, earliest first, so the first thing a
   // visitor met was the 1440s: one object, by nobody they have heard of. No decade
@@ -1845,11 +1912,12 @@ footer a{border-bottom:1px solid var(--rule)}
     state.group = g;
     $("g-decade").setAttribute("aria-pressed", g==="decade");
     $("g-artist").setAttribute("aria-pressed", g==="artist");
+    $("g-time").setAttribute("aria-pressed", g==="timeline");
     syncOrder();
   }
   function syncOrder(){
     const a = $("o-asc"), b = $("o-desc");
-    if (state.group === "decade"){
+    if (state.group !== "artist"){          // decade and timeline both run earliest/latest
       a.textContent = T("earliest"); b.textContent = T("latest");
       a.setAttribute("aria-pressed", state.decOrder==="earliest");
       b.setAttribute("aria-pressed", state.decOrder==="latest");
@@ -1864,8 +1932,9 @@ footer a{border-bottom:1px solid var(--rule)}
   });
   $("g-decade").addEventListener("click", () => { setGroup("decade"); state.expand.clear(); render(); pushHash(); });
   $("g-artist").addEventListener("click", () => { setGroup("artist"); state.expand.clear(); state.gLimit=50; render(); pushHash(); });
-  $("o-asc").addEventListener("click", () => { state.group==="decade" ? state.decOrder="earliest" : state.artOrder="az"; syncOrder(); render(); pushHash(); });
-  $("o-desc").addEventListener("click", () => { state.group==="decade" ? state.decOrder="latest" : state.artOrder="birth"; syncOrder(); render(); pushHash(); });
+  $("o-asc").addEventListener("click", () => { state.group!=="artist" ? state.decOrder="earliest" : state.artOrder="az"; syncOrder(); render(); pushHash(); });
+  $("o-desc").addEventListener("click", () => { state.group!=="artist" ? state.decOrder="latest" : state.artOrder="birth"; syncOrder(); render(); pushHash(); });
+  $("g-time").addEventListener("click", () => { setGroup("timeline"); state.expand.clear(); state.tlLimit=400; render(); pushHash(); });
   $("reset").addEventListener("click", () => {
     state.q=""; state.decade=null; state.media.clear(); state.museums.clear(); state.cats.clear(); state.srcs.clear(); state.origins.clear(); state.groups.clear();
     state.artist=null; state.letter=null; state.idxOpen=false; state.sort="year"; state.year=null; state.from=null; state.to=null; state.undOnly=false; $("sortby").value="year";
@@ -2029,7 +2098,7 @@ footer a{border-bottom:1px solid var(--rule)}
 
   Promise.all([
     fetch("data/index.json?v=1ca00ad2").then(r => r.json()),
-    fetch("data/i18n.json?v=8a38bf06").then(r => r.json())
+    fetch("data/i18n.json?v=64d77f49").then(r => r.json())
   ]).then(([data, i18n]) => boot(data, i18n))
    .catch(err => {
      document.getElementById("register").innerHTML =
