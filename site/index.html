@@ -46,6 +46,7 @@
   --invert-bg:#F1F2F4; --invert-fg:#0B0C0E; --focus:#F1F2F4;
 }
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.5;
   -webkit-font-smoothing:antialiased;font-optical-sizing:auto;text-rendering:optimizeLegibility}
 /* digits that sit in columns must not jitter */
@@ -406,13 +407,24 @@ footer a{border-bottom:1px solid var(--rule)}
 :root[data-theme="dark"] .r-title{font-weight:450}
 :root[data-theme="dark"] .mono h2{font-weight:550}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
-.doors{border-top:1px solid var(--rule);margin:var(--sp-4) 0 0;padding-top:var(--sp-3);
-  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--sp-4)}
-@media(min-width:1100px){
-  .doors{grid-template-columns:repeat(3,minmax(0,1fr))}
-  .doors .d-names{grid-column:span 2}
-  .doors .d-names ul{columns:2;column-gap:var(--sp-4)}
-  .doors .d-names li{break-inside:avoid}
+.doors{border-top:1px solid var(--rule);margin:var(--sp-4) 0 0;padding-top:var(--sp-3)}
+.doors .d-names ul{columns:2;column-gap:var(--sp-4)} .doors .d-names li{break-inside:avoid}
+@media(min-width:1100px){.doors .d-names ul{columns:3}}
+@media(max-width:760px){.doors .d-names ul{columns:1}}
+/* era band under the histogram: positioned against the decade cells on wide screens,
+   a plain wrapped row where the cells are too narrow to label */
+.eras{position:relative;height:24px;margin-top:6px}
+.era{position:absolute;top:0;height:22px;box-sizing:border-box;padding:4px 2px 0;text-align:left;
+  font-family:var(--mono);font-size:var(--fs-xs);letter-spacing:.04em;text-transform:uppercase;
+  color:var(--grey-6);background:none;border:0;border-top:2px solid var(--rule);cursor:pointer;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.era:hover{color:var(--ink);border-top-color:var(--ink)}
+.era[aria-pressed="true"]{color:var(--ink);border-top-color:var(--ink)}
+.era:focus-visible{outline:2px solid var(--focus);outline-offset:1px}
+@media(max-width:1000px){
+  .eras{height:auto;display:flex;flex-wrap:wrap;gap:4px 14px}
+  .era{position:static!important;width:auto!important;left:auto!important;height:auto;
+    border-top:0;border-bottom:1px solid var(--rule);padding:2px 0;overflow:visible}
 }
 .doors h2{font-family:var(--mono);font-size:var(--fs-sm);letter-spacing:var(--ls-label);
   text-transform:uppercase;color:var(--grey-6);font-weight:400;margin:0 0 var(--sp-2)}
@@ -466,6 +478,7 @@ footer a{border-bottom:1px solid var(--rule)}
       <span class="eyebrow" id="histo-hint">Select a decade to filter</span>
     </div>
     <div class="bars" id="bars"></div>
+    <div class="eras" id="eras"></div>
   </section>
 
   <div class="controls">
@@ -497,6 +510,7 @@ footer a{border-bottom:1px solid var(--rule)}
         <button id="o-desc" aria-pressed="false">Latest</button>
       </div>
     </div>
+    <button class="linkbtn" id="filters-toggle" aria-expanded="false" aria-controls="filterpanel">Show filters</button>
     <button class="linkbtn" id="mylist" aria-pressed="false"></button>
     <button class="linkbtn" id="share" data-i18n="linkview"></button>
     <button class="linkbtn" id="reset" data-i18n="reset"></button>
@@ -511,7 +525,6 @@ footer a{border-bottom:1px solid var(--rule)}
   <div class="filterbar">
     <span class="ctl-label" data-i18n="filters"></span>
     <div class="active-filters" id="activefilters"></div>
-    <button class="linkbtn" id="filters-toggle" aria-expanded="false" aria-controls="filterpanel">Show filters</button>
   </div>
   <div id="filterpanel" hidden>
   <div class="facetbar"><span class="ctl-label" data-i18n="years"></span>
@@ -951,7 +964,42 @@ footer a{border-bottom:1px solid var(--rule)}
          </div>`;
     $("histo-hint").textContent = state.decade===null ? T("selectdecade")
       : (state.decade==="und" ? T("undatedonly") : T("filteredto",{x:state.decade+"s"}));
+    renderEras();
   }
+  // The eras sit against the bars they describe: a band beneath the histogram with one
+  // segment per period, measured from the rendered decade cells so it stays aligned
+  // whether the early centuries are folded or opened. The period door this replaces
+  // listed the same five names in a column, away from the data.
+  function renderEras(){
+    const el = $("eras"); if (!el) return;
+    const bars = $("bars"), box = el.getBoundingClientRect();
+    const cellFor = d => bars.querySelector(`.bar-btn[data-dec="${d}"]`);
+    const early = bars.querySelector(".early-btn");
+    const segs = DOOR_PERIODS.map((p, i) => {
+      const [lo, hi] = p;
+      let first = null, last = null;
+      if (lo === null && early){ first = last = early; }              // folded pre-1700 band
+      else DECADES.forEach(d => {
+        const mid = d + 5;
+        if ((lo === null || mid >= lo) && mid <= hi){ const c = cellFor(d); if (c){ first = first || c; last = c; } }
+      });
+      if (!first) return "";
+      const l = first.getBoundingClientRect().left - box.left, r = last.getBoundingClientRect().right - box.left;
+      const on = state.from === lo && state.to === (hi === 2099 ? null : hi) && !state.undOnly;
+      const lab = dpLabel(p);
+      return `<button class="era" data-era="${i}" aria-pressed="${on}" title="${esc(lab)} — ${PCOUNT[i].toLocaleString(LANG==="en"?"en":"et")} ${esc(T("worksn"))}"
+                style="left:${l.toFixed(1)}px;width:${Math.max(0, r - l - 2).toFixed(1)}px">${esc(lab)}</button>`;
+    });
+    el.innerHTML = segs.join("");
+    // A two-decade segment cannot hold "First Republic"; fall back to a short form, and
+    // only then to an ellipsis (the title still carries the full name).
+    el.querySelectorAll(".era").forEach(b => {
+      if (b.scrollWidth <= b.clientWidth) return;
+      const key = DOOR_PERIODS[+b.dataset.era][2], short = key && I18N[LANG === "en" ? "EN" : "ET"]["era_short_" + key];
+      if (short) b.textContent = short;
+    });
+  }
+  addEventListener("resize", (() => { let t; return () => { clearTimeout(t); t = setTimeout(renderEras, 120); }; })());
 
   const YEARS = (() => { const ys = W.map(w=>w.y).filter(y=>y!=null); 
     return {min: Math.min(...ys), max: Math.max(...ys)}; })();
@@ -998,9 +1046,9 @@ footer a{border-bottom:1px solid var(--rule)}
     if (state.shared) add(T("sl_shared", {n: state.shared.size}), () => { state.shared = null; });
     else if (state.list) add(T("mylist"), () => { state.list = false; });
     ACTIVE = chips;
-    el.innerHTML = chips.length
-      ? chips.map((c, i) => `<button class="af" data-af="${i}" title="${esc(T("removefilter"))}">${esc(c.label)}<span>×</span></button>`).join("")
-      : `<span class="af-none">${esc(T("nofilters",{n:W.length.toLocaleString("en")}))}</span>`;
+    // No chips, no bar: "none — showing all 51,598 works" restated the masthead.
+    el.closest(".filterbar").hidden = chips.length === 0;
+    el.innerHTML = chips.map((c, i) => `<button class="af" data-af="${i}" title="${esc(T("removefilter"))}">${esc(c.label)}<span>×</span></button>`).join("");
     const n = chips.length;
     $("filters-toggle").textContent = $("filterpanel").hidden
       ? (n ? T("showfiltersn",{n}) : T("showfilters")) : T("hidefilters");
@@ -1285,7 +1333,9 @@ footer a{border-bottom:1px solid var(--rule)}
   }
 
   function groupHTML(key, gutter, items, showArtist){
-    const LIMIT = state.group === "decade" ? LIMIT_DEC : LIMIT_ART;
+    // Untouched, the page opened every decade to 50 rows: 1,800 rows and 74,000px before
+    // anyone had asked for anything. A dozen per decade shows the shape; "show all" is a click.
+    const LIMIT = state.group === "decade" ? (pristine() ? 12 : LIMIT_DEC) : LIMIT_ART;
     const gk = String(key);                       // dataset values are always strings
     const n = items.length, exp = state.expand.has(gk);
     const shown = exp ? items : items.slice(0, LIMIT);
@@ -1315,6 +1365,9 @@ footer a{border-bottom:1px solid var(--rule)}
 
   function render(){
     renderDoors(); renderListBar();
+    // The count line and Reset describe and undo a selection; before there is one
+    // they only repeat the masthead.
+    $("countline").hidden = pristine(); $("reset").hidden = pristine();
     const set = fullSet();
     $("stat-w").textContent = W.length.toLocaleString("en");
     $("stat-a").textContent = STATS.artists;
@@ -1438,9 +1491,10 @@ footer a{border-bottom:1px solid var(--rule)}
   // visitor met was the 1440s: one object, by nobody they have heard of. No decade
   // makes a good first row -- without images a single catalogue line cannot carry a
   // landing view -- so the question is not which row comes first but what the first
-  // screen is. Three ways in, above the list: a name, a period, a collection. They
-  // are the doors people actually arrive with. Any search or filter hides them.
-  // Collections were a third door; the museum facet already does that job.
+  // screen is. One door above the list: a name -- the way in people actually arrive
+  // with. A period door and a collection door were here too; the eras now sit under
+  // the histogram against the bars they describe, and the museum facet does
+  // collections. Any search or filter hides it.
   const TOP_ART = (() => {
     const c = new Map();
     W.forEach(w => c.set(w.a, (c.get(w.a) || 0) + 1));
@@ -1468,8 +1522,7 @@ footer a{border-bottom:1px solid var(--rule)}
       ([label, n, kind, v]) => `<li><button data-door="${kind}" data-v="${v}">` +
         `<span>${esc(label)}</span><span class="n">${num(n)}</span></button></li>`).join("") + "</ul></div>";
     el.innerHTML =
-      col("doors_name",   TOP_ART.map(([i, n]) => [A[i].n, n, "a", i]), "d-names") +
-      col("doors_period", DOOR_PERIODS.map((p, i) => [dpLabel(p), PCOUNT[i], "p", i]));
+      col("doors_name",   TOP_ART.map(([i, n]) => [A[i].n, n, "a", i]), "d-names");
     el.hidden = false;
   }
 
@@ -1717,6 +1770,13 @@ footer a{border-bottom:1px solid var(--rule)}
     const b = e.target.closest(".sl"); if (!b) return;
     e.stopPropagation(); slToggle(b.dataset.sl);
   });
+  $("eras").addEventListener("click", e => {
+    const b = e.target.closest(".era"); if (!b) return;
+    const [lo, hi] = DOOR_PERIODS[+b.dataset.era];
+    const on = b.getAttribute("aria-pressed") === "true";
+    state.from = on ? null : lo; state.to = on ? null : (hi === 2099 ? null : hi); state.undOnly = false;
+    renderAll(); pushHash();
+  });
   $("doors").addEventListener("click", e => {
     const b = e.target.closest("button[data-door]");
     if (!b) return;
@@ -1925,7 +1985,7 @@ footer a{border-bottom:1px solid var(--rule)}
 
   Promise.all([
     fetch("data/index.json?v=fb6cb12d").then(r => r.json()),
-    fetch("data/i18n.json?v=f51241d6").then(r => r.json())
+    fetch("data/i18n.json?v=d35ce425").then(r => r.json())
   ]).then(([data, i18n]) => boot(data, i18n))
    .catch(err => {
      document.getElementById("register").innerHTML =
