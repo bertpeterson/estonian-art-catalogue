@@ -268,6 +268,7 @@ footer p{margin:0;font-size:.81rem;line-height:1.6;color:var(--grey-6);max-width
 /* the A-Z link is one line; left in a grid cell beside three long notes it sat at
    the top of a tall row with a void beneath it. It takes a row of its own. */
 footer p:first-child{grid-column:1/-1;max-width:none;margin-bottom:-12px}
+.foot-theme{grid-column:1/-1;display:flex;align-items:center;gap:14px;margin-top:8px}
 footer b{color:var(--ink);font-weight:500}
 footer a{border-bottom:1px solid var(--rule)}
 
@@ -446,11 +447,6 @@ footer a{border-bottom:1px solid var(--rule)}
             <button id="lang-en" aria-pressed="true">ENG</button>
             <button id="lang-et" aria-pressed="false">EST</button>
           </div>
-          <div class="langsw themesw" role="group" aria-label="Theme">
-            <button id="th-auto" aria-pressed="true" data-i18n="th_auto"></button>
-            <button id="th-light" aria-pressed="false" data-i18n="th_light"></button>
-            <button id="th-dark" aria-pressed="false" data-i18n="th_dark"></button>
-          </div>
         </div>
         <p class="mast-sub" data-i18n="sub"></p>
       </div>
@@ -498,9 +494,6 @@ footer a{border-bottom:1px solid var(--rule)}
         <option value="medium" data-i18n="s_medium"></option>
         <option value="museum" data-i18n="s_museum"></option>
       </select>
-    </div>
-    <div class="ctl">
-      <span class="ctl-label" data-i18n="order"></span>
       <div class="seg" role="group" aria-label="Order">
         <button id="o-asc" aria-pressed="true">Earliest</button>
         <button id="o-desc" aria-pressed="false">Latest</button>
@@ -543,7 +536,7 @@ footer a{border-bottom:1px solid var(--rule)}
   <div class="facetbar"><span class="ctl-label" data-i18n="source"></span><div class="facets" id="f-src" role="group" aria-label="Filter by source catalogue"></div></div>
   </div>
 
-  <section class="aidx">
+  <section class="aidx" id="aidx">
     <div class="ai-head">
       <span class="eyebrow" data-i18n="artistindex"></span>
       <nav class="ai-rail" id="ai-rail" aria-label="Jump to artists by letter"></nav>
@@ -574,5 +567,11 @@ footer a{border-bottom:1px solid var(--rule)}
     <p data-i18n-html="foot1"></p>
     <p data-i18n-html="foot2"></p>
     <p data-i18n-html="foot3"></p>
+    <div class="foot-theme"><span class="eyebrow" data-i18n="theme"></span>
+      <div class="langsw themesw" role="group" aria-label="Theme">
+        <button id="th-auto" aria-pressed="true" data-i18n="th_auto"></button>
+        <button id="th-light" aria-pressed="false" data-i18n="th_light"></button>
+        <button id="th-dark" aria-pressed="false" data-i18n="th_dark"></button>
+      </div></div>
   </footer>
 </div>
