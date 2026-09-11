@@ -1784,7 +1784,7 @@ footer a{border-bottom:1px solid var(--rule)}
 
   Promise.all([
     fetch("data/index.json?v=fb6cb12d").then(r => r.json()),
-    fetch("data/i18n.json?v=13a9d9b1").then(r => r.json())
+    fetch("data/i18n.json?v=2eaa5669").then(r => r.json())
   ]).then(([data, i18n]) => boot(data, i18n))
    .catch(err => {
      document.getElementById("register").innerHTML =
