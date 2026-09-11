@@ -1,6 +1,6 @@
 # Estonian Art Catalogue · Eesti Kunstikataloog
 
-A browsable catalogue of **52,085 artworks** by **3,664 artists** — museum holdings from **24 Estonian public
+A browsable catalogue of **51,598 artworks** by **3,663 artists** — museum holdings from **24 Estonian public
 collections**, plus current work from three commercial galleries, aggregated from the national museum databases and presented as a static site.
 
 Every record is a real museum object and links back to its source record. Nothing here is
@@ -14,18 +14,18 @@ invented, reconstructed, or filled in by hand.
 
 | Source | Records | What it is |
 |---|---|---|
-| [MuIS](https://www.muis.ee) | 27,676 | Muuseumide Infosüsteem — the shared catalogue of all Estonian museums |
-| [EKM Digital Collection](https://digikogu.ekm.ee) | 27,671 | The Art Museum of Estonia's own database, behind Kumu |
+| [MuIS](https://www.muis.ee) | 27,191 | Muuseumide Infosüsteem — the shared catalogue of all Estonian museums |
+| [EKM Digital Collection](https://digikogu.ekm.ee) | 27,670 | The Art Museum of Estonia's own database, behind Kumu |
 | [CCA Estonia](https://cca.ee) | 58 bios | Centre for Contemporary Art — artist biographies, Venice Biennale archive |
 | [EKKM](https://ekkm.ee) | — | Contemporary Art Museum of Estonia |
 | [Wikidata](https://www.wikidata.org) | 1,678 artists | Dates, birthplace, training and art-historical affiliation |
 | Seven commercial galleries | 4,222 | Haus, Vernissage, Temnikova & Kasela, Tütar, Artrovert, Kogo, Ruki — current work, metadata only, never prices |
 
-7,544 objects appear in both MuIS and the EKM database and are merged on inventory number
-(MuIS `Number` = digikogu `Tulmenumber` + `Kogunumber`), which is why 61,309 source objects
-collapse to 52,083 works.
+7,543 objects appear in both MuIS and the EKM database and are merged on inventory number
+(MuIS `Number` = digikogu `Tulmenumber` + `Kogunumber`), which is why 60,750 source objects
+collapse to 51,598 works.
 
-**Only attributed works are included.** Anonymous and unattributed objects are excluded by design.
+**Only attributed works are included.** Anonymous and unattributed objects are excluded by design — including 485 objects catalogued under the name *Tundmatu kunstnik* ("unknown artist"), which is the absence of an attribution written into the name field rather than a name. Notnames stay: *Püha Lucia legendi meister* and its kind identify a hand recognised across several works, and art history treats that as an attribution.
 
 Metadata in MuIS is published under CC0. This repository redistributes **metadata only** — no
 images are harvested, stored, or served. Each record carries the identifiers needed to reach
@@ -76,8 +76,8 @@ not as part of the normal cycle.
 `data/data.json` is dictionary-encoded and nested, which suits the site and suits
 nobody else. Flat exports with every value resolved, one row per work:
 
-    site/data/export/works.csv.gz      52,083 rows
-    site/data/export/artists.csv.gz     3,664 rows
+    site/data/export/works.csv.gz      51,598 rows
+    site/data/export/artists.csv.gz     3,663 rows
     site/data/export/works.jsonl.gz     one JSON object per line
 
 Rebuild them with `python3 data/export_csv.py`. `data/validate.py` runs the sanity
@@ -161,7 +161,7 @@ related-works carousel, so the images attached to the wrong artworks.
 Code: MIT (see `LICENSE`).
 
 **Data is mixed, and the split is in the data itself.** Records marked `kind: held` —
-47,838 of them, 91.8% — derive from museum metadata published under CC0, which carries no
+47,353 of them, 91.8% — derive from museum metadata published under CC0, which carries no
 restriction on reuse, commercial included. The 4,222 records marked `kind: gallery` come from
 commercial galleries that grant no licence; they are included as a public catalogue of current
 work, and anyone reusing this dataset should decide for themselves whether to keep them. One
