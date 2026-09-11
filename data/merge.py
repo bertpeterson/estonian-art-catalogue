@@ -87,6 +87,15 @@ def year_of(d):
     parts, seen = [], set()
     for p in (x.strip() for x in lab.split(";")):
         if p and p.lower() not in seen: seen.add(p.lower()); parts.append(p)
+    # A range wider than a generation is a period, not a year. "ca 1800–1899" is the
+    # cataloguer writing "19th century" in digits, and filing it at its first year put
+    # Helene von Wrangell's ox-cart, painted after 1835, in the 1800s beside the
+    # Baroque. Keep the museum's words as the label; give it no single year. The app
+    # reads the century off a same-century range, as it does off "18. saj".
+    # Tested on the normalised label, not the raw string: "umbes 1800 - umbes 1899" has
+    # a marker before each year, and only after folding is it a plain range.
+    m = re.search(r'(?<!\d)(1[3-9]\d\d|20[0-4]\d)\s*[-–]\s*(?:ca\s+)?(1[3-9]\d\d|20[0-4]\d)(?!\d)', lab)
+    if m and int(m.group(2)) - int(m.group(1)) > 30: return None, "; ".join(parts)
     return ys[0], "; ".join(parts)
 
 # ---------- load ----------
@@ -235,6 +244,12 @@ for r in DK:
     m = re.search(r'\((\d{3,4})\s*[-–]\s*(\d{3,4})?\)', a)
     if m and r["artist"] not in DK_LIFE: DK_LIFE[r["artist"]] = [m.group(1), m.group(2) or ""]
 
+# Source records that are wrong on their face -- a death before a birth -- corrected
+# here and tagged editorial, so the tag on the page says who is asserting the date.
+# EKM's author string reads "Karl Pavlovitš Brüllov (1799 - 1582)": Bryullov died in
+# 1852, digits transposed. Ivan Velts "(1866 - 1826)" died in 1926.
+LIFE_FIX = {"Karl Pavlovitš Brüllov": ["1799", "1852"], "Ivan Augustinovitš Welz": ["1866", "1926"]}
+
 artists, aidx = [], {}
 for name in sorted(by_artist, key=lambda n: (n.split()[-1], n)):
     au = AU.get(name, {})
@@ -242,6 +257,7 @@ for name in sorted(by_artist, key=lambda n: (n.split()[-1], n)):
     if not life: life, ls = au_life(au), "ekm"
     if not life: life, ls = DK_LIFE.get(name), "ekm"
     if not life: life, ls = ED_LIFE.get(name), "ed"
+    if name in LIFE_FIX: life, ls = LIFE_FIX[name], "ed"
     bio, bs = MU_BIO.get(name), "muis"
     if not bio: bio, bs = au_bio(au), "ekm"
     if not bio: bio, bs = ED_BIO.get(name), "ed"
@@ -267,8 +283,12 @@ def tkey(t):
     return re.sub(r'[^a-z0-9]', '', t)
 groups = collections.OrderedDict()
 for r in recs:
-    y, _ = year_of(r.get("date"))
-    g = (r["artist"], tkey(r["t"]), y)
+    y, lab = year_of(r.get("date"))
+    # Same artist, same title, same year -- impressions of one print, catalogued as
+    # "1920" and "ca 1920", are one work. Without a year, the dating label decides:
+    # a "Maastik" dated "1839–1893" is not the same sheet as one left undated, and a
+    # wide range now carries no year of its own.
+    g = (r["artist"], tkey(r["t"]), y, "" if y else (lab or "").lower())
     groups.setdefault(g, []).append(r)
 OBJECTS = len(recs)
 recs = []
@@ -295,7 +315,9 @@ works = []
 for r in recs:
     y, lab = year_of(r.get("date"))
     dsrc = "museum" if y else None
-    if y is None:
+    # Only when the dating field said nothing at all. A wide range yields no year but is
+    # still the museum's dating; a year off the title must not overrule it.
+    if y is None and not lab:
         m = TITLE_YEAR.search(r["t"])
         if m:
             ty = int(m.group(1))
@@ -318,6 +340,22 @@ for r in recs:
 
 for i, a in enumerate(artists):
     a["c"] = sum(1 for w in works if w["a"] == i)
+
+# A work dated before its artist was born, or after they died, is one of three things:
+# a cataloguing slip in the source (Šiškin's "1478"), a later impression or copy dated
+# by its own making (heliogravures after Tšemesov, printed 1878), or a photograph of
+# the work standing in for it (Wedekind portraits "1997"). The record stays as the
+# museum holds it; the flag lets the page say what it sees, and keeps the year out of
+# the artist's activity span, where a single 1478 would stretch Šiškin to the 1400s.
+def _yr(s):
+    m = re.search(r'\d{4}', str(s or "")); return int(m.group()) if m else None
+FLAGGED = {"pre": 0, "post": 0}
+for w in works:
+    if w["y"] is None: continue
+    b, d = _yr(artists[w["a"]]["l"][0]), _yr(artists[w["a"]]["l"][1])
+    if b and w["y"] < b:        w["f"] = "pre";  FLAGGED["pre"] += 1
+    elif d and w["y"] > d + 1:  w["f"] = "post"; FLAGGED["post"] += 1
+print("  flagged: dated before birth", FLAGGED["pre"], "/ after death", FLAGGED["post"])
 
 
 # ---------- CCA artist biographies, Venice pavilion, EKKM collection ----------
