@@ -2,6 +2,9 @@
 # Rebuild the self-hosted static site from data/data.json
 set -e
 cd "$(dirname "$0")"
+# i18n.json is generated, not hand-kept. build_site.py only copies it, so edits to
+# i18n.py reached the repo but never the site until this ran here.
+python3 -u i18n.py
 python3 build_site.py
 python3 - <<'PY'
 h=open('tpl_head.html',encoding='utf-8').read()
