@@ -14,7 +14,7 @@ carries over.
 """
 import json, os, re, html, unicodedata, datetime
 
-BASE = "https://bertpeterson.github.io/estonian-art-catalogue"
+BASE = "https://museaal.ee"
 OUT  = "site/a"
 d = json.load(open("data/data.json", encoding="utf-8"))
 A, W, V = d["artists"], d["works"], d.get("vocab", {})

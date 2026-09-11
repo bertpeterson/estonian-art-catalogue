@@ -1,4 +1,0 @@
-User-agent: *
-Allow: /
-
-Sitemap: https://bertpeterson.github.io/estonian-art-catalogue/sitemap.xml
