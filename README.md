@@ -6,7 +6,7 @@ collections**, plus current work from three commercial galleries, aggregated fro
 Every record is a real museum object and links back to its source record. Nothing here is
 invented, reconstructed, or filled in by hand.
 
-**Live site (canonical):** https://bertpeterson.github.io/estonian-art-catalogue/
+**Live site (canonical):** https://museaal.ee/
 
 ---
 
