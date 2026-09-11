@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="description" content="A catalogue of works of art held in Estonian public collections, 1577-2026, compiled from MuIS and the EKM Digital Collection.">
+<meta name="description" content="A catalogue of works of art held in Estonian public collections, 1440-2026, compiled from MuIS and the EKM Digital Collection.">
 <title>Estonian Art Catalogue</title>
 <meta name="description" content="A catalogue of 52,000 artworks by 3,600 artists held in Estonian public collections and galleries, 1440–2026. Compiled from MuIS and the EKM Digital Collection; every record links back to its source.">
 <link rel="canonical" href="https://bertpeterson.github.io/estonian-art-catalogue/">
@@ -1161,7 +1161,7 @@ footer a{border-bottom:1px solid var(--rule)}
     if (SHARDS.has(key)) return SHARDS.get(key);
     // A retry must skip the browser cache: the failure we are retrying is often a
     // cached 404 or 5xx, and re-requesting the identical URL just returns it again.
-    const url = attempt ? `data/detail/${key}.json?r=${attempt}` : `data/detail/${key}.json`;
+    const url = `data/detail/${key}.json?v=fb6cb12d` + (attempt ? `&r=${attempt}` : "");
     const p = fetch(url, attempt ? {cache: "reload"} : undefined)
       .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
       .catch(async () => {
@@ -1783,8 +1783,8 @@ footer a{border-bottom:1px solid var(--rule)}
   }   // end boot
 
   Promise.all([
-    fetch("data/index.json").then(r => r.json()),
-    fetch("data/i18n.json").then(r => r.json())
+    fetch("data/index.json?v=fb6cb12d").then(r => r.json()),
+    fetch("data/i18n.json?v=13a9d9b1").then(r => r.json())
   ]).then(([data, i18n]) => boot(data, i18n))
    .catch(err => {
      document.getElementById("register").innerHTML =

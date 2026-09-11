@@ -7,6 +7,15 @@ cd "$(dirname "$0")"
 python3 -u i18n.py
 python3 build_site.py
 python3 - <<'PY'
+import hashlib
+def _v(p):
+    # GitHub Pages serves data/*.json with cache-control: max-age=600, so for ten
+    # minutes after a deploy a returning browser keeps the old copy -- which is how
+    # a fixed i18n.json still rendered "th_auto" on the live site. Versioning each
+    # URL by its own content means a changed file is a different URL and is fetched
+    # immediately, while an unchanged one stays cached.
+    return hashlib.sha1(open(p,'rb').read()).hexdigest()[:8]
+V_INDEX, V_I18N = _v('site/data/index.json'), _v('site/data/i18n.json')
 h=open('tpl_head.html',encoding='utf-8').read()
 a=open('tpl_app.html',encoding='utf-8').read()
 miss=[]
@@ -22,7 +31,7 @@ sub('  function rowHTML(w, showArtist){',
     if (SHARDS.has(key)) return SHARDS.get(key);
     // A retry must skip the browser cache: the failure we are retrying is often a
     // cached 404 or 5xx, and re-requesting the identical URL just returns it again.
-    const url = attempt ? `data/detail/${key}.json?r=${attempt}` : `data/detail/${key}.json`;
+    const url = `data/detail/${key}.json?v=__V_INDEX__` + (attempt ? `&r=${attempt}` : "");
     const p = fetch(url, attempt ? {cache: "reload"} : undefined)
       .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
       .catch(async () => {
@@ -87,8 +96,8 @@ sub('''  }
   }   // end boot
 
   Promise.all([
-    fetch("data/index.json").then(r => r.json()),
-    fetch("data/i18n.json").then(r => r.json())
+    fetch("data/index.json?v=__V_INDEX__").then(r => r.json()),
+    fetch("data/i18n.json?v=__V_I18N__").then(r => r.json())
   ]).then(([data, i18n]) => boot(data, i18n))
    .catch(err => {
      document.getElementById("register").innerHTML =
@@ -100,8 +109,9 @@ head='''<!doctype html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="description" content="A catalogue of works of art held in Estonian public collections, 1577-2026, compiled from MuIS and the EKM Digital Collection.">
+<meta name="description" content="A catalogue of works of art held in Estonian public collections, 1440-2026, compiled from MuIS and the EKM Digital Collection.">
 '''
+a=a.replace('__V_INDEX__',V_INDEX).replace('__V_I18N__',V_I18N)
 body=h.replace('<meta charset="utf-8">\n','',1)
 open('site/index.html','w',encoding='utf-8').write(head+body+"\n"+a+"\n</body>\n</html>\n")
 import os
