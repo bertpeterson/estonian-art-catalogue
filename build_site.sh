@@ -16,6 +16,15 @@ def _v(p):
     # immediately, while an unchanged one stays cached.
     return hashlib.sha1(open(p,'rb').read()).hexdigest()[:8]
 V_INDEX, V_I18N = _v('site/data/index.json'), _v('site/data/i18n.json')
+import json, re
+_m = json.load(open('data/data.json',encoding='utf-8'))
+_meta, _ys = _m['meta'], [w['y'] for w in _m['works'] if w.get('y')]
+# Two descriptions shipped before -- one here, one in the template -- and the template's
+# quoted "52,000 artworks by 3,600 artists" from whenever it was last typed. One, from the data.
+DESC = ('<meta name="description" content="A catalogue of %s works of art by %s artists in Estonian public '
+        'collections and galleries, %d\u2013%d. Museum records from MuIS and the EKM Digital Collection, gallery '
+        'stock from the galleries\' own catalogues; every record links back to its source.">'
+        % (f"{_meta['works']:,}", f"{_meta['artists']:,}", min(_ys), max(_ys)))
 h=open('tpl_head.html',encoding='utf-8').read()
 a=open('tpl_app.html',encoding='utf-8').read()
 miss=[]
@@ -109,10 +118,11 @@ head='''<!doctype html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="description" content="A catalogue of works of art held in Estonian public collections, 1440-2026, compiled from MuIS and the EKM Digital Collection.">
+''' + DESC + '''
 '''
 a=a.replace('__V_INDEX__',V_INDEX).replace('__V_I18N__',V_I18N)
 body=h.replace('<meta charset="utf-8">\n','',1)
+body=re.sub(r'<meta name="description"[^>]*>\n?','',body,count=1)   # the template's static copy
 open('site/index.html','w',encoding='utf-8').write(head+body+"\n"+a+"\n</body>\n</html>\n")
 import os
 print("MISSED:",miss if miss else "none")

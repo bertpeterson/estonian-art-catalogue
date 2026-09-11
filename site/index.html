@@ -3,9 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="description" content="A catalogue of works of art held in Estonian public collections, 1440-2026, compiled from MuIS and the EKM Digital Collection.">
+<meta name="description" content="A catalogue of 51,598 works of art by 3,663 artists in Estonian public collections and galleries, 1440–2026. Museum records from MuIS and the EKM Digital Collection, gallery stock from the galleries' own catalogues; every record links back to its source.">
 <title>Estonian Art Catalogue</title>
-<meta name="description" content="A catalogue of 52,000 artworks by 3,600 artists held in Estonian public collections and galleries, 1440–2026. Compiled from MuIS and the EKM Digital Collection; every record links back to its source.">
 <link rel="canonical" href="https://museaal.ee/">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Estonian Art Catalogue">
@@ -1841,8 +1840,8 @@ footer a{border-bottom:1px solid var(--rule)}
     $("lang-en").setAttribute("aria-pressed", LANG === "en");
     $("built").textContent = DATA.meta.built;
     $("srcsplit").textContent = LANG === "en"
-      ? `${DATA.meta.dated_from_title} works carry a date the cataloguer wrote at the end of the title rather than in the dating field; those are marked with an asterisk. ${DATA.meta.objects.toLocaleString("en")} catalogued objects → ${DATA.meta.works.toLocaleString("en")} works (identical title + date + artist collapsed): ${DATA.meta.muis.toLocaleString("en")} from MuIS, ${DATA.meta.ekm.toLocaleString("en")} from the EKM Digital Collection, ${DATA.meta.both.toLocaleString("en")} in both, merged on inventory number.`
-      : `${DATA.meta.dated_from_title} teosel on dateering kirjutatud pealkirja lõppu, mitte dateeringuvälja; need on tähistatud tärniga. ${DATA.meta.objects.toLocaleString("et")} museaali → ${DATA.meta.works.toLocaleString("et")} teost (sama pealkiri + dateering + autor koondatud): ${DATA.meta.muis.toLocaleString("et")} MuIS-ist, ${DATA.meta.ekm.toLocaleString("et")} EKM Digitaalkogust, ${DATA.meta.both.toLocaleString("et")} mõlemast, ühendatud tulmenumbri järgi.`;
+      ? `${DATA.meta.dated_from_title} works carry a date the cataloguer wrote at the end of the title rather than in the dating field; those are marked with an asterisk. ${DATA.meta.objects.toLocaleString("en")} catalogued objects → ${DATA.meta.works.toLocaleString("en")} works (identical title + date + artist collapsed): ${DATA.meta.muis.toLocaleString("en")} from MuIS, ${DATA.meta.ekm.toLocaleString("en")} from the EKM Digital Collection, ${DATA.meta.both.toLocaleString("en")} in both, merged on inventory number. A further ${DATA.meta.gallery.toLocaleString("en")} works are the current stock of ${DATA.meta.galleries} galleries, from their own catalogues.`
+      : `${DATA.meta.dated_from_title} teosel on dateering kirjutatud pealkirja lõppu, mitte dateeringuvälja; need on tähistatud tärniga. ${DATA.meta.objects.toLocaleString("et")} museaali → ${DATA.meta.works.toLocaleString("et")} teost (sama pealkiri + dateering + autor koondatud): ${DATA.meta.muis.toLocaleString("et")} MuIS-ist, ${DATA.meta.ekm.toLocaleString("et")} EKM Digitaalkogust, ${DATA.meta.both.toLocaleString("et")} mõlemast, ühendatud tulmenumbri järgi. Veel ${DATA.meta.gallery.toLocaleString("et")} teost on ${DATA.meta.galleries} galerii praegune müügivalik, nende endi kataloogidest.`;
     const un = $("undated-note");
     if (un) un.textContent = LANG === "en"
       ? `${DATA.meta.undated} of ${DATA.meta.works.toLocaleString("en")} records carry no dating; they sit in their own group rather than being guessed into a decade.`
@@ -1924,7 +1923,7 @@ footer a{border-bottom:1px solid var(--rule)}
 
   Promise.all([
     fetch("data/index.json?v=fb6cb12d").then(r => r.json()),
-    fetch("data/i18n.json?v=322c9a09").then(r => r.json())
+    fetch("data/i18n.json?v=142f1ec1").then(r => r.json())
   ]).then(([data, i18n]) => boot(data, i18n))
    .catch(err => {
      document.getElementById("register").innerHTML =
