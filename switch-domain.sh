@@ -12,12 +12,18 @@ NEW="https://${DOMAIN}"
 
 echo "checking DNS for ${DOMAIN}…"
 GH_IPS="185.199.108.153 185.199.109.153 185.199.110.153 185.199.111.153"
-# Ask a public resolver, not this machine's cache: a lookup made before the records
-# existed is remembered as "no such name" for the length of the zone's negative TTL,
-# so the local answer stays empty long after the world can see the domain.
-GOT=$(dig +short @8.8.8.8 "$DOMAIN" A 2>/dev/null | tr '\n' ' ')
-[ -n "$GOT" ] || GOT=$(dig +short @1.1.1.1 "$DOMAIN" A 2>/dev/null | tr '\n' ' ')
-[ -n "$GOT" ] || { echo "  ✗ ${DOMAIN} does not resolve yet — configure DNS first, then re-run."; exit 1; }
+# Ask the domain's own nameservers, which hold the zone, rather than a resolver that
+# holds a copy of it. A cache answers with whatever it was told up to half an hour ago:
+# before the records existed it insists the name does not exist, and after a record is
+# deleted it keeps serving it until the TTL runs out -- and the public resolvers are
+# many independent caches, so they disagree with each other meanwhile. The zone is the
+# only answer that is true now; caches converge on it within the TTL either way.
+AUTH=$(dig +short "$DOMAIN" NS 2>/dev/null | head -1)
+[ -n "$AUTH" ] || AUTH=$(dig +short @8.8.8.8 "$DOMAIN" NS 2>/dev/null | head -1)
+[ -n "$AUTH" ] || { echo "  ✗ ${DOMAIN} has no nameservers — the domain is registered but not delegated."; exit 1; }
+echo "  asking ${AUTH%.}"
+GOT=$(dig +short "@${AUTH%.}" "$DOMAIN" A 2>/dev/null | tr '\n' ' ')
+[ -n "$GOT" ] || { echo "  ✗ ${DOMAIN} has no A records yet — configure DNS first, then re-run."; exit 1; }
 # Every address must be GitHub's, not merely one of them. A registrar that parks the
 # domain on its own server leaves that record behind when you add the Pages ones, and
 # five A records means browsers round-robin: roughly one visitor in five lands on the

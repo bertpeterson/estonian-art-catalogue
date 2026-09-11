@@ -8,7 +8,7 @@ the live site. Run it deliberately, not on every change.
 """
 import json, datetime, sys
 
-SITE = "https://bertpeterson.github.io/estonian-art-catalogue/"
+SITE = "https://museaal.ee/"
 head = open('tpl_head.html', encoding='utf-8').read()
 app  = open('tpl_app.html',  encoding='utf-8').read()
 data = json.load(open('data/data.json', encoding='utf-8'))
