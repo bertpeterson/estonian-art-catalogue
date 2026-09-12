@@ -902,7 +902,6 @@
           return `<div class="g-split">${held.toLocaleString(LANG==="en"?"en":"et")} ${esc(T("cross_held"))} · ${sold} ${esc(T("cross_sold"))}</div>`; })() : "";
         const gutter = `<span class="g-name">${esc(ar.n)}</span>
           <div class="g-dates">${esc(life)}${stag(ar.ls)}</div>${split}
-          <div style="margin-top:9px;color:var(--bar)">${spark(decCounts(i), 200, 22)}</div>
           <p class="g-blurb">${esc(bioFor(ar).t)}</p>
           <button class="showartist" data-artist="${i}">Open artist →</button>`;
         return groupHTML("a"+i, gutter, items, false);
