@@ -67,13 +67,23 @@ def parse(name):
     if not title: return None
     return artist, title, year, tech, dims
 
-recs, page, seen = [], 1, set()
+recs, page, seen, skipped = [], 1, set(), 0
 while True:
     batch=api(page)
     if not batch: break
     for p in batch:
-        # p also carries prices; they are not read
-        got=parse(p.get("name") or "")
+        # Vernissage is an auction house as well as a shop, and the product list
+        # carries every lot from every past auction, hammer price in the name.
+        # Those are not for sale: a lot that sold in 2023 is in someone's home.
+        # The API says which is which -- is_purchasable is false for every auction
+        # lot, past or unsold -- so only the shop stock is taken.
+        if not p.get("is_purchasable"): skipped+=1; continue
+        # ...and a shop item marked sold in its own name is not stock either
+        if re.search(r'\b(müüdud|sold|reserveeritud|reserved)\b', p.get("name") or "", re.I): skipped+=1; continue
+        # p also carries prices; they are not read, and the name must not carry one
+        # either: "Alghind: 1800 € Haamrihind: 1800 €" is a price in disguise.
+        name=re.sub(r'\b(alghind|haamrihind|hind|price|starting price|hammer price)\s*:?\s*[\d\s.,]*\s*(€|eur)?', ' ', p.get("name") or "", flags=re.I)
+        got=parse(name)
         if not got: continue
         artist,title,year,tech,dims = got
         gid="vern-"+str(p.get("id"))
@@ -89,6 +99,6 @@ while True:
 prev=json.load(open("gallery_records.json",encoding="utf-8"))
 keep=[r for r in prev if not r["gid"].startswith("vern-")]
 json.dump(keep+recs,open("gallery_records.json","w",encoding="utf-8"),ensure_ascii=False)
-print(f"\nVERNISSAGE WORKS: {len(recs)}   artists: {len({r['artist'] for r in recs})}")
+print(f"\nVERNISSAGE WORKS: {len(recs)}   artists: {len({r['artist'] for r in recs})}   auction lots skipped: {skipped}")
 print(f"  with year {sum(1 for r in recs if r['year'])}, with dims {sum(1 for r in recs if r['dims'])}")
 for r in recs[:5]: print(f"   {r['artist'][:20]:20} {r['title'][:30]:30} {r['year'] or '—':6} {r['dims']:14} {r['tech'][:22]}")

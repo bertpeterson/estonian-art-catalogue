@@ -22,7 +22,7 @@ def txt(s):
     return re.sub(r'\s+',' ',s).strip()
 
 BLOCK = re.compile(r'<div class="artwork-details">(.*?)</div><!-- details -->', re.S)
-out = []
+out = []; sold = 0
 for page in ("art-store", "works"):
     try: h = get(f"https://www.kogogallery.ee/en/{page}/", f"kogo_{page}")
     except Exception as e: print("skip", page, repr(e)[:60]); continue
@@ -33,6 +33,8 @@ for page in ("art-store", "works"):
         info = re.search(r'artwork-info">(.*?)$', b, re.S)
         if not (t and a): continue
         raw = txt(info.group(1)) if info else ""
+        # Kogo keeps sold works on the page with "Sold" after the year. Not for sale.
+        if re.search(r'\b(sold|müüdud|reserved|reserveeritud)\b', raw, re.I): sold += 1; continue
         dm = re.search(r'<span class="dimensions">(.*?)</span>', b, re.S)
         dims = re.sub(r'\s*cm\s*cm', ' cm', txt(dm.group(1))).strip(" ,") if dm else ""
         yr = re.search(r'(\b(?:19|20)\d{2}\b)\s*$', raw)
@@ -45,6 +47,7 @@ for page in ("art-store", "works"):
                     "year": yr.group(1) if yr else None, "tech": tech, "dims": dims,
                     "gallery": "Kogo galerii", "city": "Tartu", "url": t.group(1)})
 
+print("  sold, skipped:", sold)
 seen, recs = set(), []
 for r in out:
     if r["gid"] in seen: continue
