@@ -41,7 +41,7 @@ jobs:
         working-directory: data
         run: |
           rm -rf gcache
-          for s in haus kogo temnikova tutar artrovert ruki vernissage noba; do
+          for s in haus kogo temnikova tutar artrovert ruki vernissage noba noba_artists; do
             echo "=== $s ==="
             python3 -u $s.py
           done

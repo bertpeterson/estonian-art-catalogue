@@ -563,7 +563,8 @@ print("  wikidata dropped as unresolvable conflict:", WD_CONFLICT)
 # carry kind="gallery" so a visitor can always tell the two apart, and every record
 # links back to the gallery's own page. Prices are deliberately not collected.
 GAL = json.load(open("gallery_records.json", encoding="utf-8")) if os.path.exists("gallery_records.json") else []
-gal_added = gal_unknown = 0
+gal_added = gal_unknown = gal_new_est = 0
+NOBA_ARTISTS = json.load(open("noba_artists.json", encoding="utf-8")) if os.path.exists("noba_artists.json") else {}
 # Marketplace records are decided last, once every gallery's own artists are in.
 GAL.sort(key=lambda g: bool(g.get("only_known")))
 # Each gallery parser decoded its own shortlist of HTML entities, which let
@@ -574,10 +575,18 @@ for g in GAL:
     # A marketplace lists artists from the whole region. Its records are taken only
     # for artists the catalogue already has -- museum-held or in a gallery harvested
     # on its own -- and never add a name. The rest is a separate decision.
-    if g.get("only_known"):
-        if toks(g["artist"]) not in by_tok: gal_unknown += 1; continue
+    if g.get("only_known") and toks(g["artist"]) not in by_tok:
+        # ...unless NOBA's own artist page says the artist is based in Estonia. That
+        # is the catalogue's line: art in Estonia, not art from the whole Baltic.
+        na = NOBA_ARTISTS.get(g["artist"]) or {}
+        if na.get("country") != "Eesti": gal_unknown += 1; continue
+        gal_new_est += 1
     ai = artist_index(g["artist"])
     if ai is None or not g.get("title"): continue
+    # a biography from the artist's NOBA page, for artists who have none elsewhere
+    na = NOBA_ARTISTS.get(g["artist"]) or {}
+    if na.get("bio") and not artists[ai].get("b") and not artists[ai].get("ben"):
+        artists[ai]["b"], artists[ai]["bs"] = na["bio"], "noba"
     y = int(g["year"]) if g.get("year") and g["year"].isdigit() else None
     tech = g.get("tech") or None
     works.append({"a": ai, "t": g["title"], "y": y,
@@ -589,7 +598,8 @@ for g in GAL:
         "k": "G" + re.sub(r'[^A-Za-z0-9]', '', g["gid"]), "n": 1,
         "mem": None, "kind": "gallery", "url": g.get("url")})
     gal_added += 1
-print("  marketplace works skipped, artist not in catalogue:", gal_unknown)
+print("  marketplace works skipped, artist not in catalogue and not based in Estonia:", gal_unknown)
+print("  marketplace works by Estonia-based artists new to the catalogue:", gal_new_est)
 print("  gallery works added:", gal_added,
       "from", len({g["gallery"] for g in GAL}), "galleries")
 
