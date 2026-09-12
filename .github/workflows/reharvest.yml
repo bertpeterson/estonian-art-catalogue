@@ -1,0 +1,76 @@
+# Monthly re-harvest of the seven galleries' stock.
+#
+# Museum holdings do not move; gallery stock does. "For sale" was found twice to
+# include works that had sold, because the harvest was a snapshot nothing refreshed.
+# On the first of each month this fetches every gallery again, rebuilds, and commits
+# the result -- which triggers the normal Pages deploy. If any gallery's parser
+# comes back empty or collapsed, harvest_guard.py fails the run and nothing is
+# committed. The museum sources are never re-crawled here.
+name: Monthly gallery re-harvest
+
+on:
+  schedule:
+    - cron: "0 4 1 * *"        # 04:00 UTC on the 1st
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: reharvest
+  cancel-in-progress: false
+
+jobs:
+  reharvest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Restore the museum harvest from data/raw
+        run: python3 data/unpack.py
+
+      - name: Snapshot gallery counts
+        working-directory: data
+        run: python3 harvest_guard.py before
+
+      - name: Fetch every gallery afresh
+        working-directory: data
+        run: |
+          rm -rf gcache
+          for s in haus kogo temnikova tutar artrovert ruki vernissage; do
+            echo "=== $s ==="
+            python3 -u $s.py
+          done
+
+      - name: Refuse a collapsed harvest
+        working-directory: data
+        run: python3 harvest_guard.py after
+
+      - name: Merge and build
+        run: |
+          (cd data && python3 merge.py)
+          ./build_site.sh
+          python3 data/readme_figures.py
+
+      - name: Commit if anything changed
+        run: |
+          git config user.name  "gallery re-harvest"
+          git config user.email "actions@users.noreply.github.com"
+          git add data/gallery_records.json data/data.json README.md site i18n.json
+          if git diff --cached --quiet; then
+            echo "nothing changed"; exit 0
+          fi
+          python3 - > /tmp/msg <<'PY'
+          import json, collections, datetime
+          c = collections.Counter(g["gallery"] for g in json.load(open("data/gallery_records.json")))
+          print("Monthly gallery re-harvest,", datetime.date.today().isoformat(), "\n")
+          for g, n in sorted(c.items()): print(f"  {g:22} {n}")
+          print("\nAutomated: fetched each gallery's current stock, rebuilt, and updated the")
+          print("README figures. Museum data untouched.")
+          PY
+          git commit -F /tmp/msg
+          git push
