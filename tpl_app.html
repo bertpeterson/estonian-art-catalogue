@@ -337,13 +337,18 @@
                                           && (state.year===null || w.y===state.year));
 
   function renderBars(){
-    const set = baseSet(), counts = {}; DECADES.forEach(d=>counts[d]=0); counts.und = 0;
-    set.forEach(w => { const d = decOf(w); if (d in counts) counts[d]++; });
+    // Each bar is split: museum holdings below, gallery stock above. Since NOBA, the
+    // 2020s bar is 98% works for sale, and an unsplit bar read as the most-collected
+    // decade in Estonian history. The shape must not lie at a glance.
+    const set = baseSet(), counts = {}, sale = {}; DECADES.forEach(d=>{counts[d]=0; sale[d]=0;}); counts.und = sale.und = 0;
+    set.forEach(w => { const d = decOf(w); if (d in counts){ counts[d]++; if (w.kind === "gallery") sale[d]++; } });
     const max = Math.max(1, ...DECADES.map(d=>counts[d]));
     const cell = (key, lab, title, cls) => {
-      const c = counts[key], h = c ? Math.round(6 + (Math.min(c,max)/max)*66) : 2;
-      return `<button class="bar-btn ${cls||""}" data-dec="${key}" aria-pressed="${state.decade===key}" title="${title} — ${c===1?T('oneworkc'):T('nworks',{n:c})}">
-        <span class="bar-n">${c||""}</span><span class="bar-fill" style="height:${h}px"></span><span class="bar-lab">${lab}</span></button>`;
+      const c = counts[key], s = sale[key], h = c ? Math.round(6 + (Math.min(c,max)/max)*66) : 2;
+      const sh = c && s ? Math.round(h * s / c) : 0;
+      const tip = `${title} — ${c===1?T('oneworkc'):T('nworks',{n:c})}` + (s ? ` · ${T('nforsale',{n:s})}` : "");
+      return `<button class="bar-btn ${cls||""}" data-dec="${key}" aria-pressed="${state.decade===key}" title="${tip}">
+        <span class="bar-n">${c||""}</span><span class="bar-fill" style="height:${h}px">${sh ? `<span class="bar-sale" style="height:${sh}px"></span>` : ""}</span><span class="bar-lab">${lab}</span></button>`;
     };
     // group the decade bars by century so 1830s and 1930s can never be read as the same "30"
     const cents = [];

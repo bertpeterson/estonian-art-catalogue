@@ -108,7 +108,12 @@ h1 em{font-style:italic;font-weight:400}
   color:var(--grey-4);cursor:pointer;padding:2px 0;text-align:left}
 .cent-collapse:hover{color:var(--ink)}
 .bar-btn{flex:1;min-width:0;background:none;border:0;padding:0;cursor:pointer;display:flex;flex-direction:column;justify-content:flex-end;gap:7px;font-family:var(--mono);font-size:.66rem;color:var(--grey-6)}
-.bar-fill{width:100%;background:var(--bar);min-height:2px;transition:background .15s ease}
+.bar-fill{width:100%;background:var(--bar);min-height:2px;transition:background .15s ease;position:relative}
+/* the for-sale share of a decade: hatched, at the top of the bar */
+.bar-sale{position:absolute;left:0;right:0;top:0;background:repeating-linear-gradient(-45deg,var(--ink) 0 1px,transparent 1px 4px);opacity:.55}
+.bar-btn:hover .bar-sale,.bar-btn[aria-pressed="true"] .bar-sale{background:repeating-linear-gradient(-45deg,var(--paper) 0 1px,transparent 1px 4px);opacity:.7}
+.histo-key{font-family:var(--mono);font-size:var(--fs-xs);letter-spacing:.08em;text-transform:uppercase;color:var(--grey-6);display:inline-flex;align-items:center;gap:6px;margin-left:18px}
+.histo-key i{display:inline-block;width:14px;height:9px;background:repeating-linear-gradient(-45deg,var(--ink) 0 1px,transparent 1px 4px);opacity:.55}
 .bar-btn:hover .bar-fill,.bar-btn[aria-pressed="true"] .bar-fill{background:var(--ink)}
 .bar-btn:hover,.bar-btn[aria-pressed="true"]{color:var(--ink)}
 .bar-lab{border-top:1px solid var(--rule);padding-top:6px;overflow:hidden}
@@ -502,7 +507,7 @@ footer a{border-bottom:1px solid var(--rule)}
 
   <section class="histo">
     <div class="histo-head">
-      <span class="eyebrow" data-i18n="worksperdecade"></span>
+      <span><span class="eyebrow" data-i18n="worksperdecade"></span><span class="histo-key"><i></i><span data-i18n="forsale"></span></span></span>
       <span class="eyebrow" id="histo-hint">Select a decade to filter</span>
     </div>
     <div class="bars" id="bars"></div>
