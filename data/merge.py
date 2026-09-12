@@ -332,7 +332,7 @@ for name in sorted(by_artist, key=lambda n: (n.split()[-1], n)):
     if not bio: bio, bs = ED_BIO.get(name), "ed"
     aidx[name] = len(artists)
     artists.append({"n": name, "l": life or ["", ""], "ls": ls if life else "ed",
-                    "b": (bio or "")[:1200], "bs": bs if bio else "ed", "ai": au.get("aid")})
+                    "b": (bio or "")[:2400], "bs": bs if bio else "ed", "ai": au.get("aid")})
 
 def term(v, table):
     if not v: return None
