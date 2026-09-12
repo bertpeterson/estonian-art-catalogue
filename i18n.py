@@ -273,6 +273,7 @@ MEDIUM_ET = {
  "Painting":"Maal","Print":"Graafika","Sculpture":"Skulptuur","Drawing":"Joonistus","Installation":"Installatsioon",
  "Video":"Videosalvestis","Watercolour":"Akvarell","Photograph":"Foto","Relief":"Reljeef","Collage":"Kollaaž",
  "Mixed media":"Segatehnika","Illustration":"Illustratsioon","Digital image":"Digitaalne kujutis","Film":"Film",
+ "Textile":"Tekstiil","Street art":"Tänavakunst","Digital":"Digitaalkunst",
  "Other":"Muu","Applied art":"Tarbekunst","Ceramics":"Keraamika","Pastel":"Pastell","Tempera":"Tempera",
  "Monotype":"Monotüüpia","Gouache":"Guašš","Object":"Objekt","Bookplate":"Eksliibris","Tapestry":"Vaip",
  "Mosaic":"Mosaiik","Stained glass":"Vitraaž","Assemblage":"Assamblaaž","Enamel":"Emailmaal",
