@@ -2,6 +2,8 @@
 data/cache/
 data/dkcache/
 data/cca_cache/
+data/gcache/
+data/harvest_before.json
 
 # The compressed harvest in data/raw/ IS committed — see data/unpack.py. The
 # uncompressed working copies below are not.
