@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="description" content="A catalogue of 54,285 works of art by 3,580 artists in Estonian public collections and galleries, 1440–2026. Museum records from MuIS and the EKM Digital Collection, gallery stock from the galleries' own catalogues; every record links back to its source.">
+<meta name="description" content="A catalogue of 57,657 works of art by 4,050 artists in Estonian public collections and galleries, 1440–2026. Museum records from MuIS and the EKM Digital Collection, gallery stock from the galleries' own catalogues; every record links back to its source.">
 <title>Estonian Art Catalogue</title>
 <link rel="canonical" href="https://museaal.ee/">
 <meta property="og:type" content="website">
@@ -797,7 +797,8 @@ footer a{border-bottom:1px solid var(--rule)}
   const SRCLAB = {muis:"muis", ekm:"digi", ekmmuis:"both", cca:"cca", ekkm:"ekkm"};
   const SRCFULL = {muis:"catalogued in MuIS only", ekm:"catalogued in the EKM Digital Collection only", ekmmuis:"in both catalogues, merged on inventory number", cca:"Estonian Centre for Contemporary Art", ekkm:"Contemporary Art Museum of Estonia"};
   const stag = s => s==="ed" ? '<span class="tag">ed</span>' : s==="ekm" ? '<span class="tag">EKM</span>'
-                  : s==="wd" ? '<span class="tag">Wikidata</span>' : '<span class="tag">MuIS</span>';
+                  : s==="wd" ? '<span class="tag">Wikidata</span>' : s==="noba" ? '<span class="tag">NOBA</span>'
+                  : s==="cca" ? '<span class="tag">CCA</span>' : '<span class="tag">MuIS</span>';
 
   const state = {group:"decade", decOrder:"earliest", artOrder:"az", q:"", list:false, shared:null, cross:false, sale:false, tlLimit:400,
                  decade:null, media:new Set(), museums:new Set(), cats:new Set(), srcs:new Set(),
@@ -1304,7 +1305,7 @@ footer a{border-bottom:1px solid var(--rule)}
     if (SHARDS.has(key)) return SHARDS.get(key);
     // A retry must skip the browser cache: the failure we are retrying is often a
     // cached 404 or 5xx, and re-requesting the identical URL just returns it again.
-    const url = `data/detail/${key}.json?v=eb1d353b` + (attempt ? `&r=${attempt}` : "");
+    const url = `data/detail/${key}.json?v=97125ffe` + (attempt ? `&r=${attempt}` : "");
     const p = fetch(url, attempt ? {cache: "reload"} : undefined)
       .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
       .catch(async () => {
@@ -2159,8 +2160,8 @@ footer a{border-bottom:1px solid var(--rule)}
   }   // end boot
 
   Promise.all([
-    fetch("data/index.json?v=eb1d353b").then(r => r.json()),
-    fetch("data/i18n.json?v=41da7841").then(r => r.json())
+    fetch("data/index.json?v=97125ffe").then(r => r.json()),
+    fetch("data/i18n.json?v=211be444").then(r => r.json())
   ]).then(([data, i18n]) => boot(data, i18n))
    .catch(err => {
      document.getElementById("register").innerHTML =

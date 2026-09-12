@@ -11,8 +11,9 @@ Metadata only: artist, title, year, technique, dimensions, and a link to the lis
 Prices are not read. The seller is not in the API, so the holder is NOBA itself.
 
 Records carry only_known=True: merge.py takes them for artists already in the
-catalogue -- museum-held or in the seven galleries -- and drops the rest. NOBA's
-other 1,066 artists, many Latvian and Lithuanian, are a separate decision.
+catalogue -- museum-held or in the seven galleries -- and otherwise only when
+noba_artists.json says the artist is based in Estonia. Latvian, Lithuanian,
+Finnish and Swedish artists on NOBA stay out.
 """
 import json, re, ssl, time, urllib.request, os, unicodedata
 UA = "EstonianArtCatalogue/1.0 (research compile; contact via claude.ai)"
