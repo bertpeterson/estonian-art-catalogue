@@ -563,12 +563,19 @@ print("  wikidata dropped as unresolvable conflict:", WD_CONFLICT)
 # carry kind="gallery" so a visitor can always tell the two apart, and every record
 # links back to the gallery's own page. Prices are deliberately not collected.
 GAL = json.load(open("gallery_records.json", encoding="utf-8")) if os.path.exists("gallery_records.json") else []
-gal_added = 0
+gal_added = gal_unknown = 0
+# Marketplace records are decided last, once every gallery's own artists are in.
+GAL.sort(key=lambda g: bool(g.get("only_known")))
 # Each gallery parser decoded its own shortlist of HTML entities, which let
 # "&#8220;" and "&#8221;" through into titles. Decode the lot here instead, once.
 for g in GAL:
     for f in ("artist", "title", "tech", "dims"):
         if g.get(f): g[f] = re.sub(r'\s+', ' ', html.unescape(g[f])).strip()
+    # A marketplace lists artists from the whole region. Its records are taken only
+    # for artists the catalogue already has -- museum-held or in a gallery harvested
+    # on its own -- and never add a name. The rest is a separate decision.
+    if g.get("only_known"):
+        if toks(g["artist"]) not in by_tok: gal_unknown += 1; continue
     ai = artist_index(g["artist"])
     if ai is None or not g.get("title"): continue
     y = int(g["year"]) if g.get("year") and g["year"].isdigit() else None
@@ -582,6 +589,7 @@ for g in GAL:
         "k": "G" + re.sub(r'[^A-Za-z0-9]', '', g["gid"]), "n": 1,
         "mem": None, "kind": "gallery", "url": g.get("url")})
     gal_added += 1
+print("  marketplace works skipped, artist not in catalogue:", gal_unknown)
 print("  gallery works added:", gal_added,
       "from", len({g["gallery"] for g in GAL}), "galleries")
 

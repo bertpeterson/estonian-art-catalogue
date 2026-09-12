@@ -21,7 +21,7 @@ subs = [
     (r"\*\*[\d,]+ artists\*\*",                         f"**{f(m['artists'])} artists**"),
     (r"\| [\d,]+ \| Muuseumide Infosüsteem",           f"| {f(m['muis'])} | Muuseumide Infosüsteem"),
     (r"\| [\d,]+ \| The Art Museum of Estonia's own", f"| {f(m['ekm'])} | The Art Museum of Estonia's own"),
-    (r"\| Seven commercial galleries \| [\d,]+ \|",    f"| Seven commercial galleries | {f(m['gallery'])} |"),
+    (r"\| Seven commercial galleries and NOBA \| [\d,]+ \|", f"| Seven commercial galleries and NOBA | {f(m['gallery'])} |"),
     (r"[\d,]+ objects appear in both",                  f"{f(m['both'])} objects appear in both"),
     (r"which is why [\d,]+ source objects",             f"which is why {f(m['objects'])} source objects"),
     (r"collapse to [\d,]+ works\.",                     f"collapse to {f(m['works'])} works."),
