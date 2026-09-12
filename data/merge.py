@@ -613,6 +613,26 @@ for g in GAL:
         "k": "G" + re.sub(r'[^A-Za-z0-9]', '', g["gid"]), "n": 1,
         "mem": None, "kind": "gallery", "url": g.get("url")})
     gal_added += 1
+# NOBA publishes no birth years, but the biographies its artists write usually state
+# one -- "sündinud 1987", "born 1974", "(s. 1962)". Read from the biography only for
+# artists with no date from anywhere else, tagged NOBA, and only a year a working
+# artist could plausibly have been born in.
+BIO_BORN = re.compile(r"(?:sündinud|sündis|sünd\.?|\bs\.|\bborn|\bb\.)\s*(?:\d{1,2}\.?\s*(?:\d{1,2}\.|[a-zäöüõ]+)\s*)?(1[89]\d\d|20[01]\d)\b", re.I)
+BIO_PAREN = re.compile(r"\((?:s\.|b\.|sünd\.?|born)?\s*(1[89]\d\d|20[01]\d)\s*[-–]?\s*(1[89]\d\d|20[0-2]\d)?\)")
+bio_dated = 0
+_first_work = {}
+for w in works:
+    if w["y"]: _first_work[w["a"]] = min(_first_work.get(w["a"], 9999), w["y"])
+for i, a in enumerate(artists):
+    if a["l"][0] or a.get("bs") != "noba": continue
+    m = BIO_BORN.search(a["b"]) or BIO_PAREN.search(a["b"])
+    if not m: continue
+    b = int(m.group(1))
+    # "(2008-2013)" in a biography is a course of study, not a life; a birth year is
+    # only believed when the artist's earliest work comes at least fifteen years after it
+    if not (1900 <= b <= 2010) or _first_work.get(i, 9999) < b + 15: continue
+    a["l"], a["ls"] = [str(b), ""], "noba"; bio_dated += 1
+print("  birth years read from NOBA biographies:", bio_dated)
 print("  marketplace works skipped, artist not in catalogue and not based in Estonia:", gal_unknown)
 print("  marketplace works by Estonia-based artists new to the catalogue:", gal_new_est)
 print("  gallery works added:", gal_added,
