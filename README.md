@@ -1,6 +1,6 @@
 # Estonian Art Catalogue · Eesti Kunstikataloog
 
-A browsable catalogue of **50,616 artworks** by **3,580 artists** — museum holdings from **24 Estonian public
+A browsable catalogue of **54,285 artworks** by **3,580 artists** — museum holdings from **24 Estonian public
 collections**, plus current work from three commercial galleries, aggregated from the national museum databases and presented as a static site.
 
 Every record is a real museum object and links back to its source record. Nothing here is
@@ -19,11 +19,11 @@ invented, reconstructed, or filled in by hand.
 | [CCA Estonia](https://cca.ee) | 58 bios | Centre for Contemporary Art — artist biographies, Venice Biennale archive |
 | [EKKM](https://ekkm.ee) | — | Contemporary Art Museum of Estonia |
 | [Wikidata](https://www.wikidata.org) | 1,678 artists | Dates, birthplace, training and art-historical affiliation |
-| Seven commercial galleries | 3,055 | Haus, Vernissage, Temnikova & Kasela, Tütar, Artrovert, Kogo, Ruki — current work, metadata only, never prices |
+| Seven commercial galleries and NOBA | 6,724 | Haus, Vernissage, Temnikova & Kasela, Tütar, Artrovert, Kogo, Ruki, and the NOBA marketplace for artists the catalogue already holds — current stock, metadata only, never prices |
 
 7,415 objects appear in both MuIS and the EKM database and are merged on inventory number
 (MuIS `Number` = digikogu `Tulmenumber` + `Kogunumber`), which is why 60,750 source objects
-collapse to 50,616 works.
+collapse to 54,285 works.
 
 **Only attributed works are included.** Anonymous and unattributed objects are excluded by design — including 485 objects catalogued under the name *Tundmatu kunstnik* ("unknown artist"), which is the absence of an attribution written into the name field rather than a name. Notnames stay: *Püha Lucia legendi meister* and its kind identify a hand recognised across several works, and art history treats that as an attribution.
 
@@ -76,7 +76,7 @@ not as part of the normal cycle.
 `data/data.json` is dictionary-encoded and nested, which suits the site and suits
 nobody else. Flat exports with every value resolved, one row per work:
 
-    site/data/export/works.csv.gz      50,616 rows
+    site/data/export/works.csv.gz      54,285 rows
     site/data/export/artists.csv.gz     3,580 rows
     site/data/export/works.jsonl.gz     one JSON object per line
 
@@ -161,7 +161,7 @@ related-works carousel, so the images attached to the wrong artworks.
 Code: MIT (see `LICENSE`).
 
 **Data is mixed, and the split is in the data itself.** Records marked `kind: held` —
-47,538 of them, 93.9% — derive from museum metadata published under CC0, which carries no
+47,538 of them, 87.6% — derive from museum metadata published under CC0, which carries no
 restriction on reuse, commercial included. The 4,222 records marked `kind: gallery` come from
 commercial galleries that grant no licence; they are included as a public catalogue of current
 work, and anyone reusing this dataset should decide for themselves whether to keep them. One
