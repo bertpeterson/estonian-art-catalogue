@@ -15,7 +15,7 @@ catalogue -- museum-held or in the seven galleries -- and otherwise only when
 noba_artists.json says the artist is based in Estonia. Latvian, Lithuanian,
 Finnish and Swedish artists on NOBA stay out.
 """
-import json, re, ssl, time, urllib.request, os, unicodedata
+import json, re, ssl, time, urllib.request, os, unicodedata, html
 UA = "EstonianArtCatalogue/1.0 (research compile; contact via claude.ai)"
 API = "https://noba.ac/wp-json/wc/store/v1/products"
 ctx = ssl.create_default_context(); ctx.check_hostname = False; ctx.verify_mode = ssl.CERT_NONE
@@ -83,6 +83,27 @@ for g in groups.values():
     else: out.extend(g)
 recs = out
 print(f"  translated pairs folded: {folded}")
+
+# The permalink the API gives is the bare product page: no price, no add-to-cart, no
+# artist. NOBA's real page for a work is /kunst/<slug>/ or /artwork/<slug>/, listed on
+# the artist's page (noba_artworks.py). A product is matched to it within its artist
+# on title in either language, then size, then size and year; one candidate or none.
+# About a third of the products have no artwork page at all -- the product page is
+# the only page they have -- and keep the link they came with.
+AW = json.load(open("noba_artworks.json", encoding="utf-8")) if os.path.exists("noba_artworks.json") else {}
+ntitle = lambda t: re.sub(r"[^a-z0-9]", "", fold(html.unescape(t)))
+ndims  = lambda d: re.sub(r"[^0-9x]", "", (d or "").lower().replace("×", "x").replace(",", "."))
+relinked = 0
+for r in recs:
+    a = AW.get(r["artist"])
+    if not a or not a.get("slug"): continue
+    ws = a["works"]
+    c = [s for s, w in ws.items() if ntitle(r["title"]) in {ntitle(t) for t in w["title"].values()}]
+    if len(c) > 1: c = [s for s in c if ndims(ws[s]["dims"]) == ndims(r["dims"])]
+    if not c: c = [s for s, w in ws.items() if ndims(w["dims"]) == ndims(r["dims"]) and w["year"] == (r["year"] or "") and w["dims"]]
+    if len(c) == 1:
+        r["url"] = f"https://noba.ac/{lang(r)}/{'kunst' if lang(r) == 'et' else 'artwork'}/{c[0]}/"; relinked += 1
+print(f"  linked to the artwork page: {relinked}")
 
 prev = json.load(open("gallery_records.json", encoding="utf-8")) if os.path.exists("gallery_records.json") else []
 keep = [r for r in prev if not r["gid"].startswith("noba-")]
