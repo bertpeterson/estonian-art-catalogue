@@ -127,8 +127,23 @@ for _id, _val in (('stat-w', _meta['works']), ('stat-a', _meta['artists']), ('st
                   ('stat-g', len(_holders)), ('stat-s', _gal)):
     h = h.replace(f'<b id="{_id}">0</b>', f'<b id="{_id}">{_val:,}</b>', 1)
 h = h.replace('<div id="stat-gwrap" hidden>', '<div id="stat-gwrap">', 1).replace('id="stat-sale" hidden>', 'id="stat-sale">', 1)
-for _key, _en in (('works', 'works'), ('artists', 'artists'), ('museums', 'museums'), ('galleries', 'galleries'), ('forsale', 'for sale')):
-    h = h.replace(f'<span data-i18n="{_key}"></span>', f'<span data-i18n="{_key}">{_en}</span>', 1)
+# Every label the HTML leaves empty for the app to fill is filled at build time with
+# its English text, from the same dictionary. The first paint then reads as a page,
+# not a skeleton; the app re-applies the visitor's language on load as before. The
+# subtitle's year placeholders are the real years. The "(hidden after load)" attributes
+# that kept the empty header from showing are dropped for the same reason.
+import re as _re
+_I = json.load(open('i18n.json', encoding='utf-8'))
+def _fill(m):
+    tag, attrs, key = m.group(1), m.group(2), m.group(3)
+    txt = _I['EN'].get(key, '')
+    if key == 'sub': txt = _re.sub(r'\d{4}\s*[–-]\s*\d{4}', f'{min(_ys)}–{max(_ys)}', txt)
+    return f'<{tag}{attrs}data-i18n="{key}"{m.group(4)}>{txt}</{tag}>'
+h = _re.sub(r'<(\w+)([^>]*?)data-i18n="([a-z_0-9]+)"([^>]*)></\1>', _fill, h)
+def _fillh(m):
+    tag, attrs, key = m.group(1), m.group(2), m.group(3)
+    return f'<{tag}{attrs}data-i18n-html="{key}"{m.group(4)}>{_I["HTML_EN"].get(key, "")}</{tag}>'
+h = _re.sub(r'<(\w+)([^>]*?)data-i18n-html="([a-z_0-9]+)"([^>]*)></\1>', _fillh, h)
 a=a.replace('__V_INDEX__',V_INDEX).replace('__V_I18N__',V_I18N)
 body=h.replace('<meta charset="utf-8">\n','',1)
 body=re.sub(r'<meta name="description"[^>]*>\n?','',body,count=1)   # the template's static copy
