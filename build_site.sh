@@ -118,6 +118,17 @@ head='''<!doctype html>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 ''' + DESC + '''
 '''
+# The masthead figures are in the HTML from the first paint. They were "0" placeholders
+# the app filled once the 11 MB index had loaded, so a reload showed 0 · 0 · 0 for a
+# moment; the app still overwrites them, but with the same numbers.
+_gal = sum(1 for w in _m['works'] if w.get('kind') == 'gallery')
+_holders = {w['mu'] for w in _m['works'] if w.get('kind') == 'gallery'}
+for _id, _val in (('stat-w', _meta['works']), ('stat-a', _meta['artists']), ('stat-m', _meta['museums'] if 'museums' in _meta else len({w['mu'] for w in _m['works'] if w.get('kind', 'held') == 'held'})),
+                  ('stat-g', len(_holders)), ('stat-s', _gal)):
+    h = h.replace(f'<b id="{_id}">0</b>', f'<b id="{_id}">{_val:,}</b>', 1)
+h = h.replace('<div id="stat-gwrap" hidden>', '<div id="stat-gwrap">', 1).replace('id="stat-sale" hidden>', 'id="stat-sale">', 1)
+for _key, _en in (('works', 'works'), ('artists', 'artists'), ('museums', 'museums'), ('galleries', 'galleries'), ('forsale', 'for sale')):
+    h = h.replace(f'<span data-i18n="{_key}"></span>', f'<span data-i18n="{_key}">{_en}</span>', 1)
 a=a.replace('__V_INDEX__',V_INDEX).replace('__V_I18N__',V_I18N)
 body=h.replace('<meta charset="utf-8">\n','',1)
 body=re.sub(r'<meta name="description"[^>]*>\n?','',body,count=1)   # the template's static copy
