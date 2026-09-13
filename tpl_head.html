@@ -203,6 +203,10 @@ h1 em{font-style:italic;font-weight:400}
 .gy-row[aria-pressed="true"] .gy-bar{background:var(--invert-fg)}
 .gy-row[aria-pressed="true"] .gy-n{color:var(--invert-fg)}
 .gy-y{color:var(--grey-6);font-variant-numeric:tabular-nums}
+/* the same rows carry artist names in the undated group: one fixed column so every
+   bar starts on the same line, the rare long name trimmed rather than wrapped */
+.gy-artists .gy-row{grid-template-columns:8.6em 1fr 30px}
+.gy-artists .gy-y{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .gy-row:hover .gy-y,.gy-row[aria-pressed="true"] .gy-y{color:inherit}
 .gy-track{height:7px;background:var(--rule-soft);position:relative;overflow:hidden}
 .gy-bar{position:absolute;left:0;top:0;bottom:0;background:var(--bar)}
