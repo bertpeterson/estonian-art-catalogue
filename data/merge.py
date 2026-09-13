@@ -578,6 +578,16 @@ print("  wikidata dropped as unresolvable conflict:", WD_CONFLICT)
 # carry kind="gallery" so a visitor can always tell the two apart, and every record
 # links back to the gallery's own page. Prices are deliberately not collected.
 GAL = json.load(open("gallery_records.json", encoding="utf-8")) if os.path.exists("gallery_records.json") else []
+# A gallery that lists one work under two product ids -- Haus does, a hundred times --
+# is one work. Same artist, same title, same size, same gallery: the first listing stays.
+_seen, _dedup, _gal_dup = set(), [], 0
+for g in GAL:
+    k = (g["gallery"], " ".join(fold(g.get("artist") or "")), "".join(fold(g.get("title") or "")),
+         re.sub(r"[^0-9x]", "", (g.get("dims") or "").lower().replace("×", "x").replace(",", ".")))
+    if k[2] and k in _seen: _gal_dup += 1; continue
+    _seen.add(k); _dedup.append(g)
+print("  gallery listings that were the same work twice:", _gal_dup)
+GAL = _dedup
 gal_added = gal_unknown = gal_new_est = 0
 NOBA_ARTISTS = json.load(open("noba_artists.json", encoding="utf-8")) if os.path.exists("noba_artists.json") else {}
 # Marketplace records are decided last, once every gallery's own artists are in.
