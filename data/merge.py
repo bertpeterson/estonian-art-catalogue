@@ -331,6 +331,9 @@ for names in _bysur.values():
                 if not _life_of(big) and _life_of(small): LIFE_FROM_VARIANT[big] = _life_of(small, src=True)
                 SPELLINGS.append((small, big))
 print("  merged as one person under two spellings:", len(SPELLINGS))
+# The retired spellings had artist pages of their own, indexed and bookmarked.
+# build_pages.py turns each into a redirect to the surviving page.
+json.dump({small: big for small, big in SPELLINGS}, open("retired_names.json", "w", encoding="utf-8"), ensure_ascii=False, indent=0)
 for small, big in SPELLINGS: print("     %-38s -> %s" % (small, big))
 
 artists, aidx = [], {}
