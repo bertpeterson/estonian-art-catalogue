@@ -606,8 +606,9 @@ for g in GAL:
         na = NOBA_ARTISTS.get(g["artist"]) or {}
         if na.get("country") != "Eesti": gal_unknown += 1; continue
         gal_new_est += 1
+    if not g.get("title"): continue           # before the artist is added: a titleless listing must not create a name
     ai = artist_index(g["artist"])
-    if ai is None or not g.get("title"): continue
+    if ai is None: continue
     # a biography from the artist's NOBA page, for artists who have none elsewhere
     na = NOBA_ARTISTS.get(g["artist"]) or {}
     if na.get("bio") and not artists[ai].get("b") and not artists[ai].get("ben"):
