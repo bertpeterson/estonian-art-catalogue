@@ -1,10 +1,12 @@
 # Estonian Art Catalogue · Eesti Kunstikataloog
 
 A browsable catalogue of **57,546 artworks** by **4,049 artists** — museum holdings from **24 Estonian public
-collections**, plus current work from three commercial galleries, aggregated from the national museum databases and presented as a static site.
+collections**, plus what seven commercial galleries and the NOBA marketplace are selling right now,
+aggregated from the national museum databases and the galleries' own listings and presented as a static site.
 
-Every record is a real museum object and links back to its source record. Nothing here is
-invented, reconstructed, or filled in by hand.
+Every record is a real object with a real holder and links back to its source record. Nothing here is
+invented, reconstructed, or filled in by hand; where a judgement was made instead of a count, the page
+says so with an *ed* tag.
 
 **Live site (canonical):** https://museaal.ee/
 
@@ -18,8 +20,12 @@ invented, reconstructed, or filled in by hand.
 | [EKM Digital Collection](https://digikogu.ekm.ee) | 27,681 | The Art Museum of Estonia's own database, behind Kumu |
 | [CCA Estonia](https://cca.ee) | 58 bios | Centre for Contemporary Art — artist biographies, Venice Biennale archive |
 | [EKKM](https://ekkm.ee) | — | Contemporary Art Museum of Estonia |
-| [Wikidata](https://www.wikidata.org) | 1,678 artists | Dates, birthplace, training and art-historical affiliation |
-| Seven commercial galleries and NOBA | 9,985 | Haus, Vernissage, Temnikova & Kasela, Tütar, Artrovert, Kogo, Ruki, and the NOBA marketplace for artists the catalogue already holds or who are based in Estonia — current stock, metadata only, never prices |
+| [Wikidata](https://www.wikidata.org) | 1,629 artists | Dates, birthplace, description, training and art-historical affiliation — matched on name, gated on dates and occupation (see *Rules*) |
+| Seven commercial galleries and NOBA | 9,985 | Haus, Vernissage, Temnikova & Kasela, Tütar, Artrovert, Kogo, Ruki — current stock from each gallery's own site; and [NOBA](https://noba.ac), the Nordic-Baltic marketplace, for artists the catalogue already holds or whose NOBA page places them in Estonia. Metadata only, never prices |
+
+Of the works for sale, 7,039 are NOBA listings, 2,946 the galleries' own. NOBA also supplies a short
+biography, written by the artist or NOBA, for 544 artists who have none from a museum, and a birth year
+read from that biography for 301 — both tagged *NOBA* on the page.
 
 7,415 objects appear in both MuIS and the EKM database and are merged on inventory number
 (MuIS `Number` = digikogu `Tulmenumber` + `Kogunumber`), which is why 60,750 source objects
@@ -35,14 +41,16 @@ the original entry at its holding institution.
 
 ```
 site/                 the deployable static site (open index.html over HTTP)
-  data/index.json     9.3 MB — everything the list, search and facets need
-  data/detail/<decade>.json  46 shards — descriptions, dimensions, collapsed duplicates
+  data/index.json     11 MB — everything the list, search and facets need
+  data/detail/<decade>.json  shards — descriptions, dimensions, collapsed duplicates
+  a/<artist>.html     a static page per artist, plus redirects for retired spellings
+  404.html            for stale addresses
 register.html         a dated snapshot as one self-contained file — see below
 data/data.json        the merged dataset (see Schema below)
 data/*.py             the harvest, enrichment and merge scripts
 tpl_head.html         markup + CSS for the app
 tpl_app.html          the application itself
-i18n.json             the EN/ET dictionary
+i18n.py               the EN/ET dictionary — the source; i18n.json is generated from it on every build
 build_site.py/.sh     rebuilds site/ from data/data.json
 ```
 
@@ -58,6 +66,59 @@ than merely inconvenient to lose. From a fresh clone:
     ./build_site.sh            # merge, validate, export, build
 
 Everything then rebuilds without fetching anything from anyone.
+
+## Rules the data follows
+
+These are the decisions between the sources and the page. Each is in `data/merge.py` with its reasons.
+
+**Attribution.** Only attributed work. Objects catalogued as *Tundmatu kunstnik* or with a trailing `(?)`
+are out; notnames (*Püha Lucia legendi meister*) stay. A workshop, copy or "after" is never merged with
+its master.
+
+**One person, one page.** Two spellings are one artist when they share the surname and birth year and
+their first names are a letter apart or one a subsequence of the other (Johan/Johann Köler, Erich
+Kügelgen / Erich von Kügelgen). A generation qualifier — *sen.*, *jun.*, *vanem*, *noorem* — must agree.
+56 spellings merged; the retired address of each redirects to the survivor.
+
+**Dates.** A range wider than thirty years (*ca 1800–1899*) is a period, not a year: the museum's words
+stay as the label, the page shows the century. A year written at the end of a title is used only when
+the dating field said nothing at all. A work dated before its artist was born or after they died keeps
+the museum's date and carries a flag (`f: pre | post`; 30 and 169) that the page explains and the
+artist's activity span ignores. Two source records with a death before a birth are corrected and tagged
+*ed*.
+
+**Wikidata.** Matched on the name label, then kept only if the birth year agrees with the museum's, or —
+where the museum gives no dates — sits ten to ninety years before the artist's earliest work; and only
+if the item's recorded occupations include an artistic one (an item with none recorded is kept). 165
+matches were the wrong person by that last rule alone: a veterinarian, a wrestling coach, a footballer
+born in 2003. Where the museum gave no dates and Wikidata does, the date is filled and tagged *Wikidata*.
+
+**Galleries.** Only what is purchasable now: Vernissage's 1,769 past auction lots and Kogo's sold works
+are excluded, and any price phrase is stripped before parsing. One listing per work per gallery. NOBA
+lists most works twice, once per site language, with the title translated; pairs are folded on artist,
+year, size and medium where that leaves exactly one of each, keeping the Estonian. A work a gallery
+lists on its own site and again on NOBA keeps the gallery's listing. NOBA links go to the artwork page
+(`/kunst/`, `/artwork/`) where one exists — 5,717 of 8,885 — and otherwise to the product page, which
+for the rest is the only page there is.
+
+**Biographies** are the holder's text, whole: MuIS's are two or three paragraphs and an earlier
+harvest kept only the longest, which opened Priidu Aavik's life at "on returning to Estonia".
+
+**Editorial.** The sixteen names on the landing page are chosen, not counted, and tagged *ed*. Decade
+notes and the English medium vocabulary are editorial. Everything else on a record is the holder's.
+
+## The site
+
+The register groups by decade, artist or **timeline** — one bar per artist with a known birth year, a
+darker segment for the years the catalogue holds dated work from, every filter applying. **For sale**
+in the masthead opens everything a gallery is selling; the line under the names opens the 325 artists
+who are both in a museum and on the market. Every gallery row links out with *For sale ↗*. The
+**shortlist** (bookmark on each row) is kept in the browser, exports as CSV and shares as a link that
+carries the keys. Each decade bar shows its for-sale share hatched, because since NOBA the 2020s bar
+is 98% gallery stock and unsplit it read as the most-collected decade in Estonian history.
+
+`site/a/` holds a static page per artist for crawlers, each linking to related artists by school and
+period, and `site/404.html` prefills a search from any stale artist address.
 
 ## Two builds, and which one is current
 
@@ -145,11 +206,17 @@ collection and cached locally, then parsed. Requests identified themselves as
 the MuIS harvest used the bulk RDF files it publishes at `/rdf/collection/`. **A refresh
 should go through those bulk files and the OAI interface rather than fetching object pages.**
 
-Gallery records come from each gallery's own public listings — WooCommerce's Store API where
-one exists, otherwise the pages themselves. Prices are never collected, and every record
-links back to the gallery's page. Where a site asked not to be collected from, it was not:
-`alleegalerii.ee` sets `ClaudeBot: Disallow` and an Article 4 reservation, and holds no
-records here.
+Gallery records come from each gallery's own public listings — WooCommerce's documented Store API
+where one exists (Vernissage, NOBA), otherwise the pages themselves. NOBA's artist pages were read
+once each for the artist's stated country of location, biography, and the addresses of their artwork
+pages. Prices are never collected, and every record links back to the gallery's page. Where a site
+asked not to be collected from, it was not: `alleegalerii.ee` sets `ClaudeBot: Disallow` and an
+Article 4 reservation, and holds no records here.
+
+**Gallery stock is re-harvested monthly** by `.github/workflows/reharvest.yml`, at 04:00 UTC on the
+1st: every gallery fetched afresh, rebuilt, README figures updated, committed. `data/harvest_guard.py`
+refuses the run if any gallery comes back empty or down more than 40%, so a redesigned site fails
+loudly rather than vanishing quietly. The museum sources are never re-crawled by it.
 
 **Images are deliberately absent.** MuIS states a licence per image, and none of the 31,000
 carry a permissive one — 26,308 are marked *rights undetermined*, 4,905 *protected by
@@ -162,10 +229,11 @@ Code: MIT (see `LICENSE`).
 
 **Data is mixed, and the split is in the data itself.** Records marked `kind: held` —
 47,538 of them, 82.6% — derive from museum metadata published under CC0, which carries no
-restriction on reuse, commercial included. The 4,222 records marked `kind: gallery` come from
-commercial galleries that grant no licence; they are included as a public catalogue of current
-work, and anyone reusing this dataset should decide for themselves whether to keep them. One
-filter on `kind` separates the two.
+restriction on reuse, commercial included. The 9,985 records marked `kind: gallery` come from
+commercial galleries and the NOBA marketplace, which grant no licence; they are included as a
+public catalogue of current work, and anyone reusing this dataset should decide for themselves
+whether to keep them. One filter on `kind` separates the two. Biographies and birth years tagged
+*NOBA* are NOBA's or the artist's own text.
 
 Attribution to the holding institution is carried in every record, and every record links back
 to its source.
