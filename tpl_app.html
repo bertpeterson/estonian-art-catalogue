@@ -184,7 +184,8 @@
 
   const state = {group:"decade", decOrder:"earliest", artOrder:"az", q:"", list:false, shared:null, cross:false, sale:false, tlLimit:400,
                  decade:null, media:new Set(), museums:new Set(), cats:new Set(), srcs:new Set(),
-                 artist:null, letter:null, idxOpen:false, idxQ:"", idxLimit:120, idxSort:"az", showEarly:false, origins:new Set(), groups:new Set(), sort:"year", year:null, gLimit:50, from:null, to:null, undOnly:false, open:null, expand:new Set()};
+                 artist:null, letter:null, idxOpen:false, idxQ:"", idxLimit:120, idxSort:"az", showEarly:false, origins:new Set(), groups:new Set(), sort:"year", year:null, gLimit:50, from:null, to:null, undOnly:false, open:null, expand:new Set(),
+                 od:new Set(), cc:new Set()};   // decades opened, centuries folded -- the register's outline
   const LIMIT_DEC = 50, LIMIT_ART = 18;
   const slug = s => (s||"").normalize("NFKD").replace(/[\u0300-\u036f]/g,"")
       .toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"");
@@ -213,6 +214,8 @@
     state.origins.forEach(v => p.append("origin", v===NOORIGIN?"none":v));
     state.groups.forEach(v => p.append("grp", v));
     if (state.open) p.set("open", state.open);
+    state.od.forEach(v => p.append("od", v));
+    state.cc.forEach(v => p.append("cc", v));
     if (state.idxOpen) p.set("index", state.letter || "all");
     // The list travels as its keys, so "Link to this view" of your own list is a link
     // anyone can open. An empty list is "mine" -- nothing to carry.
@@ -261,6 +264,7 @@
     state.origins = new Set(ORIGINS.filter(o => g("origin").includes(o===NOORIGIN?"none":o)));
     state.groups  = new Set(GROUPS.filter(x => g("grp").includes(x)));
     state.open    = p.get("open") || null;
+    state.od = new Set(g("od")); state.cc = new Set(g("cc"));
     // A list in the URL is yours if it matches what this browser holds, and someone
     // else's otherwise -- shown as a shared list, never merged into yours unasked.
     state.cross = p.get("cross") === "1";
@@ -282,7 +286,7 @@
     // rather than the thing being shared. Expand whichever group holds it.
     if (state.open){
       const w = W.find(x => x.k === state.open);
-      if (w) state.expand.add(String(state.group === "artist" ? w.a : decOf(w)));
+      if (w){ state.expand.add(String(state.group === "artist" ? w.a : decOf(w))); state.od.add(String(decOf(w))); }
     }
   }
 
@@ -522,7 +526,7 @@
   // groups are kept while the selection and order are unchanged.
   let _sgKey = "", _sg = new Map();
   function sortedGroup(d, items, desc){
-    const key = stateToHash().replace(/&?open=[^&]*/, "") + "|" + state.sort + "|" + desc;
+    const key = stateToHash().replace(/&?(open|od|cc)=[^&]*/g, "") + "|" + state.sort + "|" + desc;
     if (key !== _sgKey){ _sgKey = key; _sg = new Map(); }
     let r = _sg.get(d);
     if (!r || r.length !== items.length){ r = sortRows(items, desc); _sg.set(d, r); }
@@ -772,9 +776,7 @@
   }
 
   function groupHTML(key, gutter, items, showArtist){
-    // Untouched, the page opened every decade to 50 rows: 1,800 rows and 74,000px before
-    // anyone had asked for anything. A dozen per decade shows the shape; "show all" is a click.
-    const LIMIT = state.group === "decade" ? (pristine() ? 12 : LIMIT_DEC) : LIMIT_ART;
+    const LIMIT = state.group === "decade" ? LIMIT_DEC : LIMIT_ART;
     const gk = String(key);                       // dataset values are always strings
     const n = items.length, exp = state.expand.has(gk);
     const shown = exp ? items : items.slice(0, LIMIT);
@@ -859,7 +861,7 @@
       const asc = state.decOrder === "earliest";
       let keys = [...new Set(set.map(decOf))].filter(k=>k!=="und").sort((a,b)=>asc?a-b:b-a);
       if (set.some(w=>w.y==null)) keys.push("und");
-      html = keys.map(d => {
+      const decSection = d => {
         let items = sortedGroup(d, setByDec.get(d) || [], !asc);
         if (d === "und" && state.sort === "year"){
           // Nothing here has a year, but not everything is equally unknown: 174 records
@@ -910,7 +912,45 @@
              <div class="g-period">${esc(periodLabel(d))}</div>
              <p class="g-blurb">${esc(blurbFor(d))}</p>${yearBlock}`;
         return groupHTML(d, gutter, items, true);
-      }).join("");
+      };
+      // Untouched, the page listed every decade one after another: 57 groups, each with
+      // its gutter and its first rows, 74,000px before anyone had asked for anything.
+      // A broad view folds into an outline instead -- one heading per century, one line
+      // per decade with its count, and a decade opens on a click. A narrow one (an
+      // artist, a single decade) is short enough to stay flat, and a search always is:
+      // someone who typed a name wants the works, not a table of contents.
+      const compact = state.artist === null && !state.q && keys.length > 6 && set.length > 300;
+      if (!compact) html = keys.map(decSection).join("");
+      else {
+        const cents = [];
+        for (const d of keys){
+          const c = d === "und" ? "und" : Math.floor(d/100) + 1, last = cents[cents.length-1];
+          if (last && last.c === c) last.ds.push(d); else cents.push({c, ds:[d]});
+        }
+        const cnt = k => (setByDec.get(k) || []).length;
+        html = cents.map(({c, ds}) => {
+          const max = Math.max(1, ...ds.map(cnt));
+          const line = d => {
+            const on = state.od.has(String(d));
+            return `<button class="dl" data-od="${d}" aria-expanded="${on}">
+              <span class="dl-d">${d==="und" ? esc(T("undated")) : d + "s"}</span>
+              <span class="dl-track">${d==="und" ? "" : `<span class="dl-bar" style="width:${Math.round(cnt(d)/max*100)}%"></span>`}</span>
+              <span class="dl-n">${fmt(cnt(d))}</span></button>` + (on ? decSection(d) : "");
+          };
+          if (c === "und") return `<section class="cy cy-nd">${line("und")}</section>`;
+          const lo = (c-1)*100, hi = lo + 99;
+          const per = PERIODS.filter(p=>p[1]>=lo && p[0]<=hi)
+            .map(p => LANG === "en" ? I18N.PERIOD_EN[p[2]] : I18N.PERIOD_ET[p[2]]).join("  →  ")
+            || (hi < 1700 ? T("p_pre") : "");
+          const closed = state.cc.has(String(c));
+          return `<section class="cy" id="cy-${c}">
+            <button class="cy-h" data-cc="${c}" aria-expanded="${!closed}">
+              <span class="cy-n">${esc(T("century",{n:ordN(c)}))}</span>
+              <span class="cy-p">${esc(per)}</span>
+              <span class="cy-c">${esc(T("nworks",{n:fmt(ds.reduce((n,d)=>n+cnt(d),0))}))}</span></button>
+            ${closed ? "" : ds.map(line).join("")}</section>`;
+        }).join("");
+      }
     } else {
       // The last word is not the surname when the name ends in a bracket -- "Johann
       // Willinges (1560-1625)" sorted under "(", ahead of every letter. surnameOf skips those.
@@ -1210,6 +1250,12 @@
     if (e.target.closest("#more-artists")){ state.gLimit += 100; render(); return; }
     const mb = e.target.closest(".more");
     if (mb){ state.expand.add(String(mb.dataset.exp)); render(); return; }
+    const fold = e.target.closest(".dl, .cy-h");
+    if (fold){
+      const set = fold.dataset.od !== undefined ? state.od : state.cc, k = fold.dataset.od ?? fold.dataset.cc;
+      set.has(k) ? set.delete(k) : set.add(k);
+      render(); pushHash(true); return;
+    }
     const b = e.target.closest(".row-btn"); if (!b) return;
     const id = b.dataset.id;
     state.open = state.open === id ? null : id;
@@ -1375,7 +1421,7 @@
   $("reset").addEventListener("click", () => {
     state.q=""; state.decade=null; state.media.clear(); state.museums.clear(); state.cats.clear(); state.srcs.clear(); state.origins.clear(); state.groups.clear();
     state.artist=null; state.letter=null; state.idxOpen=false; state.sort="year"; state.year=null; state.from=null; state.to=null; state.undOnly=false; $("sortby").value="year";
-    state.open=null; state.expand.clear(); state.decOrder="earliest"; state.artOrder="az";
+    state.open=null; state.expand.clear(); state.od.clear(); state.cc.clear(); state.decOrder="earliest"; state.artOrder="az";
     state.list=false; state.shared=null; state.cross=false; state.sale=false;
     $("q").value=""; setGroup("decade"); renderAll(); pushHash(); window.scrollTo({top:0,behavior:"auto"});
   });
