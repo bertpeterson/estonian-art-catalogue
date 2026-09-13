@@ -254,6 +254,53 @@ open("site/a/index.html", "w", encoding="utf-8").write(
     f'<nav><a href="{BASE}/">Estonian Art Catalogue</a> › Artists</nav>'
     f'<h1>Artists A–Z</h1><p class="m">{len(index_rows):,} artists</p><ul>{lst}</ul></body></html>')
 
+# ---- retired names: redirect stubs --------------------------------------------
+# A spelling merged away in merge.py had an artist page of its own, indexed and
+# bookmarked. Each old URL now carries a stub that says where the artist went and
+# sends the reader there; the canonical tag tells a crawler the same.
+_retired = os.path.join("data", "retired_names.json")
+stubs = 0
+if os.path.exists(_retired):
+    live = {a["n"]: SLUG[i] for i, a in enumerate(A) if i in SLUG}
+    for old, new in json.load(open(_retired, encoding="utf-8")).items():
+        if new not in live: continue
+        osl, nsl = slug(old), live[new]
+        if osl == nsl or os.path.exists(f"{OUT}/{osl}.html"): continue
+        open(f"{OUT}/{osl}.html", "w", encoding="utf-8").write(
+            f"<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\">"
+            f"<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">"
+            f"<title>{e(old)} — see {e(new)} — Estonian Art Catalogue</title>"
+            f"<link rel=\"canonical\" href=\"{BASE}/a/{nsl}.html\">"
+            f"<meta http-equiv=\"refresh\" content=\"0; url={BASE}/a/{nsl}.html\">"
+            f"<meta name=\"robots\" content=\"noindex\"><style>{CSS}</style></head><body>"
+            f"<nav><a href=\"{BASE}/\">Estonian Art Catalogue</a> › {e(old)}</nav>"
+            f"<h1>{e(old)}</h1><p class=\"m\">This spelling has been merged. The artist is catalogued as "
+            f"<a href=\"{BASE}/a/{nsl}.html\">{e(new)}</a> — taking you there.</p></body></html>")
+        stubs += 1
+
+# ---- 404 --------------------------------------------------------------------
+# GitHub Pages serves 404.html for any missing path. A stale link usually names
+# an artist, so the page offers a search prefilled from the path, and the A-Z.
+open("site/404.html", "w", encoding="utf-8").write(
+    f"<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\">"
+    f"<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">"
+    f"<title>Not found — Estonian Art Catalogue</title><meta name=\"robots\" content=\"noindex\">"
+    f"<style>{CSS}form{{display:flex;gap:8px;max-width:520px;margin:18px 0}}"
+    f"input{{flex:1;font:inherit;padding:8px 10px;border:1px solid #bbb}}button{{font:inherit;padding:8px 14px}}</style></head><body>"
+    f"<nav><a href=\"{BASE}/\">Estonian Art Catalogue</a> › Not found</nav>"
+    f"<h1>There is no page here</h1>"
+    f"<p class=\"m\" id=\"why\">The address may be misspelt, or the page has moved.</p>"
+    f"<form id=\"f\"><input id=\"q\" placeholder=\"Search the catalogue\" aria-label=\"Search\"><button>Search</button></form>"
+    f"<p><a href=\"{BASE}/a/\">Artists A–Z / Kunstnikud A–Ü</a> · <a href=\"{BASE}/\">Full catalogue</a></p>"
+    f"<script>"
+    f"var m=location.pathname.match(/\\/a\\/([^\\/]+?)(?:\\.html)?$/);"
+    f"if(m){{var w=decodeURIComponent(m[1]).replace(/-/g,' ');document.getElementById('q').value=w;"
+    f"document.getElementById('why').textContent='No artist page at this address. The name may have been merged with another spelling — try the search.';}}"
+    f"document.getElementById('f').onsubmit=function(ev){{ev.preventDefault();var q=document.getElementById('q').value.trim();"
+    f"location.href='{BASE}/#'+(q?'q='+encodeURIComponent(q):'');}};"
+    f"</script></body></html>")
+
+print(f"  redirect stubs {stubs:,}")
 print(f"  artist pages   {pages:,}")
 print(f"  sitemap        {len(index_rows)+1:,} urls")
 print(f"  total size     {sum(os.path.getsize(os.path.join(OUT,f)) for f in os.listdir(OUT))/1048576:.1f} MB")
