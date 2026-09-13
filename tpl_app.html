@@ -150,12 +150,14 @@
     return out;
   })();
 
-  const MEDIA = [...new Set(W.map(w=>w.e))].sort((a,b)=>
-    W.filter(w=>w.e===b).length - W.filter(w=>w.e===a).length);
-  const MUSEUMS = [...new Set(W.map(w=>w.mu))].sort((a,b)=>
-    W.filter(w=>w.mu===b).length - W.filter(w=>w.mu===a).length);
-  const CATS = [...new Set(W.map(w=>w.c).filter(Boolean))].sort((a,b)=>
-    W.filter(w=>w.c===b).length - W.filter(w=>w.c===a).length);
+  // Facet vocabularies ordered by how many works carry each value. These used to count
+  // through all 57,000 works inside the sort comparator -- twice per comparison -- which
+  // was a third of a second at every page load. One pass each now.
+  const bySize = f => {
+    const n = new Map(); for (const w of W){ const v = w[f]; if (v != null) n.set(v, (n.get(v) || 0) + 1); }
+    return [...n.keys()].sort((a, b) => n.get(b) - n.get(a));
+  };
+  const MEDIA = bySize("e"), MUSEUMS = bySize("mu"), CATS = bySize("c");
   const SRCS = [["muis","MuIS"],["ekm","EKM Digital"],["ekmmuis","Both"],["ekkm","EKKM"],["cca","CCA / Venice"]];
   const NOORIGIN = "\u0000none";
   const originsOf = w => { const f = A[w.a].aff; return f ? [f] : [NOORIGIN]; };
@@ -506,17 +508,39 @@
     medium: w => w.e,
     museum: w => w.mu
   };
+  // Every render sorted every dated work in every decade -- 48,000 of them -- with
+  // Intl.Collator deciding ties on title and artist. The collator was 13% of all CPU
+  // time and the sort another 4%, for rows nobody saw: a decade shows 12 to 50. A
+  // sort key is folded once per work and compared as a plain string; collation only
+  // ever ordered ties within one year, where locale-perfect order is invisible.
+  const skey = s => (s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  const SK = w => w._sk || (w._sk = skey(w.t));
+  const SA = w => w._sa || (w._sa = skey(A[w.a].n));
+  const cmpKey = (x, y) => x < y ? -1 : x > y ? 1 : 0;
+  // Opening a record, marking a bookmark, switching language: each re-renders the
+  // register with the same selection, and re-sorted every decade for it. The sorted
+  // groups are kept while the selection and order are unchanged.
+  let _sgKey = "", _sg = new Map();
+  function sortedGroup(d, items, desc){
+    const key = stateToHash().replace(/&?open=[^&]*/, "") + "|" + state.sort + "|" + desc;
+    if (key !== _sgKey){ _sgKey = key; _sg = new Map(); }
+    let r = _sg.get(d);
+    if (!r || r.length !== items.length){ r = sortRows(items, desc); _sg.set(d, r); }
+    return r;
+  }
   function sortRows(items, desc){
-    const k = KEYS[state.sort] || KEYS.year;
-    const numeric = state.sort === "year";
+    const sort = state.sort;
+    const prim = sort === "artist" ? SA : sort === "title" ? SK
+               : sort === "medium" ? (w => skey(medName(w.e))) : sort === "museum" ? (w => skey(musName(w.mu))) : null;
     return items.slice().sort((a,b) => {
-      let r = numeric ? (k(a)-k(b)) : cmpStr(k(a), k(b));
-      if (desc) r = -r;
-      if (state.sort === "year"){
+      let r;
+      if (!prim){
         const ua = a.y == null, ub = b.y == null;
         if (ua !== ub) return ua ? 1 : -1;
-      }
-      return r || (a.y||0)-(b.y||0) || cmpStr(a.t, b.t) || cmpStr(A[a.a].n, A[b.a].n);
+        r = (a.y || 0) - (b.y || 0);
+      } else r = cmpKey(prim(a), prim(b));
+      if (desc) r = -r;
+      return r || (a.y||0)-(b.y||0) || cmpKey(SK(a), SK(b)) || cmpKey(SA(a), SA(b));
     });
   }
 
@@ -836,7 +860,7 @@
       let keys = [...new Set(set.map(decOf))].filter(k=>k!=="und").sort((a,b)=>asc?a-b:b-a);
       if (set.some(w=>w.y==null)) keys.push("und");
       html = keys.map(d => {
-        let items = sortRows((setByDec.get(d) || []).slice(), !asc);
+        let items = sortedGroup(d, setByDec.get(d) || [], !asc);
         if (d === "und" && state.sort === "year"){
           // Nothing here has a year, but not everything is equally unknown: 174 records
           // are dated to a century by the museum. Use that where it exists — it beats
