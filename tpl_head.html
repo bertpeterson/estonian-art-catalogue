@@ -193,6 +193,29 @@ h1 em{font-style:italic;font-weight:400}
 .g-dates{font-family:var(--mono);font-size:.7rem;letter-spacing:.08em;color:var(--grey-6);margin-top:6px}
 .g-period{font-family:var(--mono);font-size:var(--fs-xs);letter-spacing:var(--ls-label);text-transform:uppercase;color:var(--grey-6);margin-top:10px;padding-top:8px;border-top:1px solid var(--rule)}
 .g-blurb{font-size:.82rem;line-height:1.55;color:var(--grey-6);margin-top:10px;max-width:32ch}
+/* ---- the outline: a century heading, a line per decade, the decade's group beneath
+   its line once opened. The line shares the group's two columns so the bars sit over
+   the rows. ---- */
+.cy{border-bottom:1px solid var(--ink);padding-bottom:10px}
+.cy-h{width:100%;display:grid;grid-template-columns:230px 1fr auto;gap:0 34px;align-items:baseline;
+  background:none;border:0;padding:24px 0 12px;cursor:pointer;color:inherit;text-align:left;border-radius:0}
+.cy-n{font-family:var(--serif-text);font-weight:500;font-size:1.75rem;line-height:1;letter-spacing:-.015em}
+.cy-p{font-family:var(--mono);font-size:var(--fs-xs);letter-spacing:var(--ls-label);text-transform:uppercase;color:var(--grey-6)}
+.cy-c{font-family:var(--mono);font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;color:var(--grey-4);
+  font-variant-numeric:tabular-nums;white-space:nowrap}
+.cy-h:hover .cy-c,.cy-h[aria-expanded="false"] .cy-c{color:var(--ink)}
+.cy-nd{padding-top:8px}
+.dl{width:100%;display:grid;grid-template-columns:230px 1fr 52px;gap:34px;align-items:center;
+  background:none;border:0;border-top:1px solid var(--rule);padding:9px 3px;cursor:pointer;color:inherit;text-align:left;border-radius:0}
+.dl:hover{background:var(--field)}
+.dl-d{font-family:var(--serif-text);font-weight:500;font-size:1.05rem;letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+.dl-track{height:7px;background:var(--rule-soft);position:relative;overflow:hidden}
+.dl-bar{position:absolute;left:0;top:0;bottom:0;background:var(--bar)}
+.dl:hover .dl-bar,.dl[aria-expanded="true"] .dl-bar{background:var(--ink)}
+.dl-n{font-family:var(--mono);font-size:.66rem;color:var(--grey-6);text-align:right;font-variant-numeric:tabular-nums}
+.dl[aria-expanded="true"]{border-top-color:var(--ink)}
+.dl[aria-expanded="true"] .dl-n{color:var(--ink)}
+.cy .group{border-bottom:0;padding-top:14px}
 .gy{margin-top:16px;border-top:1px solid var(--rule);padding-top:9px}
 .gy-h{font-family:var(--mono);font-size:var(--fs-xs);letter-spacing:var(--ls-label);text-transform:uppercase;color:var(--grey-4);margin-bottom:6px}
 .gy-row{display:grid;grid-template-columns:34px 1fr 30px;gap:8px;align-items:center;width:100%;
@@ -376,6 +399,9 @@ footer a{border-bottom:1px solid var(--rule)}
   .wrap{padding:0 18px}
   .mast-grid{grid-template-columns:1fr}
   .group{grid-template-columns:1fr;gap:16px}
+  .cy-h{grid-template-columns:1fr auto;gap:6px 14px;padding-top:20px}
+  .cy-p{grid-column:1/-1}
+  .dl{grid-template-columns:4.4em 1fr 48px;gap:12px}
   .gutter{position:static}
   .g-blurb{max-width:60ch}
   .row-btn{grid-template-columns:86px minmax(0,1fr);gap:10px;padding-top:7px;padding-bottom:7px}
