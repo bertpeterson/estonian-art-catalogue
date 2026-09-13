@@ -197,6 +197,29 @@ h1 em{font-style:italic;font-weight:400}
 .g-dates{font-family:var(--mono);font-size:.7rem;letter-spacing:.08em;color:var(--grey-6);margin-top:6px}
 .g-period{font-family:var(--mono);font-size:var(--fs-xs);letter-spacing:var(--ls-label);text-transform:uppercase;color:var(--grey-6);margin-top:10px;padding-top:8px;border-top:1px solid var(--rule)}
 .g-blurb{font-size:.82rem;line-height:1.55;color:var(--grey-6);margin-top:10px;max-width:32ch}
+/* ---- the outline: a century heading, a line per decade, the decade's group beneath
+   its line once opened. The line shares the group's two columns so the bars sit over
+   the rows. ---- */
+.cy{border-bottom:1px solid var(--ink);padding-bottom:10px}
+.cy-h{width:100%;display:grid;grid-template-columns:230px 1fr auto;gap:0 34px;align-items:baseline;
+  background:none;border:0;padding:24px 0 12px;cursor:pointer;color:inherit;text-align:left;border-radius:0}
+.cy-n{font-family:var(--serif-text);font-weight:500;font-size:1.75rem;line-height:1;letter-spacing:-.015em}
+.cy-p{font-family:var(--mono);font-size:var(--fs-xs);letter-spacing:var(--ls-label);text-transform:uppercase;color:var(--grey-6)}
+.cy-c{font-family:var(--mono);font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;color:var(--grey-4);
+  font-variant-numeric:tabular-nums;white-space:nowrap}
+.cy-h:hover .cy-c,.cy-h[aria-expanded="false"] .cy-c{color:var(--ink)}
+.cy-nd{padding-top:8px}
+.dl{width:100%;display:grid;grid-template-columns:230px 1fr 52px;gap:34px;align-items:center;
+  background:none;border:0;border-top:1px solid var(--rule);padding:9px 3px;cursor:pointer;color:inherit;text-align:left;border-radius:0}
+.dl:hover{background:var(--field)}
+.dl-d{font-family:var(--serif-text);font-weight:500;font-size:1.05rem;letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+.dl-track{height:7px;background:var(--rule-soft);position:relative;overflow:hidden}
+.dl-bar{position:absolute;left:0;top:0;bottom:0;background:var(--bar)}
+.dl:hover .dl-bar,.dl[aria-expanded="true"] .dl-bar{background:var(--ink)}
+.dl-n{font-family:var(--mono);font-size:.66rem;color:var(--grey-6);text-align:right;font-variant-numeric:tabular-nums}
+.dl[aria-expanded="true"]{border-top-color:var(--ink)}
+.dl[aria-expanded="true"] .dl-n{color:var(--ink)}
+.cy .group{border-bottom:0;padding-top:14px}
 .gy{margin-top:16px;border-top:1px solid var(--rule);padding-top:9px}
 .gy-h{font-family:var(--mono);font-size:var(--fs-xs);letter-spacing:var(--ls-label);text-transform:uppercase;color:var(--grey-4);margin-bottom:6px}
 .gy-row{display:grid;grid-template-columns:34px 1fr 30px;gap:8px;align-items:center;width:100%;
@@ -380,6 +403,9 @@ footer a{border-bottom:1px solid var(--rule)}
   .wrap{padding:0 18px}
   .mast-grid{grid-template-columns:1fr}
   .group{grid-template-columns:1fr;gap:16px}
+  .cy-h{grid-template-columns:1fr auto;gap:6px 14px;padding-top:20px}
+  .cy-p{grid-column:1/-1}
+  .dl{grid-template-columns:4.4em 1fr 48px;gap:12px}
   .gutter{position:static}
   .g-blurb{max-width:60ch}
   .row-btn{grid-template-columns:86px minmax(0,1fr);gap:10px;padding-top:7px;padding-bottom:7px}
@@ -811,7 +837,8 @@ footer a{border-bottom:1px solid var(--rule)}
 
   const state = {group:"decade", decOrder:"earliest", artOrder:"az", q:"", list:false, shared:null, cross:false, sale:false, tlLimit:400,
                  decade:null, media:new Set(), museums:new Set(), cats:new Set(), srcs:new Set(),
-                 artist:null, letter:null, idxOpen:false, idxQ:"", idxLimit:120, idxSort:"az", showEarly:false, origins:new Set(), groups:new Set(), sort:"year", year:null, gLimit:50, from:null, to:null, undOnly:false, open:null, expand:new Set()};
+                 artist:null, letter:null, idxOpen:false, idxQ:"", idxLimit:120, idxSort:"az", showEarly:false, origins:new Set(), groups:new Set(), sort:"year", year:null, gLimit:50, from:null, to:null, undOnly:false, open:null, expand:new Set(),
+                 od:new Set(), cc:new Set()};   // decades opened, centuries folded -- the register's outline
   const LIMIT_DEC = 50, LIMIT_ART = 18;
   const slug = s => (s||"").normalize("NFKD").replace(/[\u0300-\u036f]/g,"")
       .toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"");
@@ -840,6 +867,8 @@ footer a{border-bottom:1px solid var(--rule)}
     state.origins.forEach(v => p.append("origin", v===NOORIGIN?"none":v));
     state.groups.forEach(v => p.append("grp", v));
     if (state.open) p.set("open", state.open);
+    state.od.forEach(v => p.append("od", v));
+    state.cc.forEach(v => p.append("cc", v));
     if (state.idxOpen) p.set("index", state.letter || "all");
     // The list travels as its keys, so "Link to this view" of your own list is a link
     // anyone can open. An empty list is "mine" -- nothing to carry.
@@ -888,6 +917,7 @@ footer a{border-bottom:1px solid var(--rule)}
     state.origins = new Set(ORIGINS.filter(o => g("origin").includes(o===NOORIGIN?"none":o)));
     state.groups  = new Set(GROUPS.filter(x => g("grp").includes(x)));
     state.open    = p.get("open") || null;
+    state.od = new Set(g("od")); state.cc = new Set(g("cc"));
     // A list in the URL is yours if it matches what this browser holds, and someone
     // else's otherwise -- shown as a shared list, never merged into yours unasked.
     state.cross = p.get("cross") === "1";
@@ -909,7 +939,7 @@ footer a{border-bottom:1px solid var(--rule)}
     // rather than the thing being shared. Expand whichever group holds it.
     if (state.open){
       const w = W.find(x => x.k === state.open);
-      if (w) state.expand.add(String(state.group === "artist" ? w.a : decOf(w)));
+      if (w){ state.expand.add(String(state.group === "artist" ? w.a : decOf(w))); state.od.add(String(decOf(w))); }
     }
   }
 
@@ -1149,7 +1179,7 @@ footer a{border-bottom:1px solid var(--rule)}
   // groups are kept while the selection and order are unchanged.
   let _sgKey = "", _sg = new Map();
   function sortedGroup(d, items, desc){
-    const key = stateToHash().replace(/&?open=[^&]*/, "") + "|" + state.sort + "|" + desc;
+    const key = stateToHash().replace(/&?(open|od|cc)=[^&]*/g, "") + "|" + state.sort + "|" + desc;
     if (key !== _sgKey){ _sgKey = key; _sg = new Map(); }
     let r = _sg.get(d);
     if (!r || r.length !== items.length){ r = sortRows(items, desc); _sg.set(d, r); }
@@ -1430,9 +1460,7 @@ footer a{border-bottom:1px solid var(--rule)}
   }
 
   function groupHTML(key, gutter, items, showArtist){
-    // Untouched, the page opened every decade to 50 rows: 1,800 rows and 74,000px before
-    // anyone had asked for anything. A dozen per decade shows the shape; "show all" is a click.
-    const LIMIT = state.group === "decade" ? (pristine() ? 12 : LIMIT_DEC) : LIMIT_ART;
+    const LIMIT = state.group === "decade" ? LIMIT_DEC : LIMIT_ART;
     const gk = String(key);                       // dataset values are always strings
     const n = items.length, exp = state.expand.has(gk);
     const shown = exp ? items : items.slice(0, LIMIT);
@@ -1517,7 +1545,7 @@ footer a{border-bottom:1px solid var(--rule)}
       const asc = state.decOrder === "earliest";
       let keys = [...new Set(set.map(decOf))].filter(k=>k!=="und").sort((a,b)=>asc?a-b:b-a);
       if (set.some(w=>w.y==null)) keys.push("und");
-      html = keys.map(d => {
+      const decSection = d => {
         let items = sortedGroup(d, setByDec.get(d) || [], !asc);
         if (d === "und" && state.sort === "year"){
           // Nothing here has a year, but not everything is equally unknown: 174 records
@@ -1568,7 +1596,45 @@ footer a{border-bottom:1px solid var(--rule)}
              <div class="g-period">${esc(periodLabel(d))}</div>
              <p class="g-blurb">${esc(blurbFor(d))}</p>${yearBlock}`;
         return groupHTML(d, gutter, items, true);
-      }).join("");
+      };
+      // Untouched, the page listed every decade one after another: 57 groups, each with
+      // its gutter and its first rows, 74,000px before anyone had asked for anything.
+      // A broad view folds into an outline instead -- one heading per century, one line
+      // per decade with its count, and a decade opens on a click. A narrow one (an
+      // artist, a single decade) is short enough to stay flat, and a search always is:
+      // someone who typed a name wants the works, not a table of contents.
+      const compact = state.artist === null && !state.q && keys.length > 6 && set.length > 300;
+      if (!compact) html = keys.map(decSection).join("");
+      else {
+        const cents = [];
+        for (const d of keys){
+          const c = d === "und" ? "und" : Math.floor(d/100) + 1, last = cents[cents.length-1];
+          if (last && last.c === c) last.ds.push(d); else cents.push({c, ds:[d]});
+        }
+        const cnt = k => (setByDec.get(k) || []).length;
+        html = cents.map(({c, ds}) => {
+          const max = Math.max(1, ...ds.map(cnt));
+          const line = d => {
+            const on = state.od.has(String(d));
+            return `<button class="dl" data-od="${d}" aria-expanded="${on}">
+              <span class="dl-d">${d==="und" ? esc(T("undated")) : d + "s"}</span>
+              <span class="dl-track">${d==="und" ? "" : `<span class="dl-bar" style="width:${Math.round(cnt(d)/max*100)}%"></span>`}</span>
+              <span class="dl-n">${fmt(cnt(d))}</span></button>` + (on ? decSection(d) : "");
+          };
+          if (c === "und") return `<section class="cy cy-nd">${line("und")}</section>`;
+          const lo = (c-1)*100, hi = lo + 99;
+          const per = PERIODS.filter(p=>p[1]>=lo && p[0]<=hi)
+            .map(p => LANG === "en" ? I18N.PERIOD_EN[p[2]] : I18N.PERIOD_ET[p[2]]).join("  →  ")
+            || (hi < 1700 ? T("p_pre") : "");
+          const closed = state.cc.has(String(c));
+          return `<section class="cy" id="cy-${c}">
+            <button class="cy-h" data-cc="${c}" aria-expanded="${!closed}">
+              <span class="cy-n">${esc(T("century",{n:ordN(c)}))}</span>
+              <span class="cy-p">${esc(per)}</span>
+              <span class="cy-c">${esc(T("nworks",{n:fmt(ds.reduce((n,d)=>n+cnt(d),0))}))}</span></button>
+            ${closed ? "" : ds.map(line).join("")}</section>`;
+        }).join("");
+      }
     } else {
       // The last word is not the surname when the name ends in a bracket -- "Johann
       // Willinges (1560-1625)" sorted under "(", ahead of every letter. surnameOf skips those.
@@ -1868,6 +1934,12 @@ footer a{border-bottom:1px solid var(--rule)}
     if (e.target.closest("#more-artists")){ state.gLimit += 100; render(); return; }
     const mb = e.target.closest(".more");
     if (mb){ state.expand.add(String(mb.dataset.exp)); render(); return; }
+    const fold = e.target.closest(".dl, .cy-h");
+    if (fold){
+      const set = fold.dataset.od !== undefined ? state.od : state.cc, k = fold.dataset.od ?? fold.dataset.cc;
+      set.has(k) ? set.delete(k) : set.add(k);
+      render(); pushHash(true); return;
+    }
     const b = e.target.closest(".row-btn"); if (!b) return;
     const id = b.dataset.id;
     if (state.open === id){ state.open = null; render(); pushHash(); return; }
@@ -2036,7 +2108,7 @@ footer a{border-bottom:1px solid var(--rule)}
   $("reset").addEventListener("click", () => {
     state.q=""; state.decade=null; state.media.clear(); state.museums.clear(); state.cats.clear(); state.srcs.clear(); state.origins.clear(); state.groups.clear();
     state.artist=null; state.letter=null; state.idxOpen=false; state.sort="year"; state.year=null; state.from=null; state.to=null; state.undOnly=false; $("sortby").value="year";
-    state.open=null; state.expand.clear(); state.decOrder="earliest"; state.artOrder="az";
+    state.open=null; state.expand.clear(); state.od.clear(); state.cc.clear(); state.decOrder="earliest"; state.artOrder="az";
     state.list=false; state.shared=null; state.cross=false; state.sale=false;
     $("q").value=""; setGroup("decade"); renderAll(); pushHash(); window.scrollTo({top:0,behavior:"auto"});
   });
