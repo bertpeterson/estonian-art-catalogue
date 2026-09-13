@@ -285,7 +285,6 @@ footer p{margin:0;font-size:.81rem;line-height:1.6;color:var(--grey-6);max-width
 /* the A-Z link is one line; left in a grid cell beside three long notes it sat at
    the top of a tall row with a void beneath it. It takes a row of its own. */
 footer p:first-child{grid-column:1/-1;max-width:none;margin-bottom:-12px}
-.foot-theme{grid-column:1/-1;display:flex;align-items:center;gap:14px;margin-top:8px}
 footer b{color:var(--ink);font-weight:500}
 footer a{border-bottom:1px solid var(--rule)}
 
@@ -490,6 +489,11 @@ footer a{border-bottom:1px solid var(--rule)}
             <button id="lang-en" aria-pressed="true">ENG</button>
             <button id="lang-et" aria-pressed="false">EST</button>
           </div>
+          <div class="langsw themesw" role="group" aria-label="Theme">
+            <button id="th-auto" aria-pressed="true" data-i18n="th_auto">AUTO</button>
+            <button id="th-light" aria-pressed="false" data-i18n="th_light">LIGHT</button>
+            <button id="th-dark" aria-pressed="false" data-i18n="th_dark">DARK</button>
+          </div>
         </div>
         <p class="mast-sub" data-i18n="sub">Art in Estonia's public collections and galleries · 1440–2026</p>
       </div>
@@ -613,12 +617,6 @@ footer a{border-bottom:1px solid var(--rule)}
     <p data-i18n-html="foot1"><b>Where the records come from.</b> Museum holdings: two catalogues, harvested per artist and per collection and merged on inventory number. MuIS is the Ministry of Culture's shared system, covering every Estonian museum; its metadata is CC0. The EKM Digital Collection is the Art Museum of Estonia's own database. Gallery stock: each gallery's own online catalogue, and the NOBA marketplace for artists the catalogue already holds or who are based in Estonia; metadata only — title, date, technique, dimensions — never prices. Descriptions stay in Estonian, as the cataloguer wrote them.</p>
     <p data-i18n-html="foot2"><b>What is in it, and what is editorial.</b> This catalogues what Estonian collections <i>hold</i>, not only work by Estonian artists: Baltic German painters and foreign prints are here because the museums hold them. Only attributed work is included; objects catalogued without an artist are left out by design. Decade notes and the English medium vocabulary are written here. Artist dates and biographies come from MuIS, the EKM Digital Collection or the Estonian Centre for Contemporary Art and are tagged by source; how an artist is described, their citizenship, birthplace and training come from Wikidata where it covers them; only those tagged <span class="tag">ed</span> are editorial. Everything on a work record is the holder's — the museum's or the gallery's.</p>
     <p data-i18n-html="foot3"><b>What the shape shows.</b> Holdings are not history. The peaks are collecting peaks: the Soviet system moved work into museum inventories at scale, and that machinery ended with independence in 1991 — museum holdings fall away sharply after it, and thin to almost nothing for the last two decades. The rise into the 2020s is the opposite bias. Galleries keep what they have not sold and show what they showed lately, so their stock climbs steadily toward the present: seven works here are dated 2010, more than two hundred are dated 2024. That is why the 2020s carry more works than the completed 2010s — two sources leaning opposite ways, not a statement about how much art was made. <span id="undated-note"></span></p>
-    <div class="foot-theme"><span class="eyebrow" data-i18n="theme">Theme</span>
-      <div class="langsw themesw" role="group" aria-label="Theme">
-        <button id="th-auto" aria-pressed="true" data-i18n="th_auto">AUTO</button>
-        <button id="th-light" aria-pressed="false" data-i18n="th_light">LIGHT</button>
-        <button id="th-dark" aria-pressed="false" data-i18n="th_dark">DARK</button>
-      </div></div>
   </footer>
 </div>
 
