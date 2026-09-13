@@ -1,6 +1,6 @@
 # Estonian Art Catalogue · Eesti Kunstikataloog
 
-A browsable catalogue of **57,546 artworks** by **4,050 artists** — museum holdings from **24 Estonian public
+A browsable catalogue of **57,546 artworks** by **4,049 artists** — museum holdings from **24 Estonian public
 collections**, plus current work from three commercial galleries, aggregated from the national museum databases and presented as a static site.
 
 Every record is a real museum object and links back to its source record. Nothing here is
@@ -77,7 +77,7 @@ not as part of the normal cycle.
 nobody else. Flat exports with every value resolved, one row per work:
 
     site/data/export/works.csv.gz      57,546 rows
-    site/data/export/artists.csv.gz     4,050 rows
+    site/data/export/artists.csv.gz     4,049 rows
     site/data/export/works.jsonl.gz     one JSON object per line
 
 Rebuild them with `python3 data/export_csv.py`. `data/validate.py` runs the sanity
