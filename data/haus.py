@@ -48,6 +48,11 @@ def parse(h):
         if not (aut and ttl): continue
         title = txt(ttl.group(1))
         if yr: title = re.sub(r'\s*' + yr.group(1) + r'\s*$', '', title).strip()
+        # Haus writes "Title. Technique" and the harvester kept the separator: 967 titles
+        # ended in a full stop, and a work with no title showed as "--.". Strip the
+        # trailing stop unless it closes an initial or an abbreviation; blank the dashes.
+        title = re.sub(r'\.\s*$', '', title).strip()
+        if re.fullmatch(r'[-–—\s.]*', title): title = ""
         tech = txt(tec.group(1)) if tec else ""
         # "Oil, acrylic, canvas. 120.0 × 130.0 cm" -> technique / dimensions
         dm = re.search(r'([\d.,]+\s*[×x]\s*[\d.,]+(?:\s*[×x]\s*[\d.,]+)?\s*(?:cm|mm))', tech, re.I)
@@ -71,7 +76,10 @@ with ThreadPoolExecutor(max_workers=3) as ex:
         if i % 10 == 0: print(f"  page {i}/{pages}  works {len(rows)}", flush=True)
 
 recs = list(rows.values())
-json.dump(recs, open("gallery_records.json", "w", encoding="utf-8"), ensure_ascii=False)
+# Replace only Haus's own records. This was the first harvester and wrote the whole
+# file; run on its own after the others existed, it wiped them.
+prev = json.load(open("gallery_records.json", encoding="utf-8")) if os.path.exists("gallery_records.json") else []
+json.dump([r for r in prev if r.get("gallery") != "Haus Galerii"] + recs, open("gallery_records.json", "w", encoding="utf-8"), ensure_ascii=False)
 print(f"\nHAUS WORKS: {len(recs)}")
 print(f"  with year      : {sum(1 for r in recs if r['year'])}")
 print(f"  with dimensions: {sum(1 for r in recs if r['dims'])}")
