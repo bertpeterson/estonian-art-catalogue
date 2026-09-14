@@ -438,15 +438,48 @@ def toks(n):
     return tuple(sorted(t for t in re.split(r'[^a-z0-9]+', n) if len(t) > 1))
 by_tok = {toks(a["n"]): i for i, a in enumerate(artists)}
 
+# The auction houses and galleries write names their own way -- "Amandus Heinrich
+# Adamson", "Carl Timoleon von Neff", "Henn-Olavi Roode", "Woldemar Tank" -- and each
+# such spelling was becoming an artist of its own beside the museum's "Amandus Adamson".
+# A name is the same person's when the surname matches and every given name of the
+# shorter form has a close match in the longer (C/K, W/V, X/KS folded, one letter of
+# slack), with one candidate only; a generation word must agree. Fewer, surer merges
+# than guessing on the surname alone.
+_vn = lambda t: re.sub(r"^c", "k", t.replace("x", "ks").replace("w", "v"))
+def _vtoks(n): return [_vn(t) for t in re.findall(r"[^\s.,\-]+", " ".join(_toks(n)))]
+_vsur = collections.defaultdict(list)
+def resolve_variant(name):
+    if NEVER.search(name) or re.search(r"\s[&/]\s|\sja\s|\sand\s", name): return None   # two hands are not a variant of one
+    t = _vtoks(name)
+    if len(t) < 2: return None
+    hits = []
+    for j in _vsur.get(t[-1], []):
+        c = _vtoks(artists[j]["n"])
+        if len(c) < 2 or _qual(artists[j]["n"]) != _qual(name): continue
+        lo, hi = (t[:-1], c[:-1]) if len(t) <= len(c) else (c[:-1], t[:-1])
+        # a short given name gets no slack: Are is not Mare, Ott is not Otto
+        near = lambda a, b: a == b if min(len(a), len(b)) < 4 else _close(a, b)
+        if all(any(near(a, b) for b in hi) for a in lo): hits.append(j)
+    return hits[0] if len(hits) == 1 else None
+
 def artist_index(name, bio_en=None):
     """Find an artist, or add one. Returns index or None for unusable names."""
     t = toks(name)
     if not t: return None
     if t in by_tok: return by_tok[t]
+    if not _vsur:
+        for j, a in enumerate(artists):
+            v = _vtoks(a["n"])
+            if len(v) >= 2: _vsur[v[-1]].append(j)
+    j = resolve_variant(name)
+    if j is not None: by_tok[t] = j; VARIANTS.append((name, artists[j]["n"])); return j
     artists.append({"n": name.strip(), "l": ["", ""], "ls": "ed", "b": "", "bs": "ed",
                     "ai": None, "c": 0, "ben": bio_en, "bens": "cca" if bio_en else None})
     by_tok[t] = len(artists) - 1
+    v = _vtoks(name)
+    if len(v) >= 2: _vsur[v[-1]].append(by_tok[t])
     return by_tok[t]
+VARIANTS = []
 
 # English biographies, written by the field rather than by me
 CCA_BIO = {toks(a["name"]): a["bio"] for a in CE["artists"] if a.get("bio")}
@@ -658,27 +691,31 @@ print("  gallery works added:", gal_added,
 # from a museum holding and from a gallery listing: nothing here is for sale, and
 # the price is the record of a sale, not a valuation. An unsold lot is a result too.
 AUC = json.load(open("auction_records.json", encoding="utf-8")) if os.path.exists("auction_records.json") else []
-auc_added = 0
+auc_added = auc_skipped = 0
 for r in AUC:
     for f in ("artist", "title", "tech", "dims"):
         if r.get(f): r[f] = re.sub(r'\s+', ' ', html.unescape(r[f])).strip()
     if not r.get("title"): continue
+    # a lot the house could not attribute, or attributed to two hands, is not one artist's
+    if re.search(r"tundmatu|unknown|\s[&/]\s|\sja\s", r["artist"], re.I): auc_skipped += 1; continue
     ai = artist_index(r["artist"])
     if ai is None: continue
     y = int(r["year"]) if r.get("year") and r["year"].isdigit() else None
     tech = r.get("tech") or None
     works.append({"a": ai, "t": r["title"], "y": y,
-        "yl": r.get("year") or None, "dsrc": "gallery" if y else None,
+        "yl": r.get("yl") or r.get("year") or None, "dsrc": "gallery" if y else None,
         "e": infer_med(None, tech, tech), "ee": None,
         "tc": tech, "tce": tech, "m": None, "me": None,
         "dm": r.get("dims") or None, "mu": r["house"], "co": None,
         "nu": None, "d": None, "c": None, "s": "auction", "mi": None, "oi": None,
         "k": "A" + re.sub(r'[^A-Za-z0-9]', '', r["aid"]), "n": 1,
         "mem": None, "kind": "auction", "url": r.get("url"),
-        "an": r["sale"], "ad": r["when"], "as": r.get("start"), "ap": r.get("hammer"), "ao": 1 if r["sold"] else 0})
+        "an": r["sale"], "ad": r.get("date") or r["when"], "as": r.get("start"), "ap": r.get("hammer"), "ao": 1 if r["sold"] else 0})
     auc_added += 1
 print("  auction results added:", auc_added, "sold", sum(1 for r in AUC if r["sold"]),
-      "from", len({r["house"] for r in AUC}), "houses")
+      "from", len({r["house"] for r in AUC}), "houses; unattributed or joint lots skipped:", auc_skipped)
+print("  house and gallery spellings resolved to a catalogued artist:", len(VARIANTS))
+for v in VARIANTS: print(f"     {v[0]!r} -> {v[1]!r}")
 
 # ---------- training, movements, memberships ----------
 # Where an artist trained is a real axis in Estonian art — the Pallas school in Tartu

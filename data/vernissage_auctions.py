@@ -16,7 +16,7 @@ left out until it is.
 The shop harvest is not touched: these records are a separate kind, and the
 catalogue's rule that gallery asking prices are never shown stands.
 """
-import re, json, time, datetime, urllib.request, ssl, html
+import re, json, os, time, datetime, urllib.request, ssl, html
 from vern_parse import parse
 UA = "EstonianArtCatalogue/1.0 (research compile; contact via claude.ai)"
 API = "https://vernissage.ee/wp-json/wc/store/v1/products"
@@ -80,7 +80,9 @@ while True:
     if page > 80: break
 
 recs.sort(key=lambda r: (r["when"], r["artist"], r["title"]))
-json.dump(recs, open("auction_records.json", "w", encoding="utf-8"), ensure_ascii=False, indent=0)
+# one file for every house; this script owns its own house's records in it
+prev = json.load(open("auction_records.json", encoding="utf-8")) if os.path.exists("auction_records.json") else []
+json.dump([r for r in prev if r["house"] != "Vernissage"] + recs, open("auction_records.json", "w", encoding="utf-8"), ensure_ascii=False, indent=0)
 sold = [r for r in recs if r["sold"]]
 print(f"\nVERNISSAGE AUCTION RESULTS: {len(recs)}   sold {len(sold)} (with hammer price {sum(1 for r in sold if r['hammer'])})   unsold {len(recs)-len(sold)}")
 print(f"  lots seen {n_lots}, upcoming {n_upcoming}, unparsed {n_unparsed}, hammer below start {n_odd}, non-lots skipped {n_nosale}")

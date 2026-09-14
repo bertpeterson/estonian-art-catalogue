@@ -210,7 +210,7 @@ for i, a in enumerate(A):
         au_line = (f"{len(lots)} auction lots · {sum(1 for w in lots if w.get('ao'))} sold · "
                    f"{ys[0] if ys[0]==ys[-1] else f'{ys[0]}–{ys[-1]}'}"
                    + (f" · {ps[0]:,}–{ps[-1]:,} €" if len(ps) > 1 and ps[0] != ps[-1] else f" · {ps[0]:,} €" if ps else "")
-                   + " — as Vernissage published them; not a valuation")
+                   + " — as the auction houses published them; not a valuation")
     else: au_line = ""
 
     doc = (f"<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\">"
@@ -241,7 +241,7 @@ for i, a in enumerate(A):
            + f"<table><thead><tr><th>Year</th><th>Title</th><th>Technique</th><th>Dimensions</th>"
            f"<th>Held by</th></tr></thead><tbody>{rows}</tbody></table>"
            + neighbours(i)
-           + f"<p class=\"m\">Museum records from MuIS and the EKM Digital Collection; gallery stock from the galleries' own catalogues; auction results as Vernissage published them. "
+           + f"<p class=\"m\">Museum records from MuIS and the EKM Digital Collection; gallery stock from the galleries' own catalogues; auction results as Haus Galerii and Vernissage published them. "
            f"<a href=\"{BASE}/\">Full catalogue</a></p></body></html>")
     open(f"{OUT}/{sl}.html", "w", encoding="utf-8").write(doc)
     pages += 1
