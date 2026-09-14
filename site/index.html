@@ -226,7 +226,7 @@ h1 a:hover{color:var(--grey-6)}
 .mo-col.und .mo-cell{background:repeating-linear-gradient(45deg,var(--rule-soft),var(--rule-soft) 2px,transparent 2px,transparent 5px)}
 .mo-col.und .mo-cell:hover{background:var(--bar)}
 .mo-col.und .mo-cell[aria-pressed="true"]{background:var(--invert-bg)}
-@container (max-height:15px){ .mo-cell span,.mo-cell i{display:none} }
+@container (max-height:11px){ .mo-cell span,.mo-cell i{display:none} }
 @container (max-width:88px){ .mo-cell i{display:none} }
 @container (max-width:44px){ .mo-cell span{display:none} }
 .mosaic + .group{border-top:0}
@@ -1529,7 +1529,8 @@ footer a{border-bottom:1px solid var(--rule)}
         ? [...new Set(c.ds.map(d => Math.floor(d/100)))].map(h => ({ds: c.ds.filter(d => Math.floor(d/100) === h), lab: ordN(h+1), full: T("century", {n: ordN(h+1)})}))
         : c.ds.map(d => ({ds: [d], lab: d === "und" ? T("undated") : d + "s"}));
       units.forEach(u => u.n = u.ds.reduce((n, d) => n + cnt(d), 0));
-      const rowsTpl = units.map(u => `minmax(4px,${(100 * u.n / (c.n || 1)).toFixed(2)}fr)`).join(" ");
+      // 14px is one line of label: every decade gets its name, the thinnest a little over-stated
+      const rowsTpl = units.map(u => `minmax(14px,${(100 * u.n / (c.n || 1)).toFixed(2)}fr)`).join(" ");
       const cells = units.map(u => {
         const on = u.ds.every(d => state.od.has(String(d)));
         return `<button class="mo-cell" data-od="${u.ds.join(",")}" aria-pressed="${on}"
