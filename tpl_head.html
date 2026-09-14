@@ -56,6 +56,9 @@ a{color:inherit}
 .mast-grid{display:grid;grid-template-columns:1fr auto;gap:32px;align-items:end}
 h1{font-family:var(--serif-text);font-weight:500;font-size:clamp(2.1rem,4.6vw,3.2rem);line-height:1;letter-spacing:-.015em;margin:0;text-wrap:balance}
 h1 em{font-style:italic;font-weight:400}
+/* the wordmark is the way home: a plain link back to the untouched page, no hash */
+h1 a{color:inherit;border-bottom:0}
+h1 a:hover{color:var(--grey-6)}
 .switches{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
 .langsw{display:inline-flex;border:1px solid var(--rule)}
 .langsw button{font-family:var(--mono);font-size:var(--fs-xs);letter-spacing:var(--ls-label);
@@ -509,7 +512,7 @@ footer a{border-bottom:1px solid var(--rule)}
   <header class="masthead">
     <div class="mast-grid">
       <div>
-        <h1 data-i18n-html="wordmark"></h1>
+        <h1><a href="./" data-i18n-html="wordmark"></a></h1>
         <div class="switches">
           <div class="langsw" role="group" aria-label="Language">
             <button id="lang-en" aria-pressed="true">ENG</button>
