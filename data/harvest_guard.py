@@ -14,6 +14,11 @@ import json, os, sys, collections
 here = os.path.dirname(os.path.abspath(__file__))
 SNAP = os.path.join(here, "harvest_before.json")
 counts = collections.Counter(g["gallery"] for g in json.load(open(os.path.join(here, "gallery_records.json"), encoding="utf-8")))
+# Auction results only ever accumulate: a past sale does not disappear. Guarded the
+# same way, under the house's name with "auctions" appended.
+AUC = os.path.join(here, "auction_records.json")
+if os.path.exists(AUC):
+    counts.update(r["house"] + " auctions" for r in json.load(open(AUC, encoding="utf-8")))
 
 if sys.argv[1:2] == ["before"]:
     json.dump(counts, open(SNAP, "w"))

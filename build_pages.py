@@ -193,11 +193,25 @@ for i, a in enumerate(A):
             f"collections{' and galleries' if any(w.get('kind')=='gallery' for w in ws) else ''}"
             f"{', ' + span if span else ''}. " + (a.get("wdesc") or ""))[:300]
 
+    # an auction result says what it is in the holder column: the sale and the outcome
+    def holder(w):
+        if w.get("kind") != "auction": return e(val(w, "mu") or "")
+        out = "Sold " + f"{w['ap']:,} €" if w.get("ao") and w.get("ap") else "Sold" if w.get("ao") else "Unsold"
+        return f"{e(val(w, 'mu'))} · {e(w.get('an') or '')} · {out}"
     rows = "".join(
         f"<tr><td>{e(w.get('y') or w.get('yl') or '—')}</td><td>{e(w.get('t'))}</td>"
         f"<td>{e(val(w,'tc') or val(w,'tce') or '')}</td><td>{e(w.get('dm') or '')}</td>"
-        f"<td>{e(val(w,'mu') or '')}</td></tr>"
+        f"<td>{holder(w)}</td></tr>"
         for w in sorted(ws, key=lambda x: (x.get("y") is None, x.get("y") or 0, x.get("t") or ""))[:600])
+    lots = [w for w in ws if w.get("kind") == "auction"]
+    if lots:
+        ps = sorted(w["ap"] for w in lots if w.get("ao") and w.get("ap"))
+        ys = sorted(int(w["ad"][:4]) for w in lots)
+        au_line = (f"{len(lots)} auction lots · {sum(1 for w in lots if w.get('ao'))} sold · "
+                   f"{ys[0] if ys[0]==ys[-1] else f'{ys[0]}–{ys[-1]}'}"
+                   + (f" · {ps[0]:,}–{ps[-1]:,} €" if len(ps) > 1 and ps[0] != ps[-1] else f" · {ps[0]:,} €" if ps else "")
+                   + " — as Vernissage published them; not a valuation")
+    else: au_line = ""
 
     doc = (f"<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\">"
            f"<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">"
@@ -219,6 +233,7 @@ for i, a in enumerate(A):
            + (f"<p class=\"m\">{e(' · '.join(KIND[g.split(':',1)[0]] + ' ' + g.split(':',1)[1] for g in a.get('grp', [])))}</p>"
               if a.get("grp") else "")
            + (f"<p class=\"bio\">{e(a.get('b') or a.get('ben') or '')}</p>" if (a.get('b') or a.get('ben')) else "")
+           + (f"<p class=\"m\">{e(au_line)}</p>" if au_line else "")
            + f"<p><a class=\"cta\" href=\"{BASE}/#artist={sl}\">Browse {len(ws)} works in the catalogue →</a></p>"
            + related(i)
            + (f"<p class=\"m\">Showing the first 600 of {len(ws):,} works — "
@@ -226,7 +241,7 @@ for i, a in enumerate(A):
            + f"<table><thead><tr><th>Year</th><th>Title</th><th>Technique</th><th>Dimensions</th>"
            f"<th>Held by</th></tr></thead><tbody>{rows}</tbody></table>"
            + neighbours(i)
-           + f"<p class=\"m\">Museum records from MuIS and the EKM Digital Collection; gallery stock from the galleries' own catalogues. "
+           + f"<p class=\"m\">Museum records from MuIS and the EKM Digital Collection; gallery stock from the galleries' own catalogues; auction results as Vernissage published them. "
            f"<a href=\"{BASE}/\">Full catalogue</a></p></body></html>")
     open(f"{OUT}/{sl}.html", "w", encoding="utf-8").write(doc)
     pages += 1
