@@ -185,7 +185,7 @@
   const state = {group:"decade", decOrder:"earliest", artOrder:"az", q:"", list:false, shared:null, cross:false, sale:false, tlLimit:400,
                  decade:null, media:new Set(), museums:new Set(), cats:new Set(), srcs:new Set(),
                  artist:null, letter:null, idxOpen:false, idxQ:"", idxLimit:120, idxSort:"az", showEarly:false, origins:new Set(), groups:new Set(), sort:"year", year:null, gLimit:50, from:null, to:null, undOnly:false, open:null, expand:new Set(),
-                 od:new Set(), cc:new Set()};   // decades opened, centuries folded -- the register's outline
+                 od:new Set()};   // the decades opened in the register's mosaic
   const LIMIT_DEC = 50, LIMIT_ART = 18;
   const slug = s => (s||"").normalize("NFKD").replace(/[\u0300-\u036f]/g,"")
       .toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"");
@@ -215,7 +215,6 @@
     state.groups.forEach(v => p.append("grp", v));
     if (state.open) p.set("open", state.open);
     state.od.forEach(v => p.append("od", v));
-    state.cc.forEach(v => p.append("cc", v));
     if (state.idxOpen) p.set("index", state.letter || "all");
     // The list travels as its keys, so "Link to this view" of your own list is a link
     // anyone can open. An empty list is "mine" -- nothing to carry.
@@ -264,7 +263,7 @@
     state.origins = new Set(ORIGINS.filter(o => g("origin").includes(o===NOORIGIN?"none":o)));
     state.groups  = new Set(GROUPS.filter(x => g("grp").includes(x)));
     state.open    = p.get("open") || null;
-    state.od = new Set(g("od")); state.cc = new Set(g("cc"));
+    state.od = new Set(g("od"));
     // A list in the URL is yours if it matches what this browser holds, and someone
     // else's otherwise -- shown as a shared list, never merged into yours unasked.
     state.cross = p.get("cross") === "1";
@@ -330,7 +329,7 @@
       && (state.origins.size===0 || originsOf(w).some(o=>state.origins.has(o)))
       && (state.groups.size===0  || groupsOf(w).some(g=>state.groups.has(g)))
       && (state.artist===null || w.a===state.artist)
-      && (state.undOnly ? w.y===null
+      && (state.undOnly ? w.y==null
           : ((state.from===null || (w.y!==null && w.y>=state.from))
           && (state.to===null   || (w.y!==null && w.y<=state.to)))));
   const baseSetIgnoringYears = () => W.filter(w => matchText(w) && inList(w)
@@ -460,7 +459,7 @@
     $("yr-from").disabled = $("yr-to").disabled = state.undOnly;
     const u = $("yr-undated");
     u.setAttribute("aria-pressed", state.undOnly);
-    const undN = baseSetIgnoringYears().filter(w=>w.y===null).length;
+    const undN = baseSetIgnoringYears().filter(w=>w.y==null).length;
     $("yr-und-n").textContent = undN;
     const set = fullSet();
     const ys = set.map(w=>w.y).filter(y=>y!=null);
@@ -526,7 +525,7 @@
   // groups are kept while the selection and order are unchanged.
   let _sgKey = "", _sg = new Map();
   function sortedGroup(d, items, desc){
-    const key = stateToHash().replace(/&?(open|od|cc)=[^&]*/g, "") + "|" + state.sort + "|" + desc;
+    const key = stateToHash().replace(/&?(open|od)=[^&]*/g, "") + "|" + state.sort + "|" + desc;
     if (key !== _sgKey){ _sgKey = key; _sg = new Map(); }
     let r = _sg.get(d);
     if (!r || r.length !== items.length){ r = sortRows(items, desc); _sg.set(d, r); }
@@ -804,6 +803,40 @@
     </section>`;
   }
 
+  // The three centuries before 1700 hold 247 works between them; as columns of their
+  // own they would be hairlines. They share one, as they share an era on the band.
+  // Every column and cell keeps a floor width so the small ones can still be read
+  // and clicked -- the printed count, not the area, is the figure.
+  function mosaicHTML(keys, cnt){
+    const cols = [];
+    for (const d of keys){
+      const c = d === "und" ? "und" : d < 1700 ? "pre" : Math.floor(d/100) + 1, last = cols[cols.length-1];
+      if (last && last.c === c) last.ds.push(d); else cols.push({c, ds:[d]});
+    }
+    cols.forEach(c => c.n = c.ds.reduce((n, d) => n + cnt(d), 0));
+    const total = cols.reduce((n, c) => n + c.n, 0) || 1;
+    // Proportions are grid tracks in fr, so the gaps come off the top and the shares
+    // stay exact; the floors are pixel minimums the stylesheet sets for the viewport.
+    // (shares as percentages: a grid treats fr factors that sum below 1 as summing to 1,
+    // and would leave the remainder of the width empty)
+    const colsTpl = cols.map(c => `minmax(var(--mow),${(100 * c.n / total).toFixed(2)}fr)`).join(" ");
+    return `<div class="mosaic" role="group" aria-label="${esc(T("mosaic_aria"))}" style="grid-template-columns:${colsTpl}">` + cols.map(c => {
+      const lab = c.c === "und" ? T("nd") : c.c === "pre" ? "<1700" : ordN(c.c);
+      const full = c.c === "und" ? T("undated") : c.c === "pre" ? T("p_pre") : T("century", {n: ordN(c.c)});
+      const span = c.c === "und" ? "und," : c.c === "pre" ? ",1699" : `${(c.c-1)*100},${(c.c-1)*100+99}`;
+      const rowsTpl = c.ds.map(d => `minmax(3px,${(100 * cnt(d) / (c.n || 1)).toFixed(2)}fr)`).join(" ");
+      const cells = c.ds.map(d => {
+        const n = cnt(d), on = state.od.has(String(d));
+        const dl = d === "und" ? T("undated") : d + "s";
+        return `<button class="mo-cell" data-od="${d}" aria-pressed="${on}"
+          title="${esc(dl)} · ${esc(n===1?T("oneworkc"):T("nworks",{n:fmt(n)}))}"><span>${esc(dl)}</span><i>${fmt(n)}</i></button>`;
+      }).join("");
+      return `<div class="mo-col${c.c==="und"?" und":""}">
+        <button class="mo-h" data-span="${span}" title="${esc(full)} · ${esc(T("nworks",{n:fmt(c.n)}))}"><b>${esc(lab)}</b><span>${fmt(c.n)}</span></button>
+        <div class="mo-cells" style="grid-template-rows:${rowsTpl}">${cells}</div></div>`;
+    }).join("") + `</div>`;
+  }
+
   function render(){
     renderDoors(); renderListBar();
     // The count line and Reset describe and undo a selection; before there is one
@@ -915,42 +948,15 @@
       };
       // Untouched, the page listed every decade one after another: 57 groups, each with
       // its gutter and its first rows, 74,000px before anyone had asked for anything.
-      // A broad view folds into an outline instead -- one heading per century, one line
-      // per decade with its count, and a decade opens on a click. A narrow one (an
-      // artist, a single decade) is short enough to stay flat, and a search always is:
-      // someone who typed a name wants the works, not a table of contents.
+      // A broad view opens on a mosaic instead: one column per century, wide as its
+      // share of the works; the decades stacked inside it, tall as theirs. The whole
+      // span reads at a glance, and a decade opens beneath the mosaic on a click. A
+      // narrow view (an artist, a single decade) is short enough to stay flat, and a
+      // search always is: someone who typed a name wants the works, not a chart.
       const compact = state.artist === null && !state.q && keys.length > 6 && set.length > 300;
       if (!compact) html = keys.map(decSection).join("");
-      else {
-        const cents = [];
-        for (const d of keys){
-          const c = d === "und" ? "und" : Math.floor(d/100) + 1, last = cents[cents.length-1];
-          if (last && last.c === c) last.ds.push(d); else cents.push({c, ds:[d]});
-        }
-        const cnt = k => (setByDec.get(k) || []).length;
-        html = cents.map(({c, ds}) => {
-          const max = Math.max(1, ...ds.map(cnt));
-          const line = d => {
-            const on = state.od.has(String(d));
-            return `<button class="dl" data-od="${d}" aria-expanded="${on}">
-              <span class="dl-d">${d==="und" ? esc(T("undated")) : d + "s"}</span>
-              <span class="dl-track">${d==="und" ? "" : `<span class="dl-bar" style="width:${Math.round(cnt(d)/max*100)}%"></span>`}</span>
-              <span class="dl-n">${fmt(cnt(d))}</span></button>` + (on ? decSection(d) : "");
-          };
-          if (c === "und") return `<section class="cy cy-nd">${line("und")}</section>`;
-          const lo = (c-1)*100, hi = lo + 99;
-          const per = PERIODS.filter(p=>p[1]>=lo && p[0]<=hi)
-            .map(p => LANG === "en" ? I18N.PERIOD_EN[p[2]] : I18N.PERIOD_ET[p[2]]).join("  →  ")
-            || (hi < 1700 ? T("p_pre") : "");
-          const closed = state.cc.has(String(c));
-          return `<section class="cy" id="cy-${c}">
-            <button class="cy-h" data-cc="${c}" aria-expanded="${!closed}">
-              <span class="cy-n">${esc(T("century",{n:ordN(c)}))}</span>
-              <span class="cy-p">${esc(per)}</span>
-              <span class="cy-c">${esc(T("nworks",{n:fmt(ds.reduce((n,d)=>n+cnt(d),0))}))}</span></button>
-            ${closed ? "" : ds.map(line).join("")}</section>`;
-        }).join("");
-      }
+      else html = mosaicHTML(keys, k => (setByDec.get(k) || []).length)
+               + keys.filter(d => state.od.has(String(d))).map(decSection).join("");
     } else {
       // The last word is not the surname when the name ends in a bracket -- "Johann
       // Willinges (1560-1625)" sorted under "(", ahead of every letter. surnameOf skips those.
@@ -1250,11 +1256,14 @@
     if (e.target.closest("#more-artists")){ state.gLimit += 100; render(); return; }
     const mb = e.target.closest(".more");
     if (mb){ state.expand.add(String(mb.dataset.exp)); render(); return; }
-    const fold = e.target.closest(".dl, .cy-h");
-    if (fold){
-      const set = fold.dataset.od !== undefined ? state.od : state.cc, k = fold.dataset.od ?? fold.dataset.cc;
-      set.has(k) ? set.delete(k) : set.add(k);
-      render(); pushHash(true); return;
+    const cell = e.target.closest(".mo-cell");
+    if (cell){ const k = cell.dataset.od; state.od.has(k) ? state.od.delete(k) : state.od.add(k); render(); pushHash(true); return; }
+    const col = e.target.closest(".mo-h");
+    if (col){                                   // a column heading narrows the view to that span
+      const [lo, hi] = col.dataset.span.split(",");
+      if (lo === "und"){ state.undOnly = true; state.from = state.to = null; }
+      else { state.undOnly = false; state.from = lo === "" ? null : +lo; state.to = hi === "" ? null : +hi; }
+      state.open = null; state.expand.clear(); renderAll(); pushHash(); return;
     }
     const b = e.target.closest(".row-btn"); if (!b) return;
     const id = b.dataset.id;
@@ -1421,7 +1430,7 @@
   $("reset").addEventListener("click", () => {
     state.q=""; state.decade=null; state.media.clear(); state.museums.clear(); state.cats.clear(); state.srcs.clear(); state.origins.clear(); state.groups.clear();
     state.artist=null; state.letter=null; state.idxOpen=false; state.sort="year"; state.year=null; state.from=null; state.to=null; state.undOnly=false; $("sortby").value="year";
-    state.open=null; state.expand.clear(); state.od.clear(); state.cc.clear(); state.decOrder="earliest"; state.artOrder="az";
+    state.open=null; state.expand.clear(); state.od.clear(); state.decOrder="earliest"; state.artOrder="az";
     state.list=false; state.shared=null; state.cross=false; state.sale=false;
     $("q").value=""; setGroup("decade"); renderAll(); pushHash(); window.scrollTo({top:0,behavior:"auto"});
   });
