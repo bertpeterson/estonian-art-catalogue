@@ -1,6 +1,6 @@
 # Estonian Art Catalogue · Eesti Kunstikataloog
 
-A browsable catalogue of **55,397 artworks** by **4,033 artists** — museum holdings from **24 Estonian public
+A browsable catalogue of **60,475 artworks** by **4,052 artists** — museum holdings from **24 Estonian public
 collections**, plus what seven commercial galleries and the NOBA marketplace are selling right now,
 aggregated from the national museum databases and the galleries' own listings and presented as a static site.
 
@@ -22,7 +22,7 @@ says so with an *ed* tag.
 | [EKKM](https://ekkm.ee) | — | Contemporary Art Museum of Estonia |
 | [Wikidata](https://www.wikidata.org) | 1,629 artists | Dates, birthplace, description, training and art-historical affiliation — matched on name, gated on dates and occupation (see *Rules*) |
 | Seven commercial galleries and NOBA | 6,151 | Haus, Vernissage, Temnikova & Kasela, Tütar, Artrovert, Kogo, Ruki — current stock from each gallery's own site; and [NOBA](https://noba.ac), the Nordic-Baltic marketplace, for artists the catalogue already holds or whose NOBA page places them in Estonia. Metadata only, never prices |
-| Vernissage auction results | 1,685 lots | Every lot in Vernissage's fifteen sales since 2021, as the house published it: starting price, hammer price, sold or unsold. A record of what happened at auction, not a valuation |
+| Auction results: Haus Galerii and Vernissage | 6,763 lots | Every lot in Haus Galerii's hundred sales since 1998 and Vernissage's fifteen since 2021, as the house published it: starting price, hammer price, sold or unsold. A record of what happened at auction, not a valuation |
 
 Of the works for sale, 7,039 are NOBA listings, 2,946 the galleries' own. NOBA also supplies a short
 biography, written by the artist or NOBA, for 544 artists who have none from a museum, and a birth year
@@ -30,7 +30,7 @@ read from that biography for 301 — both tagged *NOBA* on the page.
 
 7,415 objects appear in both MuIS and the EKM database and are merged on inventory number
 (MuIS `Number` = digikogu `Tulmenumber` + `Kogunumber`), which is why 60,750 source objects
-collapse to 55,397 works.
+collapse to 60,475 works.
 
 **Only attributed works are included.** Anonymous and unattributed objects are excluded by design — including 485 objects catalogued under the name *Tundmatu kunstnik* ("unknown artist"), which is the absence of an attribution written into the name field rather than a name. Notnames stay: *Püha Lucia legendi meister* and its kind identify a hand recognised across several works, and art history treats that as an attribution.
 
@@ -102,13 +102,22 @@ lists on its own site and again on NOBA keeps the gallery's listing. NOBA links 
 (`/kunst/`, `/artwork/`) where one exists — 5,717 of 8,885 — and otherwise to the product page, which
 for the rest is the only page there is.
 
-**Auction results** are a kind of their own, neither a holding nor stock. Vernissage lists every lot it
-has offered in the same shop feed, and the house publishes the outcome in the lot's name: *Alghind
-1800 €, Haamrihind 1800 €*; *Haamrihind: €* for a lot that found no buyer; *MÜÜDUD* for one sold after
-the sale at a price the house did not print. All three are kept — an unsold lot is a result too, and
-leaving it out would bias every artist's line upward — with the starting price, the hammer price where
-there is one, and the sale. A lot in a sale that has not yet taken place is not a result and waits.
-The two prices are the only prices in the catalogue: gallery asking prices are never taken.
+**Auction results** are a kind of their own, neither a holding nor stock. Haus Galerii publishes its
+whole archive — a page per sale since 1997, a figure per lot with starting price, last bid and hammer
+price, kroon-era prices shown by the house in euro at the fixed rate. Vernissage lists every lot it has
+offered in the same shop feed as its stock, with the outcome in the lot's name: *Alghind 1800 €,
+Haamrihind 1800 €*; *Haamrihind: €* for a lot that found no buyer; *MÜÜDUD* for one sold after the
+sale at a price the house did not print. All are kept — an unsold lot is a result too, and leaving it
+out would bias every artist's line upward — with the starting price, the hammer price where there is
+one, and the sale. A lot in a sale that has not yet taken place is not a result and waits; a lot the
+house could not attribute, or attributed to two hands, is left out. The two prices are the only prices
+in the catalogue: gallery asking prices are never taken.
+
+**House spellings.** The houses write names their own way — *Amandus Heinrich Adamson*, *Carl Timoleon
+von Neff*, *Woldemar Tank* — and each spelling was becoming an artist beside the museum's. A gallery or
+house name is taken as a catalogued artist's when the surname matches and every given name of the
+shorter form has a close match in the longer (C/K, W/V, X/KS folded; one letter of slack, none for
+names under four letters), with one candidate only and the generation word agreeing. 49 resolved.
 
 **Biographies** are the holder's text, whole: MuIS's are two or three paragraphs and an earlier
 harvest kept only the longest, which opened Priidu Aavik's life at "on returning to Estonia".
@@ -146,8 +155,8 @@ not as part of the normal cycle.
 `data/data.json` is dictionary-encoded and nested, which suits the site and suits
 nobody else. Flat exports with every value resolved, one row per work:
 
-    site/data/export/works.csv.gz      55,397 rows
-    site/data/export/artists.csv.gz     4,033 rows
+    site/data/export/works.csv.gz      60,475 rows
+    site/data/export/artists.csv.gz     4,052 rows
     site/data/export/works.jsonl.gz     one JSON object per line
 
 Rebuild them with `python3 data/export_csv.py`. `data/validate.py` runs the sanity
@@ -238,7 +247,7 @@ related-works carousel, so the images attached to the wrong artworks.
 Code: MIT (see `LICENSE`).
 
 **Data is mixed, and the split is in the data itself.** Records marked `kind: held` —
-47,538 of them, 85.8% — derive from museum metadata published under CC0, which carries no
+47,538 of them, 78.6% — derive from museum metadata published under CC0, which carries no
 restriction on reuse, commercial included. The 9,985 records marked `kind: gallery` come from
 commercial galleries and the NOBA marketplace, which grant no licence; they are included as a
 public catalogue of current work, and anyone reusing this dataset should decide for themselves
