@@ -652,6 +652,34 @@ print("  marketplace works by Estonia-based artists new to the catalogue:", gal_
 print("  gallery works added:", gal_added,
       "from", len({g["gallery"] for g in GAL}), "galleries")
 
+# ---------- auction results ----------
+# Results as the auction house published them (vernissage_auctions.py): a lot, the
+# sale it was in, its starting price, its hammer price if it sold. A separate kind
+# from a museum holding and from a gallery listing: nothing here is for sale, and
+# the price is the record of a sale, not a valuation. An unsold lot is a result too.
+AUC = json.load(open("auction_records.json", encoding="utf-8")) if os.path.exists("auction_records.json") else []
+auc_added = 0
+for r in AUC:
+    for f in ("artist", "title", "tech", "dims"):
+        if r.get(f): r[f] = re.sub(r'\s+', ' ', html.unescape(r[f])).strip()
+    if not r.get("title"): continue
+    ai = artist_index(r["artist"])
+    if ai is None: continue
+    y = int(r["year"]) if r.get("year") and r["year"].isdigit() else None
+    tech = r.get("tech") or None
+    works.append({"a": ai, "t": r["title"], "y": y,
+        "yl": r.get("year") or None, "dsrc": "gallery" if y else None,
+        "e": infer_med(None, tech, tech), "ee": None,
+        "tc": tech, "tce": tech, "m": None, "me": None,
+        "dm": r.get("dims") or None, "mu": r["house"], "co": None,
+        "nu": None, "d": None, "c": None, "s": "auction", "mi": None, "oi": None,
+        "k": "A" + re.sub(r'[^A-Za-z0-9]', '', r["aid"]), "n": 1,
+        "mem": None, "kind": "auction", "url": r.get("url"),
+        "an": r["sale"], "ad": r["when"], "as": r.get("start"), "ap": r.get("hammer"), "ao": 1 if r["sold"] else 0})
+    auc_added += 1
+print("  auction results added:", auc_added, "sold", sum(1 for r in AUC if r["sold"]),
+      "from", len({r["house"] for r in AUC}), "houses")
+
 # ---------- training, movements, memberships ----------
 # Where an artist trained is a real axis in Estonian art — the Pallas school in Tartu
 # and the academy in Tallinn are different lineages, and Ants Laikmaa's atelier taught
@@ -765,6 +793,9 @@ data = {"meta": {"built": datetime.date.today().isoformat(),
                  "shown": sum(1 for w in works if w["kind"]=="shown"),
                  "gallery": sum(1 for w in works if w["kind"]=="gallery"),
                  "galleries": len({w["mu"] for w in works if w["kind"]=="gallery"}),
+                 "auction": sum(1 for w in works if w["kind"]=="auction"),
+                 "auction_sold": sum(1 for w in works if w["kind"]=="auction" and w.get("ao")),
+                 "houses": len({w["mu"] for w in works if w["kind"]=="auction"}),
                  "cca_bios": sum(1 for a in artists if a.get("bens")=="cca"),
                  "with_origin": sum(1 for a in artists if a.get("cit")),
                  "with_aff": sum(1 for a in artists if a.get("aff")),
