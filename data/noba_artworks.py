@@ -9,7 +9,9 @@ listing was tried first and repeats itself after 200 pages; an artist's own page
 lists every work of theirs once, in both site languages, with title, medium, size
 and year -- enough to match each product to its artwork page within the artist.
 
-Cached by artist: a later run fetches only artists it has not seen.
+Fetched afresh on every run: the listing is what says a work is still for sale, so
+a page from last month would keep sold works on sale. The previous file stands in
+only for an artist whose page cannot be fetched this time.
 """
 import json, re, ssl, time, urllib.request, os, html, unicodedata
 UA = "EstonianArtCatalogue/1.0 (research compile; contact via claude.ai)"
@@ -48,12 +50,13 @@ def parse(h):
                     "dims": re.sub(r"\s+", " ", dims.group(1)).strip() if dims else "", "year": year.group(1) if year else ""})
     return out
 
-recs = [g for g in json.load(open("gallery_records.json", encoding="utf-8")) if g["gid"].startswith("noba-")]
+recs = (json.load(open("noba_raw.json", encoding="utf-8")) if os.path.exists("noba_raw.json")
+        else [g for g in json.load(open("gallery_records.json", encoding="utf-8")) if g["gid"].startswith("noba-")])
 names = sorted({g["artist"] for g in recs})
 url_of = {g["artist"]: g["url"] for g in recs}
-have = json.load(open(OUT, encoding="utf-8")) if os.path.exists(OUT) else {}
-todo = [n for n in names if n not in have]
-print(f"NOBA artists: {len(names)}, cached {len(have)}, to fetch {len(todo)}", flush=True)
+prev = json.load(open(OUT, encoding="utf-8")) if os.path.exists(OUT) else {}
+have, todo = {}, names
+print(f"NOBA artists: {len(names)}, previously {len(prev)}, to fetch {len(todo)}", flush=True)
 
 def artist_slug(n):
     s = slugify(n)
@@ -63,15 +66,17 @@ def artist_slug(n):
     return m.group(1) if m else None
 
 for i, n in enumerate(todo, 1):
-    s = artist_slug(n)
-    works = {}
+    s = (prev.get(n) or {}).get("slug") or artist_slug(n)
+    works, failed = {}, False
     if s:
         for lang, base in (("et", "https://noba.ac/et/kunstnik/%s/"), ("en", "https://noba.ac/en/artist/%s/")):
-            for c in parse(get(base % s)):
+            h = get(base % s)
+            if not h: failed = True
+            for c in parse(h):
                 w = works.setdefault(c["slug"], {"id": c["id"], "dims": c["dims"], "year": c["year"], "title": {}})
                 w["title"][lang] = c["title"]
             time.sleep(0.6)
-    have[n] = {"slug": s, "works": works}
+    have[n] = prev[n] if failed and n in prev else {"slug": s, "works": works}
     if i % 50 == 0:
         json.dump(have, open(OUT, "w", encoding="utf-8"), ensure_ascii=False)
         print(f"  {i}/{len(todo)}  artworks so far {sum(len(v['works']) for v in have.values())}", flush=True)

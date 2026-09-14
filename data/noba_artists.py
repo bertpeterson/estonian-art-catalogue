@@ -51,7 +51,8 @@ def parse(h):
     if len(bio) < 40 or re.match(r"^(Graafika|Maal|Skulptuur|Foto|Joonistus|Video)\b", bio): bio = ""
     return {"country": country, "bio": bio[:1200]}
 
-recs = [g for g in json.load(open("gallery_records.json", encoding="utf-8")) if g["gid"].startswith("noba-")]
+recs = (json.load(open("noba_raw.json", encoding="utf-8")) if os.path.exists("noba_raw.json")
+        else [g for g in json.load(open("gallery_records.json", encoding="utf-8")) if g["gid"].startswith("noba-")])
 names = sorted({g["artist"] for g in recs})
 have = json.load(open(OUT, encoding="utf-8")) if os.path.exists(OUT) else {}
 todo = [n for n in names if n not in have]
