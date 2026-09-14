@@ -1509,22 +1509,31 @@ footer a{border-bottom:1px solid var(--rule)}
       if (last && last.c === c) last.ds.push(d); else cols.push({c, ds:[d]});
     }
     cols.forEach(c => c.n = c.ds.reduce((n, d) => n + cnt(d), 0));
-    const total = cols.reduce((n, c) => n + c.n, 0) || 1;
+    // Column widths follow the square root of the count, as a bubble's radius does:
+    // the 20th century holds 56% of the works and would otherwise be 56% of the
+    // width, with everything else squeezed beside it. The cells inside a column are
+    // linear -- a column is a bar, and its decades divide it.
+    const total = cols.reduce((n, c) => n + Math.sqrt(c.n), 0) || 1;
     // Proportions are grid tracks in fr, so the gaps come off the top and the shares
     // stay exact; the floors are pixel minimums the stylesheet sets for the viewport.
     // (shares as percentages: a grid treats fr factors that sum below 1 as summing to 1,
     // and would leave the remainder of the width empty)
-    const colsTpl = cols.map(c => `minmax(var(--mow),${(100 * c.n / total).toFixed(2)}fr)`).join(" ");
+    const colsTpl = cols.map(c => `minmax(var(--mow),${(100 * Math.sqrt(c.n) / total).toFixed(2)}fr)`).join(" ");
     return `<div class="mosaic" role="group" aria-label="${esc(T("mosaic_aria"))}" style="grid-template-columns:${colsTpl}">` + cols.map(c => {
       const lab = c.c === "und" ? T("nd") : c.c === "pre" ? "<1700" : ordN(c.c);
       const full = c.c === "und" ? T("undated") : c.c === "pre" ? T("p_pre") : T("century", {n: ordN(c.c)});
       const span = c.c === "und" ? "und," : c.c === "pre" ? ",1699" : `${(c.c-1)*100},${(c.c-1)*100+99}`;
-      const rowsTpl = c.ds.map(d => `minmax(3px,${(100 * cnt(d) / (c.n || 1)).toFixed(2)}fr)`).join(" ");
-      const cells = c.ds.map(d => {
-        const n = cnt(d), on = state.od.has(String(d));
-        const dl = d === "und" ? T("undated") : d + "s";
-        return `<button class="mo-cell" data-od="${d}" aria-pressed="${on}"
-          title="${esc(dl)} · ${esc(n===1?T("oneworkc"):T("nworks",{n:fmt(n)}))}"><span>${esc(dl)}</span><i>${fmt(n)}</i></button>`;
+      // Before 1700 the decades are 23 slivers of a few works each; that column is
+      // cut by century instead, and a cell opens every decade it holds.
+      const units = c.c === "pre"
+        ? [...new Set(c.ds.map(d => Math.floor(d/100)))].map(h => ({ds: c.ds.filter(d => Math.floor(d/100) === h), lab: ordN(h+1), full: T("century", {n: ordN(h+1)})}))
+        : c.ds.map(d => ({ds: [d], lab: d === "und" ? T("undated") : d + "s"}));
+      units.forEach(u => u.n = u.ds.reduce((n, d) => n + cnt(d), 0));
+      const rowsTpl = units.map(u => `minmax(4px,${(100 * u.n / (c.n || 1)).toFixed(2)}fr)`).join(" ");
+      const cells = units.map(u => {
+        const on = u.ds.every(d => state.od.has(String(d)));
+        return `<button class="mo-cell" data-od="${u.ds.join(",")}" aria-pressed="${on}"
+          title="${esc(u.full || u.lab)} · ${esc(u.n===1?T("oneworkc"):T("nworks",{n:fmt(u.n)}))}"><span>${esc(u.lab)}</span><i>${fmt(u.n)}</i></button>`;
       }).join("");
       return `<div class="mo-col${c.c==="und"?" und":""}">
         <button class="mo-h" data-span="${span}" title="${esc(full)} · ${esc(T("nworks",{n:fmt(c.n)}))}"><b>${esc(lab)}</b><span>${fmt(c.n)}</span></button>
@@ -1952,7 +1961,11 @@ footer a{border-bottom:1px solid var(--rule)}
     const mb = e.target.closest(".more");
     if (mb){ state.expand.add(String(mb.dataset.exp)); render(); return; }
     const cell = e.target.closest(".mo-cell");
-    if (cell){ const k = cell.dataset.od; state.od.has(k) ? state.od.delete(k) : state.od.add(k); render(); pushHash(true); return; }
+    if (cell){
+      const ks = cell.dataset.od.split(","), on = ks.every(k => state.od.has(k));
+      ks.forEach(k => on ? state.od.delete(k) : state.od.add(k));
+      render(); pushHash(true); return;
+    }
     const col = e.target.closest(".mo-h");
     if (col){                                   // a column heading narrows the view to that span
       const [lo, hi] = col.dataset.span.split(",");
