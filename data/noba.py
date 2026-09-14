@@ -68,7 +68,7 @@ while True:
 # The Estonian listing is kept, as the catalogue keeps titles the way the holder
 # wrote them in Estonian. Larger groups (Red lines 1 and 2, both languages) are left
 # alone: nothing in the data says which is which.
-MED = {"maal": "p", "painting": "p", "graafika": "g", "print": "g", "graphics": "g", "skulptuur": "s",
+MED = {"maal": "p", "painting": "p", "graafika": "g", "print": "g", "graphics": "g", "printmaking": "g", "skulptuur": "s",
        "sculpture": "s", "foto": "f", "photo": "f", "photography": "f", "joonistus": "d", "drawing": "d",
        "akvarell": "w", "watercolor": "w", "watercolour": "w", "video": "v", "segatehnika": "m", "mixed media": "m"}
 lang = lambda r: (re.search(r"noba\.ac/(\w\w)/", r["url"]) or [None, "?"])[1]
@@ -88,8 +88,12 @@ print(f"  translated pairs folded: {folded}")
 # artist. NOBA's real page for a work is /kunst/<slug>/ or /artwork/<slug>/, listed on
 # the artist's page (noba_artworks.py). A product is matched to it within its artist
 # on title in either language, then size, then size and year; one candidate or none.
-# About a third of the products have no artwork page at all -- the product page is
-# the only page they have -- and keep the link they came with.
+# About a third of the products have no artwork page on the artist's page. Those are
+# not for sale: NOBA takes a sold work's page private (it answers 401, where a live
+# one answers 200 and a never-made one 404) and leaves the shop product standing --
+# "1 in stock", no image, no way to reach it from the site. Videvik by Malle Leis was
+# one. Only products matched to a listed artwork page are kept; a sample of the rest
+# was 24 sold to 1 live listing the matching had missed.
 AW = json.load(open("noba_artworks.json", encoding="utf-8")) if os.path.exists("noba_artworks.json") else {}
 ntitle = lambda t: re.sub(r"[^a-z0-9]", "", fold(html.unescape(t)))
 ndims  = lambda d: re.sub(r"[^0-9x]", "", (d or "").lower().replace("×", "x").replace(",", "."))
@@ -104,6 +108,12 @@ for r in recs:
     if len(c) == 1:
         r["url"] = f"https://noba.ac/{lang(r)}/{'kunst' if lang(r) == 'et' else 'artwork'}/{c[0]}/"; relinked += 1
 print(f"  linked to the artwork page: {relinked}")
+# The full harvest, before the drop, is what the artist-page scripts read: a new
+# artist's works are unmatched until their page has been fetched.
+json.dump(recs, open("noba_raw.json", "w", encoding="utf-8"), ensure_ascii=False)
+before = len(recs)
+recs = [r for r in recs if "/toode/" not in r["url"]]
+print(f"  dropped as sold or withdrawn (no artwork page listed for them): {before - len(recs)}")
 
 prev = json.load(open("gallery_records.json", encoding="utf-8")) if os.path.exists("gallery_records.json") else []
 keep = [r for r in prev if not r["gid"].startswith("noba-")]

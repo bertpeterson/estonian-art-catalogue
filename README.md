@@ -1,6 +1,6 @@
 # Estonian Art Catalogue · Eesti Kunstikataloog
 
-A browsable catalogue of **57,546 artworks** by **4,049 artists** — museum holdings from **24 Estonian public
+A browsable catalogue of **54,600 artworks** by **3,982 artists** — museum holdings from **24 Estonian public
 collections**, plus what seven commercial galleries and the NOBA marketplace are selling right now,
 aggregated from the national museum databases and the galleries' own listings and presented as a static site.
 
@@ -21,7 +21,7 @@ says so with an *ed* tag.
 | [CCA Estonia](https://cca.ee) | 58 bios | Centre for Contemporary Art — artist biographies, Venice Biennale archive |
 | [EKKM](https://ekkm.ee) | — | Contemporary Art Museum of Estonia |
 | [Wikidata](https://www.wikidata.org) | 1,629 artists | Dates, birthplace, description, training and art-historical affiliation — matched on name, gated on dates and occupation (see *Rules*) |
-| Seven commercial galleries and NOBA | 9,985 | Haus, Vernissage, Temnikova & Kasela, Tütar, Artrovert, Kogo, Ruki — current stock from each gallery's own site; and [NOBA](https://noba.ac), the Nordic-Baltic marketplace, for artists the catalogue already holds or whose NOBA page places them in Estonia. Metadata only, never prices |
+| Seven commercial galleries and NOBA | 7,039 | Haus, Vernissage, Temnikova & Kasela, Tütar, Artrovert, Kogo, Ruki — current stock from each gallery's own site; and [NOBA](https://noba.ac), the Nordic-Baltic marketplace, for artists the catalogue already holds or whose NOBA page places them in Estonia. Metadata only, never prices |
 
 Of the works for sale, 7,039 are NOBA listings, 2,946 the galleries' own. NOBA also supplies a short
 biography, written by the artist or NOBA, for 544 artists who have none from a museum, and a birth year
@@ -29,7 +29,7 @@ read from that biography for 301 — both tagged *NOBA* on the page.
 
 7,415 objects appear in both MuIS and the EKM database and are merged on inventory number
 (MuIS `Number` = digikogu `Tulmenumber` + `Kogunumber`), which is why 60,750 source objects
-collapse to 57,546 works.
+collapse to 54,600 works.
 
 **Only attributed works are included.** Anonymous and unattributed objects are excluded by design — including 485 objects catalogued under the name *Tundmatu kunstnik* ("unknown artist"), which is the absence of an attribution written into the name field rather than a name. Notnames stay: *Püha Lucia legendi meister* and its kind identify a hand recognised across several works, and art history treats that as an attribution.
 
@@ -137,8 +137,8 @@ not as part of the normal cycle.
 `data/data.json` is dictionary-encoded and nested, which suits the site and suits
 nobody else. Flat exports with every value resolved, one row per work:
 
-    site/data/export/works.csv.gz      57,546 rows
-    site/data/export/artists.csv.gz     4,049 rows
+    site/data/export/works.csv.gz      54,600 rows
+    site/data/export/artists.csv.gz     3,982 rows
     site/data/export/works.jsonl.gz     one JSON object per line
 
 Rebuild them with `python3 data/export_csv.py`. `data/validate.py` runs the sanity
@@ -228,7 +228,7 @@ related-works carousel, so the images attached to the wrong artworks.
 Code: MIT (see `LICENSE`).
 
 **Data is mixed, and the split is in the data itself.** Records marked `kind: held` —
-47,538 of them, 82.6% — derive from museum metadata published under CC0, which carries no
+47,538 of them, 87.1% — derive from museum metadata published under CC0, which carries no
 restriction on reuse, commercial included. The 9,985 records marked `kind: gallery` come from
 commercial galleries and the NOBA marketplace, which grant no licence; they are included as a
 public catalogue of current work, and anyone reusing this dataset should decide for themselves
