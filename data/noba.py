@@ -108,6 +108,20 @@ for r in recs:
     if len(c) == 1:
         r["url"] = f"https://noba.ac/{lang(r)}/{'kunst' if lang(r) == 'et' else 'artwork'}/{c[0]}/"; relinked += 1
 print(f"  linked to the artwork page: {relinked}")
+# Two products that resolve to one artwork page are one work -- the translated pair
+# the folding above could not settle because a sibling (Spruces I and II, same size,
+# same year) made the group too big to pair. The Estonian listing is kept.
+by_page = {}
+for r in recs:
+    m = re.search(r"noba\.ac/\w\w/(?:kunst|artwork)/([^/]+)/", r["url"])
+    if m: by_page.setdefault((fold(r["artist"]), m.group(1)), []).append(r)
+same_page = set()
+for g in by_page.values():
+    if len(g) > 1:
+        keep_r = next((r for r in g if lang(r) == "et"), g[0])
+        same_page.update(r["gid"] for r in g if r is not keep_r)
+recs = [r for r in recs if r["gid"] not in same_page]
+print(f"  same artwork page, folded: {len(same_page)}")
 # The full harvest, before the drop, is what the artist-page scripts read: a new
 # artist's works are unmatched until their page has been fetched.
 json.dump(recs, open("noba_raw.json", "w", encoding="utf-8"), ensure_ascii=False)
