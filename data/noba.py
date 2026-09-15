@@ -125,10 +125,13 @@ print(f"  same artwork page, folded: {len(same_page)}")
 # The full harvest, before the drop, is what the artist-page scripts read: a new
 # artist's works are unmatched until their page has been fetched.
 json.dump(recs, open("noba_raw.json", "w", encoding="utf-8"), ensure_ascii=False)
-n_sold = 0
+# NOBA never says sold; it takes the artwork page private and leaves the shop
+# product standing. That is a work no longer listed -- kept as a past listing, but
+# not called sold, since the house does not.
+n_gone = 0
 for r in recs:
-    if "/toode/" in r["url"]: r["sold"] = True; n_sold += 1
-print(f"  sold or withdrawn (no artwork page listed for them), kept as past listings: {n_sold}")
+    if "/toode/" in r["url"]: r["past"] = True; n_gone += 1
+print(f"  no longer listed (no artwork page on the artist's page), kept as past listings: {n_gone}")
 
 prev = json.load(open("gallery_records.json", encoding="utf-8")) if os.path.exists("gallery_records.json") else []
 keep = [r for r in prev if not r["gid"].startswith("noba-")]
