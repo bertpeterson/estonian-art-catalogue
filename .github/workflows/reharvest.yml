@@ -52,7 +52,7 @@ jobs:
 
       - name: Merge and build
         run: |
-          (cd data && python3 merge.py)
+          (cd data && python3 ledger.py && python3 merge.py)
           ./build_site.sh
           python3 data/readme_figures.py
 

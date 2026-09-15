@@ -195,6 +195,7 @@ for i, a in enumerate(A):
 
     # an auction result says what it is in the holder column: the sale and the outcome
     def holder(w):
+        if w.get("kind") == "sold": return f"{e(val(w, 'mu'))} · {'sold' if w.get('gs') else 'no longer listed'}"
         if w.get("kind") != "auction": return e(val(w, "mu") or "")
         out = "Sold " + f"{w['ap']:,} €" if w.get("ao") and w.get("ap") else "Sold" if w.get("ao") else "Unsold"
         return f"{e(val(w, 'mu'))} · {e(w.get('an') or '')} · {out}"

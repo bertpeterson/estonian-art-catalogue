@@ -179,6 +179,10 @@
     return [...m.entries()].sort((x,y)=> (x[0]===NOORIGIN)-(y[0]===NOORIGIN) || y[1]-x[1]).map(x=>x[0]);
   })();
   const SRCLAB = {muis:"muis", ekm:"digi", ekmmuis:"both", cca:"cca", ekkm:"ekkm", auction:"auction"};
+  // a museum holding or a work shown; not stock, not a past listing, not a lot
+  const isHeld = w => !w.kind || w.kind === "held" || w.kind === "shown";
+  // a past listing: sold, or no longer listed -- and the month it was last seen for sale
+  const pastText = w => w.gs ? T("rl_sold") : T("rl_gone");
   // An auction result: the sale, and what the house published about the outcome.
   const eur = n => fmt(n) + " €";
   // a lot sold after the sale reads "Sold" like any other; the detail panel says how
@@ -759,7 +763,7 @@
           <div class="d-v" style="margin-top:16px;display:flex;flex-wrap:wrap;gap:18px">
             ${w.mi?`<a class="permalink" href="https://www.muis.ee/museaalview/${esc(w.mi)}" target="_blank" rel="noopener">${esc(T("d_recmuis"))}</a>`:""}
             ${w.oi?`<a class="permalink" href="https://digikogu.ekm.ee/ekm/search/oid-${esc(w.oi)}/" target="_blank" rel="noopener">${esc(T("d_recekm"))}</a>`:""}
-            ${w.url?`<a class="permalink" href="${esc(w.url)}" target="_blank" rel="noopener">${esc(w.kind === "gallery" ? T("d_gallerylink", {g: musName(w.mu)}) : w.kind === "auction" ? T("d_lotlink", {g: musName(w.mu)}) : T("d_recsource"))}</a>`:""}
+            ${w.url?`<a class="permalink" href="${esc(w.url)}" target="_blank" rel="noopener">${esc(w.kind === "gallery" ? T("d_gallerylink", {g: musName(w.mu)}) : w.kind === "sold" ? T("d_pastlink", {g: musName(w.mu)}) : w.kind === "auction" ? T("d_lotlink", {g: musName(w.mu)}) : T("d_recsource"))}</a>`:""}
             ${slBtn(id, "sl-d")}
           </div>
         </div>
@@ -774,7 +778,8 @@
           ${w.dm?`<div class="d-k">${esc(T("d_dimensions"))}</div><div class="d-v">${esc(w.dm)}</div>`:""}
           ${w.c?`<div class="d-k">${esc(T("d_category"))}</div><div class="d-v">${esc(catName(w.c))}</div>`:""}
           <div class="d-k">${esc(w.kind==="held"?T("d_collection"):T("venue"))}</div><div class="d-v">${esc(w.co||"")}<br><em>${siteOf(w.mu) ? `<a class="permalink" href="${esc(siteOf(w.mu))}" target="_blank" rel="noopener">${esc(musName(w.mu))}</a>` : esc(musName(w.mu))}</em></div>
-          <div class="d-k">${esc(T("kind"))}</div><div class="d-v">${esc(T(w.kind==="shown"?"shown":w.kind==="gallery"?"gallery":w.kind==="auction"?"kind_auction":"held"))}</div>
+          <div class="d-k">${esc(T("kind"))}</div><div class="d-v">${esc(T(w.kind==="shown"?"shown":w.kind==="gallery"?"gallery":w.kind==="auction"?"kind_auction":w.kind==="sold"?"kind_sold":"held"))}</div>
+          ${w.kind==="sold" ? `<div class="d-k">${esc(T("d_status"))}</div><div class="d-v">${esc(pastText(w))}${w.gl ? `<br><span class="d-sub">${esc(T("d_lastseen", {d: w.gl}))}</span>` : ""}<br><span class="d-sub">${esc(T("d_pastnote"))}</span></div>` : ""}
           ${w.kind==="auction" ? `<div class="d-k">${esc(T("d_result"))}</div><div class="d-v">${esc(w.an)} · <b>${esc(auText(w))}</b>${w.as ? `<br><span class="d-sub">${esc(T("d_start", {p: eur(w.as)}))}</span>` : ""}${w.aa ? `<br><span class="d-sub">${esc(T("au_afternote"))}</span>` : ""}<br><span class="d-sub">${esc(T("au_note"))}</span></div>` : ""}
           ${w.nu ? `<div class="d-k">${esc(T("d_number"))}</div><div class="d-v" style="font-family:var(--mono);font-size:.78rem">${esc(w.nu)}</div>` : ""}
           ${ar.wdesc?`<div class="d-k">${esc(T("d_origin"))}</div><div class="d-v">${esc(ar.wdesc)}${ar.qid?` <a class="permalink" href="https://www.wikidata.org/wiki/${esc(ar.qid)}" target="_blank" rel="noopener">${esc(T("d_wd"))}</a>`:""}</div>`:""}
@@ -787,6 +792,9 @@
     // click further and the link was the thing a collector came for.
     const rl = w.kind === "gallery" && w.url
       ? `<a class="rl" href="${esc(w.url)}" target="_blank" rel="noopener" title="${esc(T("d_gallerylink", {g: musName(w.mu)}))}">${esc(T("rl_view"))}</a>`
+      // a past listing links to the gallery's page for as long as it stays up
+      : w.kind === "sold"
+      ? `<a class="rl rl-past" href="${esc(w.url)}" target="_blank" rel="noopener" title="${esc(T("d_pastlink", {g: musName(w.mu)}))}${w.gl ? ` · ${esc(T("d_lastseen", {d: w.gl}))}` : ""}">${esc(pastText(w))} ↗</a>`
       // an auction result carries its outcome on the row: the sale is the point of the record
       : w.kind === "auction" && w.url
       // the price alone on the row -- it is the outcome; "sold" is in the title and the detail
@@ -1164,10 +1172,10 @@
   // two facets at once, which the facet panel cannot express.
   const CROSS = (() => {
     const held = new Set(), sold = new Set();
-    W.forEach(w => { if (w.kind === "gallery") sold.add(w.a); else if (w.kind !== "auction") held.add(w.a); });
+    W.forEach(w => { if (w.kind === "gallery") sold.add(w.a); else if (isHeld(w)) held.add(w.a); });
     return new Set([...held].filter(i => sold.has(i)));
   })();
-  const HELD_N = (() => { const m = new Map(); W.forEach(w => { if (w.kind !== "gallery" && w.kind !== "auction") m.set(w.a, (m.get(w.a) || 0) + 1); }); return m; })();
+  const HELD_N = (() => { const m = new Map(); W.forEach(w => { if (isHeld(w)) m.set(w.a, (m.get(w.a) || 0) + 1); }); return m; })();
   const FOR_SALE = W.reduce((n, w) => n + (w.kind === "gallery" ? 1 : 0), 0);
   const CROSS_WORKS = W.reduce((n, w) => n + (w.kind === "gallery" && CROSS.has(w.a) ? 1 : 0), 0);
   const TOP_ART = (() => {
@@ -1605,8 +1613,8 @@
     $("lang-en").setAttribute("aria-pressed", LANG === "en");
     $("built").textContent = DATA.meta.built;
     $("srcsplit").textContent = LANG === "en"
-      ? `${DATA.meta.dated_from_title} works carry a date the cataloguer wrote at the end of the title rather than in the dating field; those are marked with an asterisk. ${DATA.meta.objects.toLocaleString(LANG === "en" ? "en-GB" : "et-EE")} catalogued objects → ${DATA.meta.works.toLocaleString(LANG === "en" ? "en-GB" : "et-EE")} works (identical title + date + artist collapsed): ${DATA.meta.muis.toLocaleString(LANG === "en" ? "en-GB" : "et-EE")} from MuIS, ${DATA.meta.ekm.toLocaleString(LANG === "en" ? "en-GB" : "et-EE")} from the EKM Digital Collection, ${DATA.meta.both.toLocaleString(LANG === "en" ? "en-GB" : "et-EE")} in both, merged on inventory number. A further ${DATA.meta.gallery.toLocaleString(LANG === "en" ? "en-GB" : "et-EE")} works are the current stock of ${DATA.meta.galleries} galleries, from their own catalogues.${DATA.meta.auction ? ` ${fmt(DATA.meta.auction)} auction lots (${fmt(DATA.meta.auction_sold)} sold) are results as Haus Galerii, Vernissage, Allee galerii, Vaal galerii and Eesti Kunsti Oksjonid published them.` : ""}`
-      : `${DATA.meta.dated_from_title} teosel on dateering kirjutatud pealkirja lõppu, mitte dateeringuvälja; need on tähistatud tärniga. ${DATA.meta.objects.toLocaleString("et")} museaali → ${DATA.meta.works.toLocaleString("et")} teost (sama pealkiri + dateering + autor koondatud): ${DATA.meta.muis.toLocaleString("et")} MuIS-ist, ${DATA.meta.ekm.toLocaleString("et")} EKM Digitaalkogust, ${DATA.meta.both.toLocaleString("et")} mõlemast, ühendatud tulmenumbri järgi. Veel ${DATA.meta.gallery.toLocaleString("et")} teost on ${DATA.meta.galleries} galerii praegune müügivalik, nende endi kataloogidest.${DATA.meta.auction ? ` ${fmt(DATA.meta.auction)} oksjonipartiid (${fmt(DATA.meta.auction_sold)} müüdud) on tulemused nii, nagu Haus Galerii, Vernissage, Allee galerii, Vaal galerii ja Eesti Kunsti Oksjonid need avaldasid.` : ""}`;
+      ? `${DATA.meta.dated_from_title} works carry a date the cataloguer wrote at the end of the title rather than in the dating field; those are marked with an asterisk. ${DATA.meta.objects.toLocaleString(LANG === "en" ? "en-GB" : "et-EE")} catalogued objects → ${DATA.meta.works.toLocaleString(LANG === "en" ? "en-GB" : "et-EE")} works (identical title + date + artist collapsed): ${DATA.meta.muis.toLocaleString(LANG === "en" ? "en-GB" : "et-EE")} from MuIS, ${DATA.meta.ekm.toLocaleString(LANG === "en" ? "en-GB" : "et-EE")} from the EKM Digital Collection, ${DATA.meta.both.toLocaleString(LANG === "en" ? "en-GB" : "et-EE")} in both, merged on inventory number. A further ${DATA.meta.gallery.toLocaleString(LANG === "en" ? "en-GB" : "et-EE")} works are the current stock of ${DATA.meta.galleries} galleries, from their own catalogues.${DATA.meta.past ? ` ${fmt(DATA.meta.past)} are past listings — works a gallery has sold (${fmt(DATA.meta.past_sold)}) or no longer lists — kept as a record of the work, never as stock.` : ""}${DATA.meta.auction ? ` ${fmt(DATA.meta.auction)} auction lots (${fmt(DATA.meta.auction_sold)} sold) are results as Haus Galerii, Vernissage, Allee galerii, Vaal galerii and Eesti Kunsti Oksjonid published them.` : ""}`
+      : `${DATA.meta.dated_from_title} teosel on dateering kirjutatud pealkirja lõppu, mitte dateeringuvälja; need on tähistatud tärniga. ${DATA.meta.objects.toLocaleString("et")} museaali → ${DATA.meta.works.toLocaleString("et")} teost (sama pealkiri + dateering + autor koondatud): ${DATA.meta.muis.toLocaleString("et")} MuIS-ist, ${DATA.meta.ekm.toLocaleString("et")} EKM Digitaalkogust, ${DATA.meta.both.toLocaleString("et")} mõlemast, ühendatud tulmenumbri järgi. Veel ${DATA.meta.gallery.toLocaleString("et")} teost on ${DATA.meta.galleries} galerii praegune müügivalik, nende endi kataloogidest.${DATA.meta.past ? ` ${fmt(DATA.meta.past)} on varasemad müügipakkumised — teosed, mille galerii on müünud (${fmt(DATA.meta.past_sold)}) või mida ta enam ei paku — jäetud teose kirjena, mitte kunagi laoseisuna.` : ""}${DATA.meta.auction ? ` ${fmt(DATA.meta.auction)} oksjonipartiid (${fmt(DATA.meta.auction_sold)} müüdud) on tulemused nii, nagu Haus Galerii, Vernissage, Allee galerii, Vaal galerii ja Eesti Kunsti Oksjonid need avaldasid.` : ""}`;
     const un = $("undated-note");
     if (un) un.textContent = LANG === "en"
       ? `${DATA.meta.undated} of ${DATA.meta.works.toLocaleString(LANG === "en" ? "en-GB" : "et-EE")} records carry no dating; they sit in their own group rather than being guessed into a decade.`

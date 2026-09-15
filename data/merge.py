@@ -614,6 +614,12 @@ print("  wikidata dropped as unresolvable conflict:", WD_CONFLICT)
 # carry kind="gallery" so a visitor can always tell the two apart, and every record
 # links back to the gallery's own page. Prices are deliberately not collected.
 GAL = json.load(open("gallery_records.json", encoding="utf-8")) if os.path.exists("gallery_records.json") else []
+# ...and the listings that have left: a work a gallery marks sold, or one that was
+# listed and is not any more (ledger.py). A past listing is a record of a work that
+# passed through a known hand -- kept, as its own kind, never counted as for sale.
+PAST = json.load(open("gallery_past.json", encoding="utf-8")) if os.path.exists("gallery_past.json") else []
+for r in PAST: r["past"] = True
+GAL = GAL + PAST
 # A gallery that lists one work under two product ids -- Haus does, a hundred times --
 # is one work. Same artist, same title, same size, same gallery: the first listing stays.
 _seen, _dedup, _gal_dup = set(), [], 0
@@ -658,7 +664,9 @@ for g in GAL:
         "dm": g.get("dims") or None, "mu": g["gallery"], "co": None,
         "nu": None, "d": None, "c": None, "s": "gallery", "mi": None, "oi": None,
         "k": "G" + re.sub(r'[^A-Za-z0-9]', '', g["gid"]), "n": 1,
-        "mem": None, "kind": "gallery", "url": g.get("url")})
+        "mem": None, "kind": "sold" if (g.get("sold") or g.get("past")) else "gallery", "url": g.get("url"),
+        "gs": (1 if g.get("sold") else 0) if (g.get("sold") or g.get("past")) else None,   # 1 the gallery said sold, 0 no longer listed
+        "gl": g.get("last")})                                                             # last month seen for sale
     gal_added += 1
 # NOBA publishes no birth years, but the biographies its artists write usually state
 # one -- "sündinud 1987", "born 1974", "(s. 1962)". Read from the biography only for
@@ -682,8 +690,9 @@ for i, a in enumerate(artists):
 print("  birth years read from NOBA biographies:", bio_dated)
 print("  marketplace works skipped, artist not in catalogue and not based in Estonia:", gal_unknown)
 print("  marketplace works by Estonia-based artists new to the catalogue:", gal_new_est)
-print("  gallery works added:", gal_added,
-      "from", len({g["gallery"] for g in GAL}), "galleries")
+print("  gallery works added:", gal_added, "of which past listings", sum(1 for w in works if w.get("kind") == "sold"),
+      "(", sum(1 for w in works if w.get("kind") == "sold" and w.get("gs")), "sold,",
+      sum(1 for w in works if w.get("kind") == "sold" and not w.get("gs")), "no longer listed ) from", len({g["gallery"] for g in GAL}), "galleries")
 
 # ---------- auction results ----------
 # Results as the auction house published them (vernissage_auctions.py): a lot, the
@@ -852,6 +861,8 @@ data = {"meta": {"built": datetime.date.today().isoformat(),
                  "gallery": sum(1 for w in works if w["kind"]=="gallery"),
                  "galleries": len({w["mu"] for w in works if w["kind"]=="gallery"}),
                  "noba": sum(1 for w in works if w["kind"]=="gallery" and w["mu"]=="NOBA"),
+                 "past": sum(1 for w in works if w.get("kind")=="sold"),
+                 "past_sold": sum(1 for w in works if w.get("kind")=="sold" and w.get("gs")),
                  "auction": sum(1 for w in works if w["kind"]=="auction"),
                  "auction_sold": sum(1 for w in works if w["kind"]=="auction" and w.get("ao")),
                  "houses": len({w["mu"] for w in works if w["kind"]=="auction"}),
