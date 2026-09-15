@@ -666,6 +666,7 @@ for g in GAL:
         "k": "G" + re.sub(r'[^A-Za-z0-9]', '', g["gid"]), "n": 1,
         "mem": None, "kind": "sold" if (g.get("sold") or g.get("past")) else "gallery", "url": g.get("url"),
         "gs": (1 if g.get("sold") else 0) if (g.get("sold") or g.get("past")) else None,   # 1 the gallery said sold, 0 no longer listed
+        "ga": 1 if g.get("urlkind") == "artist" else None,                                   # the link goes to the artist's page, not the work's
         "gl": g.get("last")})                                                             # last month seen for sale
     gal_added += 1
 # NOBA publishes no birth years, but the biographies its artists write usually state
