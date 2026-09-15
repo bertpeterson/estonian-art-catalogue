@@ -848,7 +848,8 @@ footer a{border-bottom:1px solid var(--rule)}
   const SRCLAB = {muis:"muis", ekm:"digi", ekmmuis:"both", cca:"cca", ekkm:"ekkm", auction:"auction"};
   // An auction result: the sale, and what the house published about the outcome.
   const eur = n => fmt(n) + " €";
-  const auText = w => w.ao ? (w.ap ? T(w.aa ? "au_after" : "au_sold", {p: eur(w.ap)}) : T("au_soldnp")) : T("au_unsold");
+  // a lot sold after the sale reads "Sold" like any other; the detail panel says how
+  const auText = w => w.ao ? (w.ap ? T("au_sold", {p: eur(w.ap)}) : T("au_soldnp")) : T("au_unsold");
   // One line per artist: lots, sales, span, and the range of hammer prices.
   function auLine(i){
     const lots = W.filter(w => w.a === i && w.kind === "auction");
@@ -2327,7 +2328,7 @@ footer a{border-bottom:1px solid var(--rule)}
 
   Promise.all([
     fetch("data/index.json?v=3713a98e").then(r => r.json()),
-    fetch("data/i18n.json?v=9861f30d").then(r => r.json())
+    fetch("data/i18n.json?v=9f44481c").then(r => r.json())
   ]).then(([data, i18n]) => boot(data, i18n))
    .catch(err => {
      document.getElementById("register").innerHTML =
