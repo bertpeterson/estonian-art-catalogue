@@ -789,8 +789,9 @@
       ? `<a class="rl" href="${esc(w.url)}" target="_blank" rel="noopener" title="${esc(T("d_gallerylink", {g: musName(w.mu)}))}">${esc(T("rl_view"))}</a>`
       // an auction result carries its outcome on the row: the sale is the point of the record
       : w.kind === "auction" && w.url
-      ? `<a class="rl rl-au${w.ao ? "" : " unsold"}" href="${esc(w.url)}" target="_blank" rel="noopener" title="${esc(w.an)} · ${esc(auText(w))}">${esc(auText(w))} ↗</a>` : "";
-    return `<div class="row${rl ? " has-link" : ""}" data-open="${open}">
+      // the price alone on the row -- it is the outcome; "sold" is in the title and the detail
+      ? `<a class="rl rl-au${w.ao ? "" : " unsold"}" href="${esc(w.url)}" target="_blank" rel="noopener" title="${esc(w.an)} · ${esc(auText(w))}">${esc(w.ao ? (w.ap ? eur(w.ap) : T("au_soldnp")) : T("au_unsold"))} ↗</a>` : "";
+    return `<div class="row${rl ? " has-link" : ""}${w.kind === "auction" ? " au" : ""}" data-open="${open}">
       <button class="row-btn" data-id="${esc(id)}" aria-expanded="${open}">
         ${yr}
         <span class="r-title" title="${esc(w.t)}">${esc(w.t)}${w.n>1?`<span class="src-tag" title="${w.n} catalogued objects share this title and date — sheets, impressions or parts">×${w.n}</span>`:""}</span>
