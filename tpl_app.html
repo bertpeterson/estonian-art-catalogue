@@ -526,7 +526,8 @@
     artist: w => A[w.a].n,
     title:  w => w.t,
     medium: w => w.e,
-    museum: w => w.mu
+    museum: w => w.mu,
+    price:  w => w.ap || 0
   };
   // Every render sorted every dated work in every decade -- 48,000 of them -- with
   // Intl.Collator deciding ties on title and artist. The collator was 13% of all CPU
@@ -552,6 +553,8 @@
     const sort = state.sort;
     const prim = sort === "artist" ? SA : sort === "title" ? SK
                : sort === "medium" ? (w => skey(medName(w.e))) : sort === "museum" ? (w => skey(musName(w.mu))) : null;
+    if (sort === "price")                  // hammer price, highest first; works without one after
+      return items.slice().sort((a,b) => ((b.ap||0)-(a.ap||0)) * (desc ? -1 : 1) || (a.y||0)-(b.y||0) || cmpKey(SK(a), SK(b)));
     return items.slice().sort((a,b) => {
       let r;
       if (!prim){
@@ -1034,6 +1037,14 @@
       let g = sales.get(k); if (!g) sales.set(k, g = {ad: w.ad, mu: w.mu, an: w.an, items: []});
       g.items.push(w);
     }
+    if (state.sort === "price"){
+      // one list across every sale, highest hammer first; the sort's order toggle flips it
+      const items = sortRows(lots, state.decOrder === "earliest"), sold = lots.filter(w => w.ao && w.ap);
+      const ps = sold.map(w => w.ap).sort((a, b) => a - b);
+      const gutter = `<span class="g-name">${esc(T("au_byprice"))}</span>
+        <div class="g-split">${esc(T("au_saleline", {n: fmt(lots.length), s: fmt(lots.filter(w => w.ao).length)}))}${ps.length ? ` · ${fmt(ps[0])}–${eur(ps[ps.length-1])}` : ""}</div>`;
+      return groupHTML("price", gutter, items, true) + `<p class="tl-note">${esc(T("au_note"))}</p>`;
+    }
     const asc = state.decOrder === "earliest";
     const order = [...sales.values()].sort((x, y) => asc ? x.ad.localeCompare(y.ad) : y.ad.localeCompare(x.ad));
     const shown = order.slice(0, state.auLimit);
@@ -1494,7 +1505,8 @@
   function syncOrder(){
     const a = $("o-asc"), b = $("o-desc");
     if (state.group !== "artist"){          // decade and timeline both run earliest/latest
-      a.textContent = T("earliest"); b.textContent = T("latest");
+      // by price the same toggle reads lowest / highest
+      a.textContent = T(state.sort === "price" ? "lowest" : "earliest"); b.textContent = T(state.sort === "price" ? "highest" : "latest");
       a.setAttribute("aria-pressed", state.decOrder==="earliest");
       b.setAttribute("aria-pressed", state.decOrder==="latest");
     } else {
@@ -1504,7 +1516,7 @@
     }
   }
   $("sortby").addEventListener("change", e => {
-    state.sort = e.target.value; state.expand.clear(); render(); pushHash();
+    state.sort = e.target.value; state.expand.clear(); syncOrder(); render(); pushHash();
   });
   $("g-decade").addEventListener("click", () => { setGroup("decade"); state.expand.clear(); render(); pushHash(); });
   $("g-artist").addEventListener("click", () => { setGroup("artist"); state.expand.clear(); state.gLimit=50; render(); pushHash(); });
