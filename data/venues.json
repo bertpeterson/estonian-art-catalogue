@@ -338,5 +338,29 @@
   "city": "Tartu",
   "type": "school",
   "url": "https://www.pallasart.ee"
+ },
+ {
+  "n": "Allee galerii",
+  "en": "Allee Gallery",
+  "city": "Tallinn",
+  "type": "auction house",
+  "url": "https://alleegalerii.ee",
+  "holder": "Allee galerii"
+ },
+ {
+  "n": "Vaal galerii",
+  "en": "Vaal Gallery",
+  "city": "Tallinn",
+  "type": "auction house",
+  "url": "https://www.vaal.ee",
+  "holder": "Vaal galerii"
+ },
+ {
+  "n": "Eesti Kunsti Oksjonid",
+  "en": "Estonian Art Auctions (EKO)",
+  "city": "Tallinn",
+  "type": "auction house",
+  "url": "https://eestikunstioksjonid.ee",
+  "holder": "Eesti Kunsti Oksjonid"
  }
 ]

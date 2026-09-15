@@ -46,6 +46,23 @@ def get(url, key):
     return h
 
 clean = lambda s: re.sub(r"\s+", " ", html.unescape(re.sub(r"<[^>]+>", " ", s or ""))).strip()
+
+# The houses set sale names in capitals; that is the poster, not the name. Sentence
+# case, keeping roman numerals and the houses' own initials.
+def sentence(s):
+    letters = re.findall(r"[A-Za-zÄÖÜÕäöüõŠŽšž]", s or "")
+    if len(letters) < 4 or sum(c.isupper() for c in letters) < 0.5 * len(letters): return s
+    keep = {"I","II","III","IV","V","VI","VII","VIII","IX","X","XI","XII","XX","XXX","XL","L","EKO","EML","EKA","EKL","MM","M&M"}
+    proper = {"eesti","haus","galerii","kuressaare","kuursaalis","pärnu","tallinn","tartu","eduard","wiiralt","riho","sibula",
+              "debora","vaarandi","mall","nukke","wiiralti","kunstiakadeemia","art&tonic","viimsi","artiumis","kontserdimajas","suvepealinna"}
+    out = []
+    for i, w in enumerate(re.split(r"(\s+)", s)):
+        if not w.strip(): out.append(w); continue
+        core = w.strip(",.:;()\"„“”")
+        if core in keep or re.fullmatch(r"[IVXL]+", core): out.append(w)
+        elif i == 0 or core.lower() in proper or (out and out[-2].endswith((":", ".", "-", "–"))): out.append(w[:1] + w[1:].lower())
+        else: out.append(w.lower())
+    return "".join(out)
 # Arnold Alas “Öine Tallinna vaade” 1963, 96×80  /  Jüri Arrak (1936-2022) “Kolmik”, 2020a  /
 # Arkadio Laigo, Mapp ”Tartu näitusplats” 1936a  /  Jüri Arrak, Lend 1983a.
 LOT = re.compile(r"^(?P<a>[^“”\"„]+?)\s*,?\s*[“”\"„]\s*(?P<t>.+?)\s*[”\"“]\s*,?\s*(?P<rest>.*)$", re.S)
@@ -81,6 +98,7 @@ for slug in slugs:
             sale = clean(m.group(1)) if m else slug
             dm = re.search(r"(\d{1,2})\.(\d{1,2})\.?(?:\s*(\d{2,4})\b)?", sale) or re.search(r"(\d{1,2})-(\d{1,2})(?:-(\d{4}|\d{2}))?(?:/|$)", slug)
             for _ in range(3): sale = SALE_NOISE.sub("", sale).strip(" ,.–-!")
+            sale = sentence(sale)
             day = dm.groups() if dm else None
         cards = re.split(r'(?=<div class="single_product_ product_)', h)[1:]
         if not cards: break
