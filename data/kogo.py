@@ -33,8 +33,10 @@ for page in ("art-store", "works"):
         info = re.search(r'artwork-info">(.*?)$', b, re.S)
         if not (t and a): continue
         raw = txt(info.group(1)) if info else ""
-        # Kogo keeps sold works on the page with "Sold" after the year. Not for sale.
-        if re.search(r'\b(sold|müüdud|reserved|reserveeritud)\b', raw, re.I): sold += 1; continue
+        # Kogo keeps sold works on the page with "Sold" after the year. Not for sale,
+        # but a work that passed through the gallery: kept, flagged sold.
+        is_sold = bool(re.search(r'\b(sold|müüdud|reserved|reserveeritud)\b', raw, re.I))
+        if is_sold: sold += 1; raw = re.sub(r'\b(sold|müüdud|reserved|reserveeritud)\b', ' ', raw, flags=re.I).strip(" ,")
         dm = re.search(r'<span class="dimensions">(.*?)</span>', b, re.S)
         dims = re.sub(r'\s*cm\s*cm', ' cm', txt(dm.group(1))).strip(" ,") if dm else ""
         yr = re.search(r'(\b(?:19|20)\d{2}\b)\s*$', raw)
@@ -45,9 +47,9 @@ for page in ("art-store", "works"):
         out.append({"gid": "kogo-"+t.group(1).rstrip("/").rsplit("/",1)[-1],
                     "artist": txt(a.group(1)), "title": txt(t.group(2)),
                     "year": yr.group(1) if yr else None, "tech": tech, "dims": dims,
-                    "gallery": "Kogo galerii", "city": "Tartu", "url": t.group(1)})
+                    "gallery": "Kogo galerii", "city": "Tartu", "url": t.group(1), **({"sold": True} if is_sold else {})})
 
-print("  sold, skipped:", sold)
+print("  sold, kept as past listings:", sold)
 seen, recs = set(), []
 for r in out:
     if r["gid"] in seen: continue

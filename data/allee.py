@@ -36,18 +36,25 @@ while True:
     if not batch: break
     for p in batch:
         cats = [clean(c["name"]) for c in p.get("categories", [])]
-        # stock, not a lot: a plain product, purchasable and in stock, in no sale's category
-        if p.get("type") != "simple" or not p.get("is_purchasable") or not p.get("is_in_stock") or any(SALE.search(c) for c in cats):
-            skipped += 1; continue
+        # a plain product in no sale's category: stock if in stock, a past listing if
+        # the gallery marks it sold (out of stock, category Müüdud)
+        if p.get("type") != "simple" or any(SALE.search(c) for c in cats): skipped += 1; continue
+        is_sold = not p.get("is_in_stock") or "Müüdud" in cats
+        if not p.get("is_purchasable") and not is_sold: skipped += 1; continue
         line = clean(p.get("name"))
         m = LOT.match(line)
-        if not m: unparsed += 1; continue
+        if not m:
+            # "Vive Tolli eksliibris": no quotes -- the capitalised words are the name, the rest the title
+            m = re.match(r"^(?P<a>(?:[A-ZÄÖÜÕŠŽ][^\s]*\s+){1,3}[A-ZÄÖÜÕŠŽ][^\s]*)\s+(?P<t>[a-zäöüõšž].+?)(?:,\s*(?P<rest>\d.*))?$", line)
+            if not m: unparsed += 1; continue
+            line_title = m.group("t")[:1].upper() + m.group("t")[1:]
+        else: line_title = m.group("t")
         artist = re.sub(r"\([^)]*\)", " ", m.group("a"))
         artist = re.sub(r"i\s+illustratsioon.*$", "", artist)                    # "Eduard Wiiralti illustratsioon ..." -- the genitive
         artist = re.sub(r"(\s+[a-zäöüõšž][^\s]*)+$", "", re.sub(r"\s+", " ", artist).strip(" ,"))
         if not re.match(r"^[^\d]{3,60}$", artist): unparsed += 1; continue
-        title = m.group("t").strip()
-        yl = m.group("rest").strip(" ,.")
+        title = line_title.strip()
+        yl = (m.group("rest") or "").strip(" ,.")
         y4 = re.search(r"(1[5-9]\d\d|20[0-2]\d)", yl)
         desc = clean(p.get("short_description") or "") or clean(p.get("description") or "")
         first = re.split(r"\.\s", desc, 1)[0]
@@ -61,7 +68,7 @@ while True:
         seen.add(gid)
         recs.append({"gid": gid, "artist": artist, "title": title, "year": y4.group(1) if y4 else None,
                      "tech": medium, "dims": dims, "gallery": "Allee galerii", "city": "Tallinn",
-                     "url": p.get("permalink") or "https://alleegalerii.ee"})
+                     "url": p.get("permalink") or "https://alleegalerii.ee", **({"sold": True} if is_sold else {})})
     if page % 5 == 0: print(f"  page {page}  kept {len(recs)}", flush=True)
     page += 1; time.sleep(0.8)
     if page > 80: break
@@ -69,6 +76,6 @@ while True:
 prev = json.load(open("gallery_records.json", encoding="utf-8")) if os.path.exists("gallery_records.json") else []
 keep = [r for r in prev if not r["gid"].startswith("allee-")]
 json.dump(keep + recs, open("gallery_records.json", "w", encoding="utf-8"), ensure_ascii=False)
-print(f"\nALLEE WORKS: {len(recs)}   artists: {len({r['artist'] for r in recs})}   unparsed: {unparsed}   lots and sold skipped: {skipped}")
+print(f"\nALLEE WORKS: {len(recs)} ({sum(1 for r in recs if r.get('sold'))} sold, kept as past listings)   artists: {len({r['artist'] for r in recs})}   unparsed: {unparsed}   lots skipped: {skipped}")
 print(f"  with year {sum(1 for r in recs if r['year'])}, with medium {sum(1 for r in recs if r['tech'])}, with dims {sum(1 for r in recs if r['dims'])}")
 for r in recs[:5]: print(f"   {r['artist'][:20]:20} {r['title'][:30]:30} {r['year'] or '—':6} {r['dims']:14} {r['tech'][:22]}")
