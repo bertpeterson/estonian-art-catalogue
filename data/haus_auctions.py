@@ -82,11 +82,15 @@ for aid, (sale, when) in sorted(sales.items(), key=lambda x: x[1][1]):
         prices = dict((clean(k).lower(), clean(v)) for k, v in re.findall(r'<div class="price">(.*?)<strong class="price[^"]*">(.*?)</strong>', fig, re.S))
         start = euros(prices.get("alghind", ""))
         hammer = euros(prices.get("haamrihind", ""))
+        # a hammer price with no bid in the room is a sale made after the sale, at the
+        # price the house then agreed -- often below the start; the house still prints
+        # it as Haamrihind on the sale page, and it is kept, marked as such
+        after = hammer is not None and not re.search(r"\d", prices.get("viimane pakkumine", ""))
         y4 = re.match(r"(\d{4})", year)
         recs.append({"aid": "haus-" + item.group(1), "artist": artist, "title": title,
                      "year": y4.group(1) if y4 else None, "yl": year or None, "tech": medium, "dims": dims,
                      "house": "Haus Galerii", "sale": sale, "when": when[:7], "date": when,
-                     "start": start, "hammer": hammer, "sold": hammer is not None,
+                     "start": start, "hammer": hammer, "sold": hammer is not None, "after": after,
                      "url": f"{BASE}/?c=toimunud-oksjonid&l=et&id={aid}&item={item.group(1)}"})
     print(f"  {when} {sale[:40]:40} lots so far {len(recs)}", flush=True)
 

@@ -63,6 +63,7 @@ while True:
         start = euros(start.group(1)) if start else None
         hammer = euros(hammer.group(2)) if hammer else None
         sold = hammer is not None or bool(re.search(r"\bmüüdud\b|\bsold\b", name, re.I))
+        after = bool(hammer and re.search(r"haamrihind\s*:?\s*müüdud", name, re.I)) or (sold and hammer is None)   # sold after the sale
         if re.search(r"\bmüümata\b|\bunsold\b", name, re.I): sold = False
         if hammer is not None and start is not None and hammer < start: n_odd += 1
         got = parse(LOTNO.sub("", PRICE_PHRASE.sub(" ", name)))
@@ -73,7 +74,7 @@ while True:
         seen.add(aid)
         recs.append({"aid": aid, "artist": artist, "title": title, "year": wyear, "tech": tech, "dims": dims,
                      "house": "Vernissage", "sale": sale, "when": f"{year}-{month:02d}",
-                     "start": start, "hammer": hammer, "sold": sold,
+                     "start": start, "hammer": hammer, "sold": sold, "after": after,
                      "url": p.get("permalink") or "https://vernissage.ee"})
     if page % 5 == 0: print(f"  page {page}  lots {len(recs)}", flush=True)
     page += 1; time.sleep(1.0)

@@ -111,13 +111,14 @@ for slug in slugs:
         label, price, bids = oc.group(1), re.sub(r"\D", "", oc.group(2) or ""), oc.group(3)
         hammer = int(price) if price else None
         sold = hammer is not None
+        after = sold and (label == "Müüdud" or bids == "0")                 # sold after the sale, no bid in it
         lp = get(url.group(1), f"ekoauc_{pid.group(1)}")
         pub = re.search(r'"datePublished":"(\d{4}-\d{2})-(\d{2})', lp or "")
         if pub: months[pub.group(1)] += 1
         got.append({"aid": "eko-" + pid.group(1), "artist": artist, "title": ltitle,
                     "year": y4.group(1) if y4 else None, "yl": yl or None, "tech": clean(med.group(1)) if med else "", "dims": dims,
                     "house": "Eesti Kunsti Oksjonid", "sale": sale,
-                    "start": int(float(st.group(1))) if st else None, "hammer": hammer, "sold": sold, "url": url.group(1)})
+                    "start": int(float(st.group(1))) if st else None, "hammer": hammer, "sold": sold, "after": after, "url": url.group(1)})
     # the sale's month: when its lots were listed, moved to the day the name gives
     ym = months.most_common(1)[0][0] if months else None
     if ym and day:
