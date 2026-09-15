@@ -114,9 +114,6 @@ h1 a:hover{color:var(--grey-6)}
 .bar-fill{width:100%;background:var(--bar);min-height:2px;transition:background .15s ease;position:relative}
 /* the for-sale share of a decade: hatched, at the top of the bar */
 .bar-sale{position:absolute;left:0;right:0;top:0;background:repeating-linear-gradient(-45deg,var(--ink) 0 1px,transparent 1px 4px);opacity:.55}
-.bar-auc{position:absolute;left:0;right:0;background:radial-gradient(var(--ink) 0.7px,transparent 0.8px) 0 0/3px 3px;opacity:.55}
-.bar-btn:hover .bar-auc,.bar-btn[aria-pressed="true"] .bar-auc{background:radial-gradient(var(--paper) 0.7px,transparent 0.8px) 0 0/3px 3px;opacity:.7}
-.histo-key i.auc{background:radial-gradient(var(--ink) 0.7px,transparent 0.8px) 0 0/3px 3px}
 .bar-btn:hover .bar-sale,.bar-btn[aria-pressed="true"] .bar-sale{background:repeating-linear-gradient(-45deg,var(--paper) 0 1px,transparent 1px 4px);opacity:.7}
 .histo-key{font-family:var(--mono);font-size:var(--fs-xs);letter-spacing:.08em;text-transform:uppercase;color:var(--grey-6);display:inline-flex;align-items:center;gap:6px;margin-left:18px}
 .histo-key i{display:inline-block;width:14px;height:9px;background:repeating-linear-gradient(-45deg,var(--ink) 0 1px,transparent 1px 4px);opacity:.55}
@@ -566,7 +563,7 @@ footer a{border-bottom:1px solid var(--rule)}
 
   <section class="histo">
     <div class="histo-head">
-      <span><span class="eyebrow" data-i18n="worksperdecade"></span><span class="histo-key"><i></i><span data-i18n="forsale"></span></span><span class="histo-key"><i class="auc"></i><span data-i18n="at_auction"></span></span></span>
+      <span><span class="eyebrow" data-i18n="worksperdecade"></span><span class="histo-key"><i></i><span data-i18n="forsale"></span></span></span>
       <span class="eyebrow" id="histo-hint">Select a decade to filter</span>
     </div>
     <div class="bars" id="bars"></div>
