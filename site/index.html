@@ -118,6 +118,9 @@ h1 a:hover{color:var(--grey-6)}
 .bar-fill{width:100%;background:var(--bar);min-height:2px;transition:background .15s ease;position:relative}
 /* the for-sale share of a decade: hatched, at the top of the bar */
 .bar-sale{position:absolute;left:0;right:0;top:0;background:repeating-linear-gradient(-45deg,var(--ink) 0 1px,transparent 1px 4px);opacity:.55}
+.bar-auc{position:absolute;left:0;right:0;background:radial-gradient(var(--ink) 0.7px,transparent 0.8px) 0 0/3px 3px;opacity:.55}
+.bar-btn:hover .bar-auc,.bar-btn[aria-pressed="true"] .bar-auc{background:radial-gradient(var(--paper) 0.7px,transparent 0.8px) 0 0/3px 3px;opacity:.7}
+.histo-key i.auc{background:radial-gradient(var(--ink) 0.7px,transparent 0.8px) 0 0/3px 3px}
 .bar-btn:hover .bar-sale,.bar-btn[aria-pressed="true"] .bar-sale{background:repeating-linear-gradient(-45deg,var(--paper) 0 1px,transparent 1px 4px);opacity:.7}
 .histo-key{font-family:var(--mono);font-size:var(--fs-xs);letter-spacing:.08em;text-transform:uppercase;color:var(--grey-6);display:inline-flex;align-items:center;gap:6px;margin-left:18px}
 .histo-key i{display:inline-block;width:14px;height:9px;background:repeating-linear-gradient(-45deg,var(--ink) 0 1px,transparent 1px 4px);opacity:.55}
@@ -470,6 +473,10 @@ footer a{border-bottom:1px solid var(--rule)}
 .doors .d-names ul{columns:2;column-gap:var(--sp-4)} .doors .d-names li{break-inside:avoid}
 @media(min-width:1100px){.doors .d-names ul{columns:4}}
 @media(max-width:760px){.doors .d-names ul{columns:1}}
+.doors .d-results{margin-top:var(--sp-3)} .doors .d-results ul{columns:2;column-gap:var(--sp-4)} .doors .d-results li{break-inside:avoid}
+.doors .d-results em{font-style:italic;font-weight:400}
+.doors .d-yr{font-family:var(--mono);font-size:var(--fs-xs);color:var(--grey-4);margin-left:8px;letter-spacing:.03em}
+@media(max-width:760px){.doors .d-results ul{columns:1}}
 /* timeline: one row per artist, a label column and a track; bars are percentages of
    the track so the same markup holds at any width */
 .tl{--tl-lab:240px;position:relative;margin-top:var(--sp-3)}
@@ -487,6 +494,8 @@ footer a{border-bottom:1px solid var(--rule)}
 .tl-life{position:absolute;top:6px;height:6px;background:var(--bar)}
 .tl-life.living{background:linear-gradient(90deg,var(--bar) 75%,transparent)}
 .tl-act{position:absolute;top:6px;height:6px;background:var(--ink)}
+/* a sale: a tick below the bar, in the year the hammer fell */
+.tl-sale{position:absolute;top:13px;width:2px;height:4px;margin-left:-1px;background:var(--ink)}
 .tl-note{font-size:var(--fs-sm);color:var(--grey-6);margin-top:14px;max-width:72ch}
 @media(max-width:760px){.tl{--tl-lab:140px}.tl-d{display:none}.tl-axis{position:static}}
 .g-split{font-family:var(--mono);font-size:var(--fs-sm);letter-spacing:var(--ls-data);color:var(--grey-6);margin-top:6px;font-variant-numeric:tabular-nums}
@@ -561,7 +570,7 @@ footer a{border-bottom:1px solid var(--rule)}
 
   <section class="histo">
     <div class="histo-head">
-      <span><span class="eyebrow" data-i18n="worksperdecade">Works per decade</span><span class="histo-key"><i></i><span data-i18n="forsale">for sale</span></span></span>
+      <span><span class="eyebrow" data-i18n="worksperdecade">Works per decade</span><span class="histo-key"><i></i><span data-i18n="forsale">for sale</span></span><span class="histo-key"><i class="auc"></i><span data-i18n="at_auction">at auction</span></span></span>
       <span class="eyebrow" id="histo-hint">Select a decade to filter</span>
     </div>
     <div class="bars" id="bars"></div>
@@ -579,6 +588,7 @@ footer a{border-bottom:1px solid var(--rule)}
         <button id="g-decade" aria-pressed="true" data-i18n="decade">Decade</button>
         <button id="g-artist" aria-pressed="false" data-i18n="artist">Artist</button>
         <button id="g-time" aria-pressed="false" data-i18n="timeline">Timeline</button>
+        <button id="g-auc" aria-pressed="false" data-i18n="auctions">Auctions</button>
       </div>
     </div>
     <div class="ctl">
@@ -749,7 +759,9 @@ footer a{border-bottom:1px solid var(--rule)}
     "Eesti Kaasaegse Kunsti Muuseum":"EKKM","Veneetsia biennaal, Eesti paviljon":"VEN","Saaremaa Muuseum":"SM","Virumaa Muuseumid":"VIRU",
     "Eesti Maaelumuuseumid SA, Eesti Põllumajandusmuuseum":"EPM",
     "Eesti Maaelumuuseumid SA, C. R. Jakobsoni Talumuuseum":"JAK",
-    "Hiiumaa Muuseumid":"HIIU","Haapsalu ja Läänemaa Muuseumid":"HLM","Pärnu Muuseum":"PM"};
+    "Hiiumaa Muuseumid":"HIIU","Haapsalu ja Läänemaa Muuseumid":"HLM","Pärnu Muuseum":"PM",
+    // the auction houses, on the row beside their lots
+    "Haus Galerii":"HAUS","Vernissage":"VERN","Allee galerii":"ALLEE","Vaal galerii":"VAAL","Eesti Kunsti Oksjonid":"EKO"};
   const abbr = m => MUS[m] || (m||"").slice(0,4).toUpperCase();
 
   const PERIODS = [[1700,1917,"Tsaariaeg","Imperial Russia"],[1918,1939,"Vabariik","First Republic"],
@@ -868,7 +880,8 @@ footer a{border-bottom:1px solid var(--rule)}
   const state = {group:"decade", decOrder:"earliest", artOrder:"az", q:"", list:false, shared:null, cross:false, sale:false, tlLimit:400,
                  decade:null, media:new Set(), museums:new Set(), cats:new Set(), srcs:new Set(),
                  artist:null, letter:null, idxOpen:false, idxQ:"", idxLimit:120, idxSort:"az", showEarly:false, origins:new Set(), groups:new Set(), sort:"year", year:null, gLimit:50, from:null, to:null, undOnly:false, open:null, expand:new Set(),
-                 od:new Set()};   // the decades opened in the register's mosaic
+                 od:new Set(),    // the decades opened in the register's mosaic
+                 auLimit:20};     // sales drawn in the auction view before "more"
   const LIMIT_DEC = 50, LIMIT_ART = 18;
   const slug = s => (s||"").normalize("NFKD").replace(/[\u0300-\u036f]/g,"")
       .toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"");
@@ -921,7 +934,7 @@ footer a{border-bottom:1px solid var(--rule)}
     LANG = p.get("lang") === "en" ? "en" : (p.get("lang") === "et" ? "et" : LANG);
     const th = p.get("theme");
     if (th === "light" || th === "dark" || th === "auto") THEME = th;
-    state.group    = ["artist", "timeline"].includes(p.get("group")) ? p.get("group") : "decade";
+    state.group    = ["artist", "timeline", "auction"].includes(p.get("group")) ? p.get("group") : "decade";
     const ord      = p.get("order");
     state.decOrder = ord === "latest" ? "latest" : "earliest";
     state.artOrder = ord === "birth"  ? "birth"  : "az";
@@ -1028,15 +1041,16 @@ footer a{border-bottom:1px solid var(--rule)}
     // Each bar is split: museum holdings below, gallery stock above. Since NOBA, the
     // 2020s bar is 98% works for sale, and an unsplit bar read as the most-collected
     // decade in Estonian history. The shape must not lie at a glance.
-    const set = baseSet(), counts = {}, sale = {}; DECADES.forEach(d=>{counts[d]=0; sale[d]=0;}); counts.und = sale.und = 0;
-    set.forEach(w => { const d = decOf(w); if (d in counts){ counts[d]++; if (w.kind === "gallery") sale[d]++; } });
+    const set = baseSet(), counts = {}, sale = {}, auc = {}; DECADES.forEach(d=>{counts[d]=0; sale[d]=0; auc[d]=0;}); counts.und = sale.und = auc.und = 0;
+    set.forEach(w => { const d = decOf(w); if (d in counts){ counts[d]++; if (w.kind === "gallery") sale[d]++; else if (w.kind === "auction") auc[d]++; } });
     const max = Math.max(1, ...DECADES.map(d=>counts[d]));
     const cell = (key, lab, title, cls) => {
-      const c = counts[key], s = sale[key], h = c ? Math.round(6 + (Math.min(c,max)/max)*66) : 2;
-      const sh = c && s ? Math.round(h * s / c) : 0;
-      const tip = `${title} — ${c===1?T('oneworkc'):T('nworks',{n:c})}` + (s ? ` · ${T('nforsale',{n:s})}` : "");
+      const c = counts[key], s = sale[key], q = auc[key], h = c ? Math.round(6 + (Math.min(c,max)/max)*66) : 2;
+      const sh = c && s ? Math.round(h * s / c) : 0, qh = c && q ? Math.round(h * q / c) : 0;
+      const tip = `${title} — ${c===1?T('oneworkc'):T('nworks',{n:c})}` + (s ? ` · ${T('nforsale',{n:s})}` : "") + (q ? ` · ${T('nauction',{n:q})}` : "");
+      // for sale hatched at the top, auction lots dotted beneath it, holdings plain below
       return `<button class="bar-btn ${cls||""}" data-dec="${key}" aria-pressed="${state.decade===key}" title="${tip}">
-        <span class="bar-n">${c||""}</span><span class="bar-fill" style="height:${h}px">${sh ? `<span class="bar-sale" style="height:${sh}px"></span>` : ""}</span><span class="bar-lab">${lab}</span></button>`;
+        <span class="bar-n">${c||""}</span><span class="bar-fill" style="height:${h}px">${sh ? `<span class="bar-sale" style="height:${sh}px"></span>` : ""}${qh ? `<span class="bar-auc" style="height:${qh}px;top:${sh}px"></span>` : ""}</span><span class="bar-lab">${lab}</span></button>`;
     };
     // group the decade bars by century so 1830s and 1930s can never be read as the same "30"
     const cents = [];
@@ -1402,7 +1416,7 @@ footer a{border-bottom:1px solid var(--rule)}
     if (SHARDS.has(key)) return SHARDS.get(key);
     // A retry must skip the browser cache: the failure we are retrying is often a
     // cached 404 or 5xx, and re-requesting the identical URL just returns it again.
-    const url = `data/detail/${key}.json?v=3713a98e` + (attempt ? `&r=${attempt}` : "");
+    const url = `data/detail/${key}.json?v=1540ca04` + (attempt ? `&r=${attempt}` : "");
     const p = fetch(url, attempt ? {cache: "reload"} : undefined)
       .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
       .catch(async () => {
@@ -1495,7 +1509,7 @@ footer a{border-bottom:1px solid var(--rule)}
   }
 
   function groupHTML(key, gutter, items, showArtist){
-    const LIMIT = state.group === "decade" ? LIMIT_DEC : LIMIT_ART;
+    const LIMIT = state.group === "artist" ? LIMIT_ART : LIMIT_DEC;
     const gk = String(key);                       // dataset values are always strings
     const n = items.length, exp = state.expand.has(gk);
     const shown = exp ? items : items.slice(0, LIMIT);
@@ -1609,6 +1623,7 @@ footer a{border-bottom:1px solid var(--rule)}
 
     if (!set.length){ reg.innerHTML = `<p class="empty">${esc(T("noresults"))}</p>`; return; }
     if (state.group === "timeline"){ reg.innerHTML = renderTimeline(set); return; }
+    if (state.group === "auction"){ reg.innerHTML = renderAuctions(set); return; }
 
     let html = "";
     const BASE = baseSet();          // hoisted: was recomputed once per decade
@@ -1717,6 +1732,41 @@ footer a{border-bottom:1px solid var(--rule)}
     }
     reg.innerHTML = html;
   }
+  // ---- auction results --------------------------------------------------------
+  // The lots in the current selection, one group per sale, newest sale first, the
+  // highest result at the top of each. Every filter applies: an artist's sales, a
+  // medium's, a decade's. The row already states the outcome and links to the lot.
+  function renderAuctions(set){
+    const lots = set.filter(w => w.kind === "auction");
+    if (!lots.length) return `<p class="empty">${esc(T("au_none"))}</p>`;
+    const sales = new Map();
+    for (const w of lots){
+      const k = `${w.ad}|${w.mu}|${w.an}`;
+      let g = sales.get(k); if (!g) sales.set(k, g = {ad: w.ad, mu: w.mu, an: w.an, items: []});
+      g.items.push(w);
+    }
+    const asc = state.decOrder === "earliest";
+    const order = [...sales.values()].sort((x, y) => asc ? x.ad.localeCompare(y.ad) : y.ad.localeCompare(x.ad));
+    const shown = order.slice(0, state.auLimit);
+    return shown.map((g, k) => {
+      const items = g.items.slice().sort((x, y) => (y.ap || -1) - (x.ap || -1) || cmpStr(A[x.a].n, A[y.a].n));
+      const sold = items.filter(w => w.ao), total = sold.reduce((n, w) => n + (w.ap || 0), 0);
+      const top = sold.length && sold[0].ap ? sold[0] : null;
+      const when = g.ad.length > 7 ? g.ad.split("-").reverse().join(".") : (g.ad.slice(5, 7) ? `${g.ad.slice(5, 7)}.${g.ad.slice(0, 4)}` : g.ad);
+      const gutter = `<span class="g-name">${esc(g.an)}</span>
+        <div class="g-dates">${esc(musName(g.mu))} · ${esc(when)}</div>
+        <div class="g-split">${esc(T("au_saleline", {n: fmt(items.length), s: fmt(sold.length)}))}${total ? ` · ${esc(T("au_total", {p: eur(total)}))}` : ""}</div>
+        ${top ? `<p class="g-blurb">${esc(T("au_top"))}: ${esc(A[top.a].n)}, <em>${esc(top.t)}</em> — ${esc(eur(top.ap))}</p>` : ""}`;
+      return groupHTML("s" + k, gutter, items, true);
+    }).join("") + (order.length > shown.length
+      ? `<button class="more" id="more-sales" style="margin-top:18px">${esc(T("au_moresales", {n: fmt(order.length - shown.length)}))}</button>` : "")
+      + `<p class="tl-note">${esc(T("au_note"))}</p>`;
+  }
+  // the highest results, for the landing page
+  const TOP_AU = W.filter(w => w.kind === "auction" && w.ao && w.ap).sort((x, y) => y.ap - x.ap).slice(0, 8);
+  const AU_N = W.reduce((n, w) => n + (w.kind === "auction" ? 1 : 0), 0);
+  const AU_HOUSES = new Set(W.filter(w => w.kind === "auction").map(w => w.mu)).size;
+
   // ---- timeline ---------------------------------------------------------------
   // One bar per artist with a known birth year, on one axis: birth to death, or to
   // now. A dark segment inside it marks the years the catalogue holds dated work
@@ -1730,6 +1780,12 @@ footer a{border-bottom:1px solid var(--rule)}
       const s = m.get(w.a);
       if (!s) m.set(w.a, [w.y, w.y]); else { if (w.y < s[0]) s[0] = w.y; if (w.y > s[1]) s[1] = w.y; }
     }
+    return m;
+  })();
+  // the years an artist's work went to auction, for the timeline
+  const SALES = (() => {
+    const m = new Map();
+    for (const w of W){ if (w.kind !== "auction" || !w.ao) continue; const y = +w.ad.slice(0, 4); let s = m.get(w.a); if (!s) m.set(w.a, s = new Map()); s.set(y, (s.get(y) || 0) + 1); }
     return m;
   })();
   let TL_ROWS = [];                        // the last drawn order, for the year ticks
@@ -1754,7 +1810,9 @@ footer a{border-bottom:1px solid var(--rule)}
       const end = d || NOW, sp = SPAN.get(i);
       const life = `<span class="tl-life${d ? "" : " living"}" style="left:${pct(b)};width:${((end - b) / (hi - lo) * 100).toFixed(2)}%"></span>`;
       const act = sp ? `<span class="tl-act" style="left:${pct(sp[0])};width:${Math.max(0.25, (sp[1] - sp[0]) / (hi - lo) * 100).toFixed(2)}%" title="${esc(T("tl_active", {a: sp[0], b: sp[1]}))}"></span>` : "";
-      return `<div class="tl-row" data-b="${b}"><button class="tl-lab" data-tl="${i}" title="${esc(a.n)} · ${b}–${d || ""}">${esc(a.n)}<span class="tl-d">${b}–${d || ""}</span></button><div class="tl-track">${life}${act}</div></div>`;
+      const sl = SALES.get(i);
+      const marks = sl ? [...sl.entries()].map(([y, n]) => `<span class="tl-sale" style="left:${pct(y)}" title="${esc(T("tl_sale", {y, n}))}"></span>`).join("") : "";
+      return `<div class="tl-row" data-b="${b}"><button class="tl-lab" data-tl="${i}" title="${esc(a.n)} · ${b}–${d || ""}">${esc(a.n)}<span class="tl-d">${b}–${d || ""}</span></button><div class="tl-track">${life}${act}${marks}</div></div>`;
     }).join("");
     const more = rows.length > shown.length
       ? `<button class="more" id="more-tl" style="margin-top:18px">${esc(T("moreartists", {n: num(rows.length - shown.length)}))}</button>` : "";
@@ -1841,9 +1899,13 @@ footer a{border-bottom:1px solid var(--rule)}
     const col = (head, items, cls, tag) => `<div class="${cls || ""}"><h2>${esc(T(head))}${tag ? ` <span class="tag">${esc(tag)}</span>` : ""}</h2><ul>` + items.map(
       ([label, n, kind, v]) => `<li><button data-door="${kind}" data-v="${v}">` +
         `<span>${esc(label)}</span><span class="n">${num(n)}</span></button></li>`).join("") + "</ul></div>";
+    const results = TOP_AU.length ? `<div class="d-results"><h2>${esc(T("doors_results"))}</h2><ul>` + TOP_AU.map(w =>
+      `<li><button data-door="r" data-v="${w.a}" title="${esc(w.an)} · ${esc(w.ad.slice(0, 4))}"><span>${esc(A[w.a].n)} · <em>${esc(w.t)}</em><span class="d-yr">${esc(w.ad.slice(0, 4))}</span></span><span class="n">${esc(eur(w.ap))}</span></button></li>`).join("") + `</ul></div>` : "";
     el.innerHTML =
       col("doors_name",   TOP_ART.map(([i, n]) => [A[i].n, n, "a", i]), "d-names", "ed")
-      + `<p class="door-line"><button data-door="x" data-v="0">${esc(T("doors_cross"))}<span class="n">${num(CROSS_WORKS)} ${esc(T("works"))} · ${num(CROSS.size)} ${esc(T("artists"))}</span><span class="arrow">&rarr;</span></button></p>`;
+      + results
+      + `<p class="door-line"><button data-door="x" data-v="0">${esc(T("doors_cross"))}<span class="n">${num(CROSS_WORKS)} ${esc(T("of_n", {n: num(FOR_SALE)}))} ${esc(T("forsale"))} · ${num(CROSS.size)} ${esc(T("artists"))}</span><span class="arrow">&rarr;</span></button></p>`
+      + (AU_N ? `<p class="door-line"><button data-door="q" data-v="0">${esc(T("doors_auctions"))}<span class="n">${num(AU_N)} ${esc(T("au_lots"))} · ${AU_HOUSES} ${esc(T("au_houses"))}</span><span class="arrow">&rarr;</span></button></p>` : "");
     el.hidden = false;
   }
 
@@ -1985,6 +2047,7 @@ footer a{border-bottom:1px solid var(--rule)}
 
   reg.addEventListener("click", e => {
     if (e.target.closest("#more-artists")){ state.gLimit += 100; render(); return; }
+    if (e.target.closest("#more-sales")){ state.auLimit += 20; render(); return; }
     const mb = e.target.closest(".more");
     if (mb){ state.expand.add(String(mb.dataset.exp)); render(); return; }
     const cell = e.target.closest(".mo-cell");
@@ -2122,6 +2185,8 @@ footer a{border-bottom:1px solid var(--rule)}
     if (!b) return;
     const v = +b.dataset.v;
     if (b.dataset.door === "a") state.artist = v;
+    else if (b.dataset.door === "r"){ state.artist = v; setGroup("auction"); state.decOrder = "latest"; }
+    else if (b.dataset.door === "q"){ setGroup("auction"); state.decOrder = "latest"; }
     else if (b.dataset.door === "x"){ state.cross = true; setGroup("artist"); }
     else { state.from = DOOR_PERIODS[v][0]; state.to = DOOR_PERIODS[v][1]; }
     renderAll(); pushHash();
@@ -2143,6 +2208,7 @@ footer a{border-bottom:1px solid var(--rule)}
     $("g-decade").setAttribute("aria-pressed", g==="decade");
     $("g-artist").setAttribute("aria-pressed", g==="artist");
     $("g-time").setAttribute("aria-pressed", g==="timeline");
+    $("g-auc").setAttribute("aria-pressed", g==="auction");
     syncOrder();
   }
   function syncOrder(){
@@ -2165,6 +2231,7 @@ footer a{border-bottom:1px solid var(--rule)}
   $("o-asc").addEventListener("click", () => { state.group!=="artist" ? state.decOrder="earliest" : state.artOrder="az"; syncOrder(); render(); pushHash(); });
   $("o-desc").addEventListener("click", () => { state.group!=="artist" ? state.decOrder="latest" : state.artOrder="birth"; syncOrder(); render(); pushHash(); });
   $("g-time").addEventListener("click", () => { setGroup("timeline"); state.expand.clear(); state.tlLimit=400; render(); pushHash(); });
+  $("g-auc").addEventListener("click", () => { setGroup("auction"); state.decOrder = "latest"; state.expand.clear(); state.auLimit = 20; syncOrder(); render(); pushHash(); });
   $("reset").addEventListener("click", () => {
     state.q=""; state.decade=null; state.media.clear(); state.museums.clear(); state.cats.clear(); state.srcs.clear(); state.origins.clear(); state.groups.clear();
     state.artist=null; state.letter=null; state.idxOpen=false; state.sort="year"; state.year=null; state.from=null; state.to=null; state.undOnly=false; $("sortby").value="year";
@@ -2327,8 +2394,8 @@ footer a{border-bottom:1px solid var(--rule)}
   }   // end boot
 
   Promise.all([
-    fetch("data/index.json?v=3713a98e").then(r => r.json()),
-    fetch("data/i18n.json?v=9f44481c").then(r => r.json())
+    fetch("data/index.json?v=1540ca04").then(r => r.json()),
+    fetch("data/i18n.json?v=bc3e157c").then(r => r.json())
   ]).then(([data, i18n]) => boot(data, i18n))
    .catch(err => {
      document.getElementById("register").innerHTML =

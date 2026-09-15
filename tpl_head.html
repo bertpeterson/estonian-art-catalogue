@@ -114,6 +114,9 @@ h1 a:hover{color:var(--grey-6)}
 .bar-fill{width:100%;background:var(--bar);min-height:2px;transition:background .15s ease;position:relative}
 /* the for-sale share of a decade: hatched, at the top of the bar */
 .bar-sale{position:absolute;left:0;right:0;top:0;background:repeating-linear-gradient(-45deg,var(--ink) 0 1px,transparent 1px 4px);opacity:.55}
+.bar-auc{position:absolute;left:0;right:0;background:radial-gradient(var(--ink) 0.7px,transparent 0.8px) 0 0/3px 3px;opacity:.55}
+.bar-btn:hover .bar-auc,.bar-btn[aria-pressed="true"] .bar-auc{background:radial-gradient(var(--paper) 0.7px,transparent 0.8px) 0 0/3px 3px;opacity:.7}
+.histo-key i.auc{background:radial-gradient(var(--ink) 0.7px,transparent 0.8px) 0 0/3px 3px}
 .bar-btn:hover .bar-sale,.bar-btn[aria-pressed="true"] .bar-sale{background:repeating-linear-gradient(-45deg,var(--paper) 0 1px,transparent 1px 4px);opacity:.7}
 .histo-key{font-family:var(--mono);font-size:var(--fs-xs);letter-spacing:.08em;text-transform:uppercase;color:var(--grey-6);display:inline-flex;align-items:center;gap:6px;margin-left:18px}
 .histo-key i{display:inline-block;width:14px;height:9px;background:repeating-linear-gradient(-45deg,var(--ink) 0 1px,transparent 1px 4px);opacity:.55}
@@ -466,6 +469,10 @@ footer a{border-bottom:1px solid var(--rule)}
 .doors .d-names ul{columns:2;column-gap:var(--sp-4)} .doors .d-names li{break-inside:avoid}
 @media(min-width:1100px){.doors .d-names ul{columns:4}}
 @media(max-width:760px){.doors .d-names ul{columns:1}}
+.doors .d-results{margin-top:var(--sp-3)} .doors .d-results ul{columns:2;column-gap:var(--sp-4)} .doors .d-results li{break-inside:avoid}
+.doors .d-results em{font-style:italic;font-weight:400}
+.doors .d-yr{font-family:var(--mono);font-size:var(--fs-xs);color:var(--grey-4);margin-left:8px;letter-spacing:.03em}
+@media(max-width:760px){.doors .d-results ul{columns:1}}
 /* timeline: one row per artist, a label column and a track; bars are percentages of
    the track so the same markup holds at any width */
 .tl{--tl-lab:240px;position:relative;margin-top:var(--sp-3)}
@@ -483,6 +490,8 @@ footer a{border-bottom:1px solid var(--rule)}
 .tl-life{position:absolute;top:6px;height:6px;background:var(--bar)}
 .tl-life.living{background:linear-gradient(90deg,var(--bar) 75%,transparent)}
 .tl-act{position:absolute;top:6px;height:6px;background:var(--ink)}
+/* a sale: a tick below the bar, in the year the hammer fell */
+.tl-sale{position:absolute;top:13px;width:2px;height:4px;margin-left:-1px;background:var(--ink)}
 .tl-note{font-size:var(--fs-sm);color:var(--grey-6);margin-top:14px;max-width:72ch}
 @media(max-width:760px){.tl{--tl-lab:140px}.tl-d{display:none}.tl-axis{position:static}}
 .g-split{font-family:var(--mono);font-size:var(--fs-sm);letter-spacing:var(--ls-data);color:var(--grey-6);margin-top:6px;font-variant-numeric:tabular-nums}
@@ -557,7 +566,7 @@ footer a{border-bottom:1px solid var(--rule)}
 
   <section class="histo">
     <div class="histo-head">
-      <span><span class="eyebrow" data-i18n="worksperdecade"></span><span class="histo-key"><i></i><span data-i18n="forsale"></span></span></span>
+      <span><span class="eyebrow" data-i18n="worksperdecade"></span><span class="histo-key"><i></i><span data-i18n="forsale"></span></span><span class="histo-key"><i class="auc"></i><span data-i18n="at_auction"></span></span></span>
       <span class="eyebrow" id="histo-hint">Select a decade to filter</span>
     </div>
     <div class="bars" id="bars"></div>
@@ -575,6 +584,7 @@ footer a{border-bottom:1px solid var(--rule)}
         <button id="g-decade" aria-pressed="true" data-i18n="decade"></button>
         <button id="g-artist" aria-pressed="false" data-i18n="artist"></button>
         <button id="g-time" aria-pressed="false" data-i18n="timeline"></button>
+        <button id="g-auc" aria-pressed="false" data-i18n="auctions"></button>
       </div>
     </div>
     <div class="ctl">
