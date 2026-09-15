@@ -907,6 +907,10 @@ for w in data["works"]:
 data["vocab"] = vocab
 data["meta"]["encoded"] = DICT_FIELDS
 data["meta"]["sites"] = SITES
+# English renderings of the Estonian prose, where translate.py has made them
+from translate import apply_translations
+_na, _nw = apply_translations(data)
+print("  translations applied:", _na, "biographies,", _nw, "descriptions")
 json.dump(data, open("data.json", "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
 print("data.json", os.path.getsize("data.json")//1024, "KB")
 for k, v in data["meta"].items(): print(" ", k, v)

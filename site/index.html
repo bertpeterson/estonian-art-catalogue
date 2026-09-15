@@ -573,7 +573,7 @@ footer a{border-bottom:1px solid var(--rule)}
     <p class="standfirst" data-i18n-html="standfirst">Every record here is a real object with a real holder, and every entry links back to its source.</p>
     <details class="srcdetails">
       <summary data-i18n="srcsummary">Sources & method</summary>
-      <p class="srcline" data-i18n-html="srcline">Sources: <a href="https://opendata.muis.ee/" target="_blank" rel="noopener">Muuseumide Infosüsteem (MuIS)</a>, Eesti Kultuuriministeerium, metadata CC0 · <a href="https://digikogu.ekm.ee/" target="_blank" rel="noopener">EKM Digitaalkogu</a>, Eesti Kunstimuuseum · the galleries' own online catalogues and the NOBA marketplace · Haus Galerii, Vernissage, Allee galerii, Vaal galerii and Eesti Kunsti Oksjonid auction results · harvested <span id="built"></span><br><span id="srcsplit"></span><br>Object data is the holder's, verbatim — the museum's or the gallery's; gallery asking prices are never taken. Auction results are recorded as the house published them — starting price, hammer price, sold or unsold: a record, not a valuation. Artist dates and biographies are tagged by source — <span class="tag">MuIS</span>, <span class="tag">EKM</span>, the Estonian Centre for Contemporary Art, <span class="tag">Wikidata</span> where the museums gave no dates, <span class="tag">Vaal</span> for the auction house's catalogue where nobody else did, or <span class="tag">ed</span> for editorial. How an artist is described, their citizenship, birthplace and training come from Wikidata where it covers them. Decade notes and English medium terms are editorial.</p>
+      <p class="srcline" data-i18n-html="srcline">Sources: <a href="https://opendata.muis.ee/" target="_blank" rel="noopener">Muuseumide Infosüsteem (MuIS)</a>, Eesti Kultuuriministeerium, metadata CC0 · <a href="https://digikogu.ekm.ee/" target="_blank" rel="noopener">EKM Digitaalkogu</a>, Eesti Kunstimuuseum · the galleries' own online catalogues and the NOBA marketplace · Haus Galerii, Vernissage, Allee galerii, Vaal galerii and Eesti Kunsti Oksjonid auction results · harvested <span id="built"></span><br><span id="srcsplit"></span><br>Object data is the holder's, verbatim — the museum's or the gallery's; gallery asking prices are never taken. Auction results are recorded as the house published them — starting price, hammer price, sold or unsold: a record, not a valuation. English renderings of Estonian biographies and record descriptions are machine translations, unedited, and marked <span class="tag">translated</span>; the Estonian is the holder's text. Artist dates and biographies are tagged by source — <span class="tag">MuIS</span>, <span class="tag">EKM</span>, the Estonian Centre for Contemporary Art, <span class="tag">Wikidata</span> where the museums gave no dates, <span class="tag">Vaal</span> for the auction house's catalogue where nobody else did, or <span class="tag">ed</span> for editorial. How an artist is described, their citizenship, birthplace and training come from Wikidata where it covers them. Decade notes and English medium terms are editorial.</p>
     </details>
   </header>
 
@@ -743,9 +743,10 @@ footer a{border-bottom:1px solid var(--rule)}
   const siteOf = m => SITES[m] || null;
   const bioFor = ar => {
     const en = ar.ben, et = ar.b;
-    if (LANG === "en") return en ? {t:en, s:ar.bens, alt:false} : (et ? {t:et, s:ar.bs, alt:true} : {t:"", s:null, alt:false});
-    return et ? {t:et, s:ar.bs, alt:false} : (en ? {t:en, s:ar.bens, alt:true} : {t:"", s:null, alt:false});
+    if (LANG === "en") return en ? {t:en, s:ar.bens, alt:false, mt:!!ar.bmt} : (et ? {t:et, s:ar.bs, alt:true} : {t:"", s:null, alt:false});
+    return et ? {t:et, s:ar.bs, alt:false} : (en ? {t:en, s:ar.bens, alt:true, mt:!!ar.bmt} : {t:"", s:null, alt:false});
   };
+  const mtTag = () => `<span class="tag" title="${esc(T("mt_note"))}">${esc(T("translated"))}</span>`;
   const catName = c => LANG === "en" ? (I18N.CAT_EN[c] || c) : c;
   const medName = e => LANG === "en" ? e : (I18N.MEDIUM_ET[e] || e);
   const techName = w => LANG === "en" ? (w.tc || w.tce) : (w.tce || w.tc);
@@ -1348,7 +1349,7 @@ footer a{border-bottom:1px solid var(--rule)}
         <div class="mono-dates">${esc(life)}${ar.ls?stag(ar.ls):""}</div>
         ${(ar.grp||[]).length ? `<div class="mono-dates">${(ar.grp||[]).map(g =>
             `<button class="showartist" style="margin:4px 6px 0 0" data-grp="${esc(g)}">${esc(grpKind(g))} ${esc(grpLabel(g))}</button>`).join("")}</div>` : ""}
-        <p class="mono-bio${bio.t.length>420?" clamp":""}" id="mono-bio">${esc(bio.t)}${bio.s?stag(bio.s):""}${bio.alt?`<span class="tag">${esc(T("biofallback"))}</span>`:""}</p>
+        <p class="mono-bio${bio.t.length>420?" clamp":""}" id="mono-bio">${esc(bio.t)}${bio.s?stag(bio.s):""}${bio.mt?mtTag():""}${bio.alt?`<span class="tag">${esc(T("biofallback"))}</span>`:""}</p>
         ${bio.t.length>420?`<button class="bio-more" id="bio-more">${esc(T("readbio"))}</button>`:""}
         <div class="mono-links">
           ${ar.ai?`<a class="permalink" href="https://digikogu.ekm.ee/authors/author_id-${esc(ar.ai)}" target="_blank" rel="noopener">${esc(T("d_artistrec"))}</a>`:""}
@@ -1434,7 +1435,7 @@ footer a{border-bottom:1px solid var(--rule)}
     if (SHARDS.has(key)) return SHARDS.get(key);
     // A retry must skip the browser cache: the failure we are retrying is often a
     // cached 404 or 5xx, and re-requesting the identical URL just returns it again.
-    const url = `data/detail/${key}.json?v=9ab6cac5` + (attempt ? `&r=${attempt}` : "");
+    const url = `data/detail/${key}.json?v=da70138d` + (attempt ? `&r=${attempt}` : "");
     const p = fetch(url, attempt ? {cache: "reload"} : undefined)
       .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
       .catch(async () => {
@@ -1480,7 +1481,7 @@ footer a{border-bottom:1px solid var(--rule)}
                 <span class="mem-tech" title="${esc(m[1])}">${esc(m[1]||"")}</span>
                 <span>${m[3]?`<a href="https://www.muis.ee/museaalview/${esc(m[3])}" target="_blank" rel="noopener">MuIS</a>`:""}${m[3]&&m[4]?" · ":""}${m[4]?`<a href="https://digikogu.ekm.ee/ekm/search/oid-${esc(m[4])}/" target="_blank" rel="noopener">EKM</a>`:""}</span>
               </div>`).join("")}</div></div>` : ""}
-          ${(detailOf(w)||{}).d ? `<div class="d-note"><span class="d-nolabel">${w.s==="cca"?esc(T("d_desc_cca"))+" · "+esc(T("inenglish")):w.s==="ekkm"?esc(T("d_desc_ekkm"))+" · "+esc(T("inenglish")):esc(T("d_desc"))+" · "+esc(T("estonianprose"))}</span>${esc(detailOf(w).d)}</div>`
+          ${(detailOf(w)||{}).d ? `<div class="d-note"><span class="d-nolabel">${w.s==="cca"?esc(T("d_desc_cca"))+" · "+esc(T("inenglish")):w.s==="ekkm"?esc(T("d_desc_ekkm"))+" · "+esc(T("inenglish")):esc(T("d_desc"))+" · "+(LANG==="en"&&w.de?esc(T("mt_desc")):esc(T("estonianprose")))}</span>${esc(LANG==="en"&&w.de?w.de:w.d)}</div>`
                    : `<div class="d-note"><span class="d-nolabel">${esc(T("d_desc"))}</span><em style="color:var(--grey-4)">${esc(T("d_nodesc"))}</em></div>`}
           <div class="d-v" style="margin-top:16px;display:flex;flex-wrap:wrap;gap:18px">
             ${(detailOf(w)||{}).mi?`<a class="permalink" href="https://www.muis.ee/museaalview/${esc(detailOf(w).mi)}" target="_blank" rel="noopener">${esc(T("d_recmuis"))}</a>`:""}
@@ -1506,7 +1507,7 @@ footer a{border-bottom:1px solid var(--rule)}
           ${w.nu ? `<div class="d-k">${esc(T("d_number"))}</div><div class="d-v" style="font-family:var(--mono);font-size:.78rem">${esc(w.nu)}</div>` : ""}
           ${ar.wdesc?`<div class="d-k">${esc(T("d_origin"))}</div><div class="d-v">${esc(ar.wdesc)}${ar.qid?` <a class="permalink" href="https://www.wikidata.org/wiki/${esc(ar.qid)}" target="_blank" rel="noopener">${esc(T("d_wd"))}</a>`:""}</div>`:""}
           ${ar.cit?`<div class="d-k">${esc(T("d_cit"))}</div><div class="d-v"><em>${esc(ar.cit.join(" · "))}</em>${ar.born?`<br><em>${esc(T("d_born"))}: ${esc(ar.born)}</em>`:""}</div>`:""}
-          <div class="d-bio">${esc(bioFor(ar).t)}${bioFor(ar).s?stag(bioFor(ar).s):""}${bioFor(ar).alt?`<span class="tag">${esc(T("biofallback"))}</span>`:""}</div>
+          <div class="d-bio">${esc(bioFor(ar).t)}${bioFor(ar).s?stag(bioFor(ar).s):""}${bioFor(ar).mt?mtTag():""}${bioFor(ar).alt?`<span class="tag">${esc(T("biofallback"))}</span>`:""}</div>
           ${state.artist===null?`<button class="showartist" data-artist="${w.a}">All ${ar.c} works by ${esc(ar.n)} →</button>`:""}
         </div></div>`;
     }
@@ -2494,8 +2495,8 @@ footer a{border-bottom:1px solid var(--rule)}
   }   // end boot
 
   Promise.all([
-    fetch("data/index.json?v=9ab6cac5").then(r => r.json()),
-    fetch("data/i18n.json?v=edc6f086").then(r => r.json())
+    fetch("data/index.json?v=da70138d").then(r => r.json()),
+    fetch("data/i18n.json?v=06fabb46").then(r => r.json())
   ]).then(([data, i18n]) => boot(data, i18n))
    .catch(err => {
      document.getElementById("register").innerHTML =
