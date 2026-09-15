@@ -470,10 +470,7 @@ footer a{border-bottom:1px solid var(--rule)}
 .doors .d-names ul{columns:2;column-gap:var(--sp-4)} .doors .d-names li{break-inside:avoid}
 @media(min-width:1100px){.doors .d-names ul{columns:4}}
 @media(max-width:760px){.doors .d-names ul{columns:1}}
-.doors .d-results{margin-top:var(--sp-3)} .doors .d-results ul{columns:2;column-gap:var(--sp-4)} .doors .d-results li{break-inside:avoid}
-.doors .d-results em{font-style:italic;font-weight:400}
-.doors .d-yr{font-family:var(--mono);font-size:var(--fs-xs);color:var(--grey-4);margin-left:8px;letter-spacing:.03em}
-@media(max-width:760px){.doors .d-results ul{columns:1}}
+
 /* timeline: one row per artist, a label column and a track; bars are percentages of
    the track so the same markup holds at any width */
 .tl{--tl-lab:240px;position:relative;margin-top:var(--sp-3)}
@@ -1758,8 +1755,6 @@ footer a{border-bottom:1px solid var(--rule)}
       ? `<button class="more" id="more-sales" style="margin-top:18px">${esc(T("au_moresales", {n: fmt(order.length - shown.length)}))}</button>` : "")
       + `<p class="tl-note">${esc(T("au_note"))}</p>`;
   }
-  // the highest results, for the landing page
-  const TOP_AU = W.filter(w => w.kind === "auction" && w.ao && w.ap).sort((x, y) => y.ap - x.ap).slice(0, 8);
   const AU_N = W.reduce((n, w) => n + (w.kind === "auction" ? 1 : 0), 0);
   const AU_HOUSES = new Set(W.filter(w => w.kind === "auction").map(w => w.mu)).size;
 
@@ -1895,11 +1890,8 @@ footer a{border-bottom:1px solid var(--rule)}
     const col = (head, items, cls, tag) => `<div class="${cls || ""}"><h2>${esc(T(head))}${tag ? ` <span class="tag">${esc(tag)}</span>` : ""}</h2><ul>` + items.map(
       ([label, n, kind, v]) => `<li><button data-door="${kind}" data-v="${v}">` +
         `<span>${esc(label)}</span><span class="n">${num(n)}</span></button></li>`).join("") + "</ul></div>";
-    const results = TOP_AU.length ? `<div class="d-results"><h2>${esc(T("doors_results"))}</h2><ul>` + TOP_AU.map(w =>
-      `<li><button data-door="r" data-v="${w.a}" title="${esc(w.an)} · ${esc(w.ad.slice(0, 4))}"><span>${esc(A[w.a].n)} · <em>${esc(w.t)}</em><span class="d-yr">${esc(w.ad.slice(0, 4))}</span></span><span class="n">${esc(eur(w.ap))}</span></button></li>`).join("") + `</ul></div>` : "";
     el.innerHTML =
       col("doors_name",   TOP_ART.map(([i, n]) => [A[i].n, n, "a", i]), "d-names", "ed")
-      + results
       + `<p class="door-line"><button data-door="x" data-v="0">${esc(T("doors_cross"))}<span class="n">${num(CROSS_WORKS)} ${esc(T("of_n", {n: num(FOR_SALE)}))} ${esc(T("forsale"))} · ${num(CROSS.size)} ${esc(T("artists"))}</span><span class="arrow">&rarr;</span></button></p>`
       + (AU_N ? `<p class="door-line"><button data-door="q" data-v="0">${esc(T("doors_auctions"))}<span class="n">${num(AU_N)} ${esc(T("au_lots"))} · ${AU_HOUSES} ${esc(T("au_houses"))}</span><span class="arrow">&rarr;</span></button></p>` : "");
     el.hidden = false;
@@ -2181,7 +2173,6 @@ footer a{border-bottom:1px solid var(--rule)}
     if (!b) return;
     const v = +b.dataset.v;
     if (b.dataset.door === "a") state.artist = v;
-    else if (b.dataset.door === "r"){ state.artist = v; setGroup("auction"); state.decOrder = "latest"; }
     else if (b.dataset.door === "q"){ setGroup("auction"); state.decOrder = "latest"; }
     else if (b.dataset.door === "x"){ state.cross = true; setGroup("artist"); }
     else { state.from = DOOR_PERIODS[v][0]; state.to = DOOR_PERIODS[v][1]; }
