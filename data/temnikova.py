@@ -14,6 +14,8 @@ BASE = "https://temnikova.ee"
 
 def get(url, key):
     p = f"gcache/{key}.html.gz"
+    # stock changes month to month: a cached page older than a day is fetched again
+    if os.path.exists(p) and time.time() - os.path.getmtime(p) > 86400: os.remove(p)
     if os.path.exists(p):
         with gzip.open(p,"rt",encoding="utf-8") as f: return f.read()
     try:
@@ -32,9 +34,26 @@ def txt(s):
     return re.sub(r'\s+',' ',s).strip()
 
 ids = set()
-for path in ("?c=exhibitions&l=en", "?c=past&l=en", "?c=exhibited-artists&l=en", "?c=gallery-artists&l=en"):
-    h = get(BASE+"/"+path, "tk_"+re.sub(r'\W+','_',path))
-    ids |= set(re.findall(r'c=exhibition&amp;l=en[^"]*id=(\d+)', h))
+# the current shows, and the past ones a year at a time (the site moved its archive
+# under ?c=past-exhibitions&s.date=YYYY in 2026; the old ?c=past now redirects home)
+h = get(BASE+"/?c=exhibitions&l=en", "tk_c_exhibitions_l_en")
+ids |= set(re.findall(r'c=exhibition&(?:amp;)?l=en[^"]*id=(\d+)', h))
+years = sorted(set(re.findall(r'c=past-exhibitions&(?:amp;)?l=en&(?:amp;)?s\.date=(\d{4})', h)))
+for y in years:
+    hy = get(f"{BASE}/?c=past-exhibitions&l=en&s.date={y}", f"tk_past_{y}")
+    ids |= set(re.findall(r'c=exhibition&(?:amp;)?l=en[^"]*id=(\d+)', hy))
+# art fairs are listed apart, and the shows the gallery's artists had elsewhere --
+# Tartu Art House, Berlin, Recklinghausen -- are no longer linked from any list at
+# all, though their pages stand. Every exhibition the ledger has seen is read again.
+hf = get(f"{BASE}/?c=art-fairs&l=en", "tk_c_art_fairs")
+ids |= set(re.findall(r'c=exhibition&(?:amp;)?l=en[^"]*id=(\d+)', hf))
+if os.path.exists("gallery_seen.json"):
+    for e in json.load(open("gallery_seen.json", encoding="utf-8")).values():
+        r = e.get("rec", {})
+        if r.get("gallery") == "Temnikova & Kasela":
+            m = re.search(r"id=(\d+)", r.get("url", ""))
+            if m: ids.add(m.group(1))
+print("archive years:", years[0] if years else "-", "to", years[-1] if years else "-", flush=True)
 print("published exhibitions:", len(ids), flush=True)
 
 ART = re.compile(r'<article id="id(\d+)".*?</article>', re.S)
