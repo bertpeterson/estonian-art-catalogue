@@ -52,9 +52,10 @@
   const siteOf = m => SITES[m] || null;
   const bioFor = ar => {
     const en = ar.ben, et = ar.b;
-    if (LANG === "en") return en ? {t:en, s:ar.bens, alt:false} : (et ? {t:et, s:ar.bs, alt:true} : {t:"", s:null, alt:false});
-    return et ? {t:et, s:ar.bs, alt:false} : (en ? {t:en, s:ar.bens, alt:true} : {t:"", s:null, alt:false});
+    if (LANG === "en") return en ? {t:en, s:ar.bens, alt:false, mt:!!ar.bmt} : (et ? {t:et, s:ar.bs, alt:true} : {t:"", s:null, alt:false});
+    return et ? {t:et, s:ar.bs, alt:false} : (en ? {t:en, s:ar.bens, alt:true, mt:!!ar.bmt} : {t:"", s:null, alt:false});
   };
+  const mtTag = () => `<span class="tag" title="${esc(T("mt_note"))}">${esc(T("translated"))}</span>`;
   const catName = c => LANG === "en" ? (I18N.CAT_EN[c] || c) : c;
   const medName = e => LANG === "en" ? e : (I18N.MEDIUM_ET[e] || e);
   const techName = w => LANG === "en" ? (w.tc || w.tce) : (w.tce || w.tc);
@@ -657,7 +658,7 @@
         <div class="mono-dates">${esc(life)}${ar.ls?stag(ar.ls):""}</div>
         ${(ar.grp||[]).length ? `<div class="mono-dates">${(ar.grp||[]).map(g =>
             `<button class="showartist" style="margin:4px 6px 0 0" data-grp="${esc(g)}">${esc(grpKind(g))} ${esc(grpLabel(g))}</button>`).join("")}</div>` : ""}
-        <p class="mono-bio${bio.t.length>420?" clamp":""}" id="mono-bio">${esc(bio.t)}${bio.s?stag(bio.s):""}${bio.alt?`<span class="tag">${esc(T("biofallback"))}</span>`:""}</p>
+        <p class="mono-bio${bio.t.length>420?" clamp":""}" id="mono-bio">${esc(bio.t)}${bio.s?stag(bio.s):""}${bio.mt?mtTag():""}${bio.alt?`<span class="tag">${esc(T("biofallback"))}</span>`:""}</p>
         ${bio.t.length>420?`<button class="bio-more" id="bio-more">${esc(T("readbio"))}</button>`:""}
         <div class="mono-links">
           ${ar.ai?`<a class="permalink" href="https://digikogu.ekm.ee/authors/author_id-${esc(ar.ai)}" target="_blank" rel="noopener">${esc(T("d_artistrec"))}</a>`:""}
@@ -758,7 +759,7 @@
                 <span class="mem-tech" title="${esc(m[1])}">${esc(m[1]||"")}</span>
                 <span>${m[3]?`<a href="https://www.muis.ee/museaalview/${esc(m[3])}" target="_blank" rel="noopener">MuIS</a>`:""}${m[3]&&m[4]?" · ":""}${m[4]?`<a href="https://digikogu.ekm.ee/ekm/search/oid-${esc(m[4])}/" target="_blank" rel="noopener">EKM</a>`:""}</span>
               </div>`).join("")}</div></div>` : ""}
-          ${w.d ? `<div class="d-note"><span class="d-nolabel">${w.s==="cca"?esc(T("d_desc_cca"))+" · "+esc(T("inenglish")):w.s==="ekkm"?esc(T("d_desc_ekkm"))+" · "+esc(T("inenglish")):esc(T("d_desc"))+" · "+esc(T("estonianprose"))}</span>${esc(w.d)}</div>`
+          ${w.d ? `<div class="d-note"><span class="d-nolabel">${w.s==="cca"?esc(T("d_desc_cca"))+" · "+esc(T("inenglish")):w.s==="ekkm"?esc(T("d_desc_ekkm"))+" · "+esc(T("inenglish")):esc(T("d_desc"))+" · "+(LANG==="en"&&w.de?esc(T("mt_desc")):esc(T("estonianprose")))}</span>${esc(LANG==="en"&&w.de?w.de:w.d)}</div>`
                    : `<div class="d-note"><span class="d-nolabel">${esc(T("d_desc"))}</span><em style="color:var(--grey-4)">${esc(T("d_nodesc"))}</em></div>`}
           <div class="d-v" style="margin-top:16px;display:flex;flex-wrap:wrap;gap:18px">
             ${w.mi?`<a class="permalink" href="https://www.muis.ee/museaalview/${esc(w.mi)}" target="_blank" rel="noopener">${esc(T("d_recmuis"))}</a>`:""}
@@ -784,7 +785,7 @@
           ${w.nu ? `<div class="d-k">${esc(T("d_number"))}</div><div class="d-v" style="font-family:var(--mono);font-size:.78rem">${esc(w.nu)}</div>` : ""}
           ${ar.wdesc?`<div class="d-k">${esc(T("d_origin"))}</div><div class="d-v">${esc(ar.wdesc)}${ar.qid?` <a class="permalink" href="https://www.wikidata.org/wiki/${esc(ar.qid)}" target="_blank" rel="noopener">${esc(T("d_wd"))}</a>`:""}</div>`:""}
           ${ar.cit?`<div class="d-k">${esc(T("d_cit"))}</div><div class="d-v"><em>${esc(ar.cit.join(" · "))}</em>${ar.born?`<br><em>${esc(T("d_born"))}: ${esc(ar.born)}</em>`:""}</div>`:""}
-          <div class="d-bio">${esc(bioFor(ar).t)}${bioFor(ar).s?stag(bioFor(ar).s):""}${bioFor(ar).alt?`<span class="tag">${esc(T("biofallback"))}</span>`:""}</div>
+          <div class="d-bio">${esc(bioFor(ar).t)}${bioFor(ar).s?stag(bioFor(ar).s):""}${bioFor(ar).mt?mtTag():""}${bioFor(ar).alt?`<span class="tag">${esc(T("biofallback"))}</span>`:""}</div>
           ${state.artist===null?`<button class="showartist" data-artist="${w.a}">All ${ar.c} works by ${esc(ar.n)} →</button>`:""}
         </div></div>`;
     }

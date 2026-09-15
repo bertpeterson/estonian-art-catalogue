@@ -233,7 +233,7 @@ for i, a in enumerate(A):
            f"{'<br>' if holders else ''}{e('; '.join(holders[:6]))}</p>"
            + (f"<p class=\"m\">{e(' · '.join(KIND[g.split(':',1)[0]] + ' ' + g.split(':',1)[1] for g in a.get('grp', [])))}</p>"
               if a.get("grp") else "")
-           + (f"<p class=\"bio\">{e(a.get('b') or a.get('ben') or '')}</p>" if (a.get('b') or a.get('ben')) else "")
+           + (f"<p class=\"bio\">{e(a.get('ben') or a.get('b') or '')}{' <span class=\"m\">(machine translation of the holder&#39;s Estonian text, unedited)</span>' if a.get('bmt') else ''}</p>" if (a.get('b') or a.get('ben')) else "")
            + (f"<p class=\"m\">{e(au_line)}</p>" if au_line else "")
            + f"<p><a class=\"cta\" href=\"{BASE}/#artist={sl}\">Browse {len(ws)} works in the catalogue →</a></p>"
            + related(i)

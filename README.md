@@ -142,6 +142,14 @@ names under four letters), with one candidate only and the generation word agree
 **Biographies** are the holder's text, whole: MuIS's are two or three paragraphs and an earlier
 harvest kept only the longest, which opened Priidu Aavik's life at "on returning to Estonia".
 
+**Translations.** The biographies and record descriptions are Estonian, as the holders wrote them, and
+that text is the canonical one. The English interface shows a machine translation of each — made once
+with the Claude API (`data/translate.py`, Sonnet 5), cached by a hash of the source text so a text is never
+sent twice, and marked *translated* wherever it appears with the note that it is unedited. Names, titles,
+inventory numbers, measurements and quoted inscriptions are kept as written; the prompt forbids
+summarising, adding or omitting. 895 biographies and 17,160 descriptions; the monthly run translates
+whatever is new. The 57 English biographies from the Centre for Contemporary Art are theirs, not translations.
+
 **Editorial.** The sixteen names on the landing page are chosen, not counted, and tagged *ed*. Decade
 notes and the English medium vocabulary are editorial. Everything else on a record is the holder's.
 

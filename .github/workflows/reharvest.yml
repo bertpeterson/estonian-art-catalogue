@@ -51,8 +51,10 @@ jobs:
         run: python3 harvest_guard.py after
 
       - name: Merge and build
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: |
-          (cd data && python3 ledger.py && python3 merge.py)
+          (cd data && python3 ledger.py && python3 merge.py && pip install -q anthropic && python3 translate.py)
           ./build_site.sh
           python3 data/readme_figures.py
 
