@@ -40,9 +40,12 @@ while True:
         # Those are not for sale: a lot that sold in 2023 is in someone's home.
         # The API says which is which -- is_purchasable is false for every auction
         # lot, past or unsold -- so only the shop stock is taken.
-        if not p.get("is_purchasable"): skipped+=1; continue
-        # ...and a shop item marked sold in its own name is not stock either
-        if re.search(r'\b(müüdud|sold|reserveeritud|reserved)\b', p.get("name") or "", re.I): skipped+=1; continue
+        is_sold = bool(re.search(r'\b(müüdud|sold|reserveeritud|reserved)\b', p.get("name") or "", re.I))
+        is_lot = any(re.search(r"oksjon\s*\d{4}", c.get("name") or "", re.I) for c in p.get("categories", []))
+        if is_lot: skipped+=1; continue
+        # a shop item the house marks sold is not stock, but it passed through the
+        # gallery: kept, flagged sold. An unpurchasable item with no such mark is skipped.
+        if not p.get("is_purchasable") and not is_sold: skipped+=1; continue
         # p also carries prices; they are not read, and the name must not carry one
         # either: "Alghind: 1800 € Haamrihind: 1800 €" is a price in disguise.
         name=re.sub(r'\b(alghind|haamrihind|hind|price|starting price|hammer price)\s*:?\s*[\d\s.,]*\s*(€|eur)?', ' ', p.get("name") or "", flags=re.I)
@@ -54,7 +57,7 @@ while True:
         seen.add(gid)
         recs.append({"gid":gid,"artist":artist,"title":title,"year":year,"tech":tech,
                      "dims":dims,"gallery":"Vernissage","city":"Tallinn",
-                     "url":p.get("permalink") or "https://vernissage.ee"})
+                     "url":p.get("permalink") or "https://vernissage.ee", **({"sold": True} if is_sold else {})})
     if page%5==0: print(f"  page {page}  kept {len(recs)}",flush=True)
     page+=1; time.sleep(1.0)
     if page>40: break
