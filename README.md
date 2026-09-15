@@ -1,6 +1,6 @@
 # Estonian Art Catalogue · Eesti Kunstikataloog
 
-A browsable catalogue of **68,838 artworks** by **4,294 artists** — museum holdings from **24 Estonian public
+A browsable catalogue of **66,280 artworks** by **4,241 artists** — museum holdings from **24 Estonian public
 collections**, plus what seven commercial galleries and the NOBA marketplace are selling right now,
 aggregated from the national museum databases and the galleries' own listings and presented as a static site.
 
@@ -31,7 +31,7 @@ read from that biography for 301 — both tagged *NOBA* on the page.
 
 7,415 objects appear in both MuIS and the EKM database and are merged on inventory number
 (MuIS `Number` = digikogu `Tulmenumber` + `Kogunumber`), which is why 60,750 source objects
-collapse to 68,838 works.
+collapse to 66,280 works.
 
 **Only attributed works are included.** Anonymous and unattributed objects are excluded by design — including 485 objects catalogued under the name *Tundmatu kunstnik* ("unknown artist"), which is the absence of an attribution written into the name field rather than a name. Notnames stay: *Püha Lucia legendi meister* and its kind identify a hand recognised across several works, and art history treats that as an attribution.
 
@@ -106,9 +106,10 @@ for the rest is the only page there is.
 **Past listings.** A work a gallery has sold is still a work that exists and passed through a known
 hand. Where the gallery says so — Allee's *Müüdud*, Vernissage's *MÜÜDUD*, Kogo's *Sold*, Artrovert's
 out-of-stock badge — the record is kept, marked *sold*, and is never counted as for sale. Where a listing
-simply disappears between two monthly harvests, or where NOBA has taken a work's artwork page private
-while its shop product still stands, it is kept as *no longer listed*, since sold and withdrawn cannot
-be told apart from outside and NOBA never says which; `ledger.py` keeps the month each
+simply disappears between two monthly harvests it is kept as *no longer listed*, since sold and withdrawn
+cannot be told apart from outside. A NOBA product whose artwork page was already private when first seen
+is left out altogether: nobody — not NOBA's own site, not this catalogue — ever saw it listed, and a
+record no one vouches for is not a record; `ledger.py` keeps the month each
 listing was first and last seen. The masthead figure is therefore the number of works the catalogue has
 ever verified with a holder, and only grows; the *for sale* figure is current stock and moves both ways.
 A sale price is never taken: what a gallery work sold for stays between the gallery and the buyer.
@@ -174,8 +175,8 @@ not as part of the normal cycle.
 `data/data.json` is dictionary-encoded and nested, which suits the site and suits
 nobody else. Flat exports with every value resolved, one row per work:
 
-    site/data/export/works.csv.gz      68,838 rows
-    site/data/export/artists.csv.gz     4,294 rows
+    site/data/export/works.csv.gz      66,280 rows
+    site/data/export/artists.csv.gz     4,241 rows
     site/data/export/works.jsonl.gz     one JSON object per line
 
 Rebuild them with `python3 data/export_csv.py`. `data/validate.py` runs the sanity
@@ -267,7 +268,7 @@ related-works carousel, so the images attached to the wrong artworks.
 Code: MIT (see `LICENSE`).
 
 **Data is mixed, and the split is in the data itself.** Records marked `kind: held` —
-47,538 of them, 69.1% — derive from museum metadata published under CC0, which carries no
+47,538 of them, 71.7% — derive from museum metadata published under CC0, which carries no
 restriction on reuse, commercial included. The 9,985 records marked `kind: gallery` come from
 commercial galleries and the NOBA marketplace, which grant no licence; they are included as a
 public catalogue of current work, and anyone reusing this dataset should decide for themselves
