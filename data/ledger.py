@@ -41,6 +41,6 @@ for gid, e in seen.items():
 
 json.dump(seen, open(LEDGER, "w", encoding="utf-8"), ensure_ascii=False)
 json.dump(past, open(os.path.join(here, "gallery_past.json"), "w", encoding="utf-8"), ensure_ascii=False)
-marked = sum(1 for g in now.values() if g.get("sold"))
+marked = sum(1 for g in now.values() if g.get("sold") or g.get("past"))
 print(f"ledger: {len(seen)} listings ever seen; this month {len(now)} ({marked} the gallery marks sold), new {new}, back {returned}; "
       f"no longer listed {len(past)} ({sum(1 for r in past if r['sold'])} sold, {sum(1 for r in past if not r['sold'])} gone)")

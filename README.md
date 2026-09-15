@@ -104,10 +104,11 @@ lists on its own site and again on NOBA keeps the gallery's listing. NOBA links 
 for the rest is the only page there is.
 
 **Past listings.** A work a gallery has sold is still a work that exists and passed through a known
-hand. Where the gallery says so — Allee's *Müüdud*, Vernissage's *MÜÜDUD*, Kogo's *Sold*, a NOBA product
-whose artwork page has been taken private — the record is kept, marked *sold*, and is never counted as
-for sale. Where a listing simply disappears between two monthly harvests it is kept as *no longer
-listed*, since sold and withdrawn cannot be told apart from outside; `ledger.py` keeps the month each
+hand. Where the gallery says so — Allee's *Müüdud*, Vernissage's *MÜÜDUD*, Kogo's *Sold*, Artrovert's
+out-of-stock badge — the record is kept, marked *sold*, and is never counted as for sale. Where a listing
+simply disappears between two monthly harvests, or where NOBA has taken a work's artwork page private
+while its shop product still stands, it is kept as *no longer listed*, since sold and withdrawn cannot
+be told apart from outside and NOBA never says which; `ledger.py` keeps the month each
 listing was first and last seen. The masthead figure is therefore the number of works the catalogue has
 ever verified with a holder, and only grows; the *for sale* figure is current stock and moves both ways.
 A sale price is never taken: what a gallery work sold for stays between the gallery and the buyer.
