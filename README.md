@@ -1,6 +1,6 @@
 # Estonian Art Catalogue · Eesti Kunstikataloog
 
-A browsable catalogue of **64,843 artworks** by **4,207 artists** — museum holdings from **24 Estonian public
+A browsable catalogue of **64,843 artworks** by **4,208 artists** — museum holdings from **24 Estonian public
 collections**, plus what seven commercial galleries and the NOBA marketplace are selling right now,
 aggregated from the national museum databases and the galleries' own listings and presented as a static site.
 
@@ -20,6 +20,7 @@ says so with an *ed* tag.
 | [EKM Digital Collection](https://digikogu.ekm.ee) | 27,681 | The Art Museum of Estonia's own database, behind Kumu |
 | [CCA Estonia](https://cca.ee) | 58 bios | Centre for Contemporary Art — artist biographies, Venice Biennale archive |
 | [EKKM](https://ekkm.ee) | — | Contemporary Art Museum of Estonia |
+| Vaal galerii | 115 artists | Life dates printed beside every lot's artist in its sales, taken for artists no museum, Wikidata or biography dates, tagged *Vaal* |
 | [Wikidata](https://www.wikidata.org) | 1,629 artists | Dates, birthplace, description, training and art-historical affiliation — matched on name, gated on dates and occupation (see *Rules*) |
 | Seven commercial galleries and NOBA | 6,151 | Haus, Vernissage, Temnikova & Kasela, Tütar, Artrovert, Kogo, Ruki — current stock from each gallery's own site; and [NOBA](https://noba.ac), the Nordic-Baltic marketplace, for artists the catalogue already holds or whose NOBA page places them in Estonia. Metadata only, never prices |
 | Auction results: Haus Galerii, Allee galerii, Vernissage, Vaal galerii, Eesti Kunsti Oksjonid | 11,131 lots | Every lot in Haus Galerii's hundred sales since 1998, Allee galerii's fifteen since 2020, Vernissage's fifteen since 2021, Vaal galerii's nine since 2022 and Eesti Kunsti Oksjonid's eighteen since 2023, as the house published it: starting price, hammer price, sold or unsold. A record of what happened at auction, not a valuation |
@@ -114,8 +115,11 @@ offered in the same shop feed as its stock, with the outcome in the lot's name: 
 Haamrihind 1800 €*; *Haamrihind: €* for a lot that found no buyer; *MÜÜDUD* for one sold after the
 sale at a price the house did not print. All are kept — an unsold lot is a result too, and leaving it
 out would bias every artist's line upward — with the starting price, the hammer price where there is
-one, and the sale. A lot in a sale that has not yet taken place is not a result and waits; a lot the
-house could not attribute, or attributed to two hands, is left out. The two prices are the only prices
+one, and the sale. A lot that drew no bid in the sale and was sold afterwards, at the start price or
+at a price the house then agreed, is marked *sold after*: Haus prints such a sale as *Haamrihind* on
+the sale page beside a dash for the last bid, Vernissage as *Haamrihind: müüdud*, EKO as *Müüdud (0)*.
+A lot in a sale that has not yet taken place is not a result and waits; a lot the house could not
+attribute, or attributed to two hands, is left out. The two prices are the only prices
 in the catalogue: gallery asking prices are never taken.
 
 **House spellings.** The houses write names their own way — *Amandus Heinrich Adamson*, *Carl Timoleon
@@ -161,7 +165,7 @@ not as part of the normal cycle.
 nobody else. Flat exports with every value resolved, one row per work:
 
     site/data/export/works.csv.gz      64,843 rows
-    site/data/export/artists.csv.gz     4,207 rows
+    site/data/export/artists.csv.gz     4,208 rows
     site/data/export/works.jsonl.gz     one JSON object per line
 
 Rebuild them with `python3 data/export_csv.py`. `data/validate.py` runs the sanity

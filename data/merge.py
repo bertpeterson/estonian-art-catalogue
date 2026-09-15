@@ -710,10 +710,31 @@ for r in AUC:
         "nu": None, "d": None, "c": None, "s": "auction", "mi": None, "oi": None,
         "k": "A" + re.sub(r'[^A-Za-z0-9]', '', r["aid"]), "n": 1,
         "mem": None, "kind": "auction", "url": r.get("url"),
-        "an": r["sale"], "ad": r.get("date") or r["when"], "as": r.get("start"), "ap": r.get("hammer"), "ao": 1 if r["sold"] else 0})
+        "an": r["sale"], "ad": r.get("date") or r["when"], "as": r.get("start"), "ap": r.get("hammer"), "ao": 1 if r["sold"] else 0,
+        "aa": 1 if r.get("after") else None})
     auc_added += 1
 print("  auction results added:", auc_added, "sold", sum(1 for r in AUC if r["sold"]),
       "from", len({r["house"] for r in AUC}), "houses; unattributed or joint lots skipped:", auc_skipped)
+# Vaal galerii prints life dates beside every lot's artist -- "s 1960", "1936–2022" --
+# the only auction house that does. For an artist with no date from any museum,
+# Wikidata or their own biography, that is taken, tagged Vaal, under the same gate as
+# the NOBA biographies: a birth year the artist's earliest work comes at least
+# fifteen years after. A death year is taken only with a birth year.
+VAAL_LIFE = {}
+for r in AUC:
+    if r.get("life") and r.get("artist"):
+        VAAL_LIFE.setdefault(toks(r["artist"]), r["life"])
+vaal_dated = 0
+for i, a in enumerate(artists):
+    if a["l"][0] or a["l"][1]: continue
+    lf = VAAL_LIFE.get(toks(a["n"]))
+    if not lf: continue
+    m = re.match(r"^(?:s\.?\s*)?(1[89]\d\d|20[01]\d)\s*(?:[-–]\s*(1[89]\d\d|20[0-2]\d))?$", lf.strip())
+    if not m: continue
+    b, d = int(m.group(1)), m.group(2)
+    if _first_work.get(i, 9999) < b + 15: continue
+    a["l"], a["ls"] = [str(b), d or ""], "vaal"; vaal_dated += 1
+print("  life dates taken from Vaal galerii's catalogue:", vaal_dated)
 print("  house and gallery spellings resolved to a catalogued artist:", len(VARIANTS))
 for v in VARIANTS: print(f"     {v[0]!r} -> {v[1]!r}")
 
