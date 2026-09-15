@@ -1419,7 +1419,7 @@ footer a{border-bottom:1px solid var(--rule)}
     if (SHARDS.has(key)) return SHARDS.get(key);
     // A retry must skip the browser cache: the failure we are retrying is often a
     // cached 404 or 5xx, and re-requesting the identical URL just returns it again.
-    const url = `data/detail/${key}.json?v=b3af52b9` + (attempt ? `&r=${attempt}` : "");
+    const url = `data/detail/${key}.json?v=6f448e73` + (attempt ? `&r=${attempt}` : "");
     const p = fetch(url, attempt ? {cache: "reload"} : undefined)
       .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
       .catch(async () => {
@@ -1470,7 +1470,7 @@ footer a{border-bottom:1px solid var(--rule)}
           <div class="d-v" style="margin-top:16px;display:flex;flex-wrap:wrap;gap:18px">
             ${(detailOf(w)||{}).mi?`<a class="permalink" href="https://www.muis.ee/museaalview/${esc(detailOf(w).mi)}" target="_blank" rel="noopener">${esc(T("d_recmuis"))}</a>`:""}
             ${(detailOf(w)||{}).oi?`<a class="permalink" href="https://digikogu.ekm.ee/ekm/search/oid-${esc(detailOf(w).oi)}/" target="_blank" rel="noopener">${esc(T("d_recekm"))}</a>`:""}
-            ${w.url?`<a class="permalink" href="${esc(w.url)}" target="_blank" rel="noopener">${esc(w.kind === "gallery" ? T("d_gallerylink", {g: musName(w.mu)}) : w.kind === "sold" ? T("d_pastlink", {g: musName(w.mu)}) : w.kind === "auction" ? T("d_lotlink", {g: musName(w.mu)}) : T("d_recsource"))}</a>`:""}
+            ${w.url?`<a class="permalink" href="${esc(w.url)}" target="_blank" rel="noopener">${esc(w.kind === "gallery" ? T("d_gallerylink", {g: musName(w.mu)}) : w.kind === "sold" ? T(w.ga ? "d_pastartist" : "d_pastlink", {g: musName(w.mu)}) : w.kind === "auction" ? T("d_lotlink", {g: musName(w.mu)}) : T("d_recsource"))}</a>`:""}
             ${slBtn(id, "sl-d")}
           </div>
         </div>
@@ -1501,7 +1501,9 @@ footer a{border-bottom:1px solid var(--rule)}
       ? `<a class="rl" href="${esc(w.url)}" target="_blank" rel="noopener" title="${esc(T("d_gallerylink", {g: musName(w.mu)}))}">${esc(T("rl_view"))}</a>`
       // a past listing links to the gallery's page for as long as it stays up
       : w.kind === "sold"
-      ? `<a class="rl rl-past" href="${esc(w.url)}" target="_blank" rel="noopener" title="${esc(T("d_pastlink", {g: musName(w.mu)}))}${w.gl ? ` · ${esc(T("d_lastseen", {d: w.gl}))}` : ""}">${esc(pastText(w))} ↗</a>`
+      ? (w.url
+        ? `<a class="rl rl-past" href="${esc(w.url)}" target="_blank" rel="noopener" title="${esc(T(w.ga ? "d_pastartist" : "d_pastlink", {g: musName(w.mu)}))}${w.gl ? ` · ${esc(T("d_lastseen", {d: w.gl}))}` : ""}">${esc(pastText(w))} ↗</a>`
+        : `<span class="rl rl-past">${esc(pastText(w))}</span>`)
       // an auction result carries its outcome on the row: the sale is the point of the record
       : w.kind === "auction" && w.url
       // the price alone on the row -- it is the outcome; "sold" is in the title and the detail
@@ -2405,8 +2407,8 @@ footer a{border-bottom:1px solid var(--rule)}
   }   // end boot
 
   Promise.all([
-    fetch("data/index.json?v=b3af52b9").then(r => r.json()),
-    fetch("data/i18n.json?v=a9033282").then(r => r.json())
+    fetch("data/index.json?v=6f448e73").then(r => r.json()),
+    fetch("data/i18n.json?v=e37ee9c5").then(r => r.json())
   ]).then(([data, i18n]) => boot(data, i18n))
    .catch(err => {
      document.getElementById("register").innerHTML =
