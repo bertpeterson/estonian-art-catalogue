@@ -52,6 +52,7 @@ while True:
         desc = clean(p.get("short_description") or "") or clean(p.get("description") or "")
         first = re.split(r"\.\s", desc, 1)[0]
         medium = first.strip(" .") if first and len(first) < 60 and not re.search(r"\d", first) else ""
+        if re.fullmatch(r"(raamitud|raamimata|signeeritud)", medium, re.I): medium = ""   # a framing note, not a medium
         dm = re.search(r"Mõõdud\s*:?\s*(.*?)(?:raamiga|$)", desc, re.I)
         dd = DIMS.search(dm.group(1)) if dm else DIMS.search(desc)
         dims = (re.sub(r"\s*[x×]\s*", " x ", dd.group(1)).replace(",", ".") + " cm") if dd else ""
