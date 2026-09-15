@@ -116,7 +116,7 @@ Haamrihind 1800 €*; *Haamrihind: €* for a lot that found no buyer; *MÜÜDUD
 sale at a price the house did not print. All are kept — an unsold lot is a result too, and leaving it
 out would bias every artist's line upward — with the starting price, the hammer price where there is
 one, and the sale. A lot that drew no bid in the sale and was sold afterwards, at the start price or
-at a price the house then agreed, is marked *sold later*: Haus prints such a sale as *Haamrihind* on
+at a price the house then agreed, reads *sold* like any other; the record notes that no one bid: Haus prints such a sale as *Haamrihind* on
 the sale page beside a dash for the last bid, Vernissage as *Haamrihind: müüdud*, EKO as *Müüdud (0)*.
 A lot in a sale that has not yet taken place is not a result and waits; a lot the house could not
 attribute, or attributed to two hands, is left out. The two prices are the only prices
