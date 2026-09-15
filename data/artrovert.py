@@ -8,6 +8,8 @@ ctx=ssl.create_default_context(); ctx.check_hostname=False; ctx.verify_mode=ssl.
 os.makedirs("gcache",exist_ok=True)
 def get(u,key):
     p=f"gcache/{key}.html.gz"
+    # stock changes month to month: a cached page older than a day is fetched again
+    if os.path.exists(p) and time.time() - os.path.getmtime(p) > 86400: os.remove(p)
     if os.path.exists(p):
         with gzip.open(p,"rt",encoding="utf-8") as f: return f.read()
     try:
@@ -52,9 +54,13 @@ for sl in sorted(slugs):
     # the description often repeats the measurements inside the technique clause
     tech = re.sub(r'[\d.,]+\s*[x×]\s*[\d.,]+(?:\s*[x×]\s*[\d.,]+)?\s*(?:cm|mm)?', '', tech or '')
     tech = re.sub(r'\s{2,}', ' ', tech).strip(" ,.;")
+    # the product's own page says whether it is still for sale: "outofstock" is the
+    # gallery's Sold badge. A sold work is kept, flagged, as a past listing.
+    main = re.search(r'<(?:article|div)[^>]*class="[^"]*\bast-article-single\b[^"]*"', h)   # the work itself, not the related-works row
+    is_sold = bool(main and "outofstock" in main.group(0))
     recs.append({"gid":"artro-"+sl,"artist":artist.strip(" ,"),"title":title.strip(),
                  "year":year,"tech":tech,"dims":dims,
-                 "gallery":"Artrovert","city":"Tallinn","url":f"{BASE}/en/toode/{sl}/"})
+                 "gallery":"Artrovert","city":"Tallinn","url":f"{BASE}/en/toode/{sl}/", **({"sold": True} if is_sold else {})})
 prev=json.load(open("gallery_records.json",encoding="utf-8"))
 keep=[r for r in prev if not r["gid"].startswith("artro-")]
 json.dump(keep+recs,open("gallery_records.json","w",encoding="utf-8"),ensure_ascii=False)
