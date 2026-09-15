@@ -2327,7 +2327,7 @@ footer a{border-bottom:1px solid var(--rule)}
 
   Promise.all([
     fetch("data/index.json?v=3713a98e").then(r => r.json()),
-    fetch("data/i18n.json?v=1bc5fa93").then(r => r.json())
+    fetch("data/i18n.json?v=9861f30d").then(r => r.json())
   ]).then(([data, i18n]) => boot(data, i18n))
    .catch(err => {
      document.getElementById("register").innerHTML =
