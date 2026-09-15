@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="description" content="A catalogue of 64,843 works of art by 4,207 artists in Estonian public collections and galleries, 1440–2026. Museum records from MuIS and the EKM Digital Collection, gallery stock from the galleries' own catalogues; every record links back to its source.">
+<meta name="description" content="A catalogue of 64,843 works of art by 4,208 artists in Estonian public collections and galleries, 1440–2026. Museum records from MuIS and the EKM Digital Collection, gallery stock from the galleries' own catalogues; every record links back to its source.">
 <title>Estonian Art Catalogue</title>
 <link rel="canonical" href="https://museaal.ee/">
 <meta property="og:type" content="website">
@@ -545,7 +545,7 @@ footer a{border-bottom:1px solid var(--rule)}
       </div>
       <div class="mast-stats">
         <div><b id="stat-w">64,843</b><span data-i18n="works">works</span></div>
-        <div><b id="stat-a">4,207</b><span data-i18n="artists">artists</span></div>
+        <div><b id="stat-a">4,208</b><span data-i18n="artists">artists</span></div>
         <div><b id="stat-m">24</b><span data-i18n="museums">museums</span></div>
         <div id="stat-gwrap"><b id="stat-g">8</b><span data-i18n="galleries">galleries</span></div>
         <!-- the one stat that is a door: the works a visitor can actually acquire -->
@@ -555,7 +555,7 @@ footer a{border-bottom:1px solid var(--rule)}
     <p class="standfirst" data-i18n-html="standfirst">Every record here is a real object with a real holder, and every entry links back to its source.</p>
     <details class="srcdetails">
       <summary data-i18n="srcsummary">Sources & method</summary>
-      <p class="srcline" data-i18n-html="srcline">Sources: <a href="https://opendata.muis.ee/" target="_blank" rel="noopener">Muuseumide Infosüsteem (MuIS)</a>, Eesti Kultuuriministeerium, metadata CC0 · <a href="https://digikogu.ekm.ee/" target="_blank" rel="noopener">EKM Digitaalkogu</a>, Eesti Kunstimuuseum · the galleries' own online catalogues and the NOBA marketplace · Haus Galerii, Vernissage, Allee galerii, Vaal galerii and Eesti Kunsti Oksjonid auction results · harvested <span id="built"></span><br><span id="srcsplit"></span><br>Object data is the holder's, verbatim — the museum's or the gallery's; gallery asking prices are never taken. Auction results are recorded as the house published them — starting price, hammer price, sold or unsold: a record, not a valuation. Artist dates and biographies are tagged by source — <span class="tag">MuIS</span>, <span class="tag">EKM</span>, the Estonian Centre for Contemporary Art, <span class="tag">Wikidata</span> where the museums gave no dates, or <span class="tag">ed</span> for editorial. How an artist is described, their citizenship, birthplace and training come from Wikidata where it covers them. Decade notes and English medium terms are editorial.</p>
+      <p class="srcline" data-i18n-html="srcline">Sources: <a href="https://opendata.muis.ee/" target="_blank" rel="noopener">Muuseumide Infosüsteem (MuIS)</a>, Eesti Kultuuriministeerium, metadata CC0 · <a href="https://digikogu.ekm.ee/" target="_blank" rel="noopener">EKM Digitaalkogu</a>, Eesti Kunstimuuseum · the galleries' own online catalogues and the NOBA marketplace · Haus Galerii, Vernissage, Allee galerii, Vaal galerii and Eesti Kunsti Oksjonid auction results · harvested <span id="built"></span><br><span id="srcsplit"></span><br>Object data is the holder's, verbatim — the museum's or the gallery's; gallery asking prices are never taken. Auction results are recorded as the house published them — starting price, hammer price, sold or unsold: a record, not a valuation. Artist dates and biographies are tagged by source — <span class="tag">MuIS</span>, <span class="tag">EKM</span>, the Estonian Centre for Contemporary Art, <span class="tag">Wikidata</span> where the museums gave no dates, <span class="tag">Vaal</span> for the auction house's catalogue where nobody else did, or <span class="tag">ed</span> for editorial. How an artist is described, their citizenship, birthplace and training come from Wikidata where it covers them. Decade notes and English medium terms are editorial.</p>
     </details>
   </header>
 
@@ -848,7 +848,7 @@ footer a{border-bottom:1px solid var(--rule)}
   const SRCLAB = {muis:"muis", ekm:"digi", ekmmuis:"both", cca:"cca", ekkm:"ekkm", auction:"auction"};
   // An auction result: the sale, and what the house published about the outcome.
   const eur = n => fmt(n) + " €";
-  const auText = w => w.ao ? (w.ap ? T("au_sold", {p: eur(w.ap)}) : T("au_soldnp")) : T("au_unsold");
+  const auText = w => w.ao ? (w.ap ? T(w.aa ? "au_after" : "au_sold", {p: eur(w.ap)}) : T("au_soldnp")) : T("au_unsold");
   // One line per artist: lots, sales, span, and the range of hammer prices.
   function auLine(i){
     const lots = W.filter(w => w.a === i && w.kind === "auction");
@@ -861,7 +861,7 @@ footer a{border-bottom:1px solid var(--rule)}
   }
   const SRCFULL = {muis:"catalogued in MuIS only", ekm:"catalogued in the EKM Digital Collection only", ekmmuis:"in both catalogues, merged on inventory number", cca:"Estonian Centre for Contemporary Art", ekkm:"Contemporary Art Museum of Estonia"};
   const stag = s => s==="ed" ? '<span class="tag">ed</span>' : s==="ekm" ? '<span class="tag">EKM</span>'
-                  : s==="wd" ? '<span class="tag">Wikidata</span>' : s==="noba" ? '<span class="tag">NOBA</span>'
+                  : s==="wd" ? '<span class="tag">Wikidata</span>' : s==="noba" ? '<span class="tag">NOBA</span>' : s==="vaal" ? '<span class="tag">Vaal</span>'
                   : s==="cca" ? '<span class="tag">CCA</span>' : '<span class="tag">MuIS</span>';
 
   const state = {group:"decade", decOrder:"earliest", artOrder:"az", q:"", list:false, shared:null, cross:false, sale:false, tlLimit:400,
@@ -1401,7 +1401,7 @@ footer a{border-bottom:1px solid var(--rule)}
     if (SHARDS.has(key)) return SHARDS.get(key);
     // A retry must skip the browser cache: the failure we are retrying is often a
     // cached 404 or 5xx, and re-requesting the identical URL just returns it again.
-    const url = `data/detail/${key}.json?v=147f18a6` + (attempt ? `&r=${attempt}` : "");
+    const url = `data/detail/${key}.json?v=3713a98e` + (attempt ? `&r=${attempt}` : "");
     const p = fetch(url, attempt ? {cache: "reload"} : undefined)
       .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
       .catch(async () => {
@@ -1468,7 +1468,7 @@ footer a{border-bottom:1px solid var(--rule)}
           ${w.c?`<div class="d-k">${esc(T("d_category"))}</div><div class="d-v">${esc(catName(w.c))}</div>`:""}
           <div class="d-k">${esc(w.kind==="held"?T("d_collection"):T("venue"))}</div><div class="d-v">${esc(w.co||"")}<br><em>${siteOf(w.mu) ? `<a class="permalink" href="${esc(siteOf(w.mu))}" target="_blank" rel="noopener">${esc(musName(w.mu))}</a>` : esc(musName(w.mu))}</em></div>
           <div class="d-k">${esc(T("kind"))}</div><div class="d-v">${esc(T(w.kind==="shown"?"shown":w.kind==="gallery"?"gallery":w.kind==="auction"?"kind_auction":"held"))}</div>
-          ${w.kind==="auction" ? `<div class="d-k">${esc(T("d_result"))}</div><div class="d-v">${esc(w.an)} · <b>${esc(auText(w))}</b>${w.as ? `<br><span class="d-sub">${esc(T("d_start", {p: eur(w.as)}))}</span>` : ""}<br><span class="d-sub">${esc(T("au_note"))}</span></div>` : ""}
+          ${w.kind==="auction" ? `<div class="d-k">${esc(T("d_result"))}</div><div class="d-v">${esc(w.an)} · <b>${esc(auText(w))}</b>${w.as ? `<br><span class="d-sub">${esc(T("d_start", {p: eur(w.as)}))}</span>` : ""}${w.aa ? `<br><span class="d-sub">${esc(T("au_afternote"))}</span>` : ""}<br><span class="d-sub">${esc(T("au_note"))}</span></div>` : ""}
           ${w.nu ? `<div class="d-k">${esc(T("d_number"))}</div><div class="d-v" style="font-family:var(--mono);font-size:.78rem">${esc(w.nu)}</div>` : ""}
           ${ar.wdesc?`<div class="d-k">${esc(T("d_origin"))}</div><div class="d-v">${esc(ar.wdesc)}${ar.qid?` <a class="permalink" href="https://www.wikidata.org/wiki/${esc(ar.qid)}" target="_blank" rel="noopener">${esc(T("d_wd"))}</a>`:""}</div>`:""}
           ${ar.cit?`<div class="d-k">${esc(T("d_cit"))}</div><div class="d-v"><em>${esc(ar.cit.join(" · "))}</em>${ar.born?`<br><em>${esc(T("d_born"))}: ${esc(ar.born)}</em>`:""}</div>`:""}
@@ -2326,8 +2326,8 @@ footer a{border-bottom:1px solid var(--rule)}
   }   // end boot
 
   Promise.all([
-    fetch("data/index.json?v=147f18a6").then(r => r.json()),
-    fetch("data/i18n.json?v=928ea097").then(r => r.json())
+    fetch("data/index.json?v=3713a98e").then(r => r.json()),
+    fetch("data/i18n.json?v=1bc5fa93").then(r => r.json())
   ]).then(([data, i18n]) => boot(data, i18n))
    .catch(err => {
      document.getElementById("register").innerHTML =
