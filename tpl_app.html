@@ -763,7 +763,7 @@
           <div class="d-v" style="margin-top:16px;display:flex;flex-wrap:wrap;gap:18px">
             ${w.mi?`<a class="permalink" href="https://www.muis.ee/museaalview/${esc(w.mi)}" target="_blank" rel="noopener">${esc(T("d_recmuis"))}</a>`:""}
             ${w.oi?`<a class="permalink" href="https://digikogu.ekm.ee/ekm/search/oid-${esc(w.oi)}/" target="_blank" rel="noopener">${esc(T("d_recekm"))}</a>`:""}
-            ${w.url?`<a class="permalink" href="${esc(w.url)}" target="_blank" rel="noopener">${esc(w.kind === "gallery" ? T("d_gallerylink", {g: musName(w.mu)}) : w.kind === "sold" ? T(w.ga ? "d_pastartist" : "d_pastlink", {g: musName(w.mu)}) : w.kind === "auction" ? T("d_lotlink", {g: musName(w.mu)}) : T("d_recsource"))}</a>`:""}
+            ${w.url?`<a class="permalink" href="${esc(w.url)}" target="_blank" rel="noopener">${esc(w.kind === "gallery" ? T("d_gallerylink", {g: musName(w.mu)}) : w.kind === "sold" ? T("d_pastlink", {g: musName(w.mu)}) : w.kind === "auction" ? T("d_lotlink", {g: musName(w.mu)}) : T("d_recsource"))}</a>`:""}
             ${slBtn(id, "sl-d")}
           </div>
         </div>
@@ -795,7 +795,7 @@
       // a past listing links to the gallery's page for as long as it stays up
       : w.kind === "sold"
       ? (w.url
-        ? `<a class="rl rl-past" href="${esc(w.url)}" target="_blank" rel="noopener" title="${esc(T(w.ga ? "d_pastartist" : "d_pastlink", {g: musName(w.mu)}))}${w.gl ? ` · ${esc(T("d_lastseen", {d: w.gl}))}` : ""}">${esc(pastText(w))} ↗</a>`
+        ? `<a class="rl rl-past" href="${esc(w.url)}" target="_blank" rel="noopener" title="${esc(T("d_pastlink", {g: musName(w.mu)}))}${w.gl ? ` · ${esc(T("d_lastseen", {d: w.gl}))}` : ""}">${esc(pastText(w))} ↗</a>`
         : `<span class="rl rl-past">${esc(pastText(w))}</span>`)
       // an auction result carries its outcome on the row: the sale is the point of the record
       : w.kind === "auction" && w.url

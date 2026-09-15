@@ -125,20 +125,14 @@ print(f"  same artwork page, folded: {len(same_page)}")
 # The full harvest, before the drop, is what the artist-page scripts read: a new
 # artist's works are unmatched until their page has been fetched.
 json.dump(recs, open("noba_raw.json", "w", encoding="utf-8"), ensure_ascii=False)
-# NOBA never says sold; it takes the artwork page private and leaves the shop
-# product standing. That is a work no longer listed -- kept as a past listing, but
-# not called sold, since the house does not.
-# Its bare product page shows no picture, no artist, and "1 in stock" for a work
-# that is not to be had: the record links to the artist's NOBA page instead, which
-# shows what of theirs is available, or to nothing where NOBA has no page for the name.
-n_gone = 0
-for r in recs:
-    if "/toode/" in r["url"]:
-        r["past"] = True; n_gone += 1
-        slug = (AW.get(r["artist"]) or {}).get("slug")
-        r["url"] = f"https://noba.ac/{lang(r)}/{'kunstnik' if lang(r) == 'et' else 'artist'}/{slug}/" if slug else None
-        r["urlkind"] = "artist" if slug else None
-print(f"  no longer listed (no artwork page on the artist's page), kept as past listings: {n_gone}")
+# A product with no artwork page was never seen for sale by anyone: NOBA has taken
+# the page private and left a shop stub -- no picture, no artist, "1 in stock" for a
+# work not to be had. Nobody vouches for such a listing, so it does not enter the
+# catalogue. A work that was seen live and later vanishes is another matter: the
+# ledger keeps it, as no longer listed, with the catalogue as the witness.
+before = len(recs)
+recs = [r for r in recs if "/toode/" not in r["url"]]
+print(f"  never seen for sale (no artwork page on the artist's page), left out: {before - len(recs)}")
 
 prev = json.load(open("gallery_records.json", encoding="utf-8")) if os.path.exists("gallery_records.json") else []
 keep = [r for r in prev if not r["gid"].startswith("noba-")]
