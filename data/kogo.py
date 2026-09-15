@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
 """Kogo Galerii (Tartu) -> appends to gallery_records.json. Metadata only, no prices."""
-import re, json, os, gzip, urllib.request, ssl
+import time, re, json, os, gzip, urllib.request, ssl
 UA = "EstonianArtCatalogue/1.0 (research compile; contact via claude.ai)"
 ctx = ssl.create_default_context(); ctx.check_hostname=False; ctx.verify_mode=ssl.CERT_NONE
 os.makedirs("gcache", exist_ok=True)
 
 def get(url, key):
     p = f"gcache/{key}.html.gz"
+    # stock changes month to month: a cached page older than a day is fetched again
+    if os.path.exists(p) and time.time() - os.path.getmtime(p) > 86400: os.remove(p)
     if os.path.exists(p):
         with gzip.open(p,"rt",encoding="utf-8") as f: return f.read()
     r = urllib.request.Request(url, headers={"User-Agent": UA, "Accept-Language":"en"})
