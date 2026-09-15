@@ -1503,7 +1503,79 @@
   $("q").addEventListener("input", e => {
     clearTimeout(t);
     t = setTimeout(() => { state.q = e.target.value.trim(); state.open = null; state.expand.clear(); renderAll(); pushHash(true); }, 160);
+    suggest(e.target.value);
   });
+
+  // ---- suggestions under the search box -------------------------------------------
+  // Typing a name or a title should get you to the thing, not to a filtered list of
+  // everything containing the letters. Artists whose name has a word starting with
+  // what was typed, then works whose title does; an artist opens their view, a work
+  // opens its record in the artist's view.
+  const AKEY = A.map(a => skey(a.n));
+  const ACOUNT = (() => { const c = new Array(A.length).fill(0); W.forEach(w => c[w.a]++); return c; })();
+  const sugg = $("sugg"), qbox = $("q");
+  let sgItems = [], sgSel = -1;
+  const starts = (key, q) => key.startsWith(q) || key.includes(" " + q) || key.includes("-" + q);
+  const hi = (text, q) => {                       // the typed part in bold, on a word boundary
+    const k = skey(text); let i = k.startsWith(q) ? 0 : -1;
+    if (i < 0){ const j = k.indexOf(" " + q); if (j >= 0) i = j + 1; }
+    if (i < 0){ const j = k.indexOf("-" + q); if (j >= 0) i = j + 1; }
+    return i < 0 ? esc(text) : esc(text.slice(0, i)) + "<mark>" + esc(text.slice(i, i + q.length)) + "</mark>" + esc(text.slice(i + q.length));
+  };
+  function suggest(raw){
+    const q = skey(raw.trim());
+    sgItems = []; sgSel = -1;
+    if (q.length < 2){ sugg.hidden = true; sugg.innerHTML = ""; qbox.setAttribute("aria-expanded", "false"); return; }
+    const arts = [];
+    for (let i = 0; i < A.length && arts.length < 40; i++) if (ACOUNT[i] && starts(AKEY[i], q)) arts.push(i);
+    arts.sort((x, y) => (AKEY[y].startsWith(q) - AKEY[x].startsWith(q)) || ACOUNT[y] - ACOUNT[x] || cmpStr(A[x].n, A[y].n));
+    const works = [];
+    for (let i = 0; i < W.length && works.length < 60; i++){ const w = W[i]; if (starts(SK(w), q)) works.push(w); }
+    works.sort((x, y) => (SK(y).startsWith(q) - SK(x).startsWith(q)) || (x.y || 9999) - (y.y || 9999) || cmpStr(x.t, y.t));
+    const top = arts.slice(0, 5), tw = works.slice(0, 6);
+    if (!top.length && !tw.length){ sugg.hidden = true; sugg.innerHTML = ""; qbox.setAttribute("aria-expanded", "false"); return; }
+    let html = "";
+    if (top.length){
+      html += `<div class="sg-h">${esc(T("sg_artists"))}</div>` + top.map(i => { const n = sgItems.push({a: i}) - 1;
+        const life = (A[i].l[0] || A[i].l[1]) ? `${A[i].l[0]}–${A[i].l[1] || ""}` : "";
+        return `<button role="option" data-sg="${n}" id="sg-${n}"><span class="sg-t">${hi(A[i].n, q)}</span><span class="sg-m">${esc(life)}${life ? " · " : ""}${fmt(ACOUNT[i])} ${esc(T("works"))}</span></button>`; }).join("");
+    }
+    if (tw.length){
+      html += `<div class="sg-h">${esc(T("sg_works"))}</div>` + tw.map(w => { const n = sgItems.push({w}) - 1;
+        return `<button role="option" data-sg="${n}" id="sg-${n}"><span class="sg-t"><em>${hi(w.t, q)}</em> · ${esc(A[w.a].n)}</span><span class="sg-m">${w.y || ""}${w.y ? " · " : ""}${esc(abbr(w.mu))}</span></button>`; }).join("");
+    }
+    sugg.innerHTML = html; sugg.hidden = false; qbox.setAttribute("aria-expanded", "true");
+  }
+  function sgGo(n){
+    const it = sgItems[n]; if (!it) return;
+    clearTimeout(t);
+    sugg.hidden = true; sugg.innerHTML = ""; qbox.setAttribute("aria-expanded", "false");
+    state.q = ""; qbox.value = "";
+    if (it.a !== undefined){ setGroup("decade"); selectArtist(it.a); return; }
+    // a work: its artist's view, the record open and in view
+    state.artist = it.w.a; state.decade = null; state.idxOpen = false; state.letter = null;
+    state.expand.clear(); state.open = it.w.k;
+    state.expand.add(String(decOf(it.w)));
+    setGroup("decade"); renderAll(); pushHash();
+    const el = document.querySelector(`.row-btn[data-id="${CSS.escape(it.w.k)}"]`);
+    if (el){ el.scrollIntoView({behavior: "auto", block: "center"}); el.focus({preventScroll: true}); }
+  }
+  const sgMove = d => {
+    if (sugg.hidden || !sgItems.length) return;
+    sgSel = (sgSel + d + sgItems.length) % sgItems.length;
+    sugg.querySelectorAll("[data-sg]").forEach(b => b.setAttribute("aria-selected", +b.dataset.sg === sgSel));
+    qbox.setAttribute("aria-activedescendant", "sg-" + sgSel);
+    const el = sugg.querySelector(`[data-sg="${sgSel}"]`); if (el) el.scrollIntoView({block: "nearest"});
+  };
+  qbox.addEventListener("keydown", e => {
+    if (e.key === "ArrowDown"){ e.preventDefault(); sgMove(1); }
+    else if (e.key === "ArrowUp"){ e.preventDefault(); sgMove(-1); }
+    else if (e.key === "Enter" && !sugg.hidden && sgSel >= 0){ e.preventDefault(); sgGo(sgSel); }
+    else if (e.key === "Escape" && !sugg.hidden){ e.preventDefault(); sugg.hidden = true; qbox.setAttribute("aria-expanded", "false"); }
+  });
+  sugg.addEventListener("mousedown", e => { const b = e.target.closest("[data-sg]"); if (b){ e.preventDefault(); sgGo(+b.dataset.sg); } });
+  document.addEventListener("click", e => { if (!e.target.closest(".search")) { sugg.hidden = true; qbox.setAttribute("aria-expanded", "false"); } });
+  qbox.addEventListener("focus", () => { if (qbox.value.trim().length >= 2 && sugg.innerHTML) sugg.hidden = false; });
 
   function setGroup(g){
     state.group = g;
