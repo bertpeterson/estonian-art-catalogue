@@ -149,6 +149,19 @@ h1 a:hover{color:var(--grey-6)}
 .search input{width:100%;background:var(--field);border:1px solid var(--rule);color:var(--ink);font-family:var(--sans);font-size:.92rem;padding:9px 12px 9px 34px}
 .search input::placeholder{color:var(--grey-4)}
 .search svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--grey-4)}
+/* suggestions under the box: artists first, then works; one line each, the arrow
+   keys walk them, Enter opens, Escape closes */
+#sugg{position:absolute;left:0;width:max(100%,min(560px,calc(100vw - 36px)));top:calc(100% - 1px);z-index:40;background:var(--paper);border:1px solid var(--rule);
+  box-shadow:0 8px 24px rgba(0,0,0,.12);max-height:min(60vh,420px);overflow-y:auto}
+#sugg .sg-h{font-family:var(--mono);font-size:var(--fs-xs);letter-spacing:var(--ls-label);text-transform:uppercase;color:var(--grey-4);
+  padding:8px 12px 3px;border-top:1px solid var(--rule-soft)} #sugg .sg-h:first-child{border-top:0}
+#sugg button{display:flex;width:100%;align-items:baseline;gap:10px;background:none;border:0;padding:6px 12px;cursor:pointer;
+  text-align:left;color:var(--ink);font-family:var(--serif-text);font-size:var(--fs-base);line-height:1.3;border-radius:0}
+#sugg button:hover,#sugg button[aria-selected="true"]{background:var(--field)}
+#sugg button .sg-t{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#sugg button .sg-t em{font-style:italic;font-weight:400}
+#sugg button .sg-m{font-family:var(--mono);font-size:var(--fs-xs);color:var(--grey-4);white-space:nowrap;letter-spacing:.03em}
+#sugg mark{background:none;color:inherit;font-weight:600}
 .ctl-label{font-family:var(--mono);font-size:var(--fs-sm);letter-spacing:var(--ls-label);text-transform:uppercase;color:var(--grey-4)}
 .linkbtn{font-family:var(--mono);font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;background:none;border:0;border-bottom:1px solid var(--rule);color:var(--grey-6);cursor:pointer;padding:2px 0}
 .linkbtn:hover{color:var(--ink);border-bottom-color:var(--ink)}
@@ -572,7 +585,9 @@ footer a{border-bottom:1px solid var(--rule)}
   <div class="controls">
     <div class="search">
       <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="7" cy="7" r="4.6"/><path d="M10.4 10.4L14 14"/></svg>
-      <input id="q" type="search" placeholder="Search titles, artists, techniques, inventory numbers…" aria-label="Search the register">
+      <input id="q" type="search" placeholder="Search titles, artists, techniques, inventory numbers…" aria-label="Search the register"
+             autocomplete="off" role="combobox" aria-expanded="false" aria-controls="sugg" aria-autocomplete="list">
+      <div id="sugg" role="listbox" hidden></div>
     </div>
     <div class="ctl">
       <span class="ctl-label" data-i18n="group"></span>
