@@ -906,7 +906,7 @@ footer a{border-bottom:1px solid var(--rule)}
     const ps = lots.filter(w => w.ao && w.ap).map(w => w.ap).sort((a, b) => a - b);
     const ys = lots.map(w => +w.ad.slice(0, 4)).sort((a, b) => a - b);
     const span = ys[0] === ys[ys.length-1] ? String(ys[0]) : `${ys[0]}–${ys[ys.length-1]}`;
-    const range = ps.length ? (ps[0] === ps[ps.length-1] ? eur(ps[0]) : `${fmt(ps[0])}–${eur(ps[ps.length-1])}`) : "";
+    const range = ps.length ? (ps[0] === ps[ps.length-1] ? eur(ps[0]) : `${eur(ps[0])} – ${eur(ps[ps.length-1])}`) : "";
     return T("au_line", {n: lots.length, s: lots.filter(w => w.ao).length, y: span}) + (range ? ` · ${range}` : "");
   }
   const SRCFULL = {muis:"catalogued in MuIS only", ekm:"catalogued in the EKM Digital Collection only", ekmmuis:"in both catalogues, merged on inventory number", cca:"Estonian Centre for Contemporary Art", ekkm:"Contemporary Art Museum of Estonia"};
@@ -1806,7 +1806,7 @@ footer a{border-bottom:1px solid var(--rule)}
       const items = sortRows(lots, state.decOrder === "earliest"), sold = lots.filter(w => w.ao && w.ap);
       const ps = sold.map(w => w.ap).sort((a, b) => a - b);
       const gutter = `<span class="g-name">${esc(T("au_byprice"))}</span>
-        <div class="g-split">${esc(T("au_saleline", {n: fmt(lots.length), s: fmt(lots.filter(w => w.ao).length)}))}${ps.length ? ` · ${fmt(ps[0])}–${eur(ps[ps.length-1])}` : ""}</div>`;
+        <div class="g-split">${esc(T("au_saleline", {n: fmt(lots.length), s: fmt(lots.filter(w => w.ao).length)}))}${ps.length ? ` · ${eur(ps[0])} – ${eur(ps[ps.length-1])}` : ""}</div>`;
       return groupHTML("price", gutter, items, true) + `<p class="tl-note">${esc(T("au_note"))}</p>`;
     }
     const asc = state.decOrder === "earliest";
