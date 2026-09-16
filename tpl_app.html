@@ -225,7 +225,7 @@
                   : s==="wd" ? '<span class="tag">Wikidata</span>' : s==="noba" ? '<span class="tag">NOBA</span>' : s==="vaal" ? '<span class="tag">Vaal</span>'
                   : s==="cca" ? '<span class="tag">CCA</span>' : '<span class="tag">MuIS</span>';
 
-  const state = {group:"decade", decOrder:"earliest", artOrder:"az", q:"", list:false, shared:null, cross:false, sale:false,
+  const state = {group:"decade", decOrder:"earliest", artOrder:"az", q:"", list:false, shared:null, sale:false,
                  decade:null, media:new Set(), museums:new Set(), cats:new Set(), srcs:new Set(),
                  artist:null, letter:null, idxOpen:false, idxQ:"", idxLimit:120, idxSort:"az", showEarly:false, origins:new Set(), groups:new Set(), sort:"year", year:null, gLimit:50, from:null, to:null, undOnly:false, open:null, expand:new Set(),
                  od:new Set(),    // the decades opened in the register's mosaic
@@ -262,7 +262,6 @@
     if (state.idxOpen) p.set("index", state.letter || "all");
     // The list travels as its keys, so "Link to this view" of your own list is a link
     // anyone can open. An empty list is "mine" -- nothing to carry.
-    if (state.cross) p.set("cross", "1");
     if (state.sale) p.set("sale", "1");
     if (state.shared) p.set("list", [...state.shared].join(","));
     else if (state.list) p.set("list", SL.size ? [...SL].join(",") : "mine");
@@ -310,7 +309,6 @@
     state.od = new Set(g("od"));
     // A list in the URL is yours if it matches what this browser holds, and someone
     // else's otherwise -- shown as a shared list, never merged into yours unasked.
-    state.cross = p.get("cross") === "1";
     state.sale = p.get("sale") === "1";
     state.list = false; state.shared = null;
     const lv = p.get("list");
@@ -364,7 +362,7 @@
     return _qTerms;
   };
   const matchText = w => { const t = qTerms(); if (!t.length) return true; const h = hay(w); return t.every(x => h.includes(x)); };
-  const inList = w => { const k = listKeys(); return (!k || k.has(w.k)) && (!state.sale || w.kind === "gallery") && (!state.cross || (w.kind === "gallery" && CROSS.has(w.a))); };
+  const inList = w => { const k = listKeys(); return (!k || k.has(w.k)) && (!state.sale || w.kind === "gallery"); };
   const baseSet = () => W.filter(w => matchText(w) && inList(w)
       && (state.media.size===0 || state.media.has(w.e))
       && (state.museums.size===0 || state.museums.has(w.mu))
@@ -532,7 +530,6 @@
     if (state.q) add(`“${state.q}”`, () => { state.q = ""; $("q").value = ""; });
     if (state.shared) add(T("sl_shared", {n: state.shared.size}), () => { state.shared = null; });
     else if (state.list) add(T("mylist"), () => { state.list = false; });
-    if (state.cross) add(T("doors_cross"), () => { state.cross = false; });
     if (state.sale) add(T("forsale_chip"), () => { state.sale = false; });
     ACTIVE = chips;
     // No chips, no bar: "none — showing all 51,598 works" restated the masthead.
@@ -934,7 +931,6 @@
     const scope = [];
     if (state.shared) scope.push(T("sl_shared", {n: state.shared.size}));
     else if (state.list) scope.push(T("mylist"));
-    if (state.cross) scope.push(T("doors_cross"));
     if (state.sale) scope.push(T("forsale_chip"));
     if (state.artist!==null) scope.push(A[state.artist].n);
     if (state.undOnly) scope.push(T("undated"));
@@ -1047,14 +1043,9 @@
         const ar = A[i];
         const items = sortRows(set.filter(w=>w.a===i), false);
         const life = (ar.l[0]||ar.l[1]) ? `${ar.l[0]}–${ar.l[1]||""}` : "dates unrecorded";
-        // In the museums-and-for-sale view the split is the point: how much of the
-        // artist a public collection holds against how much is on the market.
-        const split = state.cross ? (() => {
-          const held = HELD_N.get(i) || 0, sold = items.length;
-          return `<div class="g-split">${held.toLocaleString(LANG==="en"?"en":"et")} ${esc(T("cross_held"))} · ${sold} ${esc(T("cross_sold"))}</div>`; })() : "";
         const au = auLine(i);
         const gutter = `<span class="g-name">${esc(ar.n)}</span>
-          <div class="g-dates">${esc(life)}${stag(ar.ls)}</div>${split}${au ? `<div class="g-split">${esc(au)}</div>` : ""}
+          <div class="g-dates">${esc(life)}${stag(ar.ls)}</div>${au ? `<div class="g-split">${esc(au)}</div>` : ""}
           ${bioFor(ar).t ? `<p class="g-blurb${bioFor(ar).t.length > 260 ? " clamp" : ""}">${esc(bioFor(ar).t)}</p>${bioFor(ar).t.length > 260 ? `<button class="bio-more g-more">${esc(T("readbio"))}</button>` : ""}` : ""}
           <button class="showartist" data-artist="${i}">Open artist →</button>`;
         return groupHTML("a"+i, gutter, items, false);
@@ -1124,16 +1115,7 @@
                  "Evald Okas", "Ülo Sooster", "Olev Subbi", "Jüri Arrak",
                  "Malle Leis", "Raul Meel", "Tõnis Vint", "Leonhard Lapin"];
   // Artists a public collection has accessioned AND a gallery is selling right now.
-  // The most interesting slice for a collector, and invisible until here: it needs
-  // two facets at once, which the facet panel cannot express.
-  const CROSS = (() => {
-    const held = new Set(), sold = new Set();
-    W.forEach(w => { if (w.kind === "gallery") sold.add(w.a); else if (isHeld(w)) held.add(w.a); });
-    return new Set([...held].filter(i => sold.has(i)));
-  })();
-  const HELD_N = (() => { const m = new Map(); W.forEach(w => { if (isHeld(w)) m.set(w.a, (m.get(w.a) || 0) + 1); }); return m; })();
   const FOR_SALE = W.reduce((n, w) => n + (w.kind === "gallery" ? 1 : 0), 0);
-  const CROSS_WORKS = W.reduce((n, w) => n + (w.kind === "gallery" && CROSS.has(w.a) ? 1 : 0), 0);
   const TOP_ART = (() => {
     const c = new Map(); W.forEach(w => c.set(w.a, (c.get(w.a) || 0) + 1));
     const byName = new Map(A.map((a, i) => [a.n, i]));
@@ -1150,7 +1132,7 @@
   const PCOUNT = DOOR_PERIODS.map(([lo, hi]) => W.reduce((n, w) =>
     n + (w.y != null && (lo === null || w.y >= lo) && w.y <= hi ? 1 : 0), 0));
 
-  const pristine = () => !state.q && !listKeys() && !state.cross && !state.sale && state.decade === null && state.artist === null
+  const pristine = () => !state.q && !listKeys() && !state.sale && state.decade === null && state.artist === null
     && state.letter === null && state.from === null && state.to === null && state.year === null
     && !state.undOnly && !state.media.size && !state.museums.size && !state.cats.size
     && !state.srcs.size && !state.origins.size && !state.groups.size;
@@ -1162,10 +1144,7 @@
     const col = (head, items, cls, tag) => `<div class="${cls || ""}"><h2>${esc(T(head))}${tag ? ` <span class="tag">${esc(tag)}</span>` : ""}</h2><ul>` + items.map(
       ([label, n, kind, v]) => `<li><button data-door="${kind}" data-v="${v}">` +
         `<span>${esc(label)}</span><span class="n">${num(n)}</span></button></li>`).join("") + "</ul></div>";
-    el.innerHTML =
-      col("doors_name",   TOP_ART.map(([i, n]) => [A[i].n, n, "a", i]), "d-names", "ed")
-      + `<p class="door-line"><button data-door="x" data-v="0">${esc(T("doors_cross"))}<span class="n">${num(CROSS_WORKS)} ${esc(T("of_n", {n: num(FOR_SALE)}))} ${esc(T("forsale"))} · ${num(CROSS.size)} ${esc(T("artists"))}</span><span class="arrow">&rarr;</span></button></p>`
-      ;
+    el.innerHTML = col("doors_name", TOP_ART.map(([i, n]) => [A[i].n, n, "a", i]), "d-names", "ed");
     el.hidden = false;
   }
 
@@ -1457,7 +1436,6 @@
     if (!b) return;
     const v = +b.dataset.v;
     if (b.dataset.door === "a") state.artist = v;
-    else if (b.dataset.door === "x"){ state.cross = true; setGroup("artist"); }
     else { state.from = DOOR_PERIODS[v][0]; state.to = DOOR_PERIODS[v][1]; }
     renderAll(); pushHash();
   });
@@ -1577,7 +1555,7 @@
     state.q=""; state.decade=null; state.media.clear(); state.museums.clear(); state.cats.clear(); state.srcs.clear(); state.origins.clear(); state.groups.clear();
     state.artist=null; state.letter=null; state.idxOpen=false; state.sort="year"; state.year=null; state.from=null; state.to=null; state.undOnly=false; $("sortby").value="year";
     state.open=null; state.expand.clear(); state.od.clear(); state.decOrder="earliest"; state.artOrder="az";
-    state.list=false; state.shared=null; state.cross=false; state.sale=false;
+    state.list=false; state.shared=null; state.sale=false;
     $("q").value=""; setGroup("decade"); renderAll(); pushHash(); window.scrollTo({top:0,behavior:"auto"});
   });
 

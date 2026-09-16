@@ -157,8 +157,8 @@ notes and the English medium vocabulary are editorial. Everything else on a reco
 
 The register groups by decade, artist or **auction sale** — every filter applying to each. A broad view
 opens on a mosaic, one column per century and a cell per decade, each as large as its share. **For sale**
-in the masthead opens everything a gallery is selling; the line under the names opens the 325 artists
-who are both in a museum and on the market. Every gallery row links out with *For sale ↗*. The
+in the masthead opens everything a gallery is selling; **auctioned** opens the results, sale by sale.
+Every gallery row links out with *For sale ↗*; every lot with its hammer price. The
 **shortlist** (bookmark on each row) is kept in the browser, exports as CSV and shares as a link that
 carries the keys. Each decade bar shows its for-sale share hatched, because since NOBA the 2020s bar
 is 98% gallery stock and unsplit it read as the most-collected decade in Estonian history.
