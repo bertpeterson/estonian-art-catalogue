@@ -782,7 +782,8 @@
                     (w.yl.match(/(\d{4})\s*[–-]\s*(\d{4})/))) : null;
     const yr = w.y == null ? `<span class="r-year und" ${cy?`title="${esc(w.yl)}"`:""}>${esc(cy ? T("centshort",{n:ordN(+cy[1])}) : T("nd"))}</span>`
       : `<span class="r-year" title="${esc(dateLabel(w) || w.y)}${w.dsrc==="title"?" — date taken from the end of the title; the museum's dating field is empty":""}">${esc(dateLabel(w) || w.y)}${w.dsrc==="title"?"*":""}</span>`;
-    const art = (showArtist && state.artist===null) ? `<span class="r-artist">${esc(ar.n)}</span>` : `<span class="r-artist"></span>`;
+    // the name on the row opens the artist's view; the row handler steps aside for it
+    const art = (showArtist && state.artist===null) ? `<span class="r-artist r-alink" data-artist="${w.a}" title="${esc(T("allworksby", {n: ar.n}))}">${esc(ar.n)}</span>` : `<span class="r-artist"></span>`;
     let detail = "";
     if (open){
       const life = (ar.l[0] || ar.l[1]) ? `${ar.l[0]}–${ar.l[1] || ""}` : "";
@@ -829,7 +830,7 @@
           <div class="d-k">${esc(isHeld(w)?T("d_collection"):T("venue"))}</div><div class="d-v">${w.co?esc(collName(w.co))+"<br>":""}<em>${siteOf(w.mu) ? `<a class="permalink" href="${esc(siteOf(w.mu))}" target="_blank" rel="noopener">${esc(musName(w.mu))}</a>` : esc(musName(w.mu))}</em></div>
           <div class="d-k">${esc(T("kind"))}</div><div class="d-v">${esc(T(w.kind==="shown"?"shown":w.kind==="gallery"?"gallery":w.kind==="auction"?"kind_auction":w.kind==="sold"?"kind_sold":"held"))}</div>
           ${w.kind==="sold" ? `<div class="d-k">${esc(T("d_status"))}</div><div class="d-v">${esc(pastText(w))}${w.gl ? `<br><span class="d-sub">${esc(T("d_lastseen", {d: w.gl}))}</span>` : ""}<br><span class="d-sub">${esc(T("d_pastnote"))}</span></div>` : ""}
-          ${w.kind==="auction" ? `<div class="d-k">${esc(T("d_result"))}</div><div class="d-v">${esc(w.an)} · <b>${esc(auText(w))}</b>${w.as ? `<br><span class="d-sub">${esc(T("d_start", {p: eur(w.as)}))}</span>` : ""}${w.apr ? `<br><span class="d-sub">${esc(T("d_press"))}: ${esc(w.apr)}</span>` : ""}${chainOf(w) ? `<div class="au-hist">${chainOf(w).map(x => `<div class="au-row${x === w ? " now" : ""}"><span>${esc(String(x.ad).slice(0, 4))}</span><span>${esc(x.an.toLowerCase().includes(musName(x.mu).toLowerCase().split(" ")[0]) ? x.an : musName(x.mu) + " · " + x.an)}</span><span class="n">${x.ao ? (x.ap ? esc(eur(x.ap)) : esc(T("au_soldnp"))) : esc(T("au_unsold"))}${x.as ? ` <em>(${esc(eur(x.as))})</em>` : ""}</span>${x.url ? `<a href="${esc(x.url)}" target="_blank" rel="noopener">↗</a>` : "<span></span>"}</div>`).join("")}</div>` : ""}${w.aa ? `<br><span class="d-sub">${esc(T("au_afternote"))}</span>` : ""}<br><span class="d-sub">${esc(T("au_note"))}</span></div>` : ""}
+          ${w.kind==="auction" ? `<div class="d-k">${esc(T("d_result"))}</div><div class="d-v">${esc(w.an)} · <b>${esc(auText(w))}</b>${w.as ? `<br><span class="d-sub">${esc(T("d_start", {p: eur(w.as)}))}</span>` : ""}${w.apr ? `<br><span class="d-sub">${esc(T("d_press"))}: ${esc(w.apr)}</span>` : ""}${w.adb ? `<br><span class="d-sub">${esc(w.adb[LANG] || w.adb.en)}</span>` : ""}${chainOf(w) ? `<div class="au-hist">${chainOf(w).map(x => `<div class="au-row${x === w ? " now" : ""}"><span>${esc(String(x.ad).slice(0, 4))}</span><span>${esc(x.an.toLowerCase().includes(musName(x.mu).toLowerCase().split(" ")[0]) ? x.an : musName(x.mu) + " · " + x.an)}</span><span class="n">${x.ao ? (x.ap ? esc(eur(x.ap)) : esc(T("au_soldnp"))) : esc(T("au_unsold"))}${x.as ? ` <em>(${esc(eur(x.as))})</em>` : ""}</span>${x.url ? `<a href="${esc(x.url)}" target="_blank" rel="noopener">↗</a>` : "<span></span>"}</div>${x.adb ? `<div class="au-doubt">${esc(x.adb[LANG] || x.adb.en)}</div>` : ""}`).join("")}</div>` : ""}${w.aa ? `<br><span class="d-sub">${esc(T("au_afternote"))}</span>` : ""}<br><span class="d-sub">${esc(T("au_note"))}</span></div>` : ""}
           ${w.nu ? `<div class="d-k">${esc(T("d_number"))}</div><div class="d-v" style="font-family:var(--mono);font-size:.78rem">${esc(w.nu)}</div>` : ""}
           ${ar.wdesc?`<div class="d-k">${esc(T("d_origin"))}</div><div class="d-v">${esc(ar.wdesc)}${ar.qid?` <a class="permalink" href="https://www.wikidata.org/wiki/${esc(ar.qid)}" target="_blank" rel="noopener">${esc(T("d_wd"))}</a>`:""}</div>`:""}
           ${ar.cit?`<div class="d-k">${esc(T("d_cit"))}</div><div class="d-v"><em>${esc(ar.cit.join(" · "))}</em>${ar.born?`<br><em>${esc(T("d_born"))}: ${esc(ar.born)}</em>`:""}</div>`:""}
@@ -1260,7 +1261,8 @@
   const renderAll = () => { renderBars(); renderYearRange(); renderFacets(); renderActiveFilters(); renderArtistIndex(); renderMono(); render(); };
 
   function selectArtist(i){
-    state.artist = i; state.open = null; state.expand.clear();
+    // "all works by" means all of them: a search term in the box would hide most
+    state.artist = i; state.open = null; state.expand.clear(); state.q = ""; $("q").value = "";
     state.decade = null; state.idxOpen = false; state.letter = null;
     renderAll(); pushHash();
     window.scrollTo({top: 0, behavior: matchMedia("(prefers-reduced-motion:reduce)").matches?"auto":"smooth"});
@@ -1341,6 +1343,7 @@
       else { state.undOnly = false; state.from = lo === "" ? null : +lo; state.to = hi === "" ? null : +hi; }
       state.open = null; state.expand.clear(); renderAll(); pushHash(); return;
     }
+    if (e.target.closest("[data-artist]")) return;
     const b = e.target.closest(".row-btn"); if (!b) return;
     const id = b.dataset.id;
     state.open = state.open === id ? null : id;

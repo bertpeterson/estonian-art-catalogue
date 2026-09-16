@@ -787,8 +787,13 @@ AUC = json.load(open("auction_records.json", encoding="utf-8")) if os.path.exist
 # the time -- Köler's 172,561 € at Vaal in 2008, the 112,000 € at E-Kunstisalong in
 # 2014 -- kept by hand in press_results.json with the article they come from.
 AUC += json.load(open("press_results.json", encoding="utf-8")) if os.path.exists("press_results.json") else []
+# A published figure that cannot be right -- the 1999 Mägi after-sale Haus prints at the
+# price the work made twenty years later -- keeps its sale but loses its price, with the
+# reason shown on the record. Per lot, by hand, in auction_doubt.json; never by rule.
+DOUBT = json.load(open("auction_doubt.json", encoding="utf-8")) if os.path.exists("auction_doubt.json") else {}
 auc_added = auc_skipped = 0
 for r in AUC:
+    if r["aid"] in DOUBT: r["hammer"] = None; r["doubt"] = DOUBT[r["aid"]]
     for f in ("artist", "title", "tech", "dims"):
         if r.get(f): r[f] = re.sub(r'\s+', ' ', html.unescape(r[f])).strip()
     if not r.get("title"): continue
@@ -807,7 +812,7 @@ for r in AUC:
         "k": "A" + re.sub(r'[^A-Za-z0-9]', '', r["aid"]), "n": 1,
         "mem": None, "kind": "auction", "url": r.get("url"),
         "an": r["sale"], "ad": r.get("date") or r["when"], "as": r.get("start"), "ap": r.get("hammer"), "ao": 1 if r["sold"] else 0,
-        "aa": 1 if r.get("after") else None, "apr": r.get("press")})
+        "aa": 1 if r.get("after") else None, "apr": r.get("press"), "adb": r.get("doubt")})
     auc_added += 1
 print("  auction results added:", auc_added, "sold", sum(1 for r in AUC if r["sold"]),
       "from", len({r["house"] for r in AUC}), "houses; unattributed or joint lots skipped:", auc_skipped)
