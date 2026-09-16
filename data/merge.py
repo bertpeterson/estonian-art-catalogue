@@ -361,6 +361,20 @@ def term(v, table):
     if not v: return None
     parts = [p.strip() for p in re.split(r'[;,\n]', v) if p.strip()]
     return "; ".join(table.get(p.lower(), p) for p in parts[:3])
+# a gallery's or house's technique line mixes technique and support -- "Õli, lõuend",
+# "Söövitus paberil", "Akrüül lõuendil" -- so both tables serve it, and the Estonian
+# locative ("paberil", "lõuendil": on paper, on canvas) is read as its noun
+TECHMAT = {**MAT, **TECH, "lõuendil": "on canvas", "paberil": "on paper", "papil": "on board", "kartongil": "on card",
+           "vineeril": "on plywood", "masoniidil": "on masonite", "puidul": "on wood", "klaasil": "on glass", "metallil": "on metal",
+           "siidil": "on silk", "plaadil": "on panel", "graafika": "print", "maal": "painting", "skulptuur": "sculpture", "joonistus": "drawing",
+           "foto": "photograph", "printmaking": "print", "painting": "painting", "oil on canvas": "oil on canvas"}
+def term_gal(v):
+    if not v: return None
+    out = []
+    for p in [p.strip() for p in re.split(r'[;,\n]', v) if p.strip()][:4]:
+        words = [TECHMAT.get(w.lower().strip("."), w) for w in p.split()]
+        out.append(" ".join(words))
+    return ", ".join(out)
 
 def ess_en(e, kogu, tech, mat):
     if e:
@@ -667,7 +681,7 @@ for g in GAL:
     works.append({"a": ai, "t": g["title"], "y": y,
         "yl": g.get("year") or None, "dsrc": "gallery" if y else None,
         "e": infer_med(None, tech, tech), "ee": None,
-        "tc": tech, "tce": tech, "m": None, "me": None,
+        "tc": term_gal(tech), "tce": tech, "m": None, "me": None,
         "dm": g.get("dims") or None, "mu": g["gallery"], "co": None,
         "nu": None, "d": None, "c": None, "s": "gallery", "mi": None, "oi": None,
         "k": "G" + re.sub(r'[^A-Za-z0-9]', '', g["gid"]), "n": 1,
@@ -721,7 +735,7 @@ for r in AUC:
     works.append({"a": ai, "t": r["title"], "y": y,
         "yl": r.get("yl") or r.get("year") or None, "dsrc": "gallery" if y else None,
         "e": infer_med(None, tech, tech), "ee": None,
-        "tc": tech, "tce": tech, "m": None, "me": None,
+        "tc": term_gal(tech), "tce": tech, "m": None, "me": None,
         "dm": r.get("dims") or None, "mu": r["house"], "co": None,
         "nu": None, "d": None, "c": None, "s": "auction", "mi": None, "oi": None,
         "k": "A" + re.sub(r'[^A-Za-z0-9]', '', r["aid"]), "n": 1,
