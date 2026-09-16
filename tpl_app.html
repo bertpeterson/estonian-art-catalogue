@@ -60,8 +60,10 @@
   const cap = s => s ? s[0].toUpperCase() + s.slice(1) : s;
   // the museums' measurement words and collection names, in English on the English side
   const DIMWORD = {"kõrgus":"height","laius":"width","sügavus":"depth","pikkus":"length","kestus":"duration","diameeter":"diameter",
-                   "läbimõõt":"diameter","paksus":"thickness","kogus":"quantity","maht":"volume","kujutisemõõt":"image size","sikülg":"side"};
-  const dimsName = s => LANG === "en" && s ? s.replace(/[a-zõäöü]+(?=:)/gi, m => DIMWORD[m.toLowerCase()] || m) : s;
+                   "läbimõõt":"diameter","paksus":"thickness","kogus":"quantity","maht":"volume","kujutisemõõt":"image size","sikülg":"side",
+                   "lehe":"sheet","plaadi":"plate","kujutise":"image","raami":"frame","raamiga":"with frame","ilma":"without","raamita":"frame",
+                   "aluse":"base","alusega":"with base","ava":"window","passepartuu":"mount","paspartuu":"mount","lm":"sheet","plm":"plate","km":"image","vm":"frame"};
+  const dimsName = s => LANG === "en" && s ? s.replace(/[a-zõäöü]+/gi, m => DIMWORD[m.toLowerCase()] || m) : s;
   const COLL_EN = {"Graafikakogu":"Prints collection","Maalikogu":"Paintings collection","Kunstikogu":"Art collection","Maal":"Painting",
                    "Joonistus":"Drawing","Graafika abikogu":"Prints auxiliary collection","Graafilise disaini kogu":"Graphic design collection",
                    "Skulptuurikogu":"Sculpture collection","Välisgraafikakogu":"Foreign prints collection","Kujutav kunst":"Fine art",
@@ -363,7 +365,12 @@
   };
   const matchText = w => { const t = qTerms(); if (!t.length) return true; const h = hay(w); return t.every(x => h.includes(x)); };
   const inList = w => { const k = listKeys(); return (!k || k.has(w.k)) && (!state.sale || w.kind === "gallery"); };
-  const baseSet = () => W.filter(w => matchText(w) && inList(w)
+  // a work offered at auction more than once is one row: the latest lot, with the
+  // earlier results in its detail (the stats page still counts every lot)
+  const CHAIN = (() => { const m = new Map(); W.forEach(w => { if (w.ac){ if (!m.has(w.ac)) m.set(w.ac, []); m.get(w.ac).push(w); } }); m.forEach(l => l.sort((x, y) => String(x.ad).localeCompare(String(y.ad)))); return m; })();
+  const chainOf = w => (w.ac && CHAIN.get(w.ac)) || null;
+  const latestLot = w => !w.ac || w.al;
+  const baseSet = () => W.filter(w => matchText(w) && inList(w) && latestLot(w)
       && (state.media.size===0 || state.media.has(w.e))
       && (state.museums.size===0 || state.museums.has(w.mu))
       && (state.cats.size===0 || state.cats.has(w.c))
@@ -822,7 +829,7 @@
           <div class="d-k">${esc(isHeld(w)?T("d_collection"):T("venue"))}</div><div class="d-v">${w.co?esc(collName(w.co))+"<br>":""}<em>${siteOf(w.mu) ? `<a class="permalink" href="${esc(siteOf(w.mu))}" target="_blank" rel="noopener">${esc(musName(w.mu))}</a>` : esc(musName(w.mu))}</em></div>
           <div class="d-k">${esc(T("kind"))}</div><div class="d-v">${esc(T(w.kind==="shown"?"shown":w.kind==="gallery"?"gallery":w.kind==="auction"?"kind_auction":w.kind==="sold"?"kind_sold":"held"))}</div>
           ${w.kind==="sold" ? `<div class="d-k">${esc(T("d_status"))}</div><div class="d-v">${esc(pastText(w))}${w.gl ? `<br><span class="d-sub">${esc(T("d_lastseen", {d: w.gl}))}</span>` : ""}<br><span class="d-sub">${esc(T("d_pastnote"))}</span></div>` : ""}
-          ${w.kind==="auction" ? `<div class="d-k">${esc(T("d_result"))}</div><div class="d-v">${esc(w.an)} · <b>${esc(auText(w))}</b>${w.as ? `<br><span class="d-sub">${esc(T("d_start", {p: eur(w.as)}))}</span>` : ""}${w.apr ? `<br><span class="d-sub">${esc(T("d_press"))}: ${esc(w.apr)}</span>` : ""}${w.aa ? `<br><span class="d-sub">${esc(T("au_afternote"))}</span>` : ""}<br><span class="d-sub">${esc(T("au_note"))}</span></div>` : ""}
+          ${w.kind==="auction" ? `<div class="d-k">${esc(T("d_result"))}</div><div class="d-v">${esc(w.an)} · <b>${esc(auText(w))}</b>${w.as ? `<br><span class="d-sub">${esc(T("d_start", {p: eur(w.as)}))}</span>` : ""}${w.apr ? `<br><span class="d-sub">${esc(T("d_press"))}: ${esc(w.apr)}</span>` : ""}${chainOf(w) ? `<div class="au-hist">${chainOf(w).map(x => `<div class="au-row${x === w ? " now" : ""}"><span>${esc(String(x.ad).slice(0, 4))}</span><span>${esc(musName(x.mu))}</span><span>${esc(x.an)}</span><span class="n">${x.ao ? (x.ap ? esc(eur(x.ap)) : esc(T("au_soldnp"))) : esc(T("au_unsold"))}${x.as ? ` <em>(${esc(eur(x.as))})</em>` : ""}</span>${x.url ? `<a href="${esc(x.url)}" target="_blank" rel="noopener">↗</a>` : "<span></span>"}</div>`).join("")}</div>` : ""}${w.aa ? `<br><span class="d-sub">${esc(T("au_afternote"))}</span>` : ""}<br><span class="d-sub">${esc(T("au_note"))}</span></div>` : ""}
           ${w.nu ? `<div class="d-k">${esc(T("d_number"))}</div><div class="d-v" style="font-family:var(--mono);font-size:.78rem">${esc(w.nu)}</div>` : ""}
           ${ar.wdesc?`<div class="d-k">${esc(T("d_origin"))}</div><div class="d-v">${esc(ar.wdesc)}${ar.qid?` <a class="permalink" href="https://www.wikidata.org/wiki/${esc(ar.qid)}" target="_blank" rel="noopener">${esc(T("d_wd"))}</a>`:""}</div>`:""}
           ${ar.cit?`<div class="d-k">${esc(T("d_cit"))}</div><div class="d-v"><em>${esc(ar.cit.join(" · "))}</em>${ar.born?`<br><em>${esc(T("d_born"))}: ${esc(ar.born)}</em>`:""}</div>`:""}
@@ -846,7 +853,7 @@
     return `<div class="row${rl ? " has-link" : ""}${w.kind === "auction" ? " au" : ""}" data-open="${open}">
       <button class="row-btn" data-id="${esc(id)}" aria-expanded="${open}">
         ${yr}
-        <span class="r-title" title="${esc(w.t)}">${esc(w.t)}${w.n>1?`<span class="src-tag" title="${w.n} catalogued objects share this title and date — sheets, impressions or parts">×${w.n}</span>`:""}</span>
+        <span class="r-title" title="${esc(w.t)}">${esc(w.t)}${w.n>1?`<span class="src-tag" title="${w.n} catalogued objects share this title and date — sheets, impressions or parts">×${w.n}</span>`:""}${chainOf(w)?`<span class="src-tag" title="${esc(T("au_chain_t", {n: chainOf(w).length}))}">×${chainOf(w).length}</span>`:""}</span>
         ${art}
         <span class="r-med" title="${esc(sub(w))}">${esc(medName(w.e))}</span>
         <span class="r-coll" title="${esc(musName(w.mu))} · ${esc(w.nu||"")}">${esc(abbr(w.mu))}<span class="src-tag">${esc(SRCLAB[w.s]||w.s)}</span></span>

@@ -440,6 +440,13 @@ for r in recs:
     # a "Maastik" dated "1839–1893" is not the same sheet as one left undated, and a
     # wide range now carries no year of its own.
     g = (r["artist"], tkey(r["t"]), y, "" if y else (lab or "").lower())
+    # A painting is one object: five Mägi canvases called Veneetsia, 1922, are five
+    # works, not one work in five parts. Only multiples -- prints, photographs,
+    # bookplates, posters -- fold on title and date; anything else folds only with
+    # the same inventory number written two ways (MuIS's "153:116", EKM's "153/116").
+    ess = (r.get("ess") or "").lower()
+    if not re.search(r"graaf|foto|eksliibris|plakat|postkaart|trüki|kaart|reprodukt", ess):
+        g = g + (re.sub(r"[^a-z0-9]", "", (r.get("num") or "").lower()),)
     groups.setdefault(g, []).append(r)
 OBJECTS = len(recs)
 recs = []
@@ -661,7 +668,13 @@ for a in artists:
             WD_CONFLICT += 1
             w = v = None
     if w:
-        if w.get("cit"): a["cit"] = w["cit"]
+        # Wikidata lists the Soviet Union as a citizenship for anyone who lived here
+        # 1940-91. The state's position, and this catalogue's, is that the occupation
+        # conferred none: an Estonian of that time is Estonian. The Russian Empire
+        # before 1918 stands, there was no Estonian state then.
+        if w.get("cit"):
+            cit = [c for c in w["cit"] if c not in ("Soviet Union", "Nõukogude Liit")]
+            if cit: a["cit"] = cit
         if w.get("qid"): a["qid"] = w["qid"]
         if w.get("born"): a["born"] = w["born"]
     if v:
@@ -798,6 +811,23 @@ for r in AUC:
     auc_added += 1
 print("  auction results added:", auc_added, "sold", sum(1 for r in AUC if r["sold"]),
       "from", len({r["house"] for r in AUC}), "houses; unattributed or joint lots skipped:", auc_skipped)
+# The same work comes back to the rooms: Mägi's Oberstdorfi maastik, unsold at Haus
+# in 1999, sold there in 2019. Every lot stays a record -- each is a sale that
+# happened -- but lots of one work (artist, title, size) are chained, and the page
+# shows the work once, with its results in order, rather than twice as strangers.
+_chain = collections.defaultdict(list)
+for w in works:
+    if w.get("kind") == "auction" and w.get("dm"):
+        _chain[(w["a"], "".join(fold(w["t"])).rstrip("."), re.sub(r"[^0-9x]", "", w["dm"].lower().replace("×", "x").replace(",", ".")))].append(w)
+_nc = 0
+for lots in _chain.values():
+    if len(lots) < 2: continue
+    lots.sort(key=lambda w: str(w.get("ad") or ""))
+    _nc += 1
+    for k, w in enumerate(lots):
+        w["ac"] = _nc                                    # the chain
+        if k == len(lots) - 1: w["al"] = 1               # the latest lot carries the work on the page
+print("  works offered more than once:", _nc, "chains over", sum(len(l) for l in _chain.values() if len(l) > 1), "lots")
 # Vaal galerii prints life dates beside every lot's artist -- "s 1960", "1936–2022" --
 # the only auction house that does. For an artist with no date from any museum,
 # Wikidata or their own biography, that is taken, tagged Vaal, under the same gate as
