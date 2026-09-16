@@ -38,6 +38,9 @@ for i, w in enumerate(W):
     heavy = {k: v for k, v in w.items() if k in DETAIL}
     if heavy:
         light["h"] = 1                               # this record has detail to fetch
+        # the wall needs to know which records have a picture before any shard is
+        # fetched; the address itself stays in the shard
+        if heavy.get("im"): light["p"] = 1
         detail[shard_of(w)][str(i)] = heavy
     index.append(light)
 
