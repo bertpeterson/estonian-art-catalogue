@@ -297,6 +297,13 @@ picture listed beneath; *List* and *Artwall* switch it for that view — change 
 are the same images as the records, loaded from the holders' and galleries' servers as they scroll
 into view, seventy-two at a time. Nothing is on the artwall that is not in a record.
 
+**What comes first on an artist's wall.** Paintings, then watercolours, sculpture, drawings and prints; and for
+thirteen artists whose key works are a matter of record — Wiiralt's *Põrgu* and *Kabaree*, Mägi's Norway and
+Saaremaa pictures, Köler's *Truu valvur*, Raud's and Kallis's Kalevipoeg cycles — those works come before the
+rest, in the order `data/highlights.json` gives them, the finished work before its studies. A hand-kept list,
+open to correction. Impressions of one print, casts of one sculpture and the versions of a highlighted
+composition show as one tile, marked ×n.
+
 **Visits are counted, visitors are not.** The site loads GoatCounter, which keeps a count of page
 views by page, referrer and country, without cookies and without storing anything that identifies
 a person.
