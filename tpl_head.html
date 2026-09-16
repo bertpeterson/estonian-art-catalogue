@@ -428,6 +428,11 @@ footer a{border-bottom:1px solid var(--rule)}
 .rl-au.unsold{color:var(--grey-4)}
 .rl-past{color:var(--grey-4)}
 .d-sub{font-size:.78rem;color:var(--grey-6)}
+/* a work's results in order, the latest (the one this row is) in ink */
+.au-hist{margin-top:8px;font-family:var(--mono);font-size:.7rem;border-top:1px solid var(--rule)}
+.au-row{display:grid;grid-template-columns:38px 1fr 1.4fr auto 16px;gap:8px;padding:4px 0;border-bottom:1px solid var(--rule-soft);color:var(--grey-6)}
+.au-row.now{color:var(--ink)} .au-row .n{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums} .au-row em{font-style:normal;color:var(--grey-4)}
+.au-row span:nth-child(3){overflow:hidden;text-overflow:ellipsis;white-space:nowrap} .au-row a{color:var(--grey-4)}
 .mono-tl{margin-top:20px}
 .mono-tl .spark{color:var(--ink);width:100%;height:44px}
 .mono-ticks{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;font-family:var(--mono);font-size:.56rem;letter-spacing:.03em;color:var(--grey-4);margin-top:3px}

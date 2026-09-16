@@ -1,6 +1,6 @@
 # Estonian Art Catalogue · Eesti Kunstikataloog
 
-A browsable catalogue of **68,271 artworks** by **4,277 artists** — museum holdings from **24 Estonian public
+A browsable catalogue of **79,855 artworks** by **4,277 artists** — museum holdings from **24 Estonian public
 collections**, plus what seven commercial galleries and the NOBA marketplace are selling right now,
 aggregated from the national museum databases and the galleries' own listings and presented as a static site.
 
@@ -16,22 +16,22 @@ says so with an *ed* tag.
 
 | Source | Records | What it is |
 |---|---|---|
-| [MuIS](https://www.muis.ee) | 27,237 | Muuseumide Infosüsteem — the shared catalogue of all Estonian museums |
-| [EKM Digital Collection](https://digikogu.ekm.ee) | 27,681 | The Art Museum of Estonia's own database, behind Kumu |
+| [MuIS](https://www.muis.ee) | 32,607 | Muuseumide Infosüsteem — the shared catalogue of all Estonian museums |
+| [EKM Digital Collection](https://digikogu.ekm.ee) | 33,904 | The Art Museum of Estonia's own database, behind Kumu |
 | [CCA Estonia](https://cca.ee) | 58 bios | Centre for Contemporary Art — artist biographies, Venice Biennale archive |
 | [EKKM](https://ekkm.ee) | — | Contemporary Art Museum of Estonia |
 | Vaal galerii | 115 artists | Life dates printed beside every lot's artist in its sales, taken for artists no museum, Wikidata or biography dates, tagged *Vaal* |
 | [Wikidata](https://www.wikidata.org) | 1,629 artists | Dates, birthplace, description, training and art-historical affiliation — matched on name, gated on dates and occupation (see *Rules*) |
-| Eight commercial galleries and NOBA | 6,744 | Haus, Vernissage, Allee, Temnikova & Kasela, Tütar, Artrovert, Kogo, Ruki — current stock from each gallery's own site; and [NOBA](https://noba.ac), the Nordic-Baltic marketplace, for artists the catalogue already holds or whose NOBA page places them in Estonia. Metadata only, never prices |
+| Eight commercial galleries and NOBA | 6,739 | Haus, Vernissage, Allee, Temnikova & Kasela, Tütar, Artrovert, Kogo, Ruki — current stock from each gallery's own site; and [NOBA](https://noba.ac), the Nordic-Baltic marketplace, for artists the catalogue already holds or whose NOBA page places them in Estonia. Metadata only, never prices |
 | Auction results: Haus Galerii, E-Kunstisalong, Allee galerii, Vernissage, Vaal galerii, Eesti Kunsti Oksjonid | 13,122 lots | Every lot in Haus Galerii's hundred sales since 1998, E-Kunstisalong's thirty-five since 2008, Allee galerii's fifteen since 2020, Vernissage's fifteen since 2021, Vaal galerii's nine since 2022 and Eesti Kunsti Oksjonid's eighteen since 2023, as the house published it, plus five earlier record prices as the press reported them (`data/press_results.json`): starting price, hammer price, sold or unsold. A record of what happened at auction, not a valuation |
 
-Of the works for sale, 3,204 are NOBA listings, 3,540 the galleries' own. NOBA also supplies a short
+Of the works for sale, 3,204 are NOBA listings, 3,535 the galleries' own. NOBA also supplies a short
 biography, written by the artist or NOBA, for 544 artists who have none from a museum, and a birth year
 read from that biography for 301 — both tagged *NOBA* on the page.
 
-7,415 objects appear in both MuIS and the EKM database and are merged on inventory number
+7,420 objects appear in both MuIS and the EKM database and are merged on inventory number
 (MuIS `Number` = digikogu `Tulmenumber` + `Kogunumber`), which is why 60,750 source objects
-collapse to 68,271 works.
+collapse to 79,855 works.
 
 **Only attributed works are included.** Anonymous and unattributed objects are excluded by design — including 485 objects catalogued under the name *Tundmatu kunstnik* ("unknown artist"), which is the absence of an attribution written into the name field rather than a name. Notnames stay: *Püha Lucia legendi meister* and its kind identify a hand recognised across several works, and art history treats that as an attribution.
 
@@ -188,7 +188,7 @@ not as part of the normal cycle.
 `data/data.json` is dictionary-encoded and nested, which suits the site and suits
 nobody else. Flat exports with every value resolved, one row per work:
 
-    site/data/export/works.csv.gz      68,271 rows
+    site/data/export/works.csv.gz      79,855 rows
     site/data/export/artists.csv.gz     4,277 rows
     site/data/export/works.jsonl.gz     one JSON object per line
 
@@ -281,12 +281,18 @@ EKM's by the file path the search listing pairs with each object (`data/ekm_imag
 pages sit behind a login and show a highlights carousel to everyone else, which an earlier pass had
 read as the object's image.
 
+A work a gallery is selling now shows the gallery's own photograph, embedded from the gallery's server
+and captioned with the gallery, for as long as the listing is live — the one case where the party who
+owns the picture wants it seen. A past listing keeps no image, and auction lots have none: once the
+sale is over nobody but this catalogue has an interest in illustrating it, and the artist and the
+buyer may have one against. Any holder or rights holder can have an image removed by asking.
+
 ## Licence
 
 Code: MIT (see `LICENSE`).
 
 **Data is mixed, and the split is in the data itself.** Records marked `kind: held` —
-47,538 of them, 69.6% — derive from museum metadata published under CC0, which carries no
+59,126 of them, 74.0% — derive from museum metadata published under CC0, which carries no
 restriction on reuse, commercial included. The 9,985 records marked `kind: gallery` come from
 commercial galleries and the NOBA marketplace, which grant no licence; they are included as a
 public catalogue of current work, and anyone reusing this dataset should decide for themselves
