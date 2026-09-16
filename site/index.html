@@ -552,6 +552,8 @@ footer a{border-bottom:1px solid var(--rule)}
         <div id="stat-gwrap"><b id="stat-g">9</b><span data-i18n="galleries">galleries</span></div>
         <!-- the one stat that is a door: the works a visitor can actually acquire -->
         <button class="stat-btn" id="stat-sale"><b id="stat-s">6,744</b><span data-i18n="forsale">for sale</span></button>
+        <!-- and the other thing a visitor can act on: what the auction record says -->
+        <button class="stat-btn" id="stat-auc"><b id="stat-au">11,131</b><span data-i18n="auctioned">auctioned</span></button>
       </div>
     </div>
     <p class="standfirst" data-i18n-html="standfirst">Every record here is a real object with a real holder, and every entry links back to its source.</p>
@@ -1441,7 +1443,7 @@ footer a{border-bottom:1px solid var(--rule)}
     if (SHARDS.has(key)) return SHARDS.get(key);
     // A retry must skip the browser cache: the failure we are retrying is often a
     // cached 404 or 5xx, and re-requesting the identical URL just returns it again.
-    const url = `data/detail/${key}.json?v=ceeba563` + (attempt ? `&r=${attempt}` : "");
+    const url = `data/detail/${key}.json?v=b4760cb0` + (attempt ? `&r=${attempt}` : "");
     const p = fetch(url, attempt ? {cache: "reload"} : undefined)
       .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
       .catch(async () => {
@@ -1632,6 +1634,9 @@ footer a{border-bottom:1px solid var(--rule)}
     $("stat-s").textContent = fmt(FOR_SALE);
     $("stat-sale").hidden = FOR_SALE === 0;
     $("stat-sale").setAttribute("aria-pressed", state.sale);
+    $("stat-au").textContent = fmt(AU_N);
+    $("stat-auc").hidden = AU_N === 0;
+    $("stat-auc").setAttribute("aria-pressed", state.group === "auction");
 
     const scope = [];
     if (state.shared) scope.push(T("sl_shared", {n: state.shared.size}));
@@ -1805,7 +1810,6 @@ footer a{border-bottom:1px solid var(--rule)}
       + `<p class="tl-note">${esc(T("au_note"))}</p>`;
   }
   const AU_N = W.reduce((n, w) => n + (w.kind === "auction" ? 1 : 0), 0);
-  const AU_HOUSES = new Set(W.filter(w => w.kind === "auction").map(w => w.mu)).size;
 
   // ---- landing doors --------------------------------------------------------
   // The register opened grouped by decade, earliest first, so the first thing a
@@ -1868,7 +1872,7 @@ footer a{border-bottom:1px solid var(--rule)}
     el.innerHTML =
       col("doors_name",   TOP_ART.map(([i, n]) => [A[i].n, n, "a", i]), "d-names", "ed")
       + `<p class="door-line"><button data-door="x" data-v="0">${esc(T("doors_cross"))}<span class="n">${num(CROSS_WORKS)} ${esc(T("of_n", {n: num(FOR_SALE)}))} ${esc(T("forsale"))} · ${num(CROSS.size)} ${esc(T("artists"))}</span><span class="arrow">&rarr;</span></button></p>`
-      + (AU_N ? `<p class="door-line"><button data-door="q" data-v="0">${esc(T("doors_auctions"))}<span class="n">${num(AU_N)} ${esc(T("au_lots"))} · ${AU_HOUSES} ${esc(T("au_houses"))}</span><span class="arrow">&rarr;</span></button></p>` : "");
+      ;
     el.hidden = false;
   }
 
@@ -2139,6 +2143,12 @@ footer a{border-bottom:1px solid var(--rule)}
     const b = e.target.closest(".sl"); if (!b) return;
     e.stopPropagation(); slToggle(b.dataset.sl);
   });
+  $("stat-auc").addEventListener("click", () => {
+    if (state.group === "auction"){ setGroup("decade"); renderAll(); pushHash(); return; }
+    setGroup("auction"); state.decOrder = "latest"; state.expand.clear(); state.auLimit = 20; state.open = null; syncOrder();
+    renderAll(); pushHash();
+    $("register").scrollIntoView({behavior: "auto", block: "start"});
+  });
   $("stat-sale").addEventListener("click", () => {
     state.sale = !state.sale; state.open = null; state.expand.clear();
     if (state.sale && state.group === "decade") setGroup("artist");
@@ -2157,7 +2167,6 @@ footer a{border-bottom:1px solid var(--rule)}
     if (!b) return;
     const v = +b.dataset.v;
     if (b.dataset.door === "a") state.artist = v;
-    else if (b.dataset.door === "q"){ setGroup("auction"); state.decOrder = "latest"; }
     else if (b.dataset.door === "x"){ state.cross = true; setGroup("artist"); }
     else { state.from = DOOR_PERIODS[v][0]; state.to = DOOR_PERIODS[v][1]; }
     renderAll(); pushHash();
@@ -2436,8 +2445,8 @@ footer a{border-bottom:1px solid var(--rule)}
   }   // end boot
 
   Promise.all([
-    fetch("data/index.json?v=ceeba563").then(r => r.json()),
-    fetch("data/i18n.json?v=4aafd6b4").then(r => r.json())
+    fetch("data/index.json?v=b4760cb0").then(r => r.json()),
+    fetch("data/i18n.json?v=e6d13ebd").then(r => r.json())
   ]).then(([data, i18n]) => boot(data, i18n))
    .catch(err => {
      document.getElementById("register").innerHTML =
