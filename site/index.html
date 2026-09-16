@@ -780,8 +780,15 @@ footer a{border-bottom:1px solid var(--rule)}
     "Haus Galerii":"HAUS","Vernissage":"VERN","Allee galerii":"ALLEE","Vaal galerii":"VAAL","Eesti Kunsti Oksjonid":"EKO"};
   const abbr = m => MUS[m] || (m||"").slice(0,4).toUpperCase();
 
+  // The state's own periodisation: independence declared 1918, lost to occupation in
+  // June 1940 (Soviet 1940-41, German 1941-44, Soviet 1944-91), restored 20 August 1991.
+  // A work dated 1940 or 1991 falls on the side history put it: 1940 with the
+  // occupation, 1991 with the restored republic.
   const PERIODS = [[1700,1917,"Tsaariaeg","Imperial Russia"],[1918,1939,"Vabariik","First Republic"],
-                   [1940,1990,"Okupatsioon","Occupation"],[1991,2099,"Taasiseseisvus","Independence"]];
+                   [1940,1990,"Okupatsioon","Occupation"],[1991,2099,"Taasiseseisvus","Restored Republic"]];
+  const PERIOD_NOTE = {Okupatsioon: {et: "Nõukogude okupatsioon 1940–41 ja 1944–91, Saksa okupatsioon 1941–44", en: "Soviet occupation 1940–41 and 1944–91; German occupation 1941–44"},
+                       Vabariik: {et: "Iseseisvus välja kuulutatud 24. veebruaril 1918", en: "Independence declared 24 February 1918"},
+                       Taasiseseisvus: {et: "Iseseisvus taastatud 20. augustil 1991", en: "Independence restored 20 August 1991"}};
   const periodLabel = d => PERIODS.filter(p=>p[1]>=d && p[0]<=d+9)
     .map(p => LANG === "en" ? I18N.PERIOD_EN[p[2]] : I18N.PERIOD_ET[p[2]]).join("  →  ");
   const blurbFor = d => LANG === "en" ? (BLURBS[d] || "") : (I18N.BLURB_ET[d] || BLURBS[d] || "");
@@ -1145,7 +1152,8 @@ footer a{border-bottom:1px solid var(--rule)}
       const l = first.getBoundingClientRect().left - box.left, r = last.getBoundingClientRect().right - box.left;
       const on = state.from === lo && state.to === (hi === 2099 ? null : hi) && !state.undOnly;
       const lab = dpLabel(p);
-      return `<button class="era" data-era="${i}" aria-pressed="${on}" title="${esc(lab)} — ${PCOUNT[i].toLocaleString(LANG==="en"?"en":"et")} ${esc(T("worksn"))}"
+      const note = p[2] && PERIOD_NOTE[p[2]] ? ` · ${PERIOD_NOTE[p[2]][LANG === "en" ? "en" : "et"]}` : "";
+      return `<button class="era" data-era="${i}" aria-pressed="${on}" title="${esc(lab)}${esc(note)} — ${PCOUNT[i].toLocaleString(LANG==="en"?"en":"et")} ${esc(T("worksn"))}"
                 style="left:${l.toFixed(1)}px;width:${Math.max(0, r - l - 2).toFixed(1)}px">${esc(lab)}</button>`;
     });
     el.innerHTML = segs.join("");
@@ -2499,7 +2507,7 @@ footer a{border-bottom:1px solid var(--rule)}
 
   Promise.all([
     fetch("data/index.json?v=b4768b62").then(r => r.json()),
-    fetch("data/i18n.json?v=a6233840").then(r => r.json())
+    fetch("data/i18n.json?v=c26ecec3").then(r => r.json())
   ]).then(([data, i18n]) => boot(data, i18n))
    .catch(err => {
      document.getElementById("register").innerHTML =
