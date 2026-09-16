@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="description" content="A catalogue of 79,855 works of art by 4,277 artists in Estonian public collections and galleries, 1440–2026. Museum records from MuIS and the EKM Digital Collection, gallery stock from the galleries' own catalogues; every record links back to its source.">
+<meta name="description" content="A catalogue of 79,861 works of art by 4,277 artists in Estonian public collections and galleries, 1440–2026. Museum records from MuIS and the EKM Digital Collection, gallery stock from the galleries' own catalogues; every record links back to its source.">
 <title>Estonian Art Catalogue</title>
 <link rel="canonical" href="https://museaal.ee/">
 <meta property="og:type" content="website">
@@ -567,14 +567,14 @@ footer a{border-bottom:1px solid var(--rule)}
         <p class="mast-sub" data-i18n="sub">Art in Estonia's public collections and galleries · 1440–2026</p>
       </div>
       <div class="mast-stats">
-        <div><b id="stat-w">79,855</b><span data-i18n="works">works</span></div>
+        <div><b id="stat-w">79,861</b><span data-i18n="works">works</span></div>
         <div><b id="stat-a">4,277</b><span data-i18n="artists">artists</span></div>
         <!-- museums and galleries are counted in the sources note, not here: four
              figures read as a masthead, six as a table -->
         <div id="stat-mwrap" hidden><b id="stat-m">24</b><span data-i18n="museums">museums</span></div>
         <div id="stat-gwrap" hidden><b id="stat-g">9</b><span data-i18n="galleries">galleries</span></div>
         <!-- the one stat that is a door: the works a visitor can actually acquire -->
-        <button class="stat-btn" id="stat-sale"><b id="stat-s">6,739</b><span data-i18n="forsale">for sale</span></button>
+        <button class="stat-btn" id="stat-sale"><b id="stat-s">6,738</b><span data-i18n="forsale">for sale</span></button>
         <!-- and the other thing a visitor can act on: what the auction record says -->
         <button class="stat-btn" id="stat-auc"><b id="stat-au">13,122</b><span data-i18n="auctioned">auctioned</span></button>
       </div>
@@ -1481,7 +1481,7 @@ footer a{border-bottom:1px solid var(--rule)}
     if (SHARDS.has(key)) return SHARDS.get(key);
     // A retry must skip the browser cache: the failure we are retrying is often a
     // cached 404 or 5xx, and re-requesting the identical URL just returns it again.
-    const url = `data/detail/${key}.json?v=823dba38` + (attempt ? `&r=${attempt}` : "");
+    const url = `data/detail/${key}.json?v=c420687c` + (attempt ? `&r=${attempt}` : "");
     const p = fetch(url, attempt ? {cache: "reload"} : undefined)
       .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
       .catch(async () => {
@@ -2482,7 +2482,7 @@ footer a{border-bottom:1px solid var(--rule)}
   }   // end boot
 
   Promise.all([
-    fetch("data/index.json?v=823dba38").then(r => r.json()),
+    fetch("data/index.json?v=c420687c").then(r => r.json()),
     fetch("data/i18n.json?v=5cfa1480").then(r => r.json())
   ]).then(([data, i18n]) => boot(data, i18n))
    .catch(err => {
