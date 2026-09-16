@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="description" content="A catalogue of 79,861 works of art by 4,277 artists in Estonian public collections and galleries, 1440–2026. Museum records from MuIS and the EKM Digital Collection, gallery stock from the galleries' own catalogues; every record links back to its source.">
+<meta name="description" content="A catalogue of 79,342 works of art by 4,277 artists in Estonian public collections and galleries, 1440–2026. Museum records from MuIS and the EKM Digital Collection, gallery stock from the galleries' own catalogues; every record links back to its source.">
 <title>Estonian Art Catalogue</title>
 <link rel="canonical" href="https://museaal.ee/">
 <meta property="og:type" content="website">
@@ -364,6 +364,17 @@ h1 a:hover{color:var(--grey-6)}
 .wt.on{outline:2px solid var(--ink);outline-offset:1px} .wt:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
 .wall-open{margin:0 0 18px} .wall-open .row{border-top:1px solid var(--rule)}
 .v-n{opacity:.55;font-size:.9em;margin-left:4px}
+/* the artwall button carries four painted squares: grey while the list is showing,
+   in colour when the wall is -- the state read at a glance, on both grounds */
+#v-wall{display:inline-flex;align-items:center;gap:8px}
+.v-ico{display:grid;grid-template-columns:1fr 1fr;gap:1px;width:12px;height:12px;flex:none}
+.v-ico i{display:block;background:var(--grey-4);opacity:.5;transition:background .2s,opacity .2s}
+#v-wall[aria-pressed="true"]{background:var(--invert-bg);color:var(--invert-fg)}
+#v-wall[aria-pressed="true"] .v-ico i{opacity:1}
+#v-wall[aria-pressed="true"] .v-ico i:nth-child(1){background:#C8402E} #v-wall[aria-pressed="true"] .v-ico i:nth-child(2){background:#E2A62B}
+#v-wall[aria-pressed="true"] .v-ico i:nth-child(3){background:#2E6DB4} #v-wall[aria-pressed="true"] .v-ico i:nth-child(4){background:#3F8B4F}
+#v-wall:hover .v-ico i{opacity:1} #v-wall:hover .v-ico i:nth-child(1){background:#C8402E} #v-wall:hover .v-ico i:nth-child(2){background:#E2A62B}
+#v-wall:hover .v-ico i:nth-child(3){background:#2E6DB4} #v-wall:hover .v-ico i:nth-child(4){background:#3F8B4F}
 .more{width:100%;background:none;border:0;border-top:1px dashed var(--rule);color:var(--grey-6);font-family:var(--mono);font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;padding:11px;cursor:pointer}
 .more:hover{color:var(--ink);background:var(--field)}
 
@@ -582,7 +593,7 @@ footer a{border-bottom:1px solid var(--rule)}
         <p class="mast-sub" data-i18n="sub">Art in Estonia's public collections and galleries · 1440–2026</p>
       </div>
       <div class="mast-stats">
-        <div><b id="stat-w">79,861</b><span data-i18n="works">works</span></div>
+        <div><b id="stat-w">79,342</b><span data-i18n="works">works</span></div>
         <div><b id="stat-a">4,277</b><span data-i18n="artists">artists</span></div>
         <!-- museums and galleries are counted in the sources note, not here: four
              figures read as a masthead, six as a table -->
@@ -1508,7 +1519,7 @@ footer a{border-bottom:1px solid var(--rule)}
     if (SHARDS.has(key)) return SHARDS.get(key);
     // A retry must skip the browser cache: the failure we are retrying is often a
     // cached 404 or 5xx, and re-requesting the identical URL just returns it again.
-    const url = `data/detail/${key}.json?v=6e1bb670` + (attempt ? `&r=${attempt}` : "");
+    const url = `data/detail/${key}.json?v=78747637` + (attempt ? `&r=${attempt}` : "");
     const p = fetch(url, attempt ? {cache: "reload"} : undefined)
       .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
       .catch(async () => {
@@ -1745,7 +1756,7 @@ footer a{border-bottom:1px solid var(--rule)}
     $("viewctl").hidden = !nPics;
     $("v-list").setAttribute("aria-pressed", !wall);
     $("v-wall").setAttribute("aria-pressed", wall);
-    $("v-wall").innerHTML = esc(T("v_wall")) + `<span class="v-n">${fmt(nPics)}</span>`;
+    $("v-wall").innerHTML = `<span class="v-ico" aria-hidden="true"><i></i><i></i><i></i><i></i></span>` + esc(T("v_wall")) + `<span class="v-n">${fmt(nPics)}</span>`;
     const listSet = wall ? set.filter(w => !wallPic(w)) : set;
     let html = wall ? wallHTML(set.filter(wallPic), listSet.length, state.artist === null) : "";
     const BASE = baseSet();          // hoisted: was recomputed once per decade
@@ -1974,7 +1985,7 @@ footer a{border-bottom:1px solid var(--rule)}
     : im.startsWith("m:") ? `https://www.muis.ee/digitaalhoidla/api/meedia/pisipilt?id=${encodeURIComponent(im.slice(2))}`
     : im.startsWith("e:") ? `https://digikogu.ekm.ee/static/preview/image/${im.slice(2).replace(/\/([^\/]+)$/, "/t2_$1")}`
     : im.startsWith("g:") ? im.slice(2) : "";
-  // The wall opens by itself on a view with pictures enough to be one -- an artist, a
+  // The wall opens by itself on a view with twelve pictures or more -- an artist, a
   // decade, a search -- never on the untouched page or the auction ledger. Chosen
   // with the List / Wall buttons, the choice holds and travels in the link.
   // A List / Artwall choice belongs to the view it was made on: change the artist,
@@ -1985,7 +1996,7 @@ footer a{border-bottom:1px solid var(--rule)}
     if (state.group === "auction" || !nPics) return false;
     if (state.view) return state.view === "wall";
     if (pristine()) return false;
-    return nPics >= 12 && nPics / set.length >= 0.25;
+    return nPics >= 12;                            // a number, not a share: predictable
   }
   // What people come to an artist for goes first: the paintings, then watercolours and
   // sculpture, drawings and sketches, prints last; within a medium the chosen order.
@@ -1998,8 +2009,19 @@ footer a{border-bottom:1px solid var(--rule)}
     wallRT = setTimeout(() => { const el = reg.querySelector(".wall"); if (el && +el.dataset.cols !== wallCols()) render(); }, 150);
   });
   function wallHTML(pics, restN, showArtist){
-    const ordered = sortRows(pics, state.decOrder !== "earliest")
-      .map((w, i) => [w, i]).sort((a, b) => medRank(a[0]) - medRank(b[0]) || a[1] - b[1]).map(x => x[0]);
+    // Two impressions of one print, or two casts of one sculpture, are two records but
+    // one picture: the wall shows it once, marked x2, opening the first. Only for the
+    // multiples -- five drawings called "Mehe pea" are five drawings.
+    const MULTI = new Set(["Print", "Sculpture", "Relief", "Illustration", "Bookplate", "Poster"]);
+    const dupKey = w => `${w.a}|${String(w.t).toLowerCase().replace(/[\s.,;:"'«»„“”]+/g, " ").trim()}|${w.y ?? ""}`;
+    const seen = new Map(), dups = new Map();
+    const unique = sortRows(pics, state.decOrder !== "earliest").filter(w => {
+      if (!MULTI.has(w.e)) return true;
+      const k = dupKey(w);
+      if (seen.has(k)){ dups.set(seen.get(k), (dups.get(seen.get(k)) || 1) + 1); return false; }
+      seen.set(k, w); return true;
+    });
+    const ordered = unique.map((w, i) => [w, i]).sort((a, b) => medRank(a[0]) - medRank(b[0]) || a[1] - b[1]).map(x => x[0]);
     const shown = ordered.slice(0, state.wLimit);
     if (typeof loadShard === "function"){
       const need = [...new Set(shown.filter(w => w.h && !detailOf(w)).map(shardOf))];
@@ -2022,7 +2044,7 @@ footer a{border-bottom:1px solid var(--rule)}
       const src = imgSrc(det(w).im || ""), r = ratioOf(w);
       return `<button class="wt${state.open === w.k ? " on" : ""}" data-wt="${esc(w.k)}" title="${esc(w.t)} · ${esc(A[w.a].n)}">${src
         ? `<img src="${esc(src)}" alt="" loading="lazy" style="aspect-ratio:1/${r.toFixed(3)}" referrerpolicy="no-referrer-when-downgrade" onerror="this.closest('.wt').hidden=true">`
-        : `<span class="wt-ph" style="aspect-ratio:1/${r.toFixed(3)}"></span>`}<span class="wt-cap"><i>${esc(w.t)}</i><span>${showArtist ? esc(A[w.a].n) + " · " : ""}${w.y ?? esc(T("nd"))} · ${esc(abbr(w.mu))}</span></span></button>`;
+        : `<span class="wt-ph" style="aspect-ratio:1/${r.toFixed(3)}"></span>`}<span class="wt-cap"><i>${esc(w.t)}${dups.has(w) ? `<span class="src-tag" title="${esc(T("wall_dup", {n: dups.get(w)}))}">×${dups.get(w)}</span>` : ""}</i><span>${showArtist ? esc(A[w.a].n) + " · " : ""}${w.y ?? esc(T("nd"))} · ${esc(abbr(w.mu))}</span></span></button>`;
     };
     const nCols = wallCols(), cols = Array.from({length: nCols}, () => ({h: 0, t: []}));
     shown.forEach(w => {
@@ -2609,8 +2631,8 @@ footer a{border-bottom:1px solid var(--rule)}
   }   // end boot
 
   Promise.all([
-    fetch("data/index.json?v=6e1bb670").then(r => r.json()),
-    fetch("data/i18n.json?v=fb2f12e8").then(r => r.json())
+    fetch("data/index.json?v=78747637").then(r => r.json()),
+    fetch("data/i18n.json?v=21c466b3").then(r => r.json())
   ]).then(([data, i18n]) => boot(data, i18n))
    .catch(err => {
      document.getElementById("register").innerHTML =

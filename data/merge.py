@@ -194,6 +194,32 @@ for r in DK:
     if not u["ess"]:    u["ess"] = None
     u["_kogu"] = r.get("EKM kogu")
 
+# The same painting can sit in both catalogues under accession numbers written
+# differently -- MuIS "EKM j 153:105 M 86", digikogu "EKM j 153/1231 M 86" -- and so
+# escape the join above, to appear twice, once with each photograph. What the two
+# share is the collection number EKM gives the object, "M 86", unique within a
+# collection letter; the same artist and that number is the same object. A digikogu
+# record left on its own is joined to the one MuIS record of that artist with that
+# number, when there is exactly one.
+_tail = lambda num: (lambda m: (m.group(1).upper(), m.group(2)) if m else None)(re.search(r"\b([A-Za-z]{1,2})\s?(\d+)\s*$", num or ""))
+_bycoll = collections.defaultdict(list)
+for k, u in unified.items():
+    if u["src"] == {"muis"} and u["num"] and u["artist"] and "kunstimuuseum" in (u["museum"] or "").lower() and "eesti" in (u["museum"] or "").lower():
+        t = _tail(u["num"])
+        if t: _bycoll[(" ".join(fold(u["artist"])), t)].append(k)
+_joined = 0
+for k in [k for k, u in unified.items() if u["src"] == {"ekm"} and u["artist"]]:
+    u = unified[k]
+    t = _tail(u["num"]) or (lambda kg: _tail(kg) if kg else None)(None)
+    cands = _bycoll.get((" ".join(fold(u["artist"])), t)) if t else None
+    if not cands or len(cands) != 1 or "ekm" in unified[cands[0]]["src"]: continue
+    m = unified[cands[0]]
+    m["src"].add("ekm"); m["oid"] = u["oid"]; m["cat"] = u["cat"] or m["cat"]; m["_kogu"] = u.get("_kogu")
+    for f in ("t", "date", "tech", "mat", "dims", "coll"):
+        if not m[f]: m[f] = u[f]
+    del unified[k]; _joined += 1
+print("  digikogu records joined to their MuIS twin by collection number:", _joined)
+
 for k, u in unified.items():
     u["k"] = k
     if u["museum"]: u["museum"] = re.sub(r'\s+SA$', '', u["museum"].strip())
@@ -995,6 +1021,7 @@ _ekm = json.load(open("ekm_images.json", encoding="utf-8")) if os.path.exists("e
 # ...and each EKM picture's proportions (height over width, from the preview's pixel
 # size, ekm_shapes.py), so the wall can lay a tile out before the picture arrives
 _ekmr = json.load(open("ekm_shapes.json", encoding="utf-8")) if os.path.exists("ekm_shapes.json") else {}
+_galr = json.load(open("gallery_shapes.json", encoding="utf-8")) if os.path.exists("gallery_shapes.json") else {}
 _Y = datetime.date.today().year
 def _pd(a):
     b, d = _yr(a["l"][0]), _yr(a["l"][1])
@@ -1007,6 +1034,10 @@ for w in works:
     elif w.get("oi") and str(w["oi"]) in _ekm:
         w["im"] = "e:" + _ekm[str(w["oi"])];            IMG["ekm"] += 1
         if str(w["oi"]) in _ekmr: w["ir"] = _ekmr[str(w["oi"])]
+# ...and the gallery pictures' shapes, measured from the files (gallery_shapes.py)
+for w in works:
+    im = w.get("im") or ""
+    if im.startswith("g:") and im[2:] in _galr: w["ir"] = _galr[im[2:]]
 print("  images: public-domain museum works", IMG["pd"], "-> MuIS", IMG["muis"], "EKM", IMG["ekm"])
 
 data = {"meta": {"built": datetime.date.today().isoformat(),
