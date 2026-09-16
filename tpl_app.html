@@ -775,9 +775,15 @@
       // record is opened; the caption says whose it is and that the work is out of copyright
       const im = (det(w).im || "");
       const imSrc = im.startsWith("m:") ? `https://www.muis.ee/digitaalhoidla/api/meedia/pisipilt?id=${encodeURIComponent(im.slice(2))}`
-                  : im.startsWith("e:") ? `https://digikogu.ekm.ee/static/preview/image/${im.slice(2).replace(/\/([^\/]+)$/, "/t2_$1")}` : "";
-      const figure = imSrc ? `<figure class="d-fig"><a href="${esc(imSrc)}" target="_blank" rel="noopener"><img src="${esc(imSrc)}" alt="${esc(w.t)}" loading="lazy" onerror="this.closest('figure').hidden=true"></a>
-          <figcaption>${esc(T("d_image", {h: musName(w.mu)}))}${im.startsWith("m:") ? " · MuIS" : " · EKM"} · ${esc(T("d_pd"))}</figcaption></figure>` : "";
+                  : im.startsWith("e:") ? `https://digikogu.ekm.ee/static/preview/image/${im.slice(2).replace(/\/([^\/]+)$/, "/t2_$1")}`
+                  : im.startsWith("g:") ? im.slice(2) : "";
+      // a gallery's photograph of its stock links to the listing, not the file, and is
+      // captioned with the gallery; a museum's with the holder and the public-domain note
+      const imHref = im.startsWith("g:") ? (w.url || imSrc) : imSrc;
+      const imCap = im.startsWith("g:") ? esc(T("d_image", {h: musName(w.mu)})) + " · " + esc(T("d_imgstock"))
+                  : esc(T("d_image", {h: musName(w.mu)})) + (im.startsWith("m:") ? " · MuIS" : " · EKM") + " · " + esc(T("d_pd"));
+      const figure = imSrc ? `<figure class="d-fig"><a href="${esc(imHref)}" target="_blank" rel="noopener"><img src="${esc(imSrc)}" alt="${esc(w.t)}" loading="lazy" referrerpolicy="no-referrer-when-downgrade" onerror="this.closest('figure').hidden=true"></a>
+          <figcaption>${imCap}</figcaption></figure>` : "";
       detail = `<div class="detail${imSrc ? " has-fig" : ""}">${figure}
         <div>${w.n>1 && w.mem ? `<div class="members">
             <div class="mem-head">${esc(T("memhead",{n:w.n}))}</div>
@@ -1146,7 +1152,9 @@
 
   function renderDoors(){
     const el = $("doors");
-    if (!pristine()){ el.hidden = true; el.innerHTML = ""; return; }
+    // the names are a way in, for the untouched page only: once anything is chosen --
+    // a filter, a search, a view -- the results come first
+    if (!pristine() || state.group !== "decade"){ el.hidden = true; el.innerHTML = ""; return; }
     const num = n => n.toLocaleString(LANG === "en" ? "en-GB" : "et-EE");
     const col = (head, items, cls, tag) => `<div class="${cls || ""}"><h2>${esc(T(head))}${tag ? ` <span class="tag">${esc(tag)}</span>` : ""}</h2><ul>` + items.map(
       ([label, n, kind, v]) => `<li><button data-door="${kind}" data-v="${v}">` +
