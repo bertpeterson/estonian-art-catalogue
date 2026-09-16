@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Build the self-hosted static site: a light index loaded once, plus per-decade
 detail shards fetched only when a record is opened. Nothing is dropped."""
-import json, os, shutil, collections
+import re, json, os, shutil, collections
 
 SRC = "data/data.json"
 OUT = "site"
@@ -28,19 +28,37 @@ if os.path.isdir("static"):
         shutil.copy2(os.path.join("static", name), os.path.join(OUT, name))
         print(f"  static -> site/{name}")
 
+def shape_of(dm):
+    """height over width from a dimensions string: '41.0 x 26.0 cm', or the labelled
+    'lehe kõrgus: 28.0 cm; lehe laius: 34.9 cm' MuIS writes for sheets"""
+    dm = str(dm or "")
+    m = re.search(r"(\d+(?:[.,]\d+)?)\s*[x×]\s*(\d+(?:[.,]\d+)?)", dm)
+    if m: a, b = m.group(1), m.group(2)
+    else:
+        h, wd = re.search(r"kõrgus:\s*(\d+(?:[.,]\d+)?)", dm), re.search(r"laius:\s*(\d+(?:[.,]\d+)?)", dm)
+        if not (h and wd): return None
+        a, b = h.group(1), wd.group(1)
+    b = float(b.replace(",", "."))
+    return float(a.replace(",", ".")) / b if b else None
+
 def shard_of(w):
     return str(w["y"] // 10 * 10) if w.get("y") is not None else "und"
 
 index, detail = [], collections.defaultdict(dict)
 for i, w in enumerate(W):
-    light = {k: v for k, v in w.items() if k not in DETAIL}
+    light = {k: v for k, v in w.items() if k not in DETAIL and k != "ir"}
     light["i"] = i                                   # stable handle into the index
     heavy = {k: v for k, v in w.items() if k in DETAIL}
     if heavy:
         light["h"] = 1                               # this record has detail to fetch
         # the wall needs to know which records have a picture before any shard is
         # fetched; the address itself stays in the shard
-        if heavy.get("im"): light["p"] = 1
+        if heavy.get("im"):
+            light["p"] = 1
+            # ...and the tile's shape, height over width from the record's dimensions,
+            # so the wall lays out right on the first paint, before the shard arrives
+            r = w.get("ir") or shape_of(heavy.get("dm"))
+            if r: light["r"] = round(min(2.2, max(0.45, r)) * 100)
         detail[shard_of(w)][str(i)] = heavy
     index.append(light)
 
