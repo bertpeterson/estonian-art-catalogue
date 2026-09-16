@@ -310,12 +310,15 @@ h1 a:hover{color:var(--grey-6)}
 .members{margin-top:18px;border-top:1px solid var(--rule);padding-top:11px}
 .mem-head{font-family:var(--mono);font-size:var(--fs-xs);letter-spacing:var(--ls-label);text-transform:uppercase;color:var(--grey-4);margin-bottom:8px}
 .mem-list{max-height:260px;overflow-y:auto;border:1px solid var(--rule-soft)}
-.mem-row{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr) auto;gap:12px;align-items:baseline;
+/* the links column is fixed: "MuIS · EKM" on one row and "EKM" on the next must not
+   move the technique column between them */
+.mem-row{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr) 84px;gap:12px;align-items:baseline;
   padding:5px 9px;border-bottom:1px solid var(--rule-soft);font-family:var(--mono);font-size:.65rem;line-height:1.3}
 .mem-row:last-child{border-bottom:0}
 .mem-row:nth-child(odd){background:var(--field)}
 .mem-num{color:var(--ink-soft);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .mem-tech{color:var(--grey-6);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mem-row > span:last-child{text-align:right;white-space:nowrap}
 .mem-row a{color:var(--grey-4);border-bottom:1px solid var(--rule)}
 .mem-row a:hover{color:var(--ink);border-bottom-color:var(--ink)}
 .d-bio{font-size:.83rem;line-height:1.55;color:var(--grey-6);border-top:1px solid var(--rule);padding-top:10px;margin-top:4px}
