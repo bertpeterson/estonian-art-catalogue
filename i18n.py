@@ -11,7 +11,7 @@ import json
 ET = {
  "sub":"Kunst Eesti avalikes kogudes ja galeriides · 1835–2024",
  "works":"teost","artists":"kunstnikku","museums":"muuseumi","forsale":"müügil","auctioned":"oksjonil","forsale_chip":"Müügil",
- "srcsummary":"Allikad ja meetod",
+ "srcsummary":"Allikad ja meetod","statslink":"Kataloog arvudes",
  "worksperdecade":"Teoseid kümnendite kaupa",
  "selectdecade":"Vali kümnend, et filtreerida",
  "filteredto":"Filtreeritud: {x} — klõpsa uuesti, et tühistada",
@@ -114,7 +114,7 @@ ET = {
 EN = {
  "sub":"Art in Estonia's public collections and galleries · 1835–2024",
  "works":"works","artists":"artists","museums":"museums","forsale":"for sale","auctioned":"auctioned","forsale_chip":"For sale",
- "srcsummary":"Sources & method",
+ "srcsummary":"Sources & method","statslink":"The catalogue in figures",
  "worksperdecade":"Works per decade",
  "selectdecade":"Select a decade to filter",
  "filteredto":"Filtered to {x} — click again to clear",
