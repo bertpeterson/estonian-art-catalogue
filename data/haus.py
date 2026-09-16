@@ -47,6 +47,7 @@ def parse(h):
         yr  = re.search(r'<span class="year">(\d{4})</span>', b)
         tec = re.search(r'<p class="tech[^"]*">(.*?)</p>', b, re.S)
         slug = re.search(r'href="(\?c=all-artworks[^"]*id=\d+)"', b)
+        img = re.search(r'<img class="pilt_t t" src="([^"?]+)', b)
         if not (aut and ttl): continue
         title = txt(ttl.group(1))
         if yr: title = re.sub(r'\s*' + yr.group(1) + r'\s*$', '', title).strip()
@@ -63,7 +64,8 @@ def parse(h):
         out.append({"gid": m.group(1), "artist": aut.group(1).strip(), "title": title,
                     "year": yr.group(1) if yr else None, "tech": tech, "dims": dims,
                     "gallery": "Haus Galerii", "city": "Tallinn",
-                    "url": BASE + "/" + slug.group(1).replace("&amp;", "&") if slug else BASE})
+                    "url": BASE + "/" + slug.group(1).replace("&amp;", "&") if slug else BASE,
+                    **({"img": BASE + img.group(1)} if img else {})})
     return out
 
 first = get(f"{BASE}/?c=all-artworks&l=en&cat=0&p=1", "haus_c0_p1")

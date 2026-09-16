@@ -63,6 +63,7 @@ for sl in slugs:
         recs.append({"gid": "tutar-"+str(w.get("id") or w.get("slug")), "artist": name,
                      "title": title, "year": year, "tech": tech, "dims": dims,
                      "gallery": "Tütar galerii", "city": "Tallinn",
+                     **({"img": ((w.get("featuredImage") or {}).get("node") or {}).get("sourceUrl")} if ((w.get("featuredImage") or {}).get("node") or {}).get("sourceUrl") else {}),
                      "url": BASE + (w.get("uri") or f"/kunstnikud/{sl}")})
 
 seen, out = set(), []

@@ -30,6 +30,10 @@ for page in ("art-store", "works"):
     except Exception as e: print("skip", page, repr(e)[:60]); continue
     for m in BLOCK.finditer(h):
         b = m.group(1)
+        # the image block sits just above the details; the src attribute is the full-size file
+        prev = h[max(0, m.start() - 2500):m.start()]; j = prev.rfind('<div class="artwork-image">')
+        im = re.search(r'<img[^>]*\ssrc="([^"]+)"', prev[j:]) if j >= 0 else None
+        img = im.group(1) if im else None
         t = re.search(r'class="artwork-navigate" href="([^"]+)"[^>]*>(.*?)</a>', b, re.S)
         a = re.search(r'artwork-artist">\s*<a[^>]*>(.*?)</a>', b, re.S)
         info = re.search(r'artwork-info">(.*?)$', b, re.S)
@@ -49,7 +53,8 @@ for page in ("art-store", "works"):
         out.append({"gid": "kogo-"+t.group(1).rstrip("/").rsplit("/",1)[-1],
                     "artist": txt(a.group(1)), "title": txt(t.group(2)),
                     "year": yr.group(1) if yr else None, "tech": tech, "dims": dims,
-                    "gallery": "Kogo galerii", "city": "Tartu", "url": t.group(1), **({"sold": True} if is_sold else {})})
+                    "gallery": "Kogo galerii", "city": "Tartu", "url": t.group(1), **({"sold": True} if is_sold else {}),
+                    **({"img": img} if img else {})})
 
 print("  sold, kept as past listings:", sold)
 seen, recs = set(), []

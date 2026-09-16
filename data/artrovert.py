@@ -58,9 +58,11 @@ for sl in sorted(slugs):
     # gallery's Sold badge. A sold work is kept, flagged, as a past listing.
     main = re.search(r'<(?:article|div)[^>]*class="[^"]*\bast-article-single\b[^"]*"', h)   # the work itself, not the related-works row
     is_sold = bool(main and "outofstock" in main.group(0))
+    og = re.search(r'property="og:image" content="([^"]+)"', h)
     recs.append({"gid":"artro-"+sl,"artist":artist.strip(" ,"),"title":title.strip(),
                  "year":year,"tech":tech,"dims":dims,
-                 "gallery":"Artrovert","city":"Tallinn","url":f"{BASE}/en/toode/{sl}/", **({"sold": True} if is_sold else {})})
+                 "gallery":"Artrovert","city":"Tallinn","url":f"{BASE}/en/toode/{sl}/", **({"sold": True} if is_sold else {}),
+                 **({"img": re.sub(r"-\d+x\d+(?=\.\w+$)", "", og.group(1))} if og else {})})
 prev=json.load(open("gallery_records.json",encoding="utf-8"))
 keep=[r for r in prev if not r["gid"].startswith("artro-")]
 json.dump(keep+recs,open("gallery_records.json","w",encoding="utf-8"),ensure_ascii=False)

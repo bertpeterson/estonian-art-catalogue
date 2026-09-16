@@ -107,6 +107,7 @@ for r in recs:
     if not c: c = [s for s, w in ws.items() if ndims(w["dims"]) == ndims(r["dims"]) and w["year"] == (r["year"] or "") and w["dims"]]
     if len(c) == 1:
         r["url"] = f"https://noba.ac/{lang(r)}/{'kunst' if lang(r) == 'et' else 'artwork'}/{c[0]}/"; relinked += 1
+        if ws[c[0]].get("img"): r["img"] = ws[c[0]]["img"]
 print(f"  linked to the artwork page: {relinked}")
 # Two products that resolve to one artwork page are one work -- the translated pair
 # the folding above could not settle because a sibling (Spruces I and II, same size,

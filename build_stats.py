@@ -8,6 +8,7 @@ much of each house's offering finds a buyer. Every figure is computed here from
 the same data the app loads, so the page and the app never disagree.
 """
 import json, html, datetime, collections, re, unicodedata
+GC = '<script data-goatcounter="https://museaal.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>'   # GoatCounter: a page-view count, no cookies
 
 SRC, OUT = "data/data.json", "site/stats.html"
 d = json.load(open(SRC, encoding="utf-8"))
@@ -104,7 +105,7 @@ today = datetime.date.today().isoformat()
 parts = [f"<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">"
          f"<title>The catalogue in figures — Estonian Art Catalogue</title>"
          f"<meta name=\"description\" content=\"What museaal.ee holds by kind and medium, and the Estonian auction record by house, year and artist.\">"
-         f"<link rel=\"canonical\" href=\"https://museaal.ee/stats.html\"><style>{CSS}</style></head><body>"
+         f"<link rel=\"canonical\" href=\"https://museaal.ee/stats.html\"><style>{CSS}</style>{GC}</head><body>"
          f"<nav><a href=\"./\">Estonian Art Catalogue</a> › The catalogue in figures</nav>"
          f"<h1>The catalogue in figures</h1><p class=\"m\">Computed from the data as built on {today}. Prices are hammer prices as the houses published them; a gallery's asking prices are never taken.</p>"]
 
