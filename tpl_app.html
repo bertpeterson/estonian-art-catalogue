@@ -927,6 +927,9 @@
     $("stat-s").textContent = fmt(FOR_SALE);
     $("stat-sale").hidden = FOR_SALE === 0;
     $("stat-sale").setAttribute("aria-pressed", state.sale);
+    $("stat-au").textContent = fmt(AU_N);
+    $("stat-auc").hidden = AU_N === 0;
+    $("stat-auc").setAttribute("aria-pressed", state.group === "auction");
 
     const scope = [];
     if (state.shared) scope.push(T("sl_shared", {n: state.shared.size}));
@@ -1100,7 +1103,6 @@
       + `<p class="tl-note">${esc(T("au_note"))}</p>`;
   }
   const AU_N = W.reduce((n, w) => n + (w.kind === "auction" ? 1 : 0), 0);
-  const AU_HOUSES = new Set(W.filter(w => w.kind === "auction").map(w => w.mu)).size;
 
   // ---- landing doors --------------------------------------------------------
   // The register opened grouped by decade, earliest first, so the first thing a
@@ -1163,7 +1165,7 @@
     el.innerHTML =
       col("doors_name",   TOP_ART.map(([i, n]) => [A[i].n, n, "a", i]), "d-names", "ed")
       + `<p class="door-line"><button data-door="x" data-v="0">${esc(T("doors_cross"))}<span class="n">${num(CROSS_WORKS)} ${esc(T("of_n", {n: num(FOR_SALE)}))} ${esc(T("forsale"))} · ${num(CROSS.size)} ${esc(T("artists"))}</span><span class="arrow">&rarr;</span></button></p>`
-      + (AU_N ? `<p class="door-line"><button data-door="q" data-v="0">${esc(T("doors_auctions"))}<span class="n">${num(AU_N)} ${esc(T("au_lots"))} · ${AU_HOUSES} ${esc(T("au_houses"))}</span><span class="arrow">&rarr;</span></button></p>` : "");
+      ;
     el.hidden = false;
   }
 
@@ -1431,6 +1433,12 @@
     const b = e.target.closest(".sl"); if (!b) return;
     e.stopPropagation(); slToggle(b.dataset.sl);
   });
+  $("stat-auc").addEventListener("click", () => {
+    if (state.group === "auction"){ setGroup("decade"); renderAll(); pushHash(); return; }
+    setGroup("auction"); state.decOrder = "latest"; state.expand.clear(); state.auLimit = 20; state.open = null; syncOrder();
+    renderAll(); pushHash();
+    $("register").scrollIntoView({behavior: "auto", block: "start"});
+  });
   $("stat-sale").addEventListener("click", () => {
     state.sale = !state.sale; state.open = null; state.expand.clear();
     if (state.sale && state.group === "decade") setGroup("artist");
@@ -1449,7 +1457,6 @@
     if (!b) return;
     const v = +b.dataset.v;
     if (b.dataset.door === "a") state.artist = v;
-    else if (b.dataset.door === "q"){ setGroup("auction"); state.decOrder = "latest"; }
     else if (b.dataset.door === "x"){ state.cross = true; setGroup("artist"); }
     else { state.from = DOOR_PERIODS[v][0]; state.to = DOOR_PERIODS[v][1]; }
     renderAll(); pushHash();

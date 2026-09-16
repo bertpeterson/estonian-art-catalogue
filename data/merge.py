@@ -956,6 +956,7 @@ _na, _nw = apply_translations(data)
 for a in data["artists"]:
     for f in ("b", "ben"):
         if a.get(f) and a[f][:1].islower(): a[f] = a[f][:1].upper() + a[f][1:]
+        if a.get(f) and not re.search(r'[.!?…"”)\]]\s*$', a[f]): a[f] = a[f].rstrip() + "."   # a sentence ends with a stop
 print("  translations applied:", _na, "biographies,", _nw, "descriptions")
 json.dump(data, open("data.json", "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
 print("data.json", os.path.getsize("data.json")//1024, "KB")

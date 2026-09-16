@@ -10,7 +10,7 @@ into the build reverted all of them at once. Edit here, never there.
 import json
 ET = {
  "sub":"Kunst Eesti avalikes kogudes ja galeriides · 1835–2024",
- "works":"teost","artists":"kunstnikku","museums":"muuseumi","forsale":"müügil","forsale_chip":"Müügil",
+ "works":"teost","artists":"kunstnikku","museums":"muuseumi","forsale":"müügil","auctioned":"oksjonil","forsale_chip":"Müügil",
  "srcsummary":"Allikad ja meetod",
  "worksperdecade":"Teoseid kümnendite kaupa",
  "selectdecade":"Vali kümnend, et filtreerida",
@@ -113,7 +113,7 @@ ET = {
 }
 EN = {
  "sub":"Art in Estonia's public collections and galleries · 1835–2024",
- "works":"works","artists":"artists","museums":"museums","forsale":"for sale","forsale_chip":"For sale",
+ "works":"works","artists":"artists","museums":"museums","forsale":"for sale","auctioned":"auctioned","forsale_chip":"For sale",
  "srcsummary":"Sources & method",
  "worksperdecade":"Works per decade",
  "selectdecade":"Select a decade to filter",
