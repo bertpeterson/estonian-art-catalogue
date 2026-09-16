@@ -1719,13 +1719,16 @@ footer a{border-bottom:1px solid var(--rule)}
                 <span class="gy-n">${n}</span></button>`;
             }).join("") + `</div>`;
         })();
+        // A shortlist is a handful of works the reader chose; the decade's blurb and
+        // year chart are about the catalogue, not their list. Just the decade.
+        const slim = !!listKeys();
         const gutter = d==="und"
           ? `<span class="g-num" style="font-size:2rem">n.d.</span>
-             <div class="g-period">${esc(T("undated"))}</div>
-             <p class="g-blurb">${esc(T("undatedblurb"))}</p>${yearBlock}`
+             <div class="g-period">${esc(T("undated"))}</div>${slim ? "" : `
+             <p class="g-blurb">${esc(T("undatedblurb"))}</p>${yearBlock}`}`
           : `<span class="g-num">${d}<span style="font-size:.55em">s</span></span>
-             <div class="g-period">${esc(periodLabel(d))}</div>
-             <p class="g-blurb">${esc(blurbFor(d))}</p>${yearBlock}`;
+             <div class="g-period">${esc(periodLabel(d))}</div>${slim ? "" : `
+             <p class="g-blurb">${esc(blurbFor(d))}</p>${yearBlock}`}`;
         return groupHTML(d, gutter, items, true);
       };
       // Untouched, the page listed every decade one after another: 57 groups, each with
