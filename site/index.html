@@ -729,6 +729,21 @@ footer a{border-bottom:1px solid var(--rule)}
   };
   const mtTag = () => `<span class="tag" title="${esc(T("mt_note"))}">${esc(T("translated"))}</span>`;
   const catName = c => LANG === "en" ? (I18N.CAT_EN[c] || c) : c;
+  const cap = s => s ? s[0].toUpperCase() + s.slice(1) : s;
+  // the museums' measurement words and collection names, in English on the English side
+  const DIMWORD = {"kõrgus":"height","laius":"width","sügavus":"depth","pikkus":"length","kestus":"duration","diameeter":"diameter",
+                   "läbimõõt":"diameter","paksus":"thickness","kogus":"quantity","maht":"volume","kujutisemõõt":"image size","sikülg":"side"};
+  const dimsName = s => LANG === "en" && s ? s.replace(/[a-zõäöü]+(?=:)/gi, m => DIMWORD[m.toLowerCase()] || m) : s;
+  const COLL_EN = {"Graafikakogu":"Prints collection","Maalikogu":"Paintings collection","Kunstikogu":"Art collection","Maal":"Painting",
+                   "Joonistus":"Drawing","Graafika abikogu":"Prints auxiliary collection","Graafilise disaini kogu":"Graphic design collection",
+                   "Skulptuurikogu":"Sculpture collection","Välisgraafikakogu":"Foreign prints collection","Kujutav kunst":"Fine art",
+                   "Nüüdiskunstikogu":"Contemporary art collection","Nüüdiskunsti kogu":"Contemporary art collection","Adamson-Ericu kogu":"Adamson-Eric collection",
+                   "Kristjan Raua kogu":"Kristjan Raud collection","Mikkeli muuseumi kogu":"Mikkel Museum collection","Välismaalikogu":"Foreign paintings collection",
+                   "Väärismetallikogu":"Precious metals collection","Välistarbekunstikogu":"Foreign applied art collection","Uued meediad":"New media",
+                   "Maali abikogu":"Paintings auxiliary collection","Rändnäitustekogu":"Touring exhibitions collection","Rändnäituste kogu":"Touring exhibitions collection",
+                   "Arhiivkogu":"Archive collection","Graafika":"Prints","Skulptuur":"Sculpture","Foto":"Photography","Fotokogu":"Photography collection",
+                   "Tarbekunst":"Applied art","Tarbekunstikogu":"Applied art collection","Joonistuste kogu":"Drawings collection","Joonistus ja akvarell":"Drawing and watercolour"};
+  const collName = c => LANG === "en" && c ? (COLL_EN[c] || c) : c;
   const medName = e => LANG === "en" ? e : (I18N.MEDIUM_ET[e] || e);
   const techName = w => LANG === "en" ? (w.tc || w.tce) : (w.tce || w.tc);
   const matName  = w => LANG === "en" ? (w.m  || w.me)  : (w.me  || w.m);
@@ -1485,11 +1500,11 @@ footer a{border-bottom:1px solid var(--rule)}
             w.yl ? esc(dateLabel(w)) + (w.dsrc==="title" ? ` <em>${esc(T("d_fromtitle"))}</em>` : "")
                  : `<em>${esc(T("d_nodate",{n:ar.n,l:(ar.l[0]||"?")+"–"+(ar.l[1]||"")}))}</em>`}${
             w.f ? `<br><em>${esc(T(w.f === "pre" ? "d_prebirth" : "d_postdeath", {l:(ar.l[0]||"?")+"–"+(ar.l[1]||"")}))}</em>` : ""}</div>
-          <div class="d-k">${esc(T("d_technique"))}</div><div class="d-v">${techName(w)?esc(techName(w)[0].toUpperCase()+techName(w).slice(1)):"—"}</div>
-          <div class="d-k">${esc(T("d_material"))}</div><div class="d-v">${matName(w)?esc(matName(w)):"—"}</div>
-          ${(detailOf(w)||{}).dm?`<div class="d-k">${esc(T("d_dimensions"))}</div><div class="d-v">${esc(detailOf(w).dm)}</div>`:""}
+          <div class="d-k">${esc(T("d_technique"))}</div><div class="d-v">${techName(w)?esc(cap(techName(w))):"—"}</div>
+          <div class="d-k">${esc(T("d_material"))}</div><div class="d-v">${matName(w)?esc(cap(matName(w))):"—"}</div>
+          ${(detailOf(w)||{}).dm?`<div class="d-k">${esc(T("d_dimensions"))}</div><div class="d-v">${esc(cap(dimsName(detailOf(w).dm)))}</div>`:""}
           ${w.c?`<div class="d-k">${esc(T("d_category"))}</div><div class="d-v">${esc(catName(w.c))}</div>`:""}
-          <div class="d-k">${esc(w.kind==="held"?T("d_collection"):T("venue"))}</div><div class="d-v">${w.co?esc(w.co)+"<br>":""}<em>${siteOf(w.mu) ? `<a class="permalink" href="${esc(siteOf(w.mu))}" target="_blank" rel="noopener">${esc(musName(w.mu))}</a>` : esc(musName(w.mu))}</em></div>
+          <div class="d-k">${esc(isHeld(w)?T("d_collection"):T("venue"))}</div><div class="d-v">${w.co?esc(collName(w.co))+"<br>":""}<em>${siteOf(w.mu) ? `<a class="permalink" href="${esc(siteOf(w.mu))}" target="_blank" rel="noopener">${esc(musName(w.mu))}</a>` : esc(musName(w.mu))}</em></div>
           <div class="d-k">${esc(T("kind"))}</div><div class="d-v">${esc(T(w.kind==="shown"?"shown":w.kind==="gallery"?"gallery":w.kind==="auction"?"kind_auction":w.kind==="sold"?"kind_sold":"held"))}</div>
           ${w.kind==="sold" ? `<div class="d-k">${esc(T("d_status"))}</div><div class="d-v">${esc(pastText(w))}${w.gl ? `<br><span class="d-sub">${esc(T("d_lastseen", {d: w.gl}))}</span>` : ""}<br><span class="d-sub">${esc(T("d_pastnote"))}</span></div>` : ""}
           ${w.kind==="auction" ? `<div class="d-k">${esc(T("d_result"))}</div><div class="d-v">${esc(w.an)} · <b>${esc(auText(w))}</b>${w.as ? `<br><span class="d-sub">${esc(T("d_start", {p: eur(w.as)}))}</span>` : ""}${w.aa ? `<br><span class="d-sub">${esc(T("au_afternote"))}</span>` : ""}<br><span class="d-sub">${esc(T("au_note"))}</span></div>` : ""}
