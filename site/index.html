@@ -1364,7 +1364,7 @@ footer a{border-bottom:1px solid var(--rule)}
       </div>
       <div class="mono-side">
         <div class="mono-fig">${mine.length}</div>
-        <div class="mono-figlab">${esc(T("worksinregister"))}${shown!==mine.length?` · ${esc(T("shown",{n:shown}))}`:""}</div>
+        <div class="mono-figlab">${esc(T("worksinregister"))}${shown!==mine.length?` · ${esc(T("shown_n",{n:shown}))}`:""}</div>
         ${auLine(state.artist) ? `<div class="mono-au">${esc(auLine(state.artist))}</div>` : ""}
         <div class="mono-tl">
           ${spark(counts, 300, 44)}
@@ -1438,7 +1438,7 @@ footer a{border-bottom:1px solid var(--rule)}
     if (SHARDS.has(key)) return SHARDS.get(key);
     // A retry must skip the browser cache: the failure we are retrying is often a
     // cached 404 or 5xx, and re-requesting the identical URL just returns it again.
-    const url = `data/detail/${key}.json?v=af468250` + (attempt ? `&r=${attempt}` : "");
+    const url = `data/detail/${key}.json?v=b4768b62` + (attempt ? `&r=${attempt}` : "");
     const p = fetch(url, attempt ? {cache: "reload"} : undefined)
       .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
       .catch(async () => {
@@ -1499,11 +1499,11 @@ footer a{border-bottom:1px solid var(--rule)}
             w.yl ? esc(dateLabel(w)) + (w.dsrc==="title" ? ` <em>${esc(T("d_fromtitle"))}</em>` : "")
                  : `<em>${esc(T("d_nodate",{n:ar.n,l:(ar.l[0]||"?")+"–"+(ar.l[1]||"")}))}</em>`}${
             w.f ? `<br><em>${esc(T(w.f === "pre" ? "d_prebirth" : "d_postdeath", {l:(ar.l[0]||"?")+"–"+(ar.l[1]||"")}))}</em>` : ""}</div>
-          <div class="d-k">${esc(T("d_technique"))}</div><div class="d-v">${techName(w)?esc(techName(w)):"—"}</div>
+          <div class="d-k">${esc(T("d_technique"))}</div><div class="d-v">${techName(w)?esc(techName(w)[0].toUpperCase()+techName(w).slice(1)):"—"}</div>
           <div class="d-k">${esc(T("d_material"))}</div><div class="d-v">${matName(w)?esc(matName(w)):"—"}</div>
           ${(detailOf(w)||{}).dm?`<div class="d-k">${esc(T("d_dimensions"))}</div><div class="d-v">${esc(detailOf(w).dm)}</div>`:""}
           ${w.c?`<div class="d-k">${esc(T("d_category"))}</div><div class="d-v">${esc(catName(w.c))}</div>`:""}
-          <div class="d-k">${esc(w.kind==="held"?T("d_collection"):T("venue"))}</div><div class="d-v">${esc(w.co||"")}<br><em>${siteOf(w.mu) ? `<a class="permalink" href="${esc(siteOf(w.mu))}" target="_blank" rel="noopener">${esc(musName(w.mu))}</a>` : esc(musName(w.mu))}</em></div>
+          <div class="d-k">${esc(w.kind==="held"?T("d_collection"):T("venue"))}</div><div class="d-v">${w.co?esc(w.co)+"<br>":""}<em>${siteOf(w.mu) ? `<a class="permalink" href="${esc(siteOf(w.mu))}" target="_blank" rel="noopener">${esc(musName(w.mu))}</a>` : esc(musName(w.mu))}</em></div>
           <div class="d-k">${esc(T("kind"))}</div><div class="d-v">${esc(T(w.kind==="shown"?"shown":w.kind==="gallery"?"gallery":w.kind==="auction"?"kind_auction":w.kind==="sold"?"kind_sold":"held"))}</div>
           ${w.kind==="sold" ? `<div class="d-k">${esc(T("d_status"))}</div><div class="d-v">${esc(pastText(w))}${w.gl ? `<br><span class="d-sub">${esc(T("d_lastseen", {d: w.gl}))}</span>` : ""}<br><span class="d-sub">${esc(T("d_pastnote"))}</span></div>` : ""}
           ${w.kind==="auction" ? `<div class="d-k">${esc(T("d_result"))}</div><div class="d-v">${esc(w.an)} · <b>${esc(auText(w))}</b>${w.as ? `<br><span class="d-sub">${esc(T("d_start", {p: eur(w.as)}))}</span>` : ""}${w.aa ? `<br><span class="d-sub">${esc(T("au_afternote"))}</span>` : ""}<br><span class="d-sub">${esc(T("au_note"))}</span></div>` : ""}
@@ -2498,8 +2498,8 @@ footer a{border-bottom:1px solid var(--rule)}
   }   // end boot
 
   Promise.all([
-    fetch("data/index.json?v=af468250").then(r => r.json()),
-    fetch("data/i18n.json?v=06fabb46").then(r => r.json())
+    fetch("data/index.json?v=b4768b62").then(r => r.json()),
+    fetch("data/i18n.json?v=36db278b").then(r => r.json())
   ]).then(([data, i18n]) => boot(data, i18n))
    .catch(err => {
      document.getElementById("register").innerHTML =
