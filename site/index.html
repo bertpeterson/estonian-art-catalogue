@@ -314,6 +314,14 @@ h1 a:hover{color:var(--grey-6)}
 
 .detail{padding:2px 0 22px 12px;display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:34px}
 .d-note{font-family:var(--serif-text);font-size:1rem;line-height:1.62;max-width:64ch;color:var(--ink-soft)}
+/* the museum's image of a public-domain work: a third column, the picture at its own
+   proportions, never wider than a column, with the holder named beneath */
+.detail.has-fig{grid-template-columns:minmax(200px,300px) minmax(0,1fr) 300px}
+.d-fig{margin:4px 0 0}
+.d-fig img{display:block;max-width:100%;max-height:420px;width:auto;height:auto;background:var(--field)}
+.d-fig figcaption{font-family:var(--mono);font-size:var(--fs-xs);letter-spacing:.06em;color:var(--grey-4);margin-top:8px;line-height:1.5}
+@media(max-width:1080px){.detail.has-fig{grid-template-columns:minmax(0,1fr) 300px}.d-fig{grid-column:1/-1}.d-fig img{max-height:360px}}
+@media(max-width:860px){.detail.has-fig{grid-template-columns:1fr}}
 .d-nolabel{font-family:var(--mono);font-size:.6rem;letter-spacing:.13em;text-transform:uppercase;color:var(--grey-4);display:block;margin-bottom:6px}
 .d-side{border-top:1px solid var(--rule);padding-top:12px}
 .d-k{font-family:var(--mono);font-size:var(--fs-xs);letter-spacing:var(--ls-label);text-transform:uppercase;color:var(--grey-4)}
@@ -563,7 +571,7 @@ footer a{border-bottom:1px solid var(--rule)}
       <a class="mast-link" href="stats.html" data-i18n="statslink">The catalogue in figures</a>
       <details class="srcdetails">
         <summary data-i18n="srcsummary">Sources & method</summary>
-        <p class="srcline" data-i18n-html="srcline">Sources: <a href="https://opendata.muis.ee/" target="_blank" rel="noopener">Muuseumide Infosüsteem (MuIS)</a>, Eesti Kultuuriministeerium, metadata CC0 · <a href="https://digikogu.ekm.ee/" target="_blank" rel="noopener">EKM Digitaalkogu</a>, Eesti Kunstimuuseum · the galleries' own online catalogues and the NOBA marketplace · Haus Galerii, Vernissage, Allee galerii, Vaal galerii, E-Kunstisalong and Eesti Kunsti Oksjonid auction results · harvested <span id="built"></span><br><span id="srcsplit"></span><br>Object data is the holder's, verbatim — the museum's or the gallery's; gallery asking prices are never taken. Auction results are recorded as the house published them — starting price, hammer price, sold or unsold: a record, not a valuation. English renderings of Estonian biographies and record descriptions are machine translations, unedited, and marked <span class="tag">translated</span>; the Estonian is the holder's text. Artist dates and biographies are tagged by source — <span class="tag">MuIS</span>, <span class="tag">EKM</span>, the Estonian Centre for Contemporary Art, <span class="tag">Wikidata</span> where the museums gave no dates, <span class="tag">Vaal</span> for the auction house's catalogue where nobody else did, or <span class="tag">ed</span> for editorial. How an artist is described, their citizenship, birthplace and training come from Wikidata where it covers them. Decade notes and English medium terms are editorial.</p>
+        <p class="srcline" data-i18n-html="srcline">Sources: <a href="https://opendata.muis.ee/" target="_blank" rel="noopener">Muuseumide Infosüsteem (MuIS)</a>, Eesti Kultuuriministeerium, metadata CC0 · <a href="https://digikogu.ekm.ee/" target="_blank" rel="noopener">EKM Digitaalkogu</a>, Eesti Kunstimuuseum · the galleries' own online catalogues and the NOBA marketplace · Haus Galerii, Vernissage, Allee galerii, Vaal galerii, E-Kunstisalong and Eesti Kunsti Oksjonid auction results · harvested <span id="built"></span><br><span id="srcsplit"></span><br>Images: the holder's own photograph, shown from the museum's server when a record is opened, for works whose artist died more than seventy years ago and which are out of copyright; nothing is copied or stored, and works still in copyright have none. Object data is the holder's, verbatim — the museum's or the gallery's; gallery asking prices are never taken. Auction results are recorded as the house published them — starting price, hammer price, sold or unsold: a record, not a valuation. English renderings of Estonian biographies and record descriptions are machine translations, unedited, and marked <span class="tag">translated</span>; the Estonian is the holder's text. Artist dates and biographies are tagged by source — <span class="tag">MuIS</span>, <span class="tag">EKM</span>, the Estonian Centre for Contemporary Art, <span class="tag">Wikidata</span> where the museums gave no dates, <span class="tag">Vaal</span> for the auction house's catalogue where nobody else did, or <span class="tag">ed</span> for editorial. How an artist is described, their citizenship, birthplace and training come from Wikidata where it covers them. Decade notes and English medium terms are editorial.</p>
       </details>
     </div>
   </header>
@@ -1483,7 +1491,14 @@ footer a{border-bottom:1px solid var(--rule)}
     let detail = "";
     if (open){
       const life = (ar.l[0] || ar.l[1]) ? `${ar.l[0]}–${ar.l[1] || ""}` : "";
-      detail = `<div class="detail">
+      // the holder's own image of a public-domain work, loaded from the museum when the
+      // record is opened; the caption says whose it is and that the work is out of copyright
+      const im = (det(w).im || "");
+      const imSrc = im.startsWith("m:") ? `https://www.muis.ee/digitaalhoidla/api/meedia/pisipilt?id=${encodeURIComponent(im.slice(2))}`
+                  : im.startsWith("e:") ? `https://digikogu.ekm.ee/static/preview/image/${im.slice(2).replace(/\/([^\/]+)$/, "/t2_$1")}` : "";
+      const figure = imSrc ? `<figure class="d-fig"><a href="${esc(imSrc)}" target="_blank" rel="noopener"><img src="${esc(imSrc)}" alt="${esc(w.t)}" loading="lazy" onerror="this.closest('figure').hidden=true"></a>
+          <figcaption>${esc(T("d_image", {h: musName(w.mu)}))}${im.startsWith("m:") ? " · MuIS" : " · EKM"} · ${esc(T("d_pd"))}</figcaption></figure>` : "";
+      detail = `<div class="detail${imSrc ? " has-fig" : ""}">${figure}
         <div>${w.n>1 && (detailOf(w)||{}).mem ? `<div class="members">
             <div class="mem-head">${esc(T("memhead",{n:w.n}))}</div>
             <div class="mem-list">${detailOf(w).mem.map(m => `<div class="mem-row">
@@ -2429,7 +2444,7 @@ footer a{border-bottom:1px solid var(--rule)}
 
   Promise.all([
     fetch("data/index.json?v=b2f2ad38").then(r => r.json()),
-    fetch("data/i18n.json?v=3b79e3d9").then(r => r.json())
+    fetch("data/i18n.json?v=60bd5476").then(r => r.json())
   ]).then(([data, i18n]) => boot(data, i18n))
    .catch(err => {
      document.getElementById("register").innerHTML =

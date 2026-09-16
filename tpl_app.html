@@ -771,7 +771,14 @@
     let detail = "";
     if (open){
       const life = (ar.l[0] || ar.l[1]) ? `${ar.l[0]}–${ar.l[1] || ""}` : "";
-      detail = `<div class="detail">
+      // the holder's own image of a public-domain work, loaded from the museum when the
+      // record is opened; the caption says whose it is and that the work is out of copyright
+      const im = (det(w).im || "");
+      const imSrc = im.startsWith("m:") ? `https://www.muis.ee/digitaalhoidla/api/meedia/pisipilt?id=${encodeURIComponent(im.slice(2))}`
+                  : im.startsWith("e:") ? `https://digikogu.ekm.ee/static/preview/image/${im.slice(2).replace(/\/([^\/]+)$/, "/t2_$1")}` : "";
+      const figure = imSrc ? `<figure class="d-fig"><a href="${esc(imSrc)}" target="_blank" rel="noopener"><img src="${esc(imSrc)}" alt="${esc(w.t)}" loading="lazy" onerror="this.closest('figure').hidden=true"></a>
+          <figcaption>${esc(T("d_image", {h: musName(w.mu)}))}${im.startsWith("m:") ? " · MuIS" : " · EKM"} · ${esc(T("d_pd"))}</figcaption></figure>` : "";
+      detail = `<div class="detail${imSrc ? " has-fig" : ""}">${figure}
         <div>${w.n>1 && w.mem ? `<div class="members">
             <div class="mem-head">${esc(T("memhead",{n:w.n}))}</div>
             <div class="mem-list">${w.mem.map(m => `<div class="mem-row">
