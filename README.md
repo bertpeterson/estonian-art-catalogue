@@ -1,6 +1,6 @@
 # Estonian Art Catalogue · Eesti Kunstikataloog
 
-A browsable catalogue of **79,861 artworks** by **4,277 artists** — museum holdings from **24 Estonian public
+A browsable catalogue of **79,342 artworks** by **4,277 artists** — museum holdings from **24 Estonian public
 collections**, plus what seven commercial galleries and the NOBA marketplace are selling right now,
 aggregated from the national museum databases and the galleries' own listings and presented as a static site.
 
@@ -17,7 +17,7 @@ says so with an *ed* tag.
 | Source | Records | What it is |
 |---|---|---|
 | [MuIS](https://www.muis.ee) | 32,607 | Muuseumide Infosüsteem — the shared catalogue of all Estonian museums |
-| [EKM Digital Collection](https://digikogu.ekm.ee) | 33,904 | The Art Museum of Estonia's own database, behind Kumu |
+| [EKM Digital Collection](https://digikogu.ekm.ee) | 33,898 | The Art Museum of Estonia's own database, behind Kumu |
 | [CCA Estonia](https://cca.ee) | 58 bios | Centre for Contemporary Art — artist biographies, Venice Biennale archive |
 | [EKKM](https://ekkm.ee) | — | Contemporary Art Museum of Estonia |
 | Vaal galerii | 115 artists | Life dates printed beside every lot's artist in its sales, taken for artists no museum, Wikidata or biography dates, tagged *Vaal* |
@@ -29,9 +29,9 @@ Of the works for sale, 3,203 are NOBA listings, 3,535 the galleries' own. NOBA a
 biography, written by the artist or NOBA, for 544 artists who have none from a museum, and a birth year
 read from that biography for 301 — both tagged *NOBA* on the page.
 
-7,420 objects appear in both MuIS and the EKM database and are merged on inventory number
-(MuIS `Number` = digikogu `Tulmenumber` + `Kogunumber`), which is why 60,750 source objects
-collapse to 79,861 works.
+7,933 objects appear in both MuIS and the EKM database and are merged on inventory number
+(MuIS `Number` = digikogu `Tulmenumber` + `Kogunumber`), which is why 60,128 source objects
+collapse to 79,342 works.
 
 **Only attributed works are included.** Anonymous and unattributed objects are excluded by design — including 485 objects catalogued under the name *Tundmatu kunstnik* ("unknown artist"), which is the absence of an attribution written into the name field rather than a name. Notnames stay: *Püha Lucia legendi meister* and its kind identify a hand recognised across several works, and art history treats that as an attribution.
 
@@ -192,7 +192,7 @@ not as part of the normal cycle.
 `data/data.json` is dictionary-encoded and nested, which suits the site and suits
 nobody else. Flat exports with every value resolved, one row per work:
 
-    site/data/export/works.csv.gz      79,861 rows
+    site/data/export/works.csv.gz      79,342 rows
     site/data/export/artists.csv.gz     4,277 rows
     site/data/export/works.jsonl.gz     one JSON object per line
 
@@ -291,8 +291,8 @@ owns the picture wants it seen. A past listing keeps no image, and auction lots 
 sale is over nobody but this catalogue has an interest in illustrating it, and the artist and the
 buyer may have one against. Any holder or rights holder can have an image removed by asking.
 
-**The artwall.** A view with pictures enough to be one — an artist, a decade, a search, at least twelve
-pictures and a quarter of the works — opens as an artwall of them, paintings first, the works without a
+**The artwall.** A view with pictures enough to be one — an artist, a decade, a search, with twelve
+pictures or more — opens as an artwall of them, paintings first, the works without a
 picture listed beneath; *List* and *Artwall* switch it for that view — change the artist, decade or search and the rule decides again — and a choice travels in the link. The tiles
 are the same images as the records, loaded from the holders' and galleries' servers as they scroll
 into view, seventy-two at a time. Nothing is on the artwall that is not in a record.
@@ -306,7 +306,7 @@ a person.
 Code: MIT (see `LICENSE`).
 
 **Data is mixed, and the split is in the data itself.** Records marked `kind: held` —
-59,126 of them, 74.0% — derive from museum metadata published under CC0, which carries no
+58,607 of them, 73.9% — derive from museum metadata published under CC0, which carries no
 restriction on reuse, commercial included. The 9,985 records marked `kind: gallery` come from
 commercial galleries and the NOBA marketplace, which grant no licence; they are included as a
 public catalogue of current work, and anyone reusing this dataset should decide for themselves
