@@ -36,7 +36,8 @@ collapse to 79,855 works.
 **Only attributed works are included.** Anonymous and unattributed objects are excluded by design — including 485 objects catalogued under the name *Tundmatu kunstnik* ("unknown artist"), which is the absence of an attribution written into the name field rather than a name. Notnames stay: *Püha Lucia legendi meister* and its kind identify a hand recognised across several works, and art history treats that as an attribution.
 
 Metadata in MuIS is published under CC0. This repository redistributes **metadata only** — no
-images are harvested, stored, or served. Each record carries the identifiers needed to reach
+image file is copied or served; where the site shows a picture it is loaded from the holder's or
+the gallery's own server (see *Images* below). Each record carries the identifiers needed to reach
 the original entry at its holding institution.
 
 ## What's in the repository
@@ -286,6 +287,10 @@ and captioned with the gallery, for as long as the listing is live — the one c
 owns the picture wants it seen. A past listing keeps no image, and auction lots have none: once the
 sale is over nobody but this catalogue has an interest in illustrating it, and the artist and the
 buyer may have one against. Any holder or rights holder can have an image removed by asking.
+
+**Visits are counted, visitors are not.** The site loads GoatCounter, which keeps a count of page
+views by page, referrer and country, without cookies and without storing anything that identifies
+a person.
 
 ## Licence
 
