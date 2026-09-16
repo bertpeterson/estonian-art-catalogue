@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="description" content="A catalogue of 68,271 works of art by 4,277 artists in Estonian public collections and galleries, 1440–2026. Museum records from MuIS and the EKM Digital Collection, gallery stock from the galleries' own catalogues; every record links back to its source.">
+<meta name="description" content="A catalogue of 68,267 works of art by 4,277 artists in Estonian public collections and galleries, 1440–2026. Museum records from MuIS and the EKM Digital Collection, gallery stock from the galleries' own catalogues; every record links back to its source.">
 <title>Estonian Art Catalogue</title>
 <link rel="canonical" href="https://museaal.ee/">
 <meta property="og:type" content="website">
@@ -434,6 +434,8 @@ footer a{border-bottom:1px solid var(--rule)}
 .d-sub{font-size:.78rem;color:var(--grey-6)}
 .mono-tl{margin-top:20px}
 .mono-tl .spark{color:var(--ink);width:100%;height:44px}
+.mono-ticks{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;font-family:var(--mono);font-size:.56rem;letter-spacing:.03em;color:var(--grey-4);margin-top:3px}
+.mono-ticks span{overflow:hidden;white-space:nowrap}
 .mono-axis{display:flex;justify-content:space-between;gap:10px;font-family:var(--mono);font-size:.6rem;
   color:var(--grey-4);border-top:1px solid var(--rule);padding-top:5px;margin-top:3px}
 .mono-axis span:nth-child(2){color:var(--grey-6)}
@@ -556,12 +558,12 @@ footer a{border-bottom:1px solid var(--rule)}
         <p class="mast-sub" data-i18n="sub">Art in Estonia's public collections and galleries · 1440–2026</p>
       </div>
       <div class="mast-stats">
-        <div><b id="stat-w">68,271</b><span data-i18n="works">works</span></div>
+        <div><b id="stat-w">68,267</b><span data-i18n="works">works</span></div>
         <div><b id="stat-a">4,277</b><span data-i18n="artists">artists</span></div>
         <div><b id="stat-m">24</b><span data-i18n="museums">museums</span></div>
         <div id="stat-gwrap"><b id="stat-g">9</b><span data-i18n="galleries">galleries</span></div>
         <!-- the one stat that is a door: the works a visitor can actually acquire -->
-        <button class="stat-btn" id="stat-sale"><b id="stat-s">6,744</b><span data-i18n="forsale">for sale</span></button>
+        <button class="stat-btn" id="stat-sale"><b id="stat-s">6,739</b><span data-i18n="forsale">for sale</span></button>
         <!-- and the other thing a visitor can act on: what the auction record says -->
         <button class="stat-btn" id="stat-auc"><b id="stat-au">13,122</b><span data-i18n="auctioned">auctioned</span></button>
       </div>
@@ -1382,8 +1384,16 @@ footer a{border-bottom:1px solid var(--rule)}
         <div class="mono-figlab">${esc(T("worksinregister"))}${shown!==mine.length?` · ${esc(T("shown_n",{n:shown}))}`:""}</div>
         ${auLine(state.artist) ? `<div class="mono-au">${esc(auLine(state.artist))}</div>` : ""}
         <div class="mono-tl">
-          ${spark(counts, 300, 44)}
-          <div class="mono-axis"><span>${DECADES[0]}s</span><span>${esc(first?(first===last?T("activeone",{a:first+"s"}):T("active",{a:first+"s",b:last+"s"})):T("undatedonlyartist"))}</span><span>${DECADES[DECADES.length-1]}s</span></div>
+          ${(() => {
+            // the chart spans the artist's own decades, a decade of air each side, not the
+            // catalogue's six centuries: Mägi's 1900s-1920s were three bars in a 60-bar row
+            if (!nz.length) return spark(counts, 300, 44);
+            const lo = Math.max(0, nz[0] - 1), hi = Math.min(counts.length - 1, nz[nz.length - 1] + 1);
+            const seg = counts.slice(lo, hi + 1);
+            const tick = seg.length <= 2 ? "" : `<div class="mono-ticks">${seg.map((_, k) => `<span>${(lo + k) % 2 === 0 || seg.length < 8 ? DECADES[lo + k] + "s" : ""}</span>`).join("")}</div>`;
+            return spark(seg, 300, 44) + tick;
+          })()}
+          <div class="mono-axis"><span></span><span>${esc(first?(first===last?T("activeone",{a:first+"s"}):T("active",{a:first+"s",b:last+"s"})):T("undatedonlyartist"))}</span><span></span></div>
         </div>
         <div class="mono-med">${medl}${und?` · ${esc(T("undated"))} <b>${und}</b>`:""}</div>
       </div>
@@ -1453,7 +1463,7 @@ footer a{border-bottom:1px solid var(--rule)}
     if (SHARDS.has(key)) return SHARDS.get(key);
     // A retry must skip the browser cache: the failure we are retrying is often a
     // cached 404 or 5xx, and re-requesting the identical URL just returns it again.
-    const url = `data/detail/${key}.json?v=3a165e4b` + (attempt ? `&r=${attempt}` : "");
+    const url = `data/detail/${key}.json?v=342ce245` + (attempt ? `&r=${attempt}` : "");
     const p = fetch(url, attempt ? {cache: "reload"} : undefined)
       .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
       .catch(async () => {
@@ -2451,7 +2461,7 @@ footer a{border-bottom:1px solid var(--rule)}
   }   // end boot
 
   Promise.all([
-    fetch("data/index.json?v=3a165e4b").then(r => r.json()),
+    fetch("data/index.json?v=342ce245").then(r => r.json()),
     fetch("data/i18n.json?v=6a270dba").then(r => r.json())
   ]).then(([data, i18n]) => boot(data, i18n))
    .catch(err => {
