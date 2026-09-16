@@ -46,7 +46,8 @@ def parse(h):
         typ = html.unescape(re.sub(r"<[^>]+>", "", ty.group(1) if ty else ""))
         dims = re.search(r"(\d+(?:[.,]\d+)?\s*x\s*\d+(?:[.,]\d+)?(?:\s*x\s*\d+(?:[.,]\d+)?)?)\s*cm", typ)
         year = re.search(r"\b((?:19|20)\d\d)\b", typ)
-        out.append({"id": aid, "slug": slug, "title": title,
+        im = re.search(r'<img\s+src="([^"?]+)', body)
+        out.append({"id": aid, "slug": slug, "title": title, "img": im.group(1) if im else "",
                     "dims": re.sub(r"\s+", " ", dims.group(1)).strip() if dims else "", "year": year.group(1) if year else ""})
     return out
 
@@ -73,7 +74,7 @@ for i, n in enumerate(todo, 1):
             h = get(base % s)
             if not h: failed = True
             for c in parse(h):
-                w = works.setdefault(c["slug"], {"id": c["id"], "dims": c["dims"], "year": c["year"], "title": {}})
+                w = works.setdefault(c["slug"], {"id": c["id"], "dims": c["dims"], "year": c["year"], "title": {}, "img": c.get("img", "")})
                 w["title"][lang] = c["title"]
             time.sleep(0.6)
     have[n] = prev[n] if failed and n in prev else {"slug": s, "works": works}

@@ -13,6 +13,7 @@ Pages 301-redirects the github.io address to a custom domain, so indexing done n
 carries over.
 """
 import json, os, re, html, unicodedata, datetime
+GC = '<script data-goatcounter="https://museaal.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>'   # GoatCounter: a page-view count, no cookies
 
 BASE = "https://museaal.ee"
 OUT  = "site/a"
@@ -227,7 +228,7 @@ for i, a in enumerate(A):
            f"<meta property=\"og:site_name\" content=\"Estonian Art Catalogue\">"
            f"<meta name=\"twitter:card\" content=\"summary\">"
            f"<script type=\"application/ld+json\">{jsonld(a, ws, sl, dates)}</script>"
-           f"<style>{CSS}</style></head><body>"
+           f"<style>{CSS}</style>{GC}</head><body>"
            f"<nav><a href=\"{BASE}/\">Estonian Art Catalogue</a> › {e(a['n'])}</nav>"
            f"<h1>{e(a['n'])}</h1>"
            f"<p class=\"m\">{e(dates)}{' · ' if dates and a.get('wdesc') else ''}{e(a.get('wdesc') or '')}"
@@ -267,7 +268,7 @@ open("site/a/index.html", "w", encoding="utf-8").write(
     f'<meta name="description" content="Every artist in the Estonian Art Catalogue: {len(index_rows):,} '
     f'artists represented in Estonian public collections and galleries.">'
     f'<link rel="canonical" href="{BASE}/a/"><style>{CSS}ul{{columns:260px;list-style:none;padding:0}}'
-    f'li{{break-inside:avoid;padding:2px 0}}</style></head><body>'
+    f'li{{break-inside:avoid;padding:2px 0}}</style>{GC}</head><body>'
     f'<nav><a href="{BASE}/">Estonian Art Catalogue</a> › Artists</nav>'
     f'<h1>Artists A–Z</h1><p class="m">{len(index_rows):,} artists</p><ul>{lst}</ul></body></html>')
 
@@ -303,7 +304,7 @@ open("site/404.html", "w", encoding="utf-8").write(
     f"<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">"
     f"<title>Not found — Estonian Art Catalogue</title><meta name=\"robots\" content=\"noindex\">"
     f"<style>{CSS}form{{display:flex;gap:8px;max-width:520px;margin:18px 0}}"
-    f"input{{flex:1;font:inherit;padding:8px 10px;border:1px solid #bbb}}button{{font:inherit;padding:8px 14px}}</style></head><body>"
+    f"input{{flex:1;font:inherit;padding:8px 10px;border:1px solid #bbb}}button{{font:inherit;padding:8px 14px}}</style>{GC}</head><body>"
     f"<nav><a href=\"{BASE}/\">Estonian Art Catalogue</a> › Not found</nav>"
     f"<h1>There is no page here</h1>"
     f"<p class=\"m\" id=\"why\">The address may be misspelt, or the page has moved.</p>"

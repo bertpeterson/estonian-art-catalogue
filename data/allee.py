@@ -68,7 +68,8 @@ while True:
         seen.add(gid)
         recs.append({"gid": gid, "artist": artist, "title": title, "year": y4.group(1) if y4 else None,
                      "tech": medium, "dims": dims, "gallery": "Allee galerii", "city": "Tallinn",
-                     "url": p.get("permalink") or "https://alleegalerii.ee", **({"sold": True} if is_sold else {})})
+                     "url": p.get("permalink") or "https://alleegalerii.ee", **({"sold": True} if is_sold else {}),
+                     **({"img": p["images"][0].get("src")} if p.get("images") and p["images"][0].get("src") else {})})
     if page % 5 == 0: print(f"  page {page}  kept {len(recs)}", flush=True)
     page += 1; time.sleep(0.8)
     if page > 80: break

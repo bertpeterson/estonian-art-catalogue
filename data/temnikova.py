@@ -67,6 +67,7 @@ for eid in sorted(ids, key=int):
         t = re.search(r'<h3>(.*?)</h3>', b, re.S)
         tech = re.search(r'<span class="tech">(.*?)</span>', b, re.S)
         yr = re.search(r'<span class="year">(\d{4})</span>', b)
+        img = re.search(r'<img class="img t1" src="([^"?]+)', b)
         if not (a and t): continue
         tc = txt(tech.group(1)) if tech else ""
         dm = re.search(r'([\d.,]+\s*[×x]\s*[\d.,]+(?:\s*[×x]\s*[\d.,]+)?\s*(?:cm|mm))', tc, re.I)
@@ -75,7 +76,7 @@ for eid in sorted(ids, key=int):
         recs.append({"gid":"tk-"+m.group(1), "artist":txt(a.group(1)),
                      "title":txt(t.group(1)).strip("'’"), "year":yr.group(1) if yr else None,
                      "tech":tc, "dims":dims, "gallery":"Temnikova & Kasela", "city":"Tallinn",
-                     "url":f"{BASE}/?c=exhibition&l=en&id={eid}"})
+                     "url":f"{BASE}/?c=exhibition&l=en&id={eid}", **({"img": BASE + img.group(1)} if img else {})})
 
 seen,out=set(),[]
 for r in recs:

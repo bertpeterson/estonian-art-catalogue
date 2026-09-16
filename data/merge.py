@@ -925,6 +925,9 @@ WD_DATES = json.load(open("wd_dates.json", encoding="utf-8")) if os.path.exists(
 # wd_dates.py's second pass: artists with no match and no dates, matched on the name
 # with their own work years as the anchor, one candidate or nothing.
 WD_NEW = json.load(open("wd_matches2.json", encoding="utf-8")) if os.path.exists("wd_matches2.json") else {}
+# ...and the third pass (wd_dates3.py), which asks for a tie to Estonia and so can take
+# artists with a single dated work, or none
+WD_NEW.update(json.load(open("wd_matches3.json", encoding="utf-8")) if os.path.exists("wd_matches3.json") else {})
 WD_DATED = WD_MATCHED = 0
 for a in artists:
     if not a.get("qid") and a["n"] in WD_NEW and not (a["l"][0]):
