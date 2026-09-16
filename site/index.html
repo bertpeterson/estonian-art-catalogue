@@ -2194,8 +2194,13 @@ footer a{border-bottom:1px solid var(--rule)}
       const w = W.find(x => x.k === id);
       if (typeof loadShard === "function" && w && w.h && !detailOf(w)) loadShard(shardOf(w)).then(() => { if (state.open === id) render(); });
       render(); pushHash();
-      const el = reg.querySelector(".wall-open");
-      if (el) el.scrollIntoView({block: "start", behavior: matchMedia("(prefers-reduced-motion:reduce)").matches ? "auto" : "smooth"});
+      // to the record's title, clear of the sticky toolbar; the shard may still be on
+      // its way, so the aim is taken again once it lands
+      const aim = () => { const el = reg.querySelector(".wall-open"); if (!el) return;
+        const bar = document.querySelector(".controls"), off = bar ? bar.getBoundingClientRect().height + 8 : 0;
+        window.scrollTo({top: el.getBoundingClientRect().top + window.scrollY - off, behavior: matchMedia("(prefers-reduced-motion:reduce)").matches ? "auto" : "smooth"}); };
+      aim();
+      if (typeof loadShard === "function" && w && w.h && !detailOf(w)) loadShard(shardOf(w)).then(() => setTimeout(aim, 50));
       return;
     }
     const b = e.target.closest(".row-btn"); if (!b) return;
