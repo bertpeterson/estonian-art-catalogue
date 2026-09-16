@@ -73,7 +73,7 @@ for old,new,tag in [
   ('(LANG==="en"&&w.de?esc(T("mt_desc")):esc(T("estonianprose")))','(LANG==="en"&&detailOf(w).de?esc(T("mt_desc")):esc(T("estonianprose")))','desc label'),
   ('${esc(LANG==="en"&&w.de?w.de:w.d)}','${esc(LANG==="en"&&detailOf(w).de?detailOf(w).de:detailOf(w).d)}','desc text'),
   ('${w.dm?`<div class="d-k">','${(detailOf(w)||{}).dm?`<div class="d-k">','dims guard'),
-  ('${esc(w.dm)}','${esc(detailOf(w).dm)}','dims text'),
+  ('${esc(cap(dimsName(w.dm)))}','${esc(cap(dimsName(detailOf(w).dm)))}','dims text'),
   # source-record links: the ids live in the shard, so read them through detailOf
   ('${w.mi?`<a class="permalink"','${(detailOf(w)||{}).mi?`<a class="permalink"','muis link guard'),
   ('museaalview/${esc(w.mi)}','museaalview/${esc(detailOf(w).mi)}','muis link id'),
