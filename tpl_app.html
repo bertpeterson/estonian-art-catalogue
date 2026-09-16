@@ -1247,15 +1247,20 @@
     // one picture: the wall shows it once, marked x2, opening the first. Only for the
     // multiples -- five drawings called "Mehe pea" are five drawings.
     const MULTI = new Set(["Print", "Sculpture", "Relief", "Illustration", "Bookplate", "Poster"]);
-    const dupKey = w => `${w.a}|${String(w.t).toLowerCase().replace(/[\s.,;:"'«»„“”]+/g, " ").trim()}|${w.y ?? ""}`;
+    // A highlighted title folds across years and media too: the ten drawings and
+    // prints of Raud's Kalevipoja laul are one composition on the wall.
+    const dupKey = w => `${w.a}|${String(w.t).toLowerCase().replace(/[\s.,;:"'«»„“”]+/g, " ").trim()}|${w.hl != null ? "" : (w.y ?? "")}`;
     const seen = new Map(), dups = new Map();
     const unique = sortRows(pics, state.decOrder !== "earliest").filter(w => {
-      if (!MULTI.has(w.e)) return true;
+      if (!MULTI.has(w.e) && w.hl == null) return true;
       const k = dupKey(w);
       if (seen.has(k)){ dups.set(seen.get(k), (dups.get(seen.get(k)) || 1) + 1); return false; }
       seen.set(k, w); return true;
     });
-    const ordered = unique.map((w, i) => [w, i]).sort((a, b) => medRank(a[0]) - medRank(b[0]) || a[1] - b[1]).map(x => x[0]);
+    // the artist's key works first (highlights.json, in its order), then paintings
+    // before drawings before prints, then the chosen order
+    const hl = w => w.hl ?? 1e9;
+    const ordered = unique.map((w, i) => [w, i]).sort((a, b) => hl(a[0]) - hl(b[0]) || medRank(a[0]) - medRank(b[0]) || a[1] - b[1]).map(x => x[0]);
     const shown = ordered.slice(0, state.wLimit);
     if (typeof loadShard === "function"){
       const need = [...new Set(shown.filter(w => w.h && !detailOf(w)).map(shardOf))];
