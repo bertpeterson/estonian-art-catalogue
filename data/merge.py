@@ -787,13 +787,16 @@ AUC = json.load(open("auction_records.json", encoding="utf-8")) if os.path.exist
 # the time -- Köler's 172,561 € at Vaal in 2008, the 112,000 € at E-Kunstisalong in
 # 2014 -- kept by hand in press_results.json with the article they come from.
 AUC += json.load(open("press_results.json", encoding="utf-8")) if os.path.exists("press_results.json") else []
-# A published figure that cannot be right -- the 1999 Mägi after-sale Haus prints at the
-# price the work made twenty years later -- keeps its sale but loses its price, with the
-# reason shown on the record. Per lot, by hand, in auction_doubt.json; never by rule.
+# A published figure that cannot be right -- the 1999 Mägi lot Haus prints as sold at the
+# price the work made twenty years later, with no bid recorded -- loses the figure and,
+# where the entry says so, the sale, with the reason shown on the record. Per lot, by
+# hand, in auction_doubt.json; never by rule.
 DOUBT = json.load(open("auction_doubt.json", encoding="utf-8")) if os.path.exists("auction_doubt.json") else {}
 auc_added = auc_skipped = 0
 for r in AUC:
-    if r["aid"] in DOUBT: r["hammer"] = None; r["doubt"] = DOUBT[r["aid"]]
+    if r["aid"] in DOUBT:
+        r["hammer"] = None; r["after"] = False; r["doubt"] = DOUBT[r["aid"]]
+        if "sold" in DOUBT[r["aid"]]: r["sold"] = DOUBT[r["aid"]]["sold"]
     for f in ("artist", "title", "tech", "dims"):
         if r.get(f): r[f] = re.sub(r'\s+', ' ', html.unescape(r[f])).strip()
     if not r.get("title"): continue

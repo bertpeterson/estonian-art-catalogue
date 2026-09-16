@@ -121,9 +121,9 @@ price, kroon-era prices shown by the house in euro at the fixed rate — except 
 field still held the kroon figure (28 000 on a Wiiralt woodcut started at 1 790 €: 28 000 kroons is 1 790 €);
 a round hammer price on a kroon-era lot that reads as the start or more at the fixed rate, or as eight times
 the start, is converted and marked. One published figure is set aside by hand rather than by rule: Haus
-prints €26,000 for a 1999 after-sale of Mägi's *Oberstdorfi maastik* — the sum the same painting made at
-Haus in 2019 — so that sale is kept with its price unknown and the reason on the record
-(`data/auction_doubt.json`). Allee galerii keeps a page per sale
+prints €26,000 as the hammer price of Mägi's *Oberstdorfi maastik* in 1999, with no bid recorded — the sum the
+same painting made at Haus in 2019 — so the 1999 lot stands as offered at €6,391 and unsold, with the reason
+on the record (`data/auction_doubt.json`). Allee galerii keeps a page per sale
 with the lot line, starting and hammer price, and the medium on the lot's own page. Eesti Kunsti Oksjonid keeps each
 online sale's page up with the final bid on every lot — *Lõpppakkumine – (0)* for a lot nobody bid on — but prints no
 date, so the sale is placed by the day its name gives and the month its lots were listed. Vaal galerii's site draws each
