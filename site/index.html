@@ -565,8 +565,10 @@ footer a{border-bottom:1px solid var(--rule)}
       <div class="mast-stats">
         <div><b id="stat-w">79,855</b><span data-i18n="works">works</span></div>
         <div><b id="stat-a">4,277</b><span data-i18n="artists">artists</span></div>
-        <div><b id="stat-m">24</b><span data-i18n="museums">museums</span></div>
-        <div id="stat-gwrap"><b id="stat-g">9</b><span data-i18n="galleries">galleries</span></div>
+        <!-- museums and galleries are counted in the sources note, not here: four
+             figures read as a masthead, six as a table -->
+        <div id="stat-mwrap" hidden><b id="stat-m">24</b><span data-i18n="museums">museums</span></div>
+        <div id="stat-gwrap" hidden><b id="stat-g">9</b><span data-i18n="galleries">galleries</span></div>
         <!-- the one stat that is a door: the works a visitor can actually acquire -->
         <button class="stat-btn" id="stat-sale"><b id="stat-s">6,739</b><span data-i18n="forsale">for sale</span></button>
         <!-- and the other thing a visitor can act on: what the auction record says -->
@@ -1673,7 +1675,7 @@ footer a{border-bottom:1px solid var(--rule)}
     $("stat-a").textContent = fmt(STATS.artists);
     $("stat-m").textContent = fmt(STATS.museums);
     $("stat-g").textContent = fmt(STATS.galleries);
-    $("stat-gwrap").hidden = STATS.galleries === 0;
+    $("stat-gwrap").hidden = true; $("stat-mwrap").hidden = true;
     // Everything a gallery is selling right now, museum-held artist or not. It sits
     // beside the counts because it is the one thing here a visitor can act on.
     $("stat-s").textContent = fmt(FOR_SALE);
