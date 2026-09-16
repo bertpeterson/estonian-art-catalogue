@@ -756,7 +756,7 @@
             <div class="mem-head">${esc(T("memhead",{n:w.n}))}</div>
             <div class="mem-list">${w.mem.map(m => `<div class="mem-row">
                 <span class="mem-num" title="${esc(m[0])}">${esc(m[0]||"—")}</span>
-                <span class="mem-tech" title="${esc(m[1])}">${esc(m[1]||"")}</span>
+                <span class="mem-tech" title="${esc(m[1])}">${esc((LANG === "en" && m[5]) || m[1] || "")}</span>
                 <span>${m[3]?`<a href="https://www.muis.ee/museaalview/${esc(m[3])}" target="_blank" rel="noopener">MuIS</a>`:""}${m[3]&&m[4]?" · ":""}${m[4]?`<a href="https://digikogu.ekm.ee/ekm/search/oid-${esc(m[4])}/" target="_blank" rel="noopener">EKM</a>`:""}</span>
               </div>`).join("")}</div></div>` : ""}
           ${w.d ? `<div class="d-note"><span class="d-nolabel">${w.s==="cca"?esc(T("d_desc_cca"))+" · "+esc(T("inenglish")):w.s==="ekkm"?esc(T("d_desc_ekkm"))+" · "+esc(T("inenglish")):esc(T("d_desc"))+" · "+(LANG==="en"&&w.de?esc(T("mt_desc")):esc(T("estonianprose")))}</span>${esc(LANG==="en"&&w.de?w.de:w.d)}</div>`

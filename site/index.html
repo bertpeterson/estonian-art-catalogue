@@ -1435,7 +1435,7 @@ footer a{border-bottom:1px solid var(--rule)}
     if (SHARDS.has(key)) return SHARDS.get(key);
     // A retry must skip the browser cache: the failure we are retrying is often a
     // cached 404 or 5xx, and re-requesting the identical URL just returns it again.
-    const url = `data/detail/${key}.json?v=da70138d` + (attempt ? `&r=${attempt}` : "");
+    const url = `data/detail/${key}.json?v=dd14a431` + (attempt ? `&r=${attempt}` : "");
     const p = fetch(url, attempt ? {cache: "reload"} : undefined)
       .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
       .catch(async () => {
@@ -1478,10 +1478,10 @@ footer a{border-bottom:1px solid var(--rule)}
             <div class="mem-head">${esc(T("memhead",{n:w.n}))}</div>
             <div class="mem-list">${detailOf(w).mem.map(m => `<div class="mem-row">
                 <span class="mem-num" title="${esc(m[0])}">${esc(m[0]||"—")}</span>
-                <span class="mem-tech" title="${esc(m[1])}">${esc(m[1]||"")}</span>
+                <span class="mem-tech" title="${esc(m[1])}">${esc((LANG === "en" && m[5]) || m[1] || "")}</span>
                 <span>${m[3]?`<a href="https://www.muis.ee/museaalview/${esc(m[3])}" target="_blank" rel="noopener">MuIS</a>`:""}${m[3]&&m[4]?" · ":""}${m[4]?`<a href="https://digikogu.ekm.ee/ekm/search/oid-${esc(m[4])}/" target="_blank" rel="noopener">EKM</a>`:""}</span>
               </div>`).join("")}</div></div>` : ""}
-          ${(detailOf(w)||{}).d ? `<div class="d-note"><span class="d-nolabel">${w.s==="cca"?esc(T("d_desc_cca"))+" · "+esc(T("inenglish")):w.s==="ekkm"?esc(T("d_desc_ekkm"))+" · "+esc(T("inenglish")):esc(T("d_desc"))+" · "+(LANG==="en"&&w.de?esc(T("mt_desc")):esc(T("estonianprose")))}</span>${esc(LANG==="en"&&w.de?w.de:w.d)}</div>`
+          ${(detailOf(w)||{}).d ? `<div class="d-note"><span class="d-nolabel">${w.s==="cca"?esc(T("d_desc_cca"))+" · "+esc(T("inenglish")):w.s==="ekkm"?esc(T("d_desc_ekkm"))+" · "+esc(T("inenglish")):esc(T("d_desc"))+" · "+(LANG==="en"&&detailOf(w).de?esc(T("mt_desc")):esc(T("estonianprose")))}</span>${esc(LANG==="en"&&detailOf(w).de?detailOf(w).de:detailOf(w).d)}</div>`
                    : `<div class="d-note"><span class="d-nolabel">${esc(T("d_desc"))}</span><em style="color:var(--grey-4)">${esc(T("d_nodesc"))}</em></div>`}
           <div class="d-v" style="margin-top:16px;display:flex;flex-wrap:wrap;gap:18px">
             ${(detailOf(w)||{}).mi?`<a class="permalink" href="https://www.muis.ee/museaalview/${esc(detailOf(w).mi)}" target="_blank" rel="noopener">${esc(T("d_recmuis"))}</a>`:""}
@@ -2495,7 +2495,7 @@ footer a{border-bottom:1px solid var(--rule)}
   }   // end boot
 
   Promise.all([
-    fetch("data/index.json?v=da70138d").then(r => r.json()),
+    fetch("data/index.json?v=dd14a431").then(r => r.json()),
     fetch("data/i18n.json?v=06fabb46").then(r => r.json())
   ]).then(([data, i18n]) => boot(data, i18n))
    .catch(err => {

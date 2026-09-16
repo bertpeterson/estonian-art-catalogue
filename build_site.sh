@@ -70,7 +70,8 @@ for old,new,tag in [
   ('${w.n>1 && w.mem ?','${w.n>1 && (detailOf(w)||{}).mem ?','mem guard'),
   ('${w.mem.map(m =>','${detailOf(w).mem.map(m =>','mem map'),
   ('${w.d ?','${(detailOf(w)||{}).d ?','desc guard'),
-  ('${esc(w.d)}','${esc(detailOf(w).d)}','desc text'),
+  ('(LANG==="en"&&w.de?esc(T("mt_desc")):esc(T("estonianprose")))','(LANG==="en"&&detailOf(w).de?esc(T("mt_desc")):esc(T("estonianprose")))','desc label'),
+  ('${esc(LANG==="en"&&w.de?w.de:w.d)}','${esc(LANG==="en"&&detailOf(w).de?detailOf(w).de:detailOf(w).d)}','desc text'),
   ('${w.dm?`<div class="d-k">','${(detailOf(w)||{}).dm?`<div class="d-k">','dims guard'),
   ('${esc(w.dm)}','${esc(detailOf(w).dm)}','dims text'),
   # source-record links: the ids live in the shard, so read them through detailOf
