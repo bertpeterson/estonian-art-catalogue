@@ -207,7 +207,7 @@
   // a past listing: sold, or no longer listed -- and the month it was last seen for sale
   const pastText = w => w.gs ? T("rl_sold") : T("rl_gone");
   // An auction result: the sale, and what the house published about the outcome.
-  const eur = n => fmt(n) + " €";
+  const eur = n => "€" + fmt(n);
   // a lot sold after the sale reads "Sold" like any other; the detail panel says how
   const auText = w => w.ao ? (w.ap ? T("au_sold", {p: eur(w.ap)}) : T("au_soldnp")) : T("au_unsold");
   // One line per artist: lots, sales, span, and the range of hammer prices.
