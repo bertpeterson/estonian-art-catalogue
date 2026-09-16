@@ -740,6 +740,10 @@ print("  gallery works added:", gal_added, "of which past listings", sum(1 for w
 # from a museum holding and from a gallery listing: nothing here is for sale, and
 # the price is the record of a sale, not a valuation. An unsold lot is a result too.
 AUC = json.load(open("auction_records.json", encoding="utf-8")) if os.path.exists("auction_records.json") else []
+# ...and the few results the houses' sites no longer carry but the press recorded at
+# the time -- Köler's 172,561 € at Vaal in 2008, the 112,000 € at E-Kunstisalong in
+# 2014 -- kept by hand in press_results.json with the article they come from.
+AUC += json.load(open("press_results.json", encoding="utf-8")) if os.path.exists("press_results.json") else []
 auc_added = auc_skipped = 0
 for r in AUC:
     for f in ("artist", "title", "tech", "dims"):
@@ -760,7 +764,7 @@ for r in AUC:
         "k": "A" + re.sub(r'[^A-Za-z0-9]', '', r["aid"]), "n": 1,
         "mem": None, "kind": "auction", "url": r.get("url"),
         "an": r["sale"], "ad": r.get("date") or r["when"], "as": r.get("start"), "ap": r.get("hammer"), "ao": 1 if r["sold"] else 0,
-        "aa": 1 if r.get("after") else None})
+        "aa": 1 if r.get("after") else None, "apr": r.get("press")})
     auc_added += 1
 print("  auction results added:", auc_added, "sold", sum(1 for r in AUC if r["sold"]),
       "from", len({r["house"] for r in AUC}), "houses; unattributed or joint lots skipped:", auc_skipped)

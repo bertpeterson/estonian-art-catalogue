@@ -1,0 +1,22 @@
+[
+ {"aid": "press-1", "artist": "Johann Köler", "title": "Tatarlanna Mšatka mõisa aias", "year": null, "yl": "1875–1876", "tech": "Õli, lõuend", "dims": "138.3 x 95 cm",
+  "house": "Vaal galerii", "sale": "Vaal galerii jõuluoksjon 2008", "when": "2008-12", "date": "2008-12", "start": null, "hammer": 172561, "sold": true,
+  "url": "https://kultuur.postimees.ee/4250505/eesti-kunstioksjonite-koigi-aegade-kumme-kalleimat-teost",
+  "press": "Postimees, 25 September 2017; sold for 2,700,000 kroons, ERR/Postimees December 2008"},
+ {"aid": "press-2", "artist": "Johann Köler", "title": "Hiiu saare talupoeg kirvega / Villem Tamme portree", "year": "1863", "yl": "1863", "tech": "Õli", "dims": "41 x 30.6 cm",
+  "house": "E-Kunstisalong", "sale": "E-Kunstisalongi kevadoksjon 2014", "when": "2014-04", "date": "2014-04-05", "start": 112000, "hammer": 112000, "sold": true,
+  "url": "https://kultuur.err.ee/298157/koleri-maal-muudi-oksjonil-112-000-euro-eest",
+  "press": "ERR, 5 April 2014"},
+ {"aid": "press-3", "artist": "Konrad Mägi", "title": "Capri", "year": "1922", "yl": "1922–1923", "tech": "Õli", "dims": "57 x 66.5 cm",
+  "house": "Vaal galerii", "sale": "Vaal galerii oksjon 2015", "when": "2015", "date": "2015", "start": null, "hammer": 98800, "sold": true,
+  "url": "https://kultuur.postimees.ee/4250505/eesti-kunstioksjonite-koigi-aegade-kumme-kalleimat-teost",
+  "press": "Postimees, 25 September 2017"},
+ {"aid": "press-4", "artist": "Johann Köler", "title": "Itaalia maastik", "year": "1859", "yl": "1859–1862", "tech": "Õli", "dims": "31.5 x 42.5 cm",
+  "house": "Balti Oksjon", "sale": "Balti Oksjon 2007", "when": "2007", "date": "2007", "start": null, "hammer": 83407, "sold": true,
+  "url": "https://kultuur.postimees.ee/4250505/eesti-kunstioksjonite-koigi-aegade-kumme-kalleimat-teost",
+  "press": "Postimees, 25 September 2017"},
+ {"aid": "press-5", "artist": "Konrad Mägi", "title": "Capri motiiv", "year": "1922", "yl": "1922–1923", "tech": "Õli", "dims": "50 x 54.5 cm",
+  "house": "Vaal galerii", "sale": "Vaal galerii oksjon 2015", "when": "2015", "date": "2015", "start": null, "hammer": 75300, "sold": true,
+  "url": "https://kultuur.postimees.ee/4250505/eesti-kunstioksjonite-koigi-aegade-kumme-kalleimat-teost",
+  "press": "Postimees, 25 September 2017"}
+]
