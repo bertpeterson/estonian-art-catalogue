@@ -952,7 +952,7 @@ footer a{border-bottom:1px solid var(--rule)}
                   : s==="cca" ? '<span class="tag">CCA</span>' : '<span class="tag">MuIS</span>';
 
   const state = {group:"decade", decOrder:"earliest", artOrder:"az", q:"", list:false, shared:null, sale:false,
-                 view:null, wLimit:72,   // the picture wall: chosen, or null for the rule
+                 view:null, viewKey:"", wLimit:72,   // the artwall: chosen for one view (viewKey), or null for the rule
                  decade:null, media:new Set(), museums:new Set(), cats:new Set(), srcs:new Set(),
                  artist:null, letter:null, idxOpen:false, idxQ:"", idxLimit:120, idxSort:"az", showEarly:false, origins:new Set(), groups:new Set(), sort:"year", year:null, gLimit:50, from:null, to:null, undOnly:false, open:null, expand:new Set(),
                  od:new Set(),    // the decades opened in the register's mosaic
@@ -1016,6 +1016,7 @@ footer a{border-bottom:1px solid var(--rule)}
     state.sort     = KEYS[p.get("sort")] ? p.get("sort") : "year";
     state.q        = p.get("q") || "";
     state.view     = ["wall", "list"].includes(p.get("view")) ? p.get("view") : null;
+    state.viewKey  = "";   // set once the rest of the hash is read, below
     const as = p.get("artist");
     const ai = as ? A.findIndex(x => slug(x.n) === as) : -1;
     state.artist = ai >= 0 ? ai : null;
@@ -1035,6 +1036,7 @@ footer a{border-bottom:1px solid var(--rule)}
     state.origins = new Set(ORIGINS.filter(o => g("origin").includes(o===NOORIGIN?"none":o)));
     state.groups  = new Set(GROUPS.filter(x => g("grp").includes(x)));
     state.open    = p.get("open") || null;
+    if (state.view) state.viewKey = scopeKey();   // a linked choice is for the linked view
     state.od = new Set(g("od"));
     // A list in the URL is yours if it matches what this browser holds, and someone
     // else's otherwise -- shown as a shared list, never merged into yours unasked.
@@ -1691,6 +1693,7 @@ footer a{border-bottom:1px solid var(--rule)}
   }
 
   function render(){
+    if (state.view && state.viewKey !== scopeKey()) state.view = null;   // a List / Artwall choice is for one view
     renderDoors(); renderListBar();
     // The count line and Reset describe and undo a selection; before there is one
     // they only repeat the masthead.
@@ -1974,6 +1977,10 @@ footer a{border-bottom:1px solid var(--rule)}
   // The wall opens by itself on a view with pictures enough to be one -- an artist, a
   // decade, a search -- never on the untouched page or the auction ledger. Chosen
   // with the List / Wall buttons, the choice holds and travels in the link.
+  // A List / Artwall choice belongs to the view it was made on: change the artist,
+  // the decade, the search or a filter and the rule decides again.
+  const scopeKey = () => JSON.stringify([state.group, state.artist, state.decade, state.year, state.q, state.from, state.to, state.undOnly,
+    state.sale, state.list, [...state.media], [...state.museums], [...state.cats], [...state.srcs], [...state.origins], [...state.groups]]);
   function wallMode(set, nPics){
     if (state.group === "auction" || !nPics) return false;
     if (state.view) return state.view === "wall";
@@ -2102,7 +2109,7 @@ footer a{border-bottom:1px solid var(--rule)}
     const b = e.target.closest("[data-artist]");
     if (b){ e.preventDefault(); selectArtist(+b.dataset.artist); }
   });
-  const setView = v => { state.view = v; state.open = null; state.wLimit = 72; render(); pushHash(); };
+  const setView = v => { state.view = v; state.viewKey = scopeKey(); state.open = null; state.wLimit = 72; render(); pushHash(); };
   $("v-list").addEventListener("click", () => setView("list"));
   $("v-wall").addEventListener("click", () => setView("wall"));
   $("ai-toggle").addEventListener("click", () => {
