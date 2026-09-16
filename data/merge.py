@@ -992,6 +992,9 @@ print("  flagged: dated before birth", FLAGGED["pre"], "/ after death", FLAGGED[
 import gzip
 _img = json.load(gzip.open("raw/image_urls.json.gz", "rt", encoding="utf-8")) if os.path.exists("raw/image_urls.json.gz") else {}
 _ekm = json.load(open("ekm_images.json", encoding="utf-8")) if os.path.exists("ekm_images.json") else {}
+# ...and each EKM picture's proportions (height over width, from the preview's pixel
+# size, ekm_shapes.py), so the wall can lay a tile out before the picture arrives
+_ekmr = json.load(open("ekm_shapes.json", encoding="utf-8")) if os.path.exists("ekm_shapes.json") else {}
 _Y = datetime.date.today().year
 def _pd(a):
     b, d = _yr(a["l"][0]), _yr(a["l"][1])
@@ -1001,7 +1004,9 @@ for w in works:
     if w.get("kind") not in (None, "held") or not _pd(artists[w["a"]]): continue
     IMG["pd"] += 1
     if w.get("mi") and ("muis:" + str(w["mi"])) in _img: w["im"] = "m:" + _img["muis:" + str(w["mi"])]; IMG["muis"] += 1
-    elif w.get("oi") and str(w["oi"]) in _ekm:              w["im"] = "e:" + _ekm[str(w["oi"])];            IMG["ekm"] += 1
+    elif w.get("oi") and str(w["oi"]) in _ekm:
+        w["im"] = "e:" + _ekm[str(w["oi"])];            IMG["ekm"] += 1
+        if str(w["oi"]) in _ekmr: w["ir"] = _ekmr[str(w["oi"])]
 print("  images: public-domain museum works", IMG["pd"], "-> MuIS", IMG["muis"], "EKM", IMG["ekm"])
 
 data = {"meta": {"built": datetime.date.today().isoformat(),
