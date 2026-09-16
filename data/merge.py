@@ -820,6 +820,17 @@ for a in artists:
 print("  artists with a school/movement/membership:", grp_n)
 
 for w in works: w.setdefault("kind", "held")
+# the medium field is English, but MuIS's object types came through untranslated for
+# the long tail; the names a reader will meet get their English, the rest fold to Other
+_MED_EN = {"Kavand": "Design", "Nõu": "Vessel", "Karikatuur": "Caricature", "Miniatuur": "Miniature", "Plakat": "Poster",
+           "Figuur": "Figurine", "Visand": "Sketch", "Kaaned": "Book cover", "Taldrik": "Plate", "Raamat": "Book",
+           "Videoinstallatsioon": "Video installation", "Postkaart": "Postcard", "Plaat": "Tile", "Aksessuaar": "Accessory",
+           "Ehe": "Jewellery", "Kauss": "Bowl", "Laegas": "Casket", "Surimask": "Death mask", "Vaas": "Vase",
+           "Graafikaplaat": "Printing plate", "Alus": "Stand", "Ümbris": "Cover", "Kahhel (keraamiline plaat)": "Tile",
+           "Märkmik": "Notebook", "Dekoratiivne vorm": "Decorative form", "Toos": "Box", "Kangas": "Fabric", "Tähtpäevakaart": "Greeting card",
+           "Mapp": "Portfolio", "Väljalõige": "Cutting", "Kott": "Bag", "Mööbel": "Furniture", "Kate": "Cover", "Pannoo": "Panel", "Kann": "Jug", "???": "Other"}
+for w in works:
+    if w.get("e") in _MED_EN: w["e"] = _MED_EN[w["e"]]
 for i, a in enumerate(artists): a["c"] = sum(1 for w in works if w["a"] == i)
 
 # ---------- where to find the holder ----------

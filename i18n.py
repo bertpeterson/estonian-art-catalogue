@@ -277,7 +277,11 @@ CAT_EN = {
  "Foto- ja videokunst":"Photography and video art",
  "Klassikaline modernism, Kunst nõukogude perioodil":"Classical modernism; Art of the Soviet period",
 }
-MEDIUM_ET = {
+MEDIUM_ET = {"Design":"Kavand","Vessel":"Nõu","Caricature":"Karikatuur","Miniature":"Miniatuur","Poster":"Plakat","Figurine":"Figuur","Sketch":"Visand",
+ "Book cover":"Kaaned","Plate":"Taldrik","Book":"Raamat","Video installation":"Videoinstallatsioon","Postcard":"Postkaart","Tile":"Plaat","Accessory":"Aksessuaar",
+ "Jewellery":"Ehe","Bowl":"Kauss","Casket":"Laegas","Death mask":"Surimask","Vase":"Vaas","Printing plate":"Graafikaplaat","Stand":"Alus","Cover":"Ümbris",
+ "Notebook":"Märkmik","Decorative form":"Dekoratiivne vorm","Box":"Toos","Fabric":"Kangas","Greeting card":"Tähtpäevakaart","Portfolio":"Mapp","Cutting":"Väljalõige",
+ "Bag":"Kott","Furniture":"Mööbel","Panel":"Pannoo","Jug":"Kann",
  "Painting":"Maal","Print":"Graafika","Sculpture":"Skulptuur","Drawing":"Joonistus","Installation":"Installatsioon",
  "Video":"Videosalvestis","Watercolour":"Akvarell","Photograph":"Foto","Relief":"Reljeef","Collage":"Kollaaž",
  "Mixed media":"Segatehnika","Illustration":"Illustratsioon","Digital image":"Digitaalne kujutis","Film":"Film",
