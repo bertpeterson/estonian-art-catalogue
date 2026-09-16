@@ -78,6 +78,14 @@ h1 a:hover{color:var(--grey-6)}
 .stat-btn:focus-visible{outline:2px solid var(--focus);outline-offset:3px}
 .mast-stats b{display:block;font-family:var(--serif-text);font-weight:500;font-size:1.6rem;line-height:1.05;letter-spacing:0;color:var(--ink);font-variant-numeric:tabular-nums}
 .standfirst{max-width:78ch;margin:16px 0 0;color:var(--ink-soft);font-size:.95rem;line-height:1.55}
+/* two small links on one line under the standfirst: the sources note (which opens
+   in place) and the figures page */
+.mast-links{margin-top:12px;display:flex;flex-wrap:wrap;gap:6px 22px;align-items:baseline}
+.mast-links .srcdetails{margin-top:0}
+.mast-links .srcdetails[open]{flex-basis:100%}
+.mast-link{font-family:var(--mono);font-size:.66rem;letter-spacing:.13em;text-transform:uppercase;color:var(--grey-6);
+  border-bottom:1px solid var(--rule);padding-bottom:2px;text-decoration:none}
+.mast-link:hover{color:var(--ink);border-bottom-color:var(--ink)}
 .srcdetails{margin-top:12px}
 .srcdetails summary{font-family:var(--mono);font-size:.66rem;letter-spacing:.13em;text-transform:uppercase;
   color:var(--grey-6);cursor:pointer;list-style:none;display:inline-block;border-bottom:1px solid var(--rule);padding-bottom:2px}
@@ -547,10 +555,13 @@ footer a{border-bottom:1px solid var(--rule)}
       </div>
     </div>
     <p class="standfirst" data-i18n-html="standfirst"></p>
-    <details class="srcdetails">
-      <summary data-i18n="srcsummary"></summary>
-      <p class="srcline" data-i18n-html="srcline"></p>
-    </details>
+    <div class="mast-links">
+      <a class="mast-link" href="stats.html" data-i18n="statslink"></a>
+      <details class="srcdetails">
+        <summary data-i18n="srcsummary"></summary>
+        <p class="srcline" data-i18n-html="srcline"></p>
+      </details>
+    </div>
   </header>
 
   <section class="histo">
@@ -656,7 +667,7 @@ footer a{border-bottom:1px solid var(--rule)}
   <footer>
     <!-- static, not i18n: a crawler never runs the app, and this is the route into
          the per-artist pages that make the catalogue findable at all -->
-    <p><a href="a/">Artists A–Z / Kunstnikud A–Ü</a> — every artist as a plain page. <a href="stats.html">The catalogue in figures / Kataloog arvudes</a>.</p>
+    <p><a href="a/">Artists A–Z / Kunstnikud A–Ü</a> — every artist as a plain page.</p>
     <p data-i18n-html="foot1"></p>
     <p data-i18n-html="foot2"></p>
     <p data-i18n-html="foot3"></p>

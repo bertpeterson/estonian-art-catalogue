@@ -63,6 +63,22 @@ for w in lots:
     m = auc_med[val(w, "e") or "Other"]; m["lots"] += 1
     if w.get("ao"): m["sold"] += 1; m["sum"] += w.get("ap") or 0
 
+def hbars(rows, fmtv=fmt, width=420, bar=14, gap=6, label_w=150):
+    """Horizontal bars, one series: label at left, value at the bar's end. Ink-coloured
+    marks on the page surface, so they read in both colour schemes."""
+    if not rows: return ""
+    mx = max(v for _, v in rows) or 1
+    h = len(rows) * (bar + gap)
+    out = [f'<svg class="hb" viewBox="0 0 {width} {h}" width="{width}" height="{h}" role="img">']
+    for k, (lab, v) in enumerate(rows):
+        y = k * (bar + gap); w = max(1, round((width - label_w - 70) * v / mx))
+        out.append(f'<text x="{label_w - 8}" y="{y + bar - 3}" text-anchor="end" class="hl">{e(str(lab))[:22]}</text>'
+                   f'<rect x="{label_w}" y="{y}" width="{w}" height="{bar}" rx="1" class="hr"><title>{e(str(lab))}: {e(fmtv(v))}</title></rect>'
+                   f'<text x="{label_w + w + 6}" y="{y + bar - 3}" class="hv">{e(fmtv(v))}</text>')
+    out.append("</svg>")
+    return "".join(out)
+def cellbar(v, mx):
+    return f'<span class="cb"><i style="width:{max(1, round(100 * v / mx)) if mx else 0}%"></i></span>'
 def artist_link(i):
     return f'<a href="a/{slug(A[i]["n"]) or "artist-" + str(i)}.html">{e(A[i]["n"])}</a>'
 def pct(a, b): return f"{a / b * 100:.0f}%" if b else "—"
@@ -76,7 +92,13 @@ CSS = ("body{margin:0;padding:28px;font:15px/1.55 -apple-system,BlinkMacSystemFo
        ".m{color:#666;font-size:.9rem}nav{font-size:.9rem;margin-bottom:22px}a{color:inherit}"
        "table{border-collapse:collapse;width:100%;font-size:.9rem;margin-top:8px}th,td{text-align:left;padding:5px 8px;border-bottom:1px solid #e3e3e3;vertical-align:top}"
        "th{font-weight:500;font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;color:#666}.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}"
-       ".big{font-size:2rem;font-weight:500;line-height:1.1}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:18px;margin:18px 0 6px}")
+       ".big{font-size:2rem;font-weight:500;line-height:1.1}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:18px;margin:18px 0 6px}"
+       ".sec{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px 32px;align-items:start}.sec table{margin-top:0}"
+       "@media(max-width:820px){.sec{grid-template-columns:1fr}.hb{width:100%;height:auto}}"
+       ".hb{display:block;margin-top:8px;overflow:visible}.hb .hr{fill:#111}.hb .hl,.hb .hv{font-size:11px;fill:#666}.hb .hv{font-variant-numeric:tabular-nums}"
+       "@media(prefers-color-scheme:dark){.hb .hr{fill:#f1f2f4}.hb .hl,.hb .hv{fill:#8b9098}}"
+       ".cb{display:inline-block;width:110px;height:8px;background:#e8e8e8;vertical-align:middle}.cb i{display:block;height:100%;background:#111}"
+       "@media(prefers-color-scheme:dark){.cb{background:#2b2e34}.cb i{background:#f1f2f4}}")
 
 today = datetime.date.today().isoformat()
 parts = [f"<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">"
@@ -88,31 +110,41 @@ parts = [f"<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\"><meta 
 
 parts.append('<div class="grid">' + "".join(f'<div><div class="big">{fmt(n)}</div><div class="m">{e(KIND.get(k, k))}</div></div>'
              for k, n in sorted(by_kind.items(), key=lambda kv: -kv[1])) + "</div>")
-parts.append(f"<h2>By medium</h2>" + table(["Medium", "Museums", "For sale", "Past listings", "Auction lots", "All"],
-             [[e(m), fmt(c["held"] + c.get("shown", 0)), fmt(c["gallery"]), fmt(c["sold"]), fmt(c["auction"]), fmt(sum(c.values()))] for m, c in med_rows]))
+parts.append(f"<h2>By medium</h2><div class=\"sec\">" + table(["Medium", "Museums", "For sale", "Past listings", "Auction lots", "All"],
+             [[e(m), fmt(c["held"] + c.get("shown", 0)), fmt(c["gallery"]), fmt(c["sold"]), fmt(c["auction"]), fmt(sum(c.values()))] for m, c in med_rows])
+             + hbars([(m, sum(c.values())) for m, c in med_rows], width=360, label_w=110) + "</div>")
 
 parts.append(f"<h2>The auction record</h2><div class=\"grid\">"
              f"<div><div class=\"big\">{fmt(len(lots))}</div><div class=\"m\">lots</div></div>"
              f"<div><div class=\"big\">{fmt(len(sold))}</div><div class=\"m\">sold · {pct(len(sold), len(lots))}</div></div>"
              f"<div><div class=\"big\">{eur(total)}</div><div class=\"m\">hammer prices in all, {fmt(len(priced))} lots</div></div>"
              f"<div><div class=\"big\">{eur(round(total / len(priced)))}</div><div class=\"m\">average · median {eur(sorted(w['ap'] for w in priced)[len(priced) // 2])}</div></div></div>")
-parts.append("<h2>By house</h2>" + table(["House", "Sales", "Lots", "Sold", "Sell-through", "Hammer total"],
-             [[e(h), f"{v['first']}–{v['last']}", fmt(v["lots"]), fmt(v["sold"]), pct(v["sold"], v["lots"]), eur(v["sum"])]
-              for h, v in sorted(house.items(), key=lambda kv: -kv[1]["sum"])]))
-parts.append("<h2>By year</h2>" + table(["Year", "Lots", "Sold", "Sell-through", "Hammer total", "Average"],
+hs = sorted(house.items(), key=lambda kv: -kv[1]["sum"])
+parts.append("<h2>By house</h2><div class=\"sec\">" + table(["House", "Sales", "Lots", "Sold", "Sell-through", "Hammer total"],
+             [[e(h), f"{v['first']}–{v['last']}", fmt(v["lots"]), fmt(v["sold"]), pct(v["sold"], v["lots"]), eur(v["sum"])] for h, v in hs])
+             + "<div>" + hbars([(h, v["sum"]) for h, v in hs], fmtv=lambda n: f"{n / 1e6:.1f} M €", width=360, label_w=140)
+             + hbars([(h, v["lots"]) for h, v in hs], width=360, label_w=140) + "</div></div>")
+ys = sorted(year.items())
+parts.append("<h2>By year</h2><div class=\"sec\">" + table(["Year", "Lots", "Sold", "Sell-through", "Hammer total", "Average"],
              [[y, fmt(v["lots"]), fmt(v["sold"]), pct(v["sold"], v["lots"]), eur(v["sum"]), eur(round(v["sum"] / v["sold"])) if v["sold"] else "—"]
-              for y, v in sorted(year.items(), reverse=True)]))
-parts.append("<h2>By medium at auction</h2>" + table(["Medium", "Lots", "Sold", "Sell-through", "Hammer total", "Average"],
-             [[e(m), fmt(v["lots"]), fmt(v["sold"]), pct(v["sold"], v["lots"]), eur(v["sum"]), eur(round(v["sum"] / v["sold"])) if v["sold"] else "—"]
-              for m, v in sorted(auc_med.items(), key=lambda kv: -kv[1]["sum"])]))
-parts.append("<h2>Artists most sold at auction</h2><p class=\"m\">By lots sold.</p>" + table(["", "Artist", "Sold", "Of lots", "Hammer total", "Highest"],
-             [[str(k + 1), artist_link(i), fmt(v["sold"]), fmt(v["lots"]), eur(v["sum"]), eur(v["top"])] for k, (i, v) in enumerate(top_by_lots)]))
-parts.append("<h2>Artists by the sum of their hammer prices</h2>" + table(["", "Artist", "Hammer total", "Sold", "Of lots", "Average", "Highest"],
-             [[str(k + 1), artist_link(i), eur(v["sum"]), fmt(v["sold"]), fmt(v["lots"]), eur(round(v["sum"] / v["sold"])) if v["sold"] else "—", eur(v["top"])]
+              for y, v in reversed(ys)])
+             + "<div><p class=\"m\" style=\"margin:8px 0 0\">Hammer total by year</p>" + hbars([(y, v["sum"]) for y, v in ys], fmtv=lambda n: f"{n / 1e6:.1f} M €", width=360, bar=10, gap=3, label_w=50)
+             + "<p class=\"m\" style=\"margin:14px 0 0\">Lots by year</p>" + hbars([(y, v["lots"]) for y, v in ys], width=360, bar=10, gap=3, label_w=50) + "</div></div>")
+ams = sorted(auc_med.items(), key=lambda kv: -kv[1]["sum"])
+parts.append("<h2>By medium at auction</h2><div class=\"sec\">" + table(["Medium", "Lots", "Sold", "Sell-through", "Hammer total", "Average"],
+             [[e(m), fmt(v["lots"]), fmt(v["sold"]), pct(v["sold"], v["lots"]), eur(v["sum"]), eur(round(v["sum"] / v["sold"])) if v["sold"] else "—"] for m, v in ams])
+             + hbars([(m, v["sum"]) for m, v in ams], fmtv=lambda n: f"{n / 1e6:.1f} M €", width=360, label_w=100) + "</div>")
+mx = top_by_lots[0][1]["sold"] if top_by_lots else 1
+parts.append("<h2>Artists most sold at auction</h2><p class=\"m\">By lots sold.</p>" + table(["", "Artist", "", "Sold", "Of lots", "Hammer total", "Highest"],
+             [[str(k + 1), artist_link(i), cellbar(v["sold"], mx), fmt(v["sold"]), fmt(v["lots"]), eur(v["sum"]), eur(v["top"])] for k, (i, v) in enumerate(top_by_lots)]))
+mx = top_by_sum[0][1]["sum"] if top_by_sum else 1
+parts.append("<h2>Artists by the sum of their hammer prices</h2>" + table(["", "Artist", "", "Hammer total", "Sold", "Of lots", "Average", "Highest"],
+             [[str(k + 1), artist_link(i), cellbar(v["sum"], mx), eur(v["sum"]), fmt(v["sold"]), fmt(v["lots"]), eur(round(v["sum"] / v["sold"])) if v["sold"] else "—", eur(v["top"])]
               for k, (i, v) in enumerate(top_by_sum)]))
-parts.append("<h2>Highest results</h2>" + table(["", "Work", "Artist", "House", "Sale", "Hammer price"],
+mx = top_results[0]["ap"] if top_results else 1
+parts.append("<h2>Highest results</h2>" + table(["", "Work", "Artist", "House", "Sale", "", "Hammer price"],
              [[str(k + 1), f"<em>{e(w['t'])}</em>" + (f" <span class=m>{e(str(w.get('yl') or w.get('y') or ''))}</span>" if (w.get('yl') or w.get('y')) else ""),
-               artist_link(w["a"]), e(val(w, "mu")), e(str(w.get("ad", ""))[:4]), eur(w["ap"])] for k, w in enumerate(top_results)]))
+               artist_link(w["a"]), e(val(w, "mu")), e(str(w.get("ad", ""))[:4]), cellbar(w["ap"], mx), eur(w["ap"])] for k, w in enumerate(top_results)]))
 parts.append(f"<p class=\"m\" style=\"margin-top:36px\">Auction results as Haus Galerii, Vernissage, Allee galerii, Vaal galerii, E-Kunstisalong and Eesti Kunsti Oksjonid published them, plus a few earlier record prices as the press reported them; kroon-era prices in euro at the fixed rate. A record, not a valuation. <a href=\"./\">Full catalogue</a> · <a href=\"a/\">Artists A–Z</a></p></body></html>")
 open(OUT, "w", encoding="utf-8").write("".join(parts))
 print(f"  stats page      {len(lots):,} lots, {len(house)} houses, {len(year)} years")
