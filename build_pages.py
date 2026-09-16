@@ -198,7 +198,7 @@ for i, a in enumerate(A):
     def holder(w):
         if w.get("kind") == "sold": return f"{e(val(w, 'mu'))} · {'sold' if w.get('gs') else 'no longer listed'}"
         if w.get("kind") != "auction": return e(val(w, "mu") or "")
-        out = "Sold " + f"{w['ap']:,} €" if w.get("ao") and w.get("ap") else "Sold" if w.get("ao") else "Unsold"
+        out = "Sold " + f"€{w['ap']:,}" if w.get("ao") and w.get("ap") else "Sold" if w.get("ao") else "Unsold"
         return f"{e(val(w, 'mu'))} · {e(w.get('an') or '')} · {out}"
     rows = "".join(
         f"<tr><td>{e(w.get('y') or w.get('yl') or '—')}</td><td>{e(w.get('t'))}</td>"
@@ -211,7 +211,7 @@ for i, a in enumerate(A):
         ys = sorted(int(w["ad"][:4]) for w in lots)
         au_line = (f"{len(lots)} auction lots · {sum(1 for w in lots if w.get('ao'))} sold · "
                    f"{ys[0] if ys[0]==ys[-1] else f'{ys[0]}–{ys[-1]}'}"
-                   + (f" · {ps[0]:,} € – {ps[-1]:,} €" if len(ps) > 1 and ps[0] != ps[-1] else f" · {ps[0]:,} €" if ps else "")
+                   + (f" · €{ps[0]:,} – €{ps[-1]:,}" if len(ps) > 1 and ps[0] != ps[-1] else f" · €{ps[0]:,}" if ps else "")
                    + " — as the auction houses published them; not a valuation")
     else: au_line = ""
 

@@ -16,7 +16,7 @@ e = html.escape
 val = lambda w, f: (V[f][w[f]] if isinstance(w.get(f), int) and f in V else w.get(f))
 kind = lambda w: w.get("kind") or "held"
 fmt = lambda n: f"{n:,}"
-eur = lambda n: f"{n:,} €"
+eur = lambda n: f"€{n:,}"
 def slug(s):
     s = unicodedata.normalize("NFKD", s).encode("ascii", "ignore").decode().lower()
     return re.sub(r"^-+|-+$", "", re.sub(r"[^a-z0-9]+", "-", s))
@@ -122,18 +122,18 @@ parts.append(f"<h2>The auction record</h2><div class=\"grid\">"
 hs = sorted(house.items(), key=lambda kv: -kv[1]["sum"])
 parts.append("<h2>By house</h2><div class=\"sec\">" + table(["House", "Sales", "Lots", "Sold", "Sell-through", "Hammer total"],
              [[e(h), f"{v['first']}–{v['last']}", fmt(v["lots"]), fmt(v["sold"]), pct(v["sold"], v["lots"]), eur(v["sum"])] for h, v in hs])
-             + "<div>" + hbars([(h, v["sum"]) for h, v in hs], fmtv=lambda n: f"{n / 1e6:.1f} M €", width=360, label_w=140)
+             + "<div>" + hbars([(h, v["sum"]) for h, v in hs], fmtv=lambda n: f"€{n / 1e6:.1f} M", width=360, label_w=140)
              + hbars([(h, v["lots"]) for h, v in hs], width=360, label_w=140) + "</div></div>")
 ys = sorted(year.items())
 parts.append("<h2>By year</h2><div class=\"sec\">" + table(["Year", "Lots", "Sold", "Sell-through", "Hammer total", "Average"],
              [[y, fmt(v["lots"]), fmt(v["sold"]), pct(v["sold"], v["lots"]), eur(v["sum"]), eur(round(v["sum"] / v["sold"])) if v["sold"] else "—"]
               for y, v in reversed(ys)])
-             + "<div><p class=\"m\" style=\"margin:8px 0 0\">Hammer total by year</p>" + hbars([(y, v["sum"]) for y, v in reversed(ys)], fmtv=lambda n: f"{n / 1e6:.1f} M €", width=360, bar=10, gap=3, label_w=50)
+             + "<div><p class=\"m\" style=\"margin:8px 0 0\">Hammer total by year</p>" + hbars([(y, v["sum"]) for y, v in reversed(ys)], fmtv=lambda n: f"€{n / 1e6:.1f} M", width=360, bar=10, gap=3, label_w=50)
              + "<p class=\"m\" style=\"margin:14px 0 0\">Lots by year</p>" + hbars([(y, v["lots"]) for y, v in reversed(ys)], width=360, bar=10, gap=3, label_w=50) + "</div></div>")
 ams = sorted(auc_med.items(), key=lambda kv: -kv[1]["sum"])
 parts.append("<h2>By medium at auction</h2><div class=\"sec\">" + table(["Medium", "Lots", "Sold", "Sell-through", "Hammer total", "Average"],
              [[e(m), fmt(v["lots"]), fmt(v["sold"]), pct(v["sold"], v["lots"]), eur(v["sum"]), eur(round(v["sum"] / v["sold"])) if v["sold"] else "—"] for m, v in ams])
-             + hbars([(m, v["sum"]) for m, v in ams], fmtv=lambda n: f"{n / 1e6:.1f} M €", width=360, label_w=100) + "</div>")
+             + hbars([(m, v["sum"]) for m, v in ams], fmtv=lambda n: f"€{n / 1e6:.1f} M", width=360, label_w=100) + "</div>")
 mx = top_by_lots[0][1]["sold"] if top_by_lots else 1
 parts.append("<h2>Artists most sold at auction</h2><p class=\"m\">By lots sold.</p>" + table(["", "Artist", "", "Sold", "Of lots", "Hammer total", "Highest"],
              [[str(k + 1), artist_link(i), cellbar(v["sold"], mx), fmt(v["sold"]), fmt(v["lots"]), eur(v["sum"]), eur(v["top"])] for k, (i, v) in enumerate(top_by_lots)]))
