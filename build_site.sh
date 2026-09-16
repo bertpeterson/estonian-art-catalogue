@@ -128,7 +128,7 @@ _auc = sum(1 for w in _m['works'] if w.get('kind') == 'auction')
 for _id, _val in (('stat-w', _meta['works']), ('stat-a', _meta['artists']), ('stat-m', _meta['museums'] if 'museums' in _meta else len({w['mu'] for w in _m['works'] if w.get('kind', 'held') == 'held'})),
                   ('stat-g', len(_holders)), ('stat-s', _gal), ('stat-au', _auc)):
     h = h.replace(f'<b id="{_id}">0</b>', f'<b id="{_id}">{_val:,}</b>', 1)
-h = h.replace('<div id="stat-gwrap" hidden>', '<div id="stat-gwrap">', 1).replace('id="stat-sale" hidden>', 'id="stat-sale">', 1).replace('id="stat-auc" hidden>', 'id="stat-auc">', 1)
+h = h.replace('id="stat-sale" hidden>', 'id="stat-sale">', 1).replace('id="stat-auc" hidden>', 'id="stat-auc">', 1)
 # Every label the HTML leaves empty for the app to fill is filled at build time with
 # its English text, from the same dictionary. The first paint then reads as a page,
 # not a skeleton; the app re-applies the visitor's language on load as before. The

@@ -946,7 +946,7 @@
     $("stat-a").textContent = fmt(STATS.artists);
     $("stat-m").textContent = fmt(STATS.museums);
     $("stat-g").textContent = fmt(STATS.galleries);
-    $("stat-gwrap").hidden = STATS.galleries === 0;
+    $("stat-gwrap").hidden = true; $("stat-mwrap").hidden = true;
     // Everything a gallery is selling right now, museum-held artist or not. It sits
     // beside the counts because it is the one thing here a visitor can act on.
     $("stat-s").textContent = fmt(FOR_SALE);
