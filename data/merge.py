@@ -236,11 +236,16 @@ for r in recs: by_artist[r["artist"]].append(r)
 # a catalogue note quoting an outside source is not a biography
 BAD_BIO = re.compile(r'^(väljavõte|katkend|allikas|tsitaat|refereeritud|vt\.?\s)|https?://|www\.|facebook', re.I)
 MU_LIFE, MU_BIO = {}, {}
+# The biography an artist's records agree on. The longest was taken before, and for
+# Johann Köler that was a life of Jesus: one record of a Christ painting carried the
+# sitter's biography in the artist's field, 121 carried Köler's. Majority first, and
+# length only to settle a tie.
+_bios = collections.defaultdict(collections.Counter)
 for r in MU:
     if r.get("life") and r["artist"] not in MU_LIFE: MU_LIFE[r["artist"]] = r["life"]
-    if r.get("bio") and not BAD_BIO.search(r["bio"]):
-        b = MU_BIO.get(r["artist"])
-        if not b or len(r["bio"]) > len(b): MU_BIO[r["artist"]] = r["bio"]
+    if r.get("bio") and not BAD_BIO.search(r["bio"]): _bios[r["artist"]][r["bio"].strip()] += 1
+for a, c in _bios.items():
+    MU_BIO[a] = max(c, key=lambda b: (c[b], len(b)))
 AU = json.load(open("dk_authors.json", encoding="utf-8")) if os.path.exists("dk_authors.json") else {}
 def au_life(a):
     b = re.search(r'(\d{4})', a.get("Sündinud", "") or ""); d = re.search(r'(\d{4})', a.get("Surnud", "") or "")
@@ -912,6 +917,12 @@ data["meta"]["sites"] = SITES
 # English renderings of the Estonian prose, where translate.py has made them
 from translate import apply_translations
 _na, _nw = apply_translations(data)
+# MuIS opens a biography mid-sentence now and then ("painter, printmaker and pedagogue.
+# At the beginning..."): the record's person field continued from the name. Shown as
+# prose, it starts with a capital.
+for a in data["artists"]:
+    for f in ("b", "ben"):
+        if a.get(f) and a[f][:1].islower(): a[f] = a[f][:1].upper() + a[f][1:]
 print("  translations applied:", _na, "biographies,", _nw, "descriptions")
 json.dump(data, open("data.json", "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
 print("data.json", os.path.getsize("data.json")//1024, "KB")
