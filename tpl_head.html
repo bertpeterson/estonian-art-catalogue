@@ -485,27 +485,6 @@ footer a{border-bottom:1px solid var(--rule)}
 @media(min-width:1100px){.doors .d-names ul{columns:4}}
 @media(max-width:760px){.doors .d-names ul{columns:1}}
 
-/* timeline: one row per artist, a label column and a track; bars are percentages of
-   the track so the same markup holds at any width */
-.tl{--tl-lab:240px;position:relative;margin-top:var(--sp-3)}
-.tl-axis,.tl-row{display:flex;align-items:center;gap:12px;height:18px}
-.tl-axis{position:sticky;top:62px;z-index:5;height:26px;background:var(--paper);border-bottom:1px solid var(--rule)}
-.tl-lab{flex:0 0 var(--tl-lab);min-width:0;text-align:left;background:none;border:0;padding:0;cursor:pointer;
-  color:var(--ink);font-family:var(--serif-text);font-size:var(--fs-base);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.tl-lab:hover{text-decoration:underline} .tl-lab:focus-visible{outline:2px solid var(--focus);outline-offset:1px}
-.tl-d{font-family:var(--mono);font-size:var(--fs-xs);color:var(--grey-4);margin-left:8px;letter-spacing:.03em}
-.tl-track{flex:1;position:relative;height:100%}
-.tl-tick{position:absolute;top:2px;transform:translateX(-50%);font-family:var(--mono);font-size:var(--fs-xs);color:var(--grey-6);
-  background:none;border:0;padding:3px 5px;cursor:pointer;border-radius:2px;min-height:22px}
-.tl-tick:hover{color:var(--ink);background:var(--field)} .tl-tick:focus-visible{outline:2px solid var(--focus)}
-.tl-grid{position:absolute;top:26px;bottom:0;border-left:1px solid var(--rule-soft);pointer-events:none}
-.tl-life{position:absolute;top:6px;height:6px;background:var(--bar)}
-.tl-life.living{background:linear-gradient(90deg,var(--bar) 75%,transparent)}
-.tl-act{position:absolute;top:6px;height:6px;background:var(--ink)}
-/* a sale: a tick below the bar, in the year the hammer fell */
-.tl-sale{position:absolute;top:13px;width:2px;height:4px;margin-left:-1px;background:var(--ink)}
-.tl-note{font-size:var(--fs-sm);color:var(--grey-6);margin-top:14px;max-width:72ch}
-@media(max-width:760px){.tl{--tl-lab:140px}.tl-d{display:none}.tl-axis{position:static}}
 .g-split{font-family:var(--mono);font-size:var(--fs-sm);letter-spacing:var(--ls-data);color:var(--grey-6);margin-top:6px;font-variant-numeric:tabular-nums}
 .door-line{margin:var(--sp-3) 0 0}
 .door-line button{display:inline-flex;align-items:baseline;gap:10px;background:none;border:0;padding:5px 0;
@@ -597,7 +576,6 @@ footer a{border-bottom:1px solid var(--rule)}
       <div class="seg" role="group" aria-label="Group by">
         <button id="g-decade" aria-pressed="true" data-i18n="decade"></button>
         <button id="g-artist" aria-pressed="false" data-i18n="artist"></button>
-        <button id="g-time" aria-pressed="false" data-i18n="timeline"></button>
         <button id="g-auc" aria-pressed="false" data-i18n="auctions"></button>
       </div>
     </div>
