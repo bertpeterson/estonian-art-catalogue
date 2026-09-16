@@ -293,7 +293,7 @@ buyer may have one against. Any holder or rights holder can have an image remove
 
 **The artwall.** A view with pictures enough to be one — an artist, a decade, a search, at least twelve
 pictures and a quarter of the works — opens as an artwall of them, paintings first, the works without a
-picture listed beneath; *List* and *Artwall* switch it, and the choice travels in the link. The tiles
+picture listed beneath; *List* and *Artwall* switch it for that view — change the artist, decade or search and the rule decides again — and a choice travels in the link. The tiles
 are the same images as the records, loaded from the holders' and galleries' servers as they scroll
 into view, seventy-two at a time. Nothing is on the artwall that is not in a record.
 
