@@ -32,7 +32,7 @@ ET = {
  "sl_empty":"Nimekiri on tühi — märgi teoseid sirvides järjehoidjaga.",
  "sl_kept":"Salvestatud ainult selles brauseris.","sl_shared_note":"Kellegi teise nimekiri — sinu oma see ei muuda.",
  "doors_cross":"Müügil — kunstnikud, keda muuseumid hoiavad","d_gallerylink":"Vaata galeriis {g} ↗","rl_view":"Müügil ↗","cross_held":"muuseumides","cross_sold":"müügil","doors_name":"Alusta nimest","doors_period":"Alusta ajajärgust",
- "p_pre":"Enne 1700","era_short_Vabariik":"Vabariik","era_short_Taasiseseisvus":"Iseseisvus", "reset":"Lähtesta","copy":"Kopeeri","copied":"Kopeeritud",
+ "p_pre":"Enne 1700","era_short_Vabariik":"Vabariik","era_short_Taasiseseisvus":"Taastatud", "reset":"Lähtesta","copy":"Kopeeri","copied":"Kopeeritud",
  "filters":"Filtrid","years":"Aastad","medium":"Liik","museum":"Muuseum","ekmcat":"EKM kategooria","source":"Allikas",
  "anyyear":"Kõik aastad","undated":"Dateerimata","earliestopt":"varaseim","latestopt":"hiliseim",
  "inview":"{a}–{b} vaates","undatedonlyshort":"ainult dateerimata",
@@ -137,7 +137,7 @@ EN = {
  "sl_empty":"Your list is empty — mark works with the bookmark as you browse.",
  "sl_kept":"Kept in this browser only.","sl_shared_note":"Someone else's list — it does not change yours.",
  "doors_cross":"For sale, by artists the museums hold","d_gallerylink":"View at {g} ↗","rl_view":"For sale ↗","cross_held":"in museums","cross_sold":"for sale","doors_name":"Start with a name","doors_period":"Start with a period",
- "p_pre":"Before 1700","era_short_Vabariik":"Republic","era_short_Taasiseseisvus":"Indep.", "reset":"Reset","copy":"Copy","copied":"Copied",
+ "p_pre":"Before 1700","era_short_Vabariik":"Republic","era_short_Taasiseseisvus":"Restored", "reset":"Reset","copy":"Copy","copied":"Copied",
  "filters":"Filters","years":"Years","medium":"Medium","museum":"Museum","ekmcat":"EKM category","source":"Source",
  "anyyear":"Any year","undated":"Undated","earliestopt":"earliest","latestopt":"latest",
  "inview":"{a}–{b} in view","undatedonlyshort":"undated only",
@@ -256,8 +256,8 @@ BLURB_ET = {
 2010:"Post-internet ja arhiiv. E-Eestist saab kunsti aines.",
 2020:"Keraamika, ökoloogia ja müüt; Karlsoni hundid täidavad Veneetsias pühitsusest vabastatud kiriku.",
 }
-PERIOD_ET = {"Tsaariaeg":"Tsaariaeg","Vabariik":"Esimene vabariik","Okupatsioon":"Okupatsioon","Taasiseseisvus":"Taasiseseisvus"}
-PERIOD_EN = {"Tsaariaeg":"Imperial Russia","Vabariik":"First Republic","Okupatsioon":"Occupation","Taasiseseisvus":"Independence"}
+PERIOD_ET = {"Tsaariaeg":"Tsaariaeg","Vabariik":"Esimene vabariik","Okupatsioon":"Okupatsioon","Taasiseseisvus":"Taastatud vabariik"}
+PERIOD_EN = {"Tsaariaeg":"Imperial Russia","Vabariik":"First Republic","Okupatsioon":"Occupation","Taasiseseisvus":"Restored Republic"}
 MUSEUM_EN = {
  "Eesti Kunstimuuseum":"Art Museum of Estonia","Tartu Kunstimuuseum":"Tartu Art Museum",
  "Eesti Ajaloomuuseum":"Estonian History Museum","Eesti Kunstiakadeemia muuseum":"Estonian Academy of Arts Museum",
