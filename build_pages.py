@@ -211,7 +211,7 @@ for i, a in enumerate(A):
         ys = sorted(int(w["ad"][:4]) for w in lots)
         au_line = (f"{len(lots)} auction lots · {sum(1 for w in lots if w.get('ao'))} sold · "
                    f"{ys[0] if ys[0]==ys[-1] else f'{ys[0]}–{ys[-1]}'}"
-                   + (f" · {ps[0]:,}–{ps[-1]:,} €" if len(ps) > 1 and ps[0] != ps[-1] else f" · {ps[0]:,} €" if ps else "")
+                   + (f" · {ps[0]:,} € – {ps[-1]:,} €" if len(ps) > 1 and ps[0] != ps[-1] else f" · {ps[0]:,} €" if ps else "")
                    + " — as the auction houses published them; not a valuation")
     else: au_line = ""
 
