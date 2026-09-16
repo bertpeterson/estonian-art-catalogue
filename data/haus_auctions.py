@@ -103,11 +103,22 @@ for aid, (sale, when) in sorted(sales.items(), key=lambda x: x[1][1]):
         # price the house then agreed -- often below the start; the house still prints
         # it as Haamrihind on the sale page, and it is kept, marked as such
         after = hammer is not None and not re.search(r"\d", prices.get("viimane pakkumine", ""))
+        # In the kroon years the house shows its prices converted to euro, so they are
+        # never round -- 1 790 €, 3 899 €. A round hammer price on such a lot (28 000 €
+        # on a 1926 Wiiralt woodcut started at 1 790 €) is the kroon figure that was
+        # never converted: 28 000 kroons is 1 790 €, the starting price, and the lot
+        # in fact sold at its start. Converted at the fixed rate where that reading
+        # lands at or above the start; otherwise left as the house shows it.
+        kroon = False
+        # (or, sold after the sale below its start, a round figure eight times the start
+        # and more: 75 000 on a 6 008 € Tolts is 4 793 €, not a twelvefold leap)
+        if hammer and start and when < "2011-01-01" and hammer % 100 == 0 and (hammer / 15.6466 >= start * 0.9 or hammer >= 8 * start):
+            hammer = round(hammer / 15.6466); kroon = True
         y4 = re.match(r"(\d{4})", year)
         recs.append({"aid": "haus-" + item.group(1), "artist": artist, "title": title,
                      "year": y4.group(1) if y4 else None, "yl": year or None, "tech": medium, "dims": dims,
                      "house": "Haus Galerii", "sale": sale, "when": when[:7], "date": when,
-                     "start": start, "hammer": hammer, "sold": hammer is not None, "after": after,
+                     "start": start, "hammer": hammer, "sold": hammer is not None, "after": after, **({"kroon": True} if kroon else {}),
                      "url": f"{BASE}/?c=toimunud-oksjonid&l=et&id={aid}&item={item.group(1)}"})
     print(f"  {when} {sale[:40]:40} lots so far {len(recs)}", flush=True)
 
