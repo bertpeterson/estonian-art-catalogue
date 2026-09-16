@@ -1022,6 +1022,7 @@ _ekm = json.load(open("ekm_images.json", encoding="utf-8")) if os.path.exists("e
 # size, ekm_shapes.py), so the wall can lay a tile out before the picture arrives
 _ekmr = json.load(open("ekm_shapes.json", encoding="utf-8")) if os.path.exists("ekm_shapes.json") else {}
 _galr = json.load(open("gallery_shapes.json", encoding="utf-8")) if os.path.exists("gallery_shapes.json") else {}
+_muisr = json.load(open("muis_shapes.json", encoding="utf-8")) if os.path.exists("muis_shapes.json") else {}
 _Y = datetime.date.today().year
 def _pd(a):
     b, d = _yr(a["l"][0]), _yr(a["l"][1])
@@ -1034,10 +1035,32 @@ for w in works:
     elif w.get("oi") and str(w["oi"]) in _ekm:
         w["im"] = "e:" + _ekm[str(w["oi"])];            IMG["ekm"] += 1
         if str(w["oi"]) in _ekmr: w["ir"] = _ekmr[str(w["oi"])]
+# What people come to an artist for goes first on the wall: highlights.json names, per
+# artist, the works art history treats as the key ones, in order. A pictured work whose
+# title matches gets a rank -- the exact title before a version or a study of it.
+_HL = json.load(open("highlights.json", encoding="utf-8")) if os.path.exists("highlights.json") else {}
+_hl_by_artist = {}
+for i, a in enumerate(artists):
+    if a["n"] in _HL: _hl_by_artist[i] = _HL[a["n"]]
+_STUDY = re.compile(r"visand|etüüd|eskiis|kavand|fragment|detail|proovi|krokii|reproduk|trükiplaat|eeltöö|variant", re.I)
+_hln = 0
+for w in works:
+    pats = _hl_by_artist.get(w["a"])
+    if not pats or not w.get("im"): continue
+    t = w["t"].strip().rstrip(".")
+    for k, pat in enumerate(pats):
+        if re.search(r"(?:^|[\s(„\"])" + pat, t, re.I):
+            exact = re.fullmatch(pat + r"[.!?]?", t, re.I) is not None
+            # the exact title, then a version of it; every study, sketch and plate of
+            # any highlight comes after all of those -- Põrgu has twenty studies
+            w["hl"] = (1000 + k) if _STUDY.search(t) else k * 2 + (0 if exact else 1); _hln += 1
+            break
+print("  highlighted works on the wall:", _hln, "for", len(_hl_by_artist), "artists")
 # ...and the gallery pictures' shapes, measured from the files (gallery_shapes.py)
 for w in works:
     im = w.get("im") or ""
     if im.startswith("g:") and im[2:] in _galr: w["ir"] = _galr[im[2:]]
+    if im.startswith("m:") and im[2:] in _muisr: w["ir"] = _muisr[im[2:]]
 print("  images: public-domain museum works", IMG["pd"], "-> MuIS", IMG["muis"], "EKM", IMG["ekm"])
 
 data = {"meta": {"built": datetime.date.today().isoformat(),
