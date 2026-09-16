@@ -240,12 +240,31 @@ MU_LIFE, MU_BIO = {}, {}
 # Johann Köler that was a life of Jesus: one record of a Christ painting carried the
 # sitter's biography in the artist's field, 121 carried Köler's. Majority first, and
 # length only to settle a tie.
+# MuIS puts the sitter's biography in the same field as the maker's: a sculpture of
+# Lurich carries Lurich's life, a Christ carries a life of Jesus. So a text that turns
+# up under several artists belongs to the one whose records carry it most, and to
+# nobody else; Amandus Adamson's five bio-bearing records (Köler's life twice,
+# Jesus twice, Lurich once) leave him rightly without one.
 _bios = collections.defaultdict(collections.Counter)
 for r in MU:
     if r.get("life") and r["artist"] not in MU_LIFE: MU_LIFE[r["artist"]] = r["life"]
     if r.get("bio") and not BAD_BIO.search(r["bio"]): _bios[r["artist"]][r["bio"].strip()] += 1
+_owner = {}                                           # bio text -> the artist it belongs to
 for a, c in _bios.items():
-    MU_BIO[a] = max(c, key=lambda b: (c[b], len(b)))
+    for b, n in c.items():
+        if b not in _owner or n > _bios[_owner[b]][b]: _owner[b] = a
+# ...and a text that opens "Georg Lurich (22 April 1876" is a life of Georg Lurich,
+# whoever's record it sits on: a two-or-three-word name followed by a bracketed date
+# names its subject, and if none of those words is in the artist's name it is not theirs.
+_SUBJ = re.compile(r"^((?:[A-ZÄÖÜÕŠŽ][^\s(]*\s+){1,2}[A-ZÄÖÜÕŠŽ][^\s(]*)\s*\(\s*(?:\d|s\.|sünd)")
+def _other_person(bio, artist):
+    m = _SUBJ.match(bio)
+    if not m: return False
+    words = lambda t: {"".join(fold(x)) for x in re.findall(r"[^\W\d_]+", t) if len(x) > 2}
+    return not (words(m.group(1)) & words(artist))
+for a, c in _bios.items():
+    mine = [b for b in c if _owner[b] == a and not _other_person(b, a)]
+    if mine: MU_BIO[a] = max(mine, key=lambda b: (c[b], len(b)))
 AU = json.load(open("dk_authors.json", encoding="utf-8")) if os.path.exists("dk_authors.json") else {}
 def au_life(a):
     b = re.search(r'(\d{4})', a.get("Sündinud", "") or ""); d = re.search(r'(\d{4})', a.get("Surnud", "") or "")
