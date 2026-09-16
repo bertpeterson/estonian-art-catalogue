@@ -387,6 +387,32 @@ TECHMAT = {**MAT, **TECH, "lõuendil": "on canvas", "paberil": "on paper", "papi
            "vineeril": "on plywood", "masoniidil": "on masonite", "puidul": "on wood", "klaasil": "on glass", "metallil": "on metal",
            "siidil": "on silk", "plaadil": "on panel", "graafika": "print", "maal": "painting", "skulptuur": "sculpture", "joonistus": "drawing",
            "foto": "photograph", "printmaking": "print", "painting": "painting", "oil on canvas": "oil on canvas"}
+# the museums' material phrases carry qualifiers the tables do not know: "paber
+# (dubleeritud lõuendile)", "kips (patineeritud; pronksi imitatsioon)". Word by word
+# after the phrase tables, so the English side reads "paper (laid down on canvas)"
+MATWORD = {"dubleeritud": "laid down", "kleebitud": "mounted", "papile": "on board", "pappalusele": "on a card support", "lõuendile": "on canvas",
+           "paberile": "on paper", "alusele": "on a support", "puidule": "on wood", "vineerile": "on plywood", "plastikule": "on plastic", "klaasile": "on glass",
+           "patineeritud": "patinated", "raamitud": "framed", "klaasitud": "glazed", "lamineeritud": "laminated", "imitatsioon": "imitation", "pronksi": "bronze",
+           "kullatud": "gilded", "hõbetatud": "silvered", "värvitud": "painted", "toonitud": "tinted", "krunditud": "primed", "poleeritud": "polished",
+           "portselan": "porcelain", "fotopaber": "photographic paper", "tsink": "zinc", "akvarellpaber": "watercolour paper", "tselluloid": "celluloid",
+           "kalka": "tracing paper", "taimparknahk": "vegetable-tanned leather", "puu": "wood", "terrakota": "terracotta", "fajanss": "faience", "luu": "bone",
+           "tehismaterjal": "synthetic material", "akrüül": "acrylic", "riie": "cloth", "kartong": "card", "papp": "board", "paber": "paper", "lõuend": "canvas",
+           "kips": "plaster", "vineer": "plywood", "masoniit": "masonite", "klaas": "glass", "metall": "metal", "puit": "wood", "pronks": "bronze", "savi": "clay",
+           "siid": "silk", "vill": "wool", "lina": "linen", "nahk": "leather", "teras": "steel", "vask": "copper", "hõbe": "silver", "kuld": "gold", "kivi": "stone",
+           "graniit": "granite", "marmor": "marble", "dolomiit": "dolomite", "paekivi": "limestone", "betoon": "concrete", "plastik": "plastic", "kumm": "rubber",
+           "email": "enamel", "keraamika": "ceramic", "tekstiil": "textile", "kangas": "fabric", "puuvill": "cotton", "ja": "and", "või": "or", "peal": "on",
+           "vesimärk": "watermark", "õhuke": "thin", "paks": "thick", "leht": "sheet", "ülemise": "top", "servaga": "edge", "ülemist": "top", "serva": "edge",
+           "pidi": "along the", "ülaäärt": "top edge", "aluspaberile": "to a backing sheet", "aluspapile": "to a backing board", "kõrgkuumus": "high-fired",
+           "pronksivärviliseks": "bronze-coloured", "pürokseniit": "pyroxenite", "all": "lower", "vasakul": "left", "paremal": "right", "üleval": "upper",
+           "osaliselt": "partly", "täielikult": "fully", "servadest": "at the edges", "nurkadest": "at the corners", "tagant": "from behind", "keskelt": "in the middle"}
+def term_words(v):
+    if not v: return None
+    out = term(v, MAT)                                              # the phrase tables first
+    def word(m):
+        w = m.group(0); k = w.lower()
+        return MATWORD.get(k, MAT.get(k, TECH.get(k, w)))
+    out = re.sub(r"[A-Za-zÕÄÖÜõäöüŠšŽž]+", word, out)
+    return out
 def term_gal(v):
     if not v: return None
     out = []
@@ -459,7 +485,7 @@ for r in recs:
       "e": ess_en(r.get("ess"), r.get("_kogu") or r.get("coll"), r.get("tech"), r.get("mat")),
       "ee": (re.split(r'[;/]', r["ess"])[0].strip() if r.get("ess") else None),
       "tc": term(r.get("tech"), TECH), "tce": r.get("tech"),
-      "m": term(r.get("mat"), MAT), "me": r.get("mat"),
+      "m": term_words(r.get("mat")), "me": r.get("mat"),
       "dm": r.get("dims"), "mu": r.get("museum"), "co": r.get("coll"),
       "nu": r.get("num"), "d": r.get("desc"), "c": r.get("cat"),
       "s": "".join(sorted(r["src"])), "mi": r.get("muis"), "oi": r.get("oid"), "k": r["k"], "n": r["n"],
@@ -706,6 +732,10 @@ for g in GAL:
         "k": "G" + re.sub(r'[^A-Za-z0-9]', '', g["gid"]), "n": 1,
         "mem": None, "kind": "sold" if (g.get("sold") or g.get("past")) else "gallery", "url": g.get("url"),
         "gs": (1 if g.get("sold") else 0) if (g.get("sold") or g.get("past")) else None,   # 1 the gallery said sold, 0 no longer listed
+        # the gallery's own photograph, for stock only: shown from the gallery's server, with
+        # the gallery named, while the listing is live -- what the gallery wants of a work it
+        # is selling. A past listing keeps no image: the sale is over and the picture is theirs.
+        "im": ("g:" + g["img"]) if g.get("img") and not (g.get("sold") or g.get("past")) else None,
         "gl": g.get("last")})                                                             # last month seen for sale
     gal_added += 1
 # NOBA publishes no birth years, but the biographies its artists write usually state

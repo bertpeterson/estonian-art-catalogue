@@ -693,8 +693,16 @@
         <div class="mono-figlab">${esc(T("worksinregister"))}${shown!==mine.length?` · ${esc(T("shown_n",{n:shown}))}`:""}</div>
         ${auLine(state.artist) ? `<div class="mono-au">${esc(auLine(state.artist))}</div>` : ""}
         <div class="mono-tl">
-          ${spark(counts, 300, 44)}
-          <div class="mono-axis"><span>${DECADES[0]}s</span><span>${esc(first?(first===last?T("activeone",{a:first+"s"}):T("active",{a:first+"s",b:last+"s"})):T("undatedonlyartist"))}</span><span>${DECADES[DECADES.length-1]}s</span></div>
+          ${(() => {
+            // the chart spans the artist's own decades, a decade of air each side, not the
+            // catalogue's six centuries: Mägi's 1900s-1920s were three bars in a 60-bar row
+            if (!nz.length) return spark(counts, 300, 44);
+            const lo = Math.max(0, nz[0] - 1), hi = Math.min(counts.length - 1, nz[nz.length - 1] + 1);
+            const seg = counts.slice(lo, hi + 1);
+            const tick = seg.length <= 2 ? "" : `<div class="mono-ticks">${seg.map((_, k) => `<span>${(lo + k) % 2 === 0 || seg.length < 8 ? DECADES[lo + k] + "s" : ""}</span>`).join("")}</div>`;
+            return spark(seg, 300, 44) + tick;
+          })()}
+          <div class="mono-axis"><span></span><span>${esc(first?(first===last?T("activeone",{a:first+"s"}):T("active",{a:first+"s",b:last+"s"})):T("undatedonlyartist"))}</span><span></span></div>
         </div>
         <div class="mono-med">${medl}${und?` · ${esc(T("undated"))} <b>${und}</b>`:""}</div>
       </div>
