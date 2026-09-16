@@ -1229,6 +1229,12 @@
   // sculpture, drawings and sketches, prints last; within a medium the chosen order.
   const MED_RANK = {"Painting":0, "Watercolour":1, "Sculpture":2, "Mixed media":3, "Installation":3, "Drawing":4, "Sketch":5, "Photograph":6, "Print":7};
   const medRank = w => MED_RANK[w.e] ?? 8;
+  const wallCols = () => { const w = reg.clientWidth || innerWidth; return w >= 1100 ? 6 : w >= 720 ? 4 : w >= 480 ? 3 : 2; };
+  let wallRT = null;
+  addEventListener("resize", () => {          // a new column count re-lays the wall; nothing else
+    clearTimeout(wallRT);
+    wallRT = setTimeout(() => { const el = reg.querySelector(".wall"); if (el && +el.dataset.cols !== wallCols()) render(); }, 150);
+  });
   function wallHTML(pics, restN, showArtist){
     const ordered = sortRows(pics, state.decOrder !== "earliest")
       .map((w, i) => [w, i]).sort((a, b) => medRank(a[0]) - medRank(b[0]) || a[1] - b[1]).map(x => x[0]);
@@ -1238,15 +1244,30 @@
       if (need.length) Promise.all(need.map(loadShard)).then(() => render());
     }
     const openW = state.open && shown.find(w => w.k === state.open);
-    const tile = w => {
-      const src = imgSrc(det(w).im || "");
-      return `<button class="wt${state.open === w.k ? " on" : ""}" data-wt="${esc(w.k)}" title="${esc(w.t)} · ${esc(A[w.a].n)}">${src
-        ? `<img src="${esc(src)}" alt="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" onerror="this.closest('.wt').hidden=true">`
-        : `<span class="wt-ph"></span>`}<span class="wt-cap"><i>${esc(w.t)}</i><span>${showArtist ? esc(A[w.a].n) + " · " : ""}${w.y ?? esc(T("nd"))} · ${esc(abbr(w.mu))}</span></span></button>`;
+    // Every tile has its shape before its picture arrives -- the record's height and
+    // width, so a 41 x 26 cm painting is an upright tile from the first paint -- and
+    // the columns are filled by those shapes, shortest column next. Nothing moves
+    // when an image lands; a work without dimensions gets a square.
+    const ratioOf = w => {
+      const m = String(det(w).dm || "").match(/(\d+(?:[.,]\d+)?)\s*[x×]\s*(\d+(?:[.,]\d+)?)/);
+      if (!m) return 1;
+      const r = parseFloat(m[1].replace(",", ".")) / parseFloat(m[2].replace(",", "."));
+      return isFinite(r) && r > 0 ? Math.min(2.2, Math.max(0.45, r)) : 1;
     };
+    const tile = w => {
+      const src = imgSrc(det(w).im || ""), r = ratioOf(w);
+      return `<button class="wt${state.open === w.k ? " on" : ""}" data-wt="${esc(w.k)}" title="${esc(w.t)} · ${esc(A[w.a].n)}">${src
+        ? `<img src="${esc(src)}" alt="" loading="lazy" style="aspect-ratio:1/${r.toFixed(3)}" referrerpolicy="no-referrer-when-downgrade" onerror="this.closest('.wt').hidden=true">`
+        : `<span class="wt-ph" style="aspect-ratio:1/${r.toFixed(3)}"></span>`}<span class="wt-cap"><i>${esc(w.t)}</i><span>${showArtist ? esc(A[w.a].n) + " · " : ""}${w.y ?? esc(T("nd"))} · ${esc(abbr(w.mu))}</span></span></button>`;
+    };
+    const nCols = wallCols(), cols = Array.from({length: nCols}, () => ({h: 0, t: []}));
+    shown.forEach(w => {
+      const c = cols.reduce((a, b) => b.h < a.h ? b : a);
+      c.h += ratioOf(w) + 0.32; c.t.push(w);        // the caption is about a third of the width
+    });
     return `<div class="wall-bar">${esc(restN ? T("wall_line", {p: fmt(pics.length), r: fmt(restN)}) : T("wall_line_all", {p: fmt(pics.length)}))} · ${esc(T("wall_imgs"))}</div>`
       + (openW ? `<div class="wall-open rows">${rowHTML(openW, true)}</div>` : "")
-      + `<div class="wall">${shown.map(tile).join("")}</div>`
+      + `<div class="wall" data-cols="${nCols}">${cols.map(c => `<div class="wcol">${c.t.map(tile).join("")}</div>`).join("")}</div>`
       + (ordered.length > shown.length ? `<button class="more" data-wmore="1" style="margin-bottom:22px">${esc(T("wall_more", {n: fmt(Math.min(72, ordered.length - shown.length))}))}</button>` : "");
   }
   const SL_ICON = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 2h8v12l-4-3-4 3z"/></svg>';
