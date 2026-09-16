@@ -1,0 +1,2439 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="A catalogue of 66,280 works of art by 4,241 artists in Estonian public collections and galleries, 1440–2026. Museum records from MuIS and the EKM Digital Collection, gallery stock from the galleries' own catalogues; every record links back to its source.">
+<title>Estonian Art Catalogue</title>
+<link rel="canonical" href="https://museaal.ee/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Estonian Art Catalogue">
+<meta property="og:description" content="52,000 artworks by 3,600 artists in Estonian public collections and galleries, 1440–2026.">
+<meta property="og:url" content="https://museaal.ee/">
+<meta property="og:site_name" content="Estonian Art Catalogue">
+<meta name="twitter:card" content="summary">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..600&family=Archivo:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --paper:#FFFFFF; --raise:#FAFAFB; --field:#F5F6F8;
+  --ink:#0B0C0E; --ink-soft:#33363B; --grey-6:#6C7178; --grey-4:#70757C;
+  --rule:#DCDFE3; --rule-soft:#EBEDF0; --bar:#C9CDD3;
+  --invert-bg:#0B0C0E; --invert-fg:#FFFFFF; --focus:#0B0C0E;
+  --fs-xs:.62rem;   --fs-sm:.68rem;  --fs-base:.8rem; --fs-md:.88rem;
+  --fs-lg:1rem;     --fs-xl:1.5rem;  --fs-2xl:2.6rem;
+  /* greys are pinned to WCAG AA: --grey-4 carries row years, dates and small labels,
+     and at the old #A0A5AC it hit 2.48:1 on white. These clear 4.6:1 in both themes. */
+  --ls-label:.13em; --ls-data:.05em;
+  --sp-1:6px; --sp-2:11px; --sp-3:18px; --sp-4:30px;
+  --serif-text:"Newsreader","Iowan Old Style","Palatino",Georgia,serif;  /* every serif on the page */
+  --sans:"Archivo","Helvetica Neue",Helvetica,Arial,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#0B0C0E; --raise:#111316; --field:#15171A;
+    --ink:#F1F2F4; --ink-soft:#C7CACE; --grey-6:#8B9098; --grey-4:#7A7F86;
+    --rule:#2B2E34; --rule-soft:#212429; --bar:#3F434A;
+    --invert-bg:#F1F2F4; --invert-fg:#0B0C0E; --focus:#F1F2F4;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0B0C0E; --raise:#111316; --field:#15171A;
+  --ink:#F1F2F4; --ink-soft:#C7CACE; --grey-6:#8B9098; --grey-4:#7A7F86;
+  --rule:#2B2E34; --rule-soft:#212429; --bar:#3F434A;
+  --invert-bg:#F1F2F4; --invert-fg:#0B0C0E; --focus:#F1F2F4;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.5;
+  -webkit-font-smoothing:antialiased;font-optical-sizing:auto;text-rendering:optimizeLegibility}
+/* digits that sit in columns must not jitter */
+.r-year,.mast-stats b,.g-num,.mono-fig,.ai-n,.gy-y,.gy-n,.yr-n,.bar-n,.chip span,.mem-num,.g-count,.count-line
+  {font-variant-numeric:tabular-nums}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+a{color:inherit}
+.wrap{max-width:1240px;margin:0 auto;padding:0 28px}
+
+.masthead{padding:34px 0 20px;border-bottom:1px solid var(--ink)}
+.mast-grid{display:grid;grid-template-columns:1fr auto;gap:32px;align-items:end}
+h1{font-family:var(--serif-text);font-weight:500;font-size:clamp(2.1rem,4.6vw,3.2rem);line-height:1;letter-spacing:-.015em;margin:0;text-wrap:balance}
+h1 em{font-style:italic;font-weight:400}
+/* the wordmark is the way home: a plain link back to the untouched page, no hash */
+h1 a{color:inherit;text-decoration:none;border-bottom:0}
+h1 a:hover{color:var(--grey-6)}
+.switches{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+.langsw{display:inline-flex;border:1px solid var(--rule)}
+.langsw button{font-family:var(--mono);font-size:var(--fs-xs);letter-spacing:var(--ls-label);
+  background:none;border:0;color:var(--grey-6);padding:5px 11px;cursor:pointer}
+.langsw button + button{border-left:1px solid var(--rule)}
+.langsw button[aria-pressed="true"]{background:var(--invert-bg);color:var(--invert-fg)}
+/* only the frozen single-file snapshot carries this; the hosted site never shows it */
+.snapshot{font-family:var(--mono);font-size:.66rem;letter-spacing:.06em;color:var(--grey-6);
+  border:1px solid var(--rule);padding:8px 11px;margin:14px 0 0;max-width:78ch}
+.snapshot a{color:var(--ink);border-bottom:1px solid var(--rule)}
+.snapshot a:hover{border-bottom-color:var(--ink)}
+.mast-sub{font-family:var(--mono);font-size:var(--fs-sm);letter-spacing:var(--ls-label);text-transform:uppercase;color:var(--grey-6);margin:16px 0 0}
+.mast-stats{display:flex;gap:26px;font-family:var(--mono);font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:var(--grey-6);padding-bottom:6px}
+.stat-btn{background:none;border:0;padding:0 0 0 22px;margin-left:-4px;border-left:1px solid var(--rule);
+  font:inherit;letter-spacing:inherit;text-transform:inherit;color:inherit;text-align:left;cursor:pointer}
+.stat-btn:hover b,.stat-btn[aria-pressed="true"] b{text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:5px}
+.stat-btn:focus-visible{outline:2px solid var(--focus);outline-offset:3px}
+.mast-stats b{display:block;font-family:var(--serif-text);font-weight:500;font-size:1.6rem;line-height:1.05;letter-spacing:0;color:var(--ink);font-variant-numeric:tabular-nums}
+.standfirst{max-width:78ch;margin:16px 0 0;color:var(--ink-soft);font-size:.95rem;line-height:1.55}
+.srcdetails{margin-top:12px}
+.srcdetails summary{font-family:var(--mono);font-size:.66rem;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--grey-6);cursor:pointer;list-style:none;display:inline-block;border-bottom:1px solid var(--rule);padding-bottom:2px}
+.srcdetails summary::-webkit-details-marker{display:none}
+.srcdetails summary:hover{color:var(--ink);border-bottom-color:var(--ink)}
+.srcdetails[open] summary{margin-bottom:10px}
+.srcline{margin:12px 0 0;font-family:var(--mono);font-size:.7rem;line-height:1.7;letter-spacing:.02em;color:var(--grey-6);max-width:78ch}
+.srcline a{border-bottom:1px solid var(--rule)}
+.srcline a:hover{border-bottom-color:var(--ink);color:var(--ink)}
+
+.histo{padding:20px 0 18px;border-bottom:1px solid var(--rule)}
+.histo-head{display:flex;justify-content:space-between;align-items:baseline;gap:20px;margin-bottom:16px}
+.eyebrow{font-family:var(--mono);font-size:var(--fs-sm);letter-spacing:var(--ls-label);text-transform:uppercase;color:var(--grey-6)}
+.bars{display:flex;gap:26px;align-items:stretch}
+.cent{display:flex;flex-direction:column;gap:0;min-width:0}
+.cl-abbr{display:none}
+.cent-bars{display:flex;gap:4px;align-items:flex-end;flex:1}
+.cent-lab{font-family:var(--mono);font-size:.6rem;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--grey-4);padding-top:7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cent.nd .cent-lab{color:var(--grey-4)}
+.cent.early{cursor:pointer}
+.early-btn{width:100%;background:none;border:0;padding:0;cursor:pointer;display:flex;flex-direction:column;
+  justify-content:flex-end;gap:7px;font-family:var(--mono);font-size:.66rem;color:var(--grey-6)}
+.early-btn:hover{color:var(--ink)}
+.early-fill{width:100%;background:repeating-linear-gradient(90deg,var(--bar),var(--bar) 3px,transparent 3px,transparent 6px);min-height:2px}
+.early-btn:hover .early-fill{background:repeating-linear-gradient(90deg,var(--ink),var(--ink) 3px,transparent 3px,transparent 6px)}
+.early-lab{border-top:1px solid var(--rule);padding-top:6px;white-space:nowrap;font-size:.6rem;letter-spacing:.02em}
+.early-lab::after{content:" ›";color:var(--grey-4)}
+.cent.expanded .early-lab::after{content:" ‹"}
+.cent-collapse{font-family:var(--mono);font-size:.7rem;align-self:flex-end;padding-bottom:18px;letter-spacing:.06em;background:none;border:0;
+  color:var(--grey-4);cursor:pointer;padding:2px 0;text-align:left}
+.cent-collapse:hover{color:var(--ink)}
+.bar-btn{flex:1;min-width:0;background:none;border:0;padding:0;cursor:pointer;display:flex;flex-direction:column;justify-content:flex-end;gap:7px;font-family:var(--mono);font-size:.66rem;color:var(--grey-6)}
+.bar-fill{width:100%;background:var(--bar);min-height:2px;transition:background .15s ease;position:relative}
+/* the for-sale share of a decade: hatched, at the top of the bar */
+.bar-sale{position:absolute;left:0;right:0;top:0;background:repeating-linear-gradient(-45deg,var(--ink) 0 1px,transparent 1px 4px);opacity:.55}
+.bar-btn:hover .bar-sale,.bar-btn[aria-pressed="true"] .bar-sale{background:repeating-linear-gradient(-45deg,var(--paper) 0 1px,transparent 1px 4px);opacity:.7}
+.histo-key{font-family:var(--mono);font-size:var(--fs-xs);letter-spacing:.08em;text-transform:uppercase;color:var(--grey-6);display:inline-flex;align-items:center;gap:6px;margin-left:18px}
+.histo-key i{display:inline-block;width:14px;height:9px;background:repeating-linear-gradient(-45deg,var(--ink) 0 1px,transparent 1px 4px);opacity:.55}
+.bar-btn:hover .bar-fill,.bar-btn[aria-pressed="true"] .bar-fill{background:var(--ink)}
+.bar-btn:hover,.bar-btn[aria-pressed="true"]{color:var(--ink)}
+.bar-lab{border-top:1px solid var(--rule);padding-top:6px;overflow:hidden}
+.bar-btn[aria-pressed="true"] .bar-lab{border-top:1px solid var(--ink)}
+.bar-n{font-size:.58rem;color:var(--grey-4)}
+.bar-btn.undated .bar-fill{background:repeating-linear-gradient(45deg,var(--bar),var(--bar) 2px,transparent 2px,transparent 5px)}
+/* Expanded: every century's decades are on screen at once, so a 1240px rail carries
+   ~60 ticks at ~20px each. A four-digit count needs more than that, and the counts
+   overlap into illegibility — they retreat to each bar's tooltip, and the century
+   names give way to their numerals, which do fit. */
+.bars.dense .bar-n{display:none}
+.bars.dense .cl-full{display:none}
+.bars.dense .cl-abbr{display:inline}
+.bars.dense{gap:16px}
+.bars.dense .cent-bars{gap:2px}
+.bars.dense .cent-lab{font-size:.62rem;letter-spacing:.08em;color:var(--grey-6)}
+
+.yr-div{display:flex;align-items:baseline;gap:10px;font-family:var(--mono);font-size:.63rem;letter-spacing:.12em;
+  color:var(--grey-4);padding:12px 0 4px 12px;margin-left:-12px;border-bottom:1px solid var(--rule)}
+.yr-div b{color:var(--ink);font-weight:500;font-variant-numeric:tabular-nums;letter-spacing:.04em;font-size:.72rem}
+.controls{position:sticky;top:0;z-index:20;background:var(--paper);border-bottom:1px solid var(--ink);padding:12px 0;display:flex;flex-wrap:wrap;gap:12px 18px;align-items:center}
+.ctl{display:flex;align-items:center;gap:10px}
+.sortsel{font-family:var(--mono);font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;
+  background:var(--field);border:1px solid var(--rule);color:var(--ink);padding:7px 8px;cursor:pointer}
+.seg{display:flex;border:1px solid var(--rule)}
+.seg button{font-family:var(--mono);font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;background:none;border:0;color:var(--grey-6);padding:8px 14px;cursor:pointer}
+.seg button + button{border-left:1px solid var(--rule)}
+.seg button[aria-pressed="true"]{background:var(--invert-bg);color:var(--invert-fg)}
+.search{position:relative;flex:1;min-width:230px}
+.search input{width:100%;background:var(--field);border:1px solid var(--rule);color:var(--ink);font-family:var(--sans);font-size:.92rem;padding:9px 12px 9px 34px}
+.search input::placeholder{color:var(--grey-4)}
+.search svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--grey-4)}
+/* suggestions under the box: artists first, then works; one line each, the arrow
+   keys walk them, Enter opens, Escape closes */
+#sugg{position:absolute;left:0;width:max(100%,min(560px,calc(100vw - 36px)));top:calc(100% - 1px);z-index:40;background:var(--paper);border:1px solid var(--rule);
+  box-shadow:0 8px 24px rgba(0,0,0,.12);max-height:min(60vh,420px);overflow-y:auto}
+#sugg .sg-h{font-family:var(--mono);font-size:var(--fs-xs);letter-spacing:var(--ls-label);text-transform:uppercase;color:var(--grey-4);
+  padding:8px 12px 3px;border-top:1px solid var(--rule-soft)} #sugg .sg-h:first-child{border-top:0}
+#sugg button{display:flex;width:100%;align-items:baseline;gap:10px;background:none;border:0;padding:6px 12px;cursor:pointer;
+  text-align:left;color:var(--ink);font-family:var(--serif-text);font-size:var(--fs-base);line-height:1.3;border-radius:0}
+#sugg button:hover,#sugg button[aria-selected="true"]{background:var(--field)}
+#sugg button .sg-t{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#sugg button .sg-t em{font-style:italic;font-weight:400}
+#sugg button .sg-m{font-family:var(--mono);font-size:var(--fs-xs);color:var(--grey-4);white-space:nowrap;letter-spacing:.03em}
+#sugg mark{background:none;color:inherit;font-weight:600}
+.ctl-label{font-family:var(--mono);font-size:var(--fs-sm);letter-spacing:var(--ls-label);text-transform:uppercase;color:var(--grey-4)}
+.linkbtn{font-family:var(--mono);font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;background:none;border:0;border-bottom:1px solid var(--rule);color:var(--grey-6);cursor:pointer;padding:2px 0}
+.linkbtn:hover{color:var(--ink);border-bottom-color:var(--ink)}
+
+.sharebar{display:none;gap:10px;align-items:center;padding:11px 0;border-bottom:1px solid var(--rule-soft);flex-wrap:wrap}
+.sharebar.on{display:flex}
+.sharebar input{flex:1;min-width:200px;background:var(--field);border:1px solid var(--rule);color:var(--ink);
+  font-family:var(--mono);font-size:.7rem;padding:7px 9px}
+.share-note{font-family:var(--mono);font-size:.62rem;letter-spacing:.06em;color:var(--grey-4);flex-basis:100%}
+.share-note b{color:var(--grey-6);font-weight:500}
+.restore{font-family:var(--mono);font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;
+  background:none;border:1px solid var(--rule);color:var(--grey-6);padding:5px 10px;cursor:pointer}
+.restore:hover{border-color:var(--ink);color:var(--ink)}
+.filterbar{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;
+  padding:11px 0;border-bottom:1px solid var(--rule)}
+.active-filters{display:flex;flex-wrap:wrap;gap:5px;min-height:1px}
+.af{font-family:var(--mono);font-size:.63rem;letter-spacing:.06em;background:var(--invert-bg);color:var(--invert-fg);
+  border:0;padding:4px 7px;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.af:hover{opacity:.75}
+.af span{opacity:.6}
+.af-none{font-family:var(--mono);font-size:.63rem;letter-spacing:.06em;color:var(--grey-4)}
+#filterpanel .facetbar:last-child{border-bottom:1px solid var(--rule)}
+.facetbar{display:grid;grid-template-columns:88px 1fr;gap:14px;align-items:start;padding:10px 0;border-bottom:1px solid var(--rule-soft)}
+.facetbar + .facetbar{border-bottom:1px solid var(--rule)}
+.facets{display:flex;flex-wrap:wrap;gap:6px}
+.facet-note{font-size:.74rem;line-height:1.5;color:var(--grey-4);margin:7px 0 0;max-width:74ch}
+.yrange{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.yrange select{font-family:var(--mono);font-size:.68rem;background:var(--field);border:1px solid var(--rule);
+  color:var(--ink);padding:5px 6px;cursor:pointer}
+.yr-dash{color:var(--grey-4);font-family:var(--mono);font-size:.7rem}
+.yr-info{font-family:var(--mono);font-size:.62rem;letter-spacing:.06em;color:var(--grey-4)}
+.chip{font-family:var(--mono);font-size:.66rem;letter-spacing:.09em;text-transform:uppercase;background:none;border:1px solid var(--rule);color:var(--grey-6);padding:5px 10px;cursor:pointer}
+.chip:hover{border-color:var(--ink);color:var(--ink)}
+.chip[aria-pressed="true"]{background:var(--invert-bg);border-color:var(--invert-bg);color:var(--invert-fg)}
+.chip span{color:var(--grey-4);margin-left:6px}
+.chip[aria-pressed="true"] span{color:var(--invert-fg);opacity:.6}
+
+.row-btn:focus-visible{outline:none;background:var(--field);border-left-color:var(--ink)}
+.count-line{font-family:var(--mono);font-size:var(--fs-sm);letter-spacing:var(--ls-label);text-transform:uppercase;color:var(--grey-6);padding:12px 0 0}
+.group{display:grid;grid-template-columns:230px 1fr;gap:34px;padding:22px 0;border-bottom:1px solid var(--rule)}
+.group:last-child{border-bottom:0}
+.gutter{position:sticky;top:66px;align-self:start}
+.g-num{font-family:var(--serif-text);font-weight:500;font-size:2.9rem;line-height:1;letter-spacing:-.02em;font-variant-numeric:tabular-nums;display:block}
+.g-name{font-family:var(--serif-text);font-weight:500;font-size:1.5rem;line-height:1.12;letter-spacing:-.01em;display:block;text-wrap:balance}
+.g-dates{font-family:var(--mono);font-size:.7rem;letter-spacing:.08em;color:var(--grey-6);margin-top:6px}
+.g-period{font-family:var(--mono);font-size:var(--fs-xs);letter-spacing:var(--ls-label);text-transform:uppercase;color:var(--grey-6);margin-top:10px;padding-top:8px;border-top:1px solid var(--rule)}
+.g-blurb{font-size:.82rem;line-height:1.55;color:var(--grey-6);margin-top:10px;max-width:32ch}
+/* ---- the mosaic: a column per century, a cell per decade, both proportional. A cell
+   is a button; the pressed one is inverted, and its group renders below. Labels give
+   way as cells shrink -- the count first, then the decade -- so nothing is clipped. ---- */
+.mosaic{--moh:320px;--mohh:50px;--mow:64px;display:grid;gap:3px;height:var(--moh);margin-top:14px;padding-bottom:22px;border-bottom:1px solid var(--rule)}
+.mo-col{display:flex;flex-direction:column;min-width:0;container-type:inline-size}
+.mosaic.one{grid-template-columns:1fr!important}
+.mo-h{height:var(--mohh);box-sizing:border-box;background:none;border:0;border-top:1px solid var(--ink);padding:8px 0 0;text-align:left;cursor:pointer;color:inherit;
+  font-family:var(--mono);font-size:.6rem;letter-spacing:.1em;color:var(--grey-6);white-space:nowrap;overflow:hidden;border-radius:0;
+  font-variant-numeric:tabular-nums}
+.mo-h b{display:block;font-family:var(--serif-text);font-weight:500;font-size:1.25rem;line-height:1;letter-spacing:-.01em;color:var(--ink);margin-bottom:5px}
+.mo-h:hover{color:var(--ink)}
+.mo-h:hover b{text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:4px}
+.mo-cells{height:calc(var(--moh) - var(--mohh));display:grid;gap:2px;min-height:0}
+.mo-cell{background:var(--rule-soft);border:0;padding:0 7px;margin:0;text-align:left;cursor:pointer;color:var(--grey-6);border-radius:0;
+  font-family:var(--mono);font-size:.6rem;letter-spacing:.06em;min-height:2px;overflow:hidden;
+  display:flex;align-items:center;justify-content:space-between;gap:6px;container-type:size;font-variant-numeric:tabular-nums}
+.mo-cell span,.mo-cell i{white-space:nowrap;font-style:normal;line-height:1}
+.mo-cell i{color:var(--grey-4)}
+.mo-cell:hover{background:var(--bar);color:var(--ink)}
+.mo-cell:hover i{color:var(--ink)}
+.mo-cell[aria-pressed="true"],.mo-cell[aria-pressed="true"]:hover{background:var(--invert-bg);color:var(--invert-fg)}
+.mo-cell[aria-pressed="true"] i{color:var(--invert-fg);opacity:.7}
+.mo-cell:focus-visible{outline:2px solid var(--focus);outline-offset:-2px}
+.mo-col.und .mo-cell{background:repeating-linear-gradient(45deg,var(--rule-soft),var(--rule-soft) 2px,transparent 2px,transparent 5px)}
+.mo-col.und .mo-cell:hover{background:var(--bar)}
+.mo-col.und .mo-cell[aria-pressed="true"]{background:var(--invert-bg)}
+@container (max-height:11px){ .mo-cell span,.mo-cell i{display:none} }
+@container (max-width:88px){ .mo-cell i{display:none} }
+@container (max-width:44px){ .mo-cell span{display:none} }
+.mosaic + .group{border-top:0}
+.gy{margin-top:16px;border-top:1px solid var(--rule);padding-top:9px}
+.gy-h{font-family:var(--mono);font-size:var(--fs-xs);letter-spacing:var(--ls-label);text-transform:uppercase;color:var(--grey-4);margin-bottom:6px}
+.gy-row{display:grid;grid-template-columns:34px 1fr 30px;gap:8px;align-items:center;width:100%;
+  background:none;border:0;color:inherit;cursor:pointer;padding:2px 3px;font-family:var(--mono);font-size:.66rem;
+  text-align:left;border-radius:0}
+.gy-row:hover{background:var(--field)}
+.gy-row[aria-pressed="true"]{background:var(--invert-bg);color:var(--invert-fg)}
+.gy-row[aria-pressed="true"] .gy-bar{background:var(--invert-fg)}
+.gy-row[aria-pressed="true"] .gy-n{color:var(--invert-fg)}
+.gy-y{color:var(--grey-6);font-variant-numeric:tabular-nums}
+/* the same rows carry artist names in the undated group: one fixed column so every
+   bar starts on the same line, the rare long name trimmed rather than wrapped */
+.gy-artists .gy-row{grid-template-columns:8.6em 1fr 30px}
+.gy-artists .gy-y{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gy-row:hover .gy-y,.gy-row[aria-pressed="true"] .gy-y{color:inherit}
+.gy-track{height:7px;background:var(--rule-soft);position:relative;overflow:hidden}
+.gy-bar{position:absolute;left:0;top:0;bottom:0;background:var(--bar)}
+.gy-row:hover .gy-bar{background:var(--ink)}
+.gy-n{color:var(--grey-4);text-align:right;font-variant-numeric:tabular-nums;font-size:.6rem}
+.und-note{font-size:.82rem;line-height:1.55;color:var(--grey-6);margin:10px 0 0;max-width:32ch}
+.gy-empty{opacity:.4;cursor:default}
+.gy-empty:hover{background:none}
+.g-count{font-family:var(--mono);font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;color:var(--grey-4);margin-top:12px}
+
+.rows{border-top:1px solid var(--ink)}
+.row{border-bottom:1px solid var(--rule-soft);position:relative}
+/* the shortlist mark: beside the row button (a button cannot hold a button), and a
+   labelled version inside the open record */
+.sl{position:absolute;right:0;top:3px;width:30px;height:28px;display:flex;align-items:center;justify-content:center;
+  border:0;background:none;cursor:pointer;color:var(--grey-4);border-radius:2px;padding:0}
+.sl svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:1.4;stroke-linejoin:round}
+.sl:hover{color:var(--ink);background:var(--field)}
+.sl[aria-pressed="true"]{color:var(--ink)} .sl[aria-pressed="true"] svg{fill:currentColor}
+.sl:focus-visible{outline:2px solid var(--focus);outline-offset:1px}
+/* a gallery row's link out, beside the shortlist mark */
+.rl{position:absolute;right:34px;top:3px;height:28px;display:flex;align-items:center;padding:0 7px;border-radius:2px;
+  font-family:var(--mono);font-size:var(--fs-xs);letter-spacing:.1em;text-transform:uppercase;color:var(--grey-6);white-space:nowrap}
+.rl:hover{color:var(--ink);background:var(--field)}
+.sl.sl-d{position:static;width:auto;height:auto;gap:7px;padding:2px 0;font-family:var(--mono);font-size:.68rem;
+  letter-spacing:.04em;color:var(--grey-6);border-bottom:1px solid var(--rule);border-radius:0;background:none}
+.sl.sl-d:hover{color:var(--ink);border-bottom-color:var(--ink)}
+.listbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px 18px;margin-top:var(--sp-3);padding:10px 0;
+  border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);font-size:var(--fs-base)}
+.listbar b{font-weight:500} .sl-note{color:var(--grey-6);font-size:var(--fs-sm)}
+#mylist[aria-pressed="true"]{color:var(--ink);border-bottom-color:var(--ink)}
+.row-btn{width:100%;text-align:left;background:none;border:0;cursor:pointer;color:inherit;
+  display:grid;grid-template-columns:98px minmax(0,1fr) 160px 88px 104px;gap:14px;align-items:baseline;
+  padding:6px 118px 6px 12px;margin-left:-12px;border-left:2px solid transparent;transition:background .12s ease}
+.row-btn > span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row-btn:hover{background:var(--field)}
+.row[data-open="true"] .row-btn{border-left-color:var(--ink);background:var(--field)}
+.r-year{font-family:var(--mono);font-size:.71rem;color:var(--grey-6);font-variant-numeric:tabular-nums;white-space:nowrap}
+.row[data-open="true"] .r-year{color:var(--ink)}
+.r-year.und{color:var(--grey-4);font-style:italic}
+.r-title{font-family:var(--serif-text);font-style:italic;font-weight:420;font-size:var(--fs-lg);line-height:1.35}
+.r-artist{font-family:var(--sans);font-style:normal;font-size:.76rem;color:var(--ink-soft)}
+.r-med,.r-coll{font-family:var(--mono);font-size:.64rem;letter-spacing:var(--ls-data);color:var(--grey-6);line-height:1.35}
+.r-sub{display:block;color:var(--grey-4);font-size:.6rem}
+.r-coll{color:var(--grey-4)}
+.src-tag{font-family:var(--mono);font-size:.52rem;letter-spacing:.08em;color:var(--grey-4);border:1px solid var(--rule);padding:0 3px;margin-left:5px;vertical-align:1px}
+
+.detail{padding:2px 0 22px 12px;display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:34px}
+.d-note{font-family:var(--serif-text);font-size:1rem;line-height:1.62;max-width:64ch;color:var(--ink-soft)}
+.d-nolabel{font-family:var(--mono);font-size:.6rem;letter-spacing:.13em;text-transform:uppercase;color:var(--grey-4);display:block;margin-bottom:6px}
+.d-side{border-top:1px solid var(--rule);padding-top:12px}
+.d-k{font-family:var(--mono);font-size:var(--fs-xs);letter-spacing:var(--ls-label);text-transform:uppercase;color:var(--grey-4)}
+.d-v{font-size:.85rem;line-height:1.5;margin:3px 0 11px}
+.d-v em{font-style:normal;color:var(--grey-6);font-size:.78rem}
+.members{margin-top:18px;border-top:1px solid var(--rule);padding-top:11px}
+.mem-head{font-family:var(--mono);font-size:var(--fs-xs);letter-spacing:var(--ls-label);text-transform:uppercase;color:var(--grey-4);margin-bottom:8px}
+.mem-list{max-height:260px;overflow-y:auto;border:1px solid var(--rule-soft)}
+/* the links column is fixed: "MuIS · EKM" on one row and "EKM" on the next must not
+   move the technique column between them */
+.mem-row{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr) 84px;gap:12px;align-items:baseline;
+  padding:5px 9px;border-bottom:1px solid var(--rule-soft);font-family:var(--mono);font-size:.65rem;line-height:1.3}
+.mem-row:last-child{border-bottom:0}
+.mem-row:nth-child(odd){background:var(--field)}
+.mem-num{color:var(--ink-soft);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mem-tech{color:var(--grey-6);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mem-row > span:last-child{text-align:right;white-space:nowrap}
+.mem-row a{color:var(--grey-4);border-bottom:1px solid var(--rule)}
+.mem-row a:hover{color:var(--ink);border-bottom-color:var(--ink)}
+.d-bio{font-size:.83rem;line-height:1.55;color:var(--grey-6);border-top:1px solid var(--rule);padding-top:10px;margin-top:4px}
+.tag{font-family:var(--mono);font-size:.55rem;letter-spacing:.12em;text-transform:uppercase;border:1px solid var(--rule);color:var(--grey-4);padding:1px 5px;margin-left:6px;white-space:nowrap}
+.permalink{font-family:var(--mono);font-size:.68rem;letter-spacing:.04em;border-bottom:1px solid var(--rule);color:var(--grey-6)}
+.permalink:hover{color:var(--ink);border-bottom-color:var(--ink)}
+.empty{padding:70px 0;text-align:center;color:var(--grey-6);font-family:var(--serif-text);font-size:1.2rem;font-style:italic}
+.more{width:100%;background:none;border:0;border-top:1px dashed var(--rule);color:var(--grey-6);font-family:var(--mono);font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;padding:11px;cursor:pointer}
+.more:hover{color:var(--ink);background:var(--field)}
+
+footer{border-top:1px solid var(--ink);margin-top:10px;padding:30px 0 60px;display:grid;grid-template-columns:repeat(3,1fr);gap:34px}
+footer p{margin:0;font-size:.81rem;line-height:1.6;color:var(--grey-6);max-width:46ch}
+/* the A-Z link is one line; left in a grid cell beside three long notes it sat at
+   the top of a tall row with a void beneath it. It takes a row of its own. */
+footer p:first-child{grid-column:1/-1;max-width:none;margin-bottom:-12px}
+footer b{color:var(--ink);font-weight:500}
+footer a{border-bottom:1px solid var(--rule)}
+
+
+/* ---------- artist index ---------- */
+.aidx{border-bottom:1px solid var(--rule);padding:11px 0}
+.ai-head{display:grid;grid-template-columns:auto 1fr auto;gap:16px;align-items:center}
+.ai-rail{display:flex;flex-wrap:wrap;gap:2px}
+.ai-l{font-family:var(--mono);font-size:.7rem;background:none;border:0;color:var(--grey-4);padding:3px 5px;cursor:pointer;line-height:1}
+.ai-l:hover{color:var(--ink);background:var(--field)}
+.ai-l[aria-pressed="true"]{background:var(--invert-bg);color:var(--invert-fg)}
+.ai-tools{display:flex;align-items:center;gap:12px}
+.ai-sort{display:inline-flex;border:1px solid var(--rule)}
+.ai-sort button{font-family:var(--mono);font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;
+  background:none;border:0;color:var(--grey-6);padding:5px 9px;cursor:pointer;white-space:nowrap}
+.ai-sort button + button{border-left:1px solid var(--rule)}
+.ai-sort button[aria-pressed="true"]{background:var(--invert-bg);color:var(--invert-fg)}
+.ai-search{background:var(--field);border:1px solid var(--rule);color:var(--ink);
+  font-family:var(--sans);font-size:.8rem;padding:5px 9px;width:180px}
+.ai-search::placeholder{color:var(--grey-4)}
+.ai-count{column-span:all;font-family:var(--mono);font-size:var(--fs-xs);letter-spacing:var(--ls-label);
+  text-transform:uppercase;color:var(--grey-4);padding-bottom:4px}
+/* An index is read down, not across — dictionaries, phone books and back-of-book
+   indexes all run in columns for that reason. Newspaper columns keep consecutive
+   names vertically adjacent; a grid would put them side by side and make scanning
+   alphabetically a left-right zigzag. */
+.ai-body{margin-top:16px;border-top:1px solid var(--rule-soft);padding-top:14px;
+  column-width:268px;column-gap:26px}
+.ai-body .ai-item{break-inside:avoid}
+/* Ranked by size, consecutive ranks must sit next to each other. A CSS grid fills
+   row-major, so 1-2-3-4 would run across the top and rank 5 would jump back to the
+   far left; newspaper columns run them down, which also stacks the counts in a line
+   you can compare. A-Z keeps the grid, whose letter dividers span all columns. */
+.ai-item{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;width:100%;
+  background:none;border:0;border-bottom:1px solid var(--rule-soft);color:inherit;
+  text-align:left;padding:7px 4px;cursor:pointer;font-family:inherit}
+.ai-item:hover{background:var(--field)}
+.ai-nm{font-size:.86rem;line-height:1.3}
+.ai-dt{font-family:var(--mono);font-size:.62rem;color:var(--grey-4);letter-spacing:.04em}
+.ai-rt{display:flex;align-items:center;gap:9px;justify-content:flex-end}
+.ai-n{font-family:var(--mono);font-size:.66rem;color:var(--grey-6);font-variant-numeric:tabular-nums;min-width:34px;text-align:right}
+.spark{color:var(--bar);display:block}
+.ai-item:hover .spark{color:var(--ink)}
+/* the heading sits inline in its column, as in a printed index, and never strands
+   itself at the foot of one */
+.ai-letter{font-family:var(--sans);font-weight:600;font-size:1.15rem;
+  break-after:avoid;break-inside:avoid;letter-spacing:.04em;line-height:1;
+  padding:16px 0 5px;border-bottom:1px solid var(--ink);margin-bottom:3px}
+.ai-letter:first-child{padding-top:0}
+
+/* ---------- single artist view ---------- */
+.mono{border-bottom:1px solid var(--ink);padding:30px 0 26px;
+  display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:44px;align-items:start}
+.mono-back{font-family:var(--mono);font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;
+  background:none;border:0;border-bottom:1px solid var(--rule);color:var(--grey-6);cursor:pointer;
+  padding:2px 0;margin-bottom:18px}
+.mono-back:hover{color:var(--ink);border-bottom-color:var(--ink)}
+.mono h2{font-family:var(--serif-text);font-weight:500;font-size:clamp(1.9rem,4.4vw,2.9rem);
+  line-height:1.02;letter-spacing:-.015em;margin:0;text-wrap:balance}
+.mono-dates{font-family:var(--mono);font-size:.74rem;letter-spacing:.08em;color:var(--grey-6);margin-top:9px}
+.mono-bio{font-family:var(--serif-text);font-size:.98rem;line-height:1.62;color:var(--ink-soft);max-width:64ch;margin:15px 0 0}
+.mono-bio.clamp{display:-webkit-box;-webkit-line-clamp:5;-webkit-box-orient:vertical;overflow:hidden}
+.bio-more{font-family:var(--mono);font-size:.63rem;letter-spacing:.1em;text-transform:uppercase;background:none;
+  border:0;border-bottom:1px solid var(--rule);color:var(--grey-6);cursor:pointer;padding:2px 0;margin-top:9px}
+.bio-more:hover{color:var(--ink);border-bottom-color:var(--ink)}
+.mono-links{display:flex;flex-wrap:wrap;gap:18px;margin-top:16px}
+.mono-side{border-top:1px solid var(--ink);padding-top:13px}
+.mono-fig{font-family:var(--serif-text);font-size:2.4rem;line-height:1;font-variant-numeric:tabular-nums}
+.mono-figlab{font-family:var(--mono);font-size:.62rem;letter-spacing:.13em;text-transform:uppercase;color:var(--grey-6);margin-top:3px}
+.mono-au{font-family:var(--mono);font-size:.68rem;letter-spacing:.06em;color:var(--grey-6);margin-top:10px;padding-top:8px;border-top:1px solid var(--rule);font-variant-numeric:tabular-nums}
+/* an auction row's link states the outcome; an unsold lot in the quieter grey */
+.rl-au{font-variant-numeric:tabular-nums;white-space:nowrap;letter-spacing:.04em}
+/* the columns must line up with every other row; the price alone fits the same gutter */
+.rl-au.unsold{color:var(--grey-4)}
+.rl-past{color:var(--grey-4)}
+.d-sub{font-size:.78rem;color:var(--grey-6)}
+.mono-tl{margin-top:20px}
+.mono-tl .spark{color:var(--ink);width:100%;height:44px}
+.mono-axis{display:flex;justify-content:space-between;gap:10px;font-family:var(--mono);font-size:.6rem;
+  color:var(--grey-4);border-top:1px solid var(--rule);padding-top:5px;margin-top:3px}
+.mono-axis span:nth-child(2){color:var(--grey-6)}
+.mono-med{margin-top:18px;font-family:var(--mono);font-size:.66rem;line-height:1.9;color:var(--grey-6)}
+.mono-med b{color:var(--ink);font-weight:500;font-variant-numeric:tabular-nums}
+.showartist{font-family:var(--mono);font-size:.63rem;letter-spacing:.1em;text-transform:uppercase;
+  background:none;border:1px solid var(--rule);color:var(--grey-6);padding:5px 9px;cursor:pointer;margin-top:11px}
+.showartist:hover{border-color:var(--ink);color:var(--ink)}
+@media (max-width:860px){
+  .ai-head{grid-template-columns:1fr;gap:10px}
+  .mono{grid-template-columns:1fr;gap:24px}
+  .mono-side{border-top:1px solid var(--rule)}
+}
+
+@media (max-width:1080px){ .row-btn{grid-template-columns:94px minmax(0,1fr) 142px 88px} .r-coll{display:none} footer{grid-template-columns:1fr 1fr} }
+@media (max-width:880px){ .row-btn{grid-template-columns:90px minmax(0,1fr) 132px} .r-med{display:none} }
+@media (max-width:860px){
+  .wrap{padding:0 18px}
+  .mast-grid{grid-template-columns:1fr}
+  .group{grid-template-columns:1fr;gap:16px}
+  .mosaic{--moh:260px;--mohh:44px;--mow:42px;gap:2px}
+  .mo-h b{font-size:.8rem}
+  /* five figures in a row are 478px; on a phone the fifth wraps rather than the page widening */
+  .mast-stats{flex-wrap:wrap;gap:14px 22px}
+  .gutter{position:static}
+  .g-blurb{max-width:60ch}
+  .row-btn{grid-template-columns:86px minmax(0,1fr);gap:10px;padding-top:7px;padding-bottom:7px}
+  .r-artist{grid-column:2;font-size:.72rem}
+  .r-med,.r-coll{display:none}
+  .detail{grid-template-columns:1fr;gap:18px}
+  .facetbar{grid-template-columns:1fr;gap:8px}
+  footer{grid-template-columns:1fr}
+}
+/* 40+ decade ticks collide long before the page itself gets narrow */
+@media (max-width:1000px){
+  .bar-lab{font-size:0;border-top:1px solid var(--rule);padding-top:6px;min-height:1px}
+  .cent-lab{padding-top:5px}
+}
+/* Touch targets. WCAG 2.5.8 asks for 24x24 minimum; on a phone the year rows were
+   18px tall, the letter rail 17x17 and the text buttons 19px. Widened only here, so
+   the denser desktop layout is untouched. The histogram bars are the one exception:
+   24 decades across a 375px screen cannot each be 24px wide, so they stay narrow and
+   the century label above them remains the coarse, reliable target. */
+@media (pointer:coarse), (max-width:760px){
+  .gy-row{min-height:32px;padding:6px 3px}
+  .ai-l{min-width:32px;min-height:32px;display:inline-flex;align-items:center;justify-content:center}
+  .linkbtn{min-height:32px;display:inline-flex;align-items:center}
+  .early-btn,.cent-collapse{min-height:32px}
+  /* the language and theme toggles land at 23px — one pixel short of the minimum */
+  .langsw button,.seg button,.ai-sort button{min-height:32px}
+  .af{min-height:32px}   /* the active-filter chips are how a filter gets removed */
+}
+@media (max-width:760px){
+  .bar-n{display:none}
+  .bars{gap:12px}
+  .cent-bars{gap:2px}
+  .cent-lab{font-size:.55rem;letter-spacing:.06em}
+  .cl-full{display:none}
+  .cl-abbr{display:inline}
+}
+/* Serif faces thin out on a dark ground — carry a little more weight there */
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]) .r-title{font-weight:450}
+  :root:not([data-theme="light"]) .mono h2{font-weight:550}
+}
+:root[data-theme="dark"] .r-title{font-weight:450}
+:root[data-theme="dark"] .mono h2{font-weight:550}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+.doors{border-top:1px solid var(--rule);margin:var(--sp-4) 0 0;padding-top:var(--sp-3)}
+.doors .d-names ul{columns:2;column-gap:var(--sp-4)} .doors .d-names li{break-inside:avoid}
+@media(min-width:1100px){.doors .d-names ul{columns:4}}
+@media(max-width:760px){.doors .d-names ul{columns:1}}
+
+.g-split{font-family:var(--mono);font-size:var(--fs-sm);letter-spacing:var(--ls-data);color:var(--grey-6);margin-top:6px;font-variant-numeric:tabular-nums}
+.door-line{margin:var(--sp-3) 0 0}
+.door-line button{display:inline-flex;align-items:baseline;gap:10px;background:none;border:0;padding:5px 0;
+  min-height:24px;cursor:pointer;color:var(--ink);font-family:var(--serif-text);font-size:var(--fs-md);
+  border-bottom:1px solid var(--rule-soft)}
+.door-line button:hover{border-bottom-color:var(--ink)}
+.door-line .arrow{color:var(--grey-4)}
+/* era band under the histogram: positioned against the decade cells on wide screens,
+   a plain wrapped row where the cells are too narrow to label */
+.eras{position:relative;height:24px;margin-top:6px}
+.era{position:absolute;top:0;height:22px;box-sizing:border-box;padding:4px 2px 0;text-align:left;
+  font-family:var(--mono);font-size:var(--fs-xs);letter-spacing:.04em;text-transform:uppercase;
+  color:var(--grey-6);background:none;border:0;border-top:2px solid var(--rule);cursor:pointer;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.era:hover{color:var(--ink);border-top-color:var(--ink)}
+.era[aria-pressed="true"]{color:var(--ink);border-top-color:var(--ink)}
+.era:focus-visible{outline:2px solid var(--focus);outline-offset:1px}
+@media(max-width:1000px){
+  .eras{height:auto;display:flex;flex-wrap:wrap;gap:4px 14px}
+  .era{position:static!important;width:auto!important;left:auto!important;height:auto;
+    border-top:0;border-bottom:1px solid var(--rule);padding:2px 0;overflow:visible}
+}
+.doors h2{font-family:var(--mono);font-size:var(--fs-sm);letter-spacing:var(--ls-label);
+  text-transform:uppercase;color:var(--grey-6);font-weight:400;margin:0 0 var(--sp-2)}
+.doors ul{list-style:none;margin:0;padding:0}
+.doors button{display:flex;width:100%;align-items:baseline;justify-content:space-between;
+  gap:var(--sp-2);background:none;border:0;border-bottom:1px solid var(--rule-soft);
+  padding:5px 0;min-height:24px;cursor:pointer;text-align:left;color:var(--ink);
+  font-family:var(--serif-text);font-size:var(--fs-md)}
+.doors button:hover{background:var(--raise)}
+.doors button:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.doors .n{font-family:var(--mono);font-size:var(--fs-sm);color:var(--grey-4);
+  font-variant-numeric:tabular-nums;flex:none}
+@media(max-width:760px){.doors{grid-template-columns:1fr;gap:var(--sp-3)}}
+</style>
+
+<div class="wrap">
+  <header class="masthead">
+    <div class="mast-grid">
+      <div>
+        <h1><a href="./" data-i18n-html="wordmark">Estonian Art Catalogue</a></h1>
+        <div class="switches">
+          <div class="langsw" role="group" aria-label="Language">
+            <button id="lang-en" aria-pressed="true">ENG</button>
+            <button id="lang-et" aria-pressed="false">EST</button>
+          </div>
+          <div class="langsw themesw" role="group" aria-label="Theme">
+            <button id="th-auto" aria-pressed="true" data-i18n="th_auto">AUTO</button>
+            <button id="th-light" aria-pressed="false" data-i18n="th_light">LIGHT</button>
+            <button id="th-dark" aria-pressed="false" data-i18n="th_dark">DARK</button>
+          </div>
+        </div>
+        <p class="mast-sub" data-i18n="sub">Art in Estonia's public collections and galleries · 1440–2026</p>
+      </div>
+      <div class="mast-stats">
+        <div><b id="stat-w">66,280</b><span data-i18n="works">works</span></div>
+        <div><b id="stat-a">4,241</b><span data-i18n="artists">artists</span></div>
+        <div><b id="stat-m">24</b><span data-i18n="museums">museums</span></div>
+        <div id="stat-gwrap"><b id="stat-g">9</b><span data-i18n="galleries">galleries</span></div>
+        <!-- the one stat that is a door: the works a visitor can actually acquire -->
+        <button class="stat-btn" id="stat-sale"><b id="stat-s">6,744</b><span data-i18n="forsale">for sale</span></button>
+      </div>
+    </div>
+    <p class="standfirst" data-i18n-html="standfirst">Every record here is a real object with a real holder, and every entry links back to its source.</p>
+    <details class="srcdetails">
+      <summary data-i18n="srcsummary">Sources & method</summary>
+      <p class="srcline" data-i18n-html="srcline">Sources: <a href="https://opendata.muis.ee/" target="_blank" rel="noopener">Muuseumide Infosüsteem (MuIS)</a>, Eesti Kultuuriministeerium, metadata CC0 · <a href="https://digikogu.ekm.ee/" target="_blank" rel="noopener">EKM Digitaalkogu</a>, Eesti Kunstimuuseum · the galleries' own online catalogues and the NOBA marketplace · Haus Galerii, Vernissage, Allee galerii, Vaal galerii and Eesti Kunsti Oksjonid auction results · harvested <span id="built"></span><br><span id="srcsplit"></span><br>Object data is the holder's, verbatim — the museum's or the gallery's; gallery asking prices are never taken. Auction results are recorded as the house published them — starting price, hammer price, sold or unsold: a record, not a valuation. English renderings of Estonian biographies and record descriptions are machine translations, unedited, and marked <span class="tag">translated</span>; the Estonian is the holder's text. Artist dates and biographies are tagged by source — <span class="tag">MuIS</span>, <span class="tag">EKM</span>, the Estonian Centre for Contemporary Art, <span class="tag">Wikidata</span> where the museums gave no dates, <span class="tag">Vaal</span> for the auction house's catalogue where nobody else did, or <span class="tag">ed</span> for editorial. How an artist is described, their citizenship, birthplace and training come from Wikidata where it covers them. Decade notes and English medium terms are editorial.</p>
+    </details>
+  </header>
+
+  <section class="histo">
+    <div class="histo-head">
+      <span><span class="eyebrow" data-i18n="worksperdecade">Works per decade</span><span class="histo-key"><i></i><span data-i18n="forsale">for sale</span></span></span>
+      <span class="eyebrow" id="histo-hint">Select a decade to filter</span>
+    </div>
+    <div class="bars" id="bars"></div>
+    <div class="eras" id="eras"></div>
+  </section>
+
+  <div class="controls">
+    <div class="search">
+      <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="7" cy="7" r="4.6"/><path d="M10.4 10.4L14 14"/></svg>
+      <input id="q" type="search" placeholder="Search titles, artists, techniques, inventory numbers…" aria-label="Search the register"
+             autocomplete="off" role="combobox" aria-expanded="false" aria-controls="sugg" aria-autocomplete="list">
+      <div id="sugg" role="listbox" hidden></div>
+    </div>
+    <div class="ctl">
+      <span class="ctl-label" data-i18n="group">Group</span>
+      <div class="seg" role="group" aria-label="Group by">
+        <button id="g-decade" aria-pressed="true" data-i18n="decade">Decade</button>
+        <button id="g-artist" aria-pressed="false" data-i18n="artist">Artist</button>
+        <button id="g-auc" aria-pressed="false" data-i18n="auctions">Auctions</button>
+      </div>
+    </div>
+    <div class="ctl">
+      <span class="ctl-label" data-i18n="sort">Sort</span>
+      <select id="sortby" class="sortsel" aria-label="Sort rows by">
+        <option value="year" data-i18n="s_year">Year</option>
+        <option value="artist" data-i18n="s_artist">Artist</option>
+        <option value="title" data-i18n="s_title">Title</option>
+        <option value="medium" data-i18n="s_medium">Medium</option>
+        <option value="museum" data-i18n="s_museum">Museum</option>
+        <option value="price" data-i18n="s_price">Hammer price</option>
+      </select>
+      <div class="seg" role="group" aria-label="Order">
+        <button id="o-asc" aria-pressed="true">Earliest</button>
+        <button id="o-desc" aria-pressed="false">Latest</button>
+      </div>
+    </div>
+    <button class="linkbtn" id="filters-toggle" aria-expanded="false" aria-controls="filterpanel">Show filters</button>
+    <button class="linkbtn" id="mylist" aria-pressed="false"></button>
+    <button class="linkbtn" id="share" data-i18n="linkview">Link to this view</button>
+    <button class="linkbtn" id="reset" data-i18n="reset">Reset</button>
+  </div>
+
+  <div class="sharebar" id="sharebar">
+    <input id="shareurl" readonly aria-label="Link to this view">
+    <button class="linkbtn" id="sharecopy" data-i18n="copy">Copy</button>
+    <span class="share-note" id="sharenote"></span>
+  </div>
+
+  <div class="filterbar">
+    <span class="ctl-label" data-i18n="filters">Filters</span>
+    <div class="active-filters" id="activefilters"></div>
+  </div>
+  <div id="filterpanel" hidden>
+  <div class="facetbar"><span class="ctl-label" data-i18n="years">Years</span>
+    <div class="facets" id="f-years">
+      <div class="yrange">
+        <select id="yr-from" aria-label="From year"></select>
+        <span class="yr-dash">&ndash;</span>
+        <select id="yr-to" aria-label="To year"></select>
+        <button class="chip" id="yr-undated" aria-pressed="false"><span data-i18n="undated">Undated</span><span id="yr-und-n"></span></button>
+        <button class="linkbtn" id="yr-reset" data-i18n="anyyear">Any year</button>
+        <span class="yr-info" id="yr-info"></span>
+      </div>
+    </div>
+  </div>
+  <div class="facetbar"><span class="ctl-label" data-i18n="medium">Medium</span><div class="facets" id="f-med" role="group" aria-label="Filter by medium"></div></div>
+  <div class="facetbar"><span class="ctl-label" data-i18n="museum">Museum</span><div class="facets" id="f-mus" role="group" aria-label="Filter by museum"></div></div>
+  <div class="facetbar"><span class="ctl-label" data-i18n="ekmcat">EKM category</span><div class="facets" id="f-cat" role="group" aria-label="Filter by EKM collection category"></div></div>
+  <div class="facetbar"><span class="ctl-label" data-i18n="origin">Artist background</span><div><div class="facets" id="f-org" role="group" aria-label="Filter by artist citizenship"></div><p class="facet-note" data-i18n="originnote">How Wikidata describes the artist — “Estonian artist”, “Baltic German painter”, “Swiss printmaker”. This is the art-historical judgement, not citizenship: Johann Köler died in 1899 and was legally a subject of the Russian Empire, but is described as Estonian. Unresolved for artists Wikidata does not cover.</p></div></div>
+  <div class="facetbar"><span class="ctl-label" data-i18n="training">Training</span><div><div class="facets" id="f-grp" role="group" aria-label="Filter by training or movement"></div><p class="facet-note" data-i18n="trainingnote">Where an artist trained, the movement they are placed in, or a group they belonged to, from Wikidata. Known for 757 of 3,664 artists — the Pallas school in Tartu and the academy in Tallinn are different lineages, and Ants Laikmaa's atelier taught a generation before either. Absent for artists Wikidata does not cover.</p></div></div>
+  <div class="facetbar"><span class="ctl-label" data-i18n="source">Source</span><div class="facets" id="f-src" role="group" aria-label="Filter by source catalogue"></div></div>
+  </div>
+
+  <section class="aidx" id="aidx">
+    <div class="ai-head">
+      <span class="eyebrow" data-i18n="artistindex">Artist index</span>
+      <nav class="ai-rail" id="ai-rail" aria-label="Jump to artists by letter"></nav>
+      <div class="ai-tools">
+        <div class="ai-sort" role="group" aria-label="Sort artists">
+          <button id="ais-az" aria-pressed="true" data-i18n="sortaz">A–Z</button>
+          <button id="ais-works" aria-pressed="false" data-i18n="sortworks">Most works</button>
+        </div>
+        <input id="ai-q" class="ai-search" type="search" aria-label="Filter artists">
+        <button class="linkbtn" id="ai-toggle" aria-expanded="false" aria-controls="ai-body"></button>
+      </div>
+    </div>
+    <div class="ai-body" id="ai-body" hidden></div>
+  </section>
+
+  <div id="mono"></div>
+  <p class="count-line" id="countline"></p>
+
+  <section class="doors" id="doors" hidden></section>
+  <div class="listbar" id="listbar" hidden></div>
+
+  <main id="register"></main>
+
+  <footer>
+    <!-- static, not i18n: a crawler never runs the app, and this is the route into
+         the per-artist pages that make the catalogue findable at all -->
+    <p><a href="a/">Artists A–Z / Kunstnikud A–Ü</a> — every artist as a plain page.</p>
+    <p data-i18n-html="foot1"><b>Where the records come from.</b> Museum holdings: two catalogues, harvested per artist and per collection and merged on inventory number. MuIS is the Ministry of Culture's shared system, covering every Estonian museum; its metadata is CC0. The EKM Digital Collection is the Art Museum of Estonia's own database. Gallery stock: each gallery's own online catalogue, and the NOBA marketplace for artists the catalogue already holds or who are based in Estonia; metadata only — title, date, technique, dimensions — never prices. Auction results: Haus Galerii's lots since 1998, Allee galerii's since 2020, Vernissage's since 2021, Vaal galerii's since 2022 and Eesti Kunsti Oksjonid's since 2023, as the houses published them — starting price, hammer price, sold or unsold. Descriptions stay in Estonian, as the cataloguer wrote them.</p>
+    <p data-i18n-html="foot2"><b>What is in it, and what is editorial.</b> This catalogues what Estonian collections <i>hold</i>, not only work by Estonian artists: Baltic German painters and foreign prints are here because the museums hold them. Only attributed work is included; objects catalogued without an artist are left out by design. Decade notes and the English medium vocabulary are written here. Artist dates and biographies come from MuIS, the EKM Digital Collection or the Estonian Centre for Contemporary Art and are tagged by source; how an artist is described, their citizenship, birthplace and training come from Wikidata where it covers them; only those tagged <span class="tag">ed</span> are editorial. Everything on a work record is the holder's — the museum's or the gallery's.</p>
+    <p data-i18n-html="foot3"><b>What the shape shows.</b> Holdings are not history. The peaks are collecting peaks: the Soviet system moved work into museum inventories at scale, and that machinery ended with independence in 1991 — museum holdings drop to a third of their 1980s level in the 1990s and 2000s, and to a few hundred works for the 2010s and 2020s, which is partly cataloguing lag. The rise into the 2020s is the opposite bias. Galleries keep what they have not sold and show what they showed lately, so their stock climbs steadily toward the present: 143 works here are dated 2010, more than nine hundred are dated 2024. That is why the 2020s carry more works than the completed 2010s — two sources leaning opposite ways, not a statement about how much art was made. Auction lots and past gallery listings are dated by the work, not the sale, so they follow the museums' shape rather than the galleries'. 9,945 of 66,280 records carry no dating; they sit in their own group rather than being guessed into a decade.</p>
+  </footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  const boot = (DATA, I18N) => {
+  // repeated strings ship once in DATA.vocab and are referenced by index; rehydrate them
+  (function decode(){
+    const V = DATA.vocab; if (!V) return;
+    for (const f of Object.keys(V)){
+      const table = V[f];
+      for (const w of DATA.works){
+        const i = w[f];
+        if (typeof i === "number") w[f] = table[i];
+      }
+    }
+    delete DATA.vocab;
+    // row keys are the inventory number stripped of punctuation; only synthetic ones ship
+    for (const w of DATA.works)
+      if (!w.k) w.k = (w.nu || "").toUpperCase().replace(/[^A-Z0-9:]/g, "") || null;
+  })();
+  let LANG = "en";
+  // the host may stamp data-theme itself; remember it so "auto" can hand control back
+  const HOST_THEME = document.documentElement.getAttribute("data-theme");
+  let THEME = "auto";
+  function applyTheme(){
+    const root = document.documentElement;
+    if (THEME === "auto"){
+      if (HOST_THEME) root.setAttribute("data-theme", HOST_THEME);
+      else root.removeAttribute("data-theme");
+    } else root.setAttribute("data-theme", THEME);
+    for (const t of ["auto","light","dark"])
+      $("th-"+t).setAttribute("aria-pressed", THEME === t);
+  }
+  function setTheme(t, push){
+    THEME = ["light","dark"].includes(t) ? t : "auto";
+    try { localStorage.setItem("ekr:theme", THEME); } catch(e){}
+    applyTheme();
+    if (push !== false) pushHash(true);
+  }
+  const T = (k, v) => {
+    let s = (I18N[LANG === "en" ? "EN" : "ET"][k]) ?? k;
+    if (v) for (const p in v) s = s.split("{"+p+"}").join(v[p]);
+    return s;
+  };
+  // "21st", not "21th" — and Estonian just wants the ordinal dot
+  const ordN = n => LANG !== "en" ? n + "."
+    : n + (n % 100 >= 11 && n % 100 <= 13 ? "th" : (["th","st","nd","rd"][n % 10] || "th"));
+  const musName = m => LANG === "en" ? (I18N.MUSEUM_EN[m] || m) : m;
+  // One rule for every count on the page: 51,793 in English, 51 793 in Estonian.
+  const fmt = n => (+n).toLocaleString(LANG === "en" ? "en-GB" : "et-EE");
+  // Each holder's own website, verified when data/venues.json was compiled. A record
+  // should be able to send you to the place that holds the work.
+  const SITES = (DATA.meta && DATA.meta.sites) || {};
+  const siteOf = m => SITES[m] || null;
+  const bioFor = ar => {
+    const en = ar.ben, et = ar.b;
+    if (LANG === "en") return en ? {t:en, s:ar.bens, alt:false, mt:!!ar.bmt} : (et ? {t:et, s:ar.bs, alt:true} : {t:"", s:null, alt:false});
+    return et ? {t:et, s:ar.bs, alt:false} : (en ? {t:en, s:ar.bens, alt:true, mt:!!ar.bmt} : {t:"", s:null, alt:false});
+  };
+  const mtTag = () => `<span class="tag" title="${esc(T("mt_note"))}">${esc(T("translated"))}</span>`;
+  const catName = c => LANG === "en" ? (I18N.CAT_EN[c] || c) : c;
+  const cap = s => s ? s[0].toUpperCase() + s.slice(1) : s;
+  // the museums' measurement words and collection names, in English on the English side
+  const DIMWORD = {"kõrgus":"height","laius":"width","sügavus":"depth","pikkus":"length","kestus":"duration","diameeter":"diameter",
+                   "läbimõõt":"diameter","paksus":"thickness","kogus":"quantity","maht":"volume","kujutisemõõt":"image size","sikülg":"side"};
+  const dimsName = s => LANG === "en" && s ? s.replace(/[a-zõäöü]+(?=:)/gi, m => DIMWORD[m.toLowerCase()] || m) : s;
+  const COLL_EN = {"Graafikakogu":"Prints collection","Maalikogu":"Paintings collection","Kunstikogu":"Art collection","Maal":"Painting",
+                   "Joonistus":"Drawing","Graafika abikogu":"Prints auxiliary collection","Graafilise disaini kogu":"Graphic design collection",
+                   "Skulptuurikogu":"Sculpture collection","Välisgraafikakogu":"Foreign prints collection","Kujutav kunst":"Fine art",
+                   "Nüüdiskunstikogu":"Contemporary art collection","Nüüdiskunsti kogu":"Contemporary art collection","Adamson-Ericu kogu":"Adamson-Eric collection",
+                   "Kristjan Raua kogu":"Kristjan Raud collection","Mikkeli muuseumi kogu":"Mikkel Museum collection","Välismaalikogu":"Foreign paintings collection",
+                   "Väärismetallikogu":"Precious metals collection","Välistarbekunstikogu":"Foreign applied art collection","Uued meediad":"New media",
+                   "Maali abikogu":"Paintings auxiliary collection","Rändnäitustekogu":"Touring exhibitions collection","Rändnäituste kogu":"Touring exhibitions collection",
+                   "Arhiivkogu":"Archive collection","Graafika":"Prints","Skulptuur":"Sculpture","Foto":"Photography","Fotokogu":"Photography collection",
+                   "Tarbekunst":"Applied art","Tarbekunstikogu":"Applied art collection","Joonistuste kogu":"Drawings collection","Joonistus ja akvarell":"Drawing and watercolour"};
+  const collName = c => LANG === "en" && c ? (COLL_EN[c] || c) : c;
+  const medName = e => LANG === "en" ? e : (I18N.MEDIUM_ET[e] || e);
+  const techName = w => LANG === "en" ? (w.tc || w.tce) : (w.tce || w.tc);
+  const matName  = w => LANG === "en" ? (w.m  || w.me)  : (w.me  || w.m);
+  function dateLabel(w){
+    if (!w.yl) return "";
+    if (LANG !== "en") return w.yl;
+    let s = w.yl;
+    for (const k in I18N.DATEWORD_EN) s = s.split(k).join(I18N.DATEWORD_EN[k]);
+    return s.replace(/(\d{4})\.\s*s\b/g, "$1s").replace(/\s{2,}/g," ").trim();
+  }
+  const esc = s => String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+  const A = DATA.artists, W = DATA.works;
+  const decOf = w => w.y == null ? "und" : Math.floor(w.y/10)*10;
+
+  const MUS = {
+    "Eesti Kunstimuuseum":"EKM","Tartu Kunstimuuseum":"TKM","Eesti Ajaloomuuseum":"AM",
+    "Eesti Kunstiakadeemia muuseum":"EKA","Eesti Arhitektuurimuuseum":"EAM",
+    "Tartu Ülikooli kunstimuuseum":"TÜKM","Dr. Fr. R. Kreutzwaldi Memoriaalmuuseum":"KRM",
+    "Eesti Spordi- ja Olümpiamuuseum":"ESOM","Tallinna Linnamuuseum":"TLM",
+    "Narva Muuseum":"NLM","Eesti Rahva Muuseum":"ERM","Uue Kunsti Muuseum":"UKM",
+    "Eesti Teatri- ja Muusikamuuseum":"TMM","Viljandi Muuseum":"VM",
+    "Eesti Kaasaegse Kunsti Muuseum":"EKKM","Veneetsia biennaal, Eesti paviljon":"VEN","Saaremaa Muuseum":"SM","Virumaa Muuseumid":"VIRU",
+    "Eesti Maaelumuuseumid SA, Eesti Põllumajandusmuuseum":"EPM",
+    "Eesti Maaelumuuseumid SA, C. R. Jakobsoni Talumuuseum":"JAK",
+    "Hiiumaa Muuseumid":"HIIU","Haapsalu ja Läänemaa Muuseumid":"HLM","Pärnu Muuseum":"PM",
+    // the auction houses, on the row beside their lots
+    "Haus Galerii":"HAUS","Vernissage":"VERN","Allee galerii":"ALLEE","Vaal galerii":"VAAL","Eesti Kunsti Oksjonid":"EKO"};
+  const abbr = m => MUS[m] || (m||"").slice(0,4).toUpperCase();
+
+  // The state's own periodisation: independence declared 1918, lost to occupation in
+  // June 1940 (Soviet 1940-41, German 1941-44, Soviet 1944-91), restored 20 August 1991.
+  // A work dated 1940 or 1991 falls on the side history put it: 1940 with the
+  // occupation, 1991 with the restored republic.
+  const PERIODS = [[1700,1917,"Tsaariaeg","Imperial Russia"],[1918,1939,"Vabariik","First Republic"],
+                   [1940,1990,"Okupatsioon","Occupation"],[1991,2099,"Taasiseseisvus","Restored Republic"]];
+  const PERIOD_NOTE = {Okupatsioon: {et: "Nõukogude okupatsioon 1940–41 ja 1944–91, Saksa okupatsioon 1941–44", en: "Soviet occupation 1940–41 and 1944–91; German occupation 1941–44"},
+                       Vabariik: {et: "Iseseisvus välja kuulutatud 24. veebruaril 1918", en: "Independence declared 24 February 1918"},
+                       Taasiseseisvus: {et: "Iseseisvus taastatud 20. augustil 1991", en: "Independence restored 20 August 1991"}};
+  const periodLabel = d => PERIODS.filter(p=>p[1]>=d && p[0]<=d+9)
+    .map(p => LANG === "en" ? I18N.PERIOD_EN[p[2]] : I18N.PERIOD_ET[p[2]]).join("  →  ");
+  const blurbFor = d => LANG === "en" ? (BLURBS[d] || "") : (I18N.BLURB_ET[d] || BLURBS[d] || "");
+
+  const BLURBS = {
+    1840:"Julie Hagen-Schwarz trains in Dresden and Italy — the first professionally schooled woman artist from Estonia.",
+    1850:"Art here is still Baltic-German and academic. In 1855 Johann Köler, a peasant's son, enters the St Petersburg Academy.",
+    1860:"The Awakening begins. Köler paints Estonians as subjects worth painting, and runs the movement's politics from the imperial capital.",
+    1870:"Köler and Weizenberg work in St Petersburg and Rome. The first professional Estonian art is made abroad, for a nation with no state.",
+    1880:"Weizenberg cuts Linda, mother of Kalevipoeg, in marble: the national epic enters academic sculpture.",
+    1890:"Düsseldorf and Munich displace St Petersburg as the training ground. The Awakening generation reaches maturity.",
+    1900:"Noor-Eesti sets the terms — “let us be Estonians, but let us also become Europeans” (Gustav Suits). Paris, and the 1905 revolution.",
+    1910:"Konrad Mägi's colour and Ado Vabbe's line arrive together. The Republic is declared in 1918, in the middle of a war.",
+    1920:"The Pallas school opens in Tartu in 1919; the Group of Estonian Artists brings constructivism back from Paris and Riga.",
+    1930:"Wiiralt engraves Paris from the inside. At home, a state-sponsored national classicism.",
+    1940:"Occupation, war, the 1941 and 1949 deportations, flight to Sweden. The generation splits between exile and the camps.",
+    1950:"Socialist realism is compulsory. Abstraction survives privately in Tartu studios and in Sooster's prison notebooks.",
+    1960:"The Thaw. ANK'64 in Tallinn, op art, surrealism, and the first exhibitions that are not about labour.",
+    1970:"SOUP'69 and geometric abstraction. Lapin, Vint and Runge treat print, design and architecture as a single practice.",
+    1980:"Stagnation and hyperrealism above ground; performance and installation in private courtyards.",
+    1990:"Independence, the Soros Centre, and video. Estonian art joins the international circuit almost overnight.",
+    2000:"Venice becomes the measure. A generation works between Tallinn, Berlin and Amsterdam.",
+    2010:"Post-internet and the archive. e-Estonia turns into subject matter.",
+    2020:"Ceramics, ecology and myth; Karlson's wolves fill a deconsecrated Venetian church."
+  };
+
+  // Surname for filing: drop bracketed aliases and any token that is pure punctuation,
+  // so "F. K(nöttner)?" files under K rather than under "?".
+  const surnameOf = n => {
+    const t = n.replace(/\([^)]*\)?/g, " ").replace(/[()]/g, " ")
+               .split(/\s+/).filter(x => /[\p{L}\p{N}]/u.test(x));
+    return t.length ? t[t.length - 1] : n.trim();
+  };
+  const DECPOS = {};
+  let DECC = null;
+  function decTable(){
+    if (DECC) return DECC;
+    DECADES.forEach((d,i) => DECPOS[d] = i);
+    DECC = A.map(() => DECADES.map(() => 0));
+    for (const w of W){
+      if (w.y == null || w.f) continue;     // a year outside the artist's life is not their activity
+      const p = DECPOS[Math.floor(w.y/10)*10];
+      if (p !== undefined) DECC[w.a][p]++;
+    }
+    return DECC;
+  }
+  const decCounts = idx => decTable()[idx];
+  function spark(counts, w, h){
+    const max = Math.max(1, ...counts), bw = w/counts.length;
+    const bars = counts.map((c,i)=>{
+      if (!c) return "";
+      const bh = Math.max(1.5, (c/max)*h);
+      return `<rect x="${(i*bw).toFixed(2)}" y="${(h-bh).toFixed(2)}" width="${Math.max(0.9,bw-0.9).toFixed(2)}" height="${bh.toFixed(2)}"/>`;
+    }).join("");
+    return `<svg class="spark" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" preserveAspectRatio="none" aria-hidden="true" fill="currentColor">${bars}</svg>`;
+  }
+
+  // span whatever the data actually covers, rather than a range assumed up front
+  const DECADES = (() => {
+    const ys = W.map(w=>w.y).filter(y=>y!=null);
+    const lo = Math.floor(Math.min(...ys)/10)*10, hi = Math.floor(Math.max(...ys)/10)*10;
+    const out = []; for (let d=lo; d<=hi; d+=10) out.push(d);
+    return out;
+  })();
+
+  // Facet vocabularies ordered by how many works carry each value. These used to count
+  // through all 57,000 works inside the sort comparator -- twice per comparison -- which
+  // was a third of a second at every page load. One pass each now.
+  const bySize = f => {
+    const n = new Map(); for (const w of W){ const v = w[f]; if (v != null) n.set(v, (n.get(v) || 0) + 1); }
+    return [...n.keys()].sort((a, b) => n.get(b) - n.get(a));
+  };
+  const MEDIA = bySize("e"), MUSEUMS = bySize("mu"), CATS = bySize("c");
+  const SRCS = [["muis","MuIS"],["ekm","EKM Digital"],["ekmmuis","Both"],["ekkm","EKKM"],["cca","CCA / Venice"]];
+  const NOORIGIN = "\u0000none";
+  const originsOf = w => { const f = A[w.a].aff; return f ? [f] : [NOORIGIN]; };
+  // "school:Pallas" -> ["school", "Pallas"]; an artist can hold several
+  const groupsOf = w => A[w.a].grp || [];
+  const GROUPS = (() => {
+    const m = new Map();
+    for (const w of W) for (const g of groupsOf(w)) m.set(g, (m.get(g)||0)+1);
+    return [...m.entries()].sort((x,y)=> y[1]-x[1]).map(x=>x[0]);
+  })();
+  const grpLabel = g => { const i = g.indexOf(":"); return g.slice(i+1); };
+  const grpKind  = g => T("g_" + g.slice(0, g.indexOf(":")));
+
+  const ORIGINS = (() => {
+    const m = new Map();
+    for (const w of W) for (const o of originsOf(w)) m.set(o, (m.get(o)||0)+1);
+    return [...m.entries()].sort((x,y)=> (x[0]===NOORIGIN)-(y[0]===NOORIGIN) || y[1]-x[1]).map(x=>x[0]);
+  })();
+  const SRCLAB = {muis:"muis", ekm:"digi", ekmmuis:"both", cca:"cca", ekkm:"ekkm", auction:"auction"};
+  // a museum holding or a work shown; not stock, not a past listing, not a lot
+  const isHeld = w => !w.kind || w.kind === "held" || w.kind === "shown";
+  // a past listing: sold, or no longer listed -- and the month it was last seen for sale
+  const pastText = w => w.gs ? T("rl_sold") : T("rl_gone");
+  // An auction result: the sale, and what the house published about the outcome.
+  const eur = n => fmt(n) + " €";
+  // a lot sold after the sale reads "Sold" like any other; the detail panel says how
+  const auText = w => w.ao ? (w.ap ? T("au_sold", {p: eur(w.ap)}) : T("au_soldnp")) : T("au_unsold");
+  // One line per artist: lots, sales, span, and the range of hammer prices.
+  function auLine(i){
+    const lots = W.filter(w => w.a === i && w.kind === "auction");
+    if (!lots.length) return "";
+    const ps = lots.filter(w => w.ao && w.ap).map(w => w.ap).sort((a, b) => a - b);
+    const ys = lots.map(w => +w.ad.slice(0, 4)).sort((a, b) => a - b);
+    const span = ys[0] === ys[ys.length-1] ? String(ys[0]) : `${ys[0]}–${ys[ys.length-1]}`;
+    const range = ps.length ? (ps[0] === ps[ps.length-1] ? eur(ps[0]) : `${fmt(ps[0])}–${eur(ps[ps.length-1])}`) : "";
+    return T("au_line", {n: lots.length, s: lots.filter(w => w.ao).length, y: span}) + (range ? ` · ${range}` : "");
+  }
+  const SRCFULL = {muis:"catalogued in MuIS only", ekm:"catalogued in the EKM Digital Collection only", ekmmuis:"in both catalogues, merged on inventory number", cca:"Estonian Centre for Contemporary Art", ekkm:"Contemporary Art Museum of Estonia"};
+  const stag = s => s==="ed" ? '<span class="tag">ed</span>' : s==="ekm" ? '<span class="tag">EKM</span>'
+                  : s==="wd" ? '<span class="tag">Wikidata</span>' : s==="noba" ? '<span class="tag">NOBA</span>' : s==="vaal" ? '<span class="tag">Vaal</span>'
+                  : s==="cca" ? '<span class="tag">CCA</span>' : '<span class="tag">MuIS</span>';
+
+  const state = {group:"decade", decOrder:"earliest", artOrder:"az", q:"", list:false, shared:null, cross:false, sale:false,
+                 decade:null, media:new Set(), museums:new Set(), cats:new Set(), srcs:new Set(),
+                 artist:null, letter:null, idxOpen:false, idxQ:"", idxLimit:120, idxSort:"az", showEarly:false, origins:new Set(), groups:new Set(), sort:"year", year:null, gLimit:50, from:null, to:null, undOnly:false, open:null, expand:new Set(),
+                 od:new Set(),    // the decades opened in the register's mosaic
+                 auLimit:20};     // sales drawn in the auction view before "more"
+  const LIMIT_DEC = 50, LIMIT_ART = 18;
+  const slug = s => (s||"").normalize("NFKD").replace(/[\u0300-\u036f]/g,"")
+      .toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"");
+  const SRCKEYS = ["muis","ekm","ekmmuis","ekkm","cca"];
+  let applying = false;
+
+  function stateToHash(){
+    const p = new URLSearchParams();
+    if (LANG !== "en") p.set("lang", LANG);
+    if (THEME !== "auto") p.set("theme", THEME);
+    if (state.group !== "decade") p.set("group", state.group);
+    const ord = state.group === "decade" ? state.decOrder : state.artOrder;
+    if (ord !== "earliest" && ord !== "az") p.set("order", ord);
+    if (state.sort !== "year") p.set("sort", state.sort);
+    if (state.q) p.set("q", state.q);
+    if (state.artist !== null) p.set("artist", slug(A[state.artist].n));
+    if (state.decade !== null) p.set("decade", state.decade);
+    if (state.year !== null) p.set("year", state.year);
+    if (state.from !== null) p.set("from", state.from);
+    if (state.to !== null) p.set("to", state.to);
+    if (state.undOnly) p.set("undated", "1");
+    state.media.forEach(v => p.append("medium", slug(v)));
+    state.museums.forEach(v => p.append("museum", abbr(v).toLowerCase()));
+    state.cats.forEach(v => p.append("cat", slug(v)));
+    state.srcs.forEach(v => p.append("src", v));
+    state.origins.forEach(v => p.append("origin", v===NOORIGIN?"none":v));
+    state.groups.forEach(v => p.append("grp", v));
+    if (state.open) p.set("open", state.open);
+    state.od.forEach(v => p.append("od", v));
+    if (state.idxOpen) p.set("index", state.letter || "all");
+    // The list travels as its keys, so "Link to this view" of your own list is a link
+    // anyone can open. An empty list is "mine" -- nothing to carry.
+    if (state.cross) p.set("cross", "1");
+    if (state.sale) p.set("sale", "1");
+    if (state.shared) p.set("list", [...state.shared].join(","));
+    else if (state.list) p.set("list", SL.size ? [...SL].join(",") : "mine");
+    return p.toString().replace(/%3A/gi, ":").replace(/%2C/gi, ",");
+  }
+  function pushHash(replace){
+    if (applying) return;
+    const h = stateToHash();
+    try { history[replace ? "replaceState" : "pushState"](null, "",
+      location.pathname + location.search + (h ? "#" + h : "")); } catch(e){
+      try { location.hash = h; } catch(e2){}
+    }
+    saveLast(h); refreshShare();
+  }
+  function hashToState(){
+    const p = new URLSearchParams(location.hash.replace(/^#/, ""));
+    LANG = p.get("lang") === "en" ? "en" : (p.get("lang") === "et" ? "et" : LANG);
+    const th = p.get("theme");
+    if (th === "light" || th === "dark" || th === "auto") THEME = th;
+    state.group    = ["artist", "auction"].includes(p.get("group")) ? p.get("group") : "decade";
+    const ord      = p.get("order");
+    state.decOrder = ord === "latest" ? "latest" : "earliest";
+    state.artOrder = ord === "birth"  ? "birth"  : "az";
+    state.sort     = KEYS[p.get("sort")] ? p.get("sort") : "year";
+    state.q        = p.get("q") || "";
+    const as = p.get("artist");
+    const ai = as ? A.findIndex(x => slug(x.n) === as) : -1;
+    state.artist = ai >= 0 ? ai : null;
+    const d = p.get("decade");
+    state.decade = d ? (d === "und" ? "und" : (isFinite(+d) ? +d : null)) : null;
+    const yr = p.get("year");
+    state.year = yr && isFinite(+yr) ? +yr : null;
+    const nOrNull = v => (v && isFinite(+v)) ? +v : null;
+    state.from = nOrNull(p.get("from"));
+    state.to   = nOrNull(p.get("to"));
+    state.undOnly = p.get("undated") === "1";
+    const g = k => p.getAll(k);
+    state.media   = new Set(MEDIA.filter(m => g("medium").includes(slug(m))));
+    state.museums = new Set(MUSEUMS.filter(m => g("museum").includes(abbr(m).toLowerCase())));
+    state.cats    = new Set(CATS.filter(c => g("cat").includes(slug(c))));
+    state.srcs    = new Set(SRCKEYS.filter(s => g("src").includes(s)));
+    state.origins = new Set(ORIGINS.filter(o => g("origin").includes(o===NOORIGIN?"none":o)));
+    state.groups  = new Set(GROUPS.filter(x => g("grp").includes(x)));
+    state.open    = p.get("open") || null;
+    state.od = new Set(g("od"));
+    // A list in the URL is yours if it matches what this browser holds, and someone
+    // else's otherwise -- shown as a shared list, never merged into yours unasked.
+    state.cross = p.get("cross") === "1";
+    state.sale = p.get("sale") === "1";
+    state.list = false; state.shared = null;
+    const lv = p.get("list");
+    if (lv === "mine") state.list = true;
+    else if (lv){
+      const ks = lv.split(",").filter(k => KEYSET.has(k));
+      const same = ks.length === SL.size && ks.every(k => SL.has(k));
+      if (same) state.list = true; else state.shared = new Set(ks);
+    }
+    const ix = p.get("index");
+    state.idxOpen = !!ix;
+    state.letter  = (ix && ix !== "all") ? ix.toUpperCase() : null;
+    state.expand.clear();
+    // A shared link carries one record, but each group renders only its first 50 rows,
+    // so anything deeper simply was not on the page and the link showed the catalogue
+    // rather than the thing being shared. Expand whichever group holds it.
+    if (state.open){
+      const w = W.find(x => x.k === state.open);
+      if (w){ state.expand.add(String(state.group === "artist" ? w.a : decOf(w))); state.od.add(String(decOf(w))); }
+    }
+  }
+
+  const $ = id => document.getElementById(id);
+  const reg = $("register");
+
+  // Fold diacritics on both sides of the comparison: this catalogue is full of
+  // Estonian and Baltic-German names, and is read in English by default, so someone
+  // typing "Poder" or "Kugelgen" on a plain keyboard must still find Põder and
+  // Kügelgen. Folding both the haystack and the query means either spelling works.
+  const defold = s => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  const hay = w => (w._h || (w._h = defold([w.t, A[w.a].n, w.tce, w.tc, w.me, w.m, w.ee, w.e, w.nu, w.mu, w.co, w.d, w.yl, w.c]
+      .filter(Boolean).join(" ").toLowerCase())));
+  // 34k haystacks cost ~1s to build; do it in idle slices after first paint so the
+  // first keystroke does not pay for all of them at once
+  (function warmSearch(){
+    let i = 0;
+    const step = deadline => {
+      const end = Math.min(W.length, i + 4000);
+      while (i < end) hay(W[i++]);
+      if (i < W.length) schedule();
+    };
+    const schedule = () => (window.requestIdleCallback || (f => setTimeout(f, 60)))(step);
+    schedule();
+  })();
+  // Every word of the query must appear somewhere in the record, in any order. As a
+  // single substring, "Wiiralt Põrgu" matched nothing, because no record has those
+  // two words adjacent. Terms are split once per query, not once per record.
+  let _qKey = null, _qTerms = [];
+  const qTerms = () => {
+    if (_qKey !== state.q){ _qKey = state.q; _qTerms = defold(state.q.toLowerCase()).split(/\s+/).filter(Boolean); }
+    return _qTerms;
+  };
+  const matchText = w => { const t = qTerms(); if (!t.length) return true; const h = hay(w); return t.every(x => h.includes(x)); };
+  const inList = w => { const k = listKeys(); return (!k || k.has(w.k)) && (!state.sale || w.kind === "gallery") && (!state.cross || (w.kind === "gallery" && CROSS.has(w.a))); };
+  const baseSet = () => W.filter(w => matchText(w) && inList(w)
+      && (state.media.size===0 || state.media.has(w.e))
+      && (state.museums.size===0 || state.museums.has(w.mu))
+      && (state.cats.size===0 || state.cats.has(w.c))
+      && (state.srcs.size===0 || state.srcs.has(w.s))
+      && (state.origins.size===0 || originsOf(w).some(o=>state.origins.has(o)))
+      && (state.groups.size===0  || groupsOf(w).some(g=>state.groups.has(g)))
+      && (state.artist===null || w.a===state.artist)
+      && (state.undOnly ? w.y==null
+          : ((state.from===null || (w.y!==null && w.y>=state.from))
+          && (state.to===null   || (w.y!==null && w.y<=state.to)))));
+  const baseSetIgnoringYears = () => W.filter(w => matchText(w) && inList(w)
+      && (state.media.size===0 || state.media.has(w.e))
+      && (state.museums.size===0 || state.museums.has(w.mu))
+      && (state.cats.size===0 || state.cats.has(w.c))
+      && (state.srcs.size===0 || state.srcs.has(w.s))
+      && (state.artist===null || w.a===state.artist));
+  const fullSet = () => baseSet().filter(w => (state.decade===null || decOf(w)===state.decade)
+                                          && (state.year===null || w.y===state.year));
+
+  function renderBars(){
+    // Each bar is split: museum holdings below, gallery stock above. Since NOBA, the
+    // 2020s bar is 98% works for sale, and an unsplit bar read as the most-collected
+    // decade in Estonian history. The shape must not lie at a glance.
+    const set = baseSet(), counts = {}, sale = {}; DECADES.forEach(d=>{counts[d]=0; sale[d]=0;}); counts.und = sale.und = 0;
+    set.forEach(w => { const d = decOf(w); if (d in counts){ counts[d]++; if (w.kind === "gallery") sale[d]++; } });
+    const max = Math.max(1, ...DECADES.map(d=>counts[d]));
+    const cell = (key, lab, title, cls) => {
+      const c = counts[key], s = sale[key], h = c ? Math.round(6 + (Math.min(c,max)/max)*66) : 2;
+      const sh = c && s ? Math.round(h * s / c) : 0;
+      const tip = `${title} — ${c===1?T('oneworkc'):T('nworks',{n:c})}` + (s ? ` · ${T('nforsale',{n:s})}` : "");
+      return `<button class="bar-btn ${cls||""}" data-dec="${key}" aria-pressed="${state.decade===key}" title="${tip}">
+        <span class="bar-n">${c||""}</span><span class="bar-fill" style="height:${h}px">${sh ? `<span class="bar-sale" style="height:${sh}px"></span>` : ""}</span><span class="bar-lab">${lab}</span></button>`;
+    };
+    // group the decade bars by century so 1830s and 1930s can never be read as the same "30"
+    const cents = [];
+    DECADES.forEach(d => {
+      const c = Math.floor(d/100);
+      if (!cents.length || cents[cents.length-1].c !== c) cents.push({c, ds:[]});
+      cents[cents.length-1].ds.push(d);
+    });
+    // the earliest centuries hold a handful of works but claim as much width as the
+    // 20th century's tens of thousands — fold them into one band unless asked to open.
+    // Everything before 1800 folds by rule; later centuries only if they are very thin.
+    const totalDated = DECADES.reduce((s,d)=>s+counts[d],0);
+    let lead = 0;
+    while (lead < cents.length - 1 &&
+           (cents[lead].c <= 17 ||
+            cents[lead].ds.reduce((s,d)=>s+counts[d],0) < totalDated * 0.01)) lead++;
+    const foldable = lead >= 2;
+    const early = foldable ? cents.slice(0, lead) : [];
+    const rest  = foldable ? cents.slice(lead) : cents;
+    const earlyTotal = early.reduce((s,g)=>s+g.ds.reduce((t,d)=>t+counts[d],0),0);
+    const earlyLabel = early.length
+      ? T("earlyband",{a: ordN(early[0].c+1), b: ordN(early[early.length-1].c+1)}) : "";
+    const centHTML = g =>
+      `<div class="cent" style="flex:${g.ds.length}">
+         <div class="cent-bars">${g.ds.map(d => cell(d, String(d).slice(2), d+"s")).join("")}</div>
+         <div class="cent-lab"><span class="cl-full">${esc(T("century",{n:ordN(g.c+1)}))}</span><span class="cl-abbr">${g.c+1}.</span></div>
+       </div>`;
+    const earlyFolded = `<div class="cent early" style="flex:0 0 118px">
+         <div class="cent-bars">
+           <button class="early-btn" id="early-toggle" title="${esc(T("earlyexpand"))} — ${earlyTotal===1?T('oneworkc'):T('nworks',{n:earlyTotal})}">
+             <span class="bar-n">${earlyTotal||""}</span>
+             <span class="early-fill" style="height:${earlyTotal?Math.max(3,Math.round(6+(Math.min(earlyTotal,max)/max)*66)):2}px"></span>
+             <span class="early-lab">${esc(earlyLabel)}</span>
+           </button>
+         </div>
+         <div class="cent-lab">&nbsp;</div>
+       </div>`;
+    const earlyOpen = early.map(centHTML).join("")
+      + `<div class="cent" style="flex:0 0 26px"><div class="cent-bars"></div>
+           <button class="cent-collapse" id="early-toggle" title="${esc(T("earlycollapse"))}">‹‹</button></div>`;
+    // opened out, ~60 decade ticks share the width: the per-bar counts collide with
+    // each other and the century names no longer fit. Mark the dense state for CSS.
+    $("bars").className = "bars" + (foldable && state.showEarly ? " dense" : "");
+    $("bars").innerHTML =
+      (foldable ? (state.showEarly ? earlyOpen : earlyFolded) : "")
+      + rest.map(centHTML).join("")
+      + `<div class="cent nd" style="flex:1">
+           <div class="cent-bars">${cell("und",T("nd"),T("undated"),"undated")}</div>
+           <div class="cent-lab" title="Undated — works whose record carries no dating">&nbsp;</div>
+         </div>`;
+    $("histo-hint").textContent = state.decade===null ? T("selectdecade")
+      : (state.decade==="und" ? T("undatedonly") : T("filteredto",{x:state.decade+"s"}));
+    renderEras();
+  }
+  // The eras sit against the bars they describe: a band beneath the histogram with one
+  // segment per period, measured from the rendered decade cells so it stays aligned
+  // whether the early centuries are folded or opened. The period door this replaces
+  // listed the same five names in a column, away from the data.
+  function renderEras(){
+    const el = $("eras"); if (!el) return;
+    const bars = $("bars"), box = el.getBoundingClientRect();
+    const cellFor = d => bars.querySelector(`.bar-btn[data-dec="${d}"]`);
+    const early = bars.querySelector(".early-btn");
+    const segs = DOOR_PERIODS.map((p, i) => {
+      const [lo, hi] = p;
+      let first = null, last = null;
+      if (lo === null && early){ first = last = early; }              // folded pre-1700 band
+      else DECADES.forEach(d => {
+        const mid = d + 5;
+        if ((lo === null || mid >= lo) && mid <= hi){ const c = cellFor(d); if (c){ first = first || c; last = c; } }
+      });
+      if (!first) return "";
+      const l = first.getBoundingClientRect().left - box.left, r = last.getBoundingClientRect().right - box.left;
+      const on = state.from === lo && state.to === (hi === 2099 ? null : hi) && !state.undOnly;
+      const lab = dpLabel(p);
+      const note = p[2] && PERIOD_NOTE[p[2]] ? ` · ${PERIOD_NOTE[p[2]][LANG === "en" ? "en" : "et"]}` : "";
+      return `<button class="era" data-era="${i}" aria-pressed="${on}" title="${esc(lab)}${esc(note)} — ${PCOUNT[i].toLocaleString(LANG==="en"?"en":"et")} ${esc(T("worksn"))}"
+                style="left:${l.toFixed(1)}px;width:${Math.max(0, r - l - 2).toFixed(1)}px">${esc(lab)}</button>`;
+    });
+    el.innerHTML = segs.join("");
+    // A two-decade segment cannot hold "First Republic"; fall back to a short form, and
+    // only then to an ellipsis (the title still carries the full name).
+    el.querySelectorAll(".era").forEach(b => {
+      if (b.scrollWidth <= b.clientWidth) return;
+      const key = DOOR_PERIODS[+b.dataset.era][2], short = key && I18N[LANG === "en" ? "EN" : "ET"]["era_short_" + key];
+      if (short) b.textContent = short;
+    });
+  }
+  addEventListener("resize", (() => { let t; return () => { clearTimeout(t); t = setTimeout(renderEras, 120); }; })());
+
+  const YEARS = (() => { const ys = W.map(w=>w.y).filter(y=>y!=null); 
+    return {min: Math.min(...ys), max: Math.max(...ys)}; })();
+  function fillYearSelects(){
+    const opts = (sel, blank) => {
+      let o = `<option value="">${blank}</option>`;
+      for (let y = YEARS.min; y <= YEARS.max; y++) o += `<option value="${y}">${y}</option>`;
+      $(sel).innerHTML = o;
+    };
+    opts("yr-from", T("earliestopt")); opts("yr-to", T("latestopt"));
+  }
+  function renderYearRange(){
+    $("yr-from").value = state.from == null ? "" : state.from;
+    $("yr-to").value   = state.to   == null ? "" : state.to;
+    $("yr-from").disabled = $("yr-to").disabled = state.undOnly;
+    const u = $("yr-undated");
+    u.setAttribute("aria-pressed", state.undOnly);
+    const undN = baseSetIgnoringYears().filter(w=>w.y==null).length;
+    $("yr-und-n").textContent = undN;
+    const set = fullSet();
+    const ys = set.map(w=>w.y).filter(y=>y!=null);
+    $("yr-info").textContent = state.undOnly ? T("undatedonlyshort")
+      : ys.length ? T("inview",{a:Math.min(...ys),b:Math.max(...ys)}) : "";
+  }
+
+  function renderActiveFilters(){
+    const el = $("activefilters"); if (!el) return;
+    const chips = [];
+    const add = (label, clear) => chips.push({label, clear});
+    if (state.artist !== null) add(A[state.artist].n, () => state.artist = null);
+    if (state.decade !== null) add(state.decade === "und" ? T("undated") : state.decade + "s",
+                                   () => { state.decade = null; state.year = null; });
+    if (state.year !== null) add(String(state.year), () => state.year = null);
+    if (state.undOnly) add(T("undated"), () => state.undOnly = false);
+    else if (state.from !== null || state.to !== null)
+      add(`${state.from ?? YEARS.min}–${state.to ?? YEARS.max}`, () => { state.from = null; state.to = null; });
+    state.media.forEach(v => add(medName(v), () => state.media.delete(v)));
+    state.museums.forEach(v => add(abbr(v), () => state.museums.delete(v)));
+    state.cats.forEach(v => add(catName(v), () => state.cats.delete(v)));
+    state.srcs.forEach(v => add(SRCLAB[v] || v, () => state.srcs.delete(v)));
+    state.origins.forEach(v => add(v===NOORIGIN?T("originunknown"):v, () => state.origins.delete(v)));
+    state.groups.forEach(v => add(grpLabel(v), () => state.groups.delete(v)));
+    if (state.q) add(`“${state.q}”`, () => { state.q = ""; $("q").value = ""; });
+    if (state.shared) add(T("sl_shared", {n: state.shared.size}), () => { state.shared = null; });
+    else if (state.list) add(T("mylist"), () => { state.list = false; });
+    if (state.cross) add(T("doors_cross"), () => { state.cross = false; });
+    if (state.sale) add(T("forsale_chip"), () => { state.sale = false; });
+    ACTIVE = chips;
+    // No chips, no bar: "none — showing all 51,598 works" restated the masthead.
+    el.closest(".filterbar").hidden = chips.length === 0;
+    el.innerHTML = chips.map((c, i) => `<button class="af" data-af="${i}" title="${esc(T("removefilter"))}">${esc(c.label)}<span>×</span></button>`).join("");
+    const n = chips.length;
+    $("filters-toggle").textContent = $("filterpanel").hidden
+      ? (n ? T("showfiltersn",{n}) : T("showfilters")) : T("hidefilters");
+  }
+  let ACTIVE = [];
+
+  // localeCompare(s, "et") builds a fresh Intl.Collator on every call, and sorting
+  // 52,083 works makes hundreds of thousands of them — it was the single largest cost
+  // in a render. One collator, reused, does the same comparison far more cheaply.
+  const COLL = new Intl.Collator("et");
+  const cmpStr = (x,y) => COLL.compare(String(x||""), String(y||""));
+  const KEYS = {
+    year:   w => w.y == null ? Infinity : w.y,
+    artist: w => A[w.a].n,
+    title:  w => w.t,
+    medium: w => w.e,
+    museum: w => w.mu,
+    price:  w => w.ap || 0
+  };
+  // Every render sorted every dated work in every decade -- 48,000 of them -- with
+  // Intl.Collator deciding ties on title and artist. The collator was 13% of all CPU
+  // time and the sort another 4%, for rows nobody saw: a decade shows 12 to 50. A
+  // sort key is folded once per work and compared as a plain string; collation only
+  // ever ordered ties within one year, where locale-perfect order is invisible.
+  const skey = s => (s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  const SK = w => w._sk || (w._sk = skey(w.t));
+  const SA = w => w._sa || (w._sa = skey(A[w.a].n));
+  const cmpKey = (x, y) => x < y ? -1 : x > y ? 1 : 0;
+  // Opening a record, marking a bookmark, switching language: each re-renders the
+  // register with the same selection, and re-sorted every decade for it. The sorted
+  // groups are kept while the selection and order are unchanged.
+  let _sgKey = "", _sg = new Map();
+  function sortedGroup(d, items, desc){
+    const key = stateToHash().replace(/&?(open|od)=[^&]*/g, "") + "|" + state.sort + "|" + desc;
+    if (key !== _sgKey){ _sgKey = key; _sg = new Map(); }
+    let r = _sg.get(d);
+    if (!r || r.length !== items.length){ r = sortRows(items, desc); _sg.set(d, r); }
+    return r;
+  }
+  function sortRows(items, desc){
+    const sort = state.sort;
+    const prim = sort === "artist" ? SA : sort === "title" ? SK
+               : sort === "medium" ? (w => skey(medName(w.e))) : sort === "museum" ? (w => skey(musName(w.mu))) : null;
+    if (sort === "price")                  // hammer price, highest first; works without one after
+      return items.slice().sort((a,b) => ((b.ap||0)-(a.ap||0)) * (desc ? -1 : 1) || (a.y||0)-(b.y||0) || cmpKey(SK(a), SK(b)));
+    return items.slice().sort((a,b) => {
+      let r;
+      if (!prim){
+        const ua = a.y == null, ub = b.y == null;
+        if (ua !== ub) return ua ? 1 : -1;
+        r = (a.y || 0) - (b.y || 0);
+      } else r = cmpKey(prim(a), prim(b));
+      if (desc) r = -r;
+      return r || (a.y||0)-(b.y||0) || cmpKey(SK(a), SK(b)) || cmpKey(SA(a), SA(b));
+    });
+  }
+
+  // The masthead figures depend only on the loaded data, never on filter state, but
+  // were being recomputed by three full scans of 52,083 works on every render.
+  const STATS = (() => {
+    let artists = 0; const museums = new Set(), galleries = new Set();
+    for (const a of A) if (a.c > 0) artists++;
+    for (const w of W){
+      if ((w.kind || "held") === "held") museums.add(w.mu);
+      else if (w.kind === "gallery") galleries.add(w.mu);
+      // an auction house is neither
+    }
+    return {artists, museums: museums.size, galleries: galleries.size};
+  })();
+
+  let AI = null;
+  function artistIndexData(){
+    if (AI) return AI;
+    const items = A.map((ar,i)=>({i, n:ar.n, s:surnameOf(ar.n), c:ar.c||0,
+                                  l:(ar.l&&(ar.l[0]||ar.l[1]))?`${ar.l[0]}–${ar.l[1]||""}`:"", sp:decCounts(i)}))
+                   .filter(x=>x.c>0)
+                   .sort((x,y)=>COLL.compare(x.s, y.s));
+    const letters = [];
+    items.forEach(x=>{ const L = x.s[0].toUpperCase(); if (!letters.includes(L)) letters.push(L); });
+    AI = {items, letters};
+    return AI;
+  }
+  function renderArtistIndex(){
+    const {items, letters} = artistIndexData();
+    $("ai-rail").innerHTML = letters.map(L =>
+      `<button class="ai-l" data-letter="${esc(L)}" aria-pressed="${state.letter===L}">${esc(L)}</button>`).join("");
+    const t = $("ai-toggle");
+    t.textContent = state.idxOpen ? T("hideindex") : T("showall",{n:items.length.toLocaleString(LANG === "en" ? "en-GB" : "et-EE")});
+    t.setAttribute("aria-expanded", state.idxOpen);
+    const body = $("ai-body");
+    body.hidden = !state.idxOpen;
+    if (!state.idxOpen){ body.innerHTML = ""; return; }
+    let show = state.letter ? items.filter(x=>x.s[0].toUpperCase()===state.letter) : items;
+    if (state.idxQ){
+      const terms = defold(state.idxQ.toLowerCase()).split(/\s+/).filter(Boolean);
+      show = show.filter(x => { const n = defold(x.n.toLowerCase()); return terms.every(t => n.includes(t)); });
+    }
+    // Sorted by size, the alphabet is not the organising idea any more, so the
+    // letter dividers go with it — they would break the ranking into meaningless runs.
+    const byWorks = state.idxSort === "works";
+    if (byWorks) show = show.slice().sort((a,b)=> b.c - a.c || cmpStr(a.s, b.s));
+    const total = show.length;
+    show = show.slice(0, state.idxLimit);
+    let cur = "", out = `<div class="ai-count">${esc(T("idxcount",{n:total.toLocaleString(LANG === "en" ? "en-GB" : "et-EE")}))}</div>`;
+    if (!total) out += `<div class="ai-count">${esc(T("idxnone"))}</div>`;
+    show.forEach(x=>{
+      if (!byWorks){
+        const L = x.s[0].toUpperCase();
+        if (L !== cur){ cur = L; out += `<div class="ai-letter" id="ai-${esc(L)}">${esc(L)}</div>`; }
+      }
+      out += `<button class="ai-item" data-artist="${x.i}">
+        <span><span class="ai-nm">${esc(x.n)}</span><br><span class="ai-dt">${esc(x.l||"")}</span></span>
+        <span class="ai-rt"><span class="ai-n">${x.c}</span></span>
+      </button>`;
+    });
+    if (total > show.length)
+      out += `<button class="more" id="more-index" style="column-span:all;margin-top:10px">${esc(T("moreindex",{n:(total-show.length).toLocaleString(LANG === "en" ? "en-GB" : "et-EE")}))}</button>`;
+    body.className = "ai-body" + (byWorks ? " ranked" : "");
+    body.innerHTML = out;
+  }
+
+  function renderMono(){
+    const el = $("mono");
+    if (state.artist === null){ el.innerHTML = ""; return; }
+    const ar = A[state.artist], mine = W.filter(w=>w.a===state.artist);
+    const shown = fullSet().length;
+    const life = (ar.l&&(ar.l[0]||ar.l[1])) ? `${ar.l[0]}–${ar.l[1]||""}` : "";
+    const counts = decCounts(state.artist);
+    const nz = counts.map((c,i)=>c?i:-1).filter(i=>i>=0);
+    const first = nz.length ? DECADES[nz[0]] : null, last = nz.length ? DECADES[nz[nz.length-1]] : null;
+    const med = {};
+    mine.forEach(w=>{ med[w.e] = (med[w.e]||0)+1; });
+    const medl = Object.entries(med).sort((x,y)=>y[1]-x[1]).slice(0,6)
+      .map(([k,v])=>`${esc(medName(k))} <b>${v}</b>`).join(" · ");
+    const und = mine.filter(w=>w.y==null).length;
+    const bio = bioFor(ar);
+    el.innerHTML = `<section class="mono">
+      <div>
+        <button class="mono-back" id="mono-back">${esc(T("allartists",{n:artistIndexData().items.length.toLocaleString(LANG === "en" ? "en-GB" : "et-EE")}))}</button>
+        <h2>${esc(ar.n)}</h2>
+        <div class="mono-dates">${esc(life)}${ar.ls?stag(ar.ls):""}</div>
+        ${(ar.grp||[]).length ? `<div class="mono-dates">${(ar.grp||[]).map(g =>
+            `<button class="showartist" style="margin:4px 6px 0 0" data-grp="${esc(g)}">${esc(grpKind(g))} ${esc(grpLabel(g))}</button>`).join("")}</div>` : ""}
+        <p class="mono-bio${bio.t.length>420?" clamp":""}" id="mono-bio">${esc(bio.t)}${bio.s?stag(bio.s):""}${bio.mt?mtTag():""}${bio.alt?`<span class="tag">${esc(T("biofallback"))}</span>`:""}</p>
+        ${bio.t.length>420?`<button class="bio-more" id="bio-more">${esc(T("readbio"))}</button>`:""}
+        <div class="mono-links">
+          ${ar.ai?`<a class="permalink" href="https://digikogu.ekm.ee/authors/author_id-${esc(ar.ai)}" target="_blank" rel="noopener">${esc(T("d_artistrec"))}</a>`:""}
+          ${ar.qid?`<a class="permalink" href="https://www.wikidata.org/wiki/${esc(ar.qid)}" target="_blank" rel="noopener">${esc(T("d_wd"))}</a>`:""}
+          <!-- the static page: a stable address to cite or print, which the app's
+               fragment URLs are not, and the only route from app to crawlable page -->
+          <a class="permalink" href="a/${esc(slug(ar.n))}.html">${esc(T("artistpage"))}</a>
+        </div>
+      </div>
+      <div class="mono-side">
+        <div class="mono-fig">${mine.length}</div>
+        <div class="mono-figlab">${esc(T("worksinregister"))}${shown!==mine.length?` · ${esc(T("shown_n",{n:shown}))}`:""}</div>
+        ${auLine(state.artist) ? `<div class="mono-au">${esc(auLine(state.artist))}</div>` : ""}
+        <div class="mono-tl">
+          ${spark(counts, 300, 44)}
+          <div class="mono-axis"><span>${DECADES[0]}s</span><span>${esc(first?(first===last?T("activeone",{a:first+"s"}):T("active",{a:first+"s",b:last+"s"})):T("undatedonlyartist"))}</span><span>${DECADES[DECADES.length-1]}s</span></div>
+        </div>
+        <div class="mono-med">${medl}${und?` · ${esc(T("undated"))} <b>${und}</b>`:""}</div>
+      </div>
+    </section>`;
+  }
+
+  function renderFacets(){
+    const scoped = W.filter(w => matchText(w) && (state.decade===null || decOf(w)===state.decade)
+                            && (state.artist===null || w.a===state.artist));
+    const pass = (w, skip) =>
+        (skip==="med" || state.media.size===0   || state.media.has(w.e))
+     && (skip==="mus" || state.museums.size===0 || state.museums.has(w.mu))
+     && (skip==="cat" || state.cats.size===0    || state.cats.has(w.c))
+     && (skip==="src" || state.srcs.size===0    || state.srcs.has(w.s))
+     && (skip==="org" || state.origins.size===0 || originsOf(w).some(o=>state.origins.has(o)))
+     && (skip==="grp" || state.groups.size===0  || groupsOf(w).some(g=>state.groups.has(g)));
+    // one tally pass per facet group, instead of one full scan per chip
+    const tally = (attr, key) => {
+      const m = new Map();
+      for (const w of scoped){
+        if (!pass(w, attr)) continue;
+        const v = key(w);
+        if (v == null) continue;
+        m.set(v, (m.get(v) || 0) + 1);
+      }
+      return m;
+    };
+    const counts = {
+      med: tally("med", w => w.e),
+      mus: tally("mus", w => w.mu),
+      cat: tally("cat", w => w.c),
+      src: tally("src", w => w.s),
+      org: (() => { const m=new Map();
+        for (const w of scoped){ if(!pass(w,"org")) continue;
+          for (const o of originsOf(w)) m.set(o,(m.get(o)||0)+1); }
+        return m; })(),
+      grp: (() => { const m=new Map();
+        for (const w of scoped){ if(!pass(w,"grp")) continue;
+          for (const g of groupsOf(w)) m.set(g,(m.get(g)||0)+1); }
+        return m; })()
+    };
+    const chips = (el, list, attr, sel, lab, title) => {
+      $(el).innerHTML = list.map(v => {
+        const key = Array.isArray(v) ? v[0] : v, text = Array.isArray(v) ? v[1] : lab(v);
+        const c = counts[attr].get(key) || 0;
+        if (!c && !sel.has(key)) return "";
+        return `<button class="chip" data-${attr}="${esc(key)}" aria-pressed="${sel.has(key)}" title="${esc(title?title(v):text)}">${esc(text)}<span>${c}</span></button>`;
+      }).join("");
+    };
+    chips("f-med", MEDIA,    "med", state.media,   v=>medName(v));
+    chips("f-mus", MUSEUMS,  "mus", state.museums, v=>abbr(v), v=>musName(v));
+    chips("f-cat", CATS,     "cat", state.cats,    v=>catName(v));
+    chips("f-src", SRCS,     "src", state.srcs,    v=>v);
+    chips("f-org", ORIGINS,  "org", state.origins,  v=> v===NOORIGIN ? T("originunknown") : v);
+    chips("f-grp", GROUPS,   "grp", state.groups,   v=> grpLabel(v), v=> grpKind(v) + " " + grpLabel(v));
+  }
+
+  const sub = w => {
+    const tc = (techName(w)||"").trim();
+    if (tc && tc.toLowerCase() !== String(w.e||"").toLowerCase()) return tc;
+    return (w.ee && w.ee.toLowerCase() !== String(w.e||"").toLowerCase()) ? w.ee : (matName(w) || "");
+  };
+
+  const SHARDS = new Map();
+  const shardOf = w => w.y != null ? String(Math.floor(w.y/10)*10) : "und";
+  async function loadShard(key, attempt = 0){
+    if (SHARDS.has(key)) return SHARDS.get(key);
+    // A retry must skip the browser cache: the failure we are retrying is often a
+    // cached 404 or 5xx, and re-requesting the identical URL just returns it again.
+    const url = `data/detail/${key}.json?v=b4768b62` + (attempt ? `&r=${attempt}` : "");
+    const p = fetch(url, attempt ? {cache: "reload"} : undefined)
+      .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+      .catch(async () => {
+        // Never cache a failure. The old code stored {} on error, so a single network
+        // blip removed that decade's descriptions and dimensions for the rest of the
+        // session — and the record then said "No description in the record", which is
+        // a false claim about the museum rather than an honest one about the fetch.
+        SHARDS.delete(key);
+        if (attempt < 2){
+          await new Promise(r => setTimeout(r, 400 * (attempt + 1)));
+          return loadShard(key, attempt + 1);
+        }
+        return null;
+      });
+    SHARDS.set(key, p);
+    const v = await p;
+    if (v) SHARDS.set(key, v); else SHARDS.delete(key);
+    return v;
+  }
+  function detailOf(w){
+    const s = SHARDS.get(shardOf(w));
+    return (s && !(s instanceof Promise) && s[w.i]) || null;
+  }
+
+  function rowHTML(w, showArtist){
+    const id = w.k, open = state.open === id, ar = A[w.a];
+    // A museum that wrote "19. sajand" told us the century; showing "n.d." for it
+    // throws that away. 174 records are dated to a century but not to a year.
+    const cy = w.y == null && w.yl ? (w.yl.match(/(?:sajand:\s*)(\d{1,2})/i) || w.yl.match(/(\d{1,2})\s*\.?\s*saj/i)
+                 || (m => m && Math.floor(+m[1]/100) === Math.floor(+m[2]/100) ? [m[0], String(Math.floor(+m[1]/100) + 1)] : null)
+                    (w.yl.match(/(\d{4})\s*[–-]\s*(\d{4})/))) : null;
+    const yr = w.y == null ? `<span class="r-year und" ${cy?`title="${esc(w.yl)}"`:""}>${esc(cy ? T("centshort",{n:ordN(+cy[1])}) : T("nd"))}</span>`
+      : `<span class="r-year" title="${esc(dateLabel(w) || w.y)}${w.dsrc==="title"?" — date taken from the end of the title; the museum's dating field is empty":""}">${esc(dateLabel(w) || w.y)}${w.dsrc==="title"?"*":""}</span>`;
+    const art = (showArtist && state.artist===null) ? `<span class="r-artist">${esc(ar.n)}</span>` : `<span class="r-artist"></span>`;
+    let detail = "";
+    if (open){
+      const life = (ar.l[0] || ar.l[1]) ? `${ar.l[0]}–${ar.l[1] || ""}` : "";
+      detail = `<div class="detail">
+        <div>${w.n>1 && (detailOf(w)||{}).mem ? `<div class="members">
+            <div class="mem-head">${esc(T("memhead",{n:w.n}))}</div>
+            <div class="mem-list">${detailOf(w).mem.map(m => `<div class="mem-row">
+                <span class="mem-num" title="${esc(m[0])}">${esc(m[0]||"—")}</span>
+                <span class="mem-tech" title="${esc(m[1])}">${esc((LANG === "en" && m[5]) || m[1] || "")}</span>
+                <span>${m[3]?`<a href="https://www.muis.ee/museaalview/${esc(m[3])}" target="_blank" rel="noopener">MuIS</a>`:""}${m[3]&&m[4]?" · ":""}${m[4]?`<a href="https://digikogu.ekm.ee/ekm/search/oid-${esc(m[4])}/" target="_blank" rel="noopener">EKM</a>`:""}</span>
+              </div>`).join("")}</div></div>` : ""}
+          ${(detailOf(w)||{}).d ? `<div class="d-note"><span class="d-nolabel">${w.s==="cca"?esc(T("d_desc_cca"))+" · "+esc(T("inenglish")):w.s==="ekkm"?esc(T("d_desc_ekkm"))+" · "+esc(T("inenglish")):esc(T("d_desc"))+" · "+(LANG==="en"&&detailOf(w).de?esc(T("mt_desc")):esc(T("estonianprose")))}</span>${esc(LANG==="en"&&detailOf(w).de?detailOf(w).de:detailOf(w).d)}</div>`
+                   : `<div class="d-note"><span class="d-nolabel">${esc(T("d_desc"))}</span><em style="color:var(--grey-4)">${esc(T("d_nodesc"))}</em></div>`}
+          <div class="d-v" style="margin-top:16px;display:flex;flex-wrap:wrap;gap:18px">
+            ${(detailOf(w)||{}).mi?`<a class="permalink" href="https://www.muis.ee/museaalview/${esc(detailOf(w).mi)}" target="_blank" rel="noopener">${esc(T("d_recmuis"))}</a>`:""}
+            ${(detailOf(w)||{}).oi?`<a class="permalink" href="https://digikogu.ekm.ee/ekm/search/oid-${esc(detailOf(w).oi)}/" target="_blank" rel="noopener">${esc(T("d_recekm"))}</a>`:""}
+            ${w.url?`<a class="permalink" href="${esc(w.url)}" target="_blank" rel="noopener">${esc(w.kind === "gallery" ? T("d_gallerylink", {g: musName(w.mu)}) : w.kind === "sold" ? T("d_pastlink", {g: musName(w.mu)}) : w.kind === "auction" ? T("d_lotlink", {g: musName(w.mu)}) : T("d_recsource"))}</a>`:""}
+            ${slBtn(id, "sl-d")}
+          </div>
+        </div>
+        <div class="d-side">
+          <div class="d-k">${esc(T("d_artist"))}</div><div class="d-v">${esc(ar.n)} <em>${esc(life)}</em>${stag(ar.ls)}${ar.ai?` <a class="permalink" style="margin-left:8px" href="https://digikogu.ekm.ee/authors/author_id-${esc(ar.ai)}" target="_blank" rel="noopener">EKM artist record ↗</a>`:""}</div>
+          <div class="d-k">${esc(T("d_dating"))}</div><div class="d-v">${
+            w.yl ? esc(dateLabel(w)) + (w.dsrc==="title" ? ` <em>${esc(T("d_fromtitle"))}</em>` : "")
+                 : `<em>${esc(T("d_nodate",{n:ar.n,l:(ar.l[0]||"?")+"–"+(ar.l[1]||"")}))}</em>`}${
+            w.f ? `<br><em>${esc(T(w.f === "pre" ? "d_prebirth" : "d_postdeath", {l:(ar.l[0]||"?")+"–"+(ar.l[1]||"")}))}</em>` : ""}</div>
+          <div class="d-k">${esc(T("d_technique"))}</div><div class="d-v">${techName(w)?esc(cap(techName(w))):"—"}</div>
+          <div class="d-k">${esc(T("d_material"))}</div><div class="d-v">${matName(w)?esc(cap(matName(w))):"—"}</div>
+          ${(detailOf(w)||{}).dm?`<div class="d-k">${esc(T("d_dimensions"))}</div><div class="d-v">${esc(cap(dimsName(detailOf(w).dm)))}</div>`:""}
+          ${w.c?`<div class="d-k">${esc(T("d_category"))}</div><div class="d-v">${esc(catName(w.c))}</div>`:""}
+          <div class="d-k">${esc(isHeld(w)?T("d_collection"):T("venue"))}</div><div class="d-v">${w.co?esc(collName(w.co))+"<br>":""}<em>${siteOf(w.mu) ? `<a class="permalink" href="${esc(siteOf(w.mu))}" target="_blank" rel="noopener">${esc(musName(w.mu))}</a>` : esc(musName(w.mu))}</em></div>
+          <div class="d-k">${esc(T("kind"))}</div><div class="d-v">${esc(T(w.kind==="shown"?"shown":w.kind==="gallery"?"gallery":w.kind==="auction"?"kind_auction":w.kind==="sold"?"kind_sold":"held"))}</div>
+          ${w.kind==="sold" ? `<div class="d-k">${esc(T("d_status"))}</div><div class="d-v">${esc(pastText(w))}${w.gl ? `<br><span class="d-sub">${esc(T("d_lastseen", {d: w.gl}))}</span>` : ""}<br><span class="d-sub">${esc(T("d_pastnote"))}</span></div>` : ""}
+          ${w.kind==="auction" ? `<div class="d-k">${esc(T("d_result"))}</div><div class="d-v">${esc(w.an)} · <b>${esc(auText(w))}</b>${w.as ? `<br><span class="d-sub">${esc(T("d_start", {p: eur(w.as)}))}</span>` : ""}${w.aa ? `<br><span class="d-sub">${esc(T("au_afternote"))}</span>` : ""}<br><span class="d-sub">${esc(T("au_note"))}</span></div>` : ""}
+          ${w.nu ? `<div class="d-k">${esc(T("d_number"))}</div><div class="d-v" style="font-family:var(--mono);font-size:.78rem">${esc(w.nu)}</div>` : ""}
+          ${ar.wdesc?`<div class="d-k">${esc(T("d_origin"))}</div><div class="d-v">${esc(ar.wdesc)}${ar.qid?` <a class="permalink" href="https://www.wikidata.org/wiki/${esc(ar.qid)}" target="_blank" rel="noopener">${esc(T("d_wd"))}</a>`:""}</div>`:""}
+          ${ar.cit?`<div class="d-k">${esc(T("d_cit"))}</div><div class="d-v"><em>${esc(ar.cit.join(" · "))}</em>${ar.born?`<br><em>${esc(T("d_born"))}: ${esc(ar.born)}</em>`:""}</div>`:""}
+          <div class="d-bio">${esc(bioFor(ar).t)}${bioFor(ar).s?stag(bioFor(ar).s):""}${bioFor(ar).mt?mtTag():""}${bioFor(ar).alt?`<span class="tag">${esc(T("biofallback"))}</span>`:""}</div>
+          ${state.artist===null?`<button class="showartist" data-artist="${w.a}">All ${ar.c} works by ${esc(ar.n)} →</button>`:""}
+        </div></div>`;
+    }
+    // A work for sale links to the gallery from the row itself; the record is one
+    // click further and the link was the thing a collector came for.
+    const rl = w.kind === "gallery" && w.url
+      ? `<a class="rl" href="${esc(w.url)}" target="_blank" rel="noopener" title="${esc(T("d_gallerylink", {g: musName(w.mu)}))}">${esc(T("rl_view"))}</a>`
+      // a past listing links to the gallery's page for as long as it stays up
+      : w.kind === "sold"
+      ? (w.url
+        ? `<a class="rl rl-past" href="${esc(w.url)}" target="_blank" rel="noopener" title="${esc(T("d_pastlink", {g: musName(w.mu)}))}${w.gl ? ` · ${esc(T("d_lastseen", {d: w.gl}))}` : ""}">${esc(pastText(w))} ↗</a>`
+        : `<span class="rl rl-past">${esc(pastText(w))}</span>`)
+      // an auction result carries its outcome on the row: the sale is the point of the record
+      : w.kind === "auction" && w.url
+      // the price alone on the row -- it is the outcome; "sold" is in the title and the detail
+      ? `<a class="rl rl-au${w.ao ? "" : " unsold"}" href="${esc(w.url)}" target="_blank" rel="noopener" title="${esc(w.an)} · ${esc(auText(w))}">${esc(w.ao ? (w.ap ? eur(w.ap) : T("au_soldnp")) : T("au_unsold"))} ↗</a>` : "";
+    return `<div class="row${rl ? " has-link" : ""}${w.kind === "auction" ? " au" : ""}" data-open="${open}">
+      <button class="row-btn" data-id="${esc(id)}" aria-expanded="${open}">
+        ${yr}
+        <span class="r-title" title="${esc(w.t)}">${esc(w.t)}${w.n>1?`<span class="src-tag" title="${w.n} catalogued objects share this title and date — sheets, impressions or parts">×${w.n}</span>`:""}</span>
+        ${art}
+        <span class="r-med" title="${esc(sub(w))}">${esc(medName(w.e))}</span>
+        <span class="r-coll" title="${esc(musName(w.mu))} · ${esc(w.nu||"")}">${esc(abbr(w.mu))}<span class="src-tag">${esc(SRCLAB[w.s]||w.s)}</span></span>
+      </button>${rl}${slBtn(id)}${detail}</div>`;
+  }
+
+  function groupHTML(key, gutter, items, showArtist){
+    const LIMIT = state.group === "artist" ? LIMIT_ART : LIMIT_DEC;
+    const gk = String(key);                       // dataset values are always strings
+    const n = items.length, exp = state.expand.has(gk);
+    const shown = exp ? items : items.slice(0, LIMIT);
+    const divide = state.group === "decade" && state.sort === "year"
+                   && state.year === null && gk !== "und";
+    const more = (!exp && n > LIMIT)
+      ? `<button class="more" data-exp="${esc(gk)}">${esc(T("showallentries",{n:fmt(n)}))}</button>` : "";
+    return `<section class="group" id="grp-${esc(key)}">
+      <div class="gutter">${gutter}<div class="g-count">${n} ${esc(n===1?T("entry"):T("entries"))}</div></div>
+      <div class="rows">${(() => {
+        if (!divide) return shown.map(w=>rowHTML(w, showArtist)).join("");
+        let last = null, out = "";
+        const yearTally = new Map();
+        for (const x of items) yearTally.set(x.y, (yearTally.get(x.y) || 0) + 1);
+        shown.forEach(w => {
+          if (w.y !== last){
+            last = w.y;
+            const c = yearTally.get(w.y) || 0;
+            out += `<div class="yr-div"><b>${w.y==null?"n.d.":w.y}</b><span>${esc(c===1?T("oneworkc"):T("nworks",{n:c}))}</span></div>`;
+          }
+          out += rowHTML(w, showArtist);
+        });
+        return out;
+      })()}${more}</div>
+    </section>`;
+  }
+
+  // The three centuries before 1700 hold 247 works between them; as columns of their
+  // own they would be hairlines. They share one, as they share an era on the band.
+  // Every column and cell keeps a floor width so the small ones can still be read
+  // and clicked -- the printed count, not the area, is the figure.
+  function mosaicHTML(keys, cnt){
+    const cols = [];
+    for (const d of keys){
+      const c = d === "und" ? "und" : d < 1700 ? "pre" : Math.floor(d/100) + 1, last = cols[cols.length-1];
+      if (last && last.c === c) last.ds.push(d); else cols.push({c, ds:[d]});
+    }
+    cols.forEach(c => c.n = c.ds.reduce((n, d) => n + cnt(d), 0));
+    // Column widths follow the square root of the count, as a bubble's radius does:
+    // the 20th century holds 56% of the works and would otherwise be 56% of the
+    // width, with everything else squeezed beside it. The cells inside a column are
+    // linear -- a column is a bar, and its decades divide it.
+    const total = cols.reduce((n, c) => n + Math.sqrt(c.n), 0) || 1;
+    // Proportions are grid tracks in fr, so the gaps come off the top and the shares
+    // stay exact; the floors are pixel minimums the stylesheet sets for the viewport.
+    // (shares as percentages: a grid treats fr factors that sum below 1 as summing to 1,
+    // and would leave the remainder of the width empty)
+    const colsTpl = cols.map(c => `minmax(var(--mow),${(100 * Math.sqrt(c.n) / total).toFixed(2)}fr)`).join(" ");
+    return `<div class="mosaic" role="group" aria-label="${esc(T("mosaic_aria"))}" style="grid-template-columns:${colsTpl}">` + cols.map(c => {
+      const lab = c.c === "und" ? T("nd") : c.c === "pre" ? "<1700" : ordN(c.c);
+      const full = c.c === "und" ? T("undated") : c.c === "pre" ? T("p_pre") : T("century", {n: ordN(c.c)});
+      const span = c.c === "und" ? "und," : c.c === "pre" ? ",1699" : `${(c.c-1)*100},${(c.c-1)*100+99}`;
+      // Before 1700 the decades are 23 slivers of a few works each; that column is
+      // cut by century instead, and a cell opens every decade it holds.
+      const units = c.c === "pre"
+        ? [...new Set(c.ds.map(d => Math.floor(d/100)))].map(h => ({ds: c.ds.filter(d => Math.floor(d/100) === h), lab: ordN(h+1), full: T("century", {n: ordN(h+1)})}))
+        : c.ds.map(d => ({ds: [d], lab: d === "und" ? T("undated") : d + "s"}));
+      units.forEach(u => u.n = u.ds.reduce((n, d) => n + cnt(d), 0));
+      // 14px is one line of label: every decade gets its name, the thinnest a little over-stated
+      const rowsTpl = units.map(u => `minmax(14px,${(100 * u.n / (c.n || 1)).toFixed(2)}fr)`).join(" ");
+      const cells = units.map(u => {
+        const on = u.ds.every(d => state.od.has(String(d)));
+        return `<button class="mo-cell" data-od="${u.ds.join(",")}" aria-pressed="${on}"
+          title="${esc(u.full || u.lab)} · ${esc(u.n===1?T("oneworkc"):T("nworks",{n:fmt(u.n)}))}"><span>${esc(u.lab)}</span><i>${fmt(u.n)}</i></button>`;
+      }).join("");
+      return `<div class="mo-col${c.c==="und"?" und":""}">
+        <button class="mo-h" data-span="${span}" title="${esc(full)} · ${esc(T("nworks",{n:fmt(c.n)}))}"><b>${esc(lab)}</b><span>${fmt(c.n)}</span></button>
+        <div class="mo-cells" style="grid-template-rows:${rowsTpl}">${cells}</div></div>`;
+    }).join("") + `</div>`;
+  }
+
+  function render(){
+    renderDoors(); renderListBar();
+    // The count line and Reset describe and undo a selection; before there is one
+    // they only repeat the masthead.
+    $("countline").hidden = pristine(); $("reset").hidden = pristine();
+    // The A-Ü rail is the index for the artist-grouped view. On the decade view it was
+    // a third way into artists beside search and the names door.
+    $("aidx").hidden = state.group !== "artist" && !state.idxOpen && state.letter === null;
+    const set = fullSet();
+    $("stat-w").textContent = fmt(W.length);
+    $("stat-a").textContent = fmt(STATS.artists);
+    $("stat-m").textContent = fmt(STATS.museums);
+    $("stat-g").textContent = fmt(STATS.galleries);
+    $("stat-gwrap").hidden = STATS.galleries === 0;
+    // Everything a gallery is selling right now, museum-held artist or not. It sits
+    // beside the counts because it is the one thing here a visitor can act on.
+    $("stat-s").textContent = fmt(FOR_SALE);
+    $("stat-sale").hidden = FOR_SALE === 0;
+    $("stat-sale").setAttribute("aria-pressed", state.sale);
+
+    const scope = [];
+    if (state.shared) scope.push(T("sl_shared", {n: state.shared.size}));
+    else if (state.list) scope.push(T("mylist"));
+    if (state.cross) scope.push(T("doors_cross"));
+    if (state.sale) scope.push(T("forsale_chip"));
+    if (state.artist!==null) scope.push(A[state.artist].n);
+    if (state.undOnly) scope.push(T("undated"));
+    else if (state.from !== null || state.to !== null)
+      scope.push(`${state.from ?? YEARS.min}–${state.to ?? YEARS.max}`);
+    if (state.q) scope.push(`“${state.q}”`);
+    if (state.decade!==null) scope.push(state.decade==="und" ? T("undated") : (state.year!==null ? String(state.year) : state.decade+"s"));
+    if (state.media.size) scope.push([...state.media].map(medName).join(" + "));
+    if (state.museums.size) scope.push([...state.museums].map(abbr).join(" + "));
+    if (state.cats.size) scope.push([...state.cats].map(catName).join(" + "));
+    if (state.srcs.size) scope.push([...state.srcs].map(s=>SRCLAB[s]||s).join(" + "));
+    if (state.origins.size) scope.push([...state.origins].map(o=>o===NOORIGIN?T("originunknown"):o).join(" + "));
+    if (state.groups.size) scope.push([...state.groups].map(grpLabel).join(" + "));
+    $("countline").textContent = T("ofworks",{a:fmt(set.length),b:fmt(W.length)}) +
+      (scope.length ? " · " + scope.join(" · ") : " · " + T("complete"));
+
+    if (!set.length){ reg.innerHTML = `<p class="empty">${esc(T("noresults"))}</p>`; return; }
+    if (state.group === "auction"){ reg.innerHTML = renderAuctions(set); return; }
+
+    let html = "";
+    const BASE = baseSet();          // hoisted: was recomputed once per decade
+    // ...and bucket both by decade in one pass. These were being filtered once per
+    // decade key — 57 keys over 52,083 works, twice, is ~6M comparisons per render.
+    const bucket = arr => {
+      const m = new Map();
+      for (const w of arr){ const k = decOf(w); let a = m.get(k); if (!a) m.set(k, a = []); a.push(w); }
+      return m;
+    };
+    const setByDec = bucket(set), baseByDec = bucket(BASE);
+    if (state.group === "decade" || state.artist !== null){
+      const asc = state.decOrder === "earliest";
+      let keys = [...new Set(set.map(decOf))].filter(k=>k!=="und").sort((a,b)=>asc?a-b:b-a);
+      if (set.some(w=>w.y==null)) keys.push("und");
+      const decSection = d => {
+        let items = sortedGroup(d, setByDec.get(d) || [], !asc);
+        if (d === "und" && state.sort === "year"){
+          // Nothing here has a year, but not everything is equally unknown: 174 records
+          // are dated to a century by the museum. Use that where it exists — it beats
+          // the artist-lifetime proxy — and fall back to when the artist worked.
+          const birth = i => +(A[i].l[0] || 9999);
+          const centOf = w => {
+            const m = w.yl && (w.yl.match(/(?:sajand:\s*)(\d{1,2})/i) || w.yl.match(/(\d{1,2})\s*\.?\s*saj/i));
+            return m ? (+m[1] - 1) * 100 + 50 : null;   // mid-century, for ordering only
+          };
+          const at = w => centOf(w) ?? birth(w.a);
+          items = items.slice().sort((x,y) => at(x)-at(y)
+            || cmpStr(A[x.a].n, A[y.a].n) || cmpStr(x.t, y.t));
+        }
+        const yearBlock = (() => {
+          if (d === "und"){
+            const pool = baseByDec.get("und") || [];
+            const byArtist = {};
+            pool.forEach(w => { byArtist[w.a] = (byArtist[w.a]||0)+1; });
+            const list = Object.entries(byArtist)
+              .sort((x,y) => y[1]-x[1] || cmpStr(A[x[0]].n, A[y[0]].n)).slice(0, 14);
+            const max = Math.max(1, ...list.map(x=>x[1]));
+            return `<div class="gy gy-artists"><div class="gy-h">${esc(T("mostbyartist"))}</div>` +
+              list.map(([i, n]) => `<button class="gy-row" data-artist="${i}" title="${esc(A[i].n)} · ${n===1?T('oneworkc'):T('nworks',{n})}">
+                  <span class="gy-y">${esc(A[i].n.split(" ").length>1 ? A[i].n[0]+". "+surnameOf(A[i].n) : A[i].n)}</span>
+                  <span class="gy-track"><span class="gy-bar" style="width:${Math.round((n/max)*100)}%"></span></span>
+                  <span class="gy-n">${n}</span></button>`).join("") + `</div>`;
+          }
+          const pool = baseByDec.get(d) || [];
+          const c = {}; for (let y=d; y<d+10; y++) c[y]=0;
+          pool.forEach(w => { if (w.y!=null && c[w.y]!==undefined) c[w.y]++; });
+          const max = Math.max(1, ...Object.values(c));
+          return `<div class="gy"><div class="gy-h">${esc(state.year!==null?T("yearshowing",{y:state.year}):T("byyear"))}</div>` +
+            Array.from({length:10}, (_, i) => {
+              const y = d+i, n = c[y], on = state.year === y;
+              if (!n) return `<div class="gy-row gy-empty"><span class="gy-y">${y}</span><span class="gy-track"></span><span class="gy-n">·</span></div>`;
+              return `<button class="gy-row" data-gyear="${y}" aria-pressed="${on}" title="${n===1?T('oneworkc'):T('nworks',{n})} · ${y}">
+                <span class="gy-y">${y}</span>
+                <span class="gy-track"><span class="gy-bar" style="width:${Math.round((n/max)*100)}%"></span></span>
+                <span class="gy-n">${n}</span></button>`;
+            }).join("") + `</div>`;
+        })();
+        // A shortlist is a handful of works the reader chose; the decade's blurb and
+        // year chart are about the catalogue, not their list. Just the decade.
+        const slim = !!listKeys();
+        const gutter = d==="und"
+          ? `<span class="g-num" style="font-size:2rem">n.d.</span>
+             <div class="g-period">${esc(T("undated"))}</div>${slim ? "" : `
+             <p class="g-blurb">${esc(T("undatedblurb"))}</p>${yearBlock}`}`
+          : `<span class="g-num">${d}<span style="font-size:.55em">s</span></span>
+             <div class="g-period">${esc(periodLabel(d))}</div>${slim ? "" : `
+             <p class="g-blurb">${esc(blurbFor(d))}</p>${yearBlock}`}`;
+        return groupHTML(d, gutter, items, true);
+      };
+      // Untouched, the page listed every decade one after another: 57 groups, each with
+      // its gutter and its first rows, 74,000px before anyone had asked for anything.
+      // A broad view opens on a mosaic instead: one column per century, wide as its
+      // share of the works; the decades stacked inside it, tall as theirs. The whole
+      // span reads at a glance, and a decade opens beneath the mosaic on a click. A
+      // narrow view (an artist, a single decade) is short enough to stay flat, and a
+      // search always is: someone who typed a name wants the works, not a chart.
+      const compact = state.artist === null && !state.q && keys.length > 6 && set.length > 300;
+      if (!compact) html = keys.map(decSection).join("");
+      else html = mosaicHTML(keys, k => (setByDec.get(k) || []).length)
+               + keys.filter(d => state.od.has(String(d))).map(decSection).join("");
+    } else {
+      // The last word is not the surname when the name ends in a bracket -- "Johann
+      // Willinges (1560-1625)" sorted under "(", ahead of every letter. surnameOf skips those.
+      const surname = surnameOf;
+      const birth = i => +(A[i].l[0]||9999);
+      const idxs = [...new Set(set.map(w=>w.a))].sort((x,y)=>
+        state.artOrder==="az" ? COLL.compare(surname(A[x].n), surname(A[y].n))
+                              : (birth(x)-birth(y)) || COLL.compare(surname(A[x].n), surname(A[y].n)));
+      const shownIdxs = idxs.slice(0, state.gLimit);
+      html = shownIdxs.map(i => {
+        const ar = A[i];
+        const items = sortRows(set.filter(w=>w.a===i), false);
+        const life = (ar.l[0]||ar.l[1]) ? `${ar.l[0]}–${ar.l[1]||""}` : "dates unrecorded";
+        // In the museums-and-for-sale view the split is the point: how much of the
+        // artist a public collection holds against how much is on the market.
+        const split = state.cross ? (() => {
+          const held = HELD_N.get(i) || 0, sold = items.length;
+          return `<div class="g-split">${held.toLocaleString(LANG==="en"?"en":"et")} ${esc(T("cross_held"))} · ${sold} ${esc(T("cross_sold"))}</div>`; })() : "";
+        const au = auLine(i);
+        const gutter = `<span class="g-name">${esc(ar.n)}</span>
+          <div class="g-dates">${esc(life)}${stag(ar.ls)}</div>${split}${au ? `<div class="g-split">${esc(au)}</div>` : ""}
+          <p class="g-blurb">${esc(bioFor(ar).t)}</p>
+          <button class="showartist" data-artist="${i}">Open artist →</button>`;
+        return groupHTML("a"+i, gutter, items, false);
+      }).join("");
+      if (idxs.length > shownIdxs.length)
+        html += `<button class="more" id="more-artists" style="margin-top:18px">${esc(T("moreartists",{n:fmt(idxs.length-shownIdxs.length)}))}</button>`;
+    }
+    reg.innerHTML = html;
+  }
+  // ---- auction results --------------------------------------------------------
+  // The lots in the current selection, one group per sale, newest sale first, the
+  // highest result at the top of each. Every filter applies: an artist's sales, a
+  // medium's, a decade's. The row already states the outcome and links to the lot.
+  function renderAuctions(set){
+    const lots = set.filter(w => w.kind === "auction");
+    if (!lots.length) return `<p class="empty">${esc(T("au_none"))}</p>`;
+    const sales = new Map();
+    for (const w of lots){
+      const k = `${w.ad}|${w.mu}|${w.an}`;
+      let g = sales.get(k); if (!g) sales.set(k, g = {ad: w.ad, mu: w.mu, an: w.an, items: []});
+      g.items.push(w);
+    }
+    if (state.sort === "price"){
+      // one list across every sale, highest hammer first; the sort's order toggle flips it
+      const items = sortRows(lots, state.decOrder === "earliest"), sold = lots.filter(w => w.ao && w.ap);
+      const ps = sold.map(w => w.ap).sort((a, b) => a - b);
+      const gutter = `<span class="g-name">${esc(T("au_byprice"))}</span>
+        <div class="g-split">${esc(T("au_saleline", {n: fmt(lots.length), s: fmt(lots.filter(w => w.ao).length)}))}${ps.length ? ` · ${fmt(ps[0])}–${eur(ps[ps.length-1])}` : ""}</div>`;
+      return groupHTML("price", gutter, items, true) + `<p class="tl-note">${esc(T("au_note"))}</p>`;
+    }
+    const asc = state.decOrder === "earliest";
+    const order = [...sales.values()].sort((x, y) => asc ? x.ad.localeCompare(y.ad) : y.ad.localeCompare(x.ad));
+    const shown = order.slice(0, state.auLimit);
+    return shown.map((g, k) => {
+      const items = g.items.slice().sort((x, y) => (y.ap || -1) - (x.ap || -1) || cmpStr(A[x.a].n, A[y.a].n));
+      const sold = items.filter(w => w.ao), total = sold.reduce((n, w) => n + (w.ap || 0), 0);
+      const top = sold.length && sold[0].ap ? sold[0] : null;
+      const when = g.ad.length > 7 ? g.ad.split("-").reverse().join(".") : (g.ad.slice(5, 7) ? `${g.ad.slice(5, 7)}.${g.ad.slice(0, 4)}` : g.ad);
+      const gutter = `<span class="g-name">${esc(g.an)}</span>
+        <div class="g-dates">${esc(musName(g.mu))} · ${esc(when)}</div>
+        <div class="g-split">${esc(T("au_saleline", {n: fmt(items.length), s: fmt(sold.length)}))}${total ? ` · ${esc(T("au_total", {p: eur(total)}))}` : ""}</div>
+        ${top ? `<p class="g-blurb">${esc(T("au_top"))}: ${esc(A[top.a].n)}, <em>${esc(top.t)}</em> — ${esc(eur(top.ap))}</p>` : ""}`;
+      return groupHTML("s" + k, gutter, items, true);
+    }).join("") + (order.length > shown.length
+      ? `<button class="more" id="more-sales" style="margin-top:18px">${esc(T("au_moresales", {n: fmt(order.length - shown.length)}))}</button>` : "")
+      + `<p class="tl-note">${esc(T("au_note"))}</p>`;
+  }
+  const AU_N = W.reduce((n, w) => n + (w.kind === "auction" ? 1 : 0), 0);
+  const AU_HOUSES = new Set(W.filter(w => w.kind === "auction").map(w => w.mu)).size;
+
+  // ---- landing doors --------------------------------------------------------
+  // The register opened grouped by decade, earliest first, so the first thing a
+  // visitor met was the 1440s: one object, by nobody they have heard of. No decade
+  // makes a good first row -- without images a single catalogue line cannot carry a
+  // landing view -- so the question is not which row comes first but what the first
+  // screen is. One door above the list: a name -- the way in people actually arrive
+  // with. A period door and a collection door were here too; the eras now sit under
+  // the histogram against the bars they describe, and the museum facet does
+  // collections. Any search or filter hides it.
+  // Sixteen names, chosen rather than counted. Ranked by holdings, the door read as a
+  // list of the most prolific -- Richard Sagrits above Konrad Mägi, Gori above Köler --
+  // which is a fact about museum acquisition, not about Estonian art. These are the
+  // artists a history of it cannot leave out, one sculptor among them, in order of
+  // birth. Editorial: the one place on the page where a judgement stands in for a count,
+  // and tagged as such like every other editorial line.
+  const CANON = ["Johann Köler", "Amandus Adamson", "Kristjan Raud", "Ants Laikmaa",
+                 "Konrad Mägi", "Nikolai Triik", "Eduard Wiiralt", "Karin Luts",
+                 "Evald Okas", "Ülo Sooster", "Olev Subbi", "Jüri Arrak",
+                 "Malle Leis", "Raul Meel", "Tõnis Vint", "Leonhard Lapin"];
+  // Artists a public collection has accessioned AND a gallery is selling right now.
+  // The most interesting slice for a collector, and invisible until here: it needs
+  // two facets at once, which the facet panel cannot express.
+  const CROSS = (() => {
+    const held = new Set(), sold = new Set();
+    W.forEach(w => { if (w.kind === "gallery") sold.add(w.a); else if (isHeld(w)) held.add(w.a); });
+    return new Set([...held].filter(i => sold.has(i)));
+  })();
+  const HELD_N = (() => { const m = new Map(); W.forEach(w => { if (isHeld(w)) m.set(w.a, (m.get(w.a) || 0) + 1); }); return m; })();
+  const FOR_SALE = W.reduce((n, w) => n + (w.kind === "gallery" ? 1 : 0), 0);
+  const CROSS_WORKS = W.reduce((n, w) => n + (w.kind === "gallery" && CROSS.has(w.a) ? 1 : 0), 0);
+  const TOP_ART = (() => {
+    const c = new Map(); W.forEach(w => c.set(w.a, (c.get(w.a) || 0) + 1));
+    const byName = new Map(A.map((a, i) => [a.n, i]));
+    const missing = CANON.filter(n => !byName.has(n));
+    if (missing.length) console.warn("canon names not in this build:", missing);
+    return CANON.filter(n => byName.has(n)).map(n => [byName.get(n), c.get(byName.get(n)) || 0]);
+  })();
+  // The app already names Estonia's periods for the decade bands. The doors reuse
+  // exactly those labels rather than inventing a parallel vocabulary, plus one band
+  // for everything earlier than the first of them.
+  const DOOR_PERIODS = [[null, 1699, null], ...PERIODS.map(p => [p[0], p[1], p[2]])];
+  const dpLabel = ([, , key]) => key === null ? T("p_pre")
+    : (LANG === "en" ? I18N.PERIOD_EN[key] : I18N.PERIOD_ET[key]);
+  const PCOUNT = DOOR_PERIODS.map(([lo, hi]) => W.reduce((n, w) =>
+    n + (w.y != null && (lo === null || w.y >= lo) && w.y <= hi ? 1 : 0), 0));
+
+  const pristine = () => !state.q && !listKeys() && !state.cross && !state.sale && state.decade === null && state.artist === null
+    && state.letter === null && state.from === null && state.to === null && state.year === null
+    && !state.undOnly && !state.media.size && !state.museums.size && !state.cats.size
+    && !state.srcs.size && !state.origins.size && !state.groups.size;
+
+  function renderDoors(){
+    const el = $("doors");
+    if (!pristine()){ el.hidden = true; el.innerHTML = ""; return; }
+    const num = n => n.toLocaleString(LANG === "en" ? "en-GB" : "et-EE");
+    const col = (head, items, cls, tag) => `<div class="${cls || ""}"><h2>${esc(T(head))}${tag ? ` <span class="tag">${esc(tag)}</span>` : ""}</h2><ul>` + items.map(
+      ([label, n, kind, v]) => `<li><button data-door="${kind}" data-v="${v}">` +
+        `<span>${esc(label)}</span><span class="n">${num(n)}</span></button></li>`).join("") + "</ul></div>";
+    el.innerHTML =
+      col("doors_name",   TOP_ART.map(([i, n]) => [A[i].n, n, "a", i]), "d-names", "ed")
+      + `<p class="door-line"><button data-door="x" data-v="0">${esc(T("doors_cross"))}<span class="n">${num(CROSS_WORKS)} ${esc(T("of_n", {n: num(FOR_SALE)}))} ${esc(T("forsale"))} · ${num(CROSS.size)} ${esc(T("artists"))}</span><span class="arrow">&rarr;</span></button></p>`
+      + (AU_N ? `<p class="door-line"><button data-door="q" data-v="0">${esc(T("doors_auctions"))}<span class="n">${num(AU_N)} ${esc(T("au_lots"))} · ${AU_HOUSES} ${esc(T("au_houses"))}</span><span class="arrow">&rarr;</span></button></p>` : "");
+    el.hidden = false;
+  }
+
+  // ---- shortlist ------------------------------------------------------------
+  // A visitor's own list of works, kept in this browser. Every visit used to start
+  // from nothing: a researcher assembling references, or a collector comparing what
+  // is on the market, had nowhere to put a record they meant to come back to. The
+  // list lives in localStorage -- no account, no server; nothing leaves the machine
+  // unless they export it or share a link, and the link carries the keys and nothing
+  // else. Keys are inventory numbers, so a list survives rebuilds of the catalogue.
+  const SL_KEY = "museaal.shortlist";
+  const KEYSET = new Set(W.map(w => w.k));
+  const SL = new Set((() => { try { return JSON.parse(localStorage.getItem(SL_KEY) || "[]"); } catch(e){ return []; } })()
+                     .filter(k => typeof k === "string"));
+  const slSave = () => { try { localStorage.setItem(SL_KEY, JSON.stringify([...SL])); } catch(e){} };
+  // What the register is restricted to: your list, a list someone shared, or nothing.
+  const listKeys = () => state.shared || (state.list ? SL : null);
+  // Detail fields (dimensions, source ids) live in a shard in the sharded build and on
+  // the record itself in the single-file one; read them the same way in both.
+  const det = w => (typeof detailOf === "function" ? (detailOf(w) || {}) : w);
+  const SL_ICON = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 2h8v12l-4-3-4 3z"/></svg>';
+  const slBtn = (k, cls) => {
+    const on = SL.has(k), lab = T(on ? "sl_remove" : "sl_add");
+    return `<button class="sl${cls ? " " + cls : ""}" data-sl="${esc(k)}" aria-pressed="${on}" title="${esc(lab)}" aria-label="${esc(lab)}">`
+         + SL_ICON + (cls ? `<span>${esc(lab)}</span>` : "") + `</button>`;
+  };
+  function slToggle(k){
+    if (SL.has(k)) SL.delete(k); else SL.add(k);
+    slSave();
+    if (listKeys()){ render(); pushHash(true); return; }   // the row leaves or joins the view
+    // Otherwise touch only what changed: a full render is the expensive part of this page.
+    document.querySelectorAll(`.sl[data-sl="${CSS.escape(k)}"]`).forEach(b => {
+      const on = SL.has(k), lab = T(on ? "sl_remove" : "sl_add");
+      b.setAttribute("aria-pressed", on); b.title = lab; b.setAttribute("aria-label", lab);
+      const t = b.querySelector("span"); if (t) t.textContent = lab;
+    });
+    renderListBar();
+  }
+  function renderListBar(){
+    const el = $("listbar"), keys = listKeys();
+    $("mylist").textContent = SL.size ? T("mylist_n", {n: SL.size}) : T("mylist");
+    $("mylist").setAttribute("aria-pressed", !!state.list);
+    if (!keys){ el.hidden = true; el.innerHTML = ""; return; }
+    const n = [...keys].filter(k => KEYSET.has(k)).length;
+    const count = state.shared ? T("sl_shared", {n}) : (n === 1 ? T("sl_one") : T("sl_count", {n}));
+    el.innerHTML = `<b>${esc(count)}</b>`
+      + (state.shared ? `<button class="linkbtn" data-sl-act="adopt">${esc(T("sl_adopt"))}</button>` : "")
+      + (n ? `<button class="linkbtn" data-sl-act="csv">${esc(T("sl_csv"))}</button>`
+           + `<button class="linkbtn" data-sl-act="link">${esc(T("sl_link"))}</button>` : "")
+      + (!state.shared && n ? `<button class="linkbtn" data-sl-act="clear">${esc(T("sl_clear"))}</button>` : "")
+      + `<button class="linkbtn" data-sl-act="close">${esc(T("sl_close"))}</button>`
+      + `<span class="sl-note">${esc(T(n ? (state.shared ? "sl_shared_note" : "sl_kept") : "sl_empty"))}</span>`;
+    el.hidden = false;
+  }
+  async function slCSV(){
+    const keys = listKeys() || SL;
+    const rows = W.filter(w => keys.has(w.k));
+    if (typeof loadShard === "function")   // dimensions and source ids are in the shards
+      await Promise.all([...new Set(rows.filter(w => w.h && !detailOf(w)).map(shardOf))].map(loadShard));
+    const src = w => { const d = det(w);
+      return d.mi ? `https://www.muis.ee/museaalview/${d.mi}`
+           : d.oi ? `https://digikogu.ekm.ee/ekm/search/oid-${d.oi}/` : (d.url || ""); };
+    const q = v => `"${String(v ?? "").replace(/"/g, '""')}"`;
+    const head = ["artist", "title", "year", "technique", "medium", "dimensions", "holder", "inventory_no", "kind", "source"];
+    const lines = [head.join(",")].concat(rows.map(w => [
+      A[w.a].n, w.t, w.y ?? "", techName(w) || "", medName(w.e) || "", det(w).dm || "",
+      musName(w.mu), w.nu || "", w.kind || "held", src(w)].map(q).join(",")));
+    const blob = new Blob(["\ufeff" + lines.join("\r\n")], {type: "text/csv;charset=utf-8"});
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob); a.download = "museaal-list.csv";
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  }
+  const slShareURL = () => location.origin + location.pathname + "#list="
+    + [...(listKeys() || SL)].filter(k => KEYSET.has(k)).join(",");
+  async function slCopyLink(btn){
+    const url = slShareURL(), was = btn.textContent;
+    try { await navigator.clipboard.writeText(url); btn.textContent = T("copied"); }
+    catch(e){ prompt(T("sl_link"), url); return; }   // clipboard refused: let them copy by hand
+    setTimeout(() => { btn.textContent = was; }, 2200);
+  }
+
+  const renderAll = () => { renderBars(); renderYearRange(); renderFacets(); renderActiveFilters(); renderArtistIndex(); renderMono(); render(); };
+
+  function selectArtist(i){
+    state.artist = i; state.open = null; state.expand.clear();
+    state.decade = null; state.idxOpen = false; state.letter = null;
+    renderAll(); pushHash();
+    window.scrollTo({top: 0, behavior: matchMedia("(prefers-reduced-motion:reduce)").matches?"auto":"smooth"});
+  }
+  document.addEventListener("click", e => {
+    const b = e.target.closest("[data-artist]");
+    if (b){ e.preventDefault(); selectArtist(+b.dataset.artist); }
+  });
+  $("ai-toggle").addEventListener("click", () => {
+    state.idxOpen = !state.idxOpen; state.idxLimit = 120; renderArtistIndex(); pushHash(true);
+  });
+  $("ai-body").addEventListener("click", e => {
+    if (e.target.closest("#more-index")){ state.idxLimit += 300; renderArtistIndex(); }
+  });
+  let iq = null;
+  const setIdxSort = mode => {
+    state.idxSort = mode; state.idxLimit = 120;
+    $("ais-az").setAttribute("aria-pressed", mode !== "works");
+    $("ais-works").setAttribute("aria-pressed", mode === "works");
+    renderArtistIndex(); pushHash(true);
+  };
+  $("ais-az").addEventListener("click", () => setIdxSort("az"));
+  $("ais-works").addEventListener("click", () => setIdxSort("works"));
+  $("ai-q").addEventListener("input", e => {
+    clearTimeout(iq);
+    iq = setTimeout(() => {
+      state.idxQ = e.target.value.trim(); state.idxLimit = 120;
+      if (state.idxQ && !state.idxOpen) state.idxOpen = true;
+      renderArtistIndex();
+    }, 140);
+  });
+  $("ai-rail").addEventListener("click", e => {
+    const b = e.target.closest(".ai-l"); if (!b) return;
+    const L = b.dataset.letter;
+    state.letter = state.letter === L ? null : L; state.idxLimit = 120;
+    if (state.letter) state.idxOpen = true;
+    renderArtistIndex(); pushHash(true);
+    if (state.letter) $("aidx" in window ? "aidx" : "ai-body").scrollIntoView({behavior: matchMedia("(prefers-reduced-motion:reduce)").matches?"auto":"smooth", block:"nearest"});
+  });
+  document.addEventListener("click", e => {
+    if (e.target.closest("#bio-more")){
+      const p = $("mono-bio"), b = e.target.closest("#bio-more");
+      const open = p.classList.toggle("clamp");
+      b.textContent = open ? T("readbio") : T("showless");
+      return;
+    }
+    if (e.target.closest("#mono-back")){
+      state.artist = null; state.open = null; state.expand.clear();
+      state.idxOpen = true; renderAll(); pushHash();
+      $("ai-body").scrollIntoView({behavior: matchMedia("(prefers-reduced-motion:reduce)").matches?"auto":"smooth", block:"start"});
+    }
+  });
+
+  reg.addEventListener("click", e => {
+    if (e.target.closest("#more-artists")){ state.gLimit += 100; render(); return; }
+    if (e.target.closest("#more-sales")){ state.auLimit += 20; render(); return; }
+    const mb = e.target.closest(".more");
+    if (mb){ state.expand.add(String(mb.dataset.exp)); render(); return; }
+    const cell = e.target.closest(".mo-cell");
+    if (cell){
+      const ks = cell.dataset.od.split(","), on = ks.every(k => state.od.has(k));
+      ks.forEach(k => on ? state.od.delete(k) : state.od.add(k));
+      render(); pushHash(true); return;
+    }
+    const col = e.target.closest(".mo-h");
+    if (col){                                   // a column heading narrows the view to that span
+      const [lo, hi] = col.dataset.span.split(",");
+      if (lo === "und"){ state.undOnly = true; state.from = state.to = null; }
+      else { state.undOnly = false; state.from = lo === "" ? null : +lo; state.to = hi === "" ? null : +hi; }
+      state.open = null; state.expand.clear(); renderAll(); pushHash(); return;
+    }
+    const b = e.target.closest(".row-btn"); if (!b) return;
+    const id = b.dataset.id;
+    if (state.open === id){ state.open = null; render(); pushHash(); return; }
+    state.open = id;
+    const w = W.find(x => x.k === id);
+    if (w && w.h && !detailOf(w)) loadShard(shardOf(w)).then(() => { if (state.open === id) render(); });
+    render(); pushHash();
+    if (state.open){
+      const el = reg.querySelector(`.row-btn[data-id="${CSS.escape(id)}"]`);
+      if (el) el.focus({preventScroll:true});
+    }
+  });
+
+  function yrChanged(){
+    const f = $("yr-from").value, t = $("yr-to").value;
+    state.from = f === "" ? null : +f;
+    state.to   = t === "" ? null : +t;
+    if (state.from !== null && state.to !== null && state.from > state.to){
+      const s = state.from; state.from = state.to; state.to = s;
+    }
+    state.open = null; state.expand.clear(); renderAll(); pushHash();
+  }
+  $("yr-from").addEventListener("change", yrChanged);
+  $("yr-to").addEventListener("change", yrChanged);
+  $("yr-undated").addEventListener("click", () => {
+    state.undOnly = !state.undOnly;
+    if (state.undOnly){ state.from = state.to = null; state.decade = null; state.year = null; }
+    state.open = null; state.expand.clear(); renderAll(); pushHash();
+  });
+  $("yr-reset").addEventListener("click", () => {
+    state.from = state.to = null; state.undOnly = false;
+    state.open = null; state.expand.clear(); renderAll(); pushHash();
+  });
+
+  reg.addEventListener("click", e => {
+    const b = e.target.closest("[data-gyear]"); if (!b) return;
+    e.stopPropagation();
+    const y = +b.dataset.gyear;
+    state.year = state.year === y ? null : y;
+    state.open = null; state.expand.clear();
+    renderAll(); pushHash();
+  }, true);
+
+  $("filters-toggle").addEventListener("click", () => {
+    const p = $("filterpanel");
+    p.hidden = !p.hidden;
+    $("filters-toggle").setAttribute("aria-expanded", !p.hidden);
+    renderActiveFilters();
+  });
+  $("activefilters").addEventListener("click", e => {
+    const b = e.target.closest(".af"); if (!b) return;
+    const c = ACTIVE[+b.dataset.af]; if (!c) return;
+    c.clear();
+    state.open = null; state.expand.clear();
+    renderAll(); pushHash();
+  });
+
+  $("bars").addEventListener("click", e => {
+    if (e.target.closest("#early-toggle")){ state.showEarly = !state.showEarly; renderBars(); return; }
+    const b = e.target.closest(".bar-btn"); if (!b) return;
+    const raw = b.dataset.dec, d = raw === "und" ? "und" : +raw;
+    state.decade = state.decade === d ? null : d;
+    state.year = null;
+    state.open = null; state.expand.clear();
+    if (state.decade !== null) setGroup("decade");
+    renderAll(); pushHash();
+    if (state.decade !== null){
+      const t = document.getElementById("grp-" + state.decade);
+      if (t) t.scrollIntoView({behavior: matchMedia("(prefers-reduced-motion:reduce)").matches?"auto":"smooth", block:"start"});
+    }
+  });
+
+  function facetClick(el, key, set){
+    const b = el.target.closest(".chip"); if (!b) return;
+    const v = b.dataset[key]; if (v == null) return;
+    set.has(v) ? set.delete(v) : set.add(v);
+    state.open = null; state.expand.clear(); renderAll(); pushHash();
+  }
+  $("f-med").addEventListener("click", e => facetClick(e, "med", state.media));
+  $("f-mus").addEventListener("click", e => facetClick(e, "mus", state.museums));
+  $("f-cat").addEventListener("click", e => facetClick(e, "cat", state.cats));
+  $("f-src").addEventListener("click", e => facetClick(e, "src", state.srcs));
+  $("f-org").addEventListener("click", e => facetClick(e, "org", state.origins));
+  $("f-grp").addEventListener("click", e => facetClick(e, "grp", state.groups));
+  $("mylist").addEventListener("click", () => {
+    state.shared = null; state.list = !state.list; state.open = null;
+    renderAll(); pushHash();
+    if (state.list) $("listbar").scrollIntoView({behavior: "auto", block: "start"});
+  });
+  $("listbar").addEventListener("click", e => {
+    const b = e.target.closest("[data-sl-act]"); if (!b) return;
+    const act = b.dataset.slAct;
+    if (act === "csv") slCSV();
+    else if (act === "link") slCopyLink(b);
+    else if (act === "adopt"){ state.shared.forEach(k => SL.add(k)); slSave(); state.shared = null; state.list = true; renderAll(); pushHash(); }
+    else if (act === "clear"){ if (!confirm(T("sl_confirm"))) return; SL.clear(); slSave(); renderAll(); pushHash(); }
+    else if (act === "close"){ state.list = false; state.shared = null; renderAll(); pushHash(); }
+  });
+  // The mark sits beside each row button and inside the open record; neither is
+  // within a .row-btn, so the row handler never sees these clicks.
+  reg.addEventListener("click", e => {
+    const b = e.target.closest(".sl"); if (!b) return;
+    e.stopPropagation(); slToggle(b.dataset.sl);
+  });
+  $("stat-sale").addEventListener("click", () => {
+    state.sale = !state.sale; state.open = null; state.expand.clear();
+    if (state.sale && state.group === "decade") setGroup("artist");
+    renderAll(); pushHash();
+    if (state.sale) $("register").scrollIntoView({behavior: "auto", block: "start"});
+  });
+  $("eras").addEventListener("click", e => {
+    const b = e.target.closest(".era"); if (!b) return;
+    const [lo, hi] = DOOR_PERIODS[+b.dataset.era];
+    const on = b.getAttribute("aria-pressed") === "true";
+    state.from = on ? null : lo; state.to = on ? null : (hi === 2099 ? null : hi); state.undOnly = false;
+    renderAll(); pushHash();
+  });
+  $("doors").addEventListener("click", e => {
+    const b = e.target.closest("button[data-door]");
+    if (!b) return;
+    const v = +b.dataset.v;
+    if (b.dataset.door === "a") state.artist = v;
+    else if (b.dataset.door === "q"){ setGroup("auction"); state.decOrder = "latest"; }
+    else if (b.dataset.door === "x"){ state.cross = true; setGroup("artist"); }
+    else { state.from = DOOR_PERIODS[v][0]; state.to = DOOR_PERIODS[v][1]; }
+    renderAll(); pushHash();
+  });
+  $("mono").addEventListener("click", e => {
+    const b = e.target.closest("[data-grp]"); if (!b) return;
+    state.groups = new Set([b.dataset.grp]); state.artist = null; state.open = null;
+    renderAll(); pushHash();
+  });
+
+  let t = null;
+  $("q").addEventListener("input", e => {
+    clearTimeout(t);
+    t = setTimeout(() => { state.q = e.target.value.trim(); state.open = null; state.expand.clear(); renderAll(); pushHash(true); }, 160);
+    suggest(e.target.value);
+  });
+
+  // ---- suggestions under the search box -------------------------------------------
+  // Typing a name or a title should get you to the thing, not to a filtered list of
+  // everything containing the letters. Artists whose name has a word starting with
+  // what was typed, then works whose title does; an artist opens their view, a work
+  // opens its record in the artist's view.
+  const AKEY = A.map(a => skey(a.n));
+  const ACOUNT = (() => { const c = new Array(A.length).fill(0); W.forEach(w => c[w.a]++); return c; })();
+  const sugg = $("sugg"), qbox = $("q");
+  let sgItems = [], sgSel = -1;
+  const starts = (key, q) => key.startsWith(q) || key.includes(" " + q) || key.includes("-" + q);
+  const hi = (text, q) => {                       // the typed part in bold, on a word boundary
+    const k = skey(text); let i = k.startsWith(q) ? 0 : -1;
+    if (i < 0){ const j = k.indexOf(" " + q); if (j >= 0) i = j + 1; }
+    if (i < 0){ const j = k.indexOf("-" + q); if (j >= 0) i = j + 1; }
+    return i < 0 ? esc(text) : esc(text.slice(0, i)) + "<mark>" + esc(text.slice(i, i + q.length)) + "</mark>" + esc(text.slice(i + q.length));
+  };
+  function suggest(raw){
+    const q = skey(raw.trim());
+    sgItems = []; sgSel = -1;
+    if (q.length < 2){ sugg.hidden = true; sugg.innerHTML = ""; qbox.setAttribute("aria-expanded", "false"); return; }
+    const arts = [];
+    for (let i = 0; i < A.length && arts.length < 40; i++) if (ACOUNT[i] && starts(AKEY[i], q)) arts.push(i);
+    arts.sort((x, y) => (AKEY[y].startsWith(q) - AKEY[x].startsWith(q)) || ACOUNT[y] - ACOUNT[x] || cmpStr(A[x].n, A[y].n));
+    const works = [];
+    for (let i = 0; i < W.length && works.length < 60; i++){ const w = W[i]; if (starts(SK(w), q)) works.push(w); }
+    works.sort((x, y) => (SK(y).startsWith(q) - SK(x).startsWith(q)) || (x.y || 9999) - (y.y || 9999) || cmpStr(x.t, y.t));
+    const top = arts.slice(0, 5), tw = works.slice(0, 6);
+    if (!top.length && !tw.length){ sugg.hidden = true; sugg.innerHTML = ""; qbox.setAttribute("aria-expanded", "false"); return; }
+    let html = "";
+    if (top.length){
+      html += `<div class="sg-h">${esc(T("sg_artists"))}</div>` + top.map(i => { const n = sgItems.push({a: i}) - 1;
+        const life = (A[i].l[0] || A[i].l[1]) ? `${A[i].l[0]}–${A[i].l[1] || ""}` : "";
+        return `<button role="option" data-sg="${n}" id="sg-${n}"><span class="sg-t">${hi(A[i].n, q)}</span><span class="sg-m">${esc(life)}${life ? " · " : ""}${fmt(ACOUNT[i])} ${esc(T("works"))}</span></button>`; }).join("");
+    }
+    if (tw.length){
+      html += `<div class="sg-h">${esc(T("sg_works"))}</div>` + tw.map(w => { const n = sgItems.push({w}) - 1;
+        return `<button role="option" data-sg="${n}" id="sg-${n}"><span class="sg-t"><em>${hi(w.t, q)}</em> · ${esc(A[w.a].n)}</span><span class="sg-m">${w.y || ""}${w.y ? " · " : ""}${esc(abbr(w.mu))}</span></button>`; }).join("");
+    }
+    sugg.innerHTML = html; sugg.hidden = false; qbox.setAttribute("aria-expanded", "true");
+  }
+  function sgGo(n){
+    const it = sgItems[n]; if (!it) return;
+    clearTimeout(t);
+    sugg.hidden = true; sugg.innerHTML = ""; qbox.setAttribute("aria-expanded", "false");
+    state.q = ""; qbox.value = "";
+    if (it.a !== undefined){ setGroup("decade"); selectArtist(it.a); return; }
+    // a work: its artist's view, the record open and in view
+    state.artist = it.w.a; state.decade = null; state.idxOpen = false; state.letter = null;
+    state.expand.clear(); state.open = it.w.k;
+    state.expand.add(String(decOf(it.w)));
+    setGroup("decade"); renderAll(); pushHash();
+    const el = document.querySelector(`.row-btn[data-id="${CSS.escape(it.w.k)}"]`);
+    if (el){ el.scrollIntoView({behavior: "auto", block: "center"}); el.focus({preventScroll: true}); }
+  }
+  const sgMove = d => {
+    if (sugg.hidden || !sgItems.length) return;
+    sgSel = (sgSel + d + sgItems.length) % sgItems.length;
+    sugg.querySelectorAll("[data-sg]").forEach(b => b.setAttribute("aria-selected", +b.dataset.sg === sgSel));
+    qbox.setAttribute("aria-activedescendant", "sg-" + sgSel);
+    const el = sugg.querySelector(`[data-sg="${sgSel}"]`); if (el) el.scrollIntoView({block: "nearest"});
+  };
+  qbox.addEventListener("keydown", e => {
+    if (e.key === "ArrowDown"){ e.preventDefault(); sgMove(1); }
+    else if (e.key === "ArrowUp"){ e.preventDefault(); sgMove(-1); }
+    else if (e.key === "Enter" && !sugg.hidden && sgSel >= 0){ e.preventDefault(); sgGo(sgSel); }
+    else if (e.key === "Escape" && !sugg.hidden){ e.preventDefault(); sugg.hidden = true; qbox.setAttribute("aria-expanded", "false"); }
+  });
+  sugg.addEventListener("mousedown", e => { const b = e.target.closest("[data-sg]"); if (b){ e.preventDefault(); sgGo(+b.dataset.sg); } });
+  document.addEventListener("click", e => { if (!e.target.closest(".search")) { sugg.hidden = true; qbox.setAttribute("aria-expanded", "false"); } });
+  qbox.addEventListener("focus", () => { if (qbox.value.trim().length >= 2 && sugg.innerHTML) sugg.hidden = false; });
+
+  function setGroup(g){
+    state.group = g;
+    $("g-decade").setAttribute("aria-pressed", g==="decade");
+    $("g-artist").setAttribute("aria-pressed", g==="artist");
+    $("g-auc").setAttribute("aria-pressed", g==="auction");
+    syncOrder();
+  }
+  function syncOrder(){
+    const a = $("o-asc"), b = $("o-desc");
+    if (state.group !== "artist"){          // decade and auction views both run earliest/latest
+      // by price the same toggle reads lowest / highest
+      a.textContent = T(state.sort === "price" ? "lowest" : "earliest"); b.textContent = T(state.sort === "price" ? "highest" : "latest");
+      a.setAttribute("aria-pressed", state.decOrder==="earliest");
+      b.setAttribute("aria-pressed", state.decOrder==="latest");
+    } else {
+      a.textContent = T("az"); b.textContent = T("bybirth");
+      a.setAttribute("aria-pressed", state.artOrder==="az");
+      b.setAttribute("aria-pressed", state.artOrder==="birth");
+    }
+  }
+  $("sortby").addEventListener("change", e => {
+    state.sort = e.target.value; state.expand.clear(); syncOrder(); render(); pushHash();
+  });
+  $("g-decade").addEventListener("click", () => { setGroup("decade"); state.expand.clear(); render(); pushHash(); });
+  $("g-artist").addEventListener("click", () => { setGroup("artist"); state.expand.clear(); state.gLimit=50; render(); pushHash(); });
+  $("o-asc").addEventListener("click", () => { state.group!=="artist" ? state.decOrder="earliest" : state.artOrder="az"; syncOrder(); render(); pushHash(); });
+  $("o-desc").addEventListener("click", () => { state.group!=="artist" ? state.decOrder="latest" : state.artOrder="birth"; syncOrder(); render(); pushHash(); });
+  $("g-auc").addEventListener("click", () => { setGroup("auction"); state.decOrder = "latest"; state.expand.clear(); state.auLimit = 20; syncOrder(); render(); pushHash(); });
+  $("reset").addEventListener("click", () => {
+    state.q=""; state.decade=null; state.media.clear(); state.museums.clear(); state.cats.clear(); state.srcs.clear(); state.origins.clear(); state.groups.clear();
+    state.artist=null; state.letter=null; state.idxOpen=false; state.sort="year"; state.year=null; state.from=null; state.to=null; state.undOnly=false; $("sortby").value="year";
+    state.open=null; state.expand.clear(); state.od.clear(); state.decOrder="earliest"; state.artOrder="az";
+    state.list=false; state.shared=null; state.cross=false; state.sale=false;
+    $("q").value=""; setGroup("decade"); renderAll(); pushHash(); window.scrollTo({top:0,behavior:"auto"});
+  });
+
+  const EMBEDDED = (() => { try { return window.self !== window.top; } catch(e){ return true; } })();
+  const LS = "ekr:lastview";
+  function saveLast(hash){ try { localStorage.setItem(LS, hash || ""); } catch(e){} }
+  function loadLast(){ try { return localStorage.getItem(LS) || ""; } catch(e){ return ""; } }
+
+  // Inside a Claude artifact the page runs on <artifact-id>.<something>.claudeusercontent.com,
+  // and that address carries single-use frame tokens that are useless (and unwise) to share.
+  // The artifact id is the first hostname label, so rebuild the public link from it.
+  const BUILD = "2026-09-09d";
+  function frameId(host){
+    if (!/\.claudeusercontent\.com$/i.test(host || "")) return null;
+    const first = String(host).split(".")[0];
+    return /^[0-9a-f]{8}-[0-9a-f-]{20,}$/i.test(first) ? first : null;
+  }
+  function shareURL(loc, hash){
+    loc = loc || location;
+    const h = hash === undefined ? stateToHash() : hash;
+    const frag = h ? "#" + h : "";
+    const id = frameId(loc.hostname);
+    if (id) return { url: "https://claude.ai/code/artifact/" + id + frag, rewritten: true, ok: true };
+    const base = String(loc.href || "").split("#")[0];
+    const embeddedButUnknown = EMBEDDED && /claudeusercontent|\/_f\//i.test(base);
+    return { url: base + frag, rewritten: false, ok: !embeddedButUnknown };
+  }
+  window.__shareURL = shareURL;
+  window.__build = BUILD;
+
+  function refreshShare(){
+    const bar = $("sharebar");
+    if (!bar || !bar.classList.contains("on")) return;
+    const r = shareURL();
+    $("shareurl").value = r.url;
+    const stamp = ` <b>build ${BUILD}</b>`;
+    $("sharenote").innerHTML = (
+      r.rewritten
+        ? `<b>Public link to this artifact.</b> Tested: Claude's viewer does <b>not</b> reopen on the view after the <b>#</b> — it runs this page in a sandbox that never receives that part of the address, so the link above opens the register at the top. It is still the right link to send. To get back to <i>this</i> view: press Back, or reload and use <b>Restore last view</b>. Deep links work in full only in the standalone file.`
+        : !r.ok
+          ? `<b>Could not rebuild a public link.</b> This page is embedded and its address carries sandbox tokens, so the link above is not safe to share. Use <b>Restore last view</b>, or open the standalone file, where the address bar carries the view directly.`
+          : EMBEDDED
+            ? `<b>This page is embedded.</b> Copy the address above rather than the browser's address bar, which may show the container instead.`
+            : `<b>Address bar carries this view.</b> Copy it, bookmark it, or press Back to step through what you clicked.`
+    ) + stamp;
+  }
+
+  $("share").addEventListener("click", () => {
+    const bar = $("sharebar");
+    bar.classList.toggle("on");
+    $("share").textContent = bar.classList.contains("on") ? T("hidelink") : T("linkview");
+    refreshShare();
+  });
+  $("sharecopy").addEventListener("click", async () => {
+    const inp = $("shareurl"), btn = $("sharecopy");
+    try { await navigator.clipboard.writeText(inp.value); btn.textContent = T("copied"); }
+    catch(e){ inp.select(); inp.setSelectionRange(0, 99999); btn.textContent = "⌘C"; }
+    setTimeout(() => { btn.textContent = T("copy"); }, 2200);
+  });
+
+  function applyLang(){
+    document.documentElement.lang = LANG;
+    document.title = T("doctitle");
+    document.querySelectorAll("[data-i18n]").forEach(el => { el.textContent = T(el.dataset.i18n); });
+    document.querySelectorAll("[data-i18n-html]").forEach(el => { el.innerHTML = I18N[LANG === "en" ? "HTML_EN" : "HTML_ET"][el.dataset.i18nHtml] || ""; });
+    $("q").placeholder = T("searchph");
+    applyTheme();
+    $("ai-q").placeholder = T("idxsearch");
+    const ys = W.map(w=>w.y).filter(y=>y!=null);
+    const sub = document.querySelector(".mast-sub");
+    if (sub) sub.textContent = T("sub").replace(/\d{4}\s*[–-]\s*\d{4}/, `${Math.min(...ys)}–${Math.max(...ys)}`);
+    $("lang-et").setAttribute("aria-pressed", LANG === "et");
+    $("lang-en").setAttribute("aria-pressed", LANG === "en");
+    $("built").textContent = DATA.meta.built;
+    $("srcsplit").textContent = LANG === "en"
+      ? `${DATA.meta.dated_from_title} works carry a date the cataloguer wrote at the end of the title rather than in the dating field; those are marked with an asterisk. ${DATA.meta.objects.toLocaleString(LANG === "en" ? "en-GB" : "et-EE")} catalogued objects → ${DATA.meta.works.toLocaleString(LANG === "en" ? "en-GB" : "et-EE")} works (identical title + date + artist collapsed): ${DATA.meta.muis.toLocaleString(LANG === "en" ? "en-GB" : "et-EE")} from MuIS, ${DATA.meta.ekm.toLocaleString(LANG === "en" ? "en-GB" : "et-EE")} from the EKM Digital Collection, ${DATA.meta.both.toLocaleString(LANG === "en" ? "en-GB" : "et-EE")} in both, merged on inventory number. A further ${DATA.meta.gallery.toLocaleString(LANG === "en" ? "en-GB" : "et-EE")} works are the current stock of ${DATA.meta.galleries} galleries, from their own catalogues.${DATA.meta.past ? ` ${fmt(DATA.meta.past)} are past listings — works a gallery has sold (${fmt(DATA.meta.past_sold)}) or no longer lists — kept as a record of the work, never as stock.` : ""}${DATA.meta.auction ? ` ${fmt(DATA.meta.auction)} auction lots (${fmt(DATA.meta.auction_sold)} sold) are results as Haus Galerii, Vernissage, Allee galerii, Vaal galerii and Eesti Kunsti Oksjonid published them.` : ""}`
+      : `${DATA.meta.dated_from_title} teosel on dateering kirjutatud pealkirja lõppu, mitte dateeringuvälja; need on tähistatud tärniga. ${DATA.meta.objects.toLocaleString("et")} museaali → ${DATA.meta.works.toLocaleString("et")} teost (sama pealkiri + dateering + autor koondatud): ${DATA.meta.muis.toLocaleString("et")} MuIS-ist, ${DATA.meta.ekm.toLocaleString("et")} EKM Digitaalkogust, ${DATA.meta.both.toLocaleString("et")} mõlemast, ühendatud tulmenumbri järgi. Veel ${DATA.meta.gallery.toLocaleString("et")} teost on ${DATA.meta.galleries} galerii praegune müügivalik, nende endi kataloogidest.${DATA.meta.past ? ` ${fmt(DATA.meta.past)} on varasemad müügipakkumised — teosed, mille galerii on müünud (${fmt(DATA.meta.past_sold)}) või mida ta enam ei paku — jäetud teose kirjena, mitte kunagi laoseisuna.` : ""}${DATA.meta.auction ? ` ${fmt(DATA.meta.auction)} oksjonipartiid (${fmt(DATA.meta.auction_sold)} müüdud) on tulemused nii, nagu Haus Galerii, Vernissage, Allee galerii, Vaal galerii ja Eesti Kunsti Oksjonid need avaldasid.` : ""}`;
+    const un = $("undated-note");
+    if (un) un.textContent = LANG === "en"
+      ? `${DATA.meta.undated} of ${DATA.meta.works.toLocaleString(LANG === "en" ? "en-GB" : "et-EE")} records carry no dating; they sit in their own group rather than being guessed into a decade.`
+      : `${DATA.meta.undated} kirjet ${DATA.meta.works.toLocaleString("et")}-st on dateerimata; need on omaette rühmas, mitte kümnendisse ära arvatud.`;
+    fillYearSelects();
+    renderYearRange();
+    syncOrder();
+  }
+  function setLang(l, push){
+    LANG = (l === "en") ? "en" : "et";
+    try { localStorage.setItem("ekr:lang", LANG); } catch(e){}
+    AI = null;
+    applyLang(); renderAll();
+    if (push !== false) pushHash(true);
+  }
+  $("lang-et").addEventListener("click", () => setLang("et"));
+  $("th-auto").addEventListener("click", () => setTheme("auto"));
+  $("th-light").addEventListener("click", () => setTheme("light"));
+  $("th-dark").addEventListener("click", () => setTheme("dark"));
+  $("lang-en").addEventListener("click", () => setLang("en"));
+
+  function applyURL(scroll){
+    applying = true;
+    fillYearSelects();
+    hashToState();
+    applyLang();
+    $("q").value = state.q;
+    $("sortby").value = state.sort;
+    renderYearRange();
+    setGroup(state.group);
+    renderAll();
+    applying = false;
+    if (state.open){
+      const w0 = W.find(x => x.k === state.open);
+      if (w0 && w0.h && !detailOf(w0)) loadShard(shardOf(w0)).then(() => render());
+    }
+    if (scroll && state.open){
+      const el = document.querySelector(`.row-btn[data-id="${CSS.escape(state.open)}"]`);
+      if (el) el.scrollIntoView({behavior:"auto", block:"center"});
+    }
+  }
+  // ---------- keyboard navigation ----------
+  const isTyping = el => !!el && (/^(input|textarea|select)$/i.test(el.tagName) || el.isContentEditable);
+  // Keyboard navigation removed. Two conventions are kept because they are invisible
+  // and cost nothing: "/" jumps to the search box, Escape backs out of an open record
+  // and then clears the search.
+  document.addEventListener("keydown", e => {
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    if (isTyping(document.activeElement)){
+      if (e.key === "Escape") document.activeElement.blur();
+      return;
+    }
+    if (e.key === "/"){ e.preventDefault(); $("q").focus(); $("q").select(); }
+    else if (e.key === "Escape"){
+      if (state.open){ state.open = null; render(); pushHash(); }
+      else if (state.q){ state.q = ""; $("q").value = ""; renderAll(); pushHash(); }
+    }
+  });
+
+  try { const saved = localStorage.getItem("ekr:lang"); if (saved === "en" || saved === "et") LANG = saved; } catch(e){}
+  try { const st = localStorage.getItem("ekr:theme"); if (st === "light" || st === "dark") THEME = st; } catch(e){}
+  window.addEventListener("popstate", () => applyURL(false));
+  applyURL(true);
+
+  if (!location.hash.replace(/^#/, "") && loadLast()){
+    const last = loadLast();
+    const b = document.createElement("button");
+    b.className = "restore";
+    b.textContent = T("restore");
+    b.title = "#" + last;
+    b.addEventListener("click", () => {
+      try { history.replaceState(null, "", location.pathname + location.search + "#" + last); }
+      catch(e){ location.hash = last; }
+      applyURL(true); b.remove();
+    });
+    $("countline").before(b);
+  }
+  }   // end boot
+
+  Promise.all([
+    fetch("data/index.json?v=b4768b62").then(r => r.json()),
+    fetch("data/i18n.json?v=4aafd6b4").then(r => r.json())
+  ]).then(([data, i18n]) => boot(data, i18n))
+   .catch(err => {
+     document.getElementById("register").innerHTML =
+       `<p class="empty">Could not load the catalogue data.<br><small>${String(err)}</small></p>`;
+   });
+})();
+</script>
+
+</body>
+</html>
