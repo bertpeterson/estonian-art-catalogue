@@ -49,3 +49,7 @@ data/dk_records.backup.json
 data/venues_seed.json
 data/venues_checked.json
 data/noba_raw.json
+
+# Finder/iCloud conflict copies of the built site ("site 2", "site 7"), made while a
+# build rewrote site/ during a sync -- never part of the project
+site [0-9]*/
