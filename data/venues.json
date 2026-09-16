@@ -362,5 +362,21 @@
   "type": "auction house",
   "url": "https://eestikunstioksjonid.ee",
   "holder": "Eesti Kunsti Oksjonid"
+ },
+ {
+  "n": "E-Kunstisalong",
+  "en": "E-Kunstisalong",
+  "city": "Tartu",
+  "type": "auction house",
+  "url": "https://www.e-kunstisalong.ee",
+  "holder": "E-Kunstisalong"
+ },
+ {
+  "n": "Balti Oksjon",
+  "en": "Balti Oksjon",
+  "city": "Tallinn",
+  "type": "auction house",
+  "url": "",
+  "holder": "Balti Oksjon"
  }
 ]
