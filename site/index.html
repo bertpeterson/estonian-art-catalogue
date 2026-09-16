@@ -2258,7 +2258,8 @@ footer a{border-bottom:1px solid var(--rule)}
     if (state.decade !== null) setGroup("decade");
     renderAll(); pushHash();
     if (state.decade !== null){
-      const t = document.getElementById("grp-" + state.decade);
+      // to the decade's pictures when it opens on the artwall, else to its list
+      const t = reg.querySelector(".wall-bar") || document.getElementById("grp-" + state.decade);
       if (t) t.scrollIntoView({behavior: matchMedia("(prefers-reduced-motion:reduce)").matches?"auto":"smooth", block:"start"});
     }
   });
