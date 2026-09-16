@@ -1052,7 +1052,7 @@
         const au = auLine(i);
         const gutter = `<span class="g-name">${esc(ar.n)}</span>
           <div class="g-dates">${esc(life)}${stag(ar.ls)}</div>${split}${au ? `<div class="g-split">${esc(au)}</div>` : ""}
-          <p class="g-blurb">${esc(bioFor(ar).t)}</p>
+          ${bioFor(ar).t ? `<p class="g-blurb${bioFor(ar).t.length > 260 ? " clamp" : ""}">${esc(bioFor(ar).t)}</p>${bioFor(ar).t.length > 260 ? `<button class="bio-more g-more">${esc(T("readbio"))}</button>` : ""}` : ""}
           <button class="showartist" data-artist="${i}">Open artist →</button>`;
         return groupHTML("a"+i, gutter, items, false);
       }).join("");
@@ -1294,6 +1294,15 @@
       const p = $("mono-bio"), b = e.target.closest("#bio-more");
       const open = p.classList.toggle("clamp");
       b.textContent = open ? T("readbio") : T("showless");
+      return;
+    }
+    // the same in an artist group's gutter: the biography is clamped to a few lines
+    // there, since a long life should not push the next artist off the screen
+    const gm = e.target.closest(".g-more");
+    if (gm){
+      const p = gm.previousElementSibling;
+      const open = p.classList.toggle("clamp");
+      gm.textContent = open ? T("readbio") : T("showless");
       return;
     }
     if (e.target.closest("#mono-back")){
