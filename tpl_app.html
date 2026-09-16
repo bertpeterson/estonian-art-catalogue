@@ -1249,6 +1249,8 @@
     // the columns are filled by those shapes, shortest column next. Nothing moves
     // when an image lands; a work without dimensions gets a square.
     const ratioOf = w => {
+      if (w.r) return w.r / 100;                   // from the light index, before any shard
+      if (typeof detailOf === "function") return 1;   // never a shape that changes when the shard lands
       const m = String(det(w).dm || "").match(/(\d+(?:[.,]\d+)?)\s*[x×]\s*(\d+(?:[.,]\d+)?)/);
       if (!m) return 1;
       const r = parseFloat(m[1].replace(",", ".")) / parseFloat(m[2].replace(",", "."));
