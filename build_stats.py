@@ -128,8 +128,8 @@ ys = sorted(year.items())
 parts.append("<h2>By year</h2><div class=\"sec\">" + table(["Year", "Lots", "Sold", "Sell-through", "Hammer total", "Average"],
              [[y, fmt(v["lots"]), fmt(v["sold"]), pct(v["sold"], v["lots"]), eur(v["sum"]), eur(round(v["sum"] / v["sold"])) if v["sold"] else "—"]
               for y, v in reversed(ys)])
-             + "<div><p class=\"m\" style=\"margin:8px 0 0\">Hammer total by year</p>" + hbars([(y, v["sum"]) for y, v in ys], fmtv=lambda n: f"{n / 1e6:.1f} M €", width=360, bar=10, gap=3, label_w=50)
-             + "<p class=\"m\" style=\"margin:14px 0 0\">Lots by year</p>" + hbars([(y, v["lots"]) for y, v in ys], width=360, bar=10, gap=3, label_w=50) + "</div></div>")
+             + "<div><p class=\"m\" style=\"margin:8px 0 0\">Hammer total by year</p>" + hbars([(y, v["sum"]) for y, v in reversed(ys)], fmtv=lambda n: f"{n / 1e6:.1f} M €", width=360, bar=10, gap=3, label_w=50)
+             + "<p class=\"m\" style=\"margin:14px 0 0\">Lots by year</p>" + hbars([(y, v["lots"]) for y, v in reversed(ys)], width=360, bar=10, gap=3, label_w=50) + "</div></div>")
 ams = sorted(auc_med.items(), key=lambda kv: -kv[1]["sum"])
 parts.append("<h2>By medium at auction</h2><div class=\"sec\">" + table(["Medium", "Lots", "Sold", "Sell-through", "Hammer total", "Average"],
              [[e(m), fmt(v["lots"]), fmt(v["sold"]), pct(v["sold"], v["lots"]), eur(v["sum"]), eur(round(v["sum"] / v["sold"])) if v["sold"] else "—"] for m, v in ams])
