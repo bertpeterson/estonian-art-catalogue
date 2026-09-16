@@ -116,7 +116,10 @@ A sale price is never taken: what a gallery work sold for stays between the gall
 
 **Auction results** are a kind of their own, neither a holding nor stock. Haus Galerii publishes its
 whole archive — a page per sale since 1997, a figure per lot with starting price, last bid and hammer
-price, kroon-era prices shown by the house in euro at the fixed rate. Allee galerii keeps a page per sale
+price, kroon-era prices shown by the house in euro at the fixed rate — except a dozen lots where the hammer
+field still held the kroon figure (28 000 on a Wiiralt woodcut started at 1 790 €: 28 000 kroons is 1 790 €);
+a round hammer price on a kroon-era lot that reads as the start or more at the fixed rate, or as eight times
+the start, is converted and marked. Allee galerii keeps a page per sale
 with the lot line, starting and hammer price, and the medium on the lot's own page. Eesti Kunsti Oksjonid keeps each
 online sale's page up with the final bid on every lot — *Lõpppakkumine – (0)* for a lot nobody bid on — but prints no
 date, so the sale is placed by the day its name gives and the month its lots were listed. Vaal galerii's site draws each
