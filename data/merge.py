@@ -898,6 +898,30 @@ for w in works:
     elif d and w["y"] > d + 1:  w["f"] = "post"; FLAGGED["post"] += 1
 print("  flagged: dated before birth", FLAGGED["pre"], "/ after death", FLAGGED["post"])
 
+# ---------- images, for works in the public domain ----------
+# A museum record gets a reference to the holder's own image of it -- MuIS's media
+# id, or the EKM Digital Collection's file path -- only where the work itself is out
+# of copyright: the artist dead by the end of THIS_YEAR-71, or born by THIS_YEAR-156
+# with no death recorded. Nothing is copied; the page loads the picture from the
+# museum when the record is opened and says whose it is. The photograph of a
+# public-domain work is not itself protected (EU directive 2019/790 art. 14, in
+# Estonian law since 2021), whatever the catalogue's rights label says. Everything
+# by a later artist -- most of the catalogue -- stays without.
+import gzip
+_img = json.load(gzip.open("raw/image_urls.json.gz", "rt", encoding="utf-8")) if os.path.exists("raw/image_urls.json.gz") else {}
+_ekm = json.load(open("ekm_images.json", encoding="utf-8")) if os.path.exists("ekm_images.json") else {}
+_Y = datetime.date.today().year
+def _pd(a):
+    b, d = _yr(a["l"][0]), _yr(a["l"][1])
+    return bool((d and d <= _Y - 71) or (b and not d and b <= _Y - 156))
+IMG = {"pd": 0, "muis": 0, "ekm": 0}
+for w in works:
+    if w.get("kind") not in (None, "held") or not _pd(artists[w["a"]]): continue
+    IMG["pd"] += 1
+    if w.get("mi") and ("muis:" + str(w["mi"])) in _img: w["im"] = "m:" + _img["muis:" + str(w["mi"])]; IMG["muis"] += 1
+    elif w.get("oi") and str(w["oi"]) in _ekm:              w["im"] = "e:" + _ekm[str(w["oi"])];            IMG["ekm"] += 1
+print("  images: public-domain museum works", IMG["pd"], "-> MuIS", IMG["muis"], "EKM", IMG["ekm"])
+
 data = {"meta": {"built": datetime.date.today().isoformat(),
                  "works": len(works), "objects": OBJECTS, "artists": len(artists),
                  "held": sum(1 for w in works if w["kind"]=="held"),

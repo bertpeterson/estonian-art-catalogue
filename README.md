@@ -268,10 +268,15 @@ Article 4 reservation, and holds no records here.
 refuses the run if any gallery comes back empty or down more than 40%, so a redesigned site fails
 loudly rather than vanishing quietly. The museum sources are never re-crawled by it.
 
-**Images are deliberately absent.** MuIS states a licence per image, and none of the 31,000
-carry a permissive one — 26,308 are marked *rights undetermined*, 4,905 *protected by
-copyright*. An attempt at hotlinking EKM thumbnails was reverted: their pages lead with a
-related-works carousel, so the images attached to the wrong artworks.
+**Images, for public-domain works only.** A museum record shows the holder's own photograph — loaded
+from the museum's server when the record is opened, never copied or stored here — when the work is out
+of copyright: the artist dead more than seventy years, or born more than 156 years ago with no death
+recorded. The photograph of a public-domain work is not itself protected (EU directive 2019/790 art. 14,
+in Estonian law since 2021), whatever the catalogue's rights label says; MuIS marks most images *rights
+undetermined*. Everything by a later artist has no image. MuIS images come by media id from the record;
+EKM's by the file path the search listing pairs with each object (`data/ekm_images.py`) — the object
+pages sit behind a login and show a highlights carousel to everyone else, which an earlier pass had
+read as the object's image.
 
 ## Licence
 
