@@ -291,6 +291,12 @@ owns the picture wants it seen. A past listing keeps no image, and auction lots 
 sale is over nobody but this catalogue has an interest in illustrating it, and the artist and the
 buyer may have one against. Any holder or rights holder can have an image removed by asking.
 
+**The wall.** A view with pictures enough to be one — an artist, a decade, a search, at least twelve
+pictures and a quarter of the works — opens as a wall of them, paintings first, the works without a
+picture listed beneath; *List* and *Wall* switch it, and the choice travels in the link. The tiles
+are the same images as the records, loaded from the holders' and galleries' servers as they scroll
+into view, seventy-two at a time. Nothing is on the wall that is not in a record.
+
 **Visits are counted, visitors are not.** The site loads GoatCounter, which keeps a count of page
 views by page, referrer and country, without cookies and without storing anything that identifies
 a person.

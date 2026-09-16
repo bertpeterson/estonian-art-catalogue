@@ -345,6 +345,21 @@ h1 a:hover{color:var(--grey-6)}
 .permalink{font-family:var(--mono);font-size:.68rem;letter-spacing:.04em;border-bottom:1px solid var(--rule);color:var(--grey-6)}
 .permalink:hover{color:var(--ink);border-bottom-color:var(--ink)}
 .empty{padding:70px 0;text-align:center;color:var(--grey-6);font-family:var(--serif-text);font-size:1.2rem;font-style:italic}
+/* ---- the picture wall: the works of the view that have a picture, as a masonry of
+   tiles; the works without follow in the ordinary list. Columns, not a grid: a
+   painting keeps its own proportions. */
+.wall-bar{font-family:var(--mono);font-size:.7rem;letter-spacing:.08em;color:var(--grey-6);padding:14px 0 12px;border-top:1px solid var(--rule);line-height:1.6}
+.wall-bar u{text-decoration:none;color:var(--ink-soft)}
+.wall{column-count:6;column-gap:10px;margin:0 0 22px}
+@media(max-width:1200px){.wall{column-count:4}} @media(max-width:760px){.wall{column-count:3}} @media(max-width:520px){.wall{column-count:2}}
+.wt{display:block;width:100%;break-inside:avoid;margin:0 0 10px;padding:0;border:0;background:var(--field);text-align:left;cursor:pointer;color:inherit;font:inherit}
+.wt img{display:block;width:100%;height:auto;min-height:48px}
+.wt-ph{display:block;min-height:140px}
+.wt-cap{display:block;font-size:.72rem;line-height:1.3;color:var(--ink-soft);padding:6px 5px 6px}
+.wt-cap i{display:block;font-family:var(--serif-text);font-style:italic;font-size:.88rem;color:var(--ink)}
+.wt.on{outline:2px solid var(--ink);outline-offset:1px} .wt:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
+.wall-open{margin:0 0 18px} .wall-open .row{border-top:1px solid var(--rule)}
+.v-n{opacity:.55;font-size:.9em;margin-left:4px}
 .more{width:100%;background:none;border:0;border-top:1px dashed var(--rule);color:var(--grey-6);font-family:var(--mono);font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;padding:11px;cursor:pointer}
 .more:hover{color:var(--ink);background:var(--field)}
 
@@ -622,6 +637,13 @@ footer a{border-bottom:1px solid var(--rule)}
       <div class="seg" role="group" aria-label="Order">
         <button id="o-asc" aria-pressed="true">Earliest</button>
         <button id="o-desc" aria-pressed="false">Latest</button>
+      </div>
+    </div>
+    <div class="ctl" id="viewctl" hidden>
+      <span class="ctl-label" data-i18n="show"></span>
+      <div class="seg" role="group" aria-label="View">
+        <button id="v-list" aria-pressed="true" data-i18n="v_list"></button>
+        <button id="v-wall" aria-pressed="false"></button>
       </div>
     </div>
     <button class="linkbtn" id="filters-toggle" aria-expanded="false" aria-controls="filterpanel">Show filters</button>
