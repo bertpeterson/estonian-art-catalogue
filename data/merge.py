@@ -383,8 +383,10 @@ for g, members in groups.items():
     members.sort(key=lambda r: (0 if "muis" in r["src"] else 1, r.get("num") or ""))
     rep = dict(members[0]); rep["n"] = len(members)
     if len(members) > 1:
+        # [number, technique (Estonian), date, muis id, ekm id, technique (English)]
         rep["mem"] = [[m.get("num") or "", (m.get("tech") or "").split(";")[0].strip(),
-                       (m.get("date") or ""), m.get("muis") or "", m.get("oid") or ""]
+                       (m.get("date") or ""), m.get("muis") or "", m.get("oid") or "",
+                       term((m.get("tech") or "").split(";")[0].strip(), TECH) or ""]
                       for m in members]
     rep["src"] = set().union(*(m["src"] for m in members))
     if not rep.get("muis"): rep["muis"] = next((m.get("muis") for m in members if m.get("muis")), None)
