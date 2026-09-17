@@ -159,7 +159,7 @@ h1 a:hover{color:var(--grey-6)}
 .seg button{font-family:var(--mono);font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;background:none;border:0;color:var(--grey-6);padding:8px 14px;cursor:pointer}
 .seg button + button{border-left:1px solid var(--rule)}
 .seg button[aria-pressed="true"]{background:var(--invert-bg);color:var(--invert-fg)}
-.search{position:relative;flex:1;min-width:230px}
+.search{position:relative;flex:0 1 300px;max-width:100%}   /* a fixed-ish width: the controls after it must not shift when one of them hides */
 .search input{width:100%;background:var(--field);border:1px solid var(--rule);color:var(--ink);font-family:var(--sans);font-size:.92rem;padding:9px 12px 9px 34px}
 .search input::placeholder{color:var(--grey-4)}
 .search svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--grey-4)}
@@ -2499,7 +2499,18 @@ footer a{border-bottom:1px solid var(--rule)}
     $("g-auc").setAttribute("aria-pressed", g==="auction");
     syncOrder();
   }
+  // Only the sorts that mean something for the group are offered: by price only in the
+  // auction ledger, by artist never inside one artist's works, by medium or museum not
+  // across sales. A sort the new group cannot use falls back to year.
+  const SORTS_FOR = {decade: ["year", "artist", "title", "medium", "museum"], artist: ["year", "title", "medium", "museum"], auction: ["year", "artist", "title", "price"]};
+  function syncSort(){
+    const ok = SORTS_FOR[state.group] || SORTS_FOR.decade;
+    if (!ok.includes(state.sort)) state.sort = "year";
+    for (const o of $("sortby").options){ o.hidden = !ok.includes(o.value); o.disabled = o.hidden; }
+    $("sortby").value = state.sort;
+  }
   function syncOrder(){
+    syncSort();
     const a = $("o-asc"), b = $("o-desc");
     if (state.group !== "artist"){          // decade and auction views both run earliest/latest
       // by price the same toggle reads lowest / highest
