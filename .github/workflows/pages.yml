@@ -33,7 +33,7 @@ jobs:
         run: ./build_site.sh
       - name: Open the built site in headless Chrome
         run: node check_site.js site
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: site
 
