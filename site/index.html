@@ -308,6 +308,7 @@ h1 a:hover{color:var(--grey-6)}
 .row[data-open="true"] .r-year{color:var(--ink)}
 .r-year.und{color:var(--grey-4);font-style:italic}
 .r-title{font-family:var(--serif-text);font-style:italic;font-weight:420;font-size:var(--fs-lg);line-height:1.35}
+.r-year.inf{color:var(--grey-4)}   /* an inferred date, marked ≈, sits a shade lighter than a museum's */
 .r-artist{font-family:var(--sans);font-style:normal;font-size:.76rem;color:var(--ink-soft)}
 .r-alink{cursor:pointer;text-decoration:underline;text-decoration-color:transparent;text-underline-offset:3px;transition:text-decoration-color .15s} .d-v .r-alink{text-decoration-color:var(--grey-4)} .r-alink:hover{text-decoration-color:var(--grey-4);color:var(--ink)}
 .r-med,.r-coll{font-family:var(--mono);font-size:.64rem;letter-spacing:var(--ls-data);color:var(--grey-6);line-height:1.35}
@@ -599,9 +600,9 @@ footer a{border-bottom:1px solid var(--rule)}
         <!-- museums and galleries are counted in the sources note, not here: four
              figures read as a masthead, six as a table -->
         <div id="stat-mwrap" hidden><b id="stat-m">26</b><span data-i18n="museums">museums</span></div>
-        <div id="stat-gwrap" hidden><b id="stat-g">10</b><span data-i18n="galleries">galleries</span></div>
+        <div id="stat-gwrap" hidden><b id="stat-g">9</b><span data-i18n="galleries">galleries</span></div>
         <!-- the one stat that is a door: the works a visitor can actually acquire -->
-        <button class="stat-btn" id="stat-sale"><b id="stat-s">7,259</b><span data-i18n="forsale">for sale</span></button>
+        <button class="stat-btn" id="stat-sale"><b id="stat-s">6,675</b><span data-i18n="forsale">for sale</span></button>
         <!-- and the other thing a visitor can act on: what the auction record says -->
         <button class="stat-btn" id="stat-auc"><b id="stat-au">13,122</b><span data-i18n="auctioned">auctioned</span></button>
       </div>
@@ -1522,7 +1523,7 @@ footer a{border-bottom:1px solid var(--rule)}
     if (SHARDS.has(key)) return SHARDS.get(key);
     // A retry must skip the browser cache: the failure we are retrying is often a
     // cached 404 or 5xx, and re-requesting the identical URL just returns it again.
-    const url = `data/detail/${key}.json?v=2ca6cd7e` + (attempt ? `&r=${attempt}` : "");
+    const url = `data/detail/${key}.json?v=4324894f` + (attempt ? `&r=${attempt}` : "");
     const p = fetch(url, attempt ? {cache: "reload"} : undefined)
       .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
       .catch(async () => {
@@ -1555,7 +1556,7 @@ footer a{border-bottom:1px solid var(--rule)}
                  || (m => m && Math.floor(+m[1]/100) === Math.floor(+m[2]/100) ? [m[0], String(Math.floor(+m[1]/100) + 1)] : null)
                     (w.yl.match(/(\d{4})\s*[–-]\s*(\d{4})/))) : null;
     const yr = w.y == null ? `<span class="r-year und" ${cy?`title="${esc(w.yl)}"`:""}>${esc(cy ? T("centshort",{n:ordN(+cy[1])}) : T("nd"))}</span>`
-      : `<span class="r-year" title="${esc(dateLabel(w) || w.y)}${w.dsrc==="title"?" — date taken from the end of the title; the museum's dating field is empty":""}">${esc(dateLabel(w) || w.y)}${w.dsrc==="title"?"*":""}</span>`;
+      : `<span class="r-year${w.dsrc==="artist"||w.dsrc==="impression"?" inf":""}" title="${esc(dateLabel(w) || w.y)}${w.dsrc==="title"?" "+esc(T("d_fromtitle")):w.dsrc==="artist"?" "+esc(T("d_fromartist")):w.dsrc==="impression"?" "+esc(T("d_fromimpression")):""}">${esc(dateLabel(w) || w.y)}${w.dsrc==="title"?"*":w.dsrc==="artist"||w.dsrc==="impression"?"≈":""}</span>`;
     // the name on the row opens the artist's view; the row handler steps aside for it
     const art = (showArtist && state.artist===null) ? `<span class="r-artist r-alink" data-artist="${w.a}" title="${esc(T("allworksby", {n: ar.n}))}">${esc(ar.n)}</span>` : `<span class="r-artist"></span>`;
     let detail = "";
@@ -1572,7 +1573,7 @@ footer a{border-bottom:1px solid var(--rule)}
       const imHref = im.startsWith("g:") ? (w.url || imSrc)
                    : im.startsWith("m:") ? `https://opendata.muis.ee/dhmedia/${encodeURIComponent(im.slice(2))}` : imSrc;
       const imCap = w.kind === "known" ? esc(T("d_image", {h: musName("Konrad Mägi Sihtasutus")})) + " · " + esc(T("d_pd", {a: ar.n, l: life || "—"}))
-                  : im.startsWith("g:") ? esc(T("d_image", {h: musName(w.mu)})) + " · " + esc(T("d_imgstock"))
+                  : im.startsWith("g:") ? esc(T("d_image", {h: musName(w.mu)})) + " · " + esc(T(w.kind === "shown" ? "d_imgshown" : "d_imgstock"))
                   : esc(T("d_image", {h: musName(w.mu)})) + (im.startsWith("m:") ? " · MuIS" : " · EKM") + " · " + esc(T("d_pd", {a: ar.n, l: life || "—"}));
       const figure = imSrc ? `<figure class="d-fig"><a href="${esc(imHref)}" target="_blank" rel="noopener"><img src="${esc(imSrc)}" alt="${esc(w.t)}" loading="lazy" referrerpolicy="no-referrer-when-downgrade" onerror="this.closest('figure').hidden=true"></a>
           <figcaption>${imCap}</figcaption></figure>` : "";
@@ -1585,18 +1586,18 @@ footer a{border-bottom:1px solid var(--rule)}
                 <span>${m[3]?`<a href="https://www.muis.ee/museaalview/${esc(m[3])}" target="_blank" rel="noopener">MuIS</a>`:""}${m[3]&&m[4]?" · ":""}${m[4]?`<a href="https://digikogu.ekm.ee/ekm/search/oid-${esc(m[4])}/" target="_blank" rel="noopener">EKM</a>`:""}</span>
               </div>`).join("")}</div></div>` : ""}
           ${(detailOf(w)||{}).d ? `<div class="d-note"><span class="d-nolabel">${w.s==="cca"?esc(T("d_desc_cca"))+" · "+esc(T("inenglish")):w.s==="ekkm"?esc(T("d_desc_ekkm"))+" · "+esc(T("inenglish")):esc(T("d_desc"))+" · "+(LANG==="en"&&detailOf(w).de?esc(T("mt_desc")):esc(T("estonianprose")))}</span>${esc(LANG==="en"&&detailOf(w).de?detailOf(w).de:detailOf(w).d)}</div>`
-                   : isHeld(w) ? `<div class="d-note"><span class="d-nolabel">${esc(T("d_desc"))}</span><em style="color:var(--grey-4)">${esc(T("d_nodesc"))}</em></div>` : ""}
+                   : isHeld(w) && w.s !== "gallery" ? `<div class="d-note"><span class="d-nolabel">${esc(T("d_desc"))}</span><em style="color:var(--grey-4)">${esc(T("d_nodesc"))}</em></div>` : ""}
           <div class="d-v" style="margin-top:16px;display:flex;flex-wrap:wrap;gap:18px">
             ${(detailOf(w)||{}).mi?`<a class="permalink" href="https://www.muis.ee/museaalview/${esc(detailOf(w).mi)}" target="_blank" rel="noopener">${esc(T("d_recmuis"))}</a>`:""}
             ${(detailOf(w)||{}).oi?`<a class="permalink" href="https://digikogu.ekm.ee/ekm/search/oid-${esc(detailOf(w).oi)}/" target="_blank" rel="noopener">${esc(T("d_recekm"))}</a>`:""}
-            ${w.url?`<a class="permalink" href="${esc(w.url)}" target="_blank" rel="noopener">${esc(w.kind === "gallery" ? T("d_gallerylink", {g: musName(w.mu)}) : w.kind === "sold" ? T("d_pastlink", {g: musName(w.mu)}) : w.kind === "auction" ? (w.apr ? T("d_presslink") : T("d_lotlink", {g: musName(w.mu)})) : w.kind === "known" ? T("d_knownlink") : T("d_recsource"))}</a>`:""}
+            ${w.url?`<a class="permalink" href="${esc(w.url)}" target="_blank" rel="noopener">${esc(w.kind === "gallery" ? T("d_gallerylink", {g: musName(w.mu)}) : w.kind === "sold" ? T("d_pastlink", {g: musName(w.mu)}) : w.kind === "auction" ? (w.apr ? T("d_presslink") : T("d_lotlink", {g: musName(w.mu)})) : w.kind === "known" ? T("d_knownlink") : w.kind === "shown" && w.s === "gallery" ? T("d_shownlink", {g: musName(w.mu)}) : T("d_recsource"))}</a>`:""}
             ${slBtn(id, "sl-d")}
           </div>
         </div>
         <div class="d-side">
           <div class="d-k">${esc(T("d_artist"))}</div><div class="d-v">${state.artist === null ? `<span class="r-alink" data-artist="${w.a}" title="${esc(T("allworksby", {n: ar.n}))}">${esc(ar.n)}</span>` : esc(ar.n)} <em>${esc(life)}</em>${stag(ar.ls)}${ar.ai?` <a class="permalink" style="margin-left:8px" href="https://digikogu.ekm.ee/authors/author_id-${esc(ar.ai)}" target="_blank" rel="noopener">EKM artist record ↗</a>`:""}</div>
           <div class="d-k">${esc(T("d_dating"))}</div><div class="d-v">${
-            w.yl ? esc(dateLabel(w)) + (w.dsrc==="title" ? ` <em>${esc(T("d_fromtitle"))}</em>` : "")
+            w.yl ? esc(dateLabel(w)) + (w.dsrc==="title" ? ` <em>${esc(T("d_fromtitle"))}</em>` : w.dsrc==="artist" ? ` <em>${esc(T("d_fromartist"))}</em>` : w.dsrc==="impression" ? ` <em>${esc(T("d_fromimpression"))}</em>` : "")
                  : `<em>${esc(T("d_nodate",{n:ar.n,l:(ar.l[0]||"?")+"–"+(ar.l[1]||"")}))}</em>`}${
             w.f ? `<br><em>${esc(T(w.f === "pre" ? "d_prebirth" : "d_postdeath", {l:(ar.l[0]||"?")+"–"+(ar.l[1]||"")}))}</em>` : ""}</div>
           <div class="d-k">${esc(T("d_technique"))}</div><div class="d-v">${techName(w)?esc(cap(techName(w))):"—"}</div>
@@ -1604,7 +1605,7 @@ footer a{border-bottom:1px solid var(--rule)}
           ${(detailOf(w)||{}).dm?`<div class="d-k">${esc(T("d_dimensions"))}</div><div class="d-v">${esc(cap(dimsName(detailOf(w).dm)))}</div>`:""}
           ${w.c?`<div class="d-k">${esc(T("d_category"))}</div><div class="d-v">${esc(catName(w.c))}</div>`:""}
           <div class="d-k">${esc(isHeld(w)?T("d_collection"):T("venue"))}</div><div class="d-v">${w.co?esc(collName(w.co))+"<br>":""}<em>${siteOf(w.mu) ? `<a class="permalink" href="${esc(siteOf(w.mu))}" target="_blank" rel="noopener">${esc(musName(w.mu))}</a>` : esc(musName(w.mu))}</em></div>
-          <div class="d-k">${esc(T("kind"))}</div><div class="d-v">${esc(T(w.kind==="shown"?"shown":w.kind==="gallery"?"gallery":w.kind==="auction"?"kind_auction":w.kind==="sold"?"kind_sold":w.kind==="known"?"kind_known":"held"))}${w.kind==="known"?`<br><span class="d-sub">${esc(T("d_knownnote"))}</span>`:""}</div>
+          <div class="d-k">${esc(T("kind"))}</div><div class="d-v">${esc(T(w.kind==="shown"?(w.s==="gallery"?"kind_shown_gal":"shown"):w.kind==="gallery"?"gallery":w.kind==="auction"?"kind_auction":w.kind==="sold"?"kind_sold":w.kind==="known"?"kind_known":"held"))}${w.kind==="known"?`<br><span class="d-sub">${esc(T("d_knownnote"))}</span>`:""}</div>
           ${w.kind==="sold" ? `<div class="d-k">${esc(T("d_status"))}</div><div class="d-v">${esc(pastText(w))}${w.gl ? `<br><span class="d-sub">${esc(T("d_lastseen", {d: w.gl}))}</span>` : ""}<br><span class="d-sub">${esc(T("d_pastnote"))}</span></div>` : ""}
           ${w.kind==="auction" ? `<div class="d-k">${esc(T("d_result"))}</div><div class="d-v">${esc(w.an)} · <b>${esc(auText(w))}</b>${w.as ? `<br><span class="d-sub">${esc(T("d_start", {p: eur(w.as)}))}</span>` : ""}${w.apr ? `<br><span class="d-sub">${esc(T("d_press"))}: ${esc(w.apr)}</span>` : ""}${w.adb ? `<br><span class="d-sub">${esc(w.adb[LANG] || w.adb.en)}</span>` : ""}${chainOf(w) ? `<div class="au-hist">${chainOf(w).map(x => `<div class="au-row${x === w ? " now" : ""}"><span>${esc(String(x.ad).slice(0, 4))}</span><span>${esc(x.an.toLowerCase().includes(musName(x.mu).toLowerCase().split(" ")[0]) ? x.an : musName(x.mu) + " · " + x.an)}</span><span class="n">${x.ao ? (x.ap ? esc(eur(x.ap)) : esc(T("au_soldnp"))) : esc(T("au_unsold"))}${x.as ? ` <em>(${esc(eur(x.as))})</em>` : ""}</span>${x.url ? `<a href="${esc(x.url)}" target="_blank" rel="noopener">↗</a>` : "<span></span>"}</div>${x.adb ? `<div class="au-doubt">${esc(x.adb[LANG] || x.adb.en)}</div>` : ""}`).join("")}</div>` : ""}${w.aa ? `<br><span class="d-sub">${esc(T("au_afternote"))}</span>` : ""}<br><span class="d-sub">${esc(T("au_note"))}</span></div>` : ""}
           ${w.nu ? `<div class="d-k">${esc(T("d_number"))}</div><div class="d-v" style="font-family:var(--mono);font-size:.78rem">${esc(w.nu)}</div>` : ""}
@@ -1618,6 +1619,9 @@ footer a{border-bottom:1px solid var(--rule)}
     // click further and the link was the thing a collector came for.
     const rl = w.kind === "gallery" && w.url
       ? `<a class="rl" href="${esc(w.url)}" target="_blank" rel="noopener" title="${esc(T("d_gallerylink", {g: musName(w.mu)}))}">${esc(T("rl_view"))}</a>`
+      // a work a gallery exhibited: the page is the gallery's, but nothing says it is for sale
+      : w.kind === "shown" && w.s === "gallery" && w.url
+      ? `<a class="rl rl-past" href="${esc(w.url)}" target="_blank" rel="noopener" title="${esc(T("d_shownlink", {g: musName(w.mu)}))}">${esc(T("rl_shown"))} ↗</a>`
       // a past listing links to the gallery's page for as long as it stays up
       : w.kind === "sold"
       ? (w.url
@@ -1942,7 +1946,7 @@ footer a{border-bottom:1px solid var(--rule)}
   const CANON = ["Johann Köler", "August Weizenberg", "Kristjan Raud", "Ants Laikmaa",
                  "Konrad Mägi", "Nikolai Triik", "Oskar Kallis", "Eduard Wiiralt",
                  "Evald Okas", "Evi Tihemets", "Jüri Arrak", "Malle Leis",
-                 "Raul Meel", "Tõnis Vint", "Leonhard Lapin", "Merike Estna"];
+                 "Raul Meel", "Mare Vint", "Leonhard Lapin", "Merike Estna"];
   const CANON_SET = new Set(CANON.map(n => A.findIndex(a => a.n === n)).filter(i => i >= 0));
   // Artists a public collection has accessioned AND a gallery is selling right now.
   const FOR_SALE = W.reduce((n, w) => n + (w.kind === "gallery" ? 1 : 0), 0);
@@ -2678,8 +2682,8 @@ footer a{border-bottom:1px solid var(--rule)}
   }   // end boot
 
   Promise.all([
-    fetch("data/index.json?v=2ca6cd7e").then(r => r.json()),
-    fetch("data/i18n.json?v=9007f411").then(r => r.json())
+    fetch("data/index.json?v=4324894f").then(r => r.json()),
+    fetch("data/i18n.json?v=a056fb3a").then(r => r.json())
   ]).then(([data, i18n]) => boot(data, i18n))
    .catch(err => {
      document.getElementById("register").innerHTML =

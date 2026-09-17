@@ -780,7 +780,8 @@ for g in GAL:
         "dm": g.get("dims") or None, "mu": g["gallery"], "co": None,
         "nu": None, "d": None, "c": None, "s": "gallery", "mi": None, "oi": None,
         "k": "G" + re.sub(r'[^A-Za-z0-9]', '', g["gid"]), "n": 1,
-        "mem": None, "kind": "sold" if (g.get("sold") or g.get("past")) else "gallery", "url": g.get("url"),
+        # an exhibition or portfolio page says a work was shown, not that it is for sale
+        "mem": None, "kind": "sold" if (g.get("sold") or g.get("past")) else ("shown" if g.get("shown") else "gallery"), "url": g.get("url"),
         "gs": (1 if g.get("sold") else 0) if (g.get("sold") or g.get("past")) else None,   # 1 the gallery said sold, 0 no longer listed
         # the gallery's own photograph, for stock only: shown from the gallery's server, with
         # the gallery named, while the listing is live -- what the gallery wants of a work it
@@ -813,6 +814,46 @@ print("  marketplace works by Estonia-based artists new to the catalogue:", gal_
 print("  gallery works added:", gal_added, "of which past listings", sum(1 for w in works if w.get("kind") == "sold"),
       "(", sum(1 for w in works if w.get("kind") == "sold" and w.get("gs")), "sold,",
       sum(1 for w in works if w.get("kind") == "sold" and not w.get("gs")), "no longer listed ) from", len({g["gallery"] for g in GAL}), "galleries")
+
+# ---------- dates the record does not give but the evidence does ----------
+# Three inferences, each tagged in dsrc so the page, the CSV and the counts can keep
+# them apart from a museum's own dating. Only museum works; only where the dating
+# field said nothing at all (a museum's "dateerimata" or a wide range is left as it is).
+#   title      : "u 1925", "ca 1930", "1930ndad" inside the title, the forms the
+#                trailing-year rule above does not read
+#   impression : a print, bookplate, illustration, poster or cast whose artist has the
+#                same title dated elsewhere with exactly one year -- another impression
+#                of the same plate; a painting called Maastik is never dated this way
+#   artist     : a decade, "ca 1910ndad", where the artist's dated works (five or more)
+#                all fall within twenty years, or the whole working life fits in
+#                twenty-five; the museum gives none, and this is a bound, not a date
+_MULTI = {"Print", "Bookplate", "Illustration", "Poster", "Sculpture", "Relief"}
+_generic = re.compile(r"^(maastik|portree|natüürmort|akt|kompositsioon|vaade|motiiv|lilled|talv|kevad|sügis|suvi|naine|mees|joonistus|graafika|visand|etüüd|eskiis)\W*$", re.I)
+_T2 = re.compile(r"(?<![\d])(?:u\.?|ca\.?|umbes)\s*(1[5-9]\d\d|20[0-2]\d)(?![\d])|(?<![\d])(1[5-9]\d0)ndad", re.I)
+_dated_by = collections.defaultdict(set); _years_of = collections.defaultdict(list)
+for w in works:
+    if w.get("y") is not None and (w.get("kind") or "held") in ("held", "shown"):
+        _dated_by[(w["a"], "".join(fold(w["t"])).rstrip("."))].add(w["y"]); _years_of[w["a"]].append(w["y"])
+_inf = collections.Counter()
+for w in works:
+    if w.get("y") is not None or w.get("yl") or (w.get("kind") or "held") not in ("held", "shown"): continue
+    a = artists[w["a"]]; b = int(a["l"][0]) if a["l"][0] else None; dd = int(a["l"][1]) if a["l"][1] else None
+    m = _T2.search(w["t"])
+    if m:
+        ty = int(m.group(1) or m.group(2))
+        if b is None or (b + 12 <= ty <= (dd or 2026) + 2):
+            w["y"], w["yl"], w["dsrc"] = ty, (f"{ty}ndad" if m.group(2) else f"ca {ty}"), "title"; _inf["title"] += 1; continue
+    if w.get("e") in _MULTI and not _generic.match(w["t"].strip()) and len(w["t"].split()) >= 2:
+        ys = _dated_by.get((w["a"], "".join(fold(w["t"])).rstrip(".")))
+        if ys and len(ys) == 1:
+            w["y"] = next(iter(ys)); w["yl"] = str(w["y"]); w["dsrc"] = "impression"; _inf["impression"] += 1; continue
+    ys = _years_of.get(w["a"], [])
+    dec = None
+    if len(ys) >= 5 and max(ys) - min(ys) <= 20: dec = (sorted(ys)[len(ys) // 2]) // 10 * 10
+    elif b and dd and dd - (b + 20) <= 25 and dd - b >= 20: dec = ((b + 20 + dd) // 2) // 10 * 10
+    if dec:
+        w["y"], w["yl"], w["dsrc"] = dec, f"ca {dec}ndad", "artist"; _inf["artist"] += 1
+print("  dates inferred:", dict(_inf))
 
 # ---------- known works: the Konrad Mägi Foundation's catalogue ----------
 # A catalogue raisonné records works the public sources cannot: in private hands, or
@@ -1137,6 +1178,7 @@ data = {"meta": {"built": datetime.date.today().isoformat(),
                  "with_aff": sum(1 for a in artists if a.get("aff")),
                  "dated": sum(1 for w in works if w["y"]),
                  "dated_from_title": sum(1 for w in works if w.get("dsrc") == "title"),
+                 "dated_inferred": sum(1 for w in works if w.get("dsrc") in ("impression", "artist")),
                  "undated": sum(1 for w in works if w["y"] is None),
                  "muis": sum(1 for w in works if "muis" in w["s"]),
                  "ekm": sum(1 for w in works if "ekm" in w["s"]),
