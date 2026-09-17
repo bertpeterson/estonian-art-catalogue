@@ -256,7 +256,11 @@ UNCERTAIN = re.compile(r'(?:\(\s*\?\s*\)|(?:[A-ZÕÄÖÜŠŽ][^\s]*|\))\s*\?)\s*
 # "teadmata", "Tundmatu meister", "Tundmatu 19. sajandi kunstnik", ". tundmatu" -- and
 # every one of them is the same absence.
 ANON = {"tundmatu kunstnik"}
-_anon = lambda n: n.strip().lower() in ANON or re.match(r"^\W*(tundmatu|teadmata|anonüüm)\b", n.strip(), re.I) is not None or not re.match(r"^\w", n.strip())
+# A firm is not an artist either: a printing house, a publisher, a factory, a company
+# (Verlag von Franz Kluge, F. Schwabe trükikoda, Visible Solutions OÜ). The workshop of
+# a named master -- Cranach, Notke, Goltzius -- is an attribution and stays.
+_FIRM = re.compile(r"\b(trükikoda|trükk|kirjastus|verlag|druckerei|tehas|tööstus|vabrik|kombinaat|aktsiaselts|osaühing|OÜ|O\.?/ü\.?|A/S|Ltd|GmbH|Solutions)\b|&", re.I)
+_anon = lambda n: n.strip().lower() in ANON or re.match(r"^\W*(tundmatu|teadmata|anonüüm)\b", n.strip(), re.I) is not None or not re.match(r"^\w", n.strip()) or (_FIRM.search(n) is not None and not re.search(r"töökoda|ateljee", n, re.I))
 _before = [u for u in unified.values() if u["artist"] and u["t"]]
 recs = [u for u in _before
         if not UNCERTAIN.search(u["artist"]) and not _anon(u["artist"])]
