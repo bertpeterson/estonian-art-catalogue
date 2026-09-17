@@ -1493,5 +1493,579 @@
 1962,
 1962
 ]
+},
+"Kaul Annuk": {
+"qid": "Q56578230",
+"byear": 1893,
+"dyear": 1984,
+"desc": "Estonian artist and violinist (1893-1984)",
+"anchor": [
+1966,
+1971
+]
+},
+"Arturs Apinis": {
+"qid": "Q5361503",
+"byear": 1904,
+"dyear": 1975,
+"desc": "Latvian and Soviet graphic artist (1904-1975)",
+"anchor": [
+1948,
+1952
+]
+},
+"Xu Beihong": {
+"qid": "Q714152",
+"byear": 1895,
+"dyear": 1953,
+"desc": "Chinese painter (1895–1953)",
+"anchor": []
+},
+"Viktor Berg": {
+"qid": "Q24019389",
+"byear": 1917,
+"dyear": 1980,
+"desc": "Estonian-Swedish artist (1917-1980)",
+"anchor": [
+1947,
+1947
+]
+},
+"Vladimir Bogatkin": {
+"qid": "Q20528478",
+"byear": 1922,
+"dyear": 1971,
+"desc": "Soviet painter (1922–1971)",
+"anchor": [
+1937,
+1951
+]
+},
+"Heiki Ernits": {
+"qid": "Q16407793",
+"byear": 1953,
+"dyear": null,
+"desc": "Estonian film director (born 1953)",
+"anchor": [
+1978,
+1978
+]
+},
+"Juli Ganf": {
+"qid": "Q18043973",
+"byear": 1898,
+"dyear": 1973,
+"desc": "Soviet Russian graphic artist (1898-1973)",
+"anchor": [
+1956,
+1956
+]
+},
+"Berent Geistmann": {
+"qid": "Q819056",
+"byear": 1600,
+"dyear": 1628,
+"desc": "wood carver worked in Estonia (died 1628)",
+"anchor": []
+},
+"Voldemar Ilus": {
+"qid": "Q133848227",
+"byear": 1898,
+"dyear": 1944,
+"desc": "Estonian sculptor (1898-1944)",
+"anchor": []
+},
+"Maia Juhkam": {
+"qid": "Q28968700",
+"byear": 1940,
+"dyear": 2017,
+"desc": "Estonian ceramist (1940-2017)",
+"anchor": [
+1985,
+1985
+]
+},
+"Konstantin Juon": {
+"qid": "Q1343751",
+"byear": 1875,
+"dyear": 1958,
+"desc": "Russian painter (1875-1958)",
+"anchor": []
+},
+"Adrian Kaplun": {
+"qid": "Q12108391",
+"byear": 1887,
+"dyear": 1974,
+"desc": "Russian artist (1887-1974)",
+"anchor": [
+1947,
+1947
+]
+},
+"Kaido Kask": {
+"qid": "Q61111542",
+"byear": 1959,
+"dyear": null,
+"desc": "Estonian ceramicist (born 1959)",
+"anchor": [
+1985,
+1985
+]
+},
+"Jevgeni Katsman": {
+"qid": "Q18019644",
+"byear": 1890,
+"dyear": 1976,
+"desc": "Russian painter (1890-1976)",
+"anchor": [
+1945,
+1945
+]
+},
+"Mariliin Kindsiko": {
+"qid": "Q12369795",
+"byear": 1976,
+"dyear": null,
+"desc": "Estonian artist (born 1976)",
+"anchor": [
+2009,
+2009
+]
+},
+"Valentin Kurdov": {
+"qid": "Q16668981",
+"byear": 1905,
+"dyear": 1989,
+"desc": null,
+"anchor": [
+1943,
+1944
+]
+},
+"Juuro Kuusik": {
+"qid": "Q29420477",
+"byear": 1928,
+"dyear": 2012,
+"desc": "Estonian caricaturist (1928-2012)",
+"anchor": [
+1978,
+1978
+]
+},
+"Nikolai Lapšin": {
+"qid": "Q4254430",
+"byear": 1891,
+"dyear": 1942,
+"desc": "Russian painter (1888-1942)",
+"anchor": [
+1940,
+1940
+]
+},
+"Maie Lukats": {
+"qid": "Q133865805",
+"byear": 1938,
+"dyear": 1996,
+"desc": "Estonian ceramicist (1938-1996)",
+"anchor": [
+1980,
+1980
+]
+},
+"Kristjan Lume": {
+"qid": "Q111811930",
+"byear": 1986,
+"dyear": null,
+"desc": "Estonian caricaturist and artist (born 1986)",
+"anchor": [
+2025,
+2025
+]
+},
+"Endla Lõhkivi": {
+"qid": "Q16407261",
+"byear": 1962,
+"dyear": null,
+"desc": "Estonian philosopher of science (born 1962)",
+"anchor": []
+},
+"Vambola Maavara": {
+"qid": "Q16407383",
+"byear": 1928,
+"dyear": 1999,
+"desc": "Estonian entomologist and writer (1928-1999)",
+"anchor": []
+},
+"Maximilian Maksolly": {
+"qid": "Q16407448",
+"byear": 1884,
+"dyear": 1968,
+"desc": "Estonian artist (1884.1968)",
+"anchor": [
+1918,
+1920
+]
+},
+"Roman Matkiewicz": {
+"qid": "Q29419896",
+"byear": 1966,
+"dyear": null,
+"desc": "Estonian artist and caricaturist (born 1966)",
+"anchor": [
+1995,
+1995
+]
+},
+"Leonhard Merzin": {
+"qid": "Q2081886",
+"byear": 1934,
+"dyear": 1990,
+"desc": "Estonian actor (1934–1990)",
+"anchor": [
+1973,
+1973
+]
+},
+"Aino Migul": {
+"qid": "Q133867485",
+"byear": 1921,
+"dyear": 2009,
+"desc": "Estonian ceramicist (1921-2009)",
+"anchor": []
+},
+"Georgi Motovilov": {
+"qid": "Q7939419",
+"byear": 1892,
+"dyear": 1963,
+"desc": "Russian sculptor (1882-1963)",
+"anchor": []
+},
+"Pille Neeve": {
+"qid": "Q16404669",
+"byear": 1975,
+"dyear": null,
+"desc": "Estonian artist and actor (born 1975)",
+"anchor": [
+2009,
+2009
+]
+},
+"Ernst Neizvestnõi": {
+"qid": "Q622814",
+"byear": 1925,
+"dyear": 2016,
+"desc": "Soviet sculptor (1925–2016)",
+"anchor": [
+1960,
+1960
+]
+},
+"Ivan Pavlov": {
+"qid": "Q4341507",
+"byear": 1872,
+"dyear": 1951,
+"desc": "Russian painter (1872-1951)",
+"anchor": [
+1914,
+1941
+]
+},
+"Harles Pilter": {
+"qid": "Q85991783",
+"byear": 1921,
+"dyear": 1984,
+"desc": "Estonian artist (1921-1984)",
+"anchor": [
+1975,
+1975
+]
+},
+"Lina Po": {
+"qid": "Q94579109",
+"byear": 1899,
+"dyear": 1948,
+"desc": "Soviet sculptor",
+"anchor": []
+},
+"Liina Ponetajev": {
+"qid": "Q118169786",
+"byear": 1973,
+"dyear": null,
+"desc": "Estonian artist (born 1973)",
+"anchor": [
+1997,
+1997
+]
+},
+"Laine Pukk": {
+"qid": "Q124332025",
+"byear": 1935,
+"dyear": 2022,
+"desc": "Estonian artist and pedagogue (1935-2022)",
+"anchor": [
+1982,
+1982
+]
+},
+"Jaan Pärn": {
+"qid": "Q24546636",
+"byear": 1953,
+"dyear": null,
+"desc": "Estonian artist (born 1953)",
+"anchor": [
+2016,
+2016
+]
+},
+"Andres Rõhu": {
+"qid": "Q109265649",
+"byear": 1965,
+"dyear": 2021,
+"desc": "Estonian painter and book designer (1965-2021)",
+"anchor": [
+2004,
+2008
+]
+},
+"Aune Siim": {
+"qid": "Q31685814",
+"byear": 1904,
+"dyear": 1989,
+"desc": "Estonian printmaker (1904-1989)",
+"anchor": [
+1950,
+1950
+]
+},
+"Leida Soom": {
+"qid": "Q16405080",
+"byear": 1912,
+"dyear": 2009,
+"desc": "Estonian opera singer, textile artist and actress (1912-2009)",
+"anchor": [
+1983,
+1983
+]
+},
+"Kärt Summatavet": {
+"qid": "Q31275591",
+"byear": 1963,
+"dyear": null,
+"desc": "Estonian artist and art historian (born 1963)",
+"anchor": [
+2002,
+2002
+]
+},
+"Wilhelm Timm": {
+"qid": "Q2370524",
+"byear": 1820,
+"dyear": 1895,
+"desc": "Russian artist of Baltic German origin (1820-1895)",
+"anchor": []
+},
+"Malev Toom": {
+"qid": "Q61111196",
+"byear": 1953,
+"dyear": null,
+"desc": "Estonian photographer (born 1953)",
+"anchor": [
+1983,
+1991
+]
+},
+"Riho Unt": {
+"qid": "Q12373937",
+"byear": 1956,
+"dyear": null,
+"desc": "Estonian animated film director (born 1956)",
+"anchor": []
+},
+"Asta Vaks-Kiviloo": {
+"qid": "Q56578264",
+"byear": 1925,
+"dyear": 2019,
+"desc": "Estonian artist (1925-2019)",
+"anchor": []
+},
+"Viktor Vasnetsov": {
+"qid": "Q204138",
+"byear": 1848,
+"dyear": 1926,
+"desc": "Russian artist (1848-1926)",
+"anchor": [
+1870,
+1870
+]
+},
+"Ilme Vedler": {
+"qid": "Q139941187",
+"byear": 1924,
+"dyear": null,
+"desc": "Estonian artist (1924-?)",
+"anchor": [
+1960,
+1960
+]
+},
+"Ilmar Wallner": {
+"qid": "Q51000258",
+"byear": 1936,
+"dyear": 2009,
+"desc": "Estonian-Canadian artist (1936-2009)",
+"anchor": [
+1989,
+1989
+]
+},
+"Carl Wenig": {
+"qid": "Q1041014",
+"byear": 1830,
+"dyear": 1908,
+"desc": "Baltic German painter (1830-1908)",
+"anchor": [
+1855,
+1855
+]
+},
+"Heikki Zoova": {
+"qid": "Q61111859",
+"byear": 1954,
+"dyear": null,
+"desc": "Estonian architect (born 1954)",
+"anchor": [
+1982,
+1982
+]
+},
+"Irina Ždanko": {
+"qid": "Q25442195",
+"byear": 1905,
+"dyear": 1999,
+"desc": "painter (1905-1999)",
+"anchor": [
+1947,
+1947
+]
+},
+"Aleksander Yaska": {
+"qid": "Q17447354",
+"byear": 1967,
+"dyear": null,
+"desc": "Estonian sculptor (born 1967)",
+"anchor": [
+2024,
+2025
+]
+},
+"Kristi Haskol": {
+"qid": "Q139941144",
+"byear": 1989,
+"dyear": null,
+"desc": "Estonian artist (born 1989)",
+"anchor": [
+2025,
+2025
+]
+},
+"Ants Lepson": {
+"qid": "Q11958452",
+"byear": 1934,
+"dyear": 2023,
+"desc": "Estonian-Norwegian painter (1934-2023)",
+"anchor": [
+1982,
+1982
+]
+},
+"Reet Ohna": {
+"qid": "Q139941211",
+"byear": 1950,
+"dyear": null,
+"desc": "Estonian artist (born 1950)",
+"anchor": [
+2023,
+2024
+]
+},
+"Boris Šestakov": {
+"qid": "Q12360406",
+"byear": 1963,
+"dyear": null,
+"desc": "Estonian caricaturist and artist (born 1963)",
+"anchor": [
+2024,
+2025
+]
+},
+"Catherine Zarip": {
+"qid": "Q124351406",
+"byear": 1966,
+"dyear": null,
+"desc": "Estonian illustrator (born 1966)",
+"anchor": [
+2011,
+2011
+]
+},
+"Kaarel Savi": {
+"qid": "Q139941239",
+"byear": 1916,
+"dyear": 1988,
+"desc": "Estonian artist (1916-1988)",
+"anchor": [
+1971,
+1971
+]
+},
+"Kristel Sergo": {
+"qid": "Q139941248",
+"byear": 1987,
+"dyear": null,
+"desc": "Estonian artist (born 1987)",
+"anchor": [
+2024,
+2024
+]
+},
+"Lea Liblik": {
+"qid": "Q139941183",
+"byear": 1971,
+"dyear": null,
+"desc": "Estonian artist (born 1971)",
+"anchor": [
+2020,
+2020
+]
+},
+"Ilme Lindemann": {
+"qid": "Q139941187",
+"byear": 1924,
+"dyear": null,
+"desc": "Estonian artist (1924-?)",
+"anchor": [
+1991,
+1991
+]
+},
+"Marju Villem": {
+"qid": "Q139941315",
+"byear": 1953,
+"dyear": null,
+"desc": "Estonian artist (born 1953)",
+"anchor": [
+2006,
+2006
+]
+},
+"Lilia Sink": {
+"qid": "Q12368793",
+"byear": 1941,
+"dyear": 2026,
+"desc": "Estonian artist (born 1941)",
+"anchor": [
+1990,
+1991
+]
 }
 }
