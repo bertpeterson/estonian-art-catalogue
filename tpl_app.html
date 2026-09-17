@@ -1016,6 +1016,13 @@
     // On the untouched page the wall stands alone: the histogram, the door and the
     // search are the ways into the other 68,000 works, not a mosaic of every decade.
     const home = wall && pristine() && !listKeys();
+    // The landing page is baked into the HTML and is on the screen; the first render
+    // would replace it with the same tiles in the same order. It is left as it is --
+    // its tiles are links -- and every later render draws afresh.
+    if (BAKED_LIVE){
+      BAKED_LIVE = false;
+      if (home && LANG === "en" && state.wLimit === 72 && reg.querySelector(".wall[data-seed]")) return;
+    }
     const listSet = home ? [] : wall ? set.filter(w => !wallPic(w)) : set;
     let html = wall ? wallHTML(set.filter(wallPic), home ? -1 : listSet.length, state.artist === null) : "";
     // An artist who died after 1955 is in copyright: say so where the pictures would
@@ -1273,6 +1280,7 @@
   // app's first paint keeps the order the visitor already sees; without one, random
   const BAKED = document.querySelector(".wall[data-seed]");
   const VISIT = BAKED ? BAKED.dataset.seed : String(Math.random()).slice(2, 8);
+  let BAKED_LIVE = !!BAKED;
   const BAKED_KEYS = BAKED && BAKED.dataset.keys ? BAKED.dataset.keys.split(",") : null;
   const wallCols = () => { const w = reg.clientWidth || innerWidth; return w >= 1100 ? 6 : w >= 720 ? 4 : w >= 480 ? 3 : 2; };
   let wallRT = null;
@@ -1503,6 +1511,7 @@
     if (e.target.closest("[data-artist]")) return;
     const wt = e.target.closest("[data-wt]");
     if (wt){
+      if (wt.tagName === "A") e.preventDefault();   // a baked tile is a link for the moments before the app; once it is here, it opens in place
       const id = wt.dataset.wt;
       if (state.open === id){ state.open = null; render(); pushHash(); return; }
       state.open = id;
