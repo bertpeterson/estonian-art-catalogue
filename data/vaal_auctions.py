@@ -14,7 +14,7 @@ once every day of it is past and it has hammer prices; the API's own status lags
 sale predates the API and its page lists starting prices only; there is nothing
 to take from it.
 """
-import re, json, os, gzip, time, html, datetime, urllib.request, ssl
+import unicodedata, re, json, os, gzip, time, html, datetime, urllib.request, ssl
 
 BASE = "https://www.vaal.ee"
 API = "https://oksjon.vaal.ee/api"
@@ -43,6 +43,9 @@ def get(url, key):
     time.sleep(0.4)
     return h
 
+def slugify(t):
+    t = unicodedata.normalize('NFKD', t or '').encode('ascii', 'ignore').decode().lower()
+    return re.sub(r'^-+|-+$', '', re.sub(r'[^a-z0-9]+', '-', t))[:60] or 'teos'
 clean = lambda s: re.sub(r"\s+", " ", html.unescape(re.sub(r"<[^>]+>", " ", s or ""))).strip()
 euros = lambda s: int(re.sub(r"[^\d]", "", clean(s))) if re.search(r"\d", clean(s)) else None
 
@@ -88,7 +91,9 @@ for slug in slugs:
                          "tech": clean(it.get("item_technique") or ""), "dims": dims, "life": life or None,
                          "house": "Vaal galerii", "sale": sale, "when": when[:7], "date": when,
                          "start": start, "hammer": hammer, "sold": hammer is not None,
-                         "url": f"{BASE}/oksjonid/teos?{it['item_id']}"})
+                         # the lot page reads its id from between "?" and the first "-", so
+                         # the address needs a slug after the id or it shows nothing
+                         "url": f"{BASE}/oksjonid/teos?{it['item_id']}-{slugify(title)}"})
             n += 1
     print(f"  {slug} {sale[:36]:36} lots {n}", flush=True)
 

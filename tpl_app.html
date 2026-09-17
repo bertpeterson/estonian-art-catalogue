@@ -827,7 +827,7 @@
           </div>
         </div>
         <div class="d-side">
-          <div class="d-k">${esc(T("d_artist"))}</div><div class="d-v">${esc(ar.n)} <em>${esc(life)}</em>${stag(ar.ls)}${ar.ai?` <a class="permalink" style="margin-left:8px" href="https://digikogu.ekm.ee/authors/author_id-${esc(ar.ai)}" target="_blank" rel="noopener">EKM artist record ↗</a>`:""}</div>
+          <div class="d-k">${esc(T("d_artist"))}</div><div class="d-v">${state.artist === null ? `<span class="r-alink" data-artist="${w.a}" title="${esc(T("allworksby", {n: ar.n}))}">${esc(ar.n)}</span>` : esc(ar.n)} <em>${esc(life)}</em>${stag(ar.ls)}${ar.ai?` <a class="permalink" style="margin-left:8px" href="https://digikogu.ekm.ee/authors/author_id-${esc(ar.ai)}" target="_blank" rel="noopener">EKM artist record ↗</a>`:""}</div>
           <div class="d-k">${esc(T("d_dating"))}</div><div class="d-v">${
             w.yl ? esc(dateLabel(w)) + (w.dsrc==="title" ? ` <em>${esc(T("d_fromtitle"))}</em>` : "")
                  : `<em>${esc(T("d_nodate",{n:ar.n,l:(ar.l[0]||"?")+"–"+(ar.l[1]||"")}))}</em>`}${
