@@ -803,6 +803,34 @@ print("  gallery works added:", gal_added, "of which past listings", sum(1 for w
       "(", sum(1 for w in works if w.get("kind") == "sold" and w.get("gs")), "sold,",
       sum(1 for w in works if w.get("kind") == "sold" and not w.get("gs")), "no longer listed ) from", len({g["gallery"] for g in GAL}), "galleries")
 
+# ---------- known works: the Konrad Mägi Foundation's catalogue ----------
+# A catalogue raisonné records works the public sources cannot: in private hands, or
+# lost. Those enter as "known" -- the work exists, the catalogue says so, and the holder
+# is "Erakogu" (a private collection, never a name) or "asukoht teadmata" (whereabouts
+# unknown). A work the catalogue places in an Estonian museum is already here from the
+# museum and is not added again; one in an institution the catalogue does not otherwise
+# cover (an archive, a society, a museum abroad) is added under that holder's name.
+KM = json.load(open("konradmagi_records.json", encoding="utf-8")) if os.path.exists("konradmagi_records.json") else []
+_musnames = {w["mu"] for w in works if w.get("kind") in (None, "held", "shown")}
+_km_added = 0
+for r in KM:
+    if r["holder_kind"] == "held" and r["holder"] in _musnames: continue
+    ai = artist_index("Konrad Mägi")
+    if ai is None: break
+    ds = r.get("date") or ""
+    y = int(re.match(r"(\d{4})", ds).group(1)) if re.match(r"\d{4}", ds) else None
+    med = r.get("medium") or None
+    dm = re.sub(r"\s*×\s*", " x ", r["dims"]).replace(",", ".") if r.get("dims") else None
+    holder = r["holder"] if r["holder_kind"] == "held" else ("Erakogu" if r["holder_kind"] == "private" else "Asukoht teadmata")
+    works.append({"a": ai, "t": r["title"], "y": y, "yl": ds or None, "dsrc": "gallery" if y else None,
+        "e": infer_med(None, med, med), "ee": None, "tc": term_gal(med), "tce": med, "m": None, "me": None,
+        "dm": dm, "mu": holder, "co": None, "nu": None, "d": None, "c": None, "s": "kmsa", "mi": None, "oi": None,
+        "k": "K" + re.sub(r"[^a-z0-9]", "", r["url"].rstrip("/").split("/")[-1]), "n": 1, "mem": None,
+        "kind": "known", "url": r["url"], "im": ("g:" + r["img"]) if r.get("img") else None,
+        "kc": r["category"]})
+    _km_added += 1
+print("  known works from the Konrad Mägi Foundation's catalogue:", _km_added, "of", len(KM))
+
 # ---------- auction results ----------
 # Results as the auction house published them (vernissage_auctions.py): a lot, the
 # sale it was in, its starting price, its hammer price if it sold. A separate kind
@@ -1070,6 +1098,7 @@ data = {"meta": {"built": datetime.date.today().isoformat(),
                  "gallery": sum(1 for w in works if w["kind"]=="gallery"),
                  "galleries": len({w["mu"] for w in works if w["kind"]=="gallery"}),
                  "noba": sum(1 for w in works if w["kind"]=="gallery" and w["mu"]=="NOBA"),
+                 "known": sum(1 for w in works if w.get("kind")=="known"),
                  "past": sum(1 for w in works if w.get("kind")=="sold"),
                  "past_sold": sum(1 for w in works if w.get("kind")=="sold" and w.get("gs")),
                  "auction": sum(1 for w in works if w["kind"]=="auction"),
