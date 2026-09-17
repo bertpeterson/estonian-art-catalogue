@@ -109,7 +109,7 @@ for the rest is the only page there is.
 tagged in `dsrc` and marked ≈ on the page: a year or decade written inside the title (`title`); the year
 another impression of the same print, bookplate, poster or cast carries, when the artist has that title dated
 exactly once and it is not a generic one like *Maastik* (`impression`); and a decade, *ca 1910s*, where the
-artist's dated works all fall within twenty years or the whole working life fits in twenty-five (`artist`).
+artist's dated works all fall within thirty years or the whole working life fits in thirty (`artist`).
 A museum's *dateerimata* or a range wider than thirty years is left as the museum's word. 1,621 works.
 
 **Shown, not for sale.** A gallery's exhibition or portfolio page (Temnikova & Kasela's exhibitions, Kogo's
