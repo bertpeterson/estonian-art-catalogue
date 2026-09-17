@@ -1145,7 +1145,7 @@
   const CANON = ["Johann Köler", "August Weizenberg", "Kristjan Raud", "Ants Laikmaa",
                  "Konrad Mägi", "Nikolai Triik", "Oskar Kallis", "Eduard Wiiralt",
                  "Evald Okas", "Evi Tihemets", "Jüri Arrak", "Malle Leis",
-                 "Raul Meel", "Mare Vint", "Leonhard Lapin", "Merike Estna"];
+                 "Silvi Liiva", "Mare Vint", "Leonhard Lapin", "Merike Estna"];
   const CANON_SET = new Set(CANON.map(n => A.findIndex(a => a.n === n)).filter(i => i >= 0));
   // Artists a public collection has accessioned AND a gallery is selling right now.
   const FOR_SALE = W.reduce((n, w) => n + (w.kind === "gallery" ? 1 : 0), 0);
