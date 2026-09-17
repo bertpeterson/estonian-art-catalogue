@@ -53,6 +53,8 @@ const check = (name, ok, detail) => { console.log(`${ok ? "ok  " : "FAIL"} ${nam
   check("artist view: similar artists", (await ev(`document.querySelectorAll(".sim-chip").length`)) >= 3);
   await ev(`document.querySelector(".wt").click()`); await sleep(1500);
   check("artist view: a tile opens its record", (await ev(`!!document.querySelector(".wall-open .d-fig")`)) === true);
+  check("record: works that look like this", (await ev(`document.querySelectorAll(".wall-open .la-t img").length`)) >= 3);
+  check("wall: no detail shard fetched for the pictures", (await ev(`performance.getEntriesByType("resource").filter(e => /data\\/detail\\//.test(e.name)).length`)) <= 1);
   await open("#q=Veneetsia&view=list", 4000);
   check("search: rows", (await ev(`document.querySelectorAll(".row").length`)) > 20);
   // the groups are laid out on demand (content-visibility); a row opened deep in the

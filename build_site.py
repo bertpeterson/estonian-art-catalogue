@@ -52,6 +52,18 @@ def shape_of(dm):
 def shard_of(w):
     return str(w["y"] // 10 * 10) if w.get("y") is not None else "und"
 
+# works that look like this (data/lookalikes.py): by key there, by position here, into
+# the record's shard; and every pictured work's address into pics.json, the one file
+# the wall and the look-alike rows read their pictures from
+_key = lambda w: w.get("k") or re.sub(r"[^A-Z0-9:]", "", (w.get("nu") or "").upper())
+_kidx = {_key(w): i for i, w in enumerate(W) if _key(w)}
+LA = {}
+if os.path.exists("data/lookalikes.json"):
+    for k, ks in json.load(open("data/lookalikes.json", encoding="utf-8")).items():
+        if k in _kidx: LA[_kidx[k]] = [_kidx[x] for x in ks if x in _kidx]
+pics = {i: w["im"] for i, w in enumerate(W) if w.get("im")}
+json.dump(pics, open(f"{OUT}/data/pics.json", "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
+
 index, detail = [], collections.defaultdict(dict)
 for i, w in enumerate(W):
     # the light record: nothing that is null, nothing the reader can infer -- the
@@ -61,6 +73,7 @@ for i, w in enumerate(W):
     if light.get("n") == 1: light.pop("n")
     if "yl" in light and str(light["yl"]) == str(light.get("y")): light.pop("yl")
     heavy = {k: v for k, v in w.items() if k in DETAIL}
+    if LA.get(i): heavy["la"] = LA[i]
     if heavy:
         light["h"] = 1                               # this record has detail to fetch
         # the wall needs to know which records have a picture before any shard is
@@ -108,6 +121,7 @@ ix = os.path.getsize(f"{OUT}/data/index.json")
 ds = sum(os.path.getsize(f"{OUT}/data/detail/{f}") for f in os.listdir(f"{OUT}/data/detail"))
 print(f"index.json      {ix/1048576:.2f} MB")
 print(f"bios.json       {os.path.getsize(f'{OUT}/data/bios.json')/1048576:.2f} MB")
+print(f"pics.json       {os.path.getsize(f'{OUT}/data/pics.json')/1048576:.2f} MB, {len(pics):,} pictures; look-alikes for {len(LA):,} works")
 print(f"detail shards   {ds/1048576:.2f} MB across {len(detail)} files")
 print(f"largest shard   {max(os.path.getsize(f'{OUT}/data/detail/{f}') for f in os.listdir(f'{OUT}/data/detail'))/1024:.0f} KB")
 print(f"records with detail: {sum(len(v) for v in detail.values()):,} of {len(W):,}")

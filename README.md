@@ -52,6 +52,7 @@ site/                 the static site, built by ./build_site.sh — not committe
 register.html         a dated snapshot as one self-contained file — see below
 data/data.json        the merged dataset (see Schema below)
 data/*.py             the harvest, enrichment and merge scripts
+data/lookalikes.py    visual look-alikes of the museum pictures (CLIP, local; run deliberately)
 tpl_head.html         markup + CSS for the app
 tpl_app.html          the application itself
 i18n.py               the EN/ET dictionary — the source; i18n.json is generated from it on every build
@@ -194,6 +195,14 @@ media and techniques, the same subjects in the titles — landscape, portrait, n
 and, where the record knows it, the same movement, school or museum category, each a cosine, weighted
 with period and medium first; only artists with five or more works are offered as neighbours. It is a
 "more like this" for a reader who liked what they saw, not a statement of influence.
+
+**Works that look like this.** Under every museum picture, the six museum pictures nearest to it by a
+visual embedding (`data/lookalikes.py`: CLIP ViT-B/32, run on this machine — each picture read once into
+memory, embedded and discarded, as the shape reads were; nothing is stored but the numbers). Other artists
+only, at most two by any one, one per title of theirs, and nothing below a similarity of 0.6. Gallery stock
+is left out, since it changes monthly. It is *similar artists* at the level of the single picture: a
+Mägi Saaremaa beside a Laikmaa pastel and a Pallas landscape. Computed deliberately, not monthly;
+`data/lookalikes.json` is committed, the embeddings are not.
 
 **Editorial.** The sixteen names on the landing page are chosen, not counted, and tagged *ed*. Decade
 notes and the English medium vocabulary are editorial. Everything else on a record is the holder's.
@@ -348,7 +357,8 @@ buyer may have one against. Any holder or rights holder can have an image remove
 **First paint.** The landing page's door and the opening of the artwall are baked into `index.html` at build
 (`build_landing.py`), so a visitor sees the catalogue in the first quarter-second; the app, once its index
 (2.9 MB gzipped, 18 MB parsed) has arrived, takes over with the same tiles in the same order. A link into any
-other view clears the baked landing at once. The biographies are not in the index: `data/bios.json` is fetched
+other view clears the baked landing at once. A wall reads its pictures' addresses from `data/pics.json`,
+one file for every pictured work, not from the decade shards it used to fetch for them. The biographies are not in the index: `data/bios.json` is fetched
 on idle after the landing has painted, or the moment an artist's page asks for one.
 
 **Typing.** A search is matched once per query, and a query that extends the last one is looked for only

@@ -817,6 +817,19 @@
     return (w.ee && w.ee.toLowerCase() !== String(w.e||"").toLowerCase()) ? w.ee : (matName(w) || "");
   };
 
+  // Works that look like this: the six nearest museum pictures by a visual embedding
+  // (data/lookalikes.py), other artists only. Each is a link into its own artist's
+  // view, the record open.
+  function laHTML(w){
+    const la = (det(w).la || []).map(i => W[i]).filter(Boolean);
+    if (!la.length) return "";
+    return `<div class="la"><div class="d-k" title="${esc(T("lookalike_how"))}">${esc(T("lookalike"))}</div><div class="la-row">${la.map(x => {
+      const src = imgSrc(picOf(x)), r = x.r ? x.r / 100 : 1;
+      return `<a class="la-t" href="#artist=${esc(slug(A[x.a].n))}&open=${esc(x.k)}" title="${esc(x.t)} · ${esc(A[x.a].n)}"><span class="la-fr">${src
+        ? `<img src="${esc(src)}" alt="${esc(x.t)}, ${esc(A[x.a].n)}" loading="lazy" style="aspect-ratio:1/${r.toFixed(3)}" referrerpolicy="no-referrer-when-downgrade" onerror="this.closest('.la-t').hidden=true">`
+        : `<span class="wt-ph" style="aspect-ratio:1/${r.toFixed(3)}"></span>`}</span><span class="la-cap"><i>${esc(x.t)}</i><span>${esc(A[x.a].n)}${x.y ? " · " + x.y : ""}</span></span></a>`; }).join("")}</div></div>`;
+  }
+
   function rowHTML(w, showArtist){
     const id = w.k, open = state.open === id, ar = A[w.a];
     // A museum that wrote "19. sajand" told us the century; showing "n.d." for it
@@ -882,7 +895,7 @@
           ${ar.cit?`<div class="d-k">${esc(T("d_cit"))}</div><div class="d-v"><em>${esc(ar.cit.map(citName).join(" · "))}</em>${ar.born?`<br><em>${esc(T("d_born"))}: ${esc(ar.born)}</em>`:""}</div>`:""}
           <div class="d-bio">${esc(bioFor(ar).t)}${bioFor(ar).s?stag(bioFor(ar).s):""}${bioFor(ar).mt?mtTag():""}${bioFor(ar).alt?`<span class="tag">${esc(T("biofallback"))}</span>`:""}</div>
           ${state.artist===null?`<button class="showartist" data-artist="${w.a}">All ${ar.c} works by ${esc(ar.n)} →</button>`:""}
-        </div></div>`;
+        </div>${laHTML(w)}</div>`;
     }
     // A work for sale links to the gallery from the row itself; the record is one
     // click further and the link was the thing a collector came for.
@@ -1255,6 +1268,25 @@
   // tiles load lazily and seventy-two at a time. Flag in the light index; address in
   // the shard.
   const wallPic = w => w.p === 1 || (w.p === undefined && typeof w.im === "string" && w.im.length > 2);
+  // The pictures' addresses live in data/pics.json, one file for every pictured work,
+  // fetched the first time a wall or a look-alike row wants one. The wall used to
+  // fetch the detail shard of every decade it showed -- the landing page, fourteen of
+  // them, ten megabytes -- for those strings alone. A render that wanted a picture
+  // before the file arrived draws placeholders and is repeated once.
+  let PICS = typeof detailOf === "function" ? null : {}, picsP = null, picsWanted = false;
+  function loadPics(){
+    if (picsP) return picsP;
+    picsP = fetch("data/pics.json?v=__V_INDEX__").then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+      .then(p => { PICS = p; if (picsWanted) render(); })
+      .catch(() => { picsP = null; });
+    return picsP;
+  }
+  const picOf = w => {
+    if (typeof detailOf !== "function") return w.im || "";        // the single-file snapshot has it inline
+    if (PICS) return PICS[w.i] || (detailOf(w) || {}).im || "";
+    const d = detailOf(w); if (d && d.im) return d.im;
+    picsWanted = true; loadPics(); return "";
+  };
   const imgSrc = im => !im ? ""
     : im.startsWith("m:") ? `https://www.muis.ee/digitaalhoidla/api/meedia/pisipilt?id=${encodeURIComponent(im.slice(2))}`
     : im.startsWith("e:") ? `https://digikogu.ekm.ee/static/preview/image/${im.slice(2).replace(/\/([^\/]+)$/, "/t2_$1")}`
@@ -1335,10 +1367,6 @@
       ordered.sort((a, b) => (pos.has(a.k) ? pos.get(a.k) : 1e9) - (pos.has(b.k) ? pos.get(b.k) : 1e9));
     }
     const shown = ordered.slice(0, state.wLimit);
-    if (typeof loadShard === "function"){
-      const need = [...new Set(shown.filter(w => w.h && !detailOf(w)).map(shardOf))];
-      if (need.length) Promise.all(need.map(k => loadShard(k))).then(() => render());
-    }
     const openW = state.open && shown.find(w => w.k === state.open);
     // Every tile has its shape before its picture arrives -- the record's height and
     // width, so a 41 x 26 cm painting is an upright tile from the first paint -- and
@@ -1355,7 +1383,7 @@
     // the top two tiles of each column are in view at once and load at once; the rest
     // wait until scrolled towards
     const tile = (w, j) => {
-      const src = imgSrc(det(w).im || ""), r = ratioOf(w);
+      const src = imgSrc(picOf(w)), r = ratioOf(w);
       return `<button class="wt${state.open === w.k ? " on" : ""}" data-wt="${esc(w.k)}" title="${esc(w.t)} · ${esc(A[w.a].n)}">${src
         ? `<img src="${esc(src)}" alt="${esc(w.t)}, ${esc(A[w.a].n)}" loading="${j < 2 ? "eager" : "lazy"}"${w.rc ? ' class="zm"' : ""} style="aspect-ratio:1/${r.toFixed(3)}" referrerpolicy="no-referrer-when-downgrade" onerror="this.closest('.wt').hidden=true">`
         : `<span class="wt-ph" style="aspect-ratio:1/${r.toFixed(3)}"></span>`}<span class="wt-cap"><i>${esc(w.t)}${dups.has(w) ? `<span class="src-tag" title="${esc(T("wall_dup", {n: dups.get(w)}))}">×${dups.get(w)}</span>` : ""}</i><span>${showArtist ? esc(A[w.a].n) + " · " : ""}${w.y ?? esc(T("nd"))} · ${esc(abbr(w.mu))}</span></span></button>`;
