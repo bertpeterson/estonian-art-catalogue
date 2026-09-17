@@ -990,7 +990,7 @@
     $("viewctl").hidden = !nPics;
     $("v-list").setAttribute("aria-pressed", !wall);
     $("v-wall").setAttribute("aria-pressed", wall);
-    $("v-wall").innerHTML = `<span class="v-ico" aria-hidden="true"></span>` + esc(T("v_wall")) + `<span class="v-n">${fmt(nPics)}</span>`;
+    $("v-wall").innerHTML = esc(T("v_wall")) + `<span class="v-n">${fmt(nPics)}</span>`;
     const listSet = wall ? set.filter(w => !wallPic(w)) : set;
     let html = wall ? wallHTML(set.filter(wallPic), listSet.length, state.artist === null) : "";
     const BASE = baseSet();          // hoisted: was recomputed once per decade
