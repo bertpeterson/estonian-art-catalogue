@@ -1,6 +1,6 @@
 # Estonian Art Catalogue · Eesti Kunstikataloog
 
-A browsable catalogue of **79,962 artworks** by **4,298 artists** — museum holdings from **24 Estonian public
+A browsable catalogue of **81,422 artworks** by **4,413 artists** — museum holdings from **24 Estonian public
 collections**, plus what seven commercial galleries and the NOBA marketplace are selling right now,
 aggregated from the national museum databases and the galleries' own listings and presented as a static site.
 
@@ -16,7 +16,7 @@ says so with an *ed* tag.
 
 | Source | Records | What it is |
 |---|---|---|
-| [MuIS](https://www.muis.ee) | 32,607 | Muuseumide Infosüsteem — the shared catalogue of all Estonian museums |
+| [MuIS](https://www.muis.ee) | 34,067 | Muuseumide Infosüsteem — the shared catalogue of all Estonian museums |
 | [EKM Digital Collection](https://digikogu.ekm.ee) | 33,898 | The Art Museum of Estonia's own database, behind Kumu |
 | [CCA Estonia](https://cca.ee) | 58 bios | Centre for Contemporary Art — artist biographies, Venice Biennale archive |
 | [EKKM](https://ekkm.ee) | — | Contemporary Art Museum of Estonia |
@@ -31,8 +31,8 @@ biography, written by the artist or NOBA, for 544 artists who have none from a m
 read from that biography for 301 — both tagged *NOBA* on the page.
 
 7,933 objects appear in both MuIS and the EKM database and are merged on inventory number
-(MuIS `Number` = digikogu `Tulmenumber` + `Kogunumber`), which is why 60,128 source objects
-collapse to 79,962 works.
+(MuIS `Number` = digikogu `Tulmenumber` + `Kogunumber`), which is why 61,687 source objects
+collapse to 81,422 works.
 
 **Only attributed works are included.** Anonymous and unattributed objects are excluded by design — including 485 objects catalogued under the name *Tundmatu kunstnik* ("unknown artist"), which is the absence of an attribution written into the name field rather than a name. Notnames stay: *Püha Lucia legendi meister* and its kind identify a hand recognised across several works, and art history treats that as an attribution.
 
@@ -200,8 +200,8 @@ not as part of the normal cycle.
 `data/data.json` is dictionary-encoded and nested, which suits the site and suits
 nobody else. Flat exports with every value resolved, one row per work:
 
-    site/data/export/works.csv.gz      79,962 rows
-    site/data/export/artists.csv.gz     4,298 rows
+    site/data/export/works.csv.gz      81,422 rows
+    site/data/export/artists.csv.gz     4,413 rows
     site/data/export/works.jsonl.gz     one JSON object per line
 
 Rebuild them with `python3 data/export_csv.py`. `data/validate.py` runs the sanity
@@ -331,7 +331,7 @@ a person.
 Code: MIT (see `LICENSE`).
 
 **Data is mixed, and the split is in the data itself.** Records marked `kind: held` —
-58,607 of them, 73.3% — derive from museum metadata published under CC0, which carries no
+60,067 of them, 73.8% — derive from museum metadata published under CC0, which carries no
 restriction on reuse, commercial included. The 9,985 records marked `kind: gallery` come from
 commercial galleries and the NOBA marketplace, which grant no licence; they are included as a
 public catalogue of current work, and anyone reusing this dataset should decide for themselves

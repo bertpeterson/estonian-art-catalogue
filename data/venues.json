@@ -387,5 +387,21 @@
   "url": "https://konradmagi.ee",
   "holder": null,
   "note": "Catalogue of works: paintings, sketches and lost works with holder as the foundation gives it; private holders enter here as Erakogu, unnamed"
+ },
+ {
+  "n": "Tartu Linnamuuseum",
+  "en": "Tartu City Museum",
+  "city": "Tartu",
+  "type": "museum",
+  "url": "https://linnamuuseum.tartu.ee",
+  "holder": "Tartu Linnamuuseum"
+ },
+ {
+  "n": "Eesti Meremuuseum",
+  "en": "Estonian Maritime Museum",
+  "city": "Tallinn",
+  "type": "museum",
+  "url": "https://meremuuseum.ee",
+  "holder": "Eesti Meremuuseum"
  }
 ]
