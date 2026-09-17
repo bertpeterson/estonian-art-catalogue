@@ -798,7 +798,10 @@
       const imSrc = imgSrc(im);
       // a gallery's photograph of its stock links to the listing, not the file, and is
       // captioned with the gallery; a museum's with the holder and the public-domain note
-      const imHref = im.startsWith("g:") ? (w.url || imSrc) : imSrc;
+      // a MuIS picture links to its persistent identifier, the documented door to the
+      // same file (opendata.muis.ee/dhmedia/<id> resolves to it); EKM's to the file
+      const imHref = im.startsWith("g:") ? (w.url || imSrc)
+                   : im.startsWith("m:") ? `https://opendata.muis.ee/dhmedia/${encodeURIComponent(im.slice(2))}` : imSrc;
       const imCap = im.startsWith("g:") ? esc(T("d_image", {h: musName(w.mu)})) + " · " + esc(T("d_imgstock"))
                   : esc(T("d_image", {h: musName(w.mu)})) + (im.startsWith("m:") ? " · MuIS" : " · EKM") + " · " + esc(T("d_pd"));
       const figure = imSrc ? `<figure class="d-fig"><a href="${esc(imHref)}" target="_blank" rel="noopener"><img src="${esc(imSrc)}" alt="${esc(w.t)}" loading="lazy" referrerpolicy="no-referrer-when-downgrade" onerror="this.closest('figure').hidden=true"></a>

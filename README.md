@@ -280,7 +280,11 @@ from the museum's server when the record is opened, never copied or stored here 
 of copyright: the artist dead more than seventy years, or born more than 156 years ago with no death
 recorded. The photograph of a public-domain work is not itself protected (EU directive 2019/790 art. 14,
 in Estonian law since 2021), whatever the catalogue's rights label says; MuIS marks most images *rights
-undetermined*. Everything by a later artist has no image. MuIS images come by media id from the record;
+undetermined*. Everything by a later artist has no image — a rule of this catalogue, recomputed each January
+from life + 70, not a line the law draws at 1955. MuIS's open-data RDF says it in one sentence: *metadata can be used
+according to CC0 licence; usage of digital images may be subject to restrictions* — and for a faithful photograph
+of a public-domain work no such restriction can rest on copyright. MuIS images come by media id from the record,
+the same id MuIS's persistent identifier `opendata.muis.ee/dhmedia/<id>` names, which the picture links to;
 EKM's by the file path the search listing pairs with each object (`data/ekm_images.py`) — the object
 pages sit behind a login and show a highlights carousel to everyone else, which an earlier pass had
 read as the object's image.
