@@ -982,9 +982,12 @@ footer a{border-bottom:1px solid var(--rule)}
     if (LANG !== "en") p.set("lang", LANG);
     if (THEME !== "auto") p.set("theme", THEME);
     if (state.group !== "decade") p.set("group", state.group);
-    const ord = state.group === "decade" ? state.decOrder : state.artOrder;
-    if (ord !== "earliest" && ord !== "az") p.set("order", ord);
-    if (state.sort !== "year") p.set("sort", state.sort);
+    // each group has its own defaults, left out of the link: decade earliest by year,
+    // artist A-Z, auctions highest hammer price first
+    const ord = state.group === "artist" ? state.artOrder : state.decOrder;
+    const ordDefault = state.group === "artist" ? "az" : state.group === "auction" ? "latest" : "earliest";
+    if (ord !== ordDefault) p.set("order", ord);
+    if (state.sort !== (state.group === "auction" ? "price" : "year")) p.set("sort", state.sort);
     if (state.q) p.set("q", state.q);
     if (state.artist !== null) p.set("artist", slug(A[state.artist].n));
     if (state.decade !== null) p.set("decade", state.decade);
@@ -1027,7 +1030,8 @@ footer a{border-bottom:1px solid var(--rule)}
     const ord      = p.get("order");
     state.decOrder = ord === "latest" ? "latest" : "earliest";
     state.artOrder = ord === "birth"  ? "birth"  : "az";
-    state.sort     = KEYS[p.get("sort")] ? p.get("sort") : "year";
+    state.sort     = KEYS[p.get("sort")] ? p.get("sort") : (state.group === "auction" ? "price" : "year");
+    if (state.group === "auction" && !p.get("order")) state.decOrder = "latest";
     state.q        = p.get("q") || "";
     state.view     = ["wall", "list"].includes(p.get("view")) ? p.get("view") : null;
     state.viewKey  = "";   // set once the rest of the hash is read, below
@@ -2495,6 +2499,10 @@ footer a{border-bottom:1px solid var(--rule)}
   qbox.addEventListener("focus", () => { if (qbox.value.trim().length >= 2 && sugg.innerHTML) sugg.hidden = false; });
 
   function setGroup(g){
+    // the ledger opens by hammer price, highest first; leaving it goes back to the
+    // decade view's own default, earliest first by year
+    if (g === "auction" && state.group !== "auction"){ state.sort = "price"; state.decOrder = "latest"; }
+    if (g !== "auction" && state.group === "auction"){ state.sort = "year"; state.decOrder = "earliest"; }
     state.group = g;
     $("g-decade").setAttribute("aria-pressed", g==="decade");
     $("g-artist").setAttribute("aria-pressed", g==="artist");
