@@ -46,7 +46,7 @@ jobs:
     steps:
       - uses: actions/configure-pages@v5
       - id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
 
   # The build was opened in a browser before it shipped; this opens what the world
   # gets -- the domain, the certificate, the worker, the data the page names.
