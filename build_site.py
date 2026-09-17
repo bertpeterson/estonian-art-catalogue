@@ -57,7 +57,12 @@ for i, w in enumerate(W):
             light["p"] = 1
             # ...and the tile's shape, height over width from the record's dimensions,
             # so the wall lays out right on the first paint, before the shard arrives
-            r = w.get("ir") or shape_of(heavy.get("dm"))
+            # the tile takes the photograph's shape -- unless the photograph is taller
+            # than the work it shows (a colour chart clipped above the painting, a ruler
+            # beneath): then the work's own proportions, and the tile crops from the
+            # bottom, so the chart falls off
+            rp, rw = w.get("ir"), shape_of(heavy.get("dm"))
+            r = rw if (rp and rw and rp > rw * 1.08 and rw >= 0.45) else (rp or rw)
             if r: light["r"] = round(min(2.2, max(0.45, r)) * 100)
         detail[shard_of(w)][str(i)] = heavy
     index.append(light)
