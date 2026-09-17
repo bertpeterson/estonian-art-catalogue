@@ -837,8 +837,8 @@ print("  gallery works added:", gal_added, "of which past listings", sum(1 for w
 #                same title dated elsewhere with exactly one year -- another impression
 #                of the same plate; a painting called Maastik is never dated this way
 #   artist     : a decade, "ca 1910ndad", where the artist's dated works (five or more)
-#                all fall within twenty years, or the whole working life fits in
-#                twenty-five; the museum gives none, and this is a bound, not a date
+#                all fall within thirty years, or the whole working life fits in
+#                thirty; the museum gives none, and this is a bound, not a date
 _MULTI = {"Print", "Bookplate", "Illustration", "Poster", "Sculpture", "Relief"}
 _generic = re.compile(r"^(maastik|portree|natüürmort|akt|kompositsioon|vaade|motiiv|lilled|talv|kevad|sügis|suvi|naine|mees|joonistus|graafika|visand|etüüd|eskiis)\W*$", re.I)
 _T2 = re.compile(r"(?<![\d])(?:u\.?|ca\.?|umbes)\s*(1[5-9]\d\d|20[0-2]\d)(?![\d])|(?<![\d])(1[5-9]\d0)ndad", re.I)
@@ -861,8 +861,8 @@ for w in works:
             w["y"] = next(iter(ys)); w["yl"] = str(w["y"]); w["dsrc"] = "impression"; _inf["impression"] += 1; continue
     ys = _years_of.get(w["a"], [])
     dec = None
-    if len(ys) >= 5 and max(ys) - min(ys) <= 20: dec = (sorted(ys)[len(ys) // 2]) // 10 * 10
-    elif b and dd and dd - (b + 20) <= 25 and dd - b >= 20: dec = ((b + 20 + dd) // 2) // 10 * 10
+    if len(ys) >= 5 and max(ys) - min(ys) <= 30: dec = (sorted(ys)[len(ys) // 2]) // 10 * 10
+    elif b and dd and dd - (b + 20) <= 30 and dd - b >= 20: dec = ((b + 20 + dd) // 2) // 10 * 10
     if dec:
         w["y"], w["yl"], w["dsrc"] = dec, f"ca {dec}ndad", "artist"; _inf["artist"] += 1
 print("  dates inferred:", dict(_inf))

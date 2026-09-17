@@ -99,7 +99,8 @@ CSS = ("body{margin:0;padding:28px;font:15px/1.55 -apple-system,BlinkMacSystemFo
        ".hb{display:block;margin-top:8px;overflow:visible}.hb .hr{fill:#111}.hb .hl,.hb .hv{font-size:11px;fill:#666}.hb .hv{font-variant-numeric:tabular-nums}"
        "@media(prefers-color-scheme:dark){.hb .hr{fill:#f1f2f4}.hb .hl,.hb .hv{fill:#8b9098}}"
        ".cb{display:inline-block;width:110px;height:8px;background:#e8e8e8;vertical-align:middle}.cb i{display:block;height:100%;background:#111}"
-       "@media(prefers-color-scheme:dark){.cb{background:#2b2e34}.cb i{background:#f1f2f4}}")
+       "@media(prefers-color-scheme:dark){.cb{background:#2b2e34}.cb i{background:#f1f2f4}}"
+       ".dc{display:inline-flex;align-items:flex-end;gap:1px;height:22px}.dc i{display:block;width:4px;background:#111}@media(prefers-color-scheme:dark){.dc i{background:#f1f2f4}}")
 
 today = datetime.date.today().isoformat()
 parts = [f"<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">"
@@ -114,6 +115,27 @@ parts.append('<div class="grid">' + "".join(f'<div><div class="big">{fmt(n)}</di
 parts.append(f"<h2>By medium</h2><div class=\"sec\">" + table(["Medium", "Museums", "For sale", "Past listings", "Auction lots", "All"],
              [[e(m), fmt(c["held"] + c.get("shown", 0)), fmt(c["gallery"]), fmt(c["sold"]), fmt(c["auction"]), fmt(sum(c.values()))] for m, c in med_rows])
              + hbars([(m, sum(c.values())) for m, c in med_rows], width=360, label_w=110) + "</div>")
+
+# ---- the collections: works per holder, per decade, per medium ----
+held = [w for w in W if kind(w) in ("held", "shown") and val(w, "s") != "gallery"]
+by_holder = collections.Counter(val(w, "mu") for w in held)
+holders = [h for h, n in by_holder.most_common() if n >= 100]
+hold_dec = collections.defaultdict(collections.Counter); hold_med = collections.defaultdict(collections.Counter); hold_pic = collections.Counter(); hold_dated = collections.Counter()
+for w in held:
+    h = val(w, "mu"); hold_med[h][val(w, "e") or "Other"] += 1
+    if w.get("y"): hold_dec[h][w["y"] // 10 * 10] += 1; hold_dated[h] += 1
+    if w.get("im"): hold_pic[h] += 1
+DECS = list(range(1800, 2030, 10))
+def decrow(h):
+    c = hold_dec[h]; mx = max(c.values()) if c else 1
+    return "".join(f'<i title="{d}s: {c.get(d, 0)}" style="height:{max(1, round(22 * c.get(d, 0) / mx)) if c.get(d, 0) else 0}px"></i>' for d in DECS)
+parts.append("<h2>The collections</h2><p class=\"m\">Every holder with a hundred works or more; the small chart is works per decade, 1800s to 2020s; pictures are shown for public-domain works only.</p>"
+             + table(["Holder", "Works", "Dated", "With a picture", "Main media", "Per decade"],
+             [[e(h), fmt(by_holder[h]), pct(hold_dated[h], by_holder[h]), fmt(hold_pic[h]),
+               e(" · ".join(f"{m} {fmt(n)}" for m, n in hold_med[h].most_common(3))), f'<span class="dc">{decrow(h)}</span>'] for h in holders]))
+parts.append("<h2>By decade</h2><div class=\"sec\">" + table(["Decade", "Museum works", "Dated works in the catalogue", "With a picture"],
+             [[f"{d}s", fmt(sum(hold_dec[h].get(d, 0) for h in hold_dec)), fmt(sum(1 for w in W if w.get("y") and w["y"] // 10 * 10 == d)), fmt(sum(1 for w in held if w.get("im") and w.get("y") and w["y"] // 10 * 10 == d))] for d in DECS])
+             + hbars([(f"{d}s", sum(hold_dec[h].get(d, 0) for h in hold_dec)) for d in DECS], width=360, label_w=70) + "</div>")
 
 parts.append(f"<h2>The auction record</h2><div class=\"grid\">"
              f"<div><div class=\"big\">{fmt(len(lots))}</div><div class=\"m\">lots</div></div>"
