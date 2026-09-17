@@ -309,7 +309,7 @@ h1 a:hover{color:var(--grey-6)}
 .r-year.und{color:var(--grey-4);font-style:italic}
 .r-title{font-family:var(--serif-text);font-style:italic;font-weight:420;font-size:var(--fs-lg);line-height:1.35}
 .r-artist{font-family:var(--sans);font-style:normal;font-size:.76rem;color:var(--ink-soft)}
-.r-alink{cursor:pointer;text-decoration:underline;text-decoration-color:transparent;text-underline-offset:3px;transition:text-decoration-color .15s} .r-alink:hover{text-decoration-color:var(--grey-4);color:var(--ink)}
+.r-alink{cursor:pointer;text-decoration:underline;text-decoration-color:transparent;text-underline-offset:3px;transition:text-decoration-color .15s} .d-v .r-alink{text-decoration-color:var(--grey-4)} .r-alink:hover{text-decoration-color:var(--grey-4);color:var(--ink)}
 .r-med,.r-coll{font-family:var(--mono);font-size:.64rem;letter-spacing:var(--ls-data);color:var(--grey-6);line-height:1.35}
 .r-sub{display:block;color:var(--grey-4);font-size:.6rem}
 .r-coll{color:var(--grey-4)}
@@ -1522,7 +1522,7 @@ footer a{border-bottom:1px solid var(--rule)}
     if (SHARDS.has(key)) return SHARDS.get(key);
     // A retry must skip the browser cache: the failure we are retrying is often a
     // cached 404 or 5xx, and re-requesting the identical URL just returns it again.
-    const url = `data/detail/${key}.json?v=cb329e94` + (attempt ? `&r=${attempt}` : "");
+    const url = `data/detail/${key}.json?v=2ca6cd7e` + (attempt ? `&r=${attempt}` : "");
     const p = fetch(url, attempt ? {cache: "reload"} : undefined)
       .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
       .catch(async () => {
@@ -1594,7 +1594,7 @@ footer a{border-bottom:1px solid var(--rule)}
           </div>
         </div>
         <div class="d-side">
-          <div class="d-k">${esc(T("d_artist"))}</div><div class="d-v">${esc(ar.n)} <em>${esc(life)}</em>${stag(ar.ls)}${ar.ai?` <a class="permalink" style="margin-left:8px" href="https://digikogu.ekm.ee/authors/author_id-${esc(ar.ai)}" target="_blank" rel="noopener">EKM artist record ↗</a>`:""}</div>
+          <div class="d-k">${esc(T("d_artist"))}</div><div class="d-v">${state.artist === null ? `<span class="r-alink" data-artist="${w.a}" title="${esc(T("allworksby", {n: ar.n}))}">${esc(ar.n)}</span>` : esc(ar.n)} <em>${esc(life)}</em>${stag(ar.ls)}${ar.ai?` <a class="permalink" style="margin-left:8px" href="https://digikogu.ekm.ee/authors/author_id-${esc(ar.ai)}" target="_blank" rel="noopener">EKM artist record ↗</a>`:""}</div>
           <div class="d-k">${esc(T("d_dating"))}</div><div class="d-v">${
             w.yl ? esc(dateLabel(w)) + (w.dsrc==="title" ? ` <em>${esc(T("d_fromtitle"))}</em>` : "")
                  : `<em>${esc(T("d_nodate",{n:ar.n,l:(ar.l[0]||"?")+"–"+(ar.l[1]||"")}))}</em>`}${
@@ -2678,7 +2678,7 @@ footer a{border-bottom:1px solid var(--rule)}
   }   // end boot
 
   Promise.all([
-    fetch("data/index.json?v=cb329e94").then(r => r.json()),
+    fetch("data/index.json?v=2ca6cd7e").then(r => r.json()),
     fetch("data/i18n.json?v=9007f411").then(r => r.json())
   ]).then(([data, i18n]) => boot(data, i18n))
    .catch(err => {
