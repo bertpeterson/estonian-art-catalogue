@@ -35,9 +35,17 @@ def shape_of(dm):
     m = re.search(r"(\d+(?:[.,]\d+)?)\s*[x×]\s*(\d+(?:[.,]\d+)?)", dm)
     if m: a, b = m.group(1), m.group(2)
     else:
-        h, wd = re.search(r"kõrgus:\s*(\d+(?:[.,]\d+)?)", dm), re.search(r"laius:\s*(\d+(?:[.,]\d+)?)", dm)
-        if not (h and wd): return None
-        a, b = h.group(1), wd.group(1)
+        # MuIS labels each measure -- "lehe kõrgus", "graafikaplaadi laius", "kõrgus (raamiga)"
+        # -- and a print carries the sheet's and the plate's; pair like with like, the
+        # sheet first (it is what the photograph shows), never a plate height with a
+        # sheet width
+        pairs = {}
+        for q, kind, v in re.findall(r"(?:^|;)\s*([^;:]*?)(kõrgus|laius)\s*:\s*(\d+(?:[.,]\d+)?)", dm):
+            pairs.setdefault(q.strip(), {})[kind] = v
+        pick = next((pairs[q] for q in ("lehe ", "lehe", "", "graafikaplaadi ", "kujutise ") if q in pairs and len(pairs[q]) == 2), None)
+        if not pick: pick = next((v for v in pairs.values() if len(v) == 2), None)
+        if not pick: return None
+        a, b = pick["kõrgus"], pick["laius"]
     b = float(b.replace(",", "."))
     return float(a.replace(",", ".")) / b if b else None
 
