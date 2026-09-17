@@ -167,6 +167,12 @@ inventory numbers, measurements and quoted inscriptions are kept as written; the
 summarising, adding or omitting. 895 biographies and 17,160 descriptions; the monthly run translates
 whatever is new. The 57 English biographies from the Centre for Contemporary Art are theirs, not translations.
 
+**Similar artists.** Six per artist, computed, not chosen (`data/similar.py`): the same decades, the same
+media and techniques, the same subjects in the titles — landscape, portrait, nude, still life, city, sea —
+and, where the record knows it, the same movement, school or museum category, each a cosine, weighted
+with period and medium first; only artists with five or more works are offered as neighbours. It is a
+"more like this" for a reader who liked what they saw, not a statement of influence.
+
 **Editorial.** The sixteen names on the landing page are chosen, not counted, and tagged *ed*. Decade
 notes and the English medium vocabulary are editorial. Everything else on a record is the holder's.
 

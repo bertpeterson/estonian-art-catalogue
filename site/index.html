@@ -444,6 +444,13 @@ footer a{border-bottom:1px solid var(--rule)}
 .bio-more{font-family:var(--mono);font-size:.63rem;letter-spacing:.1em;text-transform:uppercase;background:none;
   border:0;border-bottom:1px solid var(--rule);color:var(--grey-6);cursor:pointer;padding:2px 0;margin-top:9px}
 .bio-more:hover{color:var(--ink);border-bottom-color:var(--ink)}
+/* similar artists: for the reader who liked the style -- chips that open the next
+   artist; the label's tooltip says what "similar" was measured on */
+.mono-sim{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:18px}
+.mono-simlab{font-family:var(--mono);font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--grey-6);margin-right:6px;cursor:help;border-bottom:1px dotted var(--grey-4)}
+.sim-chip{font-family:var(--serif-text);font-size:.95rem;color:var(--ink);background:none;border:1px solid var(--rule);padding:4px 10px;cursor:pointer;line-height:1.2}
+.sim-chip span{font-family:var(--mono);font-size:.62rem;color:var(--grey-6);margin-left:7px}
+.sim-chip:hover{border-color:var(--ink)}
 .mono-links{display:flex;flex-wrap:wrap;gap:18px;margin-top:16px}
 .mono-side{border-top:1px solid var(--ink);padding-top:13px}
 .mono-fig{font-family:var(--serif-text);font-size:2.4rem;line-height:1;font-variant-numeric:tabular-nums}
@@ -1422,6 +1429,7 @@ footer a{border-bottom:1px solid var(--rule)}
             `<button class="showartist" style="margin:4px 6px 0 0" data-grp="${esc(g)}">${esc(grpKind(g))} ${esc(grpLabel(g))}</button>`).join("")}</div>` : ""}
         <p class="mono-bio${bio.t.length>420?" clamp":""}" id="mono-bio">${esc(bio.t)}${bio.s?stag(bio.s):""}${bio.mt?mtTag():""}${bio.alt?`<span class="tag">${esc(T("biofallback"))}</span>`:""}</p>
         ${bio.t.length>420?`<button class="bio-more" id="bio-more">${esc(T("readbio"))}</button>`:""}
+        ${ar.sim && ar.sim.length ? `<div class="mono-sim"><span class="mono-simlab" title="${esc(T("similar_how"))}">${esc(T("similar"))}</span>${ar.sim.map(j => `<button class="sim-chip" data-artist="${j}" title="${esc(A[j].n)}${(A[j].l[0]||A[j].l[1]) ? ` · ${A[j].l[0]}–${A[j].l[1]||""}` : ""}">${esc(A[j].n)}<span>${(A[j].l[0]||"").slice(0,4)}</span></button>`).join("")}</div>` : ""}
         <div class="mono-links">
           ${ar.ai?`<a class="permalink" href="https://digikogu.ekm.ee/authors/author_id-${esc(ar.ai)}" target="_blank" rel="noopener">${esc(T("d_artistrec"))}</a>`:""}
           ${ar.qid?`<a class="permalink" href="https://www.wikidata.org/wiki/${esc(ar.qid)}" target="_blank" rel="noopener">${esc(T("d_wd"))}</a>`:""}
@@ -1514,7 +1522,7 @@ footer a{border-bottom:1px solid var(--rule)}
     if (SHARDS.has(key)) return SHARDS.get(key);
     // A retry must skip the browser cache: the failure we are retrying is often a
     // cached 404 or 5xx, and re-requesting the identical URL just returns it again.
-    const url = `data/detail/${key}.json?v=bb220a6c` + (attempt ? `&r=${attempt}` : "");
+    const url = `data/detail/${key}.json?v=549ea27d` + (attempt ? `&r=${attempt}` : "");
     const p = fetch(url, attempt ? {cache: "reload"} : undefined)
       .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
       .catch(async () => {
@@ -2036,10 +2044,17 @@ footer a{border-bottom:1px solid var(--rule)}
       if (seen.has(k)){ dups.set(seen.get(k), (dups.get(seen.get(k)) || 1) + 1); return false; }
       seen.set(k, w); return true;
     });
-    // the artist's key works first (highlights.json, in its order), then paintings
-    // before drawings before prints, then the chosen order
-    const hl = w => w.hl ?? 1e9;
-    const ordered = unique.map((w, i) => [w, i]).sort((a, b) => hl(a[0]) - hl(b[0]) || medRank(a[0]) - medRank(b[0]) || a[1] - b[1]).map(x => x[0]);
+    // On an artist's own wall: the key works first (highlights.json, in its order), then
+    // paintings before drawings before prints, then the chosen order. On a mixed wall --
+    // a decade, a search -- highlights would put one painter's twelve horses on top, so
+    // there the artists take turns: within a medium, everyone's first work comes before
+    // anyone's second.
+    const hl = w => (state.artist !== null ? (w.hl ?? 1e9) : 0);
+    const turns = new Map();
+    const turn = w => { const k = state.artist !== null ? 0 : (turns.get(w.a) || 0); turns.set(w.a, k + 1); return k; };
+    const ordered = unique.map((w, i) => [w, i, medRank(w)]).sort((a, b) => a[2] - b[2] || a[1] - b[1])
+      .map(x => [x[0], x[1], x[2], turn(x[0])])
+      .sort((a, b) => hl(a[0]) - hl(b[0]) || a[2] - b[2] || a[3] - b[3] || a[1] - b[1]).map(x => x[0]);
     const shown = ordered.slice(0, state.wLimit);
     if (typeof loadShard === "function"){
       const need = [...new Set(shown.filter(w => w.h && !detailOf(w)).map(shardOf))];
@@ -2649,8 +2664,8 @@ footer a{border-bottom:1px solid var(--rule)}
   }   // end boot
 
   Promise.all([
-    fetch("data/index.json?v=bb220a6c").then(r => r.json()),
-    fetch("data/i18n.json?v=b4ef37e3").then(r => r.json())
+    fetch("data/index.json?v=549ea27d").then(r => r.json()),
+    fetch("data/i18n.json?v=b3dba76d").then(r => r.json())
   ]).then(([data, i18n]) => boot(data, i18n))
    .catch(err => {
      document.getElementById("register").innerHTML =
