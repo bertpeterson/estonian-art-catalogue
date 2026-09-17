@@ -1097,6 +1097,21 @@ for w in works:
             w["hl"] = (1000 + k) if _STUDY.search(t) else k * 2 + (0 if exact else 1); _hln += 1
             break
 print("  highlighted works on the wall:", _hln, "for", len(_hl_by_artist), "artists")
+# The opening of the whole catalogue's wall is chosen by hand: masterpieces.json lists,
+# in order, the works of Estonian art a visitor should meet first -- one pictured record
+# each, the exact title in the named medium and year where the collection has it.
+_MP = json.load(open("masterpieces.json", encoding="utf-8")) if os.path.exists("masterpieces.json") else []
+_by_artist_name = {a["n"]: i for i, a in enumerate(artists)}
+_mpn = 0
+for rank, (an, pat, med, yr) in enumerate(_MP, 1):
+    ai = _by_artist_name.get(an)
+    if ai is None: continue
+    cands = [w for w in works if w["a"] == ai and w.get("im") and re.search(r"^" + pat + r"(\W|$)", w["t"], re.I) and w.get("mp") is None]
+    if not cands: print("  masterpiece not found:", an, "-", pat); continue
+    exact = lambda w: re.fullmatch(pat + r"[.!?]?", w["t"].strip(), re.I) is not None
+    cands.sort(key=lambda w: (not exact(w), (w.get("e") or "") != med, abs((w.get("y") or 9999) - yr) if yr else 0, w.get("y") or 9999))
+    cands[0]["mp"] = rank; _mpn += 1
+print("  masterpieces placed at the head of the wall:", _mpn, "of", len(_MP))
 # ...and the gallery pictures' shapes, measured from the files (gallery_shapes.py)
 for w in works:
     im = w.get("im") or ""
