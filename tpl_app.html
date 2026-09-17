@@ -1933,15 +1933,15 @@
   // so a return visit reads the index from disk instead of downloading 3.3 MB again.
   // A page the worker does not yet control fetched its data before the worker
   // existed; it hands the worker the list to copy in from the HTTP cache.
+  // Registered here, not on the load event: this code runs once the index has
+  // arrived, which on a real connection is after load has already fired.
   if ("serviceWorker" in navigator && /^https?:$/.test(location.protocol)){
-    window.addEventListener("load", () => {
-      const had = !!navigator.serviceWorker.controller;
-      navigator.serviceWorker.register("sw.js").then(reg => navigator.serviceWorker.ready).then(reg => {
-        if (had || !reg.active) return;
-        const urls = performance.getEntriesByType("resource").map(e => e.name).filter(n => /\/data\/[^?]+\.json\?v=[0-9a-f]+$/.test(n));
-        reg.active.postMessage({warm: urls});
-      }).catch(() => {});
-    });
+    const had = !!navigator.serviceWorker.controller;
+    navigator.serviceWorker.register("sw.js").then(() => navigator.serviceWorker.ready).then(reg => {
+      if (had || !reg.active) return;
+      const urls = performance.getEntriesByType("resource").map(e => e.name).filter(n => /\/data\/[^?]+\.json\?v=[0-9a-f]+$/.test(n));
+      reg.active.postMessage({warm: urls});
+    }).catch(() => {});
   }
 
 
