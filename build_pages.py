@@ -49,7 +49,7 @@ CSS = ("body{margin:0;padding:28px;font:15px/1.55 -apple-system,BlinkMacSystemFo
        ".rel.nb{margin-top:22px;padding-top:12px;border-top:1px solid #e3e5e9}"
        "@media(prefers-color-scheme:dark){.rel{color:#8b9098}.rel.nb{border-color:#2b2e34}}"
        ".wall{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin:14px 0 6px}"
-       ".wt{display:block;background:#f1f2f4;text-decoration:none;color:inherit}.wt img{display:block;width:100%;aspect-ratio:1/1;object-fit:cover;object-position:center bottom}"
+       ".wt{display:block;background:#f1f2f4;text-decoration:none;color:inherit}.wt img{display:block;width:100%;aspect-ratio:1/1;object-fit:cover;transform:scale(1.12)}.wt{overflow:hidden}"
        ".wt span{display:block;font-size:.72rem;line-height:1.3;padding:5px 6px 6px;color:#666}.wt span i{font-style:italic;color:#111}"
        "@media(prefers-color-scheme:dark){.wt{background:#15171a}.wt span{color:#8b9098}.wt span i{color:#f1f2f4}}"
        # The app offers this as "printable page for this artist", so make that true:
