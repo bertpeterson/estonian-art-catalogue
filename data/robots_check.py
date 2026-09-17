@@ -11,7 +11,7 @@ import re, sys, urllib.request
 
 HOSTS = ["haus.ee", "www.kogogallery.ee", "temnikova.ee", "www.tutar.ee", "www.artrovert.ee", "rukigalerii.ee",
          "alleegalerii.ee", "vernissage.ee", "eestikunstioksjonid.ee", "www.vaal.ee", "oksjon.vaal.ee",
-         "www.e-kunstisalong.ee", "noba.ac"]
+         "www.e-kunstisalong.ee", "noba.ac", "konradmagi.ee"]
 UA = "EstonianArtCatalogue/1.0 (research compile; contact via claude.ai)"
 OURS = {"*", "estonianartcatalogue", "claudebot", "claude-user", "claude-searchbot", "anthropic-ai"}
 

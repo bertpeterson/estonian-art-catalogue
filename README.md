@@ -24,6 +24,7 @@ says so with an *ed* tag.
 | [Wikidata](https://www.wikidata.org) | 1,629 artists | Dates, birthplace, description, training and art-historical affiliation — matched on name, gated on dates and occupation (see *Rules*) |
 | Eight commercial galleries and NOBA | 6,738 | Haus, Vernissage, Allee, Temnikova & Kasela, Tütar, Artrovert, Kogo, Ruki — current stock from each gallery's own site; and [NOBA](https://noba.ac), the Nordic-Baltic marketplace, for artists the catalogue already holds or whose NOBA page places them in Estonia. Metadata only, never prices |
 | Auction results: Haus Galerii, E-Kunstisalong, Allee galerii, Vernissage, Vaal galerii, Eesti Kunsti Oksjonid | 13,122 lots | Every lot in Haus Galerii's hundred sales since 1998, E-Kunstisalong's thirty-five since 2008, Allee galerii's fifteen since 2020, Vernissage's fifteen since 2021, Vaal galerii's nine since 2022 and Eesti Kunsti Oksjonid's eighteen since 2023, as the house published it, plus five earlier record prices as the press reported them (`data/press_results.json`): starting price, hammer price, sold or unsold. A record of what happened at auction, not a valuation |
+| Konrad Mägi Foundation — catalogue of works | 99 works | The foundation's list of every Mägi painting, sketch and lost work it knows of (konradmagi.ee); the works in Estonian museums are here already, the rest enter as *known*: in a private collection, unnamed, or of unknown whereabouts |
 
 Of the works for sale, 3,203 are NOBA listings, 3,535 the galleries' own. NOBA also supplies a short
 biography, written by the artist or NOBA, for 544 artists who have none from a museum, and a birth year
@@ -103,6 +104,13 @@ year, size and medium where that leaves exactly one of each, keeping the Estonia
 lists on its own site and again on NOBA keeps the gallery's listing. NOBA links go to the artwork page
 (`/kunst/`, `/artwork/`) where one exists — 5,717 of 8,885 — and otherwise to the product page, which
 for the rest is the only page there is.
+
+**Known works.** A catalogue raisonné records what no public source can: works in private hands and works
+lost. The Konrad Mägi Foundation's catalogue enters as `kind: known` — title, date, medium, size and the
+holder as the catalogue gives it, with one deliberate loss: a private holder of any kind, named or not on
+the foundation's page, is *Erakogu* here, a private collection with no name, city or country. Whose house a
+painting hangs in is not a fact this catalogue needs, and the foundation's page, linked from every record,
+remains the place that says more. A work the foundation places in an Estonian museum is not added twice.
 
 **Past listings.** A work a gallery has sold is still a work that exists and passed through a known
 hand. Where the gallery says so — Allee's *Müüdud*, Vernissage's *MÜÜDUD*, Kogo's *Sold*, Artrovert's
@@ -224,7 +232,7 @@ index into the same-named array in `vocab`. So `w.mu == 0` means
 | `co` | collection within the museum *(encoded)* |
 | `c` | EKM collection category *(encoded)* |
 | `s` | source catalogue *(encoded)* |
-| `kind` | `held` in a museum, `gallery` at a commercial gallery, `sold` a past gallery listing, `shown` exhibited, `auction` an auction result |
+| `kind` | `held` in a museum, `gallery` at a commercial gallery, `sold` a past gallery listing, `shown` exhibited, `auction` an auction result, `known` recorded in a catalogue raisonné (`kc`: painting, sketch or lost) |
 | `gs`, `gl` | past listings only: 1 the gallery marked it sold / 0 no longer listed; month last seen for sale |
 | `an`, `ad`, `as`, `ap`, `ao` | auction results only: sale name, sale month `YYYY-MM`, starting price €, hammer price €, sold (1/0) |
 | `nu` | inventory number |
