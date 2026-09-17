@@ -1559,7 +1559,7 @@ footer a{border-bottom:1px solid var(--rule)}
       const imHref = im.startsWith("g:") ? (w.url || imSrc)
                    : im.startsWith("m:") ? `https://opendata.muis.ee/dhmedia/${encodeURIComponent(im.slice(2))}` : imSrc;
       const imCap = im.startsWith("g:") ? esc(T("d_image", {h: musName(w.mu)})) + " · " + esc(T("d_imgstock"))
-                  : esc(T("d_image", {h: musName(w.mu)})) + (im.startsWith("m:") ? " · MuIS" : " · EKM") + " · " + esc(T("d_pd"));
+                  : esc(T("d_image", {h: musName(w.mu)})) + (im.startsWith("m:") ? " · MuIS" : " · EKM") + " · " + esc(T("d_pd", {a: ar.n, l: life || "—"}));
       const figure = imSrc ? `<figure class="d-fig"><a href="${esc(imHref)}" target="_blank" rel="noopener"><img src="${esc(imSrc)}" alt="${esc(w.t)}" loading="lazy" referrerpolicy="no-referrer-when-downgrade" onerror="this.closest('figure').hidden=true"></a>
           <figcaption>${imCap}</figcaption></figure>` : "";
       detail = `<div class="detail${imSrc ? " has-fig" : ""}">${figure}
@@ -2639,7 +2639,7 @@ footer a{border-bottom:1px solid var(--rule)}
 
   Promise.all([
     fetch("data/index.json?v=7f965f33").then(r => r.json()),
-    fetch("data/i18n.json?v=1be768b4").then(r => r.json())
+    fetch("data/i18n.json?v=10adec3c").then(r => r.json())
   ]).then(([data, i18n]) => boot(data, i18n))
    .catch(err => {
      document.getElementById("register").innerHTML =
