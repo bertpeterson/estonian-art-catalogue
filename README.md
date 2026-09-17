@@ -159,7 +159,7 @@ inventory numbers, measurements and quoted inscriptions are kept as written; the
 summarising, adding or omitting. 895 biographies and 17,160 descriptions; the monthly run translates
 whatever is new. The 57 English biographies from the Centre for Contemporary Art are theirs, not translations.
 
-**Editorial.** The sixteen names on the landing page are chosen, not counted, and tagged *ed* — artists a history of Estonian art cannot leave out whose work is in the public domain, so that each opens on an artwall; the door therefore stops at Andrus Johani (d. 1941). Decade
+**Editorial.** The sixteen names on the landing page are chosen, not counted, and tagged *ed*. Decade
 notes and the English medium vocabulary are editorial. Everything else on a record is the holder's.
 
 ## The site
