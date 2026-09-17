@@ -332,8 +332,9 @@ owns the picture wants it seen. A past listing keeps no image, and auction lots 
 sale is over nobody but this catalogue has an interest in illustrating it, and the artist and the
 buyer may have one against. Any holder or rights holder can have an image removed by asking.
 
-**The artwall.** A view with pictures enough to be one — an artist, a decade, a search, with twelve
-pictures or more — opens as an artwall of them, paintings first, the works without a
+**The artwall.** The untouched page opens on it — the fifty-four chosen works, then the door's names — with
+the histogram, the door and the search as the ways into everything else; and a view with twelve pictures
+or more — an artist, a decade, a search — opens as an artwall of them, paintings first, the works without a
 picture listed beneath; *List* and *Artwall* switch it for that view — change the artist, decade or search and the rule decides again — and a choice travels in the link. The tiles
 are the same images as the records, loaded from the holders' and galleries' servers as they scroll
 into view, seventy-two at a time. On an artist's own wall the key works come first; on a mixed wall
