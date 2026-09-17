@@ -7,6 +7,7 @@ cd "$(dirname "$0")"
 python3 -u i18n.py
 (cd data && python3 similar.py) || exit 1     # a["sim"]: six nearest artists, into data.json
 python3 build_site.py
+python3 build_landing.py || exit 1
 python3 - <<'PY'
 import hashlib
 def _v(p):
@@ -150,6 +151,14 @@ h = _re.sub(r'<(\w+)([^>]*?)data-i18n-html="([a-z_0-9]+)"([^>]*)></\1>', _fillh,
 a=a.replace('__V_INDEX__',V_INDEX).replace('__V_I18N__',V_I18N)
 body=h.replace('<meta charset="utf-8">\n','',1)
 body=re.sub(r'<meta name="description"[^>]*>\n?','',body,count=1)   # the template's static copy
+# the landing page's first paint, baked (build_landing.py): the door and the opening of
+# the artwall as plain HTML, cleared at once by an inline script when the address names
+# another view, and replaced by the app when it boots
+import json as _json, os as _os
+if _os.path.exists('site/landing.json'):
+    _L=_json.load(open('site/landing.json',encoding='utf-8'))
+    body=body.replace('<section class="doors" id="doors" hidden></section>','<section class="doors" id="doors">'+_L['doors']+'</section>',1)
+    body=body.replace('<main id="register"></main>','<main id="register">'+_L['register']+'</main>\n<script>if(location.hash&&!/^#(lang=\\w+|theme=\\w+)(&|$)/.test(location.hash)){document.getElementById("register").innerHTML="";document.getElementById("doors").hidden=true}</script>',1)
 open('site/index.html','w',encoding='utf-8').write(head+body+"\n"+a+"\n</body>\n</html>\n")
 import os
 print("MISSED:",miss if miss else "none")
