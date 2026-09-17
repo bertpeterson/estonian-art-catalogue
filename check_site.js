@@ -35,7 +35,14 @@ const check = (name, ok, detail) => { console.log(`${ok ? "ok  " : "FAIL"} ${nam
   check("landing: sixteen names", (await ev(`document.querySelectorAll("[data-door=a]").length`)) === 16);
   check("landing: seventy-two tiles", (await ev(`document.querySelectorAll(".wt").length`)) === 72);
   check("landing: masthead figures", (await ev(`+document.querySelector("#stat-w").textContent.replace(/[^0-9]/g,"")`)) > 90000);
+  // the worker stores the content-named data files on the first visit; a reload is then answered from the cache
+  const cached = await ev(`(async () => { for (let i = 0; i < 40; i++){ const c = await caches.open("museaal-v1"); const ks = (await c.keys()).map(k => k.url); if (ks.some(u => /index\\.json\\?v=/.test(u))) return ks.length; await new Promise(r => setTimeout(r, 250)); } return 0; })()`);
+  check("service worker: data stored on the first visit", cached > 0, `${cached} entries`);
+  await send("Page.reload"); await sleep(5000);
+  const sw = await ev(`(() => { const e = performance.getEntriesByType("resource").find(e => /index\\.json\\?v=/.test(e.name)); return e ? {w: e.workerStart > 0, t: e.transferSize} : null; })()`);
+  check("service worker: the index comes from the cache on the second", !!sw && sw.w && sw.t === 0, JSON.stringify(sw));
   await open("#artist=konrad-magi", 5000);
+  check("artist view: biography", (await ev(`(document.querySelector("#mono-bio")||{}).textContent||""`)).length > 100);
   check("artist view: count line names the artist", /mägi/i.test(await ev(`document.querySelector("#countline").textContent`)));
   check("artist view: a wall of pictures", (await ev(`document.querySelectorAll(".wt").length`)) >= 12);
   check("artist view: similar artists", (await ev(`document.querySelectorAll(".sim-chip").length`)) >= 3);
