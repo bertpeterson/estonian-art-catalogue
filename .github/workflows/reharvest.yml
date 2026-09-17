@@ -58,7 +58,7 @@ jobs:
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: |
-          (cd data && python3 ledger.py && python3 ekm_images.py && python3 ekm_shapes.py && python3 merge.py && python3 gallery_shapes.py && python3 muis_shapes.py && python3 merge.py && pip install -q anthropic && python3 translate.py)
+          (cd data && python3 ledger.py && python3 muis_oai.py && gzip -c oai_records.json > raw/oai_records.json.gz && python3 ekm_images.py && python3 ekm_shapes.py && python3 merge.py && python3 gallery_shapes.py && python3 muis_shapes.py && python3 merge.py && pip install -q anthropic && python3 translate.py)
           ./build_site.sh
           python3 data/readme_figures.py
 

@@ -11,6 +11,7 @@ data/harvest_before.json
 
 # Raw per-source harvest dumps (inputs to data/merge.py, not outputs)
 data/records.json
+data/oai_records.json
 data/records_pre_hygiene.json
 data/records_pre_mass.json
 data/mass_records.json

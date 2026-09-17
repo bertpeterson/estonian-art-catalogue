@@ -252,11 +252,15 @@ UNCERTAIN = re.compile(r'(?:\(\s*\?\s*\)|(?:[A-ZÕÄÖÜŠŽ][^\s]*|\))\s*\?)\s*
 # täringuga" look anonymous and are not: a notname is the conventional identifier for
 # a master whose hand is recognised across several works but whose name is lost. That
 # is an attribution, and art history treats it as one.
+# The OAI export writes the absence of a name in more ways than the pages did --
+# "teadmata", "Tundmatu meister", "Tundmatu 19. sajandi kunstnik", ". tundmatu" -- and
+# every one of them is the same absence.
 ANON = {"tundmatu kunstnik"}
+_anon = lambda n: n.strip().lower() in ANON or re.match(r"^\W*(tundmatu|teadmata|anonüüm)\b", n.strip(), re.I) is not None or not re.match(r"^\w", n.strip())
 _before = [u for u in unified.values() if u["artist"] and u["t"]]
 recs = [u for u in _before
-        if not UNCERTAIN.search(u["artist"]) and u["artist"].strip().lower() not in ANON]
-DROPPED_ANON = sum(1 for u in _before if u["artist"].strip().lower() in ANON)
+        if not UNCERTAIN.search(u["artist"]) and not _anon(u["artist"])]
+DROPPED_ANON = sum(1 for u in _before if _anon(u["artist"]))
 print("  dropped as unattributed:", DROPPED_ANON, "objects /", len(ANON), "names")
 DROPPED_UNCERTAIN = sum(1 for u in _before if UNCERTAIN.search(u["artist"]))
 print("  dropped as uncertain attribution:", DROPPED_UNCERTAIN,

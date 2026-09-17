@@ -8,7 +8,7 @@ sub-collection in one response; GetRecord with the LIDO prefix returns the full 
 maker with role and dates, title, work type, technique, measurements, description,
 the pictures' media ids with their pixel sizes. This reads the art collections named in
 SETS, skips every id the catalogue already holds, fetches the rest one record at a time
-(four in flight, a pause between), caches each answer, and writes records in the shape
+(twelve in flight, a short pause between), caches each answer, and writes records in the shape
 records.json has, so merge.py needs nothing new. The pictures' ids and shapes go to
 oai_images.json and oai_shapes.json.
 
@@ -59,7 +59,7 @@ def record(mid):
     x = get(f"{OAI}?verb=GetRecord&metadataPrefix=lido&identifier=oai:muis.ee:{mid}")
     if "<lido:lido>" in x:
         with gzip.open(p, "wt", encoding="utf-8") as f: f.write(x)
-    time.sleep(0.5)
+    time.sleep(0.1)
     return x
 
 U = html.unescape
@@ -154,7 +154,7 @@ if __name__ == "__main__":
         want = [(i, s) for i, s in pairs if s in SETS[mus] and i not in have and i not in done]
         print(f"{mus}: {len(pairs):,} ids listed; {len(want):,} to fetch from {len(SETS[mus])} sub-collections", flush=True)
         n = kept = 0
-        with ThreadPoolExecutor(4) as ex:
+        with ThreadPoolExecutor(12) as ex:
             for (mid, subset), x in zip(want, ex.map(lambda p: record(p[0]), want)):
                 n += 1
                 r = parse(mid, x, subset)

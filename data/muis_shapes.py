@@ -46,7 +46,7 @@ def one(mid):
     return mid, None
 
 n = 0
-with ThreadPoolExecutor(4) as ex:
+with ThreadPoolExecutor(12) as ex:
     for mid, r in ex.map(one, todo):
         if r: shapes[mid] = r
         n += 1
