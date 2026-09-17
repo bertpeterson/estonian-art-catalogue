@@ -328,7 +328,8 @@ for r in DK:
 # here and tagged editorial, so the tag on the page says who is asserting the date.
 # EKM's author string reads "Karl Pavlovitš Brüllov (1799 - 1582)": Bryullov died in
 # 1852, digits transposed. Ivan Velts "(1866 - 1826)" died in 1926.
-LIFE_FIX = {"Karl Pavlovitš Brüllov": ["1799", "1852"], "Ivan Augustinovitš Welz": ["1866", "1926"]}
+LIFE_FIX = {"Karl Pavlovitš Brüllov": ["1799", "1852"], "Ivan Augustinovitš Welz": ["1866", "1926"],
+            "Lucas Conrad Pfandzelt": ["1716", "1786"]}   # MuIS has "178" for the death year
 
 # ---------- one person, two spellings ----------
 # The spelling pass above folds accents and alias brackets. It cannot see that
@@ -1164,6 +1165,9 @@ for rank, (an, pat, med, yr) in enumerate(_MP, 1):
     exact = lambda w: re.fullmatch(pat + r"[.!?]?", w["t"].strip(), re.I) is not None
     cands.sort(key=lambda w: (not exact(w), (w.get("e") or "") != med, abs((w.get("y") or 9999) - yr) if yr else 0, w.get("y") or 9999))
     cands[0]["mp"] = rank; _mpn += 1
+for w in works:
+    t = re.sub(r"\s{2,}", " ", w["t"]).strip().rstrip(",;:").strip()
+    if t and t != w["t"]: w["t"] = t
 print("  masterpieces placed at the head of the wall:", _mpn, "of", len(_MP))
 # ...and the gallery pictures' shapes, measured from the files (gallery_shapes.py)
 for w in works:

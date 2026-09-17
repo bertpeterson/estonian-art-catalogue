@@ -12,6 +12,9 @@
       }
     }
     delete DATA.vocab;
+    // the light index leaves out what can be inferred: the position is the handle, a
+    // count of one, a dating label equal to the year
+    DATA.works.forEach((w, i) => { w.i = i; if (w.n == null) w.n = 1; if (w.yl == null && w.y != null) w.yl = String(w.y); });
     // row keys are the inventory number stripped of punctuation; only synthetic ones ship
     for (const w of DATA.works)
       if (!w.k) w.k = (w.nu || "").toUpperCase().replace(/[^A-Z0-9:]/g, "") || null;
