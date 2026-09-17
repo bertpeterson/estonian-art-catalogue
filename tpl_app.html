@@ -1176,6 +1176,7 @@
                  "Ants Laikmaa", "Konrad Mägi", "Nikolai Triik", "Oskar Kallis",
                  "Eduard Wiiralt", "Evald Okas", "Jüri Arrak", "Malle Leis",
                  "Raul Meel", "Tõnis Vint", "Leonhard Lapin", "Merike Estna"];
+  const CANON_SET = new Set(CANON.map(n => A.findIndex(a => a.n === n)).filter(i => i >= 0));
   // Artists a public collection has accessioned AND a gallery is selling right now.
   const FOR_SALE = W.reduce((n, w) => n + (w.kind === "gallery" ? 1 : 0), 0);
   const TOP_ART = (() => {
@@ -1282,12 +1283,21 @@
     // a decade, a search -- highlights would put one painter's twelve horses on top, so
     // there the artists take turns: within a medium, everyone's first work comes before
     // anyone's second.
-    const hl = w => (state.artist !== null ? (w.hl ?? 1e9) : 0);
+    // ...and a mixed wall is not a chronology either: the sixteen names of the door and
+    // every highlighted work come first, then the rest, each artist taking turns, the
+    // turns dealt in a fixed shuffle (a hash of the record key) rather than by year, so
+    // Mägi, Wiiralt, Arrak, Estna and Leis sit side by side at the top of the 1920s or
+    // the whole catalogue instead of twenty 1440s woodcuts.
+    const mixed = state.artist === null;
+    const hl = w => (mixed ? 0 : (w.hl ?? 1e9));
+    const tier = w => (!mixed ? 0 : (w.hl != null || CANON_SET.has(w.a)) ? 0 : 1);
+    const hash = k => { let h = 2166136261; for (const c of String(k)) h = Math.imul(h ^ c.charCodeAt(0), 16777619); return h >>> 0; };
     const turns = new Map();
-    const turn = w => { const k = state.artist !== null ? 0 : (turns.get(w.a) || 0); turns.set(w.a, k + 1); return k; };
-    const ordered = unique.map((w, i) => [w, i, medRank(w)]).sort((a, b) => a[2] - b[2] || a[1] - b[1])
-      .map(x => [x[0], x[1], x[2], turn(x[0])])
-      .sort((a, b) => hl(a[0]) - hl(b[0]) || a[2] - b[2] || a[3] - b[3] || a[1] - b[1]).map(x => x[0]);
+    const turn = w => { const k = mixed ? (turns.get(w.a) || 0) : 0; turns.set(w.a, k + 1); return k; };
+    // within an artist, highlights first, then the chosen order; that order decides who takes which turn
+    const inner = unique.map((w, i) => [w, i]).sort((a, b) => (a[0].hl ?? 1e9) - (b[0].hl ?? 1e9) || a[1] - b[1]);
+    const ordered = inner.map(x => [x[0], x[1], medRank(x[0]), turn(x[0]), tier(x[0]), mixed ? hash(x[0].k) : 0])
+      .sort((a, b) => hl(a[0]) - hl(b[0]) || a[4] - b[4] || a[3] - b[3] || a[2] - b[2] || a[5] - b[5] || a[1] - b[1]).map(x => x[0]);
     const shown = ordered.slice(0, state.wLimit);
     if (typeof loadShard === "function"){
       const need = [...new Set(shown.filter(w => w.h && !detailOf(w)).map(shardOf))];
