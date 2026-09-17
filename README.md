@@ -327,8 +327,9 @@ picture listed beneath; *List* and *Artwall* switch it for that view — change 
 are the same images as the records, loaded from the holders' and galleries' servers as they scroll
 into view, seventy-two at a time. On an artist's own wall the key works come first; on a mixed wall
 — a decade, a search, the whole catalogue — the sixteen names of the door and every highlighted work
-come first and the artists take turns, dealt in a fixed shuffle rather than by year, so it opens on
-Mägi, Estna, Triik and Wiiralt side by side rather than on the 1440s. Nothing is on the artwall
+come first and the artists take turns, dealt in a fixed shuffle rather than by year; and before all of
+that, fifty-four works chosen by hand (`data/masterpieces.json`, in order: *Norra maastik männiga*, *Truu
+valvur*, *Põrgu*, *Lennuk*, *Linda kivi kandmas*, *Marie Underi portree* …) open the whole catalogue's wall. Nothing is on the artwall
 that is not in a record.
 
 **What comes first on an artist's wall.** Paintings, then watercolours, sculpture, drawings and prints; and for
