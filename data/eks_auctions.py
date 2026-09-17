@@ -40,7 +40,7 @@ def get(url, key):
     h = fetch(url)
     if h:
         with gzip.open(p, "wt", encoding="utf-8") as f: f.write(h)
-    time.sleep(0.8)
+    time.sleep(120)     # the crawl delay e-kunstisalong.ee asks for
     return h
 
 clean = lambda s: re.sub(r"\s+", " ", html.unescape(re.sub(r"<[^>]+>", " ", s or ""))).strip()
@@ -59,10 +59,18 @@ print(f"E-KUNSTISALONG: {len(sales)} sales listed", flush=True)
 
 CARD = re.compile(r"<span class='toot_hr_jn alapealkiri'>(.*?)</span><span class='toot_hr_jn'>(.*?)</span></b><span class=toot_hr_jn>(.*?)</span><span >Alg:\s*<b>(.*?)</b></span>", re.S)
 today = datetime.date.today().isoformat()
+# The salon's robots.txt asks a two-minute delay of every crawler. A sale's page does not
+# change once its results are in, so the records read from it are kept in eks_sales.json
+# and the page is fetched again only while the sale is recent; the monthly run then
+# fetches the list and a page or two, not thirty-nine at two minutes each.
+KEPT = json.load(open("eks_sales.json", encoding="utf-8")) if os.path.exists("eks_sales.json") else {}
+recent = (datetime.date.today() - datetime.timedelta(days=60)).isoformat()
 recs, n_open, n_empty, n_unparsed = [], 0, 0, 0
 for url, sale, date in sales:
     if date > today: n_open += 1; continue
     key = "eksauc_" + re.sub(r"\W+", "_", url.rsplit("/", 1)[-1])
+    if key in KEPT and date < recent and KEPT[key]:
+        recs.extend(KEPT[key]); continue
     h = get(url, key)
     cards = CARD.findall(h)
     if not cards:
@@ -70,7 +78,7 @@ for url, sale, date in sales:
         p = os.path.join(CACHE, key + ".html.gz")
         if os.path.exists(p) and date > (datetime.date.today() - datetime.timedelta(days=60)).isoformat(): os.remove(p)   # results may come later
         continue
-    n = 0
+    n = 0; KEPT[key] = []
     for artist, lot, line, price in cards:
         artist, lot, line, price = clean(artist), clean(lot), clean(line), clean(price)
         # the older sales list the title without a lot number
@@ -97,9 +105,10 @@ for url, sale, date in sales:
                      "year": y4.group(1) if y4 else None, "yl": yl.strip("U ") or None, "tech": tech.strip(" ,."), "dims": dims,
                      "house": "E-Kunstisalong", "sale": sale, "when": date[:7], "date": date,
                      "start": start, "hammer": hammer, "sold": sold, "url": url})
-        n += 1
+        KEPT[key].append(recs[-1]); n += 1
     print(f"  {date} {sale[:36]:36} lots {n}", flush=True)
 
+json.dump(KEPT, open("eks_sales.json", "w", encoding="utf-8"), ensure_ascii=False)
 recs.sort(key=lambda r: (r["date"], r["artist"], r["title"]))
 prev = json.load(open("auction_records.json", encoding="utf-8")) if os.path.exists("auction_records.json") else []
 json.dump([r for r in prev if r["house"] != "E-Kunstisalong"] + recs, open("auction_records.json", "w", encoding="utf-8"), ensure_ascii=False, indent=0)
