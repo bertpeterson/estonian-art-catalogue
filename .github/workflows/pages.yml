@@ -47,3 +47,29 @@ jobs:
       - uses: actions/configure-pages@v5
       - id: deployment
         uses: actions/deploy-pages@v4
+
+  # The build was opened in a browser before it shipped; this opens what the world
+  # gets -- the domain, the certificate, the worker, the data the page names.
+  probe:
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch the live site
+        run: |
+          set -e
+          site=https://museaal.ee
+          get () { curl -sSL --retry 5 --retry-delay 10 --retry-all-errors -o body -w '%{http_code}' "$1"; }
+          for i in 1 2 3 4 5 6; do
+            code=$(get "$site/")
+            grep -q 'data-seed=' body && [ "$code" = 200 ] && break
+            echo "landing not there yet ($code), waiting"; sleep 20
+          done
+          grep -q 'data-seed=' body || { echo "FAIL: landing page has no baked wall"; exit 1; }
+          v=$(grep -o 'data/index.json?v=[0-9a-f]*' body | head -1)
+          [ -n "$v" ] || { echo "FAIL: page names no index"; exit 1; }
+          [ "$(get "$site/$v")" = 200 ] && grep -q '"works"' body || { echo "FAIL: $v"; exit 1; }
+          [ "$(get "$site/sw.js")" = 200 ] && grep -q 'museaal-v1' body || { echo "FAIL: sw.js"; exit 1; }
+          [ "$(get "$site/data/bios.json?${v#*?}")" = 200 ] || { echo "FAIL: bios.json"; exit 1; }
+          [ "$(get "$site/a/konrad-magi.html")" = 200 ] && grep -q 'og:image' body || { echo "FAIL: artist page"; exit 1; }
+          [ "$(get "$site/stats-et.html")" = 200 ] || { echo "FAIL: stats-et"; exit 1; }
+          echo "live: $v, sw.js, bios, artist page, stats"

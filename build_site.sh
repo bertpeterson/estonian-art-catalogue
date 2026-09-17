@@ -149,8 +149,24 @@ def _fillh(m):
     return f'<{tag}{attrs}data-i18n-html="{key}"{m.group(4)}>{_I["HTML_EN"].get(key, "")}</{tag}>'
 h = _re.sub(r'<(\w+)([^>]*?)data-i18n-html="([a-z_0-9]+)"([^>]*)></\1>', _fillh, h)
 a=a.replace('__V_INDEX__',V_INDEX).replace('__V_I18N__',V_I18N)
+# the index's download starts as the head is parsed, not when the script at the foot
+# of the page runs; crossorigin matches fetch()'s default mode, so the one download
+# serves both
+h=h.replace('<meta property="og:type"', f'<link rel="preload" href="data/index.json?v={V_INDEX}" as="fetch" crossorigin>\n<meta property="og:type"',1)
 body=h.replace('<meta charset="utf-8">\n','',1)
 body=re.sub(r'<meta name="description"[^>]*>\n?','',body,count=1)   # the template's static copy
+# the shared-link card: the same description, and the first of the chosen works as its
+# picture -- the holder's own file, by reference, as on the wall
+body=re.sub(r'<meta property="og:description" content="[^"]*">', DESC.replace('name="description"','property="og:description"'), body, count=1)
+_top=min((w for w in _m['works'] if w.get('mp') is not None and w.get('im')), key=lambda w: w['mp'], default=None)
+if _top:
+    _im=_top['im']
+    _src=(f"https://www.muis.ee/digitaalhoidla/api/meedia/pisipilt?id={_im[2:]}" if _im.startswith("m:")
+          else "https://digikogu.ekm.ee/static/preview/image/"+re.sub(r"/([^/]+)$", r"/t2_\1", _im[2:]) if _im.startswith("e:") else _im[2:])
+    _alt=(_top.get('t') or '')+', '+_m['artists'][_top['a']]['n']
+    body=body.replace('<meta name="twitter:card" content="summary">',
+        f'<meta property="og:image" content="{_src}">\n<meta property="og:image:alt" content="{_alt.replace(chr(34), "&quot;")}">\n<meta name="twitter:card" content="summary_large_image">',1)
+    print("og:image:", _alt)
 # the landing page's first paint, baked (build_landing.py): the door and the opening of
 # the artwall as plain HTML, cleared at once by an inline script when the address names
 # another view, and replaced by the app when it boots
