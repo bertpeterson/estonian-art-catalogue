@@ -31,7 +31,12 @@ const check = (name, ok, detail) => { console.log(`${ok ? "ok  " : "FAIL"} ${nam
   const open = async (hash, wait = 4000) => { await send("Page.navigate", {url: `http://127.0.0.1:${port}/${hash}`}); await sleep(wait); };
   const ev = async expr => { const r = await send("Runtime.evaluate", {expression: expr, returnByValue: true, awaitPromise: true}); return r.result && r.result.result ? r.result.result.value : null; };
 
-  await open("", 6000);
+  // The first visit is made on a throttled connection, so the index arrives after the
+  // load event as it does on a real one; the worker was once registered on load and
+  // never ran for anyone whose index took longer than the page.
+  await send("Network.enable"); await send("Network.emulateNetworkConditions", {offline: false, latency: 40, downloadThroughput: 60e6 / 8, uploadThroughput: 10e6 / 8});
+  await open("", 9000);
+  await send("Network.emulateNetworkConditions", {offline: false, latency: 0, downloadThroughput: -1, uploadThroughput: -1});
   check("landing: sixteen names", (await ev(`document.querySelectorAll("[data-door=a]").length`)) === 16);
   check("landing: seventy-two tiles", (await ev(`document.querySelectorAll(".wt").length`)) === 72);
   check("landing: masthead figures", (await ev(`+document.querySelector("#stat-w").textContent.replace(/[^0-9]/g,"")`)) > 90000);
