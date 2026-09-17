@@ -1,6 +1,6 @@
 # Estonian Art Catalogue · Eesti Kunstikataloog
 
-A browsable catalogue of **81,422 artworks** by **4,413 artists** — museum holdings from **24 Estonian public
+A browsable catalogue of **100,313 artworks** by **5,349 artists** — museum holdings from **24 Estonian public
 collections**, plus what seven commercial galleries and the NOBA marketplace are selling right now,
 aggregated from the national museum databases and the galleries' own listings and presented as a static site.
 
@@ -16,8 +16,8 @@ says so with an *ed* tag.
 
 | Source | Records | What it is |
 |---|---|---|
-| [MuIS](https://www.muis.ee) | 34,067 | Muuseumide Infosüsteem — the shared catalogue of all Estonian museums |
-| [EKM Digital Collection](https://digikogu.ekm.ee) | 33,898 | The Art Museum of Estonia's own database, behind Kumu |
+| [MuIS](https://www.muis.ee) | 67,217 | Muuseumide Infosüsteem — the shared catalogue of all Estonian museums; the art collections of the Art Museum of Estonia, Tartu Art Museum, the History, National, Maritime and Tartu City museums and the regional museums, the later ones read through its OAI-PMH service |
+| [EKM Digital Collection](https://digikogu.ekm.ee) | 32,625 | The Art Museum of Estonia's own database, behind Kumu |
 | [CCA Estonia](https://cca.ee) | 58 bios | Centre for Contemporary Art — artist biographies, Venice Biennale archive |
 | [EKKM](https://ekkm.ee) | — | Contemporary Art Museum of Estonia |
 | Vaal galerii | 115 artists | Life dates printed beside every lot's artist in its sales, taken for artists no museum, Wikidata or biography dates, tagged *Vaal* |
@@ -30,9 +30,9 @@ Of the works for sale, 3,203 are NOBA listings, 4,056 the galleries' own. NOBA a
 biography, written by the artist or NOBA, for 544 artists who have none from a museum, and a birth year
 read from that biography for 301 — both tagged *NOBA* on the page.
 
-7,933 objects appear in both MuIS and the EKM database and are merged on inventory number
-(MuIS `Number` = digikogu `Tulmenumber` + `Kogunumber`), which is why 61,687 source objects
-collapse to 81,422 works.
+20,919 objects appear in both MuIS and the EKM database and are merged on inventory number
+(MuIS `Number` = digikogu `Tulmenumber` + `Kogunumber`), which is why 88,788 source objects
+collapse to 100,313 works.
 
 **Only attributed works are included.** Anonymous and unattributed objects are excluded by design — including 485 objects catalogued under the name *Tundmatu kunstnik* ("unknown artist"), which is the absence of an attribution written into the name field rather than a name. Notnames stay: *Püha Lucia legendi meister* and its kind identify a hand recognised across several works, and art history treats that as an attribution.
 
@@ -200,8 +200,8 @@ not as part of the normal cycle.
 `data/data.json` is dictionary-encoded and nested, which suits the site and suits
 nobody else. Flat exports with every value resolved, one row per work:
 
-    site/data/export/works.csv.gz      81,422 rows
-    site/data/export/artists.csv.gz     4,413 rows
+    site/data/export/works.csv.gz      100,313 rows
+    site/data/export/artists.csv.gz     5,349 rows
     site/data/export/works.jsonl.gz     one JSON object per line
 
 Rebuild them with `python3 data/export_csv.py`. `data/validate.py` runs the sanity
@@ -265,12 +265,18 @@ cd site && python3 -m http.server 8000
 
 ## How this was collected
 
-Museum records come from MuIS and the EKM Digital Collection, fetched per artist and per
-collection and cached locally, then parsed. Requests identified themselves as
-`EstonianArtCatalogue/1.0`, every page was cached so nothing was fetched twice, and part of
-the MuIS harvest used the bulk RDF files it publishes at `/rdf/collection/`. The metadata is CC0 by
-MuIS's own statement, and the museum sources are never fetched again by this project.
-**A refresh should go through those bulk files and the OAI interface rather than fetching object pages.**
+Museum records come from MuIS and the EKM Digital Collection. The first harvest read MuIS
+per artist and per collection, cached locally, then parsed, with part of it through the bulk RDF
+files MuIS publishes at `/rdf/collection/`. Everything since goes through **MuIS's OAI-PMH service**
+(`muis_oai.py`): the interface MuIS provides for harvesters, which lists a museum's objects by
+collection and returns each record in LIDO — maker with role and dates, title, work type,
+technique, measurements, description, the pictures' media ids and pixel sizes. Tartu Art Museum's
+prints, watercolours, portfolios, ex-libris, sculpture and new media, the Art Museum of Estonia's
+print collection, and the art collections of the National, History, Maritime and Tartu City museums
+came in this way, twelve requests in flight and every answer cached; records the museum has withdrawn
+(`status="deleted"`) and objects without a maker are left out. The monthly run asks the service for
+new objects in those collections only. Requests identify themselves as `EstonianArtCatalogue/1.0`;
+the metadata is CC0 by MuIS's own statement. MuIS's object pages are never fetched again.
 
 Gallery records come from each gallery's own public listings — WooCommerce's documented Store API
 where one exists (Vernissage, NOBA), otherwise the pages themselves. NOBA's artist pages were read
@@ -331,7 +337,7 @@ a person.
 Code: MIT (see `LICENSE`).
 
 **Data is mixed, and the split is in the data itself.** Records marked `kind: held` —
-60,067 of them, 73.8% — derive from museum metadata published under CC0, which carries no
+78,958 of them, 78.7% — derive from museum metadata published under CC0, which carries no
 restriction on reuse, commercial included. The 9,985 records marked `kind: gallery` come from
 commercial galleries and the NOBA marketplace, which grant no licence; they are included as a
 public catalogue of current work, and anyone reusing this dataset should decide for themselves
