@@ -525,6 +525,19 @@ footer a{border-bottom:1px solid var(--rule)}
   .langsw button,.seg button,.ai-sort button{min-height:32px}
   .af{min-height:32px}   /* the active-filter chips are how a filter gets removed */
 }
+/* A phone: the toolbar took a third of the screen and stayed stuck there. It scrolls
+   with the page, the GROUP / SORT / SHOW labels go, and the four masthead figures sit
+   two by two instead of three and one. */
+@media (max-width:640px){
+  .controls{position:static;padding:10px 0;gap:8px 12px}
+  .ctl-label{display:none}
+  .search{flex:1 1 100%;max-width:none}
+  .sortsel{max-width:150px}
+  .mast-stats{display:grid;grid-template-columns:1fr 1fr;gap:12px 20px}
+  .mast-stats > *{border:0!important;padding:0!important}
+  .seg button{padding:8px 11px;font-size:.64rem;letter-spacing:.08em}
+  .d-fig{grid-column:1/-1}
+}
 @media (max-width:760px){
   .bar-n{display:none}
   .bars{gap:12px}
@@ -2052,7 +2065,7 @@ footer a{border-bottom:1px solid var(--rule)}
     // the fold keeps the first it sees, so a masterpiece or highlight goes first
     const unique = sortRows(pics, state.decOrder !== "earliest").map((w, i) => [w, i])
       .sort((a, b) => (a[0].mp || 1e9) - (b[0].mp || 1e9) || (a[0].hl ?? 1e9) - (b[0].hl ?? 1e9) || a[1] - b[1]).map(x => x[0]).filter(w => {
-      if (!MULTI.has(w.e) && w.hl == null) return true;
+      if (!MULTI.has(w.e) && (w.hl == null || w.e === "Painting")) return true;   // a painting is one work, however many share its title
       const k = dupKey(w);
       if (seen.has(k)){ dups.set(seen.get(k), (dups.get(seen.get(k)) || 1) + 1); return false; }
       seen.set(k, w); return true;
