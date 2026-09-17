@@ -263,7 +263,7 @@ MUSEUM_EN = {
  "Dr. Fr. R. Kreutzwaldi Memoriaalmuuseum":"Dr Fr. R. Kreutzwald Memorial Museum","Viljandi Muuseum":"Viljandi Museum",
  "Virumaa Muuseumid":"Virumaa Museums","Eesti Teatri- ja Muusikamuuseum":"Estonian Theatre and Music Museum",
  "Eesti Spordi- ja Olümpiamuuseum":"Estonian Sports and Olympic Museum","Narva Muuseum":"Narva Museum",
- "Tallinna Linnamuuseum":"Tallinn City Museum","Hiiumaa Muuseumid":"Hiiumaa Museums",
+ "Tallinna Linnamuuseum":"Tallinn City Museum","Tartu Linnamuuseum":"Tartu City Museum","Eesti Meremuuseum":"Estonian Maritime Museum","Hiiumaa Muuseumid":"Hiiumaa Museums",
  "Haapsalu ja Läänemaa Muuseumid":"Haapsalu and Läänemaa Museums","Eesti Rahva Muuseum":"Estonian National Museum",
  "Uue Kunsti Muuseum":"Museum of New Art","Erakogu":"Private collection","Asukoht teadmata":"Whereabouts unknown","Väliseesti Muuseum, Kanada":"Museum of Estonians Abroad (VEMU), Canada","Eesti Rahvusarhiiv":"National Archives of Estonia","Eesti Üliõpilaste Selts":"Estonian Students' Society","Konrad Mägi Sihtasutus":"Konrad Mägi Foundation","Pärnu Muuseum":"Pärnu Museum",
  "Eesti Maaelumuuseumid SA, Eesti Põllumajandusmuuseum":"Estonian Agricultural Museum",
