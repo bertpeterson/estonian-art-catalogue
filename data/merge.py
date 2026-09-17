@@ -115,6 +115,13 @@ def year_of(d):
 
 # ---------- load ----------
 MU = json.load(open("records.json", encoding="utf-8"))
+# ...and the collections read later through MuIS's OAI-PMH service (muis_oai.py), in
+# the same shape; an id the page harvest already holds is not read twice there
+if os.path.exists("oai_records.json"):
+    _oai = json.load(open("oai_records.json", encoding="utf-8")); _have = {r["id"] for r in MU}
+    _oai = [r for r in _oai if r["id"] not in _have and r.get("artist")]   # attributed works only, as everywhere
+    MU += _oai
+    print("  MuIS records through OAI-PMH:", len(_oai))
 DK = json.load(open("dk_records.json", encoding="utf-8")) if os.path.exists("dk_records.json") else []
 
 # Clean every artist name before anything is keyed on it, then settle on one
@@ -1045,12 +1052,14 @@ print("  flagged: dated before birth", FLAGGED["pre"], "/ after death", FLAGGED[
 # by a later artist -- most of the catalogue -- stays without.
 import gzip
 _img = json.load(gzip.open("raw/image_urls.json.gz", "rt", encoding="utf-8")) if os.path.exists("raw/image_urls.json.gz") else {}
+if os.path.exists("oai_images.json"): _img.update(json.load(open("oai_images.json", encoding="utf-8")))   # media ids from the OAI records
 _ekm = json.load(open("ekm_images.json", encoding="utf-8")) if os.path.exists("ekm_images.json") else {}
 # ...and each EKM picture's proportions (height over width, from the preview's pixel
 # size, ekm_shapes.py), so the wall can lay a tile out before the picture arrives
 _ekmr = json.load(open("ekm_shapes.json", encoding="utf-8")) if os.path.exists("ekm_shapes.json") else {}
 _galr = json.load(open("gallery_shapes.json", encoding="utf-8")) if os.path.exists("gallery_shapes.json") else {}
 _muisr = json.load(open("muis_shapes.json", encoding="utf-8")) if os.path.exists("muis_shapes.json") else {}
+if os.path.exists("oai_shapes.json"): _muisr.update(json.load(open("oai_shapes.json", encoding="utf-8")))   # pixel sizes the OAI records carry
 _Y = datetime.date.today().year
 def _pd(a):
     b, d = _yr(a["l"][0]), _yr(a["l"][1])
