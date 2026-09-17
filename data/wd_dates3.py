@@ -101,6 +101,8 @@ for i in range(0, len(cands), B):
         elif len(ok) > 1: rej["ambiguous"] += 1
     print(f"  {min(i+B, len(cands))}/{len(cands)}  matched {len(matches)}", flush=True)
     time.sleep(1.0)
+prev3 = json.load(open("wd_matches3.json", encoding="utf-8")) if os.path.exists("wd_matches3.json") else {}
+prev3.update(matches); matches = prev3   # a rerun adds to the file, never replaces it
 json.dump(matches, open("wd_matches3.json", "w", encoding="utf-8"), ensure_ascii=False, indent=0)
 print(f"\nPASS 3: matched {len(matches)} of {len(cands)}; rejected {rej}")
 for n, m in list(matches.items())[:8]: print("  ", n, m["byear"], m["dyear"], "|", (m["desc"] or "")[:50])

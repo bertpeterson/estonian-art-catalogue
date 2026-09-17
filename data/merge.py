@@ -338,7 +338,7 @@ LIFE_FIX = {"Karl Pavlovitš Brüllov": ["1799", "1852"], "Ivan Augustinovitš W
 # letter apart or one a subset of the other. Names with a workshop, copy or
 # attribution qualifier never merge -- a workshop is not its master.
 PARTICLE = {"von", "van", "de", "der", "den", "du", "la", "le", "da", "di", "af", "zu", "und", "ja"}
-NEVER = re.compile(r"töökoda|workshop|ateljee|koolkond|järgi|koopia|manner|ring|\?", re.I)
+NEVER = re.compile(r"töökoda|workshop|ateljee|koolkond|järgi|koopia|manner|ring|\?|\bja\b|&", re.I)   # a duo is two people
 def _life_of(name, src=False):
     for life, ls in ((LIFE_FIX.get(name), "ed"), (MU_LIFE.get(name), "muis"), (au_life(AU.get(name, {})), "ekm"),
                      (DK_LIFE.get(name), "ekm"), (ED_LIFE.get(name), "ed")):
@@ -349,14 +349,20 @@ def _byear(name):
     l = _life_of(name); m = re.match(r"^\s*(\d{4})", str(l[0]) if l else "")
     return int(m.group(1)) if m else None
 def _ftok(t):
-    """fold() returns a sorted tuple of words for whole names; one word folds to one string."""
-    k = fold(t); return k[0] if k else ""
+    """fold() returns a sorted tuple of words for whole names; one word folds to one string.
+    C and K, W and V, X and KS are one letter in Estonian spelling of a foreign name --
+    Carl/Karl, Alexander/Aleksander, Woldemar/Voldemar -- and fold together here."""
+    k = fold(t); k = k[0] if k else ""
+    return re.sub(r"^c", "k", k.replace("x", "ks").replace("w", "v"))
 def _toks(n):
     n = re.sub(r"\b(sen|jun|jr|sr|vanem|noorem)\.?\b", " ", _strip_brackets(n), flags=re.I)
-    return [_ftok(t) for t in re.findall(r"[^\s.,]+", n) if _ftok(t) and _ftok(t) not in PARTICLE]
+    # a hyphenated given name (Peeter-Adolf) or surname (Bergmann-Vardi) splits into its parts
+    return [_ftok(t) for t in re.findall(r"[^\s.,\-]+", n) if _ftok(t) and _ftok(t) not in PARTICLE]
 def _close(a, b):
-    """Equal, or one edit apart: Johann/Johan, Vive/Viive, Mathias/Matthias."""
+    """Equal, or one edit apart: Johann/Johan, Vive/Viive, Mathias/Matthias; an initial
+    matches the name it starts (K. -- Karin)."""
     if a == b: return True
+    if len(a) == 1 or len(b) == 1: return a[0] == b[0]
     if abs(len(a) - len(b)) > 1 or min(len(a), len(b)) < 3: return False
     if len(a) == len(b): return sum(x != y for x, y in zip(a, b)) == 1
     lo, hi = (a, b) if len(a) < len(b) else (b, a)
@@ -379,8 +385,9 @@ def _same_person(x, y):
         j += 1
     bx, by = _byear(x), _byear(y)
     if bx and by: return bx == by
-    # no year to check: only when the names are the same length and letter-close
-    return len(tx) == len(ty)
+    # no year to check: the same length and letter-close, or the shorter name lying
+    # wholly inside the longer -- Vladimir Bogatkin in Vladimir Valerianovitš Bogatkin
+    return len(tx) == len(ty) or (len(lo) >= 2 and len(lo[0]) > 1)
 _bysur = collections.defaultdict(list)
 for n in by_artist: 
     t = _toks(n)
@@ -391,7 +398,8 @@ for names in _bysur.values():
     for i, big in enumerate(names):
         if big not in by_artist: continue
         for small in names[i+1:]:
-            if small in by_artist and _same_person(big, small):
+            if small in by_artist and _same_person(big, small) and not (
+                    len(_toks(small)[0]) == 1 and sum(1 for n in names if n in by_artist and n != small and _same_person(n, small)) > 1):
                 for r in by_artist.pop(small): r["artist"] = big; by_artist[big].append(r)
                 if not _life_of(big) and _life_of(small): LIFE_FROM_VARIANT[big] = _life_of(small, src=True)
                 SPELLINGS.append((small, big))
