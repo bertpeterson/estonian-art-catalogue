@@ -7,7 +7,7 @@ auction by lots and by the sum of their hammer prices; the highest results; how
 much of each house's offering finds a buyer. Every figure is computed here from
 the same data the app loads, so the page and the app never disagree.
 """
-import json, html, datetime, collections, re, unicodedata
+import json, os, html, datetime, collections, re, unicodedata
 GC = '<script data-goatcounter="https://museaal.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>'   # GoatCounter: a page-view count, no cookies
 
 SRC, OUT = "data/data.json", "site/stats.html"
@@ -24,7 +24,7 @@ def slug(s):
 
 # ---- holdings ----
 by_kind = collections.Counter(kind(w) for w in W)
-KIND = {"held": "In museum collections", "shown": "Exhibited", "gallery": "For sale in galleries", "sold": "Past gallery listings", "auction": "Auction lots"}
+KIND = {"held": "In museum collections", "shown": "Exhibited", "gallery": "For sale in galleries", "sold": "Past gallery listings", "auction": "Auction lots", "known": "Known works"}
 med = collections.defaultdict(collections.Counter)
 for w in W: med[val(w, "e") or "Other"][kind(w)] += 1
 # the long tail of museum object types (Nõu, Kauss, Laegas...) folds into Other
@@ -103,71 +103,90 @@ CSS = ("body{margin:0;padding:28px;font:15px/1.55 -apple-system,BlinkMacSystemFo
        ".dc{display:inline-flex;align-items:flex-end;gap:1px;height:22px}.dc i{display:block;width:4px;background:#111}@media(prefers-color-scheme:dark){.dc i{background:#f1f2f4}}")
 
 today = datetime.date.today().isoformat()
-parts = [f"<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">"
-         f"<title>The catalogue in figures — Estonian Art Catalogue</title>"
-         f"<meta name=\"description\" content=\"What museaal.ee holds by kind and medium, and the Estonian auction record by house, year and artist.\">"
-         f"<link rel=\"canonical\" href=\"https://museaal.ee/stats.html\"><style>{CSS}</style>{GC}</head><body>"
-         f"<nav><a href=\"./\">Estonian Art Catalogue</a> › The catalogue in figures</nav>"
-         f"<h1>The catalogue in figures</h1><p class=\"m\">Computed from the data as built on {today}. Prices are hammer prices as the houses published them; a gallery's asking prices are never taken.</p>"]
+ET = {'The catalogue in figures': 'Kataloog arvudes', 'Estonian Art Catalogue': 'Eesti Kunstikataloog', 'What museaal.ee holds by kind and medium, and the Estonian auction record by house, year and artist.': 'Mida museaal.ee sisaldab liigi ja tehnika kaupa, ning Eesti oksjonitulemused maja, aasta ja kunstniku kaupa.', 'Computed from the data as built on': 'Arvutatud andmetest seisuga', "Prices are hammer prices as the houses published them; a gallery's asking prices are never taken.": 'Hinnad on haamrihinnad nii, nagu majad need avaldasid; galeriide küsitud hindu ei koguta.', 'By medium': 'Liigi kaupa', 'Medium': 'Liik', 'Museums': 'Muuseumid', 'For sale': 'Müügil', 'Past listings': 'Varasemad pakkumised', 'Auction lots': 'Oksjonipartiid', 'All': 'Kokku', 'The collections': 'Kogud', 'Every holder with a hundred works or more; the small chart is works per decade, 1800s to 2020s; pictures are shown for public-domain works only.': 'Iga hoidja, kellel on vähemalt sada teost; väike diagramm on teoseid kümnendi kaupa, 1800ndatest 2020ndateni; pilte näidatakse ainult autoriõiguse alt vabade teoste puhul.', 'Holder': 'Hoidja', 'Works': 'Teoseid', 'Dated': 'Dateeritud', 'With a picture': 'Pildiga', 'Main media': 'Peamised liigid', 'Per decade': 'Kümnendi kaupa', 'By decade': 'Kümnendi kaupa', 'Decade': 'Kümnend', 'Museum works': 'Muuseumiteoseid', 'Dated works in the catalogue': 'Dateeritud teoseid kataloogis', 'The auction record': 'Oksjonitulemused', 'lots': 'partiid', 'sold': 'müüdud', 'hammer prices in all,': 'haamrihindu kokku,', 'average · median': 'keskmine · mediaan', 'By house': 'Maja kaupa', 'House': 'Maja', 'Sales': 'Oksjoneid', 'Lots': 'Partiisid', 'Sold': 'Müüdud', 'Sell-through': 'Müügiosakaal', 'Hammer total': 'Haamrihinnad kokku', 'By year': 'Aasta kaupa', 'Year': 'Aasta', 'Average': 'Keskmine', 'Hammer total by year': 'Haamrihinnad kokku aasta kaupa', 'Lots by year': 'Partiisid aasta kaupa', 'By medium at auction': 'Liigi kaupa oksjonil', 'Artists most sold at auction': 'Enim müüdud kunstnikud oksjonil', 'By lots sold.': 'Müüdud partiide järgi.', 'Artist': 'Kunstnik', 'Of lots': 'Partiidest', 'Highest': 'Kõrgeim', 'Artists by the sum of their hammer prices': 'Kunstnikud haamrihindade summa järgi', 'Highest results': 'Kõrgeimad tulemused', 'Work': 'Teos', 'Sale': 'Oksjon', 'Hammer price': 'Haamrihind', 'Auction results as Haus Galerii, Vernissage, Allee galerii, Vaal galerii, E-Kunstisalong and Eesti Kunsti Oksjonid published them, plus a few earlier record prices as the press reported them; kroon-era prices in euro at the fixed rate. A record, not a valuation.': 'Oksjonitulemused nii, nagu Haus Galerii, Vernissage, Allee galerii, Vaal galerii, E-Kunstisalong ja Eesti Kunsti Oksjonid need avaldasid, lisaks mõni varasem rekordhind ajakirjanduse järgi; kroonihinnad eurodes fikseeritud kursiga. Ülestähendus, mitte hinnang.', 'Full catalogue': 'Kogu kataloog', 'Artists A–Z': 'Kunstnikud A–Ü', 'In museum collections': 'Muuseumikogudes', 'Exhibited': 'Eksponeeritud', 'For sale in galleries': 'Galeriides müügil', 'Past gallery listings': 'Varasemad galeriipakkumised', 'Known works': 'Teadaolevad teosed'}
+I18N = json.load(open("i18n.json", encoding="utf-8")) if os.path.exists("i18n.json") else {}
+MED_ET, MUS_EN = I18N.get("MEDIUM_ET", {}), I18N.get("MUSEUM_EN", {})
+PRICES_NOTE = "Prices are hammer prices as the houses published them; a gallery's asking prices are never taken."
+def render(lang):
+    _ = (lambda s: ET.get(s, s)) if lang == "et" else (lambda s: s)
+    medl = (lambda m: MED_ET.get(m, m)) if lang == "et" else (lambda m: m)
+    musl = (lambda h: h) if lang == "et" else (lambda h: MUS_EN.get(h, h))
+    decl = (lambda d: f"{d}ndad") if lang == "et" else (lambda d: f"{d}s")
+    OUTNAME = "stats.html" if lang == "en" else "stats-et.html"
+    HOME = "./" if lang == "en" else "./#lang=et"
+    OTHER, OTHERLAB = ("stats-et.html", "Eesti keeles") if lang == "en" else ("stats.html", "In English")
+    parts = []
+    parts = [f"<!doctype html><html lang=\"{lang}\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">"
+             f"<title>The catalogue in figures — Estonian Art Catalogue</title>"
+             f"<meta name=\"description\" content=\"What museaal.ee holds by kind and medium, and the Estonian auction record by house, year and artist.\">"
+             f"<link rel=\"canonical\" href=\"https://museaal.ee/{OUTNAME}\"><style>{CSS}</style>{GC}</head><body>"
+             f"<nav><a href=\"./\">{_('Estonian Art Catalogue')}</a> › {_('The catalogue in figures')}</nav>"
+             f"<h1>{_('The catalogue in figures')}</h1><p class=\"m\">{_('Computed from the data as built on')} {today}. {_(PRICES_NOTE)}</p>"]
 
-parts.append('<div class="grid">' + "".join(f'<div><div class="big">{fmt(n)}</div><div class="m">{e(KIND.get(k, k))}</div></div>'
-             for k, n in sorted(by_kind.items(), key=lambda kv: -kv[1])) + "</div>")
-parts.append(f"<h2>By medium</h2><div class=\"sec\">" + table(["Medium", "Museums", "For sale", "Past listings", "Auction lots", "All"],
-             [[e(m), fmt(c["held"] + c.get("shown", 0)), fmt(c["gallery"]), fmt(c["sold"]), fmt(c["auction"]), fmt(sum(c.values()))] for m, c in med_rows])
-             + hbars([(m, sum(c.values())) for m, c in med_rows], width=360, label_w=110) + "</div>")
+    parts.append('<div class="grid">' + "".join(f'<div><div class="big">{fmt(n)}</div><div class="m">{e(_(KIND.get(k, k)))}</div></div>'
+                 for k, n in sorted(by_kind.items(), key=lambda kv: -kv[1])) + "</div>")
+    parts.append(f"<h2>{_('By medium')}</h2><div class=\"sec\">" + table([_("Medium"), _("Museums"), _("For sale"), _("Past listings"), _("Auction lots"), _("All")],
+                 [[e(medl(m)), fmt(c["held"] + c.get("shown", 0)), fmt(c["gallery"]), fmt(c["sold"]), fmt(c["auction"]), fmt(sum(c.values()))] for m, c in med_rows])
+                 + hbars([(medl(m), sum(c.values())) for m, c in med_rows], width=360, label_w=110) + "</div>")
 
-# ---- the collections: works per holder, per decade, per medium ----
-held = [w for w in W if kind(w) in ("held", "shown") and val(w, "s") != "gallery"]
-by_holder = collections.Counter(val(w, "mu") for w in held)
-holders = [h for h, n in by_holder.most_common() if n >= 100]
-hold_dec = collections.defaultdict(collections.Counter); hold_med = collections.defaultdict(collections.Counter); hold_pic = collections.Counter(); hold_dated = collections.Counter()
-for w in held:
-    h = val(w, "mu"); hold_med[h][val(w, "e") or "Other"] += 1
-    if w.get("y"): hold_dec[h][w["y"] // 10 * 10] += 1; hold_dated[h] += 1
-    if w.get("im"): hold_pic[h] += 1
-DECS = list(range(1800, 2030, 10))
-def decrow(h):
-    c = hold_dec[h]; mx = max(c.values()) if c else 1
-    return "".join(f'<i title="{d}s: {c.get(d, 0)}" style="height:{max(1, round(22 * c.get(d, 0) / mx)) if c.get(d, 0) else 0}px"></i>' for d in DECS)
-parts.append("<h2>The collections</h2><p class=\"m\">Every holder with a hundred works or more; the small chart is works per decade, 1800s to 2020s; pictures are shown for public-domain works only.</p>"
-             + table(["Holder", "Works", "Dated", "With a picture", "Main media", "Per decade"],
-             [[e(h), fmt(by_holder[h]), pct(hold_dated[h], by_holder[h]), fmt(hold_pic[h]),
-               e(" · ".join(f"{m} {fmt(n)}" for m, n in hold_med[h].most_common(3))), f'<span class="dc">{decrow(h)}</span>'] for h in holders]))
-parts.append("<h2>By decade</h2><div class=\"sec\">" + table(["Decade", "Museum works", "Dated works in the catalogue", "With a picture"],
-             [[f"{d}s", fmt(sum(hold_dec[h].get(d, 0) for h in hold_dec)), fmt(sum(1 for w in W if w.get("y") and w["y"] // 10 * 10 == d)), fmt(sum(1 for w in held if w.get("im") and w.get("y") and w["y"] // 10 * 10 == d))] for d in DECS])
-             + hbars([(f"{d}s", sum(hold_dec[h].get(d, 0) for h in hold_dec)) for d in DECS], width=360, label_w=70) + "</div>")
+    # ---- the collections: works per holder, per decade, per medium ----
+    held = [w for w in W if kind(w) in ("held", "shown") and val(w, "s") != "gallery"]
+    by_holder = collections.Counter(val(w, "mu") for w in held)
+    holders = [h for h, n in by_holder.most_common() if n >= 100]
+    hold_dec = collections.defaultdict(collections.Counter); hold_med = collections.defaultdict(collections.Counter); hold_pic = collections.Counter(); hold_dated = collections.Counter()
+    for w in held:
+        h = val(w, "mu"); hold_med[h][val(w, "e") or "Other"] += 1
+        if w.get("y"): hold_dec[h][w["y"] // 10 * 10] += 1; hold_dated[h] += 1
+        if w.get("im"): hold_pic[h] += 1
+    DECS = list(range(1800, 2030, 10))
+    def decrow(h):
+        c = hold_dec[h]; mx = max(c.values()) if c else 1
+        return "".join(f'<i title="{d}s: {c.get(d, 0)}" style="height:{max(1, round(22 * c.get(d, 0) / mx)) if c.get(d, 0) else 0}px"></i>' for d in DECS)
+    parts.append(f"<h2>{_('The collections')}</h2><p class=\"m\">{_('Every holder with a hundred works or more; the small chart is works per decade, 1800s to 2020s; pictures are shown for public-domain works only.')}</p>"
+                 + table([_("Holder"), _("Works"), _("Dated"), _("With a picture"), _("Main media"), _("Per decade")],
+                 [[e(musl(h)), fmt(by_holder[h]), pct(hold_dated[h], by_holder[h]), fmt(hold_pic[h]),
+                   e(" · ".join(f"{medl(m)} {fmt(n)}" for m, n in hold_med[h].most_common(3))), f'<span class="dc">{decrow(h)}</span>'] for h in holders]))
+    parts.append(f"<h2>{_('By decade')}</h2><div class=\"sec\">" + table([_("Decade"), _("Museum works"), _("Dated works in the catalogue"), _("With a picture")],
+                 [[decl(d), fmt(sum(hold_dec[h].get(d, 0) for h in hold_dec)), fmt(sum(1 for w in W if w.get("y") and w["y"] // 10 * 10 == d)), fmt(sum(1 for w in held if w.get("im") and w.get("y") and w["y"] // 10 * 10 == d))] for d in DECS])
+                 + hbars([(decl(d), sum(hold_dec[h].get(d, 0) for h in hold_dec)) for d in DECS], width=360, label_w=70) + "</div>")
 
-parts.append(f"<h2>The auction record</h2><div class=\"grid\">"
-             f"<div><div class=\"big\">{fmt(len(lots))}</div><div class=\"m\">lots</div></div>"
-             f"<div><div class=\"big\">{fmt(len(sold))}</div><div class=\"m\">sold · {pct(len(sold), len(lots))}</div></div>"
-             f"<div><div class=\"big\">{eur(total)}</div><div class=\"m\">hammer prices in all, {fmt(len(priced))} lots</div></div>"
-             f"<div><div class=\"big\">{eur(round(total / len(priced)))}</div><div class=\"m\">average · median {eur(sorted(w['ap'] for w in priced)[len(priced) // 2])}</div></div></div>")
-hs = sorted(house.items(), key=lambda kv: -kv[1]["sum"])
-parts.append("<h2>By house</h2><div class=\"sec\">" + table(["House", "Sales", "Lots", "Sold", "Sell-through", "Hammer total"],
-             [[e(h), f"{v['first']}–{v['last']}", fmt(v["lots"]), fmt(v["sold"]), pct(v["sold"], v["lots"]), eur(v["sum"])] for h, v in hs])
-             + "<div>" + hbars([(h, v["sum"]) for h, v in hs], fmtv=lambda n: f"€{n / 1e6:.1f} M", width=360, label_w=140)
-             + hbars([(h, v["lots"]) for h, v in hs], width=360, label_w=140) + "</div></div>")
-ys = sorted(year.items())
-parts.append("<h2>By year</h2><div class=\"sec\">" + table(["Year", "Lots", "Sold", "Sell-through", "Hammer total", "Average"],
-             [[y, fmt(v["lots"]), fmt(v["sold"]), pct(v["sold"], v["lots"]), eur(v["sum"]), eur(round(v["sum"] / v["sold"])) if v["sold"] else "—"]
-              for y, v in reversed(ys)])
-             + "<div><p class=\"m\" style=\"margin:8px 0 0\">Hammer total by year</p>" + hbars([(y, v["sum"]) for y, v in reversed(ys)], fmtv=lambda n: f"€{n / 1e6:.1f} M", width=360, bar=10, gap=3, label_w=50)
-             + "<p class=\"m\" style=\"margin:14px 0 0\">Lots by year</p>" + hbars([(y, v["lots"]) for y, v in reversed(ys)], width=360, bar=10, gap=3, label_w=50) + "</div></div>")
-ams = sorted(auc_med.items(), key=lambda kv: -kv[1]["sum"])
-parts.append("<h2>By medium at auction</h2><div class=\"sec\">" + table(["Medium", "Lots", "Sold", "Sell-through", "Hammer total", "Average"],
-             [[e(m), fmt(v["lots"]), fmt(v["sold"]), pct(v["sold"], v["lots"]), eur(v["sum"]), eur(round(v["sum"] / v["sold"])) if v["sold"] else "—"] for m, v in ams])
-             + hbars([(m, v["sum"]) for m, v in ams], fmtv=lambda n: f"€{n / 1e6:.1f} M", width=360, label_w=100) + "</div>")
-mx = top_by_lots[0][1]["sold"] if top_by_lots else 1
-parts.append("<h2>Artists most sold at auction</h2><p class=\"m\">By lots sold.</p>" + table(["", "Artist", "", "Sold", "Of lots", "Hammer total", "Highest"],
-             [[str(k + 1), artist_link(i), cellbar(v["sold"], mx), fmt(v["sold"]), fmt(v["lots"]), eur(v["sum"]), eur(v["top"])] for k, (i, v) in enumerate(top_by_lots)]))
-mx = top_by_sum[0][1]["sum"] if top_by_sum else 1
-parts.append("<h2>Artists by the sum of their hammer prices</h2>" + table(["", "Artist", "", "Hammer total", "Sold", "Of lots", "Average", "Highest"],
-             [[str(k + 1), artist_link(i), cellbar(v["sum"], mx), eur(v["sum"]), fmt(v["sold"]), fmt(v["lots"]), eur(round(v["sum"] / v["sold"])) if v["sold"] else "—", eur(v["top"])]
-              for k, (i, v) in enumerate(top_by_sum)]))
-mx = top_results[0]["ap"] if top_results else 1
-parts.append("<h2>Highest results</h2>" + table(["", "Work", "Artist", "House", "Sale", "", "Hammer price"],
-             [[str(k + 1), f"<em>{e(w['t'])}</em>" + (f" <span class=m>{e(str(w.get('yl') or w.get('y') or ''))}</span>" if (w.get('yl') or w.get('y')) else ""),
-               artist_link(w["a"]), e(val(w, "mu")), e(str(w.get("ad", ""))[:4]), cellbar(w["ap"], mx), eur(w["ap"])] for k, w in enumerate(top_results)]))
-parts.append(f"<p class=\"m\" style=\"margin-top:36px\">Auction results as Haus Galerii, Vernissage, Allee galerii, Vaal galerii, E-Kunstisalong and Eesti Kunsti Oksjonid published them, plus a few earlier record prices as the press reported them; kroon-era prices in euro at the fixed rate. A record, not a valuation. <a href=\"./\">Full catalogue</a> · <a href=\"a/\">Artists A–Z</a></p></body></html>")
-open(OUT, "w", encoding="utf-8").write("".join(parts))
+    parts.append(f"<h2>{_('The auction record')}</h2><div class=\"grid\">"
+                 f"<div><div class=\"big\">{fmt(len(lots))}</div><div class=\"m\">{_('lots')}</div></div>"
+                 f"<div><div class=\"big\">{fmt(len(sold))}</div><div class=\"m\">{_('sold')} · {pct(len(sold), len(lots))}</div></div>"
+                 f"<div><div class=\"big\">{eur(total)}</div><div class=\"m\">{_('hammer prices in all,')} {fmt(len(priced))} {_('lots')}</div></div>"
+                 f"<div><div class=\"big\">{eur(round(total / len(priced)))}</div><div class=\"m\">{_('average · median')} {eur(sorted(w['ap'] for w in priced)[len(priced) // 2])}</div></div></div>")
+    hs = sorted(house.items(), key=lambda kv: -kv[1]["sum"])
+    parts.append(f"<h2>{_('By house')}</h2><div class=\"sec\">" + table([_("House"), _("Sales"), _("Lots"), _("Sold"), _("Sell-through"), _("Hammer total")],
+                 [[e(h), f"{v['first']}–{v['last']}", fmt(v["lots"]), fmt(v["sold"]), pct(v["sold"], v["lots"]), eur(v["sum"])] for h, v in hs])
+                 + "<div>" + hbars([(h, v["sum"]) for h, v in hs], fmtv=lambda n: f"€{n / 1e6:.1f} M", width=360, label_w=140)
+                 + hbars([(h, v["lots"]) for h, v in hs], width=360, label_w=140) + "</div></div>")
+    ys = sorted(year.items())
+    parts.append(f"<h2>{_('By year')}</h2><div class=\"sec\">" + table([_("Year"), _("Lots"), _("Sold"), _("Sell-through"), _("Hammer total"), _("Average")],
+                 [[y, fmt(v["lots"]), fmt(v["sold"]), pct(v["sold"], v["lots"]), eur(v["sum"]), eur(round(v["sum"] / v["sold"])) if v["sold"] else "—"]
+                  for y, v in reversed(ys)])
+                 + f"<div><p class=\"m\" style=\"margin:8px 0 0\">{_('Hammer total by year')}</p>" + hbars([(y, v["sum"]) for y, v in reversed(ys)], fmtv=lambda n: f"€{n / 1e6:.1f} M", width=360, bar=10, gap=3, label_w=50)
+                 + f"<p class=\"m\" style=\"margin:14px 0 0\">{_('Lots by year')}</p>" + hbars([(y, v["lots"]) for y, v in reversed(ys)], width=360, bar=10, gap=3, label_w=50) + "</div></div>")
+    ams = sorted(auc_med.items(), key=lambda kv: -kv[1]["sum"])
+    parts.append(f"<h2>{_('By medium at auction')}</h2><div class=\"sec\">" + table([_("Medium"), _("Lots"), _("Sold"), _("Sell-through"), _("Hammer total"), _("Average")],
+                 [[e(m), fmt(v["lots"]), fmt(v["sold"]), pct(v["sold"], v["lots"]), eur(v["sum"]), eur(round(v["sum"] / v["sold"])) if v["sold"] else "—"] for m, v in ams])
+                 + hbars([(medl(m), v["sum"]) for m, v in ams], fmtv=lambda n: f"€{n / 1e6:.1f} M", width=360, label_w=100) + "</div>")
+    mx = top_by_lots[0][1]["sold"] if top_by_lots else 1
+    parts.append(f"<h2>{_('Artists most sold at auction')}</h2><p class=\"m\">{_('By lots sold.')}</p>" + table(["", _("Artist"), "", _("Sold"), _("Of lots"), _("Hammer total"), _("Highest")],
+                 [[str(k + 1), artist_link(i), cellbar(v["sold"], mx), fmt(v["sold"]), fmt(v["lots"]), eur(v["sum"]), eur(v["top"])] for k, (i, v) in enumerate(top_by_lots)]))
+    mx = top_by_sum[0][1]["sum"] if top_by_sum else 1
+    parts.append(f"<h2>{_('Artists by the sum of their hammer prices')}</h2>" + table(["", _("Artist"), "", _("Hammer total"), _("Sold"), _("Of lots"), _("Average"), _("Highest")],
+                 [[str(k + 1), artist_link(i), cellbar(v["sum"], mx), eur(v["sum"]), fmt(v["sold"]), fmt(v["lots"]), eur(round(v["sum"] / v["sold"])) if v["sold"] else "—", eur(v["top"])]
+                  for k, (i, v) in enumerate(top_by_sum)]))
+    mx = top_results[0]["ap"] if top_results else 1
+    parts.append(f"<h2>{_('Highest results')}</h2>" + table(["", _("Work"), _("Artist"), _("House"), _("Sale"), "", _("Hammer price")],
+                 [[str(k + 1), f"<em>{e(w['t'])}</em>" + (f" <span class=m>{e(str(w.get('yl') or w.get('y') or ''))}</span>" if (w.get('yl') or w.get('y')) else ""),
+                   artist_link(w["a"]), e(musl(val(w, "mu"))), e(str(w.get("ad", ""))[:4]), cellbar(w["ap"], mx), eur(w["ap"])] for k, w in enumerate(top_results)]))
+    parts.append(f"<p class=\"m\" style=\"margin-top:36px\">Auction results as Haus Galerii, Vernissage, Allee galerii, Vaal galerii, E-Kunstisalong and Eesti Kunsti Oksjonid published them, plus a few earlier record prices as the press reported them; kroon-era prices in euro at the fixed rate. A record, not a valuation. <a href=\"{HOME}\">{_('Full catalogue')}</a> · <a href=\"a/\">{_('Artists A–Z')}</a> · <a href=\"{OTHER}\">{OTHERLAB}</a></p></body></html>")
+
+    out = "".join(parts)
+    if lang == "et":   # Estonian groups thousands with a space
+        for _k in range(3): out = re.sub(r"(\d),(\d{3})(?!\d)", "\\1\u202f\\2", out)
+    open("site/" + OUTNAME, "w", encoding="utf-8").write(out)
+    return len(parts)
+render("en"); render("et")
 print(f"  stats page      {len(lots):,} lots, {len(house)} houses, {len(year)} years")
