@@ -1293,7 +1293,7 @@
     const tile = w => {
       const src = imgSrc(det(w).im || ""), r = ratioOf(w);
       return `<button class="wt${state.open === w.k ? " on" : ""}" data-wt="${esc(w.k)}" title="${esc(w.t)} · ${esc(A[w.a].n)}">${src
-        ? `<img src="${esc(src)}" alt="" loading="lazy" style="aspect-ratio:1/${r.toFixed(3)}" referrerpolicy="no-referrer-when-downgrade" onerror="this.closest('.wt').hidden=true">`
+        ? `<img src="${esc(src)}" alt="" loading="lazy"${w.rc ? ' class="zm"' : ""} style="aspect-ratio:1/${r.toFixed(3)}" referrerpolicy="no-referrer-when-downgrade" onerror="this.closest('.wt').hidden=true">`
         : `<span class="wt-ph" style="aspect-ratio:1/${r.toFixed(3)}"></span>`}<span class="wt-cap"><i>${esc(w.t)}${dups.has(w) ? `<span class="src-tag" title="${esc(T("wall_dup", {n: dups.get(w)}))}">×${dups.get(w)}</span>` : ""}</i><span>${showArtist ? esc(A[w.a].n) + " · " : ""}${w.y ?? esc(T("nd"))} · ${esc(abbr(w.mu))}</span></span></button>`;
     };
     const nCols = wallCols(), cols = Array.from({length: nCols}, () => ({h: 0, t: []}));
@@ -1392,7 +1392,7 @@
   });
   let iq = null;
   const setIdxSort = mode => {
-    state.idxSort = mode; state.idxLimit = 120;
+    state.idxSort = mode; state.idxLimit = 120; state.idxOpen = true;   // choosing an order is asking to see the list
     $("ais-az").setAttribute("aria-pressed", mode !== "works");
     $("ais-works").setAttribute("aria-pressed", mode === "works");
     renderArtistIndex(); pushHash(true);
@@ -1410,7 +1410,7 @@
   $("ai-rail").addEventListener("click", e => {
     const b = e.target.closest(".ai-l"); if (!b) return;
     const L = b.dataset.letter;
-    state.letter = state.letter === L ? null : L; state.idxLimit = 120;
+    state.letter = state.letter === L ? null : L; state.idxLimit = 120; state.idxOpen = true;
     if (state.letter) state.idxOpen = true;
     renderArtistIndex(); pushHash(true);
     if (state.letter) $("aidx" in window ? "aidx" : "ai-body").scrollIntoView({behavior: matchMedia("(prefers-reduced-motion:reduce)").matches?"auto":"smooth", block:"nearest"});
