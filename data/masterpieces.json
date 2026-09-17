@@ -24,6 +24,12 @@
 1910
 ],
 [
+"Kristjan Raud",
+"Ema vaim",
+"Painting",
+1900
+],
+[
 "Oskar Kallis",
 "Linda kivi kandmas",
 "Painting",
@@ -43,9 +49,9 @@
 ],
 [
 "Kristjan Raud",
-"Kalevipoeg lauakoormaga",
+"Vaikelu",
 "Painting",
-1914
+1896
 ],
 [
 "Konrad Mägi",
@@ -72,6 +78,12 @@
 1913
 ],
 [
+"Kristjan Raud",
+"Ketraja",
+"Painting",
+1896
+],
+[
 "Nikolai Triik",
 "Poiss viiuliga",
 "Painting",
@@ -94,6 +106,12 @@
 "Otepää maastik",
 "Painting",
 1918
+],
+[
+"Kristjan Raud",
+"Puhkus rännakul",
+"Painting",
+1905
 ],
 [
 "Paul Raud",
@@ -120,6 +138,12 @@
 1933
 ],
 [
+"Kristjan Raud",
+"Viru vanne",
+"Painting",
+1928
+],
+[
 "Konrad Mägi",
 "Alide Asmuse portree",
 "Painting",
@@ -132,12 +156,6 @@
 1913
 ],
 [
-"Kristjan Raud",
-"Kalevipoja laul",
-"Drawing",
-null
-],
-[
 "Andrus Johani",
 "Tartu kalasadam",
 "Painting",
@@ -148,6 +166,12 @@ null
 "Lamavad tiigrid",
 "Drawing",
 1937
+],
+[
+"Kristjan Raud",
+"Nõid",
+"Painting",
+1914
 ],
 [
 "Konrad Mägi",
@@ -174,6 +198,12 @@ null
 1940
 ],
 [
+"Kristjan Raud",
+"Surmaingel",
+"Painting",
+1899
+],
+[
 "Konrad Mägi",
 "Capri",
 "Painting",
@@ -196,6 +226,12 @@ null
 "Tulge minu juurde",
 "Painting",
 1897
+],
+[
+"Kristjan Raud",
+"Kiidulaul",
+"Painting",
+1899
 ],
 [
 "Oskar Kallis",
@@ -294,12 +330,6 @@ null
 1935
 ],
 [
-"Kristjan Raud",
-"Vanapagan",
-"Print",
-null
-],
-[
 "Konrad Mägi",
 "Itaalia maastik",
 "Painting",
@@ -322,5 +352,17 @@ null
 "Itaalia maastik",
 "Painting",
 1858
+],
+[
+"Kristjan Raud",
+"Kalevipoeg lauakoormaga",
+"Painting",
+1914
+],
+[
+"Kristjan Raud",
+"Kalevipoja laul",
+"Drawing",
+null
 ]
 ]

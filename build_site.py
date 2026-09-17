@@ -62,8 +62,11 @@ for i, w in enumerate(W):
             # beneath): then the work's own proportions, and the tile crops from the
             # bottom, so the chart falls off
             rp, rw = w.get("ir"), shape_of(heavy.get("dm"))
-            r = rw if (rp and rw and rp > rw * 1.08 and rw >= 0.45) else (rp or rw)
+            # ...or wider (a chart or ruler at the side): the same, the tile looks at the middle
+            off = bool(rp and rw and 0.45 <= rw <= 2.2 and (rp > rw * 1.08 or rp < rw / 1.08))
+            r = rw if off else (rp or rw)
             if r: light["r"] = round(min(2.2, max(0.45, r)) * 100)
+            if off: light["rc"] = 1
         detail[shard_of(w)][str(i)] = heavy
     index.append(light)
 
