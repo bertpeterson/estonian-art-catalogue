@@ -342,7 +342,7 @@ h1 a:hover{color:var(--grey-6)}
 .wt img{display:block;width:100%;height:auto;object-fit:cover;object-position:center;background:var(--field)}
 /* a photograph taller than the work it shows carries a colour chart above or below it;
    the tile takes the work's shape and looks at the middle, so either edge falls off */
-.wt img.zm{transform:scale(1.16)}
+.wt img.zm{transform:none}   /* no zoom: a frame is cropped evenly, a chart at one edge half-cropped, nothing of the work lost */
 .wt-ph{display:block;width:100%}
 .wt-cap{display:block;font-size:.72rem;line-height:1.3;color:var(--ink-soft);padding:6px 5px 6px}
 .wt-cap i{display:block;font-family:var(--serif-text);font-style:italic;font-size:.88rem;color:var(--ink)}
