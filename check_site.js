@@ -55,6 +55,12 @@ const check = (name, ok, detail) => { console.log(`${ok ? "ok  " : "FAIL"} ${nam
   check("artist view: a tile opens its record", (await ev(`!!document.querySelector(".wall-open .d-fig")`)) === true);
   await open("#q=Veneetsia&view=list", 4000);
   check("search: rows", (await ev(`document.querySelectorAll(".row").length`)) > 20);
+  // the groups are laid out on demand (content-visibility); a row opened deep in the
+  // list must stay where it was on the screen when the register is redrawn
+  const kept = await ev(`(async () => { const r = [...document.querySelectorAll(".row")]; const x = r[Math.min(r.length - 1, 400)]; x.scrollIntoView({block: "center"}); await new Promise(f => setTimeout(f, 400));
+    const before = x.getBoundingClientRect().top; const id = x.querySelector(".row-btn").dataset.id; x.querySelector(".row-btn").click(); await new Promise(f => setTimeout(f, 1200));
+    const o = document.querySelector('.row[data-open="true"] .row-btn'); return o && o.dataset.id === id ? Math.abs(o.closest(".row").getBoundingClientRect().top - before) : 9999; })()`);
+  check("search: an opened row stays where it was", kept < 3, `${kept}px`);
   await open("#group=auction", 5000);
   check("auctions: highest hammer price first", /€\s?\d{3},?\d{3}/.test(await ev(`(document.querySelector(".row .rl-au")||{}).textContent||""`)));
   await open("#lang=et&artist=eduard-wiiralt", 5000);

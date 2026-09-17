@@ -65,7 +65,8 @@ check_site.js         opens the built site in headless Chrome; the deploy stops 
 `pages.yml` builds it on the runner, opens the result in headless Chrome
 (`check_site.js`: the landing page paints, an artist's wall and record open, search
 and auction lists fill, the Estonian text is there, the artist pages and stats pages
-exist, no script error) and deploys only a build that passes. It was committed for a
+exist, no script error) and deploys only a build that passes; a last job then fetches the live domain —
+the page, the index it names, the worker, an artist page — so a DNS or Pages fault fails the run too. It was committed for a
 year before that, which is why `.git` is large.
 
 The ~640 MB of cached source pages (`data/cache/`, `data/dkcache/`) are **not** committed —
@@ -349,6 +350,10 @@ buyer may have one against. Any holder or rights holder can have an image remove
 (2.9 MB gzipped, 18 MB parsed) has arrived, takes over with the same tiles in the same order. A link into any
 other view clears the baked landing at once. The biographies are not in the index: `data/bios.json` is fetched
 on idle after the landing has painted, or the moment an artist's page asks for one.
+
+**Typing.** A search is matched once per query, and a query that extends the last one is looked for only
+among the last one's results; the decades below the fold are laid out only when scrolled to
+(`content-visibility`). An open record stays where it is on the screen when the register is redrawn.
 
 **Return visits.** The data files are named by their content (`index.json?v=<hash>`), so a copy can never be
 stale, and `sw.js` — a service worker — keeps them in the browser's Cache Storage: the second visit reads the

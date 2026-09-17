@@ -1,0 +1,7 @@
+# The workflows pin actions by major version; this opens a pull request when one moves.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
