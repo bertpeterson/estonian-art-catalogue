@@ -22,7 +22,7 @@ def get(url, key):
         with gzip.open(p, "rt", encoding="utf-8") as f: return f.read()
     for attempt in range(3):
         try:
-            r = urllib.request.Request(url, headers={"User-Agent": UA, "Accept-Language": "en"})
+            r = urllib.request.Request(url, headers={"User-Agent": UA, "Accept-Language": "et"})
             with urllib.request.urlopen(r, timeout=45, context=ctx) as f:
                 h = f.read().decode("utf-8", "replace")
             with gzip.open(p, "wt", encoding="utf-8") as f: f.write(h)
@@ -46,7 +46,7 @@ def parse(h):
         ttl = re.search(r'<em class="title[^"]*">(.*?)</em>', b, re.S)
         yr  = re.search(r'<span class="year">(\d{4})</span>', b)
         tec = re.search(r'<p class="tech[^"]*">(.*?)</p>', b, re.S)
-        slug = re.search(r'href="(\?c=all-artworks[^"]*id=\d+)"', b)
+        slug = re.search(r'href="(\?c=(?:all-artworks|teosed)[^"]*id=\d+)"', b)
         img = re.search(r'<img class="pilt_t t" src="([^"?]+)', b)
         if not (aut and ttl): continue
         title = txt(ttl.group(1))
@@ -68,12 +68,12 @@ def parse(h):
                     **({"img": BASE + img.group(1)} if img else {})})
     return out
 
-first = get(f"{BASE}/?c=all-artworks&l=en&cat=0&p=1", "haus_c0_p1")
+first = get(f"{BASE}/?c=teosed&l=et&cat=0&p=1", "haus_et_c0_p1")   # the Estonian listing: titles as the artist gave them, not the house's English
 # hrefs are HTML-escaped ("&amp;p=18"), so do not anchor on a literal & or ?
 pages = max([int(x) for x in re.findall(r'p=(\d+)"', first)] or [1])
 print(f"Haus: {pages} pages", flush=True)
 rows = {r["gid"]: r for r in parse(first)}
-def one(p): return parse(get(f"{BASE}/?c=all-artworks&l=en&cat=0&p={p}", f"haus_c0_p{p}"))
+def one(p): return parse(get(f"{BASE}/?c=teosed&l=et&cat=0&p={p}", f"haus_et_c0_p{p}"))
 with ThreadPoolExecutor(max_workers=3) as ex:
     for i, rs in enumerate(ex.map(one, range(2, pages + 1)), 2):
         for r in rs: rows[r["gid"]] = r
