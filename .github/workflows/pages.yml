@@ -1,4 +1,9 @@
-name: Deploy site to GitHub Pages
+# Build the site from data/data.json and deploy it. site/ is not in the repo: it is
+# 117 MB of derived files that were committed on every change, which is what made
+# .git half a gigabyte. The build is deterministic apart from the landing page's
+# per-build shuffle; the smoke test opens the result in headless Chrome and refuses
+# to deploy a build that does not render.
+name: Build and deploy the site
 
 on:
   push:
@@ -15,16 +20,30 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -q numpy
+      - name: Build
+        run: ./build_site.sh
+      - name: Open the built site in headless Chrome
+        run: node check_site.js site
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
   deploy:
+    needs: build
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
       - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: site
       - id: deployment
         uses: actions/deploy-pages@v4

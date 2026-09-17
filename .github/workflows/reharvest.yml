@@ -5,7 +5,8 @@
 # On the first of each month this fetches every gallery again, rebuilds, and commits
 # the result -- which triggers the normal Pages deploy. If any gallery's parser
 # comes back empty or collapsed, harvest_guard.py fails the run and nothing is
-# committed. The museum sources are never re-crawled here.
+# committed. The museum sources are never re-crawled here; MuIS is asked only for
+# objects it lists as new through OAI-PMH.
 name: Monthly gallery re-harvest
 
 on:
@@ -60,13 +61,16 @@ jobs:
         run: |
           (cd data && python3 ledger.py && python3 muis_oai.py && gzip -c oai_records.json > raw/oai_records.json.gz && python3 ekm_images.py && python3 ekm_shapes.py && python3 merge.py && python3 gallery_shapes.py && python3 muis_shapes.py && python3 merge.py && pip install -q anthropic && python3 translate.py)
           ./build_site.sh
+          node check_site.js site
           python3 data/readme_figures.py
 
       - name: Commit if anything changed
         run: |
           git config user.name  "gallery re-harvest"
           git config user.email "actions@users.noreply.github.com"
-          git add data/gallery_records.json data/data.json README.md site i18n.json
+          # every tracked file the pipeline rewrote (data.json, gallery_records.json,
+          # raw/oai_records.json.gz, ...); site/ is built by pages.yml, not committed
+          git add -u data README.md i18n.json
           if git diff --cached --quiet; then
             echo "nothing changed"; exit 0
           fi

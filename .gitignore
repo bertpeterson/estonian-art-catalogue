@@ -57,3 +57,7 @@ site [0-9]*/
 
 # OAI-PMH answers, one per object, re-derivable
 data/oaicache/
+
+# The built site. pages.yml builds it from data/data.json and deploys it; it was
+# committed for a year and made .git 519 MB. static/ (CNAME etc.) stays tracked.
+site/
