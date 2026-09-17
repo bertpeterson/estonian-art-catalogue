@@ -1284,7 +1284,7 @@
     // the fold keeps the first it sees, so a masterpiece or highlight goes first
     const unique = sortRows(pics, state.decOrder !== "earliest").map((w, i) => [w, i])
       .sort((a, b) => (a[0].mp || 1e9) - (b[0].mp || 1e9) || (a[0].hl ?? 1e9) - (b[0].hl ?? 1e9) || a[1] - b[1]).map(x => x[0]).filter(w => {
-      if (!MULTI.has(w.e) && w.hl == null) return true;
+      if (!MULTI.has(w.e) && (w.hl == null || w.e === "Painting")) return true;   // a painting is one work, however many share its title
       const k = dupKey(w);
       if (seen.has(k)){ dups.set(seen.get(k), (dups.get(seen.get(k)) || 1) + 1); return false; }
       seen.set(k, w); return true;
