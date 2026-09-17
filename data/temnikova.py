@@ -76,7 +76,8 @@ for eid in sorted(ids, key=int):
         recs.append({"gid":"tk-"+m.group(1), "artist":txt(a.group(1)),
                      "title":txt(t.group(1)).strip("'’"), "year":yr.group(1) if yr else None,
                      "tech":tc, "dims":dims, "gallery":"Temnikova & Kasela", "city":"Tallinn",
-                     "url":f"{BASE}/?c=exhibition&l=en&id={eid}", **({"img": BASE + img.group(1)} if img else {})})
+                     "url":f"{BASE}/?c=exhibition&l=en&id={eid}", "shown": True,   # an exhibition page, not a stock list
+                     **({"img": BASE + img.group(1)} if img else {})})
 
 seen,out=set(),[]
 for r in recs:

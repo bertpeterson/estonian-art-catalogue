@@ -54,6 +54,7 @@ for page in ("art-store", "works"):
                     "artist": txt(a.group(1)), "title": txt(t.group(2)),
                     "year": yr.group(1) if yr else None, "tech": tech, "dims": dims,
                     "gallery": "Kogo galerii", "city": "Tartu", "url": t.group(1), **({"sold": True} if is_sold else {}),
+                    **({"shown": True} if page == "works" else {}),   # the portfolio page, not the art store
                     **({"img": img} if img else {})})
 
 print("  sold, kept as past listings:", sold)

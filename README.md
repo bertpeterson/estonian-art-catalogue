@@ -22,11 +22,11 @@ says so with an *ed* tag.
 | [EKKM](https://ekkm.ee) | — | Contemporary Art Museum of Estonia |
 | Vaal galerii | 115 artists | Life dates printed beside every lot's artist in its sales, taken for artists no museum, Wikidata or biography dates, tagged *Vaal* |
 | [Wikidata](https://www.wikidata.org) | 1,629 artists | Dates, birthplace, description, training and art-historical affiliation — matched on name, gated on dates and occupation (see *Rules*) |
-| Nine commercial galleries and NOBA | 7,259 | Haus, Vernissage, Allee, E-Kunstisalong, Temnikova & Kasela, Tütar, Artrovert, Kogo, Ruki — current stock from each gallery's own site; and [NOBA](https://noba.ac), the Nordic-Baltic marketplace, for artists the catalogue already holds or whose NOBA page places them in Estonia. Metadata only, never prices |
+| Nine commercial galleries and NOBA | 6,675 | Haus, Vernissage, Allee, E-Kunstisalong, Temnikova & Kasela, Tütar, Artrovert, Kogo, Ruki — current stock from each gallery's own site; and [NOBA](https://noba.ac), the Nordic-Baltic marketplace, for artists the catalogue already holds or whose NOBA page places them in Estonia. Metadata only, never prices |
 | Auction results: Haus Galerii, E-Kunstisalong, Allee galerii, Vernissage, Vaal galerii, Eesti Kunsti Oksjonid | 13,122 lots | Every lot in Haus Galerii's hundred sales since 1998, E-Kunstisalong's thirty-five since 2008, Allee galerii's fifteen since 2020, Vernissage's fifteen since 2021, Vaal galerii's nine since 2022 and Eesti Kunsti Oksjonid's eighteen since 2023, as the house published it, plus five earlier record prices as the press reported them (`data/press_results.json`): starting price, hammer price, sold or unsold. A record of what happened at auction, not a valuation |
 | Konrad Mägi Foundation — catalogue of works | 99 works | The foundation's list of every Mägi painting, sketch and lost work it knows of (konradmagi.ee); the works in Estonian museums are here already, the rest enter as *known*: in a private collection, unnamed, or of unknown whereabouts |
 
-Of the works for sale, 3,203 are NOBA listings, 4,056 the galleries' own. NOBA also supplies a short
+Of the works for sale, 3,203 are NOBA listings, 3,472 the galleries' own. NOBA also supplies a short
 biography, written by the artist or NOBA, for 544 artists who have none from a museum, and a birth year
 read from that biography for 301 — both tagged *NOBA* on the page.
 
@@ -104,6 +104,17 @@ year, size and medium where that leaves exactly one of each, keeping the Estonia
 lists on its own site and again on NOBA keeps the gallery's listing. NOBA links go to the artwork page
 (`/kunst/`, `/artwork/`) where one exists — 5,717 of 8,885 — and otherwise to the product page, which
 for the rest is the only page there is.
+
+**Inferred dates.** Where a museum's dating field says nothing at all, three inferences are allowed, each
+tagged in `dsrc` and marked ≈ on the page: a year or decade written inside the title (`title`); the year
+another impression of the same print, bookplate, poster or cast carries, when the artist has that title dated
+exactly once and it is not a generic one like *Maastik* (`impression`); and a decade, *ca 1910s*, where the
+artist's dated works all fall within twenty years or the whole working life fits in twenty-five (`artist`).
+A museum's *dateerimata* or a range wider than thirty years is left as the museum's word. 1,621 works.
+
+**Shown, not for sale.** A gallery's exhibition or portfolio page (Temnikova & Kasela's exhibitions, Kogo's
+*works*) says a work was shown there, not that it is for sale: those enter as `kind: shown` with the gallery
+as holder and the page linked, never counted among works for sale.
 
 **Known works.** A catalogue raisonné records what no public source can: works in private hands and works
 lost. The Konrad Mägi Foundation's catalogue enters as `kind: known` — title, date, medium, size and the
