@@ -37,7 +37,7 @@ def get(url, key):
     h = fetch(url)
     if h:
         with gzip.open(p, "wt", encoding="utf-8") as f: f.write(h)
-    time.sleep(0.8)
+    time.sleep(10)      # the crawl delay alleegalerii.ee asks for
     return h
 
 clean = lambda s: re.sub(r"\s+", " ", html.unescape(re.sub(r"<[^>]+>", " ", s or ""))).strip()
@@ -56,6 +56,7 @@ for slug, name in re.findall(r'href="' + BASE + r'/kunstioksjon-kategooria/([^/"
     if SALE.search(clean(name)): cats[slug] = clean(name)
 print(f"ALLEE: {len(cats)} sales listed", flush=True)
 
+LOTS = json.load(open("allee_lots.json", encoding="utf-8")) if os.path.exists("allee_lots.json") else {}
 today = datetime.date.today()
 recs, n_upcoming, n_unparsed, n_nolot = [], 0, 0, 0
 for slug, sale in cats.items():
@@ -86,7 +87,17 @@ for slug, sale in cats.items():
         dims = (re.sub(r"\s*[x×]\s*", " x ", dm.group(1)).replace(",", ".") + " cm") if dm and dm.group(1) \
                else (f"d {dm.group(2).replace(',', '.')} cm" if dm and dm.group(2) else "")
         y4 = re.match(r"(\d{4})", yl)
-        # the lot page: the medium is the first sentence of the description block
+        # the lot page: the medium is the first sentence of the description block. A
+        # past lot's page does not change, and at the ten-second delay the house asks
+        # for, 2,000 of them are six hours: the medium once read is kept in
+        # allee_lots.json and the page is not fetched again.
+        if pid in LOTS:
+            medium = LOTS[pid]
+            recs.append({"aid": "allee-" + pid, "artist": artist, "title": title,
+                         "year": y4.group(1) if y4 else None, "yl": yl or None, "tech": medium, "dims": dims,
+                         "house": "Allee galerii", "sale": sale, "when": when,
+                         "start": start, "hammer": hammer, "sold": hammer is not None, "url": url.group(1)})
+            continue
         lp = get(url.group(1), f"alleeauc_{pid}")
         # ...between the sale's heading and the size table: "Kuivnõel paberil. 1943." on
         # the newer pages, "Õli paberil, 1946." on the older; the year is the lot line's
@@ -100,12 +111,14 @@ for slug, sale in cats.items():
                 medium = lines[k + 1]; break
         medium = re.sub(r"[,.;]?\s*(?:\d{4}|\d{2,4}\s*[-–/]\s*\d{2,4}|\d{4}ndad).*$", "", medium).strip(" ,.;")
         if not medium or re.match(r"^\d", medium) or len(medium) > 60 or re.search(r"alghind|haamrihind|€|eur", medium, re.I): medium = ""
+        if lp: LOTS[pid] = medium
         recs.append({"aid": "allee-" + pid, "artist": artist, "title": title,
                      "year": y4.group(1) if y4 else None, "yl": yl or None, "tech": medium, "dims": dims,
                      "house": "Allee galerii", "sale": sale, "when": when,
                      "start": start, "hammer": hammer, "sold": hammer is not None, "url": url.group(1)})
     print(f"  {when} {sale[:32]:32} lots so far {len(recs)}", flush=True)
 
+json.dump(LOTS, open("allee_lots.json", "w", encoding="utf-8"), ensure_ascii=False)
 recs.sort(key=lambda r: (r["when"], r["artist"], r["title"]))
 prev = json.load(open("auction_records.json", encoding="utf-8")) if os.path.exists("auction_records.json") else []
 json.dump([r for r in prev if r["house"] != "Allee galerii"] + recs, open("auction_records.json", "w", encoding="utf-8"), ensure_ascii=False, indent=0)
