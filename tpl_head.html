@@ -155,7 +155,7 @@ h1 a:hover{color:var(--grey-6)}
 .seg button{font-family:var(--mono);font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;background:none;border:0;color:var(--grey-6);padding:8px 14px;cursor:pointer}
 .seg button + button{border-left:1px solid var(--rule)}
 .seg button[aria-pressed="true"]{background:var(--invert-bg);color:var(--invert-fg)}
-.search{position:relative;flex:1;min-width:230px}
+.search{position:relative;flex:0 1 300px;max-width:100%}   /* a fixed-ish width: the controls after it must not shift when one of them hides */
 .search input{width:100%;background:var(--field);border:1px solid var(--rule);color:var(--ink);font-family:var(--sans);font-size:.92rem;padding:9px 12px 9px 34px}
 .search input::placeholder{color:var(--grey-4)}
 .search svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--grey-4)}

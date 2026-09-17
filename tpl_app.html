@@ -1728,7 +1728,18 @@
     $("g-auc").setAttribute("aria-pressed", g==="auction");
     syncOrder();
   }
+  // Only the sorts that mean something for the group are offered: by price only in the
+  // auction ledger, by artist never inside one artist's works, by medium or museum not
+  // across sales. A sort the new group cannot use falls back to year.
+  const SORTS_FOR = {decade: ["year", "artist", "title", "medium", "museum"], artist: ["year", "title", "medium", "museum"], auction: ["year", "artist", "title", "price"]};
+  function syncSort(){
+    const ok = SORTS_FOR[state.group] || SORTS_FOR.decade;
+    if (!ok.includes(state.sort)) state.sort = "year";
+    for (const o of $("sortby").options){ o.hidden = !ok.includes(o.value); o.disabled = o.hidden; }
+    $("sortby").value = state.sort;
+  }
   function syncOrder(){
+    syncSort();
     const a = $("o-asc"), b = $("o-desc");
     if (state.group !== "artist"){          // decade and auction views both run earliest/latest
       // by price the same toggle reads lowest / highest
