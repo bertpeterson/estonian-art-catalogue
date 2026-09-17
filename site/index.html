@@ -1795,8 +1795,11 @@ footer a{border-bottom:1px solid var(--rule)}
     $("v-list").setAttribute("aria-pressed", !wall);
     $("v-wall").setAttribute("aria-pressed", wall);
     $("v-wall").innerHTML = esc(T("v_wall")) + `<span class="v-n">${fmt(nPics)}</span>`;
-    const listSet = wall ? set.filter(w => !wallPic(w)) : set;
-    let html = wall ? wallHTML(set.filter(wallPic), listSet.length, state.artist === null) : "";
+    // On the untouched page the wall stands alone: the histogram, the door and the
+    // search are the ways into the other 68,000 works, not a mosaic of every decade.
+    const home = wall && pristine() && !listKeys();
+    const listSet = home ? [] : wall ? set.filter(w => !wallPic(w)) : set;
+    let html = wall ? wallHTML(set.filter(wallPic), home ? -1 : listSet.length, state.artist === null) : "";
     // An artist who died after 1955 is in copyright: say so where the pictures would
     // be, so their absence reads as the rule it is. A gallery's picture of a work it
     // is selling is the one kind shown, and the line says that too.
@@ -2045,7 +2048,7 @@ footer a{border-bottom:1px solid var(--rule)}
   function wallMode(set, nPics){
     if (state.group === "auction" || !nPics) return false;
     if (state.view) return state.view === "wall";
-    if (pristine() && !listKeys()) return false;   // the untouched page stays a list; "my list" may be a wall
+    // the untouched page opens on the wall too: the masterpieces, then the door's names
     return nPics >= (listKeys() ? 1 : 12);         // a number, not a share: predictable; a shortlist with any picture
   }
   // What people come to an artist for goes first: the paintings, then watercolours and
@@ -2126,7 +2129,7 @@ footer a{border-bottom:1px solid var(--rule)}
       const c = cols.reduce((a, b) => b.h < a.h ? b : a);
       c.h += ratioOf(w) + 0.32; c.t.push(w);        // the caption is about a third of the width
     });
-    return `<div class="wall-bar">${esc(restN ? T("wall_line", {p: fmt(pics.length), r: fmt(restN)}) : T("wall_line_all", {p: fmt(pics.length)}))} · ${esc(T("wall_imgs"))}</div>`
+    return `<div class="wall-bar">${esc(restN < 0 ? T("wall_line_home", {p: fmt(pics.length)}) : restN ? T("wall_line", {p: fmt(pics.length), r: fmt(restN)}) : T("wall_line_all", {p: fmt(pics.length)}))} · ${esc(T("wall_imgs"))}</div>`
       + (openW ? `<div class="wall-open rows">${rowHTML(openW, true)}</div>` : "")
       + `<div class="wall" data-cols="${nCols}">${cols.map(c => `<div class="wcol">${c.t.map(tile).join("")}</div>`).join("")}</div>`
       + (ordered.length > shown.length ? `<button class="more" data-wmore="1" style="margin-bottom:22px">${esc(T("wall_more", {n: fmt(Math.min(72, ordered.length - shown.length))}))}</button>` : "");
@@ -2747,7 +2750,7 @@ footer a{border-bottom:1px solid var(--rule)}
 
   Promise.all([
     fetch("data/index.json?v=721aee7f").then(r => r.json()),
-    fetch("data/i18n.json?v=6d6ac326").then(r => r.json())
+    fetch("data/i18n.json?v=c2789e7d").then(r => r.json())
   ]).then(([data, i18n]) => boot(data, i18n))
    .catch(err => {
      document.getElementById("register").innerHTML =
