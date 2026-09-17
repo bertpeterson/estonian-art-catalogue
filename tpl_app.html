@@ -1230,7 +1230,11 @@
   // sculpture, drawings and sketches, prints last; within a medium the chosen order.
   const MED_RANK = {"Painting":0, "Watercolour":1, "Sculpture":2, "Mixed media":3, "Installation":3, "Drawing":4, "Sketch":5, "Photograph":6, "Print":7};
   const medRank = w => MED_RANK[w.e] ?? 8;
-  const VISIT = String(Math.random()).slice(2, 8);   // this visit's deal of the masterpieces
+  // the deal of the masterpieces: the seed the landing page was baked with, so the
+  // app's first paint keeps the order the visitor already sees; without one, random
+  const BAKED = document.querySelector(".wall[data-seed]");
+  const VISIT = BAKED ? BAKED.dataset.seed : String(Math.random()).slice(2, 8);
+  const BAKED_KEYS = BAKED && BAKED.dataset.keys ? BAKED.dataset.keys.split(",") : null;
   const wallCols = () => { const w = reg.clientWidth || innerWidth; return w >= 1100 ? 6 : w >= 720 ? 4 : w >= 480 ? 3 : 2; };
   let wallRT = null;
   addEventListener("resize", () => {          // a new column count re-lays the wall; nothing else
@@ -1278,6 +1282,11 @@
     const mp = w => (mixed && w.mp) ? w.mp + (hash(w.k + VISIT) % 12) : 1e9;
     const ordered = inner.map(x => [x[0], x[1], medRank(x[0]), turn(x[0]), tier(x[0]), mixed ? hash(x[0].k) : 0])
       .sort((a, b) => mp(a[0]) - mp(b[0]) || hl(a[0]) - hl(b[0]) || a[4] - b[4] || a[3] - b[3] || a[2] - b[2] || a[5] - b[5] || a[1] - b[1]).map(x => x[0]);
+    // on the untouched page the baked order leads, exactly, so nothing jumps
+    if (mixed && BAKED_KEYS && pristine() && !listKeys()){
+      const pos = new Map(BAKED_KEYS.map((k, i) => [k, i]));
+      ordered.sort((a, b) => (pos.has(a.k) ? pos.get(a.k) : 1e9) - (pos.has(b.k) ? pos.get(b.k) : 1e9));
+    }
     const shown = ordered.slice(0, state.wLimit);
     if (typeof loadShard === "function"){
       const need = [...new Set(shown.filter(w => w.h && !detailOf(w)).map(shardOf))];
