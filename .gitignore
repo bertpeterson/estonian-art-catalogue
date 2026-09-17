@@ -61,3 +61,8 @@ data/oaicache/
 # The built site. pages.yml builds it from data/data.json and deploys it; it was
 # committed for a year and made .git 519 MB. static/ (CNAME etc.) stays tracked.
 site/
+
+# CLIP embeddings of the museum pictures (data/lookalikes.py): recomputed from the
+# pictures themselves, which are never stored; the neighbours file is committed
+data/embcache/
+.venv-clip/
