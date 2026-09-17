@@ -1161,13 +1161,17 @@
   // Sixteen names, chosen rather than counted. Ranked by holdings, the door read as a
   // list of the most prolific -- Richard Sagrits above Konrad Mägi, Gori above Köler --
   // which is a fact about museum acquisition, not about Estonian art. These are the
-  // artists a history of it cannot leave out, one sculptor among them, in order of
-  // birth. Editorial: the one place on the page where a judgement stands in for a count,
-  // and tagged as such like every other editorial line.
-  const CANON = ["Johann Köler", "Amandus Adamson", "Kristjan Raud", "Ants Laikmaa",
-                 "Konrad Mägi", "Nikolai Triik", "Eduard Wiiralt", "Karin Luts",
-                 "Evald Okas", "Ülo Sooster", "Olev Subbi", "Jüri Arrak",
-                 "Malle Leis", "Raul Meel", "Tõnis Vint", "Leonhard Lapin"];
+  // artists a history of it cannot leave out, two sculptors among them, in order of
+  // birth. Every name opens on an artwall: these are artists whose work is in the
+  // public domain, so their museum pictures can be shown -- which is why the door
+  // stops at Johani (d. 1941); the later names it once held (Luts, Sooster, Subbi,
+  // Arrak, Leis, Meel, Vint, Lapin) are in copyright and opened on one picture or
+  // none. Editorial: the one place on the page where a judgement stands in for a
+  // count, and tagged as such like every other editorial line.
+  const CANON = ["Julie Hagen-Schwarz", "Johann Köler", "Amandus Adamson", "Kristjan Raud",
+                 "Paul Raud", "Ants Laikmaa", "Konrad Mägi", "Jaan Koort",
+                 "Nikolai Triik", "Erna Kreischmann", "Johannes Greenberg", "Paul Burman",
+                 "Oskar Kallis", "Eduard Wiiralt", "Karl Pärsimägi", "Andrus Johani"];
   // Artists a public collection has accessioned AND a gallery is selling right now.
   const FOR_SALE = W.reduce((n, w) => n + (w.kind === "gallery" ? 1 : 0), 0);
   const TOP_ART = (() => {
