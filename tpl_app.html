@@ -1000,7 +1000,7 @@
       const ar = A[state.artist], died = +(ar.l[1] || 0), born = +(ar.l[0] || 0), Y = new Date().getFullYear();
       const pd = died ? died <= Y - 71 : (born && born <= Y - 156);
       if (!pd && (died || born))
-        html = `<div class="wall-bar cr-note">${esc(T("cr_note", {a: ar.n, d: died ? T("cr_d") + " " + died : T("cr_b") + " " + born, y: died ? died + 71 : "—"}))}${nPics === 1 ? esc(T("cr_note_g1")) : nPics ? esc(T("cr_note_g", {n: fmt(nPics)})) : ""}</div>` + html;
+        html = `<div class="wall-bar cr-note">${esc(T("cr_note", {a: ar.n, d: died ? T("cr_d") + " " + died : T("cr_b") + " " + born, y: died ? died + 70 : "—"}))}${nPics === 1 ? esc(T("cr_note_g1")) : nPics ? esc(T("cr_note_g", {n: fmt(nPics)})) : ""}</div>` + html;
     }
     const BASE = baseSet();          // hoisted: was recomputed once per decade
     // ...and bucket both by decade in one pass. These were being filtered once per
