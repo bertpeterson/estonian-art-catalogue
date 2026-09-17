@@ -84,8 +84,20 @@ for i, w in enumerate(W):
 
 meta = dict(d["meta"])
 meta["shards"] = sorted(detail.keys())
-json.dump({"meta": meta, "artists": A, "vocab": d.get("vocab", {}), "works": index},
+# The biographies leave the index. They are read only on an artist's own page, in an
+# opened record and in the artist-grouped list, yet every visitor downloaded all 896
+# of them -- 0.44 MB of the 3.3 MB gzipped index -- before the catalogue would answer.
+# bios.json holds them by artist position (0 where there is none); the app fetches it
+# when it first needs a biography, and on idle after the landing page has painted.
+BIO = {"b", "ben", "bs", "bens", "bmt", "wdesc"}
+A_light = [{k: v for k, v in a.items() if k not in BIO} for a in A]
+bios = [{k: v for k, v in a.items() if k in BIO and k != "bs"} or 0 for a in A]
+for i, a in enumerate(A):
+    if bios[i] and a.get("bs"): bios[i]["bs"] = a["bs"]
+json.dump({"meta": meta, "artists": A_light, "vocab": d.get("vocab", {}), "works": index},
           open(f"{OUT}/data/index.json", "w", encoding="utf-8"),
+          ensure_ascii=False, separators=(",", ":"))
+json.dump(bios, open(f"{OUT}/data/bios.json", "w", encoding="utf-8"),
           ensure_ascii=False, separators=(",", ":"))
 for k, v in detail.items():
     json.dump(v, open(f"{OUT}/data/detail/{k}.json", "w", encoding="utf-8"),
@@ -95,6 +107,7 @@ shutil.copy("i18n.json", f"{OUT}/data/i18n.json")
 ix = os.path.getsize(f"{OUT}/data/index.json")
 ds = sum(os.path.getsize(f"{OUT}/data/detail/{f}") for f in os.listdir(f"{OUT}/data/detail"))
 print(f"index.json      {ix/1048576:.2f} MB")
+print(f"bios.json       {os.path.getsize(f'{OUT}/data/bios.json')/1048576:.2f} MB")
 print(f"detail shards   {ds/1048576:.2f} MB across {len(detail)} files")
 print(f"largest shard   {max(os.path.getsize(f'{OUT}/data/detail/{f}') for f in os.listdir(f'{OUT}/data/detail'))/1024:.0f} KB")
 print(f"records with detail: {sum(len(v) for v in detail.values()):,} of {len(W):,}")

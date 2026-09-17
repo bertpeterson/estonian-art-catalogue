@@ -56,6 +56,7 @@ tpl_head.html         markup + CSS for the app
 tpl_app.html          the application itself
 i18n.py               the EN/ET dictionary — the source; i18n.json is generated from it on every build
 build_site.py/.sh     rebuilds site/ from data/data.json
+static/sw.js          the service worker — caches the content-named data files for return visits
 check_site.js         opens the built site in headless Chrome; the deploy stops if it fails
 .github/workflows/    pages.yml builds, checks and deploys on push; reharvest.yml runs monthly
 ```
@@ -344,9 +345,15 @@ sale is over nobody but this catalogue has an interest in illustrating it, and t
 buyer may have one against. Any holder or rights holder can have an image removed by asking.
 
 **First paint.** The landing page's door and the opening of the artwall are baked into `index.html` at build
-(`build_landing.py`), so a visitor sees the catalogue in the first quarter-second; the app, once its 20 MB index
-has arrived, takes over with the same tiles in the same order. A link into any other view clears the baked
-landing at once.
+(`build_landing.py`), so a visitor sees the catalogue in the first quarter-second; the app, once its index
+(2.9 MB gzipped, 18 MB parsed) has arrived, takes over with the same tiles in the same order. A link into any
+other view clears the baked landing at once. The biographies are not in the index: `data/bios.json` is fetched
+on idle after the landing has painted, or the moment an artist's page asks for one.
+
+**Return visits.** The data files are named by their content (`index.json?v=<hash>`), so a copy can never be
+stale, and `sw.js` — a service worker — keeps them in the browser's Cache Storage: the second visit reads the
+index from disk and downloads nothing until the data changes, when the new file is a new address and the old
+one is dropped. Pages themselves always come from the network; the last copy opens offline.
 
 **The artwall.** The untouched page opens on it — the fifty-four chosen works, then the door's names — with
 the histogram, the door and the search as the ways into everything else; and a view with twelve pictures

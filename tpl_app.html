@@ -53,7 +53,20 @@
   // should be able to send you to the place that holds the work.
   const SITES = (DATA.meta && DATA.meta.sites) || {};
   const siteOf = m => SITES[m] || null;
+  // The biographies come separately (data/bios.json, by artist position) and are
+  // merged into A when they land. A render that wanted one before then draws without
+  // it and is repeated once; the landing page fetches them on idle so they are there
+  // by the first click.
+  let BIOS = DATA.artists.some(a => a.b || a.ben) ? [] : null, biosP = null, bioWanted = false;   // inline already in the single-file snapshot
+  function loadBios(){
+    if (biosP) return biosP;
+    biosP = fetch("data/bios.json?v=__V_INDEX__").then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+      .then(b => { b.forEach((x, i) => { if (x && A[i]) Object.assign(A[i], x); }); BIOS = b; if (bioWanted) render(); })
+      .catch(() => { biosP = null; });
+    return biosP;
+  }
   const bioFor = ar => {
+    if (!BIOS){ bioWanted = true; loadBios(); }
     const en = ar.ben, et = ar.b;
     if (LANG === "en") return en ? {t:en, s:ar.bens, alt:false, mt:!!ar.bmt} : (et ? {t:et, s:ar.bs, alt:true} : {t:"", s:null, alt:false});
     return et ? {t:et, s:ar.bs, alt:false} : (en ? {t:en, s:ar.bens, alt:true, mt:!!ar.bmt} : {t:"", s:null, alt:false});
@@ -1290,7 +1303,7 @@
     const shown = ordered.slice(0, state.wLimit);
     if (typeof loadShard === "function"){
       const need = [...new Set(shown.filter(w => w.h && !detailOf(w)).map(shardOf))];
-      if (need.length) Promise.all(need.map(loadShard)).then(() => render());
+      if (need.length) Promise.all(need.map(k => loadShard(k))).then(() => render());
     }
     const openW = state.open && shown.find(w => w.k === state.open);
     // Every tile has its shape before its picture arrives -- the record's height and
@@ -1359,7 +1372,7 @@
     const keys = listKeys() || SL;
     const rows = W.filter(w => keys.has(w.k));
     if (typeof loadShard === "function")   // dimensions and source ids are in the shards
-      await Promise.all([...new Set(rows.filter(w => w.h && !detailOf(w)).map(shardOf))].map(loadShard));
+      await Promise.all([...new Set(rows.filter(w => w.h && !detailOf(w)).map(shardOf))].map(k => loadShard(k)));
     const src = w => { const d = det(w);
       return d.mi ? `https://www.muis.ee/museaalview/${d.mi}`
            : d.oi ? `https://digikogu.ekm.ee/ekm/search/oid-${d.oi}/` : (d.url || ""); };
@@ -1912,6 +1925,23 @@
       applyURL(true); b.remove();
     });
     $("countline").before(b);
+  }
+
+  (window.requestIdleCallback || (f => setTimeout(f, 2500)))(() => loadBios());
+
+  // sw.js keeps the content-named data files (data/*.json?v=<hash>) in Cache Storage,
+  // so a return visit reads the index from disk instead of downloading 3.3 MB again.
+  // A page the worker does not yet control fetched its data before the worker
+  // existed; it hands the worker the list to copy in from the HTTP cache.
+  if ("serviceWorker" in navigator && /^https?:$/.test(location.protocol)){
+    window.addEventListener("load", () => {
+      const had = !!navigator.serviceWorker.controller;
+      navigator.serviceWorker.register("sw.js").then(reg => navigator.serviceWorker.ready).then(reg => {
+        if (had || !reg.active) return;
+        const urls = performance.getEntriesByType("resource").map(e => e.name).filter(n => /\/data\/[^?]+\.json\?v=[0-9a-f]+$/.test(n));
+        reg.active.postMessage({warm: urls});
+      }).catch(() => {});
+    });
   }
 
 
