@@ -946,7 +946,12 @@ footer a{border-bottom:1px solid var(--rule)}
     for (const w of W) for (const g of groupsOf(w)) m.set(g, (m.get(g)||0)+1);
     return [...m.entries()].sort((x,y)=> y[1]-x[1]).map(x=>x[0]);
   })();
-  const grpLabel = g => { const i = g.indexOf(":"); return g.slice(i+1); };
+  const decS = d => LANG === "en" ? d + "s" : d + "ndad";
+  // the few movement names Wikidata gives in English, in Estonian for the Estonian page
+  const MOVE_ET = {"Expressionism":"ekspressionism","Baroque":"barokk","Impressionism":"impressionism","Neoclassicism":"neoklassitsism","New Objectivity":"uusasjalikkus","Flemish Baroque painting":"flaami barokk","academic art":"akadeemiline kunst","Romanticism":"romantism","Realism":"realism","Symbolism":"sümbolism","Cubism":"kubism","Surrealism":"sürrealism","Pop art":"popkunst","Art Nouveau":"juugend","Biedermeier":"biidermeier","Rococo":"rokokoo","Mannerism":"manerism","Renaissance":"renessanss","Constructivism":"konstruktivism","Futurism":"futurism","Abstract art":"abstraktne kunst","Socialist realism":"sotsialistlik realism","Conceptual art":"kontseptualism"};
+  const CIT_ET = {"Estonia":"Eesti","Russian Empire":"Vene keisririik","Germany":"Saksamaa","France":"Prantsusmaa","Sweden":"Rootsi","Finland":"Soome","United States":"Ameerika Ühendriigid","Canada":"Kanada","Dutch Republic":"Madalmaade Vabariik","Switzerland":"Šveits","Kingdom of Prussia":"Preisi kuningriik","Austria":"Austria","Russia":"Venemaa","United Kingdom of Great Britain and Ireland":"Suurbritannia","Austrian Empire":"Austria keisririik","Latvia":"Läti","Lithuania":"Leedu","Poland":"Poola","Italy":"Itaalia","Spain":"Hispaania","Netherlands":"Holland","Denmark":"Taani","Norway":"Norra","United Kingdom":"Suurbritannia","Belgium":"Belgia","Ukraine":"Ukraina","Australia":"Austraalia","Israel":"Iisrael","Hungary":"Ungari","Czech Republic":"Tšehhi","Kingdom of Bavaria":"Baieri kuningriik","Holy Roman Empire":"Saksa-Rooma riik","Weimar Republic":"Weimari vabariik","Nazi Germany":"Natsi-Saksamaa","West Germany":"Lääne-Saksamaa","German Empire":"Saksa keisririik"};
+  const citName = c => LANG === "en" ? c : (CIT_ET[c] || c);
+  const grpLabel = g => { const i = g.indexOf(":"); const l = g.slice(i+1); return (LANG !== "en" && g.startsWith("movement:")) ? (MOVE_ET[l] || l) : l; };
   const grpKind  = g => T("g_" + g.slice(0, g.indexOf(":")));
 
   const ORIGINS = (() => {
@@ -1282,7 +1287,7 @@ footer a{border-bottom:1px solid var(--rule)}
     const chips = [];
     const add = (label, clear) => chips.push({label, clear});
     if (state.artist !== null) add(A[state.artist].n, () => state.artist = null);
-    if (state.decade !== null) add(state.decade === "und" ? T("undated") : state.decade + "s",
+    if (state.decade !== null) add(state.decade === "und" ? T("undated") : decS(state.decade),
                                    () => { state.decade = null; state.year = null; });
     if (state.year !== null) add(String(state.year), () => state.year = null);
     if (state.undOnly) add(T("undated"), () => state.undOnly = false);
@@ -1469,10 +1474,10 @@ footer a{border-bottom:1px solid var(--rule)}
             if (!nz.length) return spark(counts, 300, 44);
             const lo = Math.max(0, nz[0] - 1), hi = Math.min(counts.length - 1, nz[nz.length - 1] + 1);
             const seg = counts.slice(lo, hi + 1);
-            const tick = seg.length <= 2 ? "" : `<div class="mono-ticks">${seg.map((_, k) => `<span>${(lo + k) % 2 === 0 || seg.length < 8 ? DECADES[lo + k] + "s" : ""}</span>`).join("")}</div>`;
+            const tick = seg.length <= 2 ? "" : `<div class="mono-ticks">${seg.map((_, k) => `<span>${(lo + k) % 2 === 0 || seg.length < 8 ? decS(DECADES[lo + k]) : ""}</span>`).join("")}</div>`;
             return spark(seg, 300, 44) + tick;
           })()}
-          <div class="mono-axis"><span></span><span>${esc(first?(first===last?T("activeone",{a:first+"s"}):T("active",{a:first+"s",b:last+"s"})):T("undatedonlyartist"))}</span><span></span></div>
+          <div class="mono-axis"><span></span><span>${esc(first?(first===last?T("activeone",{a:decS(first)}):T("active",{a:decS(first),b:decS(last)})):T("undatedonlyartist"))}</span><span></span></div>
         </div>
         <div class="mono-med">${medl}${und?` · ${esc(T("undated"))} <b>${und}</b>`:""}</div>
       </div>
@@ -1614,7 +1619,7 @@ footer a{border-bottom:1px solid var(--rule)}
           </div>
         </div>
         <div class="d-side">
-          <div class="d-k">${esc(T("d_artist"))}</div><div class="d-v">${state.artist === null ? `<span class="r-alink" data-artist="${w.a}" title="${esc(T("allworksby", {n: ar.n}))}">${esc(ar.n)}</span>` : esc(ar.n)} <em>${esc(life)}</em>${stag(ar.ls)}${ar.ai?` <a class="permalink" style="margin-left:8px" href="https://digikogu.ekm.ee/authors/author_id-${esc(ar.ai)}" target="_blank" rel="noopener">EKM artist record ↗</a>`:""}</div>
+          <div class="d-k">${esc(T("d_artist"))}</div><div class="d-v">${state.artist === null ? `<span class="r-alink" data-artist="${w.a}" title="${esc(T("allworksby", {n: ar.n}))}">${esc(ar.n)}</span>` : esc(ar.n)} <em>${esc(life)}</em>${stag(ar.ls)}${ar.ai?` <a class="permalink" style="margin-left:8px" href="https://digikogu.ekm.ee/authors/author_id-${esc(ar.ai)}" target="_blank" rel="noopener">${esc(T("d_artistrec"))}</a>`:""}</div>
           <div class="d-k">${esc(T("d_dating"))}</div><div class="d-v">${
             w.yl ? esc(dateLabel(w)) + (w.dsrc==="title" ? ` <em>${esc(T("d_fromtitle"))}</em>` : w.dsrc==="artist" ? ` <em>${esc(T("d_fromartist"))}</em>` : w.dsrc==="impression" ? ` <em>${esc(T("d_fromimpression"))}</em>` : "")
                  : `<em>${esc(T("d_nodate",{n:ar.n,l:(ar.l[0]||"?")+"–"+(ar.l[1]||"")}))}</em>`}${
@@ -1629,7 +1634,7 @@ footer a{border-bottom:1px solid var(--rule)}
           ${w.kind==="auction" ? `<div class="d-k">${esc(T("d_result"))}</div><div class="d-v">${esc(w.an)} · <b>${esc(auText(w))}</b>${w.as ? `<br><span class="d-sub">${esc(T("d_start", {p: eur(w.as)}))}</span>` : ""}${w.apr ? `<br><span class="d-sub">${esc(T("d_press"))}: ${esc(w.apr)}</span>` : ""}${w.adb ? `<br><span class="d-sub">${esc(w.adb[LANG] || w.adb.en)}</span>` : ""}${chainOf(w) ? `<div class="au-hist">${chainOf(w).map(x => `<div class="au-row${x === w ? " now" : ""}"><span>${esc(String(x.ad).slice(0, 4))}</span><span>${esc(x.an.toLowerCase().includes(musName(x.mu).toLowerCase().split(" ")[0]) ? x.an : musName(x.mu) + " · " + x.an)}</span><span class="n">${x.ao ? (x.ap ? esc(eur(x.ap)) : esc(T("au_soldnp"))) : esc(T("au_unsold"))}${x.as ? ` <em>(${esc(eur(x.as))})</em>` : ""}</span>${x.url ? `<a href="${esc(x.url)}" target="_blank" rel="noopener">↗</a>` : "<span></span>"}</div>${x.adb ? `<div class="au-doubt">${esc(x.adb[LANG] || x.adb.en)}</div>` : ""}`).join("")}</div>` : ""}${w.aa ? `<br><span class="d-sub">${esc(T("au_afternote"))}</span>` : ""}<br><span class="d-sub">${esc(T("au_note"))}</span></div>` : ""}
           ${w.nu ? `<div class="d-k">${esc(T("d_number"))}</div><div class="d-v" style="font-family:var(--mono);font-size:.78rem">${esc(w.nu)}</div>` : ""}
           ${ar.wdesc?`<div class="d-k">${esc(T("d_origin"))}</div><div class="d-v">${esc(ar.wdesc)}${ar.qid?` <a class="permalink" href="https://www.wikidata.org/wiki/${esc(ar.qid)}" target="_blank" rel="noopener">${esc(T("d_wd"))}</a>`:""}</div>`:""}
-          ${ar.cit?`<div class="d-k">${esc(T("d_cit"))}</div><div class="d-v"><em>${esc(ar.cit.join(" · "))}</em>${ar.born?`<br><em>${esc(T("d_born"))}: ${esc(ar.born)}</em>`:""}</div>`:""}
+          ${ar.cit?`<div class="d-k">${esc(T("d_cit"))}</div><div class="d-v"><em>${esc(ar.cit.map(citName).join(" · "))}</em>${ar.born?`<br><em>${esc(T("d_born"))}: ${esc(ar.born)}</em>`:""}</div>`:""}
           <div class="d-bio">${esc(bioFor(ar).t)}${bioFor(ar).s?stag(bioFor(ar).s):""}${bioFor(ar).mt?mtTag():""}${bioFor(ar).alt?`<span class="tag">${esc(T("biofallback"))}</span>`:""}</div>
           ${state.artist===null?`<button class="showartist" data-artist="${w.a}">All ${ar.c} works by ${esc(ar.n)} →</button>`:""}
         </div></div>`;
@@ -1673,7 +1678,7 @@ footer a{border-bottom:1px solid var(--rule)}
     const more = (!exp && n > LIMIT)
       ? `<button class="more" data-exp="${esc(gk)}">${esc(T("showallentries",{n:fmt(n)}))}</button>` : "";
     return `<section class="group" id="grp-${esc(key)}">
-      <div class="gutter">${gutter}<div class="g-count">${n} ${esc(n===1?T("entry"):T("entries"))}</div></div>
+      <div class="gutter">${gutter}<div class="g-count">${fmt(n)} ${esc(n===1?T("entry"):T("entries"))}</div></div>
       <div class="rows">${(() => {
         if (!divide) return shown.map(w=>rowHTML(w, showArtist)).join("");
         let last = null, out = "";
@@ -1721,7 +1726,7 @@ footer a{border-bottom:1px solid var(--rule)}
       // cut by century instead, and a cell opens every decade it holds.
       const units = c.c === "pre"
         ? [...new Set(c.ds.map(d => Math.floor(d/100)))].map(h => ({ds: c.ds.filter(d => Math.floor(d/100) === h), lab: ordN(h+1), full: T("century", {n: ordN(h+1)})}))
-        : c.ds.map(d => ({ds: [d], lab: d === "und" ? T("undated") : d + "s"}));
+        : c.ds.map(d => ({ds: [d], lab: d === "und" ? T("undated") : decS(d)}));
       units.forEach(u => u.n = u.ds.reduce((n, d) => n + cnt(d), 0));
       // 14px is one line of label: every decade gets its name, the thinnest a little over-stated
       const rowsTpl = units.map(u => `minmax(14px,${(100 * u.n / (c.n || 1)).toFixed(2)}fr)`).join(" ");
