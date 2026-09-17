@@ -392,13 +392,26 @@
     return _qTerms;
   };
   const matchText = w => { const t = qTerms(); if (!t.length) return true; const h = hay(w); return t.every(x => h.includes(x)); };
+  // The text match is the one costly test -- a substring scan of every haystack --
+  // and each keystroke made it in every one of the four passes it triggers, 400,000
+  // scans for a letter. It is made once per query, and a query that extends the last
+  // one is looked for only among the last one's results: typing narrows, so each
+  // keystroke scans less than the one before.
+  let _tq = null, _tset = W;
+  const textSet = () => {
+    const q = state.q;
+    if (q === _tq) return _tset;
+    const from = (_tq && q.startsWith(_tq)) ? _tset : W;
+    _tq = q; _tset = qTerms().length ? from.filter(matchText) : W;
+    return _tset;
+  };
   const inList = w => { const k = listKeys(); return (!k || k.has(w.k)) && (!state.sale || w.kind === "gallery"); };
   // a work offered at auction more than once is one row: the latest lot, with the
   // earlier results in its detail (the stats page still counts every lot)
   const CHAIN = (() => { const m = new Map(); W.forEach(w => { if (w.ac){ if (!m.has(w.ac)) m.set(w.ac, []); m.get(w.ac).push(w); } }); m.forEach(l => l.sort((x, y) => String(x.ad).localeCompare(String(y.ad)))); return m; })();
   const chainOf = w => (w.ac && CHAIN.get(w.ac)) || null;
   const latestLot = w => !w.ac || w.al;
-  const baseSet = () => W.filter(w => matchText(w) && inList(w) && latestLot(w)
+  const baseSet = () => textSet().filter(w => inList(w) && latestLot(w)
       && (state.media.size===0 || state.media.has(w.e))
       && (state.museums.size===0 || state.museums.has(w.mu))
       && (state.cats.size===0 || state.cats.has(w.c))
@@ -409,7 +422,7 @@
       && (state.undOnly ? w.y==null
           : ((state.from===null || (w.y!==null && w.y>=state.from))
           && (state.to===null   || (w.y!==null && w.y<=state.to)))));
-  const baseSetIgnoringYears = () => W.filter(w => matchText(w) && inList(w)
+  const baseSetIgnoringYears = () => textSet().filter(w => inList(w)
       && (state.media.size===0 || state.media.has(w.e))
       && (state.museums.size===0 || state.museums.has(w.mu))
       && (state.cats.size===0 || state.cats.has(w.c))
@@ -748,7 +761,7 @@
   }
 
   function renderFacets(){
-    const scoped = W.filter(w => matchText(w) && (state.decade===null || decOf(w)===state.decade)
+    const scoped = textSet().filter(w => (state.decade===null || decOf(w)===state.decade)
                             && (state.artist===null || w.a===state.artist));
     const pass = (w, skip) =>
         (skip==="med" || state.media.size===0   || state.media.has(w.e))
@@ -933,7 +946,20 @@
   // own they would be hairlines. They share one, as they share an era on the band.
   // Every column and cell keeps a floor width so the small ones can still be read
   // and clicked -- the printed count, not the area, is the figure.
+  // A render replaces the register, and the groups above an open record are laid out
+  // afresh -- as placeholders until scrolled to, since a group is laid out on demand
+  // (content-visibility). The open record is kept where it was on the screen.
   function render(){
+    const sel = state.open ? `.row-btn[data-id="${CSS.escape(state.open)}"]` : null;
+    const was = sel && document.querySelector(sel);
+    const top = was ? was.getBoundingClientRect().top : null;
+    renderInner();
+    if (top != null){
+      const el = document.querySelector(sel);
+      if (el){ const d = el.getBoundingClientRect().top - top; if (Math.abs(d) > 1) window.scrollBy(0, d); }
+    }
+  }
+  function renderInner(){
     if (state.view && state.viewKey !== scopeKey()) state.view = null;   // a List / Artwall choice is for one view
     renderDoors(); renderListBar();
     // The count line and Reset describe and undo a selection; before there is one
@@ -1318,10 +1344,12 @@
       const r = parseFloat(m[1].replace(",", ".")) / parseFloat(m[2].replace(",", "."));
       return isFinite(r) && r > 0 ? Math.min(2.2, Math.max(0.45, r)) : 1;
     };
-    const tile = w => {
+    // the top two tiles of each column are in view at once and load at once; the rest
+    // wait until scrolled towards
+    const tile = (w, j) => {
       const src = imgSrc(det(w).im || ""), r = ratioOf(w);
       return `<button class="wt${state.open === w.k ? " on" : ""}" data-wt="${esc(w.k)}" title="${esc(w.t)} · ${esc(A[w.a].n)}">${src
-        ? `<img src="${esc(src)}" alt="" loading="lazy"${w.rc ? ' class="zm"' : ""} style="aspect-ratio:1/${r.toFixed(3)}" referrerpolicy="no-referrer-when-downgrade" onerror="this.closest('.wt').hidden=true">`
+        ? `<img src="${esc(src)}" alt="${esc(w.t)}, ${esc(A[w.a].n)}" loading="${j < 2 ? "eager" : "lazy"}"${w.rc ? ' class="zm"' : ""} style="aspect-ratio:1/${r.toFixed(3)}" referrerpolicy="no-referrer-when-downgrade" onerror="this.closest('.wt').hidden=true">`
         : `<span class="wt-ph" style="aspect-ratio:1/${r.toFixed(3)}"></span>`}<span class="wt-cap"><i>${esc(w.t)}${dups.has(w) ? `<span class="src-tag" title="${esc(T("wall_dup", {n: dups.get(w)}))}">×${dups.get(w)}</span>` : ""}</i><span>${showArtist ? esc(A[w.a].n) + " · " : ""}${w.y ?? esc(T("nd"))} · ${esc(abbr(w.mu))}</span></span></button>`;
     };
     const nCols = wallCols(), cols = Array.from({length: nCols}, () => ({h: 0, t: []}));
@@ -1628,7 +1656,7 @@
   let t = null;
   $("q").addEventListener("input", e => {
     clearTimeout(t);
-    t = setTimeout(() => { state.q = e.target.value.trim(); state.open = null; state.expand.clear(); renderAll(); pushHash(true); }, 160);
+    t = setTimeout(() => { const q = e.target.value.trim(); if (q === state.q) return; state.q = q; state.open = null; state.expand.clear(); renderAll(); pushHash(true); }, 160);
     suggest(e.target.value);
   });
 

@@ -211,7 +211,10 @@ h1 a:hover{color:var(--grey-6)}
 
 .row-btn:focus-visible{outline:none;background:var(--field);border-left-color:var(--ink)}
 .count-line{font-family:var(--mono);font-size:var(--fs-sm);letter-spacing:var(--ls-label);text-transform:uppercase;color:var(--grey-6);padding:12px 0 0}
-.group{display:grid;grid-template-columns:230px 1fr;gap:34px;padding:22px 0;border-bottom:1px solid var(--rule)}
+.group{display:grid;grid-template-columns:230px 1fr;gap:34px;padding:22px 0;border-bottom:1px solid var(--rule);
+  /* a search renders up to fifty rows in each of thirty decades; the groups below the
+     fold are laid out only when scrolled to, which is most of a keystroke's cost */
+  content-visibility:auto;contain-intrinsic-size:auto 900px}
 .group:last-child{border-bottom:0}
 .gutter{position:sticky;top:66px;align-self:start}
 .g-num{font-family:var(--serif-text);font-weight:500;font-size:2.9rem;line-height:1;letter-spacing:-.02em;font-variant-numeric:tabular-nums;display:block}

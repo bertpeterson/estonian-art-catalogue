@@ -68,15 +68,16 @@ cols = [{"h": 0, "t": []} for _ in range(6)]
 for w in shown:
     lw = light.get(key(w), {}); r = (lw.get("r") or 100) / 100
     c = min(cols, key=lambda c: c["h"]); c["h"] += r + 0.32; c["t"].append((w, r, lw.get("rc")))
-def tile(w, r, rc):
+def tile(w, r, rc, j):
     lab = f'{w.get("y") if w.get("y") else "n.d."} · {e(name("mu", w["mu"]))}'
     zm = ' class="zm"' if rc else ""
+    # the top two tiles of each column are in view at once and load at once
     return (f'<a class="wt" data-wt="{e(key(w))}" href="#artist={slug(A[w["a"]]["n"])}&open={e(key(w))}" title="{e(w["t"])} · {e(A[w["a"]]["n"])}">'
-            f'<img src="{e(imsrc(w["im"]))}" alt="" loading="lazy"{zm} style="aspect-ratio:1/{r:.3f}" referrerpolicy="no-referrer-when-downgrade">'
+            f'<img src="{e(imsrc(w["im"]))}" alt="{e(w["t"])}, {e(A[w["a"]]["n"])}" loading="{"eager" if j < 2 else "lazy"}"{zm} style="aspect-ratio:1/{r:.3f}" referrerpolicy="no-referrer-when-downgrade">'
             f'<span class="wt-cap"><i>{e(w["t"])}</i><span>{e(A[w["a"]]["n"])} · {lab}</span></span></a>')
 npics = len(pics)
 bar = I18N["EN"]["wall_line_home"].replace("{p}", f"{npics:,}") + " · " + I18N["EN"]["wall_imgs"]
 wall = (f'<div class="wall-bar">{e(bar)}</div><div class="wall" data-cols="6" data-seed="{SEED}" data-keys="{e(",".join(key(w) for w in shown))}">'
-        + "".join('<div class="wcol">' + "".join(tile(*t) for t in c["t"]) + "</div>" for c in cols) + "</div>")
+        + "".join('<div class="wcol">' + "".join(tile(*t, j) for j, t in enumerate(c["t"])) + "</div>" for c in cols) + "</div>")
 json.dump({"doors": door, "register": wall, "seed": SEED}, open("site/landing.json", "w", encoding="utf-8"), ensure_ascii=False)
 print(f"  landing baked   {len(shown)} tiles, seed {SEED}, first: {shown[0]['t']} · {A[shown[0]['a']]['n']}")

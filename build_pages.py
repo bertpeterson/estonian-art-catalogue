@@ -235,7 +235,7 @@ for i, a in enumerate(A):
         if len(tiles) == 48: break
     wall = ("<div class=\"wall\">" + "".join(
         f"<a class=\"wt\" href=\"{BASE}/#artist={sl}&open={e(w.get('k') or re.sub(r'[^A-Z0-9:]', '', (w.get('nu') or '').upper()))}\" title=\"{e(w.get('t') or '')}\">"
-        f"<img src=\"{e(imsrc(w['im']))}\" alt=\"\" loading=\"lazy\" referrerpolicy=\"no-referrer-when-downgrade\">"
+        f"<img src=\"{e(imsrc(w['im']))}\" alt=\"{e(w.get('t') or '')}, {e(a['n'])}\" loading=\"lazy\" referrerpolicy=\"no-referrer-when-downgrade\">"
         f"<span><i>{e(w.get('t') or '')}</i><br>{e(str(w.get('y') or ''))}{' · ' if w.get('y') else ''}{e(val(w, 'mu') or '')}</span></a>"
         for w in tiles) + "</div>"
         + f"<p class=\"m\">{len(pics):,} works with a picture; the first {len(tiles)} here, all in the catalogue. Pictures for public-domain works and live gallery listings only, from the holders' own servers.</p>") if pics else ""
@@ -259,8 +259,12 @@ for i, a in enumerate(A):
            f"<meta property=\"og:description\" content=\"{e(desc)}\">"
            f"<meta property=\"og:url\" content=\"{BASE}/a/{sl}.html\">"
            f"<meta property=\"og:site_name\" content=\"Estonian Art Catalogue\">"
-           f"<meta name=\"twitter:card\" content=\"summary\">"
-           f"<script type=\"application/ld+json\">{jsonld(a, ws, sl, dates)}</script>"
+           # a shared link shows the artist's first work -- the holder's own picture, by reference
+           + (f"<meta property=\"og:image\" content=\"{e(imsrc(tiles[0]['im']))}\">"
+              f"<meta property=\"og:image:alt\" content=\"{e(tiles[0].get('t') or '')}, {e(a['n'])}\">"
+              f"<meta name=\"twitter:card\" content=\"summary_large_image\">" if tiles else
+              f"<meta name=\"twitter:card\" content=\"summary\">")
+           + f"<script type=\"application/ld+json\">{jsonld(a, ws, sl, dates)}</script>"
            f"<style>{CSS}</style>{GC}</head><body>"
            f"<nav><a href=\"{BASE}/\">Estonian Art Catalogue</a> › {e(a['n'])}</nav>"
            f"<h1>{e(a['n'])}</h1>"
