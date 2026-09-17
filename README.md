@@ -44,8 +44,8 @@ the original entry at its holding institution.
 ## What's in the repository
 
 ```
-site/                 the deployable static site (open index.html over HTTP)
-  data/index.json     11 MB — everything the list, search and facets need
+site/                 the static site, built by ./build_site.sh — not committed, see below
+  data/index.json     everything the list, search and facets need
   data/detail/<decade>.json  shards — descriptions, dimensions, collapsed duplicates
   a/<artist>.html     a static page per artist, plus redirects for retired spellings
   404.html            for stale addresses
@@ -56,7 +56,16 @@ tpl_head.html         markup + CSS for the app
 tpl_app.html          the application itself
 i18n.py               the EN/ET dictionary — the source; i18n.json is generated from it on every build
 build_site.py/.sh     rebuilds site/ from data/data.json
+check_site.js         opens the built site in headless Chrome; the deploy stops if it fails
+.github/workflows/    pages.yml builds, checks and deploys on push; reharvest.yml runs monthly
 ```
+
+`site/` is derived from `data/data.json` and is not in the repository. On every push
+`pages.yml` builds it on the runner, opens the result in headless Chrome
+(`check_site.js`: the landing page paints, an artist's wall and record open, search
+and auction lists fill, the Estonian text is there, the artist pages and stats pages
+exist, no script error) and deploys only a build that passes. It was committed for a
+year before that, which is why `.git` is large.
 
 The ~640 MB of cached source pages (`data/cache/`, `data/dkcache/`) are **not** committed —
 they are large and genuinely disposable.
@@ -203,7 +212,7 @@ period, and `site/404.html` prefills a search from any stale artist address.
 ## Two builds, and which one is current
 
 `site/` is canonical. It shards its data and fetches on demand, so it has no size
-limit and is rebuilt on every push.
+limit, and is built and deployed by the push itself.
 
 `register.html` is a single self-contained file, published as a Claude Artifact.
 Artifacts cap at 16 MB and cannot fetch anything at runtime, so the whole catalogue
@@ -270,10 +279,11 @@ when both read "Russian Empire". `aff` **labels** origin; it does not filter any
 ## Building
 
 ```bash
-./build_site.sh          # rebuilds site/ from data/data.json
+./build_site.sh          # rebuilds site/ from data/data.json (needs python3 and numpy)
+node check_site.js site  # the smoke test the deploy runs (needs node and Chrome)
 ```
 
-The site is plain HTML, CSS and JavaScript with no build step and no dependencies. It does use
+The site itself is plain HTML, CSS and JavaScript with no dependencies. It does use
 `fetch` to load the data, so it needs to be served over HTTP — `file://` will not work:
 
 ```bash
@@ -305,7 +315,8 @@ next month. Each is fetched at the pace its file asks — `alleegalerii.ee`'s te
 and a page already read is not read again.
 
 **Gallery stock is re-harvested monthly** by `.github/workflows/reharvest.yml`, at 04:00 UTC on the
-1st: every gallery fetched afresh, rebuilt, README figures updated, committed. `data/harvest_guard.py`
+1st: every gallery fetched afresh, new MuIS objects taken through OAI-PMH, rebuilt and smoke-tested,
+README figures updated, the data committed (the push then builds and deploys the site). `data/harvest_guard.py`
 refuses the run if any gallery comes back empty or down more than 40%, so a redesigned site fails
 loudly rather than vanishing quietly. The museum sources are never re-crawled by it.
 
