@@ -149,6 +149,12 @@ def link(i):
 def related(i):
     """Rendered related-artist lines for artist i, or an empty string."""
     seen, out = {i}, []
+    # the computed neighbours first (similar.py: period, media, techniques, subjects,
+    # movement or category) -- the line for a reader who liked the style
+    sim = [j for j in A[i].get("sim", []) if j in SLUG]
+    if sim:
+        seen.update(sim)
+        out.append('<p class="rel">Similar artists — same period, media and subjects: ' + " · ".join(link(j) for j in sim) + "</p>")
     # Rarest shared group first: "Atelier School of Ants Laikmaa" tells a reader
     # far more than "Estonian Academy of Arts", which 343 artists share.
     for g in sorted(A[i].get("grp", []), key=lambda g: len(by_grp[g]))[:2]:

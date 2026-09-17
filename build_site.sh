@@ -5,6 +5,7 @@ cd "$(dirname "$0")"
 # i18n.json is generated, not hand-kept. build_site.py only copies it, so edits to
 # i18n.py reached the repo but never the site until this ran here.
 python3 -u i18n.py
+(cd data && python3 similar.py) || exit 1     # a["sim"]: six nearest artists, into data.json
 python3 build_site.py
 python3 - <<'PY'
 import hashlib
