@@ -226,33 +226,12 @@ h1 a:hover{color:var(--grey-6)}
 /* ---- the mosaic: a column per century, a cell per decade, both proportional. A cell
    is a button; the pressed one is inverted, and its group renders below. Labels give
    way as cells shrink -- the count first, then the decade -- so nothing is clipped. ---- */
-.mosaic{--moh:320px;--mohh:50px;--mow:64px;display:grid;gap:3px;height:var(--moh);margin-top:14px;padding-bottom:22px;border-bottom:1px solid var(--rule)}
-.mo-col{display:flex;flex-direction:column;min-width:0;container-type:inline-size}
-.mosaic.one{grid-template-columns:1fr!important}
-.mo-h{height:var(--mohh);box-sizing:border-box;background:none;border:0;border-top:1px solid var(--ink);padding:8px 0 0;text-align:left;cursor:pointer;color:inherit;
   font-family:var(--mono);font-size:.6rem;letter-spacing:.1em;color:var(--grey-6);white-space:nowrap;overflow:hidden;border-radius:0;
   font-variant-numeric:tabular-nums}
-.mo-h b{display:block;font-family:var(--serif-text);font-weight:500;font-size:1.25rem;line-height:1;letter-spacing:-.01em;color:var(--ink);margin-bottom:5px}
-.mo-h:hover{color:var(--ink)}
-.mo-h:hover b{text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:4px}
-.mo-cells{height:calc(var(--moh) - var(--mohh));display:grid;gap:2px;min-height:0}
-.mo-cell{background:var(--rule-soft);border:0;padding:0 7px;margin:0;text-align:left;cursor:pointer;color:var(--grey-6);border-radius:0;
   font-family:var(--mono);font-size:.6rem;letter-spacing:.06em;min-height:2px;overflow:hidden;
   display:flex;align-items:center;justify-content:space-between;gap:6px;container-type:size;font-variant-numeric:tabular-nums}
-.mo-cell span,.mo-cell i{white-space:nowrap;font-style:normal;line-height:1}
-.mo-cell i{color:var(--grey-4)}
-.mo-cell:hover{background:var(--bar);color:var(--ink)}
-.mo-cell:hover i{color:var(--ink)}
-.mo-cell[aria-pressed="true"],.mo-cell[aria-pressed="true"]:hover{background:var(--invert-bg);color:var(--invert-fg)}
-.mo-cell[aria-pressed="true"] i{color:var(--invert-fg);opacity:.7}
-.mo-cell:focus-visible{outline:2px solid var(--focus);outline-offset:-2px}
-.mo-col.und .mo-cell{background:repeating-linear-gradient(45deg,var(--rule-soft),var(--rule-soft) 2px,transparent 2px,transparent 5px)}
-.mo-col.und .mo-cell:hover{background:var(--bar)}
-.mo-col.und .mo-cell[aria-pressed="true"]{background:var(--invert-bg)}
-@container (max-height:11px){ .mo-cell span,.mo-cell i{display:none} }
 @container (max-width:88px){ .mo-cell i{display:none} }
 @container (max-width:44px){ .mo-cell span{display:none} }
-.mosaic + .group{border-top:0}
 .gy{margin-top:16px;border-top:1px solid var(--rule);padding-top:9px}
 .gy-h{font-family:var(--mono);font-size:var(--fs-xs);letter-spacing:var(--ls-label);text-transform:uppercase;color:var(--grey-4);margin-bottom:6px}
 .gy-row{display:grid;grid-template-columns:34px 1fr 30px;gap:8px;align-items:center;width:100%;
@@ -632,7 +611,7 @@ footer a{border-bottom:1px solid var(--rule)}
 
   <section class="histo">
     <div class="histo-head">
-      <span><span class="eyebrow" data-i18n="worksperdecade">Works per decade</span><span class="histo-key"><i></i><span data-i18n="forsale">for sale</span></span></span>
+      <span><span class="eyebrow" data-i18n="worksperdecade">Works per decade</span></span>
       <span class="eyebrow" id="histo-hint">Select a decade to filter</span>
     </div>
     <div class="bars" id="bars"></div>
@@ -987,7 +966,6 @@ footer a{border-bottom:1px solid var(--rule)}
                  view:null, viewKey:"", wLimit:72,   // the artwall: chosen for one view (viewKey), or null for the rule
                  decade:null, media:new Set(), museums:new Set(), cats:new Set(), srcs:new Set(),
                  artist:null, letter:null, idxOpen:false, idxQ:"", idxLimit:120, idxSort:"az", showEarly:false, origins:new Set(), groups:new Set(), sort:"year", year:null, gLimit:50, from:null, to:null, undOnly:false, open:null, expand:new Set(),
-                 od:new Set(),    // the decades opened in the register's mosaic
                  auLimit:20};     // sales drawn in the auction view before "more"
   const LIMIT_DEC = 50, LIMIT_ART = 18;
   const slug = s => (s||"").normalize("NFKD").replace(/[\u0300-\u036f]/g,"")
@@ -1021,7 +999,6 @@ footer a{border-bottom:1px solid var(--rule)}
     state.groups.forEach(v => p.append("grp", v));
     if (state.view) p.set("view", state.view);
     if (state.open) p.set("open", state.open);
-    state.od.forEach(v => p.append("od", v));
     if (state.idxOpen) p.set("index", state.letter || "all");
     // The list travels as its keys, so "Link to this view" of your own list is a link
     // anyone can open. An empty list is "mine" -- nothing to carry.
@@ -1073,7 +1050,6 @@ footer a{border-bottom:1px solid var(--rule)}
     state.groups  = new Set(GROUPS.filter(x => g("grp").includes(x)));
     state.open    = p.get("open") || null;
     if (state.view) state.viewKey = scopeKey();   // a linked choice is for the linked view
-    state.od = new Set(g("od"));
     // A list in the URL is yours if it matches what this browser holds, and someone
     // else's otherwise -- shown as a shared list, never merged into yours unasked.
     state.sale = p.get("sale") === "1";
@@ -1094,7 +1070,7 @@ footer a{border-bottom:1px solid var(--rule)}
     // rather than the thing being shared. Expand whichever group holds it.
     if (state.open){
       const w = W.find(x => x.k === state.open);
-      if (w){ state.expand.add(String(state.group === "artist" ? w.a : decOf(w))); state.od.add(String(decOf(w))); }
+      if (w){ state.expand.add(String(state.group === "artist" ? w.a : decOf(w))); }
     }
   }
 
@@ -1167,7 +1143,7 @@ footer a{border-bottom:1px solid var(--rule)}
       const sh = c && s ? Math.round(h * s / c) : 0;
       const tip = `${title} — ${c===1?T('oneworkc'):T('nworks',{n:c})}` + (s ? ` · ${T('nforsale',{n:s})}` : "");
       return `<button class="bar-btn ${cls||""}" data-dec="${key}" aria-pressed="${state.decade===key}" title="${tip}">
-        <span class="bar-n">${c||""}</span><span class="bar-fill" style="height:${h}px">${sh ? `<span class="bar-sale" style="height:${sh}px"></span>` : ""}</span><span class="bar-lab">${lab}</span></button>`;
+        <span class="bar-n">${c||""}</span><span class="bar-fill" style="height:${h}px"></span><span class="bar-lab">${lab}</span></button>`;
     };
     // group the decade bars by century so 1830s and 1930s can never be read as the same "30"
     const cents = [];
@@ -1547,7 +1523,7 @@ footer a{border-bottom:1px solid var(--rule)}
     if (SHARDS.has(key)) return SHARDS.get(key);
     // A retry must skip the browser cache: the failure we are retrying is often a
     // cached 404 or 5xx, and re-requesting the identical URL just returns it again.
-    const url = `data/detail/${key}.json?v=721aee7f` + (attempt ? `&r=${attempt}` : "");
+    const url = `data/detail/${key}.json?v=ca7e6bae` + (attempt ? `&r=${attempt}` : "");
     const p = fetch(url, attempt ? {cache: "reload"} : undefined)
       .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
       .catch(async () => {
@@ -1701,46 +1677,6 @@ footer a{border-bottom:1px solid var(--rule)}
   // own they would be hairlines. They share one, as they share an era on the band.
   // Every column and cell keeps a floor width so the small ones can still be read
   // and clicked -- the printed count, not the area, is the figure.
-  function mosaicHTML(keys, cnt){
-    const cols = [];
-    for (const d of keys){
-      const c = d === "und" ? "und" : d < 1700 ? "pre" : Math.floor(d/100) + 1, last = cols[cols.length-1];
-      if (last && last.c === c) last.ds.push(d); else cols.push({c, ds:[d]});
-    }
-    cols.forEach(c => c.n = c.ds.reduce((n, d) => n + cnt(d), 0));
-    // Column widths follow the square root of the count, as a bubble's radius does:
-    // the 20th century holds 56% of the works and would otherwise be 56% of the
-    // width, with everything else squeezed beside it. The cells inside a column are
-    // linear -- a column is a bar, and its decades divide it.
-    const total = cols.reduce((n, c) => n + Math.sqrt(c.n), 0) || 1;
-    // Proportions are grid tracks in fr, so the gaps come off the top and the shares
-    // stay exact; the floors are pixel minimums the stylesheet sets for the viewport.
-    // (shares as percentages: a grid treats fr factors that sum below 1 as summing to 1,
-    // and would leave the remainder of the width empty)
-    const colsTpl = cols.map(c => `minmax(var(--mow),${(100 * Math.sqrt(c.n) / total).toFixed(2)}fr)`).join(" ");
-    return `<div class="mosaic" role="group" aria-label="${esc(T("mosaic_aria"))}" style="grid-template-columns:${colsTpl}">` + cols.map(c => {
-      const lab = c.c === "und" ? T("nd") : c.c === "pre" ? "<1700" : ordN(c.c);
-      const full = c.c === "und" ? T("undated") : c.c === "pre" ? T("p_pre") : T("century", {n: ordN(c.c)});
-      const span = c.c === "und" ? "und," : c.c === "pre" ? ",1699" : `${(c.c-1)*100},${(c.c-1)*100+99}`;
-      // Before 1700 the decades are 23 slivers of a few works each; that column is
-      // cut by century instead, and a cell opens every decade it holds.
-      const units = c.c === "pre"
-        ? [...new Set(c.ds.map(d => Math.floor(d/100)))].map(h => ({ds: c.ds.filter(d => Math.floor(d/100) === h), lab: ordN(h+1), full: T("century", {n: ordN(h+1)})}))
-        : c.ds.map(d => ({ds: [d], lab: d === "und" ? T("undated") : decS(d)}));
-      units.forEach(u => u.n = u.ds.reduce((n, d) => n + cnt(d), 0));
-      // 14px is one line of label: every decade gets its name, the thinnest a little over-stated
-      const rowsTpl = units.map(u => `minmax(14px,${(100 * u.n / (c.n || 1)).toFixed(2)}fr)`).join(" ");
-      const cells = units.map(u => {
-        const on = u.ds.every(d => state.od.has(String(d)));
-        return `<button class="mo-cell" data-od="${u.ds.join(",")}" aria-pressed="${on}"
-          title="${esc(u.full || u.lab)} · ${esc(u.n===1?T("oneworkc"):T("nworks",{n:fmt(u.n)}))}"><span>${esc(u.lab)}</span><i>${fmt(u.n)}</i></button>`;
-      }).join("");
-      return `<div class="mo-col${c.c==="und"?" und":""}">
-        <button class="mo-h" data-span="${span}" title="${esc(full)} · ${esc(T("nworks",{n:fmt(c.n)}))}"><b>${esc(lab)}</b><span>${fmt(c.n)}</span></button>
-        <div class="mo-cells" style="grid-template-rows:${rowsTpl}">${cells}</div></div>`;
-    }).join("") + `</div>`;
-  }
-
   function render(){
     if (state.view && state.viewKey !== scopeKey()) state.view = null;   // a List / Artwall choice is for one view
     renderDoors(); renderListBar();
@@ -1877,17 +1813,13 @@ footer a{border-bottom:1px solid var(--rule)}
              <p class="g-blurb">${esc(blurbFor(d))}</p>${yearBlock}`}`;
         return groupHTML(d, gutter, items, true);
       };
-      // Untouched, the page listed every decade one after another: 57 groups, each with
-      // its gutter and its first rows, 74,000px before anyone had asked for anything.
-      // A broad view opens on a mosaic instead: one column per century, wide as its
-      // share of the works; the decades stacked inside it, tall as theirs. The whole
-      // span reads at a glance, and a decade opens beneath the mosaic on a click. A
-      // narrow view (an artist, a single decade) is short enough to stay flat, and a
-      // search always is: someone who typed a name wants the works, not a chart.
+      // A broad view -- many decades, hundreds of works -- is not listed decade by
+      // decade (57 groups, 74,000px before anyone asked); the histogram above is the
+      // way in, and the register says so. A narrow view (an artist, a single decade)
+      // is short enough to stay flat, and a search always is.
       const compact = state.artist === null && !state.q && keys.length > 6 && listSet.length > 300;
       if (!compact) html += keys.map(decSection).join("");
-      else html += mosaicHTML(keys, k => (setByDec.get(k) || []).length)
-               + keys.filter(d => state.od.has(String(d))).map(decSection).join("");
+      else html += `<p class="empty">${esc(T("pickdecade_note", {n: fmt(listSet.length)}))}</p>`;
     } else {
       // The last word is not the surname when the name ends in a bracket -- "Johann
       // Willinges (1560-1625)" sorted under "(", ahead of every letter. surnameOf skips those.
@@ -2272,19 +2204,6 @@ footer a{border-bottom:1px solid var(--rule)}
     if (e.target.closest("[data-wmore]")){ state.wLimit += 72; render(); return; }
     const mb = e.target.closest(".more");
     if (mb){ state.expand.add(String(mb.dataset.exp)); render(); return; }
-    const cell = e.target.closest(".mo-cell");
-    if (cell){
-      const ks = cell.dataset.od.split(","), on = ks.every(k => state.od.has(k));
-      ks.forEach(k => on ? state.od.delete(k) : state.od.add(k));
-      render(); pushHash(true); return;
-    }
-    const col = e.target.closest(".mo-h");
-    if (col){                                   // a column heading narrows the view to that span
-      const [lo, hi] = col.dataset.span.split(",");
-      if (lo === "und"){ state.undOnly = true; state.from = state.to = null; }
-      else { state.undOnly = false; state.from = lo === "" ? null : +lo; state.to = hi === "" ? null : +hi; }
-      state.open = null; state.expand.clear(); renderAll(); pushHash(); return;
-    }
     if (e.target.closest("[data-artist]")) return;
     const wt = e.target.closest("[data-wt]");
     if (wt){
@@ -2589,7 +2508,7 @@ footer a{border-bottom:1px solid var(--rule)}
   $("reset").addEventListener("click", () => {
     state.q=""; state.decade=null; state.media.clear(); state.museums.clear(); state.cats.clear(); state.srcs.clear(); state.origins.clear(); state.groups.clear();
     state.artist=null; state.letter=null; state.idxOpen=false; state.sort="year"; state.year=null; state.from=null; state.to=null; state.undOnly=false; $("sortby").value="year";
-    state.open=null; state.expand.clear(); state.od.clear(); state.decOrder="earliest"; state.artOrder="az";
+    state.open=null; state.expand.clear(); state.decOrder="earliest"; state.artOrder="az";
     state.list=false; state.shared=null; state.sale=false; state.view=null; state.wLimit=72;
     $("q").value=""; setGroup("decade"); renderAll(); pushHash(); window.scrollTo({top:0,behavior:"auto"});
   });
@@ -2749,8 +2668,8 @@ footer a{border-bottom:1px solid var(--rule)}
   }   // end boot
 
   Promise.all([
-    fetch("data/index.json?v=721aee7f").then(r => r.json()),
-    fetch("data/i18n.json?v=c2789e7d").then(r => r.json())
+    fetch("data/index.json?v=ca7e6bae").then(r => r.json()),
+    fetch("data/i18n.json?v=11e79261").then(r => r.json())
   ]).then(([data, i18n]) => boot(data, i18n))
    .catch(err => {
      document.getElementById("register").innerHTML =
