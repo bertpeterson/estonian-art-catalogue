@@ -71,7 +71,7 @@ while True:
                      "url": p.get("permalink") or "https://alleegalerii.ee", **({"sold": True} if is_sold else {}),
                      **({"img": p["images"][0].get("src")} if p.get("images") and p["images"][0].get("src") else {})})
     if page % 5 == 0: print(f"  page {page}  kept {len(recs)}", flush=True)
-    page += 1; time.sleep(0.8)
+    page += 1; time.sleep(10)     # the crawl delay alleegalerii.ee asks for
     if page > 80: break
 
 prev = json.load(open("gallery_records.json", encoding="utf-8")) if os.path.exists("gallery_records.json") else []

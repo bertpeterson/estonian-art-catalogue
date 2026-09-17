@@ -260,15 +260,24 @@ cd site && python3 -m http.server 8000
 Museum records come from MuIS and the EKM Digital Collection, fetched per artist and per
 collection and cached locally, then parsed. Requests identified themselves as
 `EstonianArtCatalogue/1.0`, every page was cached so nothing was fetched twice, and part of
-the MuIS harvest used the bulk RDF files it publishes at `/rdf/collection/`. **A refresh
-should go through those bulk files and the OAI interface rather than fetching object pages.**
+the MuIS harvest used the bulk RDF files it publishes at `/rdf/collection/`. The rest read about
+48,000 MuIS object pages with four to six requests in flight, which is faster than the thirty-second
+delay muis.ee's `robots.txt` asks of crawlers; that is recorded here as a fact of method. The metadata
+is CC0 by MuIS's own statement, and the museum sources are never fetched again by this project.
+**A refresh should go through those bulk files and the OAI interface rather than fetching object pages.**
 
 Gallery records come from each gallery's own public listings — WooCommerce's documented Store API
 where one exists (Vernissage, NOBA), otherwise the pages themselves. NOBA's artist pages were read
 once each for the artist's stated country of location, biography, and the addresses of their artwork
-pages. Prices are never collected, and every record links back to the gallery's page. Where a site
-asked not to be collected from, it was not: `alleegalerii.ee` sets `ClaudeBot: Disallow` and an
-Article 4 reservation, and holds no records here.
+pages. Prices are never collected, and every record links back to the gallery's page. A site's
+`robots.txt` is read before it is collected from, and the monthly run re-reads every one
+(`data/robots_check.py`) and stops if any source has since said no. One did, for a while: on 9 and
+10 September 2026 `alleegalerii.ee` served a Content-Signals file — `ai-train=no`, `use=reference`, and
+`ClaudeBot` disallowed — and nothing was taken from it then. Its stock and auction results were collected
+on 14 September, at the pace its file asks (a ten-second delay), and the file as read on 17 September is a
+plain one that allows collection; the harvest of the 14th was not preceded by a re-read, which it should
+have been. The records stand because the file as it now reads permits them; if it changes back, the check
+above stops the run and the records come out.
 
 **Gallery stock is re-harvested monthly** by `.github/workflows/reharvest.yml`, at 04:00 UTC on the
 1st: every gallery fetched afresh, rebuilt, README figures updated, committed. `data/harvest_guard.py`

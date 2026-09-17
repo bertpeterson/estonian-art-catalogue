@@ -37,6 +37,10 @@ jobs:
         working-directory: data
         run: python3 harvest_guard.py before
 
+      - name: Read every source's robots.txt; stop if one says no
+        working-directory: data
+        run: python3 robots_check.py
+
       - name: Fetch every gallery afresh
         working-directory: data
         run: |
