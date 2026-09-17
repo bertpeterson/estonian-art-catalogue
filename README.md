@@ -278,9 +278,12 @@ loudly rather than vanishing quietly. The museum sources are never re-crawled by
 **Images, for public-domain works only.** A museum record shows the holder's own photograph — loaded
 from the museum's server when the record is opened, never copied or stored here — when the work is out
 of copyright: the artist dead more than seventy years, or born more than 156 years ago with no death
-recorded. The photograph of a public-domain work is not itself protected (EU directive 2019/790 art. 14,
-in Estonian law since 2021), whatever the catalogue's rights label says; MuIS marks most images *rights
-undetermined*. Everything by a later artist has no image — a rule of this catalogue, recomputed each January
+recorded. A faithful photograph of a public-domain work is not itself protected: Autoriõiguse seadus § 5 p. 9
+(in force 7 January 2022, implementing Directive (EU) 2019/790 art. 14) takes the Act away from *any material
+obtained by reproducing a work of visual art whose term of protection has expired*, unless the reproduction is
+an original creation of its own — which a museum's record photograph is not. That holds whatever a catalogue's
+rights label says; MuIS marks most images *rights undetermined*, EKM's notice claims its site's content. Images
+appear only inside a record, are never offered for download, and any holder can have one removed by asking. Everything by a later artist has no image — a rule of this catalogue, recomputed each January
 from life + 70, not a line the law draws at 1955. MuIS's open-data RDF says it in one sentence: *metadata can be used
 according to CC0 licence; usage of digital images may be subject to restrictions* — and for a faithful photograph
 of a public-domain work no such restriction can rest on copyright. MuIS images come by media id from the record,
