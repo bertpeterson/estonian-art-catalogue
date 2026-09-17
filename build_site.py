@@ -54,8 +54,12 @@ def shard_of(w):
 
 index, detail = [], collections.defaultdict(dict)
 for i, w in enumerate(W):
-    light = {k: v for k, v in w.items() if k not in DETAIL and k != "ir"}
-    light["i"] = i                                   # stable handle into the index
+    # the light record: nothing that is null, nothing the reader can infer -- the
+    # position is the handle (w.i is set at load), a count of one is the default, a
+    # dating label equal to the year is the year. A fifth of the file, gone.
+    light = {k: v for k, v in w.items() if k not in DETAIL and k != "ir" and v is not None}
+    if light.get("n") == 1: light.pop("n")
+    if "yl" in light and str(light["yl"]) == str(light.get("y")): light.pop("yl")
     heavy = {k: v for k, v in w.items() if k in DETAIL}
     if heavy:
         light["h"] = 1                               # this record has detail to fetch
