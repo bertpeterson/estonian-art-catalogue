@@ -1529,7 +1529,7 @@ footer a{border-bottom:1px solid var(--rule)}
     if (SHARDS.has(key)) return SHARDS.get(key);
     // A retry must skip the browser cache: the failure we are retrying is often a
     // cached 404 or 5xx, and re-requesting the identical URL just returns it again.
-    const url = `data/detail/${key}.json?v=2da188e5` + (attempt ? `&r=${attempt}` : "");
+    const url = `data/detail/${key}.json?v=721aee7f` + (attempt ? `&r=${attempt}` : "");
     const p = fetch(url, attempt ? {cache: "reload"} : undefined)
       .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
       .catch(async () => {
@@ -2443,6 +2443,11 @@ footer a{border-bottom:1px solid var(--rule)}
     if (i < 0){ const j = k.indexOf("-" + q); if (j >= 0) i = j + 1; }
     return i < 0 ? esc(text) : esc(text.slice(0, i)) + "<mark>" + esc(text.slice(i, i + q.length)) + "</mark>" + esc(text.slice(i + q.length));
   };
+  const MCOUNT = {}, MUCOUNT = {}, DCOUNT = {}, TCOUNT = {};
+  W.forEach(w => { MCOUNT[w.e] = (MCOUNT[w.e] || 0) + 1; MUCOUNT[w.mu] = (MUCOUNT[w.mu] || 0) + 1;
+    if (w.y != null) DCOUNT[Math.floor(w.y / 10) * 10] = (DCOUNT[Math.floor(w.y / 10) * 10] || 0) + 1;
+    for (const tc of new Set([w.tc, w.tce])) if (tc && tc.length < 30) TCOUNT[tc] = (TCOUNT[tc] || 0) + 1; });   // both languages of the term
+  const TECHS = Object.entries(TCOUNT).filter(([, n]) => n >= 40).sort((a, b) => b[1] - a[1]);
   function suggest(raw){
     const q = skey(raw.trim());
     sgItems = []; sgSel = -1;
@@ -2453,9 +2458,20 @@ footer a{border-bottom:1px solid var(--rule)}
     const works = [];
     for (let i = 0; i < W.length && works.length < 60; i++){ const w = W[i]; if (starts(SK(w), q)) works.push(w); }
     works.sort((x, y) => (SK(y).startsWith(q) - SK(x).startsWith(q)) || (x.y || 9999) - (y.y || 9999) || cmpStr(x.t, y.t));
-    const top = arts.slice(0, 5), tw = works.slice(0, 6);
-    if (!top.length && !tw.length){ sugg.hidden = true; sugg.innerHTML = ""; qbox.setAttribute("aria-expanded", "false"); return; }
+    // ...and the filters a word can name: a medium, a holder, a decade, a technique.
+    // "akvar" offers Watercolour and akvarell; "192" the 1920s; "tartu" Tartu Art Museum.
+    const fl = [];
+    for (const m of MEDIA) if (starts(skey(medName(m)), q) || starts(skey(m), q) || starts(skey(I18N.MEDIUM_ET[m] || ""), q)) fl.push({med: m, t: medName(m), m: fmt(MCOUNT[m] || 0) + " " + T("works_pl")});
+    for (const mu of MUSEUMS) if (starts(skey(musName(mu)), q) || starts(skey(mu), q) || starts(skey(abbr(mu)), q)) fl.push({mus: mu, t: musName(mu), m: fmt(MUCOUNT[mu] || 0) + " " + T("works_pl")});
+    if (/^1[4-9]\d|^20[0-2]/.test(q)) for (const d of DECADES) if (String(d).startsWith(q.slice(0, 3)) && DCOUNT[d]) fl.push({dec: d, t: LANG === "en" ? d + "s" : d + "ndad", m: fmt(DCOUNT[d]) + " " + T("works_pl")});
+    for (const [tc, n] of TECHS) if (starts(skey(tc), q)) fl.push({tech: tc, t: tc, m: fmt(n) + " " + T("works_pl")});
+    const top = arts.slice(0, 5), tw = works.slice(0, 6), tf = fl.slice(0, 5);
+    if (!top.length && !tw.length && !tf.length){ sugg.hidden = true; sugg.innerHTML = ""; qbox.setAttribute("aria-expanded", "false"); return; }
     let html = "";
+    if (tf.length){
+      html += `<div class="sg-h">${esc(T("sg_filters"))}</div>` + tf.map(f => { const n = sgItems.push({f}) - 1;
+        return `<button role="option" data-sg="${n}" id="sg-${n}"><span class="sg-t">${hi(f.t, q)}</span><span class="sg-m">${esc(f.m)}</span></button>`; }).join("");
+    }
     if (top.length){
       html += `<div class="sg-h">${esc(T("sg_artists"))}</div>` + top.map(i => { const n = sgItems.push({a: i}) - 1;
         const life = (A[i].l[0] || A[i].l[1]) ? `${A[i].l[0]}–${A[i].l[1] || ""}` : "";
@@ -2472,6 +2488,14 @@ footer a{border-bottom:1px solid var(--rule)}
     clearTimeout(t);
     sugg.hidden = true; sugg.innerHTML = ""; qbox.setAttribute("aria-expanded", "false");
     state.q = ""; qbox.value = "";
+    if (it.f){                                  // a filter: apply it and stay where we are
+      const f = it.f; state.open = null; state.expand.clear();
+      if (f.med) state.media.add(f.med);
+      else if (f.mus) state.museums.add(f.mus);
+      else if (f.dec !== undefined){ state.decade = f.dec; state.year = null; state.undOnly = false; }
+      else if (f.tech){ state.q = f.tech; qbox.value = f.tech; }
+      renderAll(); pushHash(); return;
+    }
     if (it.a !== undefined){ setGroup("decade"); selectArtist(it.a); return; }
     // a work: its artist's view, the record open and in view
     state.artist = it.w.a; state.decade = null; state.idxOpen = false; state.letter = null;
@@ -2703,8 +2727,8 @@ footer a{border-bottom:1px solid var(--rule)}
   }   // end boot
 
   Promise.all([
-    fetch("data/index.json?v=2da188e5").then(r => r.json()),
-    fetch("data/i18n.json?v=a056fb3a").then(r => r.json())
+    fetch("data/index.json?v=721aee7f").then(r => r.json()),
+    fetch("data/i18n.json?v=6d6ac326").then(r => r.json())
   ]).then(([data, i18n]) => boot(data, i18n))
    .catch(err => {
      document.getElementById("register").innerHTML =
