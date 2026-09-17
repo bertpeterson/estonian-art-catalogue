@@ -48,6 +48,10 @@ CSS = ("body{margin:0;padding:28px;font:15px/1.55 -apple-system,BlinkMacSystemFo
        ".rel{font-size:.85rem;color:#666;margin:6px 0;max-width:80ch;line-height:1.7}"
        ".rel.nb{margin-top:22px;padding-top:12px;border-top:1px solid #e3e5e9}"
        "@media(prefers-color-scheme:dark){.rel{color:#8b9098}.rel.nb{border-color:#2b2e34}}"
+       ".wall{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin:14px 0 6px}"
+       ".wt{display:block;background:#f1f2f4;text-decoration:none;color:inherit}.wt img{display:block;width:100%;aspect-ratio:1/1;object-fit:cover}"
+       ".wt span{display:block;font-size:.72rem;line-height:1.3;padding:5px 6px 6px;color:#666}.wt span i{font-style:italic;color:#111}"
+       "@media(prefers-color-scheme:dark){.wt{background:#15171a}.wt span{color:#8b9098}.wt span i{color:#f1f2f4}}"
        # The app offers this as "printable page for this artist", so make that true:
        # drop the navigation and the call to action, force black on white regardless of
        # the reader's theme, and keep table rows from splitting across pages.
@@ -212,6 +216,29 @@ for i, a in enumerate(A):
         f"<td>{e(val(w,'tc') or val(w,'tce') or '')}</td><td>{e(w.get('dm') or '')}</td>"
         f"<td>{holder(w)}</td></tr>"
         for w in sorted(ws, key=lambda x: (x.get("y") is None, x.get("y") or 0, x.get("t") or ""))[:600])
+    # the artwall: the same pictures as the app, from the holders' and galleries' own
+    # servers, in the app's order -- key works, then paintings before drawings before
+    # prints -- capped at forty-eight, each tile a link into the app's record
+    MRANK = {"Painting": 0, "Watercolour": 1, "Sculpture": 2, "Mixed media": 3, "Installation": 3, "Drawing": 4, "Sketch": 5, "Photograph": 6, "Print": 7}
+    def imsrc(im):
+        if not im: return ""
+        if im.startswith("m:"): return f"https://www.muis.ee/digitaalhoidla/api/meedia/pisipilt?id={im[2:]}"
+        if im.startswith("e:"): return "https://digikogu.ekm.ee/static/preview/image/" + re.sub(r"/([^/]+)$", r"/t2_\1", im[2:])
+        return im[2:]
+    pics = [w for w in ws if w.get("im")]
+    pics.sort(key=lambda w: (w.get("hl", 10**9), MRANK.get(val(w, "e"), 8), w.get("y") is None, w.get("y") or 0))
+    seen_t = set(); tiles = []
+    for w in pics:
+        k = (w.get("t") or "").lower().strip(" .")
+        if k in seen_t: continue
+        seen_t.add(k); tiles.append(w)
+        if len(tiles) == 48: break
+    wall = ("<div class=\"wall\">" + "".join(
+        f"<a class=\"wt\" href=\"{BASE}/#artist={sl}&open={e(w.get('k') or re.sub(r'[^A-Z0-9:]', '', (w.get('nu') or '').upper()))}\" title=\"{e(w.get('t') or '')}\">"
+        f"<img src=\"{e(imsrc(w['im']))}\" alt=\"\" loading=\"lazy\" referrerpolicy=\"no-referrer-when-downgrade\">"
+        f"<span><i>{e(w.get('t') or '')}</i><br>{e(str(w.get('y') or ''))}{' · ' if w.get('y') else ''}{e(val(w, 'mu') or '')}</span></a>"
+        for w in tiles) + "</div>"
+        + f"<p class=\"m\">{len(pics):,} works with a picture; the first {len(tiles)} here, all in the catalogue. Pictures for public-domain works and live gallery listings only, from the holders' own servers.</p>") if pics else ""
     lots = [w for w in ws if w.get("kind") == "auction"]
     if lots:
         ps = sorted(w["ap"] for w in lots if w.get("ao") and w.get("ap"))
@@ -244,6 +271,7 @@ for i, a in enumerate(A):
            + ((f"<p class=\"bio\">{e(a.get('ben') or a.get('b') or '')}" + (MT_NOTE if a.get('bmt') else '') + "</p>") if (a.get('b') or a.get('ben')) else "")
            + (f"<p class=\"m\">{e(au_line)}</p>" if au_line else "")
            + f"<p><a class=\"cta\" href=\"{BASE}/#artist={sl}\">Browse {len(ws)} works in the catalogue →</a></p>"
+           + wall
            + related(i)
            + (f"<p class=\"m\">Showing the first 600 of {len(ws):,} works — "
               f"<a href=\"{BASE}/#artist={sl}\">see all in the catalogue</a>.</p>" if len(ws) > 600 else "")
