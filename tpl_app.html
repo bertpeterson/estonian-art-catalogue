@@ -591,8 +591,10 @@
     const sort = state.sort;
     const prim = sort === "artist" ? SA : sort === "title" ? SK
                : sort === "medium" ? (w => skey(medName(w.e))) : sort === "museum" ? (w => skey(musName(w.mu))) : null;
-    if (sort === "price")                  // hammer price, highest first; works without one after
-      return items.slice().sort((a,b) => ((b.ap||0)-(a.ap||0)) * (desc ? -1 : 1) || (a.y||0)-(b.y||0) || cmpKey(SK(a), SK(b)));
+    if (sort === "price"){                 // hammer price; a lot without one (unsold) always after, whichever way
+      const has = w => w.ap ? 0 : 1;
+      return items.slice().sort((a,b) => has(a) - has(b) || ((b.ap||0)-(a.ap||0)) * (desc ? -1 : 1) || (a.y||0)-(b.y||0) || cmpKey(SK(a), SK(b)));
+    }
     return items.slice().sort((a,b) => {
       let r;
       if (!prim){
