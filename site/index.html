@@ -1923,13 +1923,13 @@ footer a{border-bottom:1px solid var(--rule)}
   // which is a fact about museum acquisition, not about Estonian art. These are the
   // artists a history of it cannot leave out, one sculptor among them, in order of
   // birth. Editorial: the one place on the page where a judgement stands in for a count,
-  // and tagged as such like every other editorial line. Weizenberg, Burman and Kallis
-  // stand where Luts, Sooster and Subbi stood: those three are in copyright and their
-  // doors opened on one picture or none.
+  // and tagged as such like every other editorial line. Weizenberg, Kallis and Merike
+  // Estna stand where Luts, Sooster and Subbi stood: those three are in copyright and
+  // their doors opened on one picture or none; Estna's opens on her galleries' pictures.
   const CANON = ["Johann Köler", "August Weizenberg", "Amandus Adamson", "Kristjan Raud",
-                 "Ants Laikmaa", "Konrad Mägi", "Nikolai Triik", "Paul Burman",
-                 "Oskar Kallis", "Eduard Wiiralt", "Evald Okas", "Jüri Arrak",
-                 "Malle Leis", "Raul Meel", "Tõnis Vint", "Leonhard Lapin"];
+                 "Ants Laikmaa", "Konrad Mägi", "Nikolai Triik", "Oskar Kallis",
+                 "Eduard Wiiralt", "Evald Okas", "Jüri Arrak", "Malle Leis",
+                 "Raul Meel", "Tõnis Vint", "Leonhard Lapin", "Merike Estna"];
   // Artists a public collection has accessioned AND a gallery is selling right now.
   const FOR_SALE = W.reduce((n, w) => n + (w.kind === "gallery" ? 1 : 0), 0);
   const TOP_ART = (() => {
