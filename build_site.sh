@@ -165,4 +165,4 @@ python3 -u build_pages.py
 python3 -u build_stats.py
 # a build that lost its pages must not ship: the artist pages went out missing once
 # when build_pages.py failed inside a pipe and the OK line hid it
-[ -f site/a/index.html ] && [ "$(ls site/a | wc -l)" -gt 1000 ] && [ -f site/stats.html ] || { echo "BUILD FAILED: site/a or stats missing"; exit 1; }
+[ -f site/a/index.html ] && [ "$(ls site/a | wc -l)" -gt 1000 ] && [ -f site/stats.html ] && [ -f site/stats-et.html ] || { echo "BUILD FAILED: site/a or stats missing"; exit 1; }
