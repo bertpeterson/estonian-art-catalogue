@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="description" content="A catalogue of 79,342 works of art by 4,277 artists in Estonian public collections and galleries, 1440–2026. Museum records from MuIS and the EKM Digital Collection, gallery stock from the galleries' own catalogues; every record links back to its source.">
+<meta name="description" content="A catalogue of 79,441 works of art by 4,277 artists in Estonian public collections and galleries, 1440–2026. Museum records from MuIS and the EKM Digital Collection, gallery stock from the galleries' own catalogues; every record links back to its source.">
 <title>Estonian Art Catalogue</title>
 <link rel="canonical" href="https://museaal.ee/">
 <meta property="og:type" content="website">
@@ -587,7 +587,7 @@ footer a{border-bottom:1px solid var(--rule)}
         <p class="mast-sub" data-i18n="sub">Art in Estonia's public collections and galleries · 1440–2026</p>
       </div>
       <div class="mast-stats">
-        <div><b id="stat-w">79,342</b><span data-i18n="works">works</span></div>
+        <div><b id="stat-w">79,441</b><span data-i18n="works">works</span></div>
         <div><b id="stat-a">4,277</b><span data-i18n="artists">artists</span></div>
         <!-- museums and galleries are counted in the sources note, not here: four
              figures read as a masthead, six as a table -->
@@ -823,6 +823,7 @@ footer a{border-bottom:1px solid var(--rule)}
     "Tartu Ülikooli kunstimuuseum":"TÜKM","Dr. Fr. R. Kreutzwaldi Memoriaalmuuseum":"KRM",
     "Eesti Spordi- ja Olümpiamuuseum":"ESOM","Tallinna Linnamuuseum":"TLM",
     "Narva Muuseum":"NLM","Eesti Rahva Muuseum":"ERM","Uue Kunsti Muuseum":"UKM",
+    "Erakogu":"PRIV","Asukoht teadmata":"LOST","Väliseesti Muuseum, Kanada":"VEMU","Eesti Rahvusarhiiv":"RA","Eesti Üliõpilaste Selts":"EÜS",
     "Eesti Teatri- ja Muusikamuuseum":"TMM","Viljandi Muuseum":"VM",
     "Eesti Kaasaegse Kunsti Muuseum":"EKKM","Veneetsia biennaal, Eesti paviljon":"VEN","Saaremaa Muuseum":"SM","Virumaa Muuseumid":"VIRU",
     "Eesti Maaelumuuseumid SA, Eesti Põllumajandusmuuseum":"EPM",
@@ -932,7 +933,7 @@ footer a{border-bottom:1px solid var(--rule)}
     for (const w of W) for (const o of originsOf(w)) m.set(o, (m.get(o)||0)+1);
     return [...m.entries()].sort((x,y)=> (x[0]===NOORIGIN)-(y[0]===NOORIGIN) || y[1]-x[1]).map(x=>x[0]);
   })();
-  const SRCLAB = {muis:"muis", ekm:"digi", ekmmuis:"both", cca:"cca", ekkm:"ekkm", auction:"auction"};
+  const SRCLAB = {muis:"muis", ekm:"digi", ekmmuis:"both", cca:"cca", ekkm:"ekkm", auction:"auction", kmsa:"catalogue"};
   // a museum holding or a work shown; not stock, not a past listing, not a lot
   const isHeld = w => !w.kind || w.kind === "held" || w.kind === "shown";
   // a past listing: sold, or no longer listed -- and the month it was last seen for sale
@@ -1513,7 +1514,7 @@ footer a{border-bottom:1px solid var(--rule)}
     if (SHARDS.has(key)) return SHARDS.get(key);
     // A retry must skip the browser cache: the failure we are retrying is often a
     // cached 404 or 5xx, and re-requesting the identical URL just returns it again.
-    const url = `data/detail/${key}.json?v=7f965f33` + (attempt ? `&r=${attempt}` : "");
+    const url = `data/detail/${key}.json?v=5b1a3edb` + (attempt ? `&r=${attempt}` : "");
     const p = fetch(url, attempt ? {cache: "reload"} : undefined)
       .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
       .catch(async () => {
@@ -1562,7 +1563,8 @@ footer a{border-bottom:1px solid var(--rule)}
       // same file (opendata.muis.ee/dhmedia/<id> resolves to it); EKM's to the file
       const imHref = im.startsWith("g:") ? (w.url || imSrc)
                    : im.startsWith("m:") ? `https://opendata.muis.ee/dhmedia/${encodeURIComponent(im.slice(2))}` : imSrc;
-      const imCap = im.startsWith("g:") ? esc(T("d_image", {h: musName(w.mu)})) + " · " + esc(T("d_imgstock"))
+      const imCap = w.kind === "known" ? esc(T("d_image", {h: musName("Konrad Mägi Sihtasutus")})) + " · " + esc(T("d_pd", {a: ar.n, l: life || "—"}))
+                  : im.startsWith("g:") ? esc(T("d_image", {h: musName(w.mu)})) + " · " + esc(T("d_imgstock"))
                   : esc(T("d_image", {h: musName(w.mu)})) + (im.startsWith("m:") ? " · MuIS" : " · EKM") + " · " + esc(T("d_pd", {a: ar.n, l: life || "—"}));
       const figure = imSrc ? `<figure class="d-fig"><a href="${esc(imHref)}" target="_blank" rel="noopener"><img src="${esc(imSrc)}" alt="${esc(w.t)}" loading="lazy" referrerpolicy="no-referrer-when-downgrade" onerror="this.closest('figure').hidden=true"></a>
           <figcaption>${imCap}</figcaption></figure>` : "";
@@ -1579,7 +1581,7 @@ footer a{border-bottom:1px solid var(--rule)}
           <div class="d-v" style="margin-top:16px;display:flex;flex-wrap:wrap;gap:18px">
             ${(detailOf(w)||{}).mi?`<a class="permalink" href="https://www.muis.ee/museaalview/${esc(detailOf(w).mi)}" target="_blank" rel="noopener">${esc(T("d_recmuis"))}</a>`:""}
             ${(detailOf(w)||{}).oi?`<a class="permalink" href="https://digikogu.ekm.ee/ekm/search/oid-${esc(detailOf(w).oi)}/" target="_blank" rel="noopener">${esc(T("d_recekm"))}</a>`:""}
-            ${w.url?`<a class="permalink" href="${esc(w.url)}" target="_blank" rel="noopener">${esc(w.kind === "gallery" ? T("d_gallerylink", {g: musName(w.mu)}) : w.kind === "sold" ? T("d_pastlink", {g: musName(w.mu)}) : w.kind === "auction" ? (w.apr ? T("d_presslink") : T("d_lotlink", {g: musName(w.mu)})) : T("d_recsource"))}</a>`:""}
+            ${w.url?`<a class="permalink" href="${esc(w.url)}" target="_blank" rel="noopener">${esc(w.kind === "gallery" ? T("d_gallerylink", {g: musName(w.mu)}) : w.kind === "sold" ? T("d_pastlink", {g: musName(w.mu)}) : w.kind === "auction" ? (w.apr ? T("d_presslink") : T("d_lotlink", {g: musName(w.mu)})) : w.kind === "known" ? T("d_knownlink") : T("d_recsource"))}</a>`:""}
             ${slBtn(id, "sl-d")}
           </div>
         </div>
@@ -1594,7 +1596,7 @@ footer a{border-bottom:1px solid var(--rule)}
           ${(detailOf(w)||{}).dm?`<div class="d-k">${esc(T("d_dimensions"))}</div><div class="d-v">${esc(cap(dimsName(detailOf(w).dm)))}</div>`:""}
           ${w.c?`<div class="d-k">${esc(T("d_category"))}</div><div class="d-v">${esc(catName(w.c))}</div>`:""}
           <div class="d-k">${esc(isHeld(w)?T("d_collection"):T("venue"))}</div><div class="d-v">${w.co?esc(collName(w.co))+"<br>":""}<em>${siteOf(w.mu) ? `<a class="permalink" href="${esc(siteOf(w.mu))}" target="_blank" rel="noopener">${esc(musName(w.mu))}</a>` : esc(musName(w.mu))}</em></div>
-          <div class="d-k">${esc(T("kind"))}</div><div class="d-v">${esc(T(w.kind==="shown"?"shown":w.kind==="gallery"?"gallery":w.kind==="auction"?"kind_auction":w.kind==="sold"?"kind_sold":"held"))}</div>
+          <div class="d-k">${esc(T("kind"))}</div><div class="d-v">${esc(T(w.kind==="shown"?"shown":w.kind==="gallery"?"gallery":w.kind==="auction"?"kind_auction":w.kind==="sold"?"kind_sold":w.kind==="known"?"kind_known":"held"))}${w.kind==="known"?`<br><span class="d-sub">${esc(T("d_knownnote"))}</span>`:""}</div>
           ${w.kind==="sold" ? `<div class="d-k">${esc(T("d_status"))}</div><div class="d-v">${esc(pastText(w))}${w.gl ? `<br><span class="d-sub">${esc(T("d_lastseen", {d: w.gl}))}</span>` : ""}<br><span class="d-sub">${esc(T("d_pastnote"))}</span></div>` : ""}
           ${w.kind==="auction" ? `<div class="d-k">${esc(T("d_result"))}</div><div class="d-v">${esc(w.an)} · <b>${esc(auText(w))}</b>${w.as ? `<br><span class="d-sub">${esc(T("d_start", {p: eur(w.as)}))}</span>` : ""}${w.apr ? `<br><span class="d-sub">${esc(T("d_press"))}: ${esc(w.apr)}</span>` : ""}${w.adb ? `<br><span class="d-sub">${esc(w.adb[LANG] || w.adb.en)}</span>` : ""}${chainOf(w) ? `<div class="au-hist">${chainOf(w).map(x => `<div class="au-row${x === w ? " now" : ""}"><span>${esc(String(x.ad).slice(0, 4))}</span><span>${esc(x.an.toLowerCase().includes(musName(x.mu).toLowerCase().split(" ")[0]) ? x.an : musName(x.mu) + " · " + x.an)}</span><span class="n">${x.ao ? (x.ap ? esc(eur(x.ap)) : esc(T("au_soldnp"))) : esc(T("au_unsold"))}${x.as ? ` <em>(${esc(eur(x.as))})</em>` : ""}</span>${x.url ? `<a href="${esc(x.url)}" target="_blank" rel="noopener">↗</a>` : "<span></span>"}</div>${x.adb ? `<div class="au-doubt">${esc(x.adb[LANG] || x.adb.en)}</div>` : ""}`).join("")}</div>` : ""}${w.aa ? `<br><span class="d-sub">${esc(T("au_afternote"))}</span>` : ""}<br><span class="d-sub">${esc(T("au_note"))}</span></div>` : ""}
           ${w.nu ? `<div class="d-k">${esc(T("d_number"))}</div><div class="d-v" style="font-family:var(--mono);font-size:.78rem">${esc(w.nu)}</div>` : ""}
@@ -1616,7 +1618,10 @@ footer a{border-bottom:1px solid var(--rule)}
       // an auction result carries its outcome on the row: the sale is the point of the record
       : w.kind === "auction" && w.url
       // the price alone on the row -- it is the outcome; "sold" is in the title and the detail
-      ? `<a class="rl rl-au${w.ao ? "" : " unsold"}" href="${esc(w.url)}" target="_blank" rel="noopener" title="${esc(w.an)} · ${esc(auText(w))}">${esc(w.ao ? (w.ap ? eur(w.ap) : T("au_soldnp")) : T("au_unsold"))} ↗</a>` : "";
+      ? `<a class="rl rl-au${w.ao ? "" : " unsold"}" href="${esc(w.url)}" target="_blank" rel="noopener" title="${esc(w.an)} · ${esc(auText(w))}">${esc(w.ao ? (w.ap ? eur(w.ap) : T("au_soldnp")) : T("au_unsold"))} ↗</a>`
+      // a known work links to its entry in the catalogue raisonné
+      : w.kind === "known" && w.url
+      ? `<a class="rl rl-past" href="${esc(w.url)}" target="_blank" rel="noopener" title="${esc(T("d_knownlink"))}">${esc(T("rl_known"))} ↗</a>` : "";
     return `<div class="row${rl ? " has-link" : ""}${w.kind === "auction" ? " au" : ""}" data-open="${open}">
       <button class="row-btn" data-id="${esc(id)}" aria-expanded="${open}">
         ${yr}
@@ -2644,8 +2649,8 @@ footer a{border-bottom:1px solid var(--rule)}
   }   // end boot
 
   Promise.all([
-    fetch("data/index.json?v=7f965f33").then(r => r.json()),
-    fetch("data/i18n.json?v=10adec3c").then(r => r.json())
+    fetch("data/index.json?v=5b1a3edb").then(r => r.json()),
+    fetch("data/i18n.json?v=84338c02").then(r => r.json())
   ]).then(([data, i18n]) => boot(data, i18n))
    .catch(err => {
      document.getElementById("register").innerHTML =

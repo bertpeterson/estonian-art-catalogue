@@ -378,5 +378,14 @@
   "type": "auction house",
   "url": "",
   "holder": "Balti Oksjon"
+ },
+ {
+  "n": "Konrad Mägi Sihtasutus",
+  "en": "Konrad Mägi Foundation",
+  "city": "Tallinn",
+  "type": "catalogue",
+  "url": "https://konradmagi.ee",
+  "holder": null,
+  "note": "Catalogue of works: paintings, sketches and lost works with holder as the foundation gives it; private holders enter here as Erakogu, unnamed"
  }
 ]

@@ -1,6 +1,6 @@
 # Estonian Art Catalogue · Eesti Kunstikataloog
 
-A browsable catalogue of **79,342 artworks** by **4,277 artists** — museum holdings from **24 Estonian public
+A browsable catalogue of **79,441 artworks** by **4,277 artists** — museum holdings from **24 Estonian public
 collections**, plus what seven commercial galleries and the NOBA marketplace are selling right now,
 aggregated from the national museum databases and the galleries' own listings and presented as a static site.
 
@@ -31,7 +31,7 @@ read from that biography for 301 — both tagged *NOBA* on the page.
 
 7,933 objects appear in both MuIS and the EKM database and are merged on inventory number
 (MuIS `Number` = digikogu `Tulmenumber` + `Kogunumber`), which is why 60,128 source objects
-collapse to 79,342 works.
+collapse to 79,441 works.
 
 **Only attributed works are included.** Anonymous and unattributed objects are excluded by design — including 485 objects catalogued under the name *Tundmatu kunstnik* ("unknown artist"), which is the absence of an attribution written into the name field rather than a name. Notnames stay: *Püha Lucia legendi meister* and its kind identify a hand recognised across several works, and art history treats that as an attribution.
 
@@ -192,7 +192,7 @@ not as part of the normal cycle.
 `data/data.json` is dictionary-encoded and nested, which suits the site and suits
 nobody else. Flat exports with every value resolved, one row per work:
 
-    site/data/export/works.csv.gz      79,342 rows
+    site/data/export/works.csv.gz      79,441 rows
     site/data/export/artists.csv.gz     4,277 rows
     site/data/export/works.jsonl.gz     one JSON object per line
 
@@ -323,7 +323,7 @@ a person.
 Code: MIT (see `LICENSE`).
 
 **Data is mixed, and the split is in the data itself.** Records marked `kind: held` —
-58,607 of them, 73.9% — derive from museum metadata published under CC0, which carries no
+58,607 of them, 73.8% — derive from museum metadata published under CC0, which carries no
 restriction on reuse, commercial included. The 9,985 records marked `kind: gallery` come from
 commercial galleries and the NOBA marketplace, which grant no licence; they are included as a
 public catalogue of current work, and anyone reusing this dataset should decide for themselves
