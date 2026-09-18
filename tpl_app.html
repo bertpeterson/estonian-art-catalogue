@@ -837,7 +837,10 @@
     const cy = w.y == null && w.yl ? (w.yl.match(/(?:sajand:\s*)(\d{1,2})/i) || w.yl.match(/(\d{1,2})\s*\.?\s*saj/i)
                  || (m => m && Math.floor(+m[1]/100) === Math.floor(+m[2]/100) ? [m[0], String(Math.floor(+m[1]/100) + 1)] : null)
                     (w.yl.match(/(\d{4})\s*[–-]\s*(\d{4})/))) : null;
-    const yr = w.y == null ? `<span class="r-year und" ${cy?`title="${esc(w.yl)}"`:""}>${esc(cy ? T("centshort",{n:ordN(+cy[1])}) : T("nd"))}</span>`
+    // a unique work the record dates after its artist's death: the label as the museum
+    // gives it, marked, among the undated
+    const yr = w.y == null && w.f ? `<span class="r-year und" title="${esc(T(w.f === "pre" ? "d_prebirth_u" : "d_postdeath_u", {l:(A[w.a].l[0]||"?")+"–"+(A[w.a].l[1]||"")}))}">${esc(w.yl)}?</span>`
+          : w.y == null ? `<span class="r-year und" ${cy?`title="${esc(w.yl)}"`:""}>${esc(cy ? T("centshort",{n:ordN(+cy[1])}) : T("nd"))}</span>`
       : `<span class="r-year${w.dsrc==="artist"||w.dsrc==="impression"?" inf":""}" title="${esc(dateLabel(w) || w.y)}${w.dsrc==="title"?" "+esc(T("d_fromtitle")):w.dsrc==="artist"?" "+esc(T("d_fromartist")):w.dsrc==="impression"?" "+esc(T("d_fromimpression")):""}">${esc(dateLabel(w) || w.y)}${w.dsrc==="title"?"*":w.dsrc==="artist"||w.dsrc==="impression"?"≈":""}</span>`;
     // the name on the row opens the artist's view; the row handler steps aside for it
     const art = (showArtist && state.artist===null) ? `<span class="r-artist r-alink" data-artist="${w.a}" title="${esc(T("allworksby", {n: ar.n}))}">${esc(ar.n)}</span>` : `<span class="r-artist"></span>`;
@@ -881,7 +884,7 @@
           <div class="d-k">${esc(T("d_dating"))}</div><div class="d-v">${
             w.yl ? esc(dateLabel(w)) + (w.dsrc==="title" ? ` <em>${esc(T("d_fromtitle"))}</em>` : w.dsrc==="artist" ? ` <em>${esc(T("d_fromartist"))}</em>` : w.dsrc==="impression" ? ` <em>${esc(T("d_fromimpression"))}</em>` : "")
                  : `<em>${esc(T("d_nodate",{n:ar.n,l:(ar.l[0]||"?")+"–"+(ar.l[1]||"")}))}</em>`}${
-            w.f ? `<br><em>${esc(T(w.f === "pre" ? "d_prebirth" : "d_postdeath", {l:(ar.l[0]||"?")+"–"+(ar.l[1]||"")}))}</em>` : ""}</div>
+            w.f ? `<br><em>${esc(T(w.f === "pre" ? (w.y == null ? "d_prebirth_u" : "d_prebirth") : (w.y == null ? "d_postdeath_u" : "d_postdeath"), {l:(ar.l[0]||"?")+"–"+(ar.l[1]||"")}))}</em>` : ""}</div>
           <div class="d-k">${esc(T("d_technique"))}</div><div class="d-v">${techName(w)?esc(cap(techName(w))):"—"}</div>
           <div class="d-k">${esc(T("d_material"))}</div><div class="d-v">${matName(w)?esc(cap(matName(w))):"—"}</div>
           ${w.dm?`<div class="d-k">${esc(T("d_dimensions"))}</div><div class="d-v">${esc(cap(dimsName(w.dm)))}</div>`:""}
@@ -1367,7 +1370,9 @@
       ordered.sort((a, b) => (pos.has(a.k) ? pos.get(a.k) : 1e9) - (pos.has(b.k) ? pos.get(b.k) : 1e9));
     }
     const shown = ordered.slice(0, state.wLimit);
-    const openW = state.open && shown.find(w => w.k === state.open);
+    // the open record may be a picture beyond the tiles on show -- a drawing far down an
+    // artist's wall, reached by a link -- and opens above the wall all the same
+    const openW = state.open && ordered.find(w => w.k === state.open);
     // Every tile has its shape before its picture arrives -- the record's height and
     // width, so a 41 x 26 cm painting is an upright tile from the first paint -- and
     // the columns are filled by those shapes, shortest column next. Nothing moves

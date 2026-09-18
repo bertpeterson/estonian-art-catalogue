@@ -55,6 +55,9 @@ const check = (name, ok, detail) => { console.log(`${ok ? "ok  " : "FAIL"} ${nam
   check("artist view: a tile opens its record", (await ev(`!!document.querySelector(".wall-open .d-fig")`)) === true);
   check("record: works that look like this", (await ev(`document.querySelectorAll(".wall-open .la-t img").length`)) >= 3);
   check("wall: no detail shard fetched for the pictures", (await ev(`performance.getEntriesByType("resource").filter(e => /data\\/detail\\//.test(e.name)).length`)) <= 1);
+  // a link to a picture beyond the first seventy-two tiles opens its record all the same
+  await open("#artist=kristjan-raud&open=EKMJ26004G16138", 5000);
+  check("deep link: a record beyond the wall's first page opens", /Kevade laul/.test(await ev(`(document.querySelector(".wall-open .r-title")||{}).textContent||""`)));
   await open("#q=Veneetsia&view=list", 4000);
   check("search: rows", (await ev(`document.querySelectorAll(".row").length`)) > 20);
   // the groups are laid out on demand (content-visibility); a row opened deep in the

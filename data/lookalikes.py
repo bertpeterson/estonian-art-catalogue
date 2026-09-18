@@ -2,12 +2,14 @@
 """Works that look like this: the six nearest museum pictures to each museum picture,
 by a CLIP image embedding -> lookalikes.json  {work key: [work keys]}
 
-Each public-domain museum picture (MuIS pisipilt, EKM t2_ preview) is read once
-into memory, turned into a 512-number embedding by CLIP ViT-B/32 running on this
-machine, and discarded -- as the shape reads did, the picture itself is never kept.
-The embeddings are cached in embcache/ (not committed) so a later run only reads
-pictures it has not seen. Gallery stock is left out: it changes monthly and the
-neighbours would go stale.
+Every picture in the catalogue (MuIS pisipilt, EKM t2_ preview, a gallery's or the
+Mägi Foundation's photograph) is read once into memory, turned into a 512-number
+embedding by CLIP ViT-B/32 running on this machine, and discarded -- as the shape
+reads did, the picture itself is never kept. The embeddings are cached in embcache/
+(not committed) so a later run only reads pictures it has not seen. Every pictured
+work gets a row; the works offered in it are museum pictures and the Foundation's
+known works only -- gallery stock changes monthly and a row pointing at it would go
+stale.
 
 Neighbours are by cosine similarity, never the work's own artist (the artist's own
 wall is a click away), at most two by any one artist, and one per title of theirs
@@ -18,7 +20,7 @@ Run deliberately, with the venv:  .venv-clip/bin/python lookalikes.py   (from da
 """
 import json, os, re, io, sys, time, threading, queue
 from concurrent.futures import ThreadPoolExecutor
-import urllib.request
+import urllib.request, urllib.parse
 import numpy as np
 
 UA = "EstonianArtCatalogue/1.0 (research compile; contact via claude.ai)"
@@ -32,15 +34,18 @@ key = lambda w: w.get("k") or re.sub(r"[^A-Z0-9:]", "", (w.get("nu") or "").uppe
 def url_of(im):
     if im.startswith("m:"): return f"https://www.muis.ee/digitaalhoidla/api/meedia/pisipilt?id={im[2:]}"
     if im.startswith("e:"): return "https://digikogu.ekm.ee/static/preview/image/" + re.sub(r"/([^/]+)$", r"/t2_\1", im[2:])
-    return None
+    # g: a gallery's own file; the Foundation's names carry ä and × and – unencoded
+    return urllib.parse.quote(im[2:], safe=":/?=&%+~@")
 
 # one embedding per distinct picture; several works can share one (folded impressions)
 pics = {}
 for w in W:
     im = w.get("im")
-    if im and im[:2] in ("m:", "e:") and key(w): pics.setdefault(im, []).append(w)
+    if im and key(w): pics.setdefault(im, []).append(w)
 ims = sorted(pics)
-print(f"{len(ims):,} museum pictures for {sum(len(v) for v in pics.values()):,} works", flush=True)
+target = lambda w: w.get("im", "")[:2] in ("m:", "e:") or w.get("kind") == "known"
+print(f"{len(ims):,} pictures for {sum(len(v) for v in pics.values()):,} works; "
+      f"{sum(1 for im in ims if target(pics[im][0])):,} of them offered as neighbours", flush=True)
 
 # ---- the cache: embeddings by picture id ----------------------------------------
 emb_path, ids_path = os.path.join(CACHE, "emb.npy"), os.path.join(CACHE, "ids.json")
@@ -90,6 +95,7 @@ if todo:
 
     # MuIS is an API and gets fewer threads than EKM's static previews
     muis = [im for im in todo if im.startswith("m:")]; ekm = [im for im in todo if im.startswith("e:")]
+    gal = [im for im in todo if im.startswith("g:")]       # the galleries' files, four at a time as the shape reads
     def run(items, workers):
         global n, failed
         with ThreadPoolExecutor(workers) as ex:
@@ -102,7 +108,7 @@ if todo:
                 if n % 500 == 0:
                     flush(); save()
                     print(f"  {n:,}/{len(todo):,}  {n/(time.time()-t0):.1f}/s  failed {failed}", flush=True)
-    run(ekm, 4); run(muis, 8)
+    run(ekm, 4); run(muis, 8); run(gal, 4)
     flush(); save()
     print(f"embedded {len(ids):,} pictures, {failed} unreadable", flush=True)
     have = {i: n for n, i in enumerate(ids)}
@@ -112,13 +118,14 @@ rows = [im for im in ims if im in have]
 X = E[[have[im] for im in rows]].astype(np.float32)
 X /= np.linalg.norm(X, axis=1, keepdims=True) + 1e-9
 art_of = [pics[im][0]["a"] for im in rows]            # a folded picture's works share an artist
+offer = np.array([target(pics[im][0]) for im in rows])  # museum pictures and known works only
 tnorm = lambda w: re.sub(r"[^a-zõäöüšž0-9]+", " ", (w.get("t") or "").lower()).strip()
 out, sims = {}, []
 CH = 1024
 for s in range(0, len(rows), CH):
     S = X[s:s + CH] @ X.T                              # cosine, rows are unit length
     for r in range(S.shape[0]):
-        i = s + r; row = S[r]; row[i] = -1
+        i = s + r; row = S[r]; row[i] = -1; row[~offer] = -1
         cand = np.argpartition(-row, 60)[:60]
         cand = cand[np.argsort(-row[cand])]
         picked, per_artist, titles = [], {}, set()
