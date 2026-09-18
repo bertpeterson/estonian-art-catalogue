@@ -12,7 +12,7 @@ BASE is the only thing that changes when the site moves to its own domain; GitHu
 Pages 301-redirects the github.io address to a custom domain, so indexing done now
 carries over.
 """
-import json, os, re, html, unicodedata, datetime
+import json, os, re, html, unicodedata, datetime, collections
 GC = '<script data-goatcounter="https://museaal.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>'   # GoatCounter: a page-view count, no cookies
 
 BASE = "https://museaal.ee"
@@ -241,6 +241,22 @@ def neighbours(i, lang="en"):
 
 pages, index_rows = 0, []
 os.makedirs("site/k", exist_ok=True)
+# the hubs this artist belongs to -- their decades, media and museums -- as a line of links:
+# the reader's way sideways, and the crawler's; the sets and addresses are build_hubs.py's own
+import build_hubs as H
+def hub_line(ws, lang):
+    T = H.L[lang]
+    decs = collections.Counter(("before" if H.dec_of(w) < 1800 else H.dec_of(w)) for w in ws if H.dec_of(w) is not None)
+    meds = collections.Counter(val(w, "e") for w in ws if val(w, "e"))
+    muss = collections.Counter(val(w, "mu") for w in ws if (w.get("kind") or "held") == "held")
+    parts = []
+    d_ = [f'<a href="{H.dec_href(k, lang)}">{H.dec_label(k, lang)}</a>' for k, _ in sorted(decs.items(), key=lambda kv: (kv[0] == "before" and -1 or kv[0])) if k in H.DECS]
+    m_ = [f'<a href="{H.med_href(k, lang)}">{e(H.med_name(k, lang))}</a>' for k, _ in meds.most_common() if k in H.MEDS]
+    u_ = [f'<a href="{H.mus_href(k, lang)}">{e(H.mus_name(k, lang))}</a>' for k, _ in muss.most_common() if k in H.MUSS]
+    if d_: parts.append((T["by_dec"] if lang == "en" else T["by_dec"]) + ": " + " · ".join(d_))
+    if m_: parts.append(T["by_med"] + ": " + " · ".join(m_))
+    if u_: parts.append(T["by_mus"] + ": " + " · ".join(u_))
+    return f'<p class="rel">{"<br>".join(parts)}</p>' if parts else ""
 CHARTS = {k: v for k, v in (json.load(open("data/chart_sides.json", encoding="utf-8")) if os.path.exists("data/chart_sides.json") else {}).items() if v}
 POS = {"l": "100% 50%", "r": "0% 50%", "t": "50% 100%", "b": "50% 0%"}
 crop = lambda im: f' style="object-position:{POS[CHARTS[im][0]]}"' if im in CHARTS else ""
@@ -346,6 +362,7 @@ def render(i, a, ws, lang):
            + f"<p><a class=\"cta\" href=\"{app}\">{e(T['browse'].format(n=n))}</a></p>"
            + wall
            + related(i, lang)
+           + hub_line(ws, lang)
            + (f"<p class=\"m\">{T['first600'].format(n=f'{n:,}', u=app)}</p>" if n > 600 else "")
            + f"<table><thead><tr><th>{T['year']}</th><th>{T['title']}</th><th>{T['tech']}</th><th>{T['dims']}</th>"
            f"<th>{T['held']}</th></tr></thead><tbody>{rows}</tbody></table>"

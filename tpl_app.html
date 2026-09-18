@@ -742,7 +742,7 @@
           ${ar.qid?`<a class="permalink" href="https://www.wikidata.org/wiki/${esc(ar.qid)}" target="_blank" rel="noopener">${esc(T("d_wd"))}</a>`:""}
           <!-- the static page: a stable address to cite or print, which the app's
                fragment URLs are not, and the only route from app to crawlable page -->
-          <a class="permalink" href="a/${esc(slug(ar.n))}.html">${esc(T("artistpage"))}</a>
+          <a class="permalink" href="${LANG === "et" ? "k" : "a"}/${esc(slug(ar.n))}.html">${esc(T("artistpage"))}</a>
         </div>
       </div>
       <div class="mono-side">
@@ -1026,6 +1026,10 @@
     if (state.groups.size) scope.push([...state.groups].map(grpLabel).join(" + "));
     $("countline").textContent = T("ofworks",{a:fmt(set.length),b:fmt(W.length)}) +
       (scope.length ? " · " + scope.join(" · ") : " · " + T("complete"));
+    // one decade, one medium or one museum chosen: the hub page for it, a stable address
+    // beside the app's own view (the hubs are static pages, build_hubs.py)
+    const hub = hubFor();
+    if (hub) $("countline").insertAdjacentHTML("beforeend", ` · <a class="hub-link" href="${esc(hub)}">${esc(T("hubpage"))}</a>`);
 
     if (!set.length){ reg.innerHTML = `<p class="empty">${esc(T("noresults"))}</p>`; $("viewctl").hidden = true; return; }
     if (state.group === "auction"){ reg.innerHTML = renderAuctions(set); $("viewctl").hidden = true; return; }
@@ -1286,6 +1290,20 @@
   // to the far side so the chart is what falls off
   const POS = {l: "100% 50%", r: "0% 50%", t: "50% 100%", b: "50% 0%"};
   const cropPos = w => w.rs ? `;object-position:${POS[w.rs]}` : "";
+  // the static hub page for the one decade, medium or museum in the selection, if there is
+  // exactly one of them and nothing else narrows the view; the addresses follow build_hubs.py
+  const HUB_DIR = {en: {dec: "decades", med: "media", mus: "museums"}, et: {dec: "kumnendid", med: "liigid", mus: "muuseumid"}};
+  function hubFor(){
+    if (state.q || state.artist !== null || listKeys() || state.sale) return null;
+    const one = set_ => set_.size === 1 ? [...set_][0] : null;
+    const facets = [state.decade !== null && state.decade !== "und", state.media.size > 0, state.museums.size > 0, state.cats.size > 0, state.srcs.size > 0, state.origins.size > 0, state.groups.size > 0, state.from !== null || state.to !== null].filter(Boolean).length;
+    if (facets !== 1) return null;
+    const D = HUB_DIR[LANG] || HUB_DIR.en;
+    if (state.decade !== null && state.decade !== "und" && state.year === null) return `${D.dec}/${state.decade < 1800 ? "before" : state.decade}.html`;
+    const m = one(state.media); if (m) return `${D.med}/${slug(medName(m))}.html`;
+    const mu = one(state.museums); if (mu) return `${D.mus}/${slug(LANG === "en" ? musName(mu) : mu)}.html`;
+    return null;
+  }
   const wallPic = w => w.p === 1 || (w.p === undefined && typeof w.im === "string" && w.im.length > 2);
   // The pictures' addresses live in data/pics.json, one file for every pictured work,
   // fetched the first time a wall or a look-alike row wants one. The wall used to
