@@ -20,20 +20,16 @@
       if (!w.k) w.k = (w.nu || "").toUpperCase().replace(/[^A-Z0-9:]/g, "") || null;
   })();
   let LANG = "en";
-  // the host may stamp data-theme itself; remember it so "auto" can hand control back
-  const HOST_THEME = document.documentElement.getAttribute("data-theme");
-  let THEME = "auto";
+  // dark is the page's own colour; light is a choice, remembered. The head stamps a
+  // remembered light on <html> before the first paint, so the page never flashes dark.
+  let THEME = "dark";
   function applyTheme(){
-    const root = document.documentElement;
-    if (THEME === "auto"){
-      if (HOST_THEME) root.setAttribute("data-theme", HOST_THEME);
-      else root.removeAttribute("data-theme");
-    } else root.setAttribute("data-theme", THEME);
-    for (const t of ["auto","light","dark"])
+    document.documentElement.setAttribute("data-theme", THEME);
+    for (const t of ["light","dark"])
       $("th-"+t).setAttribute("aria-pressed", THEME === t);
   }
   function setTheme(t, push){
-    THEME = ["light","dark"].includes(t) ? t : "auto";
+    THEME = t === "light" ? "light" : "dark";
     try { localStorage.setItem("ekr:theme", THEME); } catch(e){}
     applyTheme();
     if (push !== false) pushHash(true);
@@ -263,7 +259,7 @@
   function stateToHash(){
     const p = new URLSearchParams();
     if (LANG !== "en") p.set("lang", LANG);
-    if (THEME !== "auto") p.set("theme", THEME);
+    // the theme is the reader's own, remembered in the browser; a link does not carry it
     if (state.group !== "decade") p.set("group", state.group);
     // each group has its own defaults, left out of the link: decade earliest by year,
     // artist A-Z, auctions highest hammer price first
@@ -307,7 +303,7 @@
     const p = new URLSearchParams(location.hash.replace(/^#/, ""));
     LANG = p.get("lang") === "en" ? "en" : (p.get("lang") === "et" ? "et" : LANG);
     const th = p.get("theme");
-    if (th === "light" || th === "dark" || th === "auto") THEME = th;
+    if (th === "light" || th === "dark") THEME = th;
     state.group    = ["artist", "auction"].includes(p.get("group")) ? p.get("group") : "decade";
     const ord      = p.get("order");
     state.decOrder = ord === "latest" ? "latest" : "earliest";
@@ -1948,7 +1944,6 @@
     if (push !== false) pushHash(true);
   }
   $("lang-et").addEventListener("click", () => setLang("et"));
-  $("th-auto").addEventListener("click", () => setTheme("auto"));
   $("th-light").addEventListener("click", () => setTheme("light"));
   $("th-dark").addEventListener("click", () => setTheme("dark"));
   $("lang-en").addEventListener("click", () => setLang("en"));

@@ -372,6 +372,11 @@ on idle after the landing has painted, or the moment an artist's page asks for o
 among the last one's results; the decades below the fold are laid out only when scrolled to
 (`content-visibility`). An open record stays where it is on the screen when the register is redrawn.
 
+**Dark by default.** The page's own colour is dark; *Light* is a choice the browser remembers
+(`localStorage`), stamped on `<html>` before the first paint so a light reader never sees a flash of
+dark. There is no *auto*: the catalogue does not follow the operating system. The static artist and
+stats pages follow the same rule. A link does not carry the theme.
+
 **Return visits.** The data files are named by their content (`index.json?v=<hash>`), so a copy can never be
 stale, and `sw.js` — a service worker — keeps them in the browser's Cache Storage: the second visit reads the
 index from disk and downloads nothing until the data changes, when the new file is a new address and the old

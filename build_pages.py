@@ -37,8 +37,8 @@ for w in W: by_artist.setdefault(w["a"], []).append(w)
 
 CSS = ("body{margin:0;padding:28px;font:15px/1.55 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;"
        "background:#fff;color:#111;max-width:940px}"
-       "@media(prefers-color-scheme:dark){body{background:#0b0c0e;color:#f1f2f4}a{color:#9ec5ff}"
-       "th,td{border-color:#2b2e34!important}.m{color:#8b9098!important}}"
+       ":root:not([data-theme=light]) body{background:#0b0c0e;color:#f1f2f4}:root:not([data-theme=light]) a{color:#9ec5ff}:root:not([data-theme=light]) "
+       "th,:root:not([data-theme=light]) td{border-color:#2b2e34!important}:root:not([data-theme=light]) .m{color:#8b9098!important}"
        "h1{font-size:1.7rem;margin:0 0 4px;font-weight:600}"
        ".m{color:#666;font-size:.85rem;margin:0 0 14px}"
        "table{border-collapse:collapse;width:100%;font-size:.88rem;margin-top:14px}"
@@ -47,11 +47,11 @@ CSS = ("body{margin:0;padding:28px;font:15px/1.55 -apple-system,BlinkMacSystemFo
        "p.bio{max-width:66ch}a.cta{display:inline-block;margin:12px 0}nav{font-size:.85rem;margin-bottom:18px}"
        ".rel{font-size:.85rem;color:#666;margin:6px 0;max-width:80ch;line-height:1.7}"
        ".rel.nb{margin-top:22px;padding-top:12px;border-top:1px solid #e3e5e9}"
-       "@media(prefers-color-scheme:dark){.rel{color:#8b9098}.rel.nb{border-color:#2b2e34}}"
+       ":root:not([data-theme=light]) .rel{color:#8b9098}:root:not([data-theme=light]) .rel.nb{border-color:#2b2e34}"
        ".wall{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin:14px 0 6px}"
        ".wt{display:block;background:#f1f2f4;text-decoration:none;color:inherit}.wt img{display:block;width:100%;aspect-ratio:1/1;object-fit:cover}.wt{overflow:hidden}"
        ".wt span{display:block;font-size:.72rem;line-height:1.3;padding:5px 6px 6px;color:#666}.wt span i{font-style:italic;color:#111}"
-       "@media(prefers-color-scheme:dark){.wt{background:#15171a}.wt span{color:#8b9098}.wt span i{color:#f1f2f4}}"
+       ":root:not([data-theme=light]) .wt{background:#15171a}:root:not([data-theme=light]) .wt span{color:#8b9098}:root:not([data-theme=light]) .wt span i{color:#f1f2f4}"
        # The app offers this as "printable page for this artist", so make that true:
        # drop the navigation and the call to action, force black on white regardless of
        # the reader's theme, and keep table rows from splitting across pages.
@@ -249,7 +249,7 @@ for i, a in enumerate(A):
                    + " — as the auction houses published them; not a valuation")
     else: au_line = ""
 
-    doc = (f"<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\">"
+    doc = (f"<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\"><script>try{{if(localStorage.getItem(\"ekr:theme\")===\"light\")document.documentElement.setAttribute(\"data-theme\",\"light\")}}catch(e){{}}</script>"
            f"<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">"
            f"<title>{e(a['n'])}{' (' + dates + ')' if dates else ''} — Estonian Art Catalogue</title>"
            f"<meta name=\"description\" content=\"{e(desc)}\">"
@@ -300,7 +300,7 @@ open("site/robots.txt", "w", encoding="utf-8").write(
 lst = "".join(f'<li><a href="{BASE}/a/{sl}.html">{html.escape(n)}</a> <span class="m">{c}</span></li>'
               for sl, n, c in sorted(index_rows, key=lambda r: r[1]))
 open("site/a/index.html", "w", encoding="utf-8").write(
-    f'<!doctype html><html lang="en"><head><meta charset="utf-8">'
+    f'<!doctype html><html lang="en"><head><meta charset="utf-8"><script>try{{if(localStorage.getItem(\"ekr:theme\")===\"light\")document.documentElement.setAttribute(\"data-theme\",\"light\")}}catch(e){{}}</script>'
     f'<meta name="viewport" content="width=device-width,initial-scale=1">'
     f'<title>Artists A–Z — Estonian Art Catalogue</title>'
     f'<meta name="description" content="Every artist in the Estonian Art Catalogue: {len(index_rows):,} '
@@ -323,7 +323,7 @@ if os.path.exists(_retired):
         osl, nsl = slug(old), live[new]
         if osl == nsl or os.path.exists(f"{OUT}/{osl}.html"): continue
         open(f"{OUT}/{osl}.html", "w", encoding="utf-8").write(
-            f"<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\">"
+            f"<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\"><script>try{{if(localStorage.getItem(\"ekr:theme\")===\"light\")document.documentElement.setAttribute(\"data-theme\",\"light\")}}catch(e){{}}</script>"
             f"<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">"
             f"<title>{e(old)} — see {e(new)} — Estonian Art Catalogue</title>"
             f"<link rel=\"canonical\" href=\"{BASE}/a/{nsl}.html\">"
@@ -338,7 +338,7 @@ if os.path.exists(_retired):
 # GitHub Pages serves 404.html for any missing path. A stale link usually names
 # an artist, so the page offers a search prefilled from the path, and the A-Z.
 open("site/404.html", "w", encoding="utf-8").write(
-    f"<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\">"
+    f"<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\"><script>try{{if(localStorage.getItem(\"ekr:theme\")===\"light\")document.documentElement.setAttribute(\"data-theme\",\"light\")}}catch(e){{}}</script>"
     f"<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">"
     f"<title>Not found — Estonian Art Catalogue</title><meta name=\"robots\" content=\"noindex\">"
     f"<style>{CSS}form{{display:flex;gap:8px;max-width:520px;margin:18px 0}}"
