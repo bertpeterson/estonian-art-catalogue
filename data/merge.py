@@ -844,8 +844,11 @@ _MULTI = {"Print", "Bookplate", "Illustration", "Poster", "Sculpture", "Relief"}
 _generic = re.compile(r"^(maastik|portree|natüürmort|akt|kompositsioon|vaade|motiiv|lilled|talv|kevad|sügis|suvi|naine|mees|joonistus|graafika|visand|etüüd|eskiis)\W*$", re.I)
 _T2 = re.compile(r"(?<![\d])(?:u\.?|ca\.?|umbes)\s*(1[5-9]\d\d|20[0-2]\d)(?![\d])|(?<![\d])(1[5-9]\d0)ndad", re.I)
 _dated_by = collections.defaultdict(set); _years_of = collections.defaultdict(list)
+def _in_life(w):     # a year outside the artist's life is a slip, not evidence
+    a = artists[w["a"]]; b = int(a["l"][0]) if a["l"][0] else None; dd = int(a["l"][1]) if a["l"][1] else None
+    return (b is None or w["y"] >= b) and (dd is None or w["y"] <= dd + 1)
 for w in works:
-    if w.get("y") is not None and (w.get("kind") or "held") in ("held", "shown"):
+    if w.get("y") is not None and (w.get("kind") or "held") in ("held", "shown") and _in_life(w):
         _dated_by[(w["a"], "".join(fold(w["t"])).rstrip("."))].add(w["y"]); _years_of[w["a"]].append(w["y"])
 _inf = collections.Counter()
 for w in works:
@@ -1097,7 +1100,14 @@ for w in works:
     b, d = _yr(artists[w["a"]]["l"][0]), _yr(artists[w["a"]]["l"][1])
     if b and w["y"] < b:        w["f"] = "pre";  FLAGGED["pre"] += 1
     elif d and w["y"] > d + 1:  w["f"] = "post"; FLAGGED["post"] += 1
-print("  flagged: dated before birth", FLAGGED["pre"], "/ after death", FLAGGED["post"])
+    # A print, a cast, a copy or a photograph can honestly be dated after its author's
+    # death; a drawing, a watercolour or a painting cannot. Those 87 keep the record's
+    # date as their label -- it is what the museum says -- but leave the timeline:
+    # Kristjan Raud (d. 1943) stood in 1993 and 1994 on his own page for a "Portaal"
+    # and a "Põgeneja" that MuIS dates so. The note on the record says why.
+    if w.get("f") and w.get("e") in ("Watercolour", "Painting", "Drawing") and (w.get("kind") or "held") == "held":
+        w["yl"] = w.get("yl") or str(w["y"]); w["y"] = None; FLAGGED["u"] = FLAGGED.get("u", 0) + 1
+print("  flagged: dated before birth", FLAGGED["pre"], "/ after death", FLAGGED["post"], "/ unique works left the timeline", FLAGGED.get("u", 0))
 
 # ---------- images, for works in the public domain ----------
 # A museum record gets a reference to the holder's own image of it -- MuIS's media

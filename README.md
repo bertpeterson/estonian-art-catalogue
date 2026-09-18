@@ -117,6 +117,12 @@ lists on its own site and again on NOBA keeps the gallery's listing. NOBA links 
 (`/kunst/`, `/artwork/`) where one exists — 5,717 of 8,885 — and otherwise to the product page, which
 for the rest is the only page there is.
 
+**Impossible dates.** A print, a cast or a copy can honestly be dated after its author's death; a drawing,
+a watercolour or a painting cannot. The 85 unique works whose record does so keep the museum's date as
+their label, marked `1993?` with a note, and sit among the undated rather than on the timeline — Kristjan
+Raud (d. 1943) stood in 1993 and 1994 on his own page for two drawings MuIS dates so. The date inference
+below does not learn from such years.
+
 **Inferred dates.** Where a museum's dating field says nothing at all, three inferences are allowed, each
 tagged in `dsrc` and marked ≈ on the page: a year or decade written inside the title (`title`); the year
 another impression of the same print, bookplate, poster or cast carries, when the artist has that title dated
@@ -196,13 +202,14 @@ and, where the record knows it, the same movement, school or museum category, ea
 with period and medium first; only artists with five or more works are offered as neighbours. It is a
 "more like this" for a reader who liked what they saw, not a statement of influence.
 
-**Works that look like this.** Under every museum picture, the six museum pictures nearest to it by a
-visual embedding (`data/lookalikes.py`: CLIP ViT-B/32, run on this machine — each picture read once into
-memory, embedded and discarded, as the shape reads were; nothing is stored but the numbers). Other artists
-only, at most two by any one, one per title of theirs, and nothing below a similarity of 0.6. Gallery stock
-is left out, since it changes monthly. It is *similar artists* at the level of the single picture: a
-Mägi Saaremaa beside a Laikmaa pastel and a Pallas landscape. Computed deliberately, not monthly;
-`data/lookalikes.json` is committed, the embeddings are not.
+**Works that look like this.** Under every picture, the six pictures nearest to it by a visual
+embedding (`data/lookalikes.py`: CLIP ViT-B/32, run on this machine — each picture read once into memory,
+embedded and discarded, as the shape reads were; nothing is stored but the numbers). Every pictured work
+gets a row; the works offered in it are museum pictures and the Foundation's known works — gallery stock
+changes monthly and a row pointing into it would go stale. Other artists only, at most two by any one, one
+per title of theirs, and nothing below a similarity of 0.6. It is *similar artists* at the level of the
+single picture: a Mägi Otepää beside Laikmaa's Capri and a Burman spring. Computed deliberately, not
+monthly; `data/lookalikes.json` is committed, the embeddings are not.
 
 **Editorial.** The sixteen names on the landing page are chosen, not counted, and tagged *ed*. Decade
 notes and the English medium vocabulary are editorial. Everything else on a record is the holder's.

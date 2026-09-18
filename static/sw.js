@@ -36,7 +36,11 @@ self.addEventListener("fetch", e => {
   if (versioned(u) && e.request.cache !== "reload"){
     e.respondWith(caches.open(CACHE).then(c => store(c, e.request.url)));
   } else if (e.request.mode === "navigate"){
-    e.respondWith(fetch(e.request).then(r => {
+    // The page itself is asked for afresh every time -- GitHub Pages lets a browser
+    // keep it for ten minutes, which after a deploy showed the old page, naming the
+    // old data, until a hard reload. Revalidating costs one round trip (304 when
+    // nothing changed); the data files are versioned and stay cached.
+    e.respondWith(fetch(u.pathname + u.search, {cache: "no-cache", credentials: "same-origin"}).then(r => {
       if (r.ok) caches.open(CACHE).then(c => c.put(u.pathname, r.clone()));
       return r;
     }).catch(() => caches.match(u.pathname).then(h => h || Response.error())));
