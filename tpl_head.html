@@ -566,12 +566,12 @@ footer a{border-bottom:1px solid var(--rule)}
 .doors h2{font-family:var(--mono);font-size:var(--fs-sm);letter-spacing:var(--ls-label);
   text-transform:uppercase;color:var(--grey-6);font-weight:400;margin:0 0 var(--sp-2)}
 .doors ul{list-style:none;margin:0;padding:0}
-.doors button{display:flex;width:100%;align-items:baseline;justify-content:space-between;
+.doors button,.doors a[data-door]{display:flex;text-decoration:none;color:inherit;box-sizing:border-box;width:100%;align-items:baseline;justify-content:space-between;
   gap:var(--sp-2);background:none;border:0;border-bottom:1px solid var(--rule-soft);
   padding:5px 0;min-height:24px;cursor:pointer;text-align:left;color:var(--ink);
   font-family:var(--serif-text);font-size:var(--fs-md)}
-.doors button:hover{background:var(--raise)}
-.doors button:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.doors button:hover,.doors a[data-door]:hover{background:var(--raise)}
+.doors button:focus-visible,.doors a[data-door]:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
 .doors .n{font-family:var(--mono);font-size:var(--fs-sm);color:var(--grey-4);
   font-variant-numeric:tabular-nums;flex:none}
 @media(max-width:760px){.doors{grid-template-columns:1fr;gap:var(--sp-3)}}
@@ -727,7 +727,8 @@ footer a{border-bottom:1px solid var(--rule)}
   <footer>
     <!-- static, not i18n: a crawler never runs the app, and this is the route into
          the per-artist pages that make the catalogue findable at all -->
-    <p><a href="a/">Artists A–Z / Kunstnikud A–Ü</a> — every artist as a plain page.</p>
+    <p><a href="a/">Artists A–Z</a> · <a href="k/" hreflang="et">Kunstnikud A–Ü</a> — every artist as a plain page, in English and in Estonian ·
+       <a href="stats.html">The catalogue in figures</a> · <a href="stats-et.html" hreflang="et">Kataloog arvudes</a></p>
     <p data-i18n-html="foot1"></p>
     <p data-i18n-html="foot2"></p>
     <p data-i18n-html="foot3"></p>
