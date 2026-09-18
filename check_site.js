@@ -76,7 +76,8 @@ const check = (name, ok, detail) => { console.log(`${ok ? "ok  " : "FAIL"} ${nam
   check("decade: wall", (await ev(`document.querySelectorAll(".wt").length`)) >= 12);
   check("no JavaScript errors", errors.length === 0, errors.slice(0, 3).join(" | "));
   for (const [f, needle] of [["stats.html", "The auction record"], ["stats-et.html", "Kataloog arvudes"], ["a/konrad-magi.html", 'class="wt"'], ["a/index.html", "Artists A"],
-                             ["k/konrad-magi.html", 'hreflang="en" href="https://museaal.ee/a/konrad-magi.html"'], ["k/index.html", "Kunstnikud A"], ["sitemap.xml", "k/konrad-magi.html"]]){
+                             ["k/konrad-magi.html", 'hreflang="en" href="https://museaal.ee/a/konrad-magi.html"'], ["k/index.html", "Kunstnikud A"], ["sitemap.xml", "k/konrad-magi.html"],
+                             ["decades/1920.html", 'class="wt"'], ["kumnendid/1920.html", "Eesti kunst 1920ndatel"], ["museums/index.html", "tartu-art-museum.html"], ["ained/maastik.html", "Maastik"], ["sitemap.xml", "subjects/landscape.html"]]){
     const p = path.join(DIR, f); check(`file: ${f}`, fs.existsSync(p) && fs.readFileSync(p, "utf-8").includes(needle));
   }
   check("artist pages: more than a thousand", fs.readdirSync(path.join(DIR, "a")).length > 1000);
