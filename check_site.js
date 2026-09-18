@@ -38,6 +38,8 @@ const check = (name, ok, detail) => { console.log(`${ok ? "ok  " : "FAIL"} ${nam
   await open("", 9000);
   await send("Network.emulateNetworkConditions", {offline: false, latency: 0, downloadThroughput: -1, uploadThroughput: -1});
   check("landing: sixteen names", (await ev(`document.querySelectorAll("[data-door=a]").length`)) === 16);
+  check("landing: the names are links a crawler can follow", (await ev(`document.querySelectorAll('a[data-door=a][href^="a/"]').length`)) === 16
+        && (fs.readFileSync(path.join(DIR, "index.html"), "utf-8").match(/href="a\/[a-z0-9-]+\.html" data-door="a"/g) || []).length === 16);
   check("landing: seventy-two tiles", (await ev(`document.querySelectorAll(".wt").length`)) === 72);
   check("landing: masthead figures", (await ev(`+document.querySelector("#stat-w").textContent.replace(/[^0-9]/g,"")`)) > 90000);
   // the worker stores the content-named data files on the first visit; a reload is then answered from the cache
@@ -73,7 +75,8 @@ const check = (name, ok, detail) => { console.log(`${ok ? "ok  " : "FAIL"} ${nam
   await open("#decade=1920", 5000);
   check("decade: wall", (await ev(`document.querySelectorAll(".wt").length`)) >= 12);
   check("no JavaScript errors", errors.length === 0, errors.slice(0, 3).join(" | "));
-  for (const [f, needle] of [["stats.html", "The auction record"], ["stats-et.html", "Kataloog arvudes"], ["a/konrad-magi.html", 'class="wt"'], ["a/index.html", "Artists A"], ["sitemap.xml", "<urlset"]]){
+  for (const [f, needle] of [["stats.html", "The auction record"], ["stats-et.html", "Kataloog arvudes"], ["a/konrad-magi.html", 'class="wt"'], ["a/index.html", "Artists A"],
+                             ["k/konrad-magi.html", 'hreflang="en" href="https://museaal.ee/a/konrad-magi.html"'], ["k/index.html", "Kunstnikud A"], ["sitemap.xml", "k/konrad-magi.html"]]){
     const p = path.join(DIR, f); check(`file: ${f}`, fs.existsSync(p) && fs.readFileSync(p, "utf-8").includes(needle));
   }
   check("artist pages: more than a thousand", fs.readdirSync(path.join(DIR, "a")).length > 1000);

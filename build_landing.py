@@ -29,9 +29,15 @@ counts = {}
 for w in W: counts[w["a"]] = counts.get(w["a"], 0) + 1
 
 # the doors
+import unicodedata
+def slug(n):    # the same slug build_pages.py gives the artist's page
+    n = unicodedata.normalize("NFKD", n or "").encode("ascii", "ignore").decode()
+    return re.sub(r"^-+|-+$", "", re.sub(r"[^a-z0-9]+", "-", n.lower())) or "artist"
 num = lambda n: f"{n:,}"
 door = ('<div class="d-names"><h2>' + e(I18N["EN"]["doors_name"]) + ' <span class="tag">ed</span></h2><ul>'
-        + "".join(f'<li><button data-door="a" data-v="{i}"><span>{e(A[i]["n"])}</span><span class="n">{num(counts.get(i, 0))}</span></button></li>' for i in canon) + "</ul></div>")
+        # a link each, to the artist's own page: what a crawler follows from the landing
+        # page, and what a reader gets before the app is here; the app intercepts the click
+        + "".join(f'<li><a href="a/{slug(A[i]["n"])}.html" data-door="a" data-v="{i}"><span>{e(A[i]["n"])}</span><span class="n">{num(counts.get(i, 0))}</span></a></li>' for i in canon) + "</ul></div>")
 
 # the wall: pictured works, masterpieces first (rank slipped by the seed), then the
 # door's names and the highlights, then the rest -- artists taking turns within a medium
@@ -63,7 +69,6 @@ def imsrc(im):
     if im.startswith("m:"): return f"https://www.muis.ee/digitaalhoidla/api/meedia/pisipilt?id={im[2:]}"
     if im.startswith("e:"): return "https://digikogu.ekm.ee/static/preview/image/" + re.sub(r"/([^/]+)$", r"/t2_\1", im[2:])
     return im[2:]
-slug = lambda n: re.sub(r"^-+|-+$", "", re.sub(r"[^a-z0-9]+", "-", n.lower().replace("õ", "o").replace("ä", "a").replace("ö", "o").replace("ü", "u").replace("š", "s").replace("ž", "z")))
 cols = [{"h": 0, "t": []} for _ in range(6)]
 for w in shown:
     lw = light.get(key(w), {}); r = (lw.get("r") or 100) / 100

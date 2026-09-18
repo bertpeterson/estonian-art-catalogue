@@ -1251,8 +1251,10 @@
     if (!pristine() || state.group !== "decade"){ el.hidden = true; el.innerHTML = ""; return; }
     const num = n => n.toLocaleString(LANG === "en" ? "en-GB" : "et-EE");
     const col = (head, items, cls, tag) => `<div class="${cls || ""}"><h2>${esc(T(head))}${tag ? ` <span class="tag">${esc(tag)}</span>` : ""}</h2><ul>` + items.map(
-      ([label, n, kind, v]) => `<li><button data-door="${kind}" data-v="${v}">` +
-        `<span>${esc(label)}</span><span class="n">${num(n)}</span></button></li>`).join("") + "</ul></div>";
+      // an artist's name is a link to their own page (the crawler's route; the click
+      // handler opens the artist in place instead), a period a button
+      ([label, n, kind, v]) => (kind === "a" ? `<li><a href="${LANG === "et" ? "k" : "a"}/${esc(slug(A[v].n))}.html" data-door="a" data-v="${v}">` : `<li><button data-door="${kind}" data-v="${v}">`) +
+        `<span>${esc(label)}</span><span class="n">${num(n)}</span>${kind === "a" ? "</a>" : "</button>"}</li>`).join("") + "</ul></div>";
     el.innerHTML = col("doors_name", TOP_ART.map(([i, n]) => [A[i].n, n, "a", i]), "d-names", "ed");
     el.hidden = false;
   }
@@ -1696,8 +1698,9 @@
     renderAll(); pushHash();
   });
   $("doors").addEventListener("click", e => {
-    const b = e.target.closest("button[data-door]");
+    const b = e.target.closest("[data-door]");
     if (!b) return;
+    if (b.tagName === "A") e.preventDefault();      // the baked door is links; once the app is here it opens in place
     const v = +b.dataset.v;
     if (b.dataset.door === "a") state.artist = v;
     else { state.from = DOOR_PERIODS[v][0]; state.to = DOOR_PERIODS[v][1]; }

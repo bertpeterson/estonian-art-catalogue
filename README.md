@@ -247,8 +247,12 @@ Every gallery row links out with *For sale ↗*; every lot with its hammer price
 carries the keys. Each decade bar shows its for-sale share hatched, because since NOBA the 2020s bar
 is 98% gallery stock and unsplit it read as the most-collected decade in Estonian history.
 
-`site/a/` holds a static page per artist for crawlers, each linking to related artists by school and
-period, and `site/404.html` prefills a search from any stale artist address.
+`site/a/` holds a static page per artist for crawlers in English and `site/k/` the same page in Estonian
+(*k* for kunstnik), each naming the other as its `hreflang` alternate — the people who look these artists up
+search in Estonian. Each links to related artists by school and period; the title and the snippet say what a
+searcher wants to know (how many works, where, what kinds, when); the sitemap lists both languages with
+alternates; the landing page's sixteen names are plain links to the pages, so a crawler has a way in. `site/404.html`
+prefills a search from any stale artist address.
 
 ## Two builds, and which one is current
 
