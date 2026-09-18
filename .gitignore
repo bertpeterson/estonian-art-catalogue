@@ -66,3 +66,6 @@ site/
 # pictures themselves, which are never stored; the neighbours file is committed
 data/embcache/
 .venv-clip/
+
+# Finder/iCloud conflict copies of data files rewritten mid-sync ("chart_sides 2.json")
+data/* [0-9].json
