@@ -77,6 +77,9 @@ const check = (name, ok, detail) => { console.log(`${ok ? "ok  " : "FAIL"} ${nam
     const p = path.join(DIR, f); check(`file: ${f}`, fs.existsSync(p) && fs.readFileSync(p, "utf-8").includes(needle));
   }
   check("artist pages: more than a thousand", fs.readdirSync(path.join(DIR, "a")).length > 1000);
+  // every page carries the policy; the browser run above would have logged a violation as an error
+  for (const f of ["index.html", "a/konrad-magi.html", "stats.html", "404.html"])
+    check(`csp: ${f}`, /http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https:\/\/gc\.zgo\.at 'sha256-/.test(fs.readFileSync(path.join(DIR, f), "utf-8")));
   ws.close(); chrome.kill(); server.kill();
   console.log(failures.length ? `\n${failures.length} check(s) failed` : "\nall checks passed");
   process.exit(failures.length ? 1 : 0);
