@@ -28,26 +28,8 @@ if os.path.isdir("static"):
         shutil.copy2(os.path.join("static", name), os.path.join(OUT, name))
         print(f"  static -> site/{name}")
 
-def shape_of(dm):
-    """height over width from a dimensions string: '41.0 x 26.0 cm', or the labelled
-    'lehe kõrgus: 28.0 cm; lehe laius: 34.9 cm' MuIS writes for sheets"""
-    dm = str(dm or "")
-    m = re.search(r"(\d+(?:[.,]\d+)?)\s*[x×]\s*(\d+(?:[.,]\d+)?)", dm)
-    if m: a, b = m.group(1), m.group(2)
-    else:
-        # MuIS labels each measure -- "lehe kõrgus", "graafikaplaadi laius", "kõrgus (raamiga)"
-        # -- and a print carries the sheet's and the plate's; pair like with like, the
-        # sheet first (it is what the photograph shows), never a plate height with a
-        # sheet width
-        pairs = {}
-        for q, kind, v in re.findall(r"(?:^|;)\s*([^;:]*?)(kõrgus|laius)\s*:\s*(\d+(?:[.,]\d+)?)", dm):
-            pairs.setdefault(q.strip(), {})[kind] = v
-        pick = next((pairs[q] for q in ("lehe ", "lehe", "", "graafikaplaadi ", "kujutise ") if q in pairs and len(pairs[q]) == 2), None)
-        if not pick: pick = next((v for v in pairs.values() if len(v) == 2), None)
-        if not pick: return None
-        a, b = pick["kõrgus"], pick["laius"]
-    b = float(b.replace(",", "."))
-    return float(a.replace(",", ".")) / b if b else None
+import sys; sys.path.insert(0, "data")
+from shape_of import shape_of
 
 def shard_of(w):
     return str(w["y"] // 10 * 10) if w.get("y") is not None else "und"
@@ -63,6 +45,9 @@ if os.path.exists("data/lookalikes.json"):
         if k in _kidx: LA[_kidx[k]] = [_kidx[x] for x in ks if x in _kidx]
 pics = {i: w["im"] for i, w in enumerate(W) if w.get("im")}
 json.dump(pics, open(f"{OUT}/data/pics.json", "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
+
+# the colour charts data/chart_side.py found in the museums' photographs: {picture: [side, fraction]}
+CHARTS = {k: v for k, v in (json.load(open("data/chart_sides.json", encoding="utf-8")) if os.path.exists("data/chart_sides.json") else {}).items() if v}
 
 index, detail = [], collections.defaultdict(dict)
 for i, w in enumerate(W):
@@ -80,18 +65,20 @@ for i, w in enumerate(W):
         # fetched; the address itself stays in the shard
         if heavy.get("im"):
             light["p"] = 1
-            # ...and the tile's shape, height over width from the record's dimensions,
-            # so the wall lays out right on the first paint, before the shard arrives
-            # the tile takes the photograph's shape -- unless the photograph is taller
-            # than the work it shows (a colour chart clipped above the painting, a ruler
-            # beneath): then the work's own proportions, and the tile crops from the
-            # bottom, so the chart falls off
+            # ...and the tile's shape, height over width, so the wall lays out right on
+            # the first paint: the photograph's own shape, or the record's dimensions
+            # when the photograph's is unknown. Where data/chart_side.py found a colour
+            # chart along one edge, the tile and the record show the photograph less
+            # that band -- rs says which side, rf how much of the width or height -- and
+            # the shape is the photograph's without it.
             rp, rw = w.get("ir"), shape_of(heavy.get("dm"))
-            # ...or wider (a chart or ruler at the side): the same, the tile looks at the middle
-            off = bool(rp and rw and 0.45 <= rw <= 2.2 and (rp > rw * 1.08 or rp < rw / 1.08))
-            r = rw if off else (rp or rw)
+            ch = CHARTS.get(heavy["im"])
+            r = rp or rw
+            if ch and rp:
+                side, f = ch
+                r = rp / (1 - f) if side in "lr" else rp * (1 - f)
+                light["rs"] = side; light["rf"] = round(f * 100)
             if r: light["r"] = round(min(2.2, max(0.45, r)) * 100)
-            if off: light["rc"] = 1
         detail[shard_of(w)][str(i)] = heavy
     index.append(light)
 
@@ -121,7 +108,8 @@ ix = os.path.getsize(f"{OUT}/data/index.json")
 ds = sum(os.path.getsize(f"{OUT}/data/detail/{f}") for f in os.listdir(f"{OUT}/data/detail"))
 print(f"index.json      {ix/1048576:.2f} MB")
 print(f"bios.json       {os.path.getsize(f'{OUT}/data/bios.json')/1048576:.2f} MB")
-print(f"pics.json       {os.path.getsize(f'{OUT}/data/pics.json')/1048576:.2f} MB, {len(pics):,} pictures; look-alikes for {len(LA):,} works")
+print(f"pics.json       {os.path.getsize(f'{OUT}/data/pics.json')/1048576:.2f} MB, {len(pics):,} pictures; look-alikes for {len(LA):,} works; "
+      f"{sum(1 for l in index if l.get('rs')):,} tiles cropped of a colour chart")
 print(f"detail shards   {ds/1048576:.2f} MB across {len(detail)} files")
 print(f"largest shard   {max(os.path.getsize(f'{OUT}/data/detail/{f}') for f in os.listdir(f'{OUT}/data/detail'))/1024:.0f} KB")
 print(f"records with detail: {sum(len(v) for v in detail.values()):,} of {len(W):,}")

@@ -225,7 +225,26 @@ for k in [k for k, u in unified.items() if u["src"] == {"ekm"} and u["artist"]]:
     for f in ("t", "date", "tech", "mat", "dims", "coll"):
         if not m[f]: m[f] = u[f]
     del unified[k]; _joined += 1
-print("  digikogu records joined to their MuIS twin by collection number:", _joined)
+# ...and once more by the accession number alone -- "EKM j 9683" -- where the two
+# catalogues disagree on the collection letter (MuIS "M 3836", digikogu "G 3836" for
+# Johani's Tartu kalasadam, whose digikogu file is named ekmj9683_m3836). A plain
+# accession number names one object; one with a sub-number (j 153:105) names a sheet
+# of many and is left alone.
+_acc = lambda num: (lambda m: m.group(1) if m else None)(re.match(r"^\s*EKM\s+j\s+(\d+)\s+[A-Za-z]{1,2}\s?\d+\s*$", num or "", re.I))
+_byacc = collections.defaultdict(list)
+for k, u in unified.items():
+    if u["src"] == {"muis"} and u["artist"] and _acc(u["num"]): _byacc[(" ".join(fold(u["artist"])), _acc(u["num"]))].append(k)
+_joined2 = 0
+for k in [k for k, u in unified.items() if u["src"] == {"ekm"} and u["artist"] and _acc(u["num"])]:
+    u = unified[k]
+    cands = _byacc.get((" ".join(fold(u["artist"])), _acc(u["num"])))
+    if not cands or len(cands) != 1 or "ekm" in unified[cands[0]]["src"]: continue
+    m = unified[cands[0]]
+    m["src"].add("ekm"); m["oid"] = u["oid"]; m["cat"] = u["cat"] or m["cat"]; m["_kogu"] = u.get("_kogu")
+    for f in ("t", "date", "tech", "mat", "dims", "coll"):
+        if not m[f]: m[f] = u[f]
+    del unified[k]; _joined2 += 1
+print("  digikogu records joined to their MuIS twin by collection number:", _joined, "/ by accession number:", _joined2)
 
 for k, u in unified.items():
     u["k"] = k

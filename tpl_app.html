@@ -826,7 +826,7 @@
     return `<div class="la"><div class="d-k" title="${esc(T("lookalike_how"))}">${esc(T("lookalike"))}</div><div class="la-row">${la.map(x => {
       const src = imgSrc(picOf(x)), r = x.r ? x.r / 100 : 1;
       return `<a class="la-t" href="#artist=${esc(slug(A[x.a].n))}&open=${esc(x.k)}" title="${esc(x.t)} · ${esc(A[x.a].n)}"><span class="la-fr">${src
-        ? `<img src="${esc(src)}" alt="${esc(x.t)}, ${esc(A[x.a].n)}" loading="lazy" style="aspect-ratio:1/${r.toFixed(3)}" referrerpolicy="no-referrer-when-downgrade" onerror="this.closest('.la-t').hidden=true">`
+        ? `<img src="${esc(src)}" alt="${esc(x.t)}, ${esc(A[x.a].n)}" loading="lazy" style="aspect-ratio:1/${r.toFixed(3)}${cropPos(x)}" referrerpolicy="no-referrer-when-downgrade" onerror="this.closest('.la-t').hidden=true">`
         : `<span class="wt-ph" style="aspect-ratio:1/${r.toFixed(3)}"></span>`}</span><span class="la-cap"><i>${esc(x.t)}</i><span>${esc(A[x.a].n)}${x.y ? " · " + x.y : ""}</span></span></a>`; }).join("")}</div></div>`;
   }
 
@@ -860,7 +860,10 @@
       const imCap = w.kind === "known" ? esc(T("d_image", {h: musName("Konrad Mägi Sihtasutus")})) + " · " + esc(T("d_pd", {a: ar.n, l: life || "—"}))
                   : im.startsWith("g:") ? esc(T("d_image", {h: musName(w.mu)})) + " · " + esc(T(w.kind === "shown" ? "d_imgshown" : "d_imgstock"))
                   : esc(T("d_image", {h: musName(w.mu)})) + (im.startsWith("m:") ? " · MuIS" : " · EKM") + " · " + esc(T("d_pd", {a: ar.n, l: life || "—"}));
-      const figure = imSrc ? `<figure class="d-fig"><a href="${esc(imHref)}" target="_blank" rel="noopener"><img src="${esc(imSrc)}" alt="${esc(w.t)}" loading="lazy" referrerpolicy="no-referrer-when-downgrade" onerror="this.closest('figure').hidden=true"></a>
+      // the record's picture, less its colour chart where there is one: the box takes the
+      // shape without it (r), no taller than 420px, and the link still opens the whole file
+      const crop = w.rs && w.r ? ` class="crop" style="aspect-ratio:1/${(w.r / 100).toFixed(3)};width:min(100%,${Math.round(420 / (w.r / 100))}px)${cropPos(w)}"` : "";
+      const figure = imSrc ? `<figure class="d-fig"><a href="${esc(imHref)}" target="_blank" rel="noopener"><img src="${esc(imSrc)}" alt="${esc(w.t)}" loading="lazy"${crop} referrerpolicy="no-referrer-when-downgrade" onerror="this.closest('figure').hidden=true"></a>
           <figcaption>${imCap}</figcaption>${laHTML(w)}</figure>` : "";
       detail = `<div class="detail${imSrc ? " has-fig" : ""}">${figure}
         <div>${w.n>1 && w.mem ? `<div class="members">
@@ -1270,6 +1273,11 @@
   // photograph, or MuIS's one public size -- 800px and up to 1.5 MB, which is why the
   // tiles load lazily and seventy-two at a time. Flag in the light index; address in
   // the shard.
+  // a photograph with a colour chart along one edge (rs: which side, rf: how much) is
+  // shown less that band: the box has the shape without it, and the picture is pushed
+  // to the far side so the chart is what falls off
+  const POS = {l: "100% 50%", r: "0% 50%", t: "50% 100%", b: "50% 0%"};
+  const cropPos = w => w.rs ? `;object-position:${POS[w.rs]}` : "";
   const wallPic = w => w.p === 1 || (w.p === undefined && typeof w.im === "string" && w.im.length > 2);
   // The pictures' addresses live in data/pics.json, one file for every pictured work,
   // fetched the first time a wall or a look-alike row wants one. The wall used to
@@ -1390,7 +1398,7 @@
     const tile = (w, j) => {
       const src = imgSrc(picOf(w)), r = ratioOf(w);
       return `<button class="wt${state.open === w.k ? " on" : ""}" data-wt="${esc(w.k)}" title="${esc(w.t)} · ${esc(A[w.a].n)}">${src
-        ? `<img src="${esc(src)}" alt="${esc(w.t)}, ${esc(A[w.a].n)}" loading="${j < 2 ? "eager" : "lazy"}"${w.rc ? ' class="zm"' : ""} style="aspect-ratio:1/${r.toFixed(3)}" referrerpolicy="no-referrer-when-downgrade" onerror="this.closest('.wt').hidden=true">`
+        ? `<img src="${esc(src)}" alt="${esc(w.t)}, ${esc(A[w.a].n)}" loading="${j < 2 ? "eager" : "lazy"}" style="aspect-ratio:1/${r.toFixed(3)}${cropPos(w)}" referrerpolicy="no-referrer-when-downgrade" onerror="this.closest('.wt').hidden=true">`
         : `<span class="wt-ph" style="aspect-ratio:1/${r.toFixed(3)}"></span>`}<span class="wt-cap"><i>${esc(w.t)}${dups.has(w) ? `<span class="src-tag" title="${esc(T("wall_dup", {n: dups.get(w)}))}">×${dups.get(w)}</span>` : ""}</i><span>${showArtist ? esc(A[w.a].n) + " · " : ""}${w.y ?? esc(T("nd"))} · ${esc(abbr(w.mu))}</span></span></button>`;
     };
     const nCols = wallCols(), cols = Array.from({length: nCols}, () => ({h: 0, t: []}));
@@ -1670,7 +1678,7 @@
   });
   $("stat-sale").addEventListener("click", () => {
     state.sale = !state.sale; state.open = null; state.expand.clear();
-    if (state.sale && state.group === "decade") setGroup("artist");
+    if (state.sale && state.group !== "artist") setGroup("artist");   // and leaves the auction ledger, if that was open
     renderAll(); pushHash();
     if (state.sale) $("register").scrollIntoView({behavior: "auto", block: "start"});
   });
@@ -1801,6 +1809,7 @@
     // the ledger opens by hammer price, highest first; leaving it goes back to the
     // decade view's own default, earliest first by year
     if (g === "auction" && state.group !== "auction"){ state.sort = "price"; state.decOrder = "latest"; }
+    if (g === "auction") state.sale = false;      // a lot that went under the hammer is not on sale: the two never combine
     if (g !== "auction" && state.group === "auction"){ state.sort = "year"; state.decOrder = "earliest"; }
     state.group = g;
     $("g-decade").setAttribute("aria-pressed", g==="decade");
