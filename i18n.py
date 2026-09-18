@@ -93,7 +93,7 @@ ET = {
  "earlyband":"{a}–{b} sajand",
  "earlyexpand":"Ava varasemad sajandid",
  "earlycollapse":"Ahenda varasemad sajandid",
- "th_auto":"AUTO",
+
  "th_light":"HELE",
  "th_dark":"TUME",
  "theme":"Teema",
@@ -204,7 +204,7 @@ EN = {
  "earlyband":"{a}–{b} century",
  "earlyexpand":"Expand earlier centuries",
  "earlycollapse":"Collapse earlier centuries",
- "th_auto":"AUTO",
+
  "th_light":"LIGHT",
  "th_dark":"DARK",
  "theme":"Theme",

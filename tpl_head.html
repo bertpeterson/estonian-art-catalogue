@@ -1,4 +1,5 @@
 <meta charset="utf-8">
+<script>try{if(localStorage.getItem("ekr:theme")==="light")document.documentElement.setAttribute("data-theme","light")}catch(e){}</script>
 <title>Estonian Art Catalogue</title>
 <meta name="description" content="A catalogue of 52,000 artworks by 3,600 artists held in Estonian public collections and galleries, 1440–2026. Compiled from MuIS and the EKM Digital Collection; every record links back to its source.">
 <link rel="canonical" href="https://museaal.ee/">
@@ -29,15 +30,9 @@
   --sans:"Archivo","Helvetica Neue",Helvetica,Arial,sans-serif;
   --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
 }
-@media (prefers-color-scheme:dark){
-  :root:not([data-theme="light"]){
-    --paper:#0B0C0E; --raise:#111316; --field:#15171A;
-    --ink:#F1F2F4; --ink-soft:#C7CACE; --grey-6:#8B9098; --grey-4:#7A7F86;
-    --rule:#2B2E34; --rule-soft:#212429; --bar:#3F434A;
-    --invert-bg:#F1F2F4; --invert-fg:#0B0C0E; --focus:#F1F2F4;
-  }
-}
-:root[data-theme="dark"]{
+/* dark is the page's own colour; light is a choice, kept for the reader who makes it
+   (localStorage ekr:theme, stamped on <html> before the first paint) */
+:root:not([data-theme="light"]){
   --paper:#0B0C0E; --raise:#111316; --field:#15171A;
   --ink:#F1F2F4; --ink-soft:#C7CACE; --grey-6:#8B9098; --grey-4:#7A7F86;
   --rule:#2B2E34; --rule-soft:#212429; --bar:#3F434A;
@@ -544,12 +539,8 @@ footer a{border-bottom:1px solid var(--rule)}
   .cl-abbr{display:inline}
 }
 /* Serif faces thin out on a dark ground — carry a little more weight there */
-@media (prefers-color-scheme:dark){
-  :root:not([data-theme="light"]) .r-title{font-weight:450}
-  :root:not([data-theme="light"]) .mono h2{font-weight:550}
-}
-:root[data-theme="dark"] .r-title{font-weight:450}
-:root[data-theme="dark"] .mono h2{font-weight:550}
+:root:not([data-theme="light"]) .r-title{font-weight:450}
+:root:not([data-theme="light"]) .mono h2{font-weight:550}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 .doors{border-top:1px solid var(--rule);margin:var(--sp-4) 0 0;padding-top:var(--sp-3)}
 .doors .d-names ul{columns:2;column-gap:var(--sp-4)} .doors .d-names li{break-inside:avoid}
@@ -597,9 +588,8 @@ footer a{border-bottom:1px solid var(--rule)}
             <button id="lang-et" aria-pressed="false">EST</button>
           </div>
           <div class="langsw themesw" role="group" aria-label="Theme">
-            <button id="th-auto" aria-pressed="true" data-i18n="th_auto"></button>
             <button id="th-light" aria-pressed="false" data-i18n="th_light"></button>
-            <button id="th-dark" aria-pressed="false" data-i18n="th_dark"></button>
+            <button id="th-dark" aria-pressed="true" data-i18n="th_dark"></button>
           </div>
         </div>
         <p class="mast-sub" data-i18n="sub"></p>
