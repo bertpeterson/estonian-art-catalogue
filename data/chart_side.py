@@ -49,19 +49,23 @@ def chart_windows(hsv):
     sat = (hsv[..., 1] > 80) & (hsv[..., 2] > 90)
     grey = hsv[..., 1] < 50                                   # the card, the grey scale, the gaps
     hue = hsv[..., 0] // 22
+    # some museums serve a thumbnail of 200 pixels (Tartu Art Museum's Johani); its
+    # chart is a few pixels of each hue, and the counts are read with that in mind
+    small = max(H, Wd) < 400
+    px, cool_n = (2, 2) if small else (3, 3)
     rows = range(0, max(1, H - WIN + 1), STEP); cols = range(0, max(1, Wd - WIN + 1), STEP)
     out = np.zeros((len(rows), len(cols)), bool)
     for i, y in enumerate(rows):
         for j, x in enumerate(cols):
             m = sat[y:y + WIN, x:x + WIN]
-            if m.sum() < 12: continue
+            if m.sum() < (6 if small else 12): continue
             bins = np.bincount(hue[y:y + WIN, x:x + WIN][m].ravel(), minlength=12)
             # a painting's edge may hold four vivid hues, but not three cool ones --
             # green, cyan, blue, violet, magenta -- in a patch this small (the patches
             # of a chart in a 1,600-pixel photograph are three pixels wide here)
             # ...and a chart's patches sit on a neutral card beside a grey scale, so a
             # third of the window is unsaturated -- a meadow of flowers is not
-            if (bins >= 3).sum() >= 4 and (bins[4:12] >= 3).sum() >= 3 and grey[y:y + WIN, x:x + WIN].mean() >= 0.3: out[i, j] = True
+            if (bins >= px).sum() >= 4 and (bins[4:12] >= px).sum() >= cool_n and grey[y:y + WIN, x:x + WIN].mean() >= 0.3: out[i, j] = True
     return out, list(rows), list(cols)
 
 def wedge_of(hsv):
@@ -144,6 +148,24 @@ def chart_of(img, surplus=None):
     _, side, xs, ys = best
     ext = {"l": xs.max() + WIN, "r": Wd - xs.min(), "t": ys.max() + WIN, "b": H - ys.min()}[side]
     full = Wd if side in "lr" else H
+    # the chart sits on a card, black or white, that runs on past the patches (Julie
+    # Hagen-Schwarz's self-portrait: the patches in the top 4%, the black holder to 10%);
+    # the crop walks on through rows that are card -- unsaturated and either very dark
+    # or very light -- for at most another 8% of the picture
+    # a row is still chart while it is neutral (the card, the grey patches, the holder)
+    # or vivid (the patches themselves); the walk looks only across the chart's own span,
+    # since beside the card is wall
+    card = ((hsv[..., 1] < 60) & ((hsv[..., 2] < 70) | (hsv[..., 2] > 190))) | (hsv[..., 1] < 15)
+    vivid = (hsv[..., 1] > 80) & (hsv[..., 2] > 90)
+    lo, hi = (ys.min(), ys.max() + WIN) if side in "lr" else (xs.min(), xs.max() + WIN)
+    seg = (lambda a, i: a[lo:hi, i]) if side in "lr" else (lambda a, i: a[i, lo:hi])
+    at = (lambda k: k) if side in "lt" else (lambda k: full - 1 - k)
+    k, miss, last = ext, 0, ext
+    while k < min(full - 1, ext + 0.08 * full) and miss <= 3:        # the dark lines between patches are not the painting
+        if seg(card, at(k)).mean() >= 0.6 or seg(vivid, at(k)).mean() >= 0.4: last = k + 1; miss = 0
+        else: miss += 1
+        k += 1
+    ext = last
     frac = (ext + 0.012 * full) / full
     if surplus and surplus[0] == ("x" if side in "lr" else "y"): frac = min(frac, surplus[1] + 0.02)
     return side, round(float(min(0.4, frac)), 3)
