@@ -9,7 +9,7 @@ build time (data-seed), then the door's names and everyone else in turn.
 import json, re, html, time
 
 d = json.load(open("data/data.json", encoding="utf-8")); A, W, V = d["artists"], d["works"], d["vocab"]
-L = json.load(open("site/data/index.json", encoding="utf-8"))["works"]          # r and rc live here
+L = json.load(open("site/data/index.json", encoding="utf-8"))["works"]          # r and rs live here
 I18N = json.load(open("i18n.json", encoding="utf-8"))
 e = html.escape
 name = lambda f, v: V[f][v] if isinstance(v, int) and f in V else v
@@ -67,13 +67,14 @@ slug = lambda n: re.sub(r"^-+|-+$", "", re.sub(r"[^a-z0-9]+", "-", n.lower().rep
 cols = [{"h": 0, "t": []} for _ in range(6)]
 for w in shown:
     lw = light.get(key(w), {}); r = (lw.get("r") or 100) / 100
-    c = min(cols, key=lambda c: c["h"]); c["h"] += r + 0.32; c["t"].append((w, r, lw.get("rc")))
-def tile(w, r, rc, j):
+    c = min(cols, key=lambda c: c["h"]); c["h"] += r + 0.32; c["t"].append((w, r, lw.get("rs")))
+POS = {"l": "100% 50%", "r": "0% 50%", "t": "50% 100%", "b": "50% 0%"}   # the chart's side is the side cropped away
+def tile(w, r, rs, j):
     lab = f'{w.get("y") if w.get("y") else "n.d."} · {e(name("mu", w["mu"]))}'
-    zm = ' class="zm"' if rc else ""
+    zm = f';object-position:{POS[rs]}' if rs else ""
     # the top two tiles of each column are in view at once and load at once
     return (f'<a class="wt" data-wt="{e(key(w))}" href="#artist={slug(A[w["a"]]["n"])}&open={e(key(w))}" title="{e(w["t"])} · {e(A[w["a"]]["n"])}">'
-            f'<img src="{e(imsrc(w["im"]))}" alt="{e(w["t"])}, {e(A[w["a"]]["n"])}" loading="{"eager" if j < 2 else "lazy"}"{zm} style="aspect-ratio:1/{r:.3f}" referrerpolicy="no-referrer-when-downgrade">'
+            f'<img src="{e(imsrc(w["im"]))}" alt="{e(w["t"])}, {e(A[w["a"]]["n"])}" loading="{"eager" if j < 2 else "lazy"}" style="aspect-ratio:1/{r:.3f}{zm}" referrerpolicy="no-referrer-when-downgrade">'
             f'<span class="wt-cap"><i>{e(w["t"])}</i><span>{e(A[w["a"]]["n"])} · {lab}</span></span></a>')
 npics = len(pics)
 bar = I18N["EN"]["wall_line_home"].replace("{p}", f"{npics:,}") + " · " + I18N["EN"]["wall_imgs"]

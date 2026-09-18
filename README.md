@@ -389,6 +389,17 @@ that, fifty-four works chosen by hand (`data/masterpieces.json`, in order: *Norr
 valvur*, *Põrgu*, *Lennuk*, *Linda kivi kandmas*, *Marie Underi portree* …) open the whole catalogue's wall. Nothing is on the artwall
 that is not in a record.
 
+**The colour chart.** A museum's photograph often has a colour chart or a grey scale standing beside the
+painting. `data/chart_side.py` reads each museum photograph once (as the shape and embedding reads did;
+nothing is kept) and looks for the chart itself — a patch of twenty-four pixels holding four vivid hues,
+three of them cool, is a chart, not a painting's edge — and records which side it is on and how much of
+the width or height it takes. The tile and the record's picture then show the photograph less that band,
+cropped from the chart's side only, so the painting keeps all its edges; the link opens the whole file.
+An earlier rule cropped from the centre wherever the photograph's shape differed from the record's
+dimensions, which found charts where there were none — a frame, an oval, a sheet measured differently —
+and cut the painting itself. A photograph without a chart is shown whole. Computed deliberately, not
+monthly; `data/chart_sides.json` is committed.
+
 **What comes first on an artist's wall.** Paintings, then watercolours, sculpture, drawings and prints; and for
 thirteen artists whose key works are a matter of record — Wiiralt's *Põrgu* and *Kabaree*, Mägi's Norway and
 Saaremaa pictures, Köler's *Truu valvur*, Raud's and Kallis's Kalevipoeg cycles — those works come before the

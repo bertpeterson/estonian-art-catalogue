@@ -301,6 +301,7 @@ h1 a:hover{color:var(--grey-6)}
 .detail.has-fig{grid-template-columns:minmax(200px,300px) minmax(0,1fr) 300px}
 .d-fig{margin:4px 0 0}
 .d-fig img{display:block;max-width:100%;max-height:420px;width:auto;height:auto;background:var(--field)}
+.d-fig img.crop{height:auto;object-fit:cover}   /* the colour chart's side falls off; see cropPos */
 .d-fig figcaption{font-family:var(--mono);font-size:var(--fs-xs);letter-spacing:.06em;color:var(--grey-4);margin-top:8px;line-height:1.5}
 @media(max-width:1080px){.detail.has-fig{grid-template-columns:minmax(0,1fr) 300px}.d-fig{grid-column:1/-1}.d-fig img{max-height:360px}}
 @media(max-width:860px){.detail.has-fig{grid-template-columns:1fr}}
@@ -355,7 +356,7 @@ h1 a:hover{color:var(--grey-6)}
 .wt img{display:block;width:100%;height:auto;object-fit:cover;object-position:center;background:var(--field)}
 /* a photograph taller than the work it shows carries a colour chart above or below it;
    the tile takes the work's shape and looks at the middle, so either edge falls off */
-.wt img.zm{transform:none}   /* no zoom: a frame is cropped evenly, a chart at one edge half-cropped, nothing of the work lost */
+   /* no zoom: a frame is cropped evenly, a chart at one edge half-cropped, nothing of the work lost */
 .wt-ph{display:block;width:100%}
 .wt-cap{display:block;font-size:.72rem;line-height:1.3;color:var(--ink-soft);padding:6px 5px 6px}
 .wt-cap i{display:block;font-family:var(--serif-text);font-style:italic;font-size:.88rem;color:var(--ink)}

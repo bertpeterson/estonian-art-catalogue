@@ -93,7 +93,7 @@ CSS = ("body{margin:0;padding:28px;font:15px/1.55 -apple-system,BlinkMacSystemFo
        ".m{color:#666;font-size:.9rem}nav{font-size:.9rem;margin-bottom:22px}a{color:inherit}"
        "table{border-collapse:collapse;width:100%;font-size:.9rem;margin-top:8px}th,td{text-align:left;padding:5px 8px;border-bottom:1px solid #e3e3e3;vertical-align:top}"
        "th{font-weight:500;font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;color:#666}.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}"
-       ".big{font-size:2rem;font-weight:500;line-height:1.1}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:18px;margin:18px 0 6px}"
+       ".big{font-size:2rem;font-weight:500;line-height:1.1}.grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:18px;margin:18px 0 6px}@media(max-width:900px){.grid{grid-template-columns:repeat(3,minmax(0,1fr))}}@media(max-width:520px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}"
        ".sec{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px 32px;align-items:start}.sec table{margin-top:0}"
        "@media(max-width:820px){.sec{grid-template-columns:1fr}.hb{width:100%;height:auto}}"
        ".hb{display:block;margin-top:8px;overflow:visible}.hb .hr{fill:#111}.hb .hl,.hb .hv{font-size:11px;fill:#666}.hb .hv{font-variant-numeric:tabular-nums}"
