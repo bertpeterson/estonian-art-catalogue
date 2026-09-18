@@ -186,6 +186,8 @@ PY
 
 # crawlable artist pages + sitemap (the app itself is a fragment-addressed SPA)
 python3 -u build_pages.py
+# the hubs: by decade, medium, museum and subject, both languages (appends to the sitemap)
+python3 -u build_hubs.py || exit 1
 # the catalogue in figures
 python3 -u build_stats.py
 # the Content-Security-Policy, into every page, from the inline scripts as written

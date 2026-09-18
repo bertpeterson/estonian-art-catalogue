@@ -252,7 +252,10 @@ is 98% gallery stock and unsplit it read as the most-collected decade in Estonia
 search in Estonian. Each links to related artists by school and period; the title and the snippet say what a
 searcher wants to know (how many works, where, what kinds, when); the sitemap lists both languages with
 alternates; the landing page's sixteen names are plain links to the pages, so a crawler has a way in. `site/404.html`
-prefills a search from any stale artist address.
+prefills a search from any stale artist address. Between the landing page and those leaves stand 188 hub
+pages (`build_hubs.py`): by decade (`/decades/1920.html`, `/kumnendid/1920.html`), by medium, by museum and
+by subject — a word in the title: *maastik*, *portree*, *Kalevipoeg*, *Toompea*, *kolhoos* — each with the
+artists most represented, a wall of pictures and links onward, in both languages.
 
 ## Two builds, and which one is current
 

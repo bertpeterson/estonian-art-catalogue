@@ -241,6 +241,9 @@ def neighbours(i, lang="en"):
 
 pages, index_rows = 0, []
 os.makedirs("site/k", exist_ok=True)
+CHARTS = {k: v for k, v in (json.load(open("data/chart_sides.json", encoding="utf-8")) if os.path.exists("data/chart_sides.json") else {}).items() if v}
+POS = {"l": "100% 50%", "r": "0% 50%", "t": "50% 100%", "b": "50% 0%"}
+crop = lambda im: f' style="object-position:{POS[CHARTS[im][0]]}"' if im in CHARTS else ""
 MRANK = {"Painting": 0, "Watercolour": 1, "Sculpture": 2, "Mixed media": 3, "Installation": 3, "Drawing": 4, "Sketch": 5, "Photograph": 6, "Print": 7}
 def imsrc(im):
     if not im: return ""
@@ -298,7 +301,7 @@ def render(i, a, ws, lang):
     key = lambda w: w.get('k') or re.sub(r'[^A-Z0-9:]', '', (w.get('nu') or '').upper())
     wall = ("<div class=\"wall\">" + "".join(
         f"<a class=\"wt\" href=\"{BASE}/#{T['hash']}artist={sl}&open={e(key(w))}\" title=\"{e(w.get('t') or '')}\">"
-        f"<img src=\"{e(imsrc(w['im']))}\" alt=\"{e(w.get('t') or '')}, {e(a['n'])}\" loading=\"lazy\" referrerpolicy=\"no-referrer-when-downgrade\">"
+        f"<img src=\"{e(imsrc(w['im']))}\" alt=\"{e(w.get('t') or '')}, {e(a['n'])}\" loading=\"lazy\"{crop(w['im'])} referrerpolicy=\"no-referrer-when-downgrade\">"
         f"<span><i>{e(w.get('t') or '')}</i><br>{e(str(w.get('y') or ''))}{' · ' if w.get('y') else ''}{e(val(w, 'mu') or '')}</span></a>"
         for w in tiles) + "</div>"
         + f"<p class=\"m\">{e(T['pics'].format(p=f'{len(pics):,}', k=len(tiles)))}</p>") if pics else ""
