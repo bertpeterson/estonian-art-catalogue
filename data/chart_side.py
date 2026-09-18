@@ -117,12 +117,31 @@ def chart_of(img, surplus=None):
         w = wedge_of(hsv)                                         # a grey scale alone
         if w and surplus and surplus[0] == ("x" if w[0] in "lr" else "y"): w = (w[0], round(min(w[1], surplus[1] + 0.02), 3))
         return w
-    ys = np.array([rows[i] for i in np.where(win)[0]]); xs = np.array([cols[j] for j in np.where(win)[1]])
-    # which edge the chart hugs: the nearest edge to the chart windows' centre
-    cy, cx = ys.mean() + WIN / 2, xs.mean() + WIN / 2
-    d = {"l": cx / Wd, "r": 1 - cx / Wd, "t": cy / H, "b": 1 - cy / H}
-    side = min(d, key=d.get)
-    if d[side] > BAND: return None                             # a colourful painting, not a chart at its edge
+    # The windows fall into clusters (touching windows); a chart is a cluster that lies
+    # wholly within the band along one edge. A painting's own colourful passages -- the
+    # shawl in Mägi's Alide Asmuse portree -- make clusters too, but in the middle, and
+    # they no longer drown a chart at the top.
+    lab = np.zeros(win.shape, int); nlab = 0
+    for i, j in zip(*np.where(win)):
+        if lab[i, j]: continue
+        nlab += 1; stack = [(i, j)]; lab[i, j] = nlab
+        while stack:
+            a, b = stack.pop()
+            for da in (-1, 0, 1):
+                for db in (-1, 0, 1):
+                    y2, x2 = a + da, b + db
+                    if 0 <= y2 < win.shape[0] and 0 <= x2 < win.shape[1] and win[y2, x2] and not lab[y2, x2]:
+                        lab[y2, x2] = nlab; stack.append((y2, x2))
+    best = None
+    for k in range(1, nlab + 1):
+        ii, jj = np.where(lab == k)
+        ys = np.array([rows[i] for i in ii]); xs = np.array([cols[j] for j in jj])
+        reach = {"l": (xs.max() + WIN) / Wd, "r": 1 - xs.min() / Wd, "t": (ys.max() + WIN) / H, "b": 1 - ys.min() / H}
+        side = min(reach, key=reach.get)
+        if reach[side] > BAND: continue                         # in the middle: the painting's own colours
+        if best is None or len(ii) > best[0]: best = (len(ii), side, xs, ys)
+    if best is None: return None
+    _, side, xs, ys = best
     ext = {"l": xs.max() + WIN, "r": Wd - xs.min(), "t": ys.max() + WIN, "b": H - ys.min()}[side]
     full = Wd if side in "lr" else H
     frac = (ext + 0.012 * full) / full
