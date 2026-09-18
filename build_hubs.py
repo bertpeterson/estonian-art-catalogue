@@ -191,82 +191,87 @@ def page(lang, me, other, title, desc, h1, lede, ws, app_hash, facets, nb, xdefa
             + f'<p class="nb">{nb["links"]}</p>'
             + f'<p class="m">{T["foot"]}</p></body></html>')
 
-# ---- write ----------------------------------------------------------------------------------
-os.makedirs("site", exist_ok=True)
-urls = []
-for lang in ("en", "et"):
-    T = L[lang]; O = L["et" if lang == "en" else "en"]
-    for k in ("dec", "med", "mus", "sub"): os.makedirs(f"site/{T[k]}", exist_ok=True)
-    # decades
-    for n_, dd in enumerate(DECS):
-        ws = by_dec[dd]; lab = dec_label(dd, lang)
-        me, other = dec_href(dd, lang), dec_href(dd, "et" if lang == "en" else "en")
-        blurb = "" if dd == "before" else (BLURB_EN.get(dd, "") if lang == "en" else BLURB_ET.get(str(dd), ""))
-        per = next((p for p in PERIODS if dd != "before" and p[0] <= dd + 9 and p[1] >= dd), None)
-        per_lab = (I18N["PERIOD_EN"][per[2]] if lang == "en" else I18N["PERIOD_ET"][per[2]]) if per else ""
-        title = T["dec_t"].format(d=dd if dd != "before" else lab, n=fmt(len(ws), lang), a=fmt(len({w["a"] for w in ws}), lang)) if dd != "before" else f"{T['site']} · {lab} · {fmt(len(ws), lang)} {T['works']}"
-        desc = T["dec_d"].format(d=dd if dd != "before" else lab, n=fmt(len(ws), lang), a=fmt(len({w["a"] for w in ws}), lang), media=media_phrase(ws, lang))
-        h1 = (f"Estonian art of the {dd}s" if lang == "en" else f"Eesti kunst {dd}ndatel") if dd != "before" else (f"Estonian art {lab}" if lang == "en" else f"Eesti kunst {lab}")
-        lede = (per_lab + " — " if per_lab else "") + blurb
-        links = " · ".join(x for x in [f'<a href="{dec_href(DECS[n_-1], lang)}">← {dec_label(DECS[n_-1], lang)}</a>' if n_ else "",
-                                        f'<a href="{BASE}/{T["dec"]}/">{T["dec_h"]}</a>',
-                                        f'<a href="{dec_href(DECS[n_+1], lang)}">{dec_label(DECS[n_+1], lang)} →</a>' if n_ + 1 < len(DECS) else ""] if x)
-        nb = dict(crumb=f'<a href="{BASE}/{T["dec"]}/">{T["dec_h"]}</a> › {lab}', links=links)
-        open(f"site/{T['dec']}/{dd}.html", "w", encoding="utf-8").write(page(lang, me, other, title, desc, h1, lede, ws,
-            f"decade={dd}" if dd != "before" else "to=1799", [(T["by_med"], facet_row(ws, lang, "med")), (T["by_mus"], facet_row(ws, lang, "mus"))], nb, dec_href(dd, "en")))
-        urls.append((me, dec_href(dd, "en"), dec_href(dd, "et")))
-    # media
-    for m in MEDS:
-        ws = by_med[m]; lab = med_name(m, lang)
-        me, other = med_href(m, lang), med_href(m, "et" if lang == "en" else "en")
-        an = fmt(len({w["a"] for w in ws}), lang)
-        title = T["med_t"].format(m=lab, n=fmt(len(ws), lang), a=an); desc = T["med_d"].format(m=lab, n=fmt(len(ws), lang), a=an, span=span_of(ws))
-        nb = dict(crumb=f'<a href="{BASE}/{T["med"]}/">{T["med_h"]}</a> › {e(lab)}', links=f'<a href="{BASE}/{T["med"]}/">{T["med_h"]}</a>')
-        open(f"site/{T['med']}/{slug(lab)}.html", "w", encoding="utf-8").write(page(lang, me, other, title, desc, lab, "", ws, f"media={m}",
-            [(T["by_dec"], facet_row(ws, lang, "dec")), (T["by_mus"], facet_row(ws, lang, "mus"))], nb, med_href(m, "en")))
-        urls.append((me, med_href(m, "en"), med_href(m, "et")))
-    # museums
-    for m in MUSS:
-        ws = by_mus[m]; lab = mus_name(m, lang)
-        me, other = mus_href(m, lang), mus_href(m, "et" if lang == "en" else "en")
-        an = fmt(len({w["a"] for w in ws}), lang)
-        title = T["mus_t"].format(m=lab, n=fmt(len(ws), lang), a=an); desc = T["mus_d"].format(m=lab, n=fmt(len(ws), lang), a=an, span=span_of(ws), media=media_phrase(ws, lang))
-        site = META.get("sites", {}).get(m)
-        lede = ""
-        nb = dict(crumb=f'<a href="{BASE}/{T["mus"]}/">{T["mus_h"]}</a> › {e(lab)}',
-                  links=" · ".join(x for x in [f'<a href="{BASE}/{T["mus"]}/">{T["mus_h"]}</a>', f'<a href="{e(site)}" rel="noopener">{e(lab)} ↗</a>' if site else ""] if x))
-        open(f"site/{T['mus']}/{slug(lab)}.html", "w", encoding="utf-8").write(page(lang, me, other, title, desc, lab, lede, ws, f"museum={m}",
-            [(T["by_dec"], facet_row(ws, lang, "dec")), (T["by_med"], facet_row(ws, lang, "med"))], nb, mus_href(m, "en")))
-        urls.append((me, mus_href(m, "en"), mus_href(m, "et")))
-    # subjects
-    for s in SUBS:
-        ws = by_sub[s[0]]; lab = s[2] if lang == "en" else s[3]
-        me, other = sub_href(s, lang), sub_href(s, "et" if lang == "en" else "en")
-        an = fmt(len({w["a"] for w in ws}), lang)
-        title = T["sub_t"].format(s=lab, n=fmt(len(ws), lang), a=an); desc = T["sub_d"].format(n=fmt(len(ws), lang), sl=("“" + s[3] + "”"), a=an, span=span_of(ws), media=media_phrase(ws, lang))
-        nb = dict(crumb=f'<a href="{BASE}/{T["sub"]}/">{T["sub_h"]}</a> › {e(lab)}', links=f'<a href="{BASE}/{T["sub"]}/">{T["sub_h"]}</a>')
-        open(f"site/{T['sub']}/{s[0] if lang == 'en' else s[1]}.html", "w", encoding="utf-8").write(page(lang, me, other, title, desc, lab, "", ws, f"q={s[3]}",
-            [(T["by_dec"], facet_row(ws, lang, "dec")), (T["by_med"], facet_row(ws, lang, "med")), (T["by_mus"], facet_row(ws, lang, "mus"))], nb, sub_href(s, "en")))
-        urls.append((me, sub_href(s, "en"), sub_href(s, "et")))
-    # the four indexes
-    for k, h, items in (("dec", T["dec_h"], [(dec_label(dd, lang), dec_href(dd, lang), len(by_dec[dd])) for dd in DECS]),
-                        ("med", T["med_h"], [(med_name(m, lang), med_href(m, lang), len(by_med[m])) for m in MEDS]),
-                        ("mus", T["mus_h"], [(mus_name(m, lang), mus_href(m, lang), len(by_mus[m])) for m in MUSS]),
-                        ("sub", T["sub_h"], [((s[2] if lang == "en" else s[3]), sub_href(s, lang), len(by_sub[s[0]])) for s in SUBS])):
-        me, other = f"{BASE}/{T[k]}/", f"{BASE}/{O[k]}/"
-        lst = '<ul class="cols">' + "".join(f'<li><a href="{u}">{e(lab)}</a><span class="n">{fmt(n, lang)}</span></li>' for lab, u, n in items) + "</ul>"
-        open(f"site/{T[k]}/index.html", "w", encoding="utf-8").write(
-            f'<!doctype html><html lang="{lang}"><head><meta charset="utf-8">{STAMP}<meta name="viewport" content="width=device-width,initial-scale=1">'
-            f'<title>{e(h)} · museaal.ee</title><meta name="description" content="{e(h)}: {len(items)} {"pages" if lang == "en" else "lehte"} · {T["site"]}">'
-            f'<link rel="canonical" href="{me}"><link rel="alternate" hreflang="{lang}" href="{me}"><link rel="alternate" hreflang="{"et" if lang == "en" else "en"}" href="{other}">'
-            f'<style>{CSS}</style>{GC}</head><body><nav><a href="{BASE}/{T["site_link"]}">{T["site"]}</a> › {e(h)} <span class="m">· <a href="{other}">{T["other"]}</a></span></nav>'
-            f'<h1>{e(h)}</h1>{lst}<p class="nb">' + " · ".join(f'<a href="{BASE}/{T[x]}/">{T[x + "_h"]}</a>' for x in ("dec", "med", "mus", "sub") if x != k)
-            + f' · <a href="{BASE}/{T["art"]}/">{"Artists A–Z" if lang == "en" else "Kunstnikud A–Ü"}</a></p></body></html>')
-        urls.append((me, f"{BASE}/{L['en'][k]}/", f"{BASE}/{L['et'][k]}/"))
+def main():
+    # ---- write ----------------------------------------------------------------------------------
+    os.makedirs("site", exist_ok=True)
+    urls = []
+    for lang in ("en", "et"):
+        T = L[lang]; O = L["et" if lang == "en" else "en"]
+        for k in ("dec", "med", "mus", "sub"): os.makedirs(f"site/{T[k]}", exist_ok=True)
+        # decades
+        for n_, dd in enumerate(DECS):
+            ws = by_dec[dd]; lab = dec_label(dd, lang)
+            me, other = dec_href(dd, lang), dec_href(dd, "et" if lang == "en" else "en")
+            blurb = "" if dd == "before" else (BLURB_EN.get(dd, "") if lang == "en" else BLURB_ET.get(str(dd), ""))
+            per = next((p for p in PERIODS if dd != "before" and p[0] <= dd + 9 and p[1] >= dd), None)
+            per_lab = (I18N["PERIOD_EN"][per[2]] if lang == "en" else I18N["PERIOD_ET"][per[2]]) if per else ""
+            title = T["dec_t"].format(d=dd if dd != "before" else lab, n=fmt(len(ws), lang), a=fmt(len({w["a"] for w in ws}), lang)) if dd != "before" else f"{T['site']} · {lab} · {fmt(len(ws), lang)} {T['works']}"
+            desc = T["dec_d"].format(d=dd if dd != "before" else lab, n=fmt(len(ws), lang), a=fmt(len({w["a"] for w in ws}), lang), media=media_phrase(ws, lang))
+            h1 = (f"Estonian art of the {dd}s" if lang == "en" else f"Eesti kunst {dd}ndatel") if dd != "before" else (f"Estonian art {lab}" if lang == "en" else f"Eesti kunst {lab}")
+            lede = (per_lab + " — " if per_lab else "") + blurb
+            links = " · ".join(x for x in [f'<a href="{dec_href(DECS[n_-1], lang)}">← {dec_label(DECS[n_-1], lang)}</a>' if n_ else "",
+                                            f'<a href="{BASE}/{T["dec"]}/">{T["dec_h"]}</a>',
+                                            f'<a href="{dec_href(DECS[n_+1], lang)}">{dec_label(DECS[n_+1], lang)} →</a>' if n_ + 1 < len(DECS) else ""] if x)
+            nb = dict(crumb=f'<a href="{BASE}/{T["dec"]}/">{T["dec_h"]}</a> › {lab}', links=links)
+            open(f"site/{T['dec']}/{dd}.html", "w", encoding="utf-8").write(page(lang, me, other, title, desc, h1, lede, ws,
+                f"decade={dd}" if dd != "before" else "to=1799", [(T["by_med"], facet_row(ws, lang, "med")), (T["by_mus"], facet_row(ws, lang, "mus"))], nb, dec_href(dd, "en")))
+            urls.append((me, dec_href(dd, "en"), dec_href(dd, "et")))
+        # media
+        for m in MEDS:
+            ws = by_med[m]; lab = med_name(m, lang)
+            me, other = med_href(m, lang), med_href(m, "et" if lang == "en" else "en")
+            an = fmt(len({w["a"] for w in ws}), lang)
+            title = T["med_t"].format(m=lab, n=fmt(len(ws), lang), a=an); desc = T["med_d"].format(m=lab, n=fmt(len(ws), lang), a=an, span=span_of(ws))
+            nb = dict(crumb=f'<a href="{BASE}/{T["med"]}/">{T["med_h"]}</a> › {e(lab)}', links=f'<a href="{BASE}/{T["med"]}/">{T["med_h"]}</a>')
+            open(f"site/{T['med']}/{slug(lab)}.html", "w", encoding="utf-8").write(page(lang, me, other, title, desc, lab, "", ws, f"media={m}",
+                [(T["by_dec"], facet_row(ws, lang, "dec")), (T["by_mus"], facet_row(ws, lang, "mus"))], nb, med_href(m, "en")))
+            urls.append((me, med_href(m, "en"), med_href(m, "et")))
+        # museums
+        for m in MUSS:
+            ws = by_mus[m]; lab = mus_name(m, lang)
+            me, other = mus_href(m, lang), mus_href(m, "et" if lang == "en" else "en")
+            an = fmt(len({w["a"] for w in ws}), lang)
+            title = T["mus_t"].format(m=lab, n=fmt(len(ws), lang), a=an); desc = T["mus_d"].format(m=lab, n=fmt(len(ws), lang), a=an, span=span_of(ws), media=media_phrase(ws, lang))
+            site = META.get("sites", {}).get(m)
+            lede = ""
+            nb = dict(crumb=f'<a href="{BASE}/{T["mus"]}/">{T["mus_h"]}</a> › {e(lab)}',
+                      links=" · ".join(x for x in [f'<a href="{BASE}/{T["mus"]}/">{T["mus_h"]}</a>', f'<a href="{e(site)}" rel="noopener">{e(lab)} ↗</a>' if site else ""] if x))
+            open(f"site/{T['mus']}/{slug(lab)}.html", "w", encoding="utf-8").write(page(lang, me, other, title, desc, lab, lede, ws, f"museum={m}",
+                [(T["by_dec"], facet_row(ws, lang, "dec")), (T["by_med"], facet_row(ws, lang, "med"))], nb, mus_href(m, "en")))
+            urls.append((me, mus_href(m, "en"), mus_href(m, "et")))
+        # subjects
+        for s in SUBS:
+            ws = by_sub[s[0]]; lab = s[2] if lang == "en" else s[3]
+            me, other = sub_href(s, lang), sub_href(s, "et" if lang == "en" else "en")
+            an = fmt(len({w["a"] for w in ws}), lang)
+            title = T["sub_t"].format(s=lab, n=fmt(len(ws), lang), a=an); desc = T["sub_d"].format(n=fmt(len(ws), lang), sl=("“" + s[3] + "”"), a=an, span=span_of(ws), media=media_phrase(ws, lang))
+            nb = dict(crumb=f'<a href="{BASE}/{T["sub"]}/">{T["sub_h"]}</a> › {e(lab)}', links=f'<a href="{BASE}/{T["sub"]}/">{T["sub_h"]}</a>')
+            open(f"site/{T['sub']}/{s[0] if lang == 'en' else s[1]}.html", "w", encoding="utf-8").write(page(lang, me, other, title, desc, lab, "", ws, f"q={s[3]}",
+                [(T["by_dec"], facet_row(ws, lang, "dec")), (T["by_med"], facet_row(ws, lang, "med")), (T["by_mus"], facet_row(ws, lang, "mus"))], nb, sub_href(s, "en")))
+            urls.append((me, sub_href(s, "en"), sub_href(s, "et")))
+        # the four indexes
+        for k, h, items in (("dec", T["dec_h"], [(dec_label(dd, lang), dec_href(dd, lang), len(by_dec[dd])) for dd in DECS]),
+                            ("med", T["med_h"], [(med_name(m, lang), med_href(m, lang), len(by_med[m])) for m in MEDS]),
+                            ("mus", T["mus_h"], [(mus_name(m, lang), mus_href(m, lang), len(by_mus[m])) for m in MUSS]),
+                            ("sub", T["sub_h"], [((s[2] if lang == "en" else s[3]), sub_href(s, lang), len(by_sub[s[0]])) for s in SUBS])):
+            me, other = f"{BASE}/{T[k]}/", f"{BASE}/{O[k]}/"
+            lst = '<ul class="cols">' + "".join(f'<li><a href="{u}">{e(lab)}</a><span class="n">{fmt(n, lang)}</span></li>' for lab, u, n in items) + "</ul>"
+            open(f"site/{T[k]}/index.html", "w", encoding="utf-8").write(
+                f'<!doctype html><html lang="{lang}"><head><meta charset="utf-8">{STAMP}<meta name="viewport" content="width=device-width,initial-scale=1">'
+                f'<title>{e(h)} · museaal.ee</title><meta name="description" content="{e(h)}: {len(items)} {"pages" if lang == "en" else "lehte"} · {T["site"]}">'
+                f'<link rel="canonical" href="{me}"><link rel="alternate" hreflang="{lang}" href="{me}"><link rel="alternate" hreflang="{"et" if lang == "en" else "en"}" href="{other}">'
+                f'<style>{CSS}</style>{GC}</head><body><nav><a href="{BASE}/{T["site_link"]}">{T["site"]}</a> › {e(h)} <span class="m">· <a href="{other}">{T["other"]}</a></span></nav>'
+                f'<h1>{e(h)}</h1>{lst}<p class="nb">' + " · ".join(f'<a href="{BASE}/{T[x]}/">{T[x + "_h"]}</a>' for x in ("dec", "med", "mus", "sub") if x != k)
+                + f' · <a href="{BASE}/{T["art"]}/">{"Artists A–Z" if lang == "en" else "Kunstnikud A–Ü"}</a></p></body></html>')
+            urls.append((me, f"{BASE}/{L['en'][k]}/", f"{BASE}/{L['et'][k]}/"))
 
-# into the sitemap build_pages.py wrote
-today = datetime.date.today().isoformat()
-sm = open("site/sitemap.xml", encoding="utf-8").read()
-add = "".join(f'<url><loc>{me}</loc><lastmod>{today}</lastmod><xhtml:link rel="alternate" hreflang="en" href="{en}"/><xhtml:link rel="alternate" hreflang="et" href="{et}"/></url>' for me, en, et in urls)
-open("site/sitemap.xml", "w", encoding="utf-8").write(sm.replace("</urlset>", add + "</urlset>"))
-print(f"  hub pages      {len(urls):,} ({len(DECS)} decades, {len(MEDS)} media, {len(MUSS)} museums, {len(SUBS)} subjects, 4 indexes; both languages)")
+    # into the sitemap build_pages.py wrote
+    today = datetime.date.today().isoformat()
+    sm = open("site/sitemap.xml", encoding="utf-8").read()
+    add = "".join(f'<url><loc>{me}</loc><lastmod>{today}</lastmod><xhtml:link rel="alternate" hreflang="en" href="{en}"/><xhtml:link rel="alternate" hreflang="et" href="{et}"/></url>' for me, en, et in urls)
+    open("site/sitemap.xml", "w", encoding="utf-8").write(sm.replace("</urlset>", add + "</urlset>"))
+    print(f"  hub pages      {len(urls):,} ({len(DECS)} decades, {len(MEDS)} media, {len(MUSS)} museums, {len(SUBS)} subjects, 4 indexes; both languages)")
+
+
+if __name__ == "__main__":
+    main()

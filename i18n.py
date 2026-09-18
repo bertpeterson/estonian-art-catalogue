@@ -117,7 +117,7 @@ ET = {
  "g_school":"õppis",
  "g_movement":"suund",
  "g_member":"liige",
- "artistpage":"Selle kunstniku trükitav leht ↗",
+ "artistpage":"Selle kunstniku trükitav leht ↗", "hubpage":"eraldi lehena ↗",
 }
 EN = {
  "sub":"Art in Estonia's public collections and galleries · 1835–2024",
@@ -228,7 +228,7 @@ EN = {
  "g_school":"trained at",
  "g_movement":"movement",
  "g_member":"member of",
- "artistpage":"Printable page for this artist ↗",
+ "artistpage":"Printable page for this artist ↗", "hubpage":"as a page ↗",
 }
 HTML_ET = {
  "standfirst":"Iga kirje on tõeline teos tõelise hoidja juures ja viitab tagasi oma allikale.",

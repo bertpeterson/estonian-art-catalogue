@@ -369,7 +369,8 @@ footer{border-top:1px solid var(--ink);margin-top:10px;padding:30px 0 60px;displ
 footer p{margin:0;font-size:.81rem;line-height:1.6;color:var(--grey-6);max-width:46ch}
 /* the A-Z link is one line; left in a grid cell beside three long notes it sat at
    the top of a tall row with a void beneath it. It takes a row of its own. */
-footer p:first-child{grid-column:1/-1;max-width:none;margin-bottom:-12px}
+.hub-link{border-bottom:1px solid var(--rule);color:var(--grey-6)}
+footer p.nav{grid-column:1/-1;max-width:none;margin-bottom:-12px}   /* the two crawlable lines span the columns; the three paragraphs sit beneath, aligned */
 footer b{color:var(--ink);font-weight:500}
 footer a{border-bottom:1px solid var(--rule)}
 
@@ -727,9 +728,9 @@ footer a{border-bottom:1px solid var(--rule)}
   <footer>
     <!-- static, not i18n: a crawler never runs the app, and this is the route into
          the per-artist pages that make the catalogue findable at all -->
-    <p><a href="a/">Artists A–Z</a> · <a href="k/" hreflang="et">Kunstnikud A–Ü</a> — every artist as a plain page, in English and in Estonian ·
+    <p class="nav"><a href="a/">Artists A–Z</a> · <a href="k/" hreflang="et">Kunstnikud A–Ü</a> — every artist as a plain page, in English and in Estonian ·
        <a href="stats.html">The catalogue in figures</a> · <a href="stats-et.html" hreflang="et">Kataloog arvudes</a></p>
-    <p>By <a href="decades/">decade</a>, <a href="media/">medium</a>, <a href="museums/">museum</a> and <a href="subjects/">subject</a> ·
+    <p class="nav">By <a href="decades/">decade</a>, <a href="media/">medium</a>, <a href="museums/">museum</a> and <a href="subjects/">subject</a> ·
        <a href="kumnendid/" hreflang="et">kümnendi</a>, <a href="liigid/" hreflang="et">liigi</a>, <a href="muuseumid/" hreflang="et">muuseumi</a> ja <a href="ained/" hreflang="et">aine kaupa</a></p>
     <p data-i18n-html="foot1"></p>
     <p data-i18n-html="foot2"></p>
