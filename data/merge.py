@@ -1128,6 +1128,17 @@ for w in works:
         w["yl"] = w.get("yl") or str(w["y"]); w["y"] = None; FLAGGED["u"] = FLAGGED.get("u", 0) + 1
 print("  flagged: dated before birth", FLAGGED["pre"], "/ after death", FLAGGED["post"], "/ unique works left the timeline", FLAGGED.get("u", 0))
 
+# A harvested address is used only if it is a web address. The galleries' pages are
+# read by machine; a javascript: or data: address in a listing would otherwise reach
+# an href on the page. (The page checks again before it writes one.)
+_web = lambda u: isinstance(u, str) and re.match(r"^https?://", u, re.I) is not None
+_dropped = 0
+for w in works:
+    if w.get("url") and not _web(w["url"]): w["url"] = None; _dropped += 1
+    im = w.get("im")
+    if isinstance(im, str) and im.startswith("g:") and not _web(im[2:]): w["im"] = None; _dropped += 1
+if _dropped: print("  addresses dropped, not web addresses:", _dropped)
+
 # ---------- images, for works in the public domain ----------
 # A museum record gets a reference to the holder's own image of it -- MuIS's media
 # id, or the EKM Digital Collection's file path -- only where the work itself is out

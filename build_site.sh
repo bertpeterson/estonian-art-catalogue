@@ -188,6 +188,8 @@ PY
 python3 -u build_pages.py
 # the catalogue in figures
 python3 -u build_stats.py
+# the Content-Security-Policy, into every page, from the inline scripts as written
+python3 -u csp.py site || exit 1
 # a build that lost its pages must not ship: the artist pages went out missing once
 # when build_pages.py failed inside a pipe and the OK line hid it
 [ -f site/a/index.html ] && [ "$(ls site/a | wc -l)" -gt 1000 ] && [ -f site/stats.html ] && [ -f site/stats-et.html ] || { echo "BUILD FAILED: site/a or stats missing"; exit 1; }

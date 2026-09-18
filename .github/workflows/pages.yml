@@ -24,8 +24,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-python@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: "3.12"
       - run: pip install -q numpy
@@ -33,7 +33,7 @@ jobs:
         run: ./build_site.sh
       - name: Open the built site in headless Chrome
         run: node check_site.js site
-      - uses: actions/upload-pages-artifact@v5
+      - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
           path: site
 
@@ -44,9 +44,9 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/configure-pages@v6
+      - uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
       - id: deployment
-        uses: actions/deploy-pages@v5
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
 
   # The build was opened in a browser before it shipped; this opens what the world
   # gets -- the domain, the certificate, the worker, the data the page names.
@@ -65,6 +65,7 @@ jobs:
             echo "landing not there yet ($code), waiting"; sleep 20
           done
           grep -q 'data-seed=' body || { echo "FAIL: landing page has no baked wall"; exit 1; }
+          grep -q 'http-equiv="Content-Security-Policy"' body || { echo "FAIL: no Content-Security-Policy"; exit 1; }
           v=$(grep -o 'data/index.json?v=[0-9a-f]*' body | head -1)
           [ -n "$v" ] || { echo "FAIL: page names no index"; exit 1; }
           [ "$(get "$site/$v")" = 200 ] && grep -q '"works"' body || { echo "FAIL: $v"; exit 1; }

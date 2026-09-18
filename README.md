@@ -83,6 +83,29 @@ than merely inconvenient to lose. From a fresh clone:
 
 Everything then rebuilds without fetching anything from anyone.
 
+## Security
+
+The site is static: no server of its own, no accounts, no forms, no database, nothing a visitor can
+write. What it has to defend against is its own data — 100,000 records harvested by machine from
+museums and galleries, any of which could carry markup or a hostile address — and the deploy path.
+
+- **Harvested text is escaped** everywhere the page writes it into markup (`esc`), and a harvested
+  address reaches an `href` only if it is a web address: `data/merge.py` drops anything else at merge,
+  and the page checks again (`href`) before it writes one.
+- **A Content-Security-Policy on every page** (`csp.py`, run last in the build; GitHub Pages sets no
+  headers, so it travels in a `<meta>` tag). Scripts run only from this site, GoatCounter and the
+  inline scripts the build itself wrote, each named by the SHA-256 of its exact text; the page has no
+  inline event handlers. Pictures from any https server (the holders'), styles inline and from Google
+  Fonts, connections to this site and GoatCounter; no plugins, no `<base>`, no forms.
+- **Nothing secret on the client.** The one key (Anthropic, for the monthly translation) lives in an
+  Actions secret and is never printed. GoatCounter counts page views without cookies.
+- **The deploy is gated**: build, 29 checks in headless Chrome, deploy, then a probe of the live domain;
+  the same probe runs daily (`probe.yml`) and a failure is mailed. The workflows' actions are pinned to
+  commit SHAs, with Dependabot proposing moves; each workflow holds the least permission it needs.
+- **The data is the backup**: `data/data.json` and the compressed harvest are in git; a bad monthly run
+  is refused by `harvest_guard.py` before anything is committed; every deploy is a commit that can be
+  reverted.
+
 ## Rules the data follows
 
 These are the decisions between the sources and the page. Each is in `data/merge.py` with its reasons.
