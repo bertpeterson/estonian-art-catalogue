@@ -402,6 +402,13 @@ on idle after the landing has painted, or the moment an artist's page asks for o
 among the last one's results; the decades below the fold are laid out only when scrolled to
 (`content-visibility`). An open record stays where it is on the screen when the register is redrawn.
 
+**Embeds.** Every artist, decade and subject has a strip for other people's pages — `/embed/<slug>.html`,
+`/embed/et/<slug>.html` (`build_embed.py`): six pictures from the holders' own servers, the count, a link
+back, nothing else — no prices, no auction line, no header. It follows the host page's light or dark scheme,
+its links open in the host page, and it is not indexed; the embed code offered on each artist and hub page
+pairs the iframe with a plain link to the page, which is the link that counts. The rule for the pictures is
+the wall's: public-domain works and live gallery stock, embedded, never copied.
+
 **Dark by default.** The page's own colour is dark; *Light* is a choice the browser remembers
 (`localStorage`), stamped on `<html>` before the first paint so a light reader never sees a flash of
 dark. There is no *auto*: the catalogue does not follow the operating system. The static artist and
