@@ -56,7 +56,9 @@ CSS = ("body{margin:0;padding:28px;font:15px/1.55 -apple-system,BlinkMacSystemFo
        ":root[data-theme=light] .wt span i{color:#111}"
        "ul.cols{columns:230px;list-style:none;padding:0;margin:0}ul.cols li{break-inside:avoid;padding:2px 0}ul.cols .n{color:#8b9098;font-size:.8rem;margin-left:6px}"
        "ul.row{list-style:none;padding:0;margin:0;display:flex;flex-wrap:wrap;gap:6px 14px}ul.row .n{color:#8b9098;font-size:.8rem;margin-left:4px}"
-       ".nb{margin-top:26px;padding-top:12px;border-top:1px solid #2b2e34;font-size:.9rem}")
+       ".nb{margin-top:26px;padding-top:12px;border-top:1px solid #2b2e34;font-size:.9rem}"
+       "details.emb{margin:18px 0 6px;font-size:.85rem}details.emb summary{cursor:pointer;color:#8b9098}details.emb textarea{width:100%;box-sizing:border-box;font:12px/1.4 ui-monospace,Menlo,monospace;padding:8px;border:1px solid #2b2e34;background:#111316;color:#c7cace}"
+       ":root[data-theme=light] details.emb textarea{border-color:#ccc;background:#f7f7f7;color:#333}")
 
 L = {"en": dict(site="Estonian Art Catalogue", dec="decades", med="media", mus="museums", sub="subjects", art="a",
                 dec_h="Estonian art by decade", med_h="Estonian art by medium", mus_h="The collections", sub_h="Estonian art by subject",
@@ -67,7 +69,7 @@ L = {"en": dict(site="Estonian Art Catalogue", dec="decades", med="media", mus="
                 med_t="{m} in Estonian collections – {n} works by {a} artists · museaal.ee", med_d="{m} in Estonian public collections and galleries: {n} works by {a} artists, {span}. The artists most represented, a wall of pictures, the decades and the museums.",
                 mus_t="{m} – {n} works by {a} artists in the catalogue · museaal.ee", mus_d="The art collection of {m}: {n} works by {a} artists as catalogued in MuIS and the EKM Digital Collection, {span} — {media}. Artists, pictures, decades.",
                 sub_t="{s} in Estonian art – {n} works by {a} artists · museaal.ee", sub_d="{n} works with {sl} in the title, by {a} Estonian artists, {span} — {media}. Who painted it, when, and where the works are.",
-                site_link="", hash=""),
+                site_link="", hash="", embed_h="Embed on your page", embed_t="A strip of pictures, the count and a link back. Paste both lines: the second is the link that tells search engines where the pictures live."),
      "et": dict(site="Eesti Kunstikataloog", dec="kumnendid", med="liigid", mus="muuseumid", sub="ained", art="k",
                 dec_h="Eesti kunst kümnendite kaupa", med_h="Eesti kunst liigi kaupa", mus_h="Kogud", sub_h="Eesti kunst aine kaupa",
                 works="teost", artists="kunstnikku", of="—", browse="Sirvi kataloogis →", top_art="Enim esindatud kunstnikud", pics="Pildid",
@@ -77,7 +79,7 @@ L = {"en": dict(site="Estonian Art Catalogue", dec="decades", med="media", mus="
                 med_t="{m} Eesti kogudes – {n} teost {a} kunstnikult · museaal.ee", med_d="{m} Eesti avalikes kogudes ja galeriides: {n} teost {a} kunstnikult, {span}. Enim esindatud kunstnikud, pildisein, kümnendid ja muuseumid.",
                 mus_t="{m} – {n} teost {a} kunstnikult kataloogis · museaal.ee", mus_d="{m} kunstikogu: {n} teost {a} kunstnikult MuISi ja EKM digikogu järgi, {span} — {media}. Kunstnikud, pildid, kümnendid.",
                 sub_t="{s} Eesti kunstis – {n} teost {a} kunstnikult · museaal.ee", sub_d="{n} teost, mille pealkirjas on {sl}, {a} Eesti kunstnikult, {span} — {media}. Kes, millal ja kus.",
-                site_link="#lang=et", hash="lang=et&")}
+                site_link="#lang=et", hash="lang=et&", embed_h="Manusta oma lehele", embed_t="Pildiriba, teoste arv ja link tagasi. Kleebi mõlemad read: teine on link, mis ütleb otsimootorile, kust pildid pärit on.")}
 MED_PL = {"en": {"Painting": "paintings", "Watercolour": "watercolours", "Drawing": "drawings", "Print": "prints", "Sculpture": "sculpture",
                  "Illustration": "illustrations", "Photograph": "photographs", "Mixed media": "mixed media", "Installation": "installations", "Poster": "posters", "Bookplate": "bookplates", "Other": "other"},
           "et": {"Painting": "maalid", "Watercolour": "akvarellid", "Drawing": "joonistused", "Print": "graafika", "Sculpture": "skulptuur",
@@ -173,7 +175,14 @@ def facet_row(ws, lang, kind):
 def span_of(ws):
     ys = sorted(w["y"] for w in ws if w.get("y"))
     return f"{ys[0]}–{ys[-1]}" if ys else ""
-def page(lang, me, other, title, desc, h1, lede, ws, app_hash, facets, nb, xdefault):
+def embed_box(lang, src, back, name):
+    T = L[lang]
+    code = (f'<iframe src="{src}" width="100%" height="230" loading="lazy" title="{name} – museaal.ee"></iframe>\n'
+            f'<p><a href="{back}">{name}{" at museaal.ee" if lang == "en" else " museaal.ee-s"}</a></p>')
+    return (f'<details class="emb"><summary>{T["embed_h"]}</summary><p class="m">{T["embed_t"]}</p>'
+            f'<textarea readonly rows="3" spellcheck="false">{e(code)}</textarea></details>')
+
+def page(lang, me, other, title, desc, h1, lede, ws, app_hash, facets, nb, xdefault, embed_src=None):
     T = L[lang]
     a_n = len({w["a"] for w in ws})
     return (f'<!doctype html><html lang="{lang}"><head><meta charset="utf-8">{STAMP}<meta name="viewport" content="width=device-width,initial-scale=1">'
@@ -189,6 +198,7 @@ def page(lang, me, other, title, desc, h1, lede, ws, app_hash, facets, nb, xdefa
             + f'<h2>{T["top_art"]}</h2>' + artists_list(ws, lang)
             + "".join(f'<h2>{h}</h2>{r}' for h, r in facets if r)
             + f'<p class="nb">{nb["links"]}</p>'
+            + (embed_box(lang, embed_src, me, h1) if embed_src else "")
             + f'<p class="m">{T["foot"]}</p></body></html>')
 
 def main():
@@ -214,7 +224,8 @@ def main():
                                             f'<a href="{dec_href(DECS[n_+1], lang)}">{dec_label(DECS[n_+1], lang)} →</a>' if n_ + 1 < len(DECS) else ""] if x)
             nb = dict(crumb=f'<a href="{BASE}/{T["dec"]}/">{T["dec_h"]}</a> › {lab}', links=links)
             open(f"site/{T['dec']}/{dd}.html", "w", encoding="utf-8").write(page(lang, me, other, title, desc, h1, lede, ws,
-                f"decade={dd}" if dd != "before" else "to=1799", [(T["by_med"], facet_row(ws, lang, "med")), (T["by_mus"], facet_row(ws, lang, "mus"))], nb, dec_href(dd, "en")))
+                f"decade={dd}" if dd != "before" else "to=1799", [(T["by_med"], facet_row(ws, lang, "med")), (T["by_mus"], facet_row(ws, lang, "mus"))], nb, dec_href(dd, "en"),
+            f"{BASE}/embed/{'' if lang == 'en' else 'et/'}{T['dec']}/{dd}.html"))
             urls.append((me, dec_href(dd, "en"), dec_href(dd, "et")))
         # media
         for m in MEDS:
@@ -247,7 +258,8 @@ def main():
             title = T["sub_t"].format(s=lab, n=fmt(len(ws), lang), a=an); desc = T["sub_d"].format(n=fmt(len(ws), lang), sl=("“" + s[3] + "”"), a=an, span=span_of(ws), media=media_phrase(ws, lang))
             nb = dict(crumb=f'<a href="{BASE}/{T["sub"]}/">{T["sub_h"]}</a> › {e(lab)}', links=f'<a href="{BASE}/{T["sub"]}/">{T["sub_h"]}</a>')
             open(f"site/{T['sub']}/{s[0] if lang == 'en' else s[1]}.html", "w", encoding="utf-8").write(page(lang, me, other, title, desc, lab, "", ws, f"q={s[3]}",
-                [(T["by_dec"], facet_row(ws, lang, "dec")), (T["by_med"], facet_row(ws, lang, "med")), (T["by_mus"], facet_row(ws, lang, "mus"))], nb, sub_href(s, "en")))
+                [(T["by_dec"], facet_row(ws, lang, "dec")), (T["by_med"], facet_row(ws, lang, "med")), (T["by_mus"], facet_row(ws, lang, "mus"))], nb, sub_href(s, "en"),
+            f"{BASE}/embed/{'' if lang == 'en' else 'et/'}{T['sub']}/{s[0] if lang == 'en' else s[1]}.html"))
             urls.append((me, sub_href(s, "en"), sub_href(s, "et")))
         # the four indexes
         for k, h, items in (("dec", T["dec_h"], [(dec_label(dd, lang), dec_href(dd, lang), len(by_dec[dd])) for dd in DECS]),

@@ -48,6 +48,7 @@ L = {
             au="{n} auction lots · {s} sold · {y}{r} — as the auction houses published them; not a valuation",
             foot="Museum records from MuIS and the EKM Digital Collection; gallery stock from the galleries' own catalogues; auction results as Haus Galerii, Vernissage, Allee galerii, Vaal galerii, E-Kunstisalong and Eesti Kunsti Oksjonid published them. ",
             full="Full catalogue", mt=" <span class=\"m\">(machine translation of the holder&#39;s Estonian text, unedited)</span>", enonly="",
+            embed_h="Embed on your page", embed_t="A strip of pictures, the count and a link back, for a blog, a course page or a museum's site. Paste both lines: the second is the link that tells search engines where the pictures live.",
             idx_title="Artists A–Z — Estonian Art Catalogue", idx_desc="Every artist in the Estonian Art Catalogue: {n} artists represented in Estonian public collections and galleries.",
             idx_h="Artists A–Z", idx_n="{n} artists", other_lang="Eesti keeles", hash="", in_mus="in Estonian museums and galleries", in_mus_nog="in Estonian museums",
             desc="{name}{dates}: {n} works in Estonian public collections{gal}, {span} — {media}, at {holders}. Every record links to its source.",
@@ -62,6 +63,7 @@ L = {
             au="{n} oksjonipartiid · {s} müüdud · {y}{r} — nii, nagu oksjonimajad avaldasid; mitte hinnang",
             foot="Muuseumikirjed MuISist ja EKM digikogust; galeriide laoseis galeriide endi kataloogidest; oksjonitulemused nii, nagu Haus Galerii, Vernissage, Allee galerii, Vaal galerii, E-Kunstisalong ja Eesti Kunsti Oksjonid need avaldasid. ",
             full="Kogu kataloog", mt="", enonly=" <span class=\"m\">(inglise keeles)</span>",
+            embed_h="Manusta oma lehele", embed_t="Pildiriba, teoste arv ja link tagasi — blogile, kursuse lehele või muuseumi kodulehele. Kleebi mõlemad read: teine on link, mis ütleb otsimootorile, kust pildid pärit on.",
             idx_title="Kunstnikud A–Ü — Eesti Kunstikataloog", idx_desc="Kõik Eesti Kunstikataloogi kunstnikud: {n} kunstnikku, kelle teoseid on Eesti avalikes kogudes ja galeriides.",
             idx_h="Kunstnikud A–Ü", idx_n="{n} kunstnikku", other_lang="In English", hash="lang=et&", in_mus="Eesti muuseumides ja galeriides", in_mus_nog="Eesti muuseumides",
             desc="{name}{dates}: {n} teost Eesti avalikes kogudes{gal}, {span} — {media}; {holders}. Iga kirje viitab allikale.",
@@ -95,6 +97,8 @@ CSS = ("body{margin:0;padding:28px;font:15px/1.55 -apple-system,BlinkMacSystemFo
        "th,td{text-align:left;padding:5px 9px 5px 0;border-bottom:1px solid #e3e5e9;vertical-align:top}"
        "th{font-size:.7rem;text-transform:uppercase;letter-spacing:.09em;color:#666;font-weight:500}"
        "p.bio{max-width:66ch}a.cta{display:inline-block;margin:12px 0}nav{font-size:.85rem;margin-bottom:18px}"
+       "details.emb{margin:22px 0 6px;font-size:.85rem}details.emb summary{cursor:pointer;color:#666}details.emb textarea{width:100%;box-sizing:border-box;font:12px/1.4 ui-monospace,Menlo,monospace;padding:8px;border:1px solid #2b2e34;background:#111316;color:#c7cace}"
+       ":root[data-theme=light] details.emb textarea{border-color:#ccc;background:#f7f7f7;color:#333}"
        ".rel{font-size:.85rem;color:#666;margin:6px 0;max-width:80ch;line-height:1.7}"
        ".rel.nb{margin-top:22px;padding-top:12px;border-top:1px solid #e3e5e9}"
        ":root:not([data-theme=light]) .rel{color:#8b9098}:root:not([data-theme=light]) .rel.nb{border-color:#2b2e34}"
@@ -268,6 +272,13 @@ def imsrc(im):
     return im[2:]
 STAMP = "<script>try{if(localStorage.getItem(\"ekr:theme\")===\"light\")document.documentElement.setAttribute(\"data-theme\",\"light\")}catch(e){}</script>"
 
+def embed_box(lang, src, back, name, T):
+    """the two lines to paste: the iframe, and the plain link that carries the credit"""
+    code = (f'<iframe src="{src}" width="100%" height="230" loading="lazy" title="{name} – museaal.ee"></iframe>\n'
+            f'<p><a href="{back}">{name}{" at museaal.ee" if lang == "en" else " museaal.ee-s"}</a></p>')
+    return (f'<details class="emb"><summary>{T["embed_h"]}</summary><p class="m">{T["embed_t"]}</p>'
+            f'<textarea readonly rows="3" spellcheck="false">{e(code)}</textarea></details>')
+
 def render(i, a, ws, lang):
     T = L[lang]; D = T["dir"]
     sl = SLUG[i]
@@ -367,6 +378,7 @@ def render(i, a, ws, lang):
            + f"<table><thead><tr><th>{T['year']}</th><th>{T['title']}</th><th>{T['tech']}</th><th>{T['dims']}</th>"
            f"<th>{T['held']}</th></tr></thead><tbody>{rows}</tbody></table>"
            + neighbours(i, lang)
+           + embed_box(lang, f"{BASE}/embed/{'' if lang == 'en' else 'et/'}{sl}.html", me, a["n"], T)
            + f"<p class=\"m\">{T['foot']}<a href=\"{BASE}/{'' if lang == 'en' else '#lang=et'}\">{T['full']}</a></p></body></html>")
 
 for i, a in enumerate(A):
