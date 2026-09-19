@@ -934,7 +934,7 @@
         <span class="r-title" title="${esc(w.t)}">${esc(w.t)}${w.n>1?`<span class="src-tag" title="${w.n} catalogued objects share this title and date — sheets, impressions or parts">×${w.n}</span>`:""}${chainOf(w)?`<span class="src-tag" title="${esc(T("au_chain_t", {n: chainOf(w).length}))}">×${chainOf(w).length}</span>`:""}</span>
         ${art}
         <span class="r-med" title="${esc(sub(w))}">${esc(medName(w.e))}</span>
-        <span class="r-coll" title="${esc(musName(w.mu))} · ${esc(w.nu||"")}">${esc(abbr(w.mu))}<span class="src-tag">${esc(SRCLAB[w.s]||w.s)}</span></span>
+        <span class="r-coll" title="${esc(musName(w.mu))} · ${esc(w.nu||"")}">${esc(abbr(w.mu))}</span>
       </button>${rl}${slBtn(id)}${detail}</div>`;
   }
 
@@ -994,19 +994,11 @@
     // a third way into artists beside search and the names door.
     $("aidx").hidden = state.group !== "artist" && !state.idxOpen && state.letter === null;
     const set = fullSet();
-    $("stat-w").textContent = fmt(W.length);
-    $("stat-a").textContent = fmt(STATS.artists);
-    $("stat-m").textContent = fmt(STATS.museums);
-    $("stat-g").textContent = fmt(STATS.galleries);
-    $("stat-gwrap").hidden = true; $("stat-mwrap").hidden = true;
+
     // Everything a gallery is selling right now, museum-held artist or not. It sits
     // beside the counts because it is the one thing here a visitor can act on.
-    $("stat-s").textContent = fmt(FOR_SALE);
     $("stat-sale").hidden = FOR_SALE === 0;
     $("stat-sale").setAttribute("aria-pressed", state.sale);
-    $("stat-au").textContent = fmt(AU_N);
-    $("stat-auc").hidden = AU_N === 0;
-    $("stat-auc").setAttribute("aria-pressed", state.group === "auction");
 
     const scope = [];
     if (state.shared) scope.push(T("sl_shared", {n: state.shared.size}));
@@ -1258,8 +1250,8 @@
       // an artist's name is a link to their own page (the crawler's route; the click
       // handler opens the artist in place instead), a period a button
       ([label, n, kind, v]) => (kind === "a" ? `<li><a href="${LANG === "et" ? "k" : "a"}/${esc(slug(A[v].n))}.html" data-door="a" data-v="${v}">` : `<li><button data-door="${kind}" data-v="${v}">`) +
-        `<span>${esc(label)}</span><span class="n">${num(n)}</span>${kind === "a" ? "</a>" : "</button>"}</li>`).join("") + "</ul></div>";
-    el.innerHTML = col("doors_name", TOP_ART.map(([i, n]) => [A[i].n, n, "a", i]), "d-names", "ed");
+        `<span>${esc(label)}</span>${kind === "a" ? "" : `<span class="n">${num(n)}</span>`}${kind === "a" ? "</a>" : "</button>"}</li>`).join("") + "</ul></div>";
+    el.innerHTML = col("doors_name", TOP_ART.map(([i, n]) => [A[i].n, n, "a", i]), "d-names");
     el.hidden = false;
   }
 
@@ -1432,8 +1424,7 @@
       const c = cols.reduce((a, b) => b.h < a.h ? b : a);
       c.h += ratioOf(w) + 0.32; c.t.push(w);        // the caption is about a third of the width
     });
-    return `<div class="wall-bar">${esc(restN < 0 ? T("wall_line_home", {p: fmt(pics.length)}) : restN ? T("wall_line", {p: fmt(pics.length), r: fmt(restN)}) : T("wall_line_all", {p: fmt(pics.length)}))} · ${esc(T("wall_imgs"))}</div>`
-      + (openW ? `<div class="wall-open rows">${rowHTML(openW, true)}</div>` : "")
+    return (openW ? `<div class="wall-open rows">${rowHTML(openW, true)}</div>` : "")
       + `<div class="wall" data-cols="${nCols}">${cols.map(c => `<div class="wcol">${c.t.map(tile).join("")}</div>`).join("")}</div>`
       + (ordered.length > shown.length ? `<button class="more" data-wmore="1" style="margin-bottom:22px">${esc(T("wall_more", {n: fmt(Math.min(72, ordered.length - shown.length))}))}</button>` : "");
   }
@@ -1696,12 +1687,6 @@
     const b = e.target.closest(".sl"); if (!b) return;
     e.stopPropagation(); slToggle(b.dataset.sl);
   });
-  $("stat-auc").addEventListener("click", () => {
-    if (state.group === "auction"){ setGroup("decade"); renderAll(); pushHash(); return; }
-    setGroup("auction"); state.decOrder = "latest"; state.expand.clear(); state.auLimit = 20; state.open = null; syncOrder();
-    renderAll(); pushHash();
-    $("register").scrollIntoView({behavior: "auto", block: "start"});
-  });
   $("stat-sale").addEventListener("click", () => {
     state.sale = !state.sale; state.open = null; state.expand.clear();
     if (state.sale && state.group !== "artist") setGroup("artist");   // and leaves the auction ledger, if that was open
@@ -1928,12 +1913,6 @@
     ) + stamp;
   }
 
-  $("share").addEventListener("click", () => {
-    const bar = $("sharebar");
-    bar.classList.toggle("on");
-    $("share").textContent = bar.classList.contains("on") ? T("hidelink") : T("linkview");
-    refreshShare();
-  });
   $("sharecopy").addEventListener("click", async () => {
     const inp = $("shareurl"), btn = $("sharecopy");
     try { await navigator.clipboard.writeText(inp.value); btn.textContent = T("copied"); }
@@ -1955,10 +1934,6 @@
     if (sub) sub.textContent = T("sub").replace(/\d{4}\s*[–-]\s*\d{4}/, `${Math.min(...ys)}–${Math.max(...ys)}`);
     $("lang-et").setAttribute("aria-pressed", LANG === "et");
     $("lang-en").setAttribute("aria-pressed", LANG === "en");
-    $("built").textContent = DATA.meta.built;
-    $("srcsplit").textContent = LANG === "en"
-      ? `${DATA.meta.dated_from_title} works carry a date the cataloguer wrote at the end of the title rather than in the dating field; those are marked with an asterisk. ${DATA.meta.objects.toLocaleString(LANG === "en" ? "en-GB" : "et-EE")} catalogued objects → ${DATA.meta.works.toLocaleString(LANG === "en" ? "en-GB" : "et-EE")} works (identical title + date + artist collapsed): ${DATA.meta.muis.toLocaleString(LANG === "en" ? "en-GB" : "et-EE")} from MuIS, ${DATA.meta.ekm.toLocaleString(LANG === "en" ? "en-GB" : "et-EE")} from the EKM Digital Collection, ${DATA.meta.both.toLocaleString(LANG === "en" ? "en-GB" : "et-EE")} in both, merged on inventory number. A further ${DATA.meta.gallery.toLocaleString(LANG === "en" ? "en-GB" : "et-EE")} works are the current stock of ${DATA.meta.galleries} galleries, from their own catalogues.${DATA.meta.past ? ` ${fmt(DATA.meta.past)} are past listings — works a gallery has sold (${fmt(DATA.meta.past_sold)}) or no longer lists — kept as a record of the work, never as stock.` : ""}${DATA.meta.auction ? ` ${fmt(DATA.meta.auction)} auction lots (${fmt(DATA.meta.auction_sold)} sold) are results as Haus Galerii, Vernissage, Allee galerii, Vaal galerii, E-Kunstisalong and Eesti Kunsti Oksjonid published them.` : ""}`
-      : `${DATA.meta.dated_from_title} teosel on dateering kirjutatud pealkirja lõppu, mitte dateeringuvälja; need on tähistatud tärniga. ${DATA.meta.objects.toLocaleString("et")} museaali → ${DATA.meta.works.toLocaleString("et")} teost (sama pealkiri + dateering + autor koondatud): ${DATA.meta.muis.toLocaleString("et")} MuIS-ist, ${DATA.meta.ekm.toLocaleString("et")} EKM Digitaalkogust, ${DATA.meta.both.toLocaleString("et")} mõlemast, ühendatud tulmenumbri järgi. Veel ${DATA.meta.gallery.toLocaleString("et")} teost on ${DATA.meta.galleries} galerii praegune müügivalik, nende endi kataloogidest.${DATA.meta.past ? ` ${fmt(DATA.meta.past)} on varasemad müügipakkumised — teosed, mille galerii on müünud (${fmt(DATA.meta.past_sold)}) või mida ta enam ei paku — jäetud teose kirjena, mitte kunagi laoseisuna.` : ""}${DATA.meta.auction ? ` ${fmt(DATA.meta.auction)} oksjonipartiid (${fmt(DATA.meta.auction_sold)} müüdud) on tulemused nii, nagu Haus Galerii, Vernissage, Allee galerii, Vaal galerii, E-Kunstisalong ja Eesti Kunsti Oksjonid need avaldasid.` : ""}`;
     const un = $("undated-note");
     if (un) un.textContent = LANG === "en"
       ? `${DATA.meta.undated} of ${DATA.meta.works.toLocaleString(LANG === "en" ? "en-GB" : "et-EE")} records carry no dating; they sit in their own group rather than being guessed into a decade.`

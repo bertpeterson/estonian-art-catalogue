@@ -41,7 +41,7 @@ const check = (name, ok, detail) => { console.log(`${ok ? "ok  " : "FAIL"} ${nam
   check("landing: the names are links a crawler can follow", (await ev(`document.querySelectorAll('a[data-door=a][href^="a/"]').length`)) === 16
         && (fs.readFileSync(path.join(DIR, "index.html"), "utf-8").match(/href="a\/[a-z0-9-]+\.html" data-door="a"/g) || []).length === 16);
   check("landing: seventy-two tiles", (await ev(`document.querySelectorAll(".wt").length`)) === 72);
-  check("landing: masthead figures", (await ev(`+document.querySelector("#stat-w").textContent.replace(/[^0-9]/g,"")`)) > 90000);
+  check("landing: the for-sale button is there", (await ev(`!!document.querySelector("#stat-sale") && !document.querySelector("#stat-sale").hidden`)) === true);
   // the worker stores the content-named data files on the first visit; a reload is then answered from the cache
   const cached = await ev(`(async () => { for (let i = 0; i < 40; i++){ const c = await caches.open("museaal-v1"); const ks = (await c.keys()).map(k => k.url); if (ks.some(u => /index\\.json\\?v=/.test(u))) return ks.length; await new Promise(r => setTimeout(r, 250)); } return 0; })()`);
   check("service worker: data stored on the first visit", cached > 0, `${cached} entries`);
@@ -71,7 +71,7 @@ const check = (name, ok, detail) => { console.log(`${ok ? "ok  " : "FAIL"} ${nam
   await open("#group=auction", 5000);
   check("auctions: highest hammer price first", /€\s?\d{3},?\d{3}/.test(await ev(`(document.querySelector(".row .rl-au")||{}).textContent||""`)));
   await open("#lang=et&artist=eduard-wiiralt", 5000);
-  check("estonian: the page speaks Estonian", /KUNSTNIKKU|kunstiseinal/.test(await ev(`document.body.textContent`)));
+  check("estonian: the page speaks Estonian", /Sarnased kunstnikud|Kõik \d[\d ]* kunstnikku/.test(await ev(`document.body.textContent`)));
   await open("#decade=1920", 5000);
   check("decade: wall", (await ev(`document.querySelectorAll(".wt").length`)) >= 12);
   check("no JavaScript errors", errors.length === 0, errors.slice(0, 3).join(" | "));

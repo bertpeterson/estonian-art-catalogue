@@ -34,10 +34,10 @@ def slug(n):    # the same slug build_pages.py gives the artist's page
     n = unicodedata.normalize("NFKD", n or "").encode("ascii", "ignore").decode()
     return re.sub(r"^-+|-+$", "", re.sub(r"[^a-z0-9]+", "-", n.lower())) or "artist"
 num = lambda n: f"{n:,}"
-door = ('<div class="d-names"><h2>' + e(I18N["EN"]["doors_name"]) + ' <span class="tag">ed</span></h2><ul>'
+door = ('<div class="d-names"><h2>' + e(I18N["EN"]["doors_name"]) + '</h2><ul>'
         # a link each, to the artist's own page: what a crawler follows from the landing
         # page, and what a reader gets before the app is here; the app intercepts the click
-        + "".join(f'<li><a href="a/{slug(A[i]["n"])}.html" data-door="a" data-v="{i}"><span>{e(A[i]["n"])}</span><span class="n">{num(counts.get(i, 0))}</span></a></li>' for i in canon) + "</ul></div>")
+        + "".join(f'<li><a href="a/{slug(A[i]["n"])}.html" data-door="a" data-v="{i}"><span>{e(A[i]["n"])}</span></a></li>' for i in canon) + "</ul></div>")
 
 # the wall: pictured works, masterpieces first (rank slipped by the seed), then the
 # door's names and the highlights, then the rest -- artists taking turns within a medium
@@ -83,7 +83,7 @@ def tile(w, r, rs, j):
             f'<span class="wt-cap"><i>{e(w["t"])}</i><span>{e(A[w["a"]]["n"])} · {lab}</span></span></a>')
 npics = len(pics)
 bar = I18N["EN"]["wall_line_home"].replace("{p}", f"{npics:,}") + " · " + I18N["EN"]["wall_imgs"]
-wall = (f'<div class="wall-bar">{e(bar)}</div><div class="wall" data-cols="6" data-seed="{SEED}" data-keys="{e(",".join(key(w) for w in shown))}">'
+wall = (f'<div class="wall" data-cols="6" data-seed="{SEED}" data-keys="{e(",".join(key(w) for w in shown))}">'
         + "".join('<div class="wcol">' + "".join(tile(*t, j) for j, t in enumerate(c["t"])) + "</div>" for c in cols) + "</div>")
 json.dump({"doors": door, "register": wall, "seed": SEED}, open("site/landing.json", "w", encoding="utf-8"), ensure_ascii=False)
 print(f"  landing baked   {len(shown)} tiles, seed {SEED}, first: {shown[0]['t']} · {A[shown[0]['a']]['n']}")
