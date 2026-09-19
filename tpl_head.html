@@ -370,7 +370,7 @@ footer p{margin:0;font-size:.81rem;line-height:1.6;color:var(--grey-6);max-width
 /* the A-Z link is one line; left in a grid cell beside three long notes it sat at
    the top of a tall row with a void beneath it. It takes a row of its own. */
 .hub-link{border-bottom:1px solid var(--rule);color:var(--grey-6)}
-footer p.nav{grid-column:1/-1;max-width:none;margin-bottom:-12px}   /* the two crawlable lines span the columns; the three paragraphs sit beneath, aligned */
+footer p.nav,footer p.foot1{grid-column:1/-1;max-width:none;margin-bottom:-12px}   /* the two crawlable lines span the columns; the three paragraphs sit beneath, aligned */
 footer b{color:var(--ink);font-weight:500}
 footer a{border-bottom:1px solid var(--rule)}
 
@@ -593,29 +593,9 @@ footer a{border-bottom:1px solid var(--rule)}
             <button id="th-dark" aria-pressed="true" data-i18n="th_dark"></button>
           </div>
         </div>
-        <p class="mast-sub" data-i18n="sub"></p>
-      </div>
-      <div class="mast-stats">
-        <div><b id="stat-w">0</b><span data-i18n="works"></span></div>
-        <div><b id="stat-a">0</b><span data-i18n="artists"></span></div>
-        <!-- museums and galleries are counted in the sources note, not here: four
-             figures read as a masthead, six as a table -->
-        <div id="stat-mwrap" hidden><b id="stat-m">0</b><span data-i18n="museums"></span></div>
-        <div id="stat-gwrap" hidden><b id="stat-g">0</b><span data-i18n="galleries"></span></div>
-        <!-- the one stat that is a door: the works a visitor can actually acquire -->
-        <button class="stat-btn" id="stat-sale" hidden><b id="stat-s">0</b><span data-i18n="forsale"></span></button>
-        <!-- and the other thing a visitor can act on: what the auction record says -->
-        <button class="stat-btn" id="stat-auc" hidden><b id="stat-au">0</b><span data-i18n="auctioned"></span></button>
       </div>
     </div>
-    <p class="standfirst" data-i18n-html="standfirst"></p>
-    <div class="mast-links">
-      <a class="mast-link" href="stats.html" data-i18n="statslink"></a>
-      <details class="srcdetails">
-        <summary data-i18n="srcsummary"></summary>
-        <p class="srcline" data-i18n-html="srcline"></p>
-      </details>
-    </div>
+
   </header>
 
   <section class="histo">
@@ -640,6 +620,7 @@ footer a{border-bottom:1px solid var(--rule)}
         <button id="g-decade" aria-pressed="true" data-i18n="decade"></button>
         <button id="g-artist" aria-pressed="false" data-i18n="artist"></button>
         <button id="g-auc" aria-pressed="false" data-i18n="auctions"></button>
+        <button id="stat-sale" aria-pressed="false" data-i18n="forsale_chip" hidden></button>
       </div>
     </div>
     <div class="ctl">
@@ -666,7 +647,6 @@ footer a{border-bottom:1px solid var(--rule)}
     </div>
     <button class="linkbtn" id="filters-toggle" aria-expanded="false" aria-controls="filterpanel">Show filters</button>
     <button class="linkbtn" id="mylist" aria-pressed="false"></button>
-    <button class="linkbtn" id="share" data-i18n="linkview"></button>
     <button class="linkbtn" id="reset" data-i18n="reset"></button>
   </div>
 
@@ -732,8 +712,6 @@ footer a{border-bottom:1px solid var(--rule)}
        <a href="stats.html">The catalogue in figures</a> · <a href="stats-et.html" hreflang="et">Kataloog arvudes</a></p>
     <p class="nav">By <a href="decades/">decade</a>, <a href="media/">medium</a>, <a href="museums/">museum</a> and <a href="subjects/">subject</a> ·
        <a href="kumnendid/" hreflang="et">kümnendi</a>, <a href="liigid/" hreflang="et">liigi</a>, <a href="muuseumid/" hreflang="et">muuseumi</a> ja <a href="ained/" hreflang="et">aine kaupa</a></p>
-    <p data-i18n-html="foot1"></p>
-    <p data-i18n-html="foot2"></p>
-    <p data-i18n-html="foot3"></p>
+    <p class="foot1" data-i18n-html="foot"></p>
   </footer>
 </div>
