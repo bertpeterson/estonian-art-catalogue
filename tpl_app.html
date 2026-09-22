@@ -1427,7 +1427,7 @@
     const tile = (w, j) => {
       const src = imgSrc(picOf(w)), r = ratioOf(w);
       return `<button class="wt${state.open === w.k ? " on" : ""}" data-wt="${esc(w.k)}" title="${esc(w.t)} · ${esc(A[w.a].n)}">${src
-        ? `<img src="${esc(src)}" alt="${esc(w.t)}, ${esc(A[w.a].n)}" loading="${j < 2 ? "eager" : "lazy"}" style="aspect-ratio:1/${r.toFixed(3)}${cropPos(w)}" referrerpolicy="no-referrer-when-downgrade">`
+        ? `<img src="${esc(src)}" alt="${esc(w.t)}, ${esc(A[w.a].n)}" loading="${j < 2 ? "eager" : "lazy"}"${j < 2 ? ' fetchpriority="high"' : ""} style="aspect-ratio:1/${r.toFixed(3)}${cropPos(w)}" referrerpolicy="no-referrer-when-downgrade">`
         : `<span class="wt-ph" style="aspect-ratio:1/${r.toFixed(3)}"></span>`}<span class="wt-cap"><i>${esc(w.t)}${dups.has(w) ? `<span class="src-tag" title="${esc(T("wall_dup", {n: dups.get(w)}))}">×${dups.get(w)}</span>` : ""}</i><span>${showArtist ? esc(A[w.a].n) + " · " : ""}${w.y ?? esc(T("nd"))} · ${esc(abbr(w.mu))}</span></span></button>`;
     };
     const nCols = wallCols(), cols = Array.from({length: nCols}, () => ({h: 0, t: []}));
