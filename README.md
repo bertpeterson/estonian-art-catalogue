@@ -419,11 +419,11 @@ stale, and `sw.js` — a service worker — keeps them in the browser's Cache St
 index from disk and downloads nothing until the data changes, when the new file is a new address and the old
 one is dropped. Pages themselves always come from the network; the last copy opens offline.
 
-**Less on the page.** The masthead is the title and the two switches; the four figures, the tagline, the
-standfirst and the source note went (the stats page and this README carry them), with the *Link to this
-view* button (the address bar is the link), the count line over the wall, the source tags on rows (the
-record keeps them), the counts on the door's names, and two of the footer's three paragraphs. *For sale* sits
-in the group row. Nothing the site could do was removed; it stopped being on the first screen.
+**Less on the page.** The masthead is the title, the two switches and the four figures (two of them doors:
+*for sale* and *auctioned*); the tagline, the standfirst and the source note went (the stats page and this
+README carry them), with the *Link to this view* button (the address bar is the link), the count line over
+the wall, the source tags on rows (the record keeps them), the counts on the door's names, and two of the
+footer's three paragraphs. Nothing the site could do was removed; it stopped being on the first screen.
 
 **The artwall.** The untouched page opens on it — the fifty-four chosen works, then the door's names — with
 the histogram, the door and the search as the ways into everything else; and a view with twelve pictures

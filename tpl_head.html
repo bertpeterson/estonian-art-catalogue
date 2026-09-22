@@ -594,8 +594,19 @@ footer a{border-bottom:1px solid var(--rule)}
           </div>
         </div>
       </div>
+      <div class="mast-stats">
+        <div><b id="stat-w">0</b><span data-i18n="works"></span></div>
+        <div><b id="stat-a">0</b><span data-i18n="artists"></span></div>
+        <!-- museums and galleries are counted in the sources note, not here: four
+             figures read as a masthead, six as a table -->
+        <div id="stat-mwrap" hidden><b id="stat-m">0</b><span data-i18n="museums"></span></div>
+        <div id="stat-gwrap" hidden><b id="stat-g">0</b><span data-i18n="galleries"></span></div>
+        <!-- the one stat that is a door: the works a visitor can actually acquire -->
+        <button class="stat-btn" id="stat-sale" hidden><b id="stat-s">0</b><span data-i18n="forsale"></span></button>
+        <!-- and the other thing a visitor can act on: what the auction record says -->
+        <button class="stat-btn" id="stat-auc" hidden><b id="stat-au">0</b><span data-i18n="auctioned"></span></button>
+      </div>
     </div>
-
   </header>
 
   <section class="histo">
@@ -620,7 +631,6 @@ footer a{border-bottom:1px solid var(--rule)}
         <button id="g-decade" aria-pressed="true" data-i18n="decade"></button>
         <button id="g-artist" aria-pressed="false" data-i18n="artist"></button>
         <button id="g-auc" aria-pressed="false" data-i18n="auctions"></button>
-        <button id="stat-sale" aria-pressed="false" data-i18n="forsale_chip" hidden></button>
       </div>
     </div>
     <div class="ctl">
