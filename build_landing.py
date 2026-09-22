@@ -77,9 +77,10 @@ POS = {"l": "100% 50%", "r": "0% 50%", "t": "50% 100%", "b": "50% 0%"}   # the c
 def tile(w, r, rs, j):
     lab = f'{w.get("y") if w.get("y") else "n.d."} · {e(name("mu", w["mu"]))}'
     zm = f';object-position:{POS[rs]}' if rs else ""
+    fp = ' fetchpriority="high"' if j < 2 else ""      # the top two of each column, before the index
     # the top two tiles of each column are in view at once and load at once
     return (f'<a class="wt" data-wt="{e(key(w))}" href="#artist={slug(A[w["a"]]["n"])}&open={e(key(w))}" title="{e(w["t"])} · {e(A[w["a"]]["n"])}">'
-            f'<img src="{e(imsrc(w["im"]))}" alt="{e(w["t"])}, {e(A[w["a"]]["n"])}" loading="{"eager" if j < 2 else "lazy"}"{' fetchpriority="high"' if j < 2 else ""} style="aspect-ratio:1/{r:.3f}{zm}" referrerpolicy="no-referrer-when-downgrade">'
+            f'<img src="{e(imsrc(w["im"]))}" alt="{e(w["t"])}, {e(A[w["a"]]["n"])}" loading="{"eager" if j < 2 else "lazy"}"{fp} style="aspect-ratio:1/{r:.3f}{zm}" referrerpolicy="no-referrer-when-downgrade">'
             f'<span class="wt-cap"><i>{e(w["t"])}</i><span>{e(A[w["a"]]["n"])} · {lab}</span></span></a>')
 npics = len(pics)
 bar = I18N["EN"]["wall_line_home"].replace("{p}", f"{npics:,}") + " · " + I18N["EN"]["wall_imgs"]
