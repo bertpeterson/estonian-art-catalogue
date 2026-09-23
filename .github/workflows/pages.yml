@@ -25,6 +25,13 @@ jobs:
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      # the scripts also run on the Mac, whose Python is 3.9: code that only 3.12 accepts
+      # (an f-string nesting its own quotes) passed CI once and broke the local build
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.9"
+      - name: The scripts compile under Python 3.9
+        run: python -m compileall -q -l . data
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: "3.12"

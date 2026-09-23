@@ -16,6 +16,10 @@ DETAIL = {"d", "de", "dm", "mem", "mi", "oi", "im"}
 d = json.load(open(SRC, encoding="utf-8"))
 W, A = d["works"], d["artists"]
 
+# the six similar artists (data/similar.py) live beside the dataset, not in it
+if os.path.exists("data/similar.json"):
+    for _i, _s in json.load(open("data/similar.json", encoding="utf-8")).items(): A[int(_i)]["sim"] = _s
+
 shutil.rmtree(OUT, ignore_errors=True)
 os.makedirs(f"{OUT}/data/detail", exist_ok=True)
 
