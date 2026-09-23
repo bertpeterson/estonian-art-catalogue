@@ -103,6 +103,7 @@ h1 a:hover{color:var(--grey-6)}
 .cent-lab{font-family:var(--mono);font-size:.6rem;letter-spacing:.13em;text-transform:uppercase;
   color:var(--grey-4);padding-top:7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .cent.nd .cent-lab{color:var(--grey-4)}
+.cent-lab{display:none}   /* one label row under the bars: the first decade of each century names it (1800, 1900) */
 .cent.early{cursor:pointer}
 .early-btn{width:100%;background:none;border:0;padding:0;cursor:pointer;display:flex;flex-direction:column;
   justify-content:flex-end;gap:7px;font-family:var(--mono);font-size:.66rem;color:var(--grey-6)}
@@ -142,7 +143,7 @@ h1 a:hover{color:var(--grey-6)}
 .yr-div{display:flex;align-items:baseline;gap:10px;font-family:var(--mono);font-size:.63rem;letter-spacing:.12em;
   color:var(--grey-4);padding:12px 0 4px 12px;margin-left:-12px;border-bottom:1px solid var(--rule)}
 .yr-div b{color:var(--ink);font-weight:500;font-variant-numeric:tabular-nums;letter-spacing:.04em;font-size:.72rem}
-.controls{position:sticky;top:0;z-index:20;background:var(--paper);border-bottom:1px solid var(--ink);padding:12px 0;display:flex;flex-wrap:wrap;gap:12px 18px;align-items:center}
+.controls{position:sticky;top:0;z-index:20;background:var(--paper);border-bottom:1px solid var(--ink);padding:12px 0;display:flex;flex-wrap:wrap;gap:12px 16px;align-items:center}
 .ctl{display:flex;align-items:center;gap:10px}
 .sortsel{font-family:var(--mono);font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;
   background:var(--field);border:1px solid var(--rule);color:var(--ink);padding:7px 8px;cursor:pointer}
@@ -502,6 +503,7 @@ footer a{border-bottom:1px solid var(--rule)}
 /* 40+ decade ticks collide long before the page itself gets narrow */
 @media (max-width:1000px){
   .bar-lab{font-size:0;border-top:1px solid var(--rule);padding-top:6px;min-height:1px}
+  .cent-lab{display:block}   /* the decade labels are too small to show here, so the century row stays */
   .cent-lab{padding-top:5px}
 }
 /* Touch targets. WCAG 2.5.8 asks for 24x24 minimum; on a phone the year rows were
@@ -632,7 +634,6 @@ footer a{border-bottom:1px solid var(--rule)}
       </div>
     </div>
     <div class="ctl">
-      <span class="ctl-label" data-i18n="sort"></span>
       <select id="sortby" class="sortsel" aria-label="Sort rows by">
         <option value="year" data-i18n="s_year"></option>
         <option value="artist" data-i18n="s_artist"></option>
@@ -647,7 +648,6 @@ footer a{border-bottom:1px solid var(--rule)}
       </div>
     </div>
     <div class="ctl" id="viewctl" hidden>
-      <span class="ctl-label" data-i18n="show"></span>
       <div class="seg" role="group" aria-label="View">
         <button id="v-list" aria-pressed="true" data-i18n="v_list"></button>
         <button id="v-wall" aria-pressed="false"></button>
