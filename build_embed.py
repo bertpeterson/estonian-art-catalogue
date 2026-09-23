@@ -68,7 +68,8 @@ def main():
             a = A[i]; sl = H.ARTIST_SLUG[i]
             life = a.get("l") or ["", ""]
             dates = f"{life[0]}–{life[1]}" if life[0] or life[1] else ""
-            sub = f"{dates + ' · ' if dates else ''}{H.fmt(len(ws), lang)} {t['works']}"
+            nw = sum(1 for w in ws if not (w.get("ac") and not w.get("al")))
+            sub = f"{dates + ' · ' if dates else ''}{H.fmt(nw, lang)} {t['works']}"
             open(f"site/{t['dir']}/{sl}.html", "w", encoding="utf-8").write(
                 embed(lang, sl, a["n"], sub, ws, f"{BASE}/{t['art']}/{sl}.html", f"artist={sl}", False)); n += 1
         for dd in H.DECS:

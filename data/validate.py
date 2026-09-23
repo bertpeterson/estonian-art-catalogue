@@ -46,7 +46,8 @@ check(not clash, f"{len(clash)} artists whose Wikidata description contradicts t
 
 # --- counts agree with the data
 meta = d["meta"]
-check(meta["works"] == len(W), f"meta.works {meta['works']} != {len(W)}")
+check(meta.get("records", meta["works"]) == len(W), f"meta.records {meta.get('records')} != {len(W)}")
+check(meta["works"] == sum(1 for w in W if not (w.get("ac") and not w.get("al"))), "meta.works is not the number of distinct works")
 check(meta["artists"] == len(A), f"meta.artists {meta['artists']} != {len(A)}")
 check(meta["undated"] == sum(1 for w in W if w.get("y") is None), "meta.undated disagrees with the works")
 kinds = collections.Counter(w.get("kind", "held") for w in W)

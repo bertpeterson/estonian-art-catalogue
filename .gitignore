@@ -76,3 +76,6 @@ data/similar.json
 data/*_probe.json
 # retired: the single-file Claude Artifact snapshot (it could not follow the split index)
 register.html
+
+# local dev helpers (the headless-browser script)
+.dev/

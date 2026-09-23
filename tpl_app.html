@@ -418,6 +418,8 @@
   const CHAIN = (() => { const m = new Map(); W.forEach(w => { if (w.ac){ if (!m.has(w.ac)) m.set(w.ac, []); m.get(w.ac).push(w); } }); m.forEach(l => l.sort((x, y) => String(x.ad).localeCompare(String(y.ad)))); return m; })();
   const chainOf = w => (w.ac && CHAIN.get(w.ac)) || null;
   const latestLot = w => !w.ac || w.al;
+  // the works, as distinct works: an earlier lot of a work sold again is in its history
+  const NWORKS = W.reduce((n, w) => n + (latestLot(w) ? 1 : 0), 0);
   const baseSet = () => textSet().filter(w => inList(w) && latestLot(w)
       && (state.media.size===0 || state.media.has(w.e))
       && (state.museums.size===0 || state.museums.has(w.mu))
@@ -1029,7 +1031,7 @@
 
     // Everything a gallery is selling right now, museum-held artist or not. It sits
     // beside the counts because it is the one thing here a visitor can act on.
-    $("stat-w").textContent = fmt(W.length);
+    $("stat-w").textContent = fmt(NWORKS);
     $("stat-a").textContent = fmt(STATS.artists);
     $("stat-m").textContent = fmt(STATS.museums);
     $("stat-g").textContent = fmt(STATS.galleries);
@@ -1059,7 +1061,7 @@
     if (state.srcs.size) scope.push([...state.srcs].map(s=>SRCLAB[s]||s).join(" + "));
     if (state.origins.size) scope.push([...state.origins].map(o=>o===NOORIGIN?T("originunknown"):o).join(" + "));
     if (state.groups.size) scope.push([...state.groups].map(grpLabel).join(" + "));
-    $("countline").textContent = T("ofworks",{a:fmt(set.length),b:fmt(W.length)}) +
+    $("countline").textContent = T("ofworks",{a:fmt(set.length),b:fmt(NWORKS)}) +
       (scope.length ? " · " + scope.join(" · ") : " · " + T("complete"));
     // one decade, one medium or one museum chosen: the hub page for it, a stable address
     // beside the app's own view (the hubs are static pages, build_hubs.py)
