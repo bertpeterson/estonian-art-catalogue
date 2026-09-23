@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Similar artists -> a["sim"] on every artist in data.json
+"""Similar artists -> similar.json {artist position: [six nearest artists]}
 
 For someone who likes what they see on an artist's page and wants more of it. Two artists
 are near when their work looks alike from a distance: the same decades, the same media,
@@ -15,6 +15,7 @@ import numpy as np
 
 d = json.load(open("data.json", encoding="utf-8"))
 A, W, V = d["artists"], d["works"], d["vocab"]
+for a in A: a.pop("sim", None)
 name = lambda f, v: V[f][v] if isinstance(v, int) and f in V else v
 MIN_WORKS, K = 5, 6
 
@@ -78,7 +79,10 @@ for start in range(0, n, 512):
         order = np.argsort(-S[r])[:K]
         A[i]["sim"] = [int(j) for j in order if S[r, j] > 0.35]
         sims += bool(A[i]["sim"])
-json.dump(d, open("data.json", "w", encoding="utf-8"), ensure_ascii=False)
+# its own file: the build reads it beside data.json. It used to be written into data.json,
+# in json.dump's spaced format where merge.py writes a compact one -- so every build
+# rewrote all 45 MB of the committed dataset, and git stored a full new copy each time
+json.dump({str(i): a["sim"] for i, a in enumerate(A) if a.get("sim")}, open("similar.json", "w", encoding="utf-8"), separators=(",", ":"))
 print(f"SIMILAR ARTISTS: {sims:,} of {n:,} artists have neighbours; {int(cand.sum()):,} candidates")
 for nm in ["Konrad Mägi", "Eduard Wiiralt", "Jüri Arrak", "Karin Luts", "Malle Leis", "Johann Köler", "Kristjan Raud"]:
     i = next(i for i, a in enumerate(A) if a["n"] == nm)

@@ -19,6 +19,10 @@ BASE = "https://museaal.ee"
 OUT  = "site/a"
 d = json.load(open("data/data.json", encoding="utf-8"))
 A, W, V = d["artists"], d["works"], d.get("vocab", {})
+
+# the six similar artists (data/similar.py) live beside the dataset, not in it
+if os.path.exists("data/similar.json"):
+    for _i, _s in json.load(open("data/similar.json", encoding="utf-8")).items(): A[int(_i)]["sim"] = _s
 os.makedirs(OUT, exist_ok=True)
 
 def slug(s):

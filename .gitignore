@@ -69,3 +69,10 @@ data/embcache/
 
 # Finder/iCloud conflict copies of data files rewritten mid-sync ("chart_sides 2.json")
 data/* [0-9].json
+
+# derived at every build by data/similar.py, read beside data.json
+data/similar.json
+# one-off probes of a source's pages, kept locally while writing a parser
+data/*_probe.json
+# retired: the single-file Claude Artifact snapshot (it could not follow the split index)
+register.html

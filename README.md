@@ -49,8 +49,7 @@ site/                 the static site, built by ./build_site.sh — not committe
   data/detail/<decade>.json  shards — descriptions, dimensions, collapsed duplicates
   a/<artist>.html     a static page per artist, plus redirects for retired spellings
   404.html            for stale addresses
-register.html         a dated snapshot as one self-contained file — see below
-data/data.json        the merged dataset (see Schema below)
+data/data.json        the merged dataset (see Schema below); written by merge.py only — the build reads it, never writes it
 data/*.py             the harvest, enrichment and merge scripts
 data/lookalikes.py    visual look-alikes of the museum pictures (CLIP, local; run deliberately)
 tpl_head.html         markup + CSS for the app
@@ -257,17 +256,12 @@ pages (`build_hubs.py`): by decade (`/decades/1920.html`, `/kumnendid/1920.html`
 by subject — a word in the title: *maastik*, *portree*, *Kalevipoeg*, *Toompea*, *kolhoos* — each with the
 artists most represented, a wall of pictures and links onward, in both languages.
 
-## Two builds, and which one is current
+## One build
 
-`site/` is canonical. It shards its data and fetches on demand, so it has no size
-limit, and is built and deployed by the push itself.
-
-`register.html` is a single self-contained file, published as a Claude Artifact.
-Artifacts cap at 16 MB and cannot fetch anything at runtime, so the whole catalogue
-has to fit in the file — which stopped being possible at around 52,000 works. It is
-now a **dated snapshot**: it says so on its own masthead, in both languages, and
-links to the live site. Rebuild it deliberately with `python3 build_artifact.py`,
-not as part of the normal cycle.
+`site/` is the catalogue. It shards its data and fetches on demand, so it has no size limit, and it is built
+and deployed by the push itself. A single-file snapshot (`register.html`, once published as a Claude
+Artifact) was retired in September 2026: an artifact caps at 16 MB and cannot fetch at runtime, and the
+catalogue outgrew it at around 52,000 works.
 
 ## Reusing the data
 
