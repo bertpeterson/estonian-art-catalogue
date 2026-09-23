@@ -240,6 +240,21 @@
   // An auction result: the sale, and what the house published about the outcome.
   const eur = n => "€" + fmt(n);
   // a lot sold after the sale reads "Sold" like any other; the detail panel says how
+  // lots of this artist in sales still to come (upcoming.py): the date, the house and
+  // sale, the work, the starting price as published, a link to the lot; and where the
+  // same title was offered before, those results
+  const UP = DATA.upcoming || [];
+  const dmy = d => { if (!d) return ""; const [y, m, dd] = String(d).split("-"); return dd ? `${+dd}.${+m}.${y}` : `${+m}.${y}`; };
+  function upHTML(ai){
+    const lots = UP.filter(u => u.a === ai);
+    if (!lots.length) return "";
+    return `<div class="mono-up"><div class="d-k">${esc(T("up_head"))}</div>${lots.map(u => `<div class="up-lot">
+        <div class="up-when">${esc(dmy(u.d))} · ${esc(musName(u.h))}${u.s ? " · " + esc(u.s) : ""}</div>
+        <div><i>${esc(u.t)}</i>${u.yl ? ", " + esc(u.yl) : ""}${u.tc ? " · " + esc(u.tc) : ""}${u.dm ? " · " + esc(u.dm) : ""}</div>
+        <div class="up-p">${u.p ? `${esc(T("up_start"))} ${esc(eur(u.p))}` : ""}${href(u.u) ? ` · <a href="${href(u.u)}" target="_blank" rel="noopener">${esc(musName(u.h))} ↗</a>` : ""}</div>
+        ${u.pr ? `<div class="up-pr">${esc(T("up_prior"))}: ${u.pr.map(p => `${esc(String(p[0]).slice(0, 4))} ${esc(musName(p[1]))} ${p[2] ? esc(eur(p[2])) : esc(T("up_unsold"))}`).join(" · ")}</div>` : ""}
+      </div>`).join("")}<div class="up-note">${esc(T("up_note"))} <a href="${LANG === "et" ? "tulemas.html" : "upcoming.html"}">${esc(T("up_all"))} →</a></div></div>`;
+  }
   const auText = w => w.ao ? (w.ap ? T("au_sold", {p: eur(w.ap)}) : T("au_soldnp")) : T("au_unsold");
   // One line per artist: lots, sales, span, and the range of hammer prices.
   function auLine(i){
@@ -718,7 +733,7 @@
   function renderMono(){
     const el = $("mono");
     if (state.artist === null){ el.innerHTML = ""; return; }
-    const ar = A[state.artist], mine = W.filter(w=>w.a===state.artist);
+    const ar = A[state.artist], mine = W.filter(w=>w.a===state.artist && latestLot(w));   // works, not lots: an earlier sale of a work sold again is in its history
     const shown = fullSet().length;
     const life = (ar.l&&(ar.l[0]||ar.l[1])) ? `${ar.l[0]}–${ar.l[1]||""}` : "";
     const counts = decCounts(state.artist);
@@ -752,6 +767,7 @@
         <div class="mono-fig">${mine.length}</div>
         <div class="mono-figlab">${esc(T("worksinregister"))}${shown!==mine.length?` · ${esc(T("shown_n",{n:shown}))}`:""}</div>
         ${auLine(state.artist) ? `<div class="mono-au">${esc(auLine(state.artist))}</div>` : ""}
+        ${upHTML(state.artist)}
         <div class="mono-tl">
           ${(() => {
             // the chart spans the artist's own decades, a decade of air each side, not the

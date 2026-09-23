@@ -56,6 +56,7 @@ print(f"VAAL: {len(slugs)} sales listed", flush=True)
 
 today = datetime.date.today().isoformat()
 recs, n_open, n_unparsed = [], 0, 0
+coming = []
 for slug in slugs:
     page = fetch(f"{BASE}/oksjonid/{slug}"); time.sleep(0.5)
     tag = re.search(r"getItems\('(\d+)'\)", page)
@@ -66,7 +67,8 @@ for slug in slugs:
     days = a.get("days") or []
     dates = [f"{m.group(3)}-{m.group(2)}-{m.group(1)}" for d in days for m in [re.search(r"(\d{2})\.(\d{2})\.(\d{4})", d.get("auction_day_description") or "")] if m]
     ended = a.get("auction_status") == "ended" or (dates and max(dates) < today and any(i.get("item_price_final") for d in days for i in d.get("item", [])))
-    if not ended: n_open += 1; continue
+    ahead = not ended and (not dates or max(dates) >= today)       # a sale still to come (or running)
+    if not ended and not ahead: n_open += 1; continue                # past its days but no results yet: wait
     sale = clean(a.get("auction_name") or slug)
     n = 0
     for day in a.get("days") or [{"auction_day_description": "", "item": a.get("item", [])}]:
@@ -86,7 +88,7 @@ for slug in slugs:
             dm2 = re.search(r"\d+(?:[.,]\d+)?\s*[x×]\s*\d+(?:[.,]\d+)?(?:\s*[x×]\s*\d+(?:[.,]\d+)?)?", dims)
             dims = (re.sub(r"\s*[x×]\s*", " x ", dm2.group(0)).replace(",", ".") + " cm") if dm2 else ""
             life = clean(it.get("item_author_datum") or "")
-            recs.append({"aid": "vaal-" + str(it["item_id"]), "artist": artist, "title": title,
+            (coming if ahead else recs).append({"aid": "vaal-" + str(it["item_id"]), "artist": artist, "title": title,
                          "year": y4.group(1) if y4 else None, "yl": yl or None,
                          "tech": clean(it.get("item_technique") or ""), "dims": dims, "life": life or None,
                          "house": "Vaal galerii", "sale": sale, "when": when[:7], "date": when,
@@ -98,8 +100,14 @@ for slug in slugs:
     print(f"  {slug} {sale[:36]:36} lots {n}", flush=True)
 
 recs.sort(key=lambda r: (r["date"], r["artist"], r["title"]))
+# the sales still to come: their lots, with the starting price, for upcoming.py
+from upcoming import emit
+emit("Vaal galerii", [{"house": r["house"], "sale": r["sale"], "date": r.get("date") or r.get("when"), "artist": r["artist"], "title": r["title"],
+                  "year": r.get("year"), "yl": r.get("yl"), "tech": r.get("tech") or "", "dims": r.get("dims") or "", "start": r.get("start"), "url": r.get("url")}
+                 for r in coming])
+
 prev = json.load(open("auction_records.json", encoding="utf-8")) if os.path.exists("auction_records.json") else []
-json.dump([r for r in prev if r["house"] != "Vaal galerii"] + recs, open("auction_records.json", "w", encoding="utf-8"), ensure_ascii=False, indent=0)
+json.dump(sorted([r for r in prev if r["house"] != "Vaal galerii"] + recs, key=lambda r: (r["house"], str(r.get("date") or r.get("when") or ""), str(r["aid"]))), open("auction_records.json", "w", encoding="utf-8"), ensure_ascii=False, indent=0)
 sold = [r for r in recs if r["sold"]]
 print(f"\nVAAL AUCTION RESULTS: {len(recs)}   sold {len(sold)}   unsold {len(recs) - len(sold)}   sales {len({r['sale'] for r in recs})}")
 print(f"  sales still open {n_open}, lots unparsed {n_unparsed}, with year {sum(1 for r in recs if r['year'])}, with dims {sum(1 for r in recs if r['dims'])}, with life dates {sum(1 for r in recs if r['life'])}")

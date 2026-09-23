@@ -59,12 +59,22 @@ print(f"ALLEE: {len(cats)} sales listed", flush=True)
 LOTS = json.load(open("allee_lots.json", encoding="utf-8")) if os.path.exists("allee_lots.json") else {}
 today = datetime.date.today()
 recs, n_upcoming, n_unparsed, n_nolot = [], 0, 0, 0
+coming = []
+# the coming sales' days, from the auction page: "Sügisoksjonid 2026: 13.-15. novembril"
+DAYS = {(s.lower(), int(y)): int(d) for s, y, d in re.findall(r"(Kevad|Sügis|Suve|Talve)oksjonid\s+(\d{4}):\s*(\d{1,2})\.", clean(index))}
 for slug, sale in cats.items():
     m = SALE.search(sale)
     year, month = int(m.group(2)), MONTH.get((m.group(1) or "").lower(), 12)
-    if (year, month) > (today.year, today.month): n_upcoming += 1; continue
+    if (year, month) > (today.year, today.month) and not re.search(r"Alghind", fetch(f"{BASE}/kunstioksjon-kategooria/{slug}/") or ""):
+        n_upcoming += 1; continue                                    # announced, no lots online yet
     when = f"{year}-{month:02d}"
     h = fetch(f"{BASE}/kunstioksjon-kategooria/{slug}/"); time.sleep(0.8)
+    # a sale is still to come if its month is ahead, or it is this month and no lot
+    # has a hammer price yet -- it must not be recorded as a sale where nothing sold
+    ahead = (year, month) > (today.year, today.month) or ((year, month) == (today.year, today.month) and "Haamrihind" not in (h or ""))
+    if ahead: n_upcoming += 1
+    day = DAYS.get(((m.group(1) or "").lower(), year))
+    date = f"{year}-{month:02d}-{day:02d}" if day else when
     for art in re.finditer(r'<article id="post-(\d+)".*?</article>', h, re.S):
         pid, body = art.group(1), art.group(0)
         url = re.search(r'href="(' + BASE + r'/kunstioksjon/[^"]+)"', body)
@@ -87,6 +97,11 @@ for slug, sale in cats.items():
         dims = (re.sub(r"\s*[x×]\s*", " x ", dm.group(1)).replace(",", ".") + " cm") if dm and dm.group(1) \
                else (f"d {dm.group(2).replace(',', '.')} cm" if dm and dm.group(2) else "")
         y4 = re.match(r"(\d{4})", yl)
+        if ahead:                                                     # a coming lot: the listing is enough; its page is read once it has a result
+            coming.append({"house": "Allee galerii", "sale": sale, "date": date, "artist": artist, "title": title,
+                           "year": y4.group(1) if y4 else None, "yl": yl or None, "tech": LOTS.get(pid, ""), "dims": dims,
+                           "start": start, "url": url.group(1)})
+            continue
         # the lot page: the medium is the first sentence of the description block. A
         # past lot's page does not change, and at the ten-second delay the house asks
         # for, 2,000 of them are six hours: the medium once read is kept in
@@ -120,8 +135,13 @@ for slug, sale in cats.items():
 
 json.dump(LOTS, open("allee_lots.json", "w", encoding="utf-8"), ensure_ascii=False)
 recs.sort(key=lambda r: (r["when"], r["artist"], r["title"]))
+# the sales still to come: their lots, with the starting price, for upcoming.py
+from upcoming import emit
+emit("Allee galerii", [{"house": r["house"], "sale": r["sale"], "date": r.get("date") or r.get("when"), "artist": r["artist"], "title": r["title"],
+                  "year": r.get("year"), "yl": r.get("yl"), "tech": r.get("tech") or "", "dims": r.get("dims") or "", "start": r.get("start"), "url": r.get("url")}
+                 for r in coming])
 prev = json.load(open("auction_records.json", encoding="utf-8")) if os.path.exists("auction_records.json") else []
-json.dump([r for r in prev if r["house"] != "Allee galerii"] + recs, open("auction_records.json", "w", encoding="utf-8"), ensure_ascii=False, indent=0)
+json.dump(sorted([r for r in prev if r["house"] != "Allee galerii"] + recs, key=lambda r: (r["house"], str(r.get("date") or r.get("when") or ""), str(r["aid"]))), open("auction_records.json", "w", encoding="utf-8"), ensure_ascii=False, indent=0)
 sold = [r for r in recs if r["sold"]]
 print(f"\nALLEE AUCTION RESULTS: {len(recs)}   sold {len(sold)}   unsold {len(recs) - len(sold)}   sales {len({r['sale'] for r in recs})}")
 print(f"  upcoming sales left out {n_upcoming}, lots unparsed {n_unparsed}, without a price block {n_nolot}, with medium {sum(1 for r in recs if r['tech'])}, with dims {sum(1 for r in recs if r['dims'])}")

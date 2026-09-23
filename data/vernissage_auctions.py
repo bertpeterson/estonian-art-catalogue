@@ -45,6 +45,7 @@ euros = lambda s: int(re.sub(r"[^\d]", "", s)) if re.sub(r"[^\d]", "", s) else N
 
 today = datetime.date.today()
 recs, page, seen = [], 1, set()
+coming = []
 n_lots = n_upcoming = n_unparsed = n_nosale = n_odd = 0
 while True:
     batch = api(page)
@@ -58,7 +59,8 @@ while True:
         n_lots += 1
         m = SALE.search(sale)
         year, month = int(m.group(2)), MONTH.get((m.group(1) or "").lower(), 12)
-        if (year, month) > (today.year, today.month): n_upcoming += 1; continue
+        ahead = (year, month) > (today.year, today.month)
+        if ahead: n_upcoming += 1
         start = START.search(name); hammer = HAMMER.search(name)
         start = euros(start.group(1)) if start else None
         hammer = euros(hammer.group(2)) if hammer else None
@@ -72,7 +74,7 @@ while True:
         aid = "vern-" + str(p.get("id"))
         if aid in seen: continue
         seen.add(aid)
-        recs.append({"aid": aid, "artist": artist, "title": title, "year": wyear, "tech": tech, "dims": dims,
+        (coming if ahead else recs).append({"aid": aid, "artist": artist, "title": title, "year": wyear, "tech": tech, "dims": dims,
                      "house": "Vernissage", "sale": sale, "when": f"{year}-{month:02d}",
                      "start": start, "hammer": hammer, "sold": sold, "after": after,
                      "url": p.get("permalink") or "https://vernissage.ee"})
@@ -80,10 +82,21 @@ while True:
     page += 1; time.sleep(1.0)
     if page > 80: break
 
+# a sale in this month with no hammer price on any lot has not happened yet
+_this = f"{today.year}-{today.month:02d}"
+for sale in {r["sale"] for r in recs if r["when"] == _this}:
+    lots = [r for r in recs if r["sale"] == sale]
+    if not any(r["hammer"] or r["sold"] for r in lots):
+        coming += lots; recs = [r for r in recs if r["sale"] != sale]
 recs.sort(key=lambda r: (r["when"], r["artist"], r["title"]))
+# the sales still to come: their lots, with the starting price, for upcoming.py
+from upcoming import emit
+emit("Vernissage", [{"house": r["house"], "sale": r["sale"], "date": r.get("date") or r.get("when"), "artist": r["artist"], "title": r["title"],
+                  "year": r.get("year"), "yl": r.get("yl"), "tech": r.get("tech") or "", "dims": r.get("dims") or "", "start": r.get("start"), "url": r.get("url")}
+                 for r in coming])
 # one file for every house; this script owns its own house's records in it
 prev = json.load(open("auction_records.json", encoding="utf-8")) if os.path.exists("auction_records.json") else []
-json.dump([r for r in prev if r["house"] != "Vernissage"] + recs, open("auction_records.json", "w", encoding="utf-8"), ensure_ascii=False, indent=0)
+json.dump(sorted([r for r in prev if r["house"] != "Vernissage"] + recs, key=lambda r: (r["house"], str(r.get("date") or r.get("when") or ""), str(r["aid"]))), open("auction_records.json", "w", encoding="utf-8"), ensure_ascii=False, indent=0)
 sold = [r for r in recs if r["sold"]]
 print(f"\nVERNISSAGE AUCTION RESULTS: {len(recs)}   sold {len(sold)} (with hammer price {sum(1 for r in sold if r['hammer'])})   unsold {len(recs)-len(sold)}")
 print(f"  lots seen {n_lots}, upcoming {n_upcoming}, unparsed {n_unparsed}, hammer below start {n_odd}, non-lots skipped {n_nosale}")

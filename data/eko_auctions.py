@@ -79,13 +79,16 @@ SALE_NOISE = re.compile(r"täname.*$|\s+\d{1,2}\.\d{1,2}\.\d{4}.*$|LÕPPENUD!?|o
 OUTCOME = re.compile(r'(Lõpppakkumine|Müüdud)</div>\s*<div>\s*<span class="uk-text-bolder">\s*([\d\s]*?)\s*(?:&euro;|€)?\s*(?:-\s*)?</span>\s*(?:<span[^>]*>\s*\((\d+)\)\s*</span>)?', re.S)
 
 home = fetch(f"{BASE}/")
-slugs = []
-for s in re.findall(r'href="(?:' + BASE + r')?/k/oksjonid/([^/"]+)/"', home):
+slugs, HOME_DAY = [], {}
+for s, txt in re.findall(r'href="(?:' + BASE + r')?/k/oksjonid/([^/"]+)/"[^>]*>([^<]{0,40})', home):
     if s not in slugs: slugs.append(s)
+    d = re.match(r"\s*(\d{1,2})\.(\d{1,2})", txt)                  # the home page names a coming day: "08.10 — Graafika"
+    if d: HOME_DAY[s] = (int(d.group(1)), int(d.group(2)))
 print(f"EKO: {len(slugs)} sales linked", flush=True)
 
 today = datetime.date.today()
 recs, n_open, n_unparsed = [], 0, 0
+coming = []                                  # the lots of sales still to come (upcoming.py)
 for slug in slugs:
     lots, page, sale, day = [], 1, None, None
     while True:
@@ -106,7 +109,7 @@ for slug in slugs:
         if f"/k/oksjonid/{slug}/page/{page + 1}/" not in h: break
         page += 1
     if not lots: continue
-    if not any(OUTCOME.search(c) for c in lots): n_open += 1; continue   # still running: no results yet
+    open_sale = not any(OUTCOME.search(c) for c in lots)          # still running: no results yet
     got, months = [], collections.Counter()
     for c in lots:
         url = re.search(r'href="(' + BASE + r'/o/[^"]+)"', c)
@@ -114,7 +117,7 @@ for slug in slugs:
         pid = re.search(r"\bpost-(\d+)\b", c)
         st = re.search(r'data-startprice="([\d.]+)"', c)
         oc = OUTCOME.search(c)
-        if not (url and title and pid and oc): n_unparsed += 1; continue
+        if not (url and title and pid and (oc or open_sale)): n_unparsed += 1; continue
         lm = split_lot(clean(title.group(1)))
         if not lm or not re.match(r"^[^\d]{3,60}$", lm[0]): n_unparsed += 1; continue
         artist, ltitle, rest = lm
@@ -126,7 +129,7 @@ for slug in slugs:
         dims = clean(dm.group(1)).split("/")[0] if dm else ""          # the work, not the frame
         dims = re.search(r"\d+(?:[.,]\d+)?\s*[x×]\s*\d+(?:[.,]\d+)?(?:\s*[x×]\s*\d+(?:[.,]\d+)?)?", dims)
         dims = (re.sub(r"\s*[x×]\s*", " x ", dims.group(0)).replace(",", ".") + " cm") if dims else ""
-        label, price, bids = oc.group(1), re.sub(r"\D", "", oc.group(2) or ""), oc.group(3)
+        label, price, bids = (oc.group(1), re.sub(r"\D", "", oc.group(2) or ""), oc.group(3)) if oc else ("", "", "")
         hammer = int(price) if price else None
         sold = hammer is not None
         after = sold and (label == "Müüdud" or bids == "0")                 # sold after the sale, no bid in it
@@ -145,14 +148,22 @@ for slug in slugs:
         elif mo < int(ym[5:7]): y += 1
         when = f"{y}-{mo:02d}-{int(day[0]):02d}"
     else: when = ym or ""
-    if when and when[:7] > today.isoformat()[:7]: n_open += 1; continue
+    if open_sale or (when and when[:7] > today.isoformat()[:7]):
+        n_open += 1
+        if slug in HOME_DAY:                                          # the day, from the home page, in the coming year
+            dd, mo = HOME_DAY[slug]; y = today.year + (1 if mo < today.month else 0)
+            when = f"{y}-{mo:02d}-{dd:02d}"
+        coming += [{"house": "Eesti Kunsti Oksjonid", "sale": r["sale"], "date": when or None, "artist": r["artist"], "title": r["title"],
+                    "year": r["year"], "yl": r["yl"], "tech": r["tech"], "dims": r["dims"], "start": r["start"], "url": r["url"]} for r in got]
+        continue
     for r in got: r["when"] = when[:7]; r["date"] = when
     recs += got
     print(f"  {when:10} {sale[:44]:44} lots {len(got)}", flush=True)
 
 recs.sort(key=lambda r: (r["date"], r["artist"], r["title"]))
+from upcoming import emit; emit("Eesti Kunsti Oksjonid", coming)
 prev = json.load(open("auction_records.json", encoding="utf-8")) if os.path.exists("auction_records.json") else []
-json.dump([r for r in prev if r["house"] != "Eesti Kunsti Oksjonid"] + recs, open("auction_records.json", "w", encoding="utf-8"), ensure_ascii=False, indent=0)
+json.dump(sorted([r for r in prev if r["house"] != "Eesti Kunsti Oksjonid"] + recs, key=lambda r: (r["house"], str(r.get("date") or r.get("when") or ""), str(r["aid"]))), open("auction_records.json", "w", encoding="utf-8"), ensure_ascii=False, indent=0)
 sold = [r for r in recs if r["sold"]]
 print(f"\nEKO AUCTION RESULTS: {len(recs)}   sold {len(sold)}   unsold {len(recs) - len(sold)}   sales {len({r['sale'] for r in recs})}")
 print(f"  sales still open {n_open}, lots unparsed {n_unparsed}, with medium {sum(1 for r in recs if r['tech'])}, with dims {sum(1 for r in recs if r['dims'])}, undated sale {sum(1 for r in recs if not r['date'])}")

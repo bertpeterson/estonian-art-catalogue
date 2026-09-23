@@ -1221,6 +1221,36 @@ for w in works:
     if im.startswith("m:") and im[2:] in _muisr: w["ir"] = _muisr[im[2:]]
 print("  images: public-domain museum works", IMG["pd"], "-> MuIS", IMG["muis"], "EKM", IMG["ekm"])
 
+# ---------- upcoming auction lots ----------
+# The lots of sales still to come (upcoming.py): shown on the artist's page and on one
+# page of coming sales, beside the artist's record at auction. Never works of their own
+# and never counted: a lot is here only while its sale is ahead. Joined to an artist
+# already in the catalogue -- an upcoming lot adds no artist -- and, where the same work
+# (artist, title, and size when both give one) has been sold before, to those results.
+UPC = json.load(open("upcoming_records.json", encoding="utf-8")) if os.path.exists("upcoming_records.json") else []
+def artist_find(name):
+    t = toks(name)
+    if not t: return None
+    j = by_tok.get(t)
+    if j is None: j = resolve_variant(name)
+    return j if j is not None and artists[j].get("c", 0) > 0 else None
+_tkey = lambda t: re.sub(r"[^a-zõäöüšž0-9]+", " ", (t or "").lower()).strip()
+_prior = collections.defaultdict(list)
+for i, w in enumerate(works):
+    if w["kind"] == "auction": _prior[(w["a"], _tkey(w["t"]))].append(w)
+upcoming, up_unmatched = [], 0
+for r in UPC:
+    if re.search(r"tundmatu|unknown|\s[&/]\s|\sja\s", r.get("artist") or "", re.I): continue
+    ai = artist_find(re.sub(r"\s+", " ", html.unescape(r.get("artist") or "")).strip())
+    if ai is None: up_unmatched += 1; continue
+    before = [w for w in _prior.get((ai, _tkey(r["title"])), [])
+              if not (w.get("dm") and r.get("dims") and w["dm"].replace(" ", "") != r["dims"].replace(" ", ""))]
+    upcoming.append({"a": ai, "t": r["title"], "yl": r.get("yl") or r.get("year"), "tc": r.get("tech") or None, "dm": r.get("dims") or None,
+                     "h": r["house"], "s": r["sale"], "d": r.get("date"), "p": r.get("start"), "u": r.get("url"),
+                     "pr": [[w["ad"], w["mu"], w.get("ap") if w.get("ao") else None] for w in sorted(before, key=lambda w: str(w["ad"]))] or None})
+print("  upcoming auction lots:", len(upcoming), "joined to catalogue artists;", up_unmatched, "by artists not in it;",
+      sum(1 for u in upcoming if u["pr"]), "offered before")
+
 data = {"meta": {"built": datetime.date.today().isoformat(),
                  "works": sum(1 for w in works if not _earlier(w)), "records": len(works), "objects": OBJECTS, "artists": len(artists),
                  "held": sum(1 for w in works if w["kind"]=="held"),
@@ -1244,7 +1274,7 @@ data = {"meta": {"built": datetime.date.today().isoformat(),
                  "muis": sum(1 for w in works if "muis" in w["s"]),
                  "ekm": sum(1 for w in works if "ekm" in w["s"]),
                  "both": sum(1 for w in works if w["s"] == "ekmmuis")},
-        "artists": artists, "works": works}
+        "artists": artists, "works": works, "upcoming": upcoming}
 # 26k works x a dozen empty fields is megabytes of "null" — drop them; JS sees undefined either way
 def prune(o):
     return {k: v for k, v in o.items() if v not in (None, "", [], {})}

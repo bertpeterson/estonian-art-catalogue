@@ -98,7 +98,7 @@ A_light = [{k: v for k, v in a.items() if k not in BIO} for a in A]
 bios = [{k: v for k, v in a.items() if k in BIO and k != "bs"} or 0 for a in A]
 for i, a in enumerate(A):
     if bios[i] and a.get("bs"): bios[i]["bs"] = a["bs"]
-json.dump({"meta": meta, "artists": A_light, "vocab": d.get("vocab", {}), "works": index},
+json.dump({"meta": meta, "artists": A_light, "vocab": d.get("vocab", {}), "works": index, "upcoming": d.get("upcoming", [])},
           open(f"{OUT}/data/index.json", "w", encoding="utf-8"),
           ensure_ascii=False, separators=(",", ":"))
 json.dump(bios, open(f"{OUT}/data/bios.json", "w", encoding="utf-8"),

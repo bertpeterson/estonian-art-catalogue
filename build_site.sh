@@ -19,6 +19,8 @@ python3 -u build_pages.py
 python3 -u build_hubs.py || exit 1
 # the embeds: a strip per artist, decade and subject for other people's pages
 python3 -u build_embed.py || exit 1
+# the coming sales: the lots of auctions still ahead, with the artists' records beside them
+python3 -u build_upcoming.py || exit 1
 # the catalogue in figures
 python3 -u build_stats.py
 # the Content-Security-Policy, into every page, from the inline scripts as written

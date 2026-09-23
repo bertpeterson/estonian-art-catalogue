@@ -276,6 +276,19 @@ def imsrc(im):
     return im[2:]
 STAMP = "<script>try{if(localStorage.getItem(\"ekr:theme\")===\"light\")document.documentElement.setAttribute(\"data-theme\",\"light\")}catch(e){}</script>"
 
+UPC = collections.defaultdict(list)
+for _u in d.get("upcoming", []): UPC[_u["a"]].append(_u)
+def up_line(i, lang):
+    """the artist's lots in sales still to come, with a link to the page of coming sales"""
+    L = UPC.get(i)
+    if not L: return ""
+    lab, start, page = ("Coming up at auction", "starting price", "upcoming.html") if lang == "en" else ("Tulemas oksjonil", "alghind", "tulemas.html")
+    def d(x):
+        if not x: return ""
+        y, m, *r = x.split("-"); return f"{int(r[0])}.{int(m)}.{y}" if r else f"{int(m)}.{y}"
+    items = " · ".join(f'{d(u.get("d"))} {e(H.mus_name(u["h"], lang))}: <i>{e(u["t"])}</i>' + (f', {start} €{u["p"]:,}' if u.get("p") else "") for u in L[:6])
+    return f'<p class="m">{lab}: {items} — <a href="{BASE}/{page}">{"all coming sales" if lang == "en" else "kõik tulevad oksjonid"}</a></p>'
+
 def embed_box(lang, src, back, name, T):
     """the two lines to paste: the iframe, and the plain link that carries the credit"""
     code = (f'<iframe src="{src}" width="100%" height="230" loading="lazy" title="{name} – museaal.ee"></iframe>\n'
@@ -374,6 +387,7 @@ def render(i, a, ws, lang):
            + (f"<p class=\"m\">{e(grp)}</p>" if grp else "")
            + ((f"<p class=\"bio\">{e(bio)}" + bio_note + "</p>") if bio else "")
            + (f"<p class=\"m\">{e(au_line)}</p>" if au_line else "")
+           + up_line(i, lang)
            + f"<p><a class=\"cta\" href=\"{app}\">{e(T['browse'].format(n=n))}</a></p>"
            + wall
            + related(i, lang)

@@ -399,6 +399,17 @@ on idle after the landing has painted, or the moment an artist's page asks for o
 among the last one's results; the decades below the fold are laid out only when scrolled to
 (`content-visibility`). An open record stays where it is on the screen when the register is redrawn.
 
+**Coming up at auction.** The six auction harvesters read the houses' coming sales as well as their past
+ones, and keep a coming sale's lots apart (`data/upcoming.py` → `upcoming_records.json`): artist, work, the
+starting price as the house published it, the sale and its date, a link to the lot. `merge.py` joins them to
+artists already in the catalogue (a coming lot adds no artist) and to any earlier sale of the same title.
+They show on the artist's page and on `/upcoming.html` · `/tulemas.html`, beside the artist's record at
+auction; never counted as works, never with bids (they change by the hour) or pictures (the rule for auction
+lots), and gone once the sale's day has passed. A house puts its catalogue online two to four weeks ahead,
+so the houses are read weekly (`.github/workflows/auctions.yml`, Mondays), past sales from a cache. A sale in
+the current month with no hammer price on any lot counts as coming, so it is never recorded as a sale
+where nothing sold.
+
 **Embeds.** Every artist, decade and subject has a strip for other people's pages — `/embed/<slug>.html`,
 `/embed/et/<slug>.html` (`build_embed.py`): six pictures from the holders' own servers, the count, a link
 back, nothing else — no prices, no auction line, no header. It follows the host page's light or dark scheme,
