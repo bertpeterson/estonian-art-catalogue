@@ -29,7 +29,7 @@ subs = [
     (r"which is why [\d,]+ source objects",             f"which is why {f(m['objects'])} source objects"),
     (r"collapse to [\d,]+ works\.",                     f"collapse to {f(m['works'])} works."),
     (r"[\d,]+ of them, [\d.]+% — derive",               f"{f(m['held'])} of them, {m['held']/m['works']*100:.1f}% — derive"),
-    (r"works\.csv\.gz(\s+)[\d,]+ rows",                 lambda mm: f"works.csv.gz{mm.group(1)}{f(m['works'])} rows"),
+    (r"works\.csv\.gz(\s+)[\d,]+ rows",                 lambda mm: f"works.csv.gz{mm.group(1)}{f(m.get('records', m['works']))} rows"),
     (r"artists\.csv\.gz(\s+)[\d,]+ rows",               lambda mm: f"artists.csv.gz{mm.group(1)}{f(m['artists'])} rows"),
 ]
 missing = []

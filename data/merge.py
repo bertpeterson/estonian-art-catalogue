@@ -1040,7 +1040,12 @@ _MED_EN = {"Kavand": "Design", "Nõu": "Vessel", "Karikatuur": "Caricature", "Mi
            "Mapp": "Portfolio", "Väljalõige": "Cutting", "Kott": "Bag", "Mööbel": "Furniture", "Kate": "Cover", "Pannoo": "Panel", "Kann": "Jug", "???": "Other"}
 for w in works:
     if w.get("e") in _MED_EN: w["e"] = _MED_EN[w["e"]]
-for i, a in enumerate(artists): a["c"] = sum(1 for w in works if w["a"] == i)
+# A work auctioned more than once is one work: its earlier lots are records in its sale
+# history (ac chains the lots, al marks the latest), not works of their own. The counts
+# of works -- the masthead, an artist's "413 works", meta.works -- leave them out;
+# meta.records counts every row.
+_earlier = lambda w: bool(w.get("ac")) and not w.get("al")
+for i, a in enumerate(artists): a["c"] = sum(1 for w in works if w["a"] == i and not _earlier(w))
 
 # ---------- where to find the holder ----------
 # data/venues.json was compiled by checking each institution's site returned 200 and
@@ -1217,7 +1222,7 @@ for w in works:
 print("  images: public-domain museum works", IMG["pd"], "-> MuIS", IMG["muis"], "EKM", IMG["ekm"])
 
 data = {"meta": {"built": datetime.date.today().isoformat(),
-                 "works": len(works), "objects": OBJECTS, "artists": len(artists),
+                 "works": sum(1 for w in works if not _earlier(w)), "records": len(works), "objects": OBJECTS, "artists": len(artists),
                  "held": sum(1 for w in works if w["kind"]=="held"),
                  "shown": sum(1 for w in works if w["kind"]=="shown"),
                  "gallery": sum(1 for w in works if w["kind"]=="gallery"),

@@ -152,7 +152,7 @@ def jsonld(a, ws, sl, dates, lang="en"):
     return json.dumps({"@context": "https://schema.org", "@graph": [person,
         {"@type": "CollectionPage", "name": (f"Works by {a['n']}" if lang == "en" else f"{a['n']} teosed"), "inLanguage": lang,
          "url": f"{BASE}/{D}/{sl}.html", "about": person,
-         "mainEntity": {"@type": "ItemList", "numberOfItems": len(ws),
+         "mainEntity": {"@type": "ItemList", "numberOfItems": sum(1 for w in ws if not (w.get("ac") and not w.get("al"))),
                         "itemListElement": [{"@type": "ListItem", "position": i + 1, "item": it}
                                             for i, it in enumerate(works)]}}]},
         ensure_ascii=False, separators=(",", ":"))
@@ -302,7 +302,7 @@ def render(i, a, ws, lang):
     gal = T["gal"] if any(w.get("kind") in ("gallery", "shown", "sold") for w in ws) else ""
     # the title and the snippet in the words a searcher uses: the name, how many works,
     # where they are, what kinds, when -- and the site's own name last
-    n = len(ws)
+    n = sum(1 for w in ws if not (w.get("ac") and not w.get("al")))   # distinct works; earlier lots are in their sale history
     title = f"{a['n']} – {n} {T['works']} {T['in_mus'] if gal else T['in_mus_nog']} · museaal.ee"
     d_ = dict(name=a["n"], dates=f" ({dates})" if dates else "", n=n, gal=gal, span=span, media=media_phrase(ws, lang) or T["works"],
               holders=", ".join(top_holders) if top_holders else "—")
@@ -392,7 +392,7 @@ for i, a in enumerate(A):
     for lang in ("en", "et"):
         open(f"site/{L[lang]['dir']}/{sl}.html", "w", encoding="utf-8").write(render(i, a, ws, lang))
     pages += 1
-    index_rows.append((sl, a["n"], len(ws)))
+    index_rows.append((sl, a["n"], sum(1 for w in ws if not (w.get("ac") and not w.get("al")))))
 
 today = datetime.date.today().isoformat()
 # both languages of every artist page, each naming the other (the sitemap's hreflang form)
