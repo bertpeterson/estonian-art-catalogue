@@ -55,11 +55,21 @@ jobs:
         working-directory: data
         run: python3 harvest_guard.py after
 
+      # numpy for similar.py and chart_side.py, pillow for chart_side.py, anthropic for
+      # translate.py. The build needs numpy; the monthly run never installed it.
+      - run: pip install -q numpy pillow anthropic
+
       - name: Merge and build
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: |
-          (cd data && python3 ledger.py && python3 muis_oai.py && gzip -c oai_records.json > raw/oai_records.json.gz && python3 ekm_images.py && python3 ekm_shapes.py && python3 merge.py && python3 gallery_shapes.py && python3 muis_shapes.py && python3 merge.py && pip install -q anthropic && python3 translate.py)
+          git show HEAD:data/data.json > /tmp/data_before.json
+          (cd data && python3 ledger.py && python3 muis_oai.py && gzip -c oai_records.json > raw/oai_records.json.gz && python3 ekm_images.py && python3 ekm_shapes.py && python3 merge.py && python3 gallery_shapes.py && python3 muis_shapes.py && python3 merge.py && python3 translate.py)
+          # a merge that quietly lost records stops here, before anything is committed
+          python3 data/data_guard.py /tmp/data_before.json data/data.json
+          # the colour charts in the new museum photographs (numpy and PIL, reads each once);
+          # the visual look-alikes need torch and stay a deliberate run on the Mac
+          (cd data && python3 chart_side.py)
           ./build_site.sh
           node check_site.js site
           python3 data/readme_figures.py

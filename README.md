@@ -56,6 +56,7 @@ tpl_head.html         markup + CSS for the app
 tpl_app.html          the application itself
 i18n.py               the EN/ET dictionary — the source; i18n.json is generated from it on every build
 build_site.py/.sh     rebuilds site/ from data/data.json
+build_index.py        assembles site/index.html: head, baked landing page, the app
 static/sw.js          the service worker — caches the content-named data files for return visits
 check_site.js         opens the built site in headless Chrome; the deploy stops if it fails
 .github/workflows/    pages.yml builds, checks and deploys on push; reharvest.yml runs monthly
@@ -102,7 +103,7 @@ museums and galleries, any of which could carry markup or a hostile address — 
   the same probe runs daily (`probe.yml`) and a failure is mailed. The workflows' actions are pinned to
   commit SHAs, with Dependabot proposing moves; each workflow holds the least permission it needs.
 - **The data is the backup**: `data/data.json` and the compressed harvest are in git; a bad monthly run
-  is refused by `harvest_guard.py` before anything is committed; every deploy is a commit that can be
+  is refused by `harvest_guard.py` and `data_guard.py` before anything is committed; every deploy is a commit that can be
   reverted.
 
 ## Rules the data follows
@@ -359,7 +360,9 @@ and a page already read is not read again.
 **Gallery stock is re-harvested monthly** by `.github/workflows/reharvest.yml`, at 04:00 UTC on the
 1st: every gallery fetched afresh, new MuIS objects taken through OAI-PMH, rebuilt and smoke-tested,
 README figures updated, the data committed (the push then builds and deploys the site). `data/harvest_guard.py`
-refuses the run if any gallery comes back empty or down more than 40%, so a redesigned site fails
+refuses the run if any gallery comes back empty or down more than 40%, and `data/data_guard.py` refuses a
+merge whose works, artists, pictures, museum holdings or auction lots fall more than 3% — or any of the fifty
+largest artists more than 15% — against the committed dataset; so a redesigned site fails
 loudly rather than vanishing quietly. The museum sources are never re-crawled by it.
 
 **Images, for public-domain works only.** A museum record shows the holder's own photograph — loaded
@@ -439,8 +442,8 @@ the width or height it takes. The tile and the record's picture then show the ph
 cropped from the chart's side only, so the painting keeps all its edges; the link opens the whole file.
 An earlier rule cropped from the centre wherever the photograph's shape differed from the record's
 dimensions, which found charts where there were none — a frame, an oval, a sheet measured differently —
-and cut the painting itself. A photograph without a chart is shown whole. Computed deliberately, not
-monthly; `data/chart_sides.json` is committed.
+and cut the painting itself. A photograph without a chart is shown whole. The monthly run reads the new
+photographs (only those not read before); `data/chart_sides.json` is committed.
 
 **What comes first on an artist's wall.** Paintings, then watercolours, sculpture, drawings and prints; and for
 thirteen artists whose key works are a matter of record — Wiiralt's *Põrgu* and *Kabaree*, Mägi's Norway and

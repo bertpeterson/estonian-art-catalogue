@@ -1,6 +1,7 @@
 <script>
 (function(){
   "use strict";
+  const boot = (DATA, I18N) => {
   // repeated strings ship once in DATA.vocab and are referenced by index; rehydrate them
   (function decode(){
     const V = DATA.vocab; if (!V) return;
@@ -836,6 +837,37 @@
         : `<span class="wt-ph" style="aspect-ratio:1/${r.toFixed(3)}"></span>`}</span><span class="la-cap"><i>${esc(x.t)}</i><span>${esc(A[x.a].n)}${x.y ? " · " + x.y : ""}</span></span></a>`; }).join("")}</div></div>`;
   }
 
+  const SHARDS = new Map();
+  const shardOf = w => w.y != null ? String(Math.floor(w.y/10)*10) : "und";
+  async function loadShard(key, attempt = 0){
+    if (SHARDS.has(key)) return SHARDS.get(key);
+    // A retry must skip the browser cache: the failure we are retrying is often a
+    // cached 404 or 5xx, and re-requesting the identical URL just returns it again.
+    const url = `data/detail/${key}.json?v=__V_INDEX__` + (attempt ? `&r=${attempt}` : "");
+    const p = fetch(url, attempt ? {cache: "reload"} : undefined)
+      .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+      .catch(async () => {
+        // Never cache a failure. The old code stored {} on error, so a single network
+        // blip removed that decade's descriptions and dimensions for the rest of the
+        // session — and the record then said "No description in the record", which is
+        // a false claim about the museum rather than an honest one about the fetch.
+        SHARDS.delete(key);
+        if (attempt < 2){
+          await new Promise(r => setTimeout(r, 400 * (attempt + 1)));
+          return loadShard(key, attempt + 1);
+        }
+        return null;
+      });
+    SHARDS.set(key, p);
+    const v = await p;
+    if (v) SHARDS.set(key, v); else SHARDS.delete(key);
+    return v;
+  }
+  function detailOf(w){
+    const s = SHARDS.get(shardOf(w));
+    return (s && !(s instanceof Promise) && s[w.i]) || null;
+  }
+
   function rowHTML(w, showArtist){
     const id = w.k, open = state.open === id, ar = A[w.a];
     // A museum that wrote "19. sajand" told us the century; showing "n.d." for it
@@ -872,18 +904,18 @@
       const figure = imSrc ? `<figure class="d-fig"><a href="${href(imHref)}" target="_blank" rel="noopener"><img src="${esc(imSrc)}" alt="${esc(w.t)}" loading="lazy"${crop} referrerpolicy="no-referrer-when-downgrade"></a>
           <figcaption>${imCap}</figcaption>${laHTML(w)}</figure>` : "";
       detail = `<div class="detail${imSrc ? " has-fig" : ""}">${figure}
-        <div>${w.n>1 && w.mem ? `<div class="members">
+        <div>${w.n>1 && (detailOf(w)||{}).mem ? `<div class="members">
             <div class="mem-head">${esc(T("memhead",{n:w.n}))}</div>
-            <div class="mem-list">${w.mem.map(m => `<div class="mem-row">
+            <div class="mem-list">${detailOf(w).mem.map(m => `<div class="mem-row">
                 <span class="mem-num" title="${esc(m[0])}">${esc(m[0]||"—")}</span>
                 <span class="mem-tech" title="${esc(m[1])}">${esc((LANG === "en" && m[5]) || m[1] || "")}</span>
                 <span>${m[3]?`<a href="https://www.muis.ee/museaalview/${esc(m[3])}" target="_blank" rel="noopener">MuIS</a>`:""}${m[3]&&m[4]?" · ":""}${m[4]?`<a href="https://digikogu.ekm.ee/ekm/search/oid-${esc(m[4])}/" target="_blank" rel="noopener">EKM</a>`:""}</span>
               </div>`).join("")}</div></div>` : ""}
-          ${w.d ? `<div class="d-note"><span class="d-nolabel">${w.s==="cca"?esc(T("d_desc_cca"))+" · "+esc(T("inenglish")):w.s==="ekkm"?esc(T("d_desc_ekkm"))+" · "+esc(T("inenglish")):esc(T("d_desc"))+" · "+(LANG==="en"&&w.de?esc(T("mt_desc")):esc(T("estonianprose")))}</span>${esc(LANG==="en"&&w.de?w.de:w.d)}</div>`
+          ${(detailOf(w)||{}).d ? `<div class="d-note"><span class="d-nolabel">${w.s==="cca"?esc(T("d_desc_cca"))+" · "+esc(T("inenglish")):w.s==="ekkm"?esc(T("d_desc_ekkm"))+" · "+esc(T("inenglish")):esc(T("d_desc"))+" · "+(LANG==="en"&&detailOf(w).de?esc(T("mt_desc")):esc(T("estonianprose")))}</span>${esc(LANG==="en"&&detailOf(w).de?detailOf(w).de:detailOf(w).d)}</div>`
                    : isHeld(w) && w.s !== "gallery" ? `<div class="d-note"><span class="d-nolabel">${esc(T("d_desc"))}</span><em style="color:var(--grey-4)">${esc(T("d_nodesc"))}</em></div>` : ""}
           <div class="d-v" style="margin-top:16px;display:flex;flex-wrap:wrap;gap:18px">
-            ${w.mi?`<a class="permalink" href="https://www.muis.ee/museaalview/${esc(w.mi)}" target="_blank" rel="noopener">${esc(T("d_recmuis"))}</a>`:""}
-            ${w.oi?`<a class="permalink" href="https://digikogu.ekm.ee/ekm/search/oid-${esc(w.oi)}/" target="_blank" rel="noopener">${esc(T("d_recekm"))}</a>`:""}
+            ${(detailOf(w)||{}).mi?`<a class="permalink" href="https://www.muis.ee/museaalview/${esc(detailOf(w).mi)}" target="_blank" rel="noopener">${esc(T("d_recmuis"))}</a>`:""}
+            ${(detailOf(w)||{}).oi?`<a class="permalink" href="https://digikogu.ekm.ee/ekm/search/oid-${esc(detailOf(w).oi)}/" target="_blank" rel="noopener">${esc(T("d_recekm"))}</a>`:""}
             ${w.url?`<a class="permalink" href="${href(w.url)}" target="_blank" rel="noopener">${esc(w.kind === "gallery" ? T("d_gallerylink", {g: musName(w.mu)}) : w.kind === "sold" ? T("d_pastlink", {g: musName(w.mu)}) : w.kind === "auction" ? (w.apr ? T("d_presslink") : T("d_lotlink", {g: musName(w.mu)})) : w.kind === "known" ? T("d_knownlink") : w.kind === "shown" && w.s === "gallery" ? T("d_shownlink", {g: musName(w.mu)}) : T("d_recsource"))}</a>`:""}
             ${slBtn(id, "sl-d")}
           </div>
@@ -896,7 +928,7 @@
             w.f ? `<br><em>${esc(T(w.f === "pre" ? (w.y == null ? "d_prebirth_u" : "d_prebirth") : (w.y == null ? "d_postdeath_u" : "d_postdeath"), {l:(ar.l[0]||"?")+"–"+(ar.l[1]||"")}))}</em>` : ""}</div>
           <div class="d-k">${esc(T("d_technique"))}</div><div class="d-v">${techName(w)?esc(cap(techName(w))):"—"}</div>
           <div class="d-k">${esc(T("d_material"))}</div><div class="d-v">${matName(w)?esc(cap(matName(w))):"—"}</div>
-          ${w.dm?`<div class="d-k">${esc(T("d_dimensions"))}</div><div class="d-v">${esc(cap(dimsName(w.dm)))}</div>`:""}
+          ${(detailOf(w)||{}).dm?`<div class="d-k">${esc(T("d_dimensions"))}</div><div class="d-v">${esc(cap(dimsName(detailOf(w).dm)))}</div>`:""}
           ${w.c?`<div class="d-k">${esc(T("d_category"))}</div><div class="d-v">${esc(catName(w.c))}</div>`:""}
           <div class="d-k">${esc(isHeld(w)?T("d_collection"):T("venue"))}</div><div class="d-v">${w.co?esc(collName(w.co))+"<br>":""}<em>${siteOf(w.mu) ? `<a class="permalink" href="${esc(siteOf(w.mu))}" target="_blank" rel="noopener">${esc(musName(w.mu))}</a>` : esc(musName(w.mu))}</em></div>
           <div class="d-k">${esc(T("kind"))}</div><div class="d-v">${esc(T(w.kind==="shown"?(w.s==="gallery"?"kind_shown_gal":"shown"):w.kind==="gallery"?"gallery":w.kind==="auction"?"kind_auction":w.kind==="sold"?"kind_sold":w.kind==="known"?"kind_known":"held"))}${w.kind==="known"?`<br><span class="d-sub">${esc(T("d_knownnote"))}</span>`:""}</div>
@@ -1598,7 +1630,10 @@
     }
     const b = e.target.closest(".row-btn"); if (!b) return;
     const id = b.dataset.id;
-    state.open = state.open === id ? null : id;
+    if (state.open === id){ state.open = null; render(); pushHash(); return; }
+    state.open = id;
+    const w = W.find(x => x.k === id);
+    if (w && w.h && !detailOf(w)) loadShard(shardOf(w)).then(() => { if (state.open === id) render(); });
     render(); pushHash();
     if (state.open){
       const el = reg.querySelector(`.row-btn[data-id="${CSS.escape(id)}"]`);
@@ -1982,6 +2017,10 @@
     setGroup(state.group);
     renderAll();
     applying = false;
+    if (state.open){
+      const w0 = W.find(x => x.k === state.open);
+      if (w0 && w0.h && !detailOf(w0)) loadShard(shardOf(w0)).then(() => render());
+    }
     if (scroll && state.open){
       const el = document.querySelector(`.row-btn[data-id="${CSS.escape(state.open)}"]`);
       if (el) el.scrollIntoView({behavior:"auto", block:"center"});
@@ -2040,7 +2079,15 @@
       reg.active.postMessage({warm: urls});
     }).catch(() => {});
   }
+  }   // end boot
 
-
+  Promise.all([
+    fetch("data/index.json?v=__V_INDEX__").then(r => r.json()),
+    fetch("data/i18n.json?v=__V_I18N__").then(r => r.json())
+  ]).then(([data, i18n]) => boot(data, i18n))
+   .catch(err => {
+     document.getElementById("register").innerHTML =
+       `<p class="empty">Could not load the catalogue data.<br><small>${String(err)}</small></p>`;
+   });
 })();
 </script>
