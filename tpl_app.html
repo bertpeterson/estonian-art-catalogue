@@ -1878,7 +1878,6 @@
     if (g === "auction") state.sale = false;      // a lot that went under the hammer is not on sale: the two never combine
     if (g !== "auction" && state.group === "auction"){ state.sort = "year"; state.decOrder = "earliest"; }
     state.group = g;
-    $("g-decade").setAttribute("aria-pressed", g==="decade");
     $("g-artist").setAttribute("aria-pressed", g==="artist");
     $("g-auc").setAttribute("aria-pressed", g==="auction");
     syncOrder();
@@ -1910,11 +1909,19 @@
   $("sortby").addEventListener("change", e => {
     state.sort = e.target.value; state.expand.clear(); syncOrder(); render(); pushHash();
   });
-  $("g-decade").addEventListener("click", () => { setGroup("decade"); state.expand.clear(); render(); pushHash(); });
-  $("g-artist").addEventListener("click", () => { setGroup("artist"); state.expand.clear(); state.gLimit=50; render(); pushHash(); });
+  // Artist and Auctions are toggles: the decade view is what is left when neither is on,
+  // so it needs no button of its own (it had one that, on the untouched page, did nothing)
+  $("g-artist").addEventListener("click", () => {
+    if (state.group === "artist") setGroup("decade"); else { setGroup("artist"); state.gLimit = 50; }
+    state.expand.clear(); renderAll(); pushHash();
+  });
   $("o-asc").addEventListener("click", () => { state.group!=="artist" ? state.decOrder="earliest" : state.artOrder="az"; syncOrder(); render(); pushHash(); });
   $("o-desc").addEventListener("click", () => { state.group!=="artist" ? state.decOrder="latest" : state.artOrder="birth"; syncOrder(); render(); pushHash(); });
-  $("g-auc").addEventListener("click", () => { setGroup("auction"); state.decOrder = "latest"; state.expand.clear(); state.auLimit = 20; syncOrder(); render(); pushHash(); });
+  $("g-auc").addEventListener("click", () => {
+    if (state.group === "auction") setGroup("decade");
+    else { setGroup("auction"); state.decOrder = "latest"; state.auLimit = 20; syncOrder(); }
+    state.expand.clear(); renderAll(); pushHash();
+  });
   $("reset").addEventListener("click", () => {
     state.q=""; state.decade=null; state.media.clear(); state.museums.clear(); state.cats.clear(); state.srcs.clear(); state.origins.clear(); state.groups.clear();
     state.artist=null; state.letter=null; state.idxOpen=false; state.sort="year"; state.year=null; state.from=null; state.to=null; state.undOnly=false; $("sortby").value="year";
