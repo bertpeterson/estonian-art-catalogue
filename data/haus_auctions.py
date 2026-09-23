@@ -73,9 +73,21 @@ print(f"HAUS: {len(sales)} sales listed", flush=True)
 
 today = datetime.date.today().isoformat()
 recs, n_upcoming, n_unparsed = [], 0, 0
+coming = []
+# the coming sale is not in the list of past sales but on its own page ("Käesolev"),
+# with its catalogue once the house has put it online
+CUR = fetch(f"{BASE}/?c=oksjon&l=et")
+if CUR and '<figure class="artwork' in CUR:
+    tm = re.search(r'<time datetime="([^"]+)"', CUR)
+    hm = re.search(r"<h[12][^>]*>([^<]*oksjon[^<]*)</h[12]>", CUR, re.I)
+    sales["current"] = (sentence(clean(hm.group(1)).strip(" .-")) if hm else "Haus Galerii oksjon", tm.group(1)[:10] if tm else "9999-12-31")
 for aid, (sale, when) in sorted(sales.items(), key=lambda x: x[1][1]):
-    if when > today: n_upcoming += 1; continue
-    h = get(f"{BASE}/?c=toimunud-oksjonid&l=et&id={aid}", f"hausauc_{aid}")
+    ahead = aid == "current" or when > today
+    if ahead: n_upcoming += 1
+    if aid == "current": h = CUR
+    elif ahead: h = fetch(f"{BASE}/?c=toimunud-oksjonid&l=et&id={aid}")     # a coming sale's page is not cached
+    else: h = get(f"{BASE}/?c=toimunud-oksjonid&l=et&id={aid}", f"hausauc_{aid}")
+    if not h: continue
     for fig in re.findall(r'<figure class="artwork.*?</figure>', h, re.S):
         item = re.search(r'data-id="(\d+)"', fig)
         aut = re.search(r'<em class="aut">(.*?)</em>', fig, re.S)
@@ -115,16 +127,21 @@ for aid, (sale, when) in sorted(sales.items(), key=lambda x: x[1][1]):
         if hammer and start and when < "2011-01-01" and hammer % 100 == 0 and (hammer / 15.6466 >= start * 0.9 or hammer >= 8 * start):
             hammer = round(hammer / 15.6466); kroon = True
         y4 = re.match(r"(\d{4})", year)
-        recs.append({"aid": "haus-" + item.group(1), "artist": artist, "title": title,
+        (coming if ahead else recs).append({"aid": "haus-" + item.group(1), "artist": artist, "title": title,
                      "year": y4.group(1) if y4 else None, "yl": year or None, "tech": medium, "dims": dims,
                      "house": "Haus Galerii", "sale": sale, "when": when[:7], "date": when,
                      "start": start, "hammer": hammer, "sold": hammer is not None, "after": after, **({"kroon": True} if kroon else {}),
-                     "url": f"{BASE}/?c=toimunud-oksjonid&l=et&id={aid}&item={item.group(1)}"})
+                     "url": f"{BASE}/?c=oksjon&l=et&item={item.group(1)}" if aid == "current" else f"{BASE}/?c=toimunud-oksjonid&l=et&id={aid}&item={item.group(1)}"})
     print(f"  {when} {sale[:40]:40} lots so far {len(recs)}", flush=True)
 
 recs.sort(key=lambda r: (r["date"], r["artist"], r["title"]))
+# the sales still to come: their lots, with the starting price, for upcoming.py
+from upcoming import emit
+emit("Haus Galerii", [{"house": r["house"], "sale": r["sale"], "date": r.get("date") if r.get("date", "9")[:1] != "9" else None, "artist": r["artist"], "title": r["title"],
+                      "year": r.get("year"), "yl": r.get("yl"), "tech": r.get("tech") or "", "dims": r.get("dims") or "", "start": r.get("start"), "url": r.get("url")}
+                     for r in coming])
 prev = json.load(open("auction_records.json", encoding="utf-8")) if os.path.exists("auction_records.json") else []
-json.dump([r for r in prev if r["house"] != "Haus Galerii"] + recs, open("auction_records.json", "w", encoding="utf-8"), ensure_ascii=False, indent=0)
+json.dump(sorted([r for r in prev if r["house"] != "Haus Galerii"] + recs, key=lambda r: (r["house"], str(r.get("date") or r.get("when") or ""), str(r["aid"]))), open("auction_records.json", "w", encoding="utf-8"), ensure_ascii=False, indent=0)
 sold = [r for r in recs if r["sold"]]
 print(f"\nHAUS AUCTION RESULTS: {len(recs)}   sold {len(sold)}   unsold {len(recs) - len(sold)}   sales {len({r['sale'] + r['date'] for r in recs})}")
 print(f"  upcoming sales left out {n_upcoming}, lots unparsed {n_unparsed}, with year {sum(1 for r in recs if r['year'])}, with dims {sum(1 for r in recs if r['dims'])}")

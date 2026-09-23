@@ -66,19 +66,23 @@ today = datetime.date.today().isoformat()
 KEPT = json.load(open("eks_sales.json", encoding="utf-8")) if os.path.exists("eks_sales.json") else {}
 recent = (datetime.date.today() - datetime.timedelta(days=60)).isoformat()
 recs, n_open, n_empty, n_unparsed = [], 0, 0, 0
+coming = []
 for url, sale, date in sales:
-    if date > today: n_open += 1; continue
+    ahead = date > today
     key = "eksauc_" + re.sub(r"\W+", "_", url.rsplit("/", 1)[-1])
-    if key in KEPT and date < recent and KEPT[key]:
+    if not ahead and key in KEPT and date < recent and KEPT[key]:
         recs.extend(KEPT[key]); continue
-    h = get(url, key)
+    if ahead: n_open += 1
+    h = fetch(url) if ahead else get(url, key)                       # a coming sale's page is not cached: its lots change
+    if ahead and not h: continue
     cards = CARD.findall(h)
     if not cards:
         n_empty += 1
         p = os.path.join(CACHE, key + ".html.gz")
         if os.path.exists(p) and date > (datetime.date.today() - datetime.timedelta(days=60)).isoformat(): os.remove(p)   # results may come later
         continue
-    n = 0; KEPT[key] = []
+    n = 0
+    if not ahead: KEPT[key] = []
     for artist, lot, line, price in cards:
         artist, lot, line, price = clean(artist), clean(lot), clean(line), clean(price)
         # the older sales list the title without a lot number
@@ -101,17 +105,24 @@ for url, sale, date in sales:
         hm = re.search(r"lõpp\s*:?\s*€?\s*([\d\s]+)", price)
         hammer = euros(hm.group(1)) if hm else (start if "müüdud" in price else None)
         sold = hammer is not None
-        recs.append({"aid": f"eks-{key[7:]}-{lotno}", "artist": artist, "title": title,
+        (coming if ahead else recs).append({"aid": f"eks-{key[7:]}-{lotno}", "artist": artist, "title": title,
                      "year": y4.group(1) if y4 else None, "yl": yl.strip("U ") or None, "tech": tech.strip(" ,."), "dims": dims,
                      "house": "E-Kunstisalong", "sale": sale, "when": date[:7], "date": date,
                      "start": start, "hammer": hammer, "sold": sold, "url": url})
-        KEPT[key].append(recs[-1]); n += 1
+        if not ahead: KEPT[key].append(recs[-1])
+        n += 1
     print(f"  {date} {sale[:36]:36} lots {n}", flush=True)
 
 json.dump(KEPT, open("eks_sales.json", "w", encoding="utf-8"), ensure_ascii=False)
+# the sales still to come: their lots, with the starting price, for upcoming.py
+from upcoming import emit
+emit("E-Kunstisalong", [{"house": r["house"], "sale": r["sale"], "date": r.get("date") or r.get("when"), "artist": r["artist"], "title": r["title"],
+                  "year": r.get("year"), "yl": r.get("yl"), "tech": r.get("tech") or "", "dims": r.get("dims") or "", "start": r.get("start"), "url": r.get("url")}
+                 for r in coming])
+
 recs.sort(key=lambda r: (r["date"], r["artist"], r["title"]))
 prev = json.load(open("auction_records.json", encoding="utf-8")) if os.path.exists("auction_records.json") else []
-json.dump([r for r in prev if r["house"] != "E-Kunstisalong"] + recs, open("auction_records.json", "w", encoding="utf-8"), ensure_ascii=False, indent=0)
+json.dump(sorted([r for r in prev if r["house"] != "E-Kunstisalong"] + recs, key=lambda r: (r["house"], str(r.get("date") or r.get("when") or ""), str(r["aid"]))), open("auction_records.json", "w", encoding="utf-8"), ensure_ascii=False, indent=0)
 sold = [r for r in recs if r["sold"]]
 print(f"\nE-KUNSTISALONG AUCTION RESULTS: {len(recs)}   sold {len(sold)}   unsold {len(recs) - len(sold)}   sales {len({r['sale'] for r in recs})}")
 print(f"  sales still to come {n_open}, sales with no lot list {n_empty}, lots unparsed {n_unparsed}, with year {sum(1 for r in recs if r['year'])}, with medium {sum(1 for r in recs if r['tech'])}, with dims {sum(1 for r in recs if r['dims'])}")

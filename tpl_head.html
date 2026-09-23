@@ -370,6 +370,11 @@ footer{border-top:1px solid var(--ink);margin-top:10px;padding:30px 0 60px;displ
 footer p{margin:0;font-size:.81rem;line-height:1.6;color:var(--grey-6);max-width:46ch}
 /* the A-Z link is one line; left in a grid cell beside three long notes it sat at
    the top of a tall row with a void beneath it. It takes a row of its own. */
+.mono-up{margin:14px 0 4px;border-top:1px solid var(--rule);padding-top:10px}
+.up-lot{margin:8px 0 10px;font-size:.84rem;line-height:1.45}
+.up-when{font-family:var(--mono);font-size:var(--fs-xs);letter-spacing:.06em;color:var(--grey-4)}
+.up-p,.up-pr,.up-note{font-size:.76rem;color:var(--grey-6)}.up-p a,.up-note a{color:inherit;border-bottom:1px solid var(--rule)}
+.up-note{margin-top:6px}
 .hub-link{border-bottom:1px solid var(--rule);color:var(--grey-6)}
 footer p.nav,footer p.foot1{grid-column:1/-1;max-width:none;margin-bottom:-12px}   /* the two crawlable lines span the columns; the three paragraphs sit beneath, aligned */
 footer b{color:var(--ink);font-weight:500}
@@ -717,7 +722,8 @@ footer a{border-bottom:1px solid var(--rule)}
     <!-- static, not i18n: a crawler never runs the app, and this is the route into
          the per-artist pages that make the catalogue findable at all -->
     <p class="nav"><a href="a/">Artists A–Z</a> · <a href="k/" hreflang="et">Kunstnikud A–Ü</a> — every artist as a plain page, in English and in Estonian ·
-       <a href="stats.html">The catalogue in figures</a> · <a href="stats-et.html" hreflang="et">Kataloog arvudes</a></p>
+       <a href="stats.html">The catalogue in figures</a> · <a href="stats-et.html" hreflang="et">Kataloog arvudes</a> ·
+       <a href="upcoming.html">Coming up at auction</a> · <a href="tulemas.html" hreflang="et">Tulemas oksjonil</a></p>
     <p class="nav">By <a href="decades/">decade</a>, <a href="media/">medium</a>, <a href="museums/">museum</a> and <a href="subjects/">subject</a> ·
        <a href="kumnendid/" hreflang="et">kümnendi</a>, <a href="liigid/" hreflang="et">liigi</a>, <a href="muuseumid/" hreflang="et">muuseumi</a> ja <a href="ained/" hreflang="et">aine kaupa</a></p>
     <p class="foot1" data-i18n-html="foot"></p>

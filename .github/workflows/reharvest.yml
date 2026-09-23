@@ -16,6 +16,7 @@ on:
 
 permissions:
   contents: write
+  actions: write               # to start the deploy: a push by this token starts no workflow
 
 concurrency:
   group: reharvest
@@ -75,6 +76,8 @@ jobs:
           python3 data/readme_figures.py
 
       - name: Commit if anything changed
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           git config user.name  "gallery re-harvest"
           git config user.email "actions@users.noreply.github.com"
@@ -94,3 +97,6 @@ jobs:
           PY
           git commit -F /tmp/msg
           git push
+          # a push made with this workflow's token starts no other workflow, so the deploy
+          # is started by hand; without this the monthly data never reached the site
+          gh workflow run pages.yml --ref main

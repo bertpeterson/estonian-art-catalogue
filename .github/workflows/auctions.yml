@@ -1,0 +1,70 @@
+# The six auction houses, weekly: the lots of sales still to come (upcoming_records.json)
+# and any new results. A house puts a sale's catalogue online two to four weeks before
+# it, so the monthly run would miss many; this reads only the houses, with their past
+# sales kept in a cache between runs (a past sale's page does not change), merges,
+# guards, builds, smoke-tests, commits the data and starts the deploy.
+name: Weekly auction lots
+
+on:
+  schedule:
+    - cron: "0 5 * * 1"         # 05:00 UTC on Mondays
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write               # to start the deploy: a push by this token starts no workflow
+
+concurrency:
+  group: reharvest             # never beside the monthly run, which writes the same files
+  cancel-in-progress: false
+
+jobs:
+  auctions:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+      - run: pip install -q numpy
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: data/gcache
+          key: auction-pages-${{ github.run_id }}
+          restore-keys: auction-pages-
+
+      - name: Restore the museum harvest from data/raw
+        run: python3 data/unpack.py
+
+      - name: Read every source's robots.txt; stop if one says no
+        working-directory: data
+        run: python3 robots_check.py
+
+      - name: The auction houses
+        working-directory: data
+        run: |
+          for s in vernissage_auctions haus_auctions allee_auctions eko_auctions vaal_auctions eks_auctions; do
+            echo "=== $s ==="; python3 -u $s.py
+          done
+
+      - name: Merge, guard and build
+        run: |
+          git show HEAD:data/data.json > /tmp/data_before.json
+          (cd data && python3 merge.py)
+          python3 data/data_guard.py /tmp/data_before.json data/data.json
+          ./build_site.sh
+          node check_site.js site
+
+      - name: Commit and deploy if anything changed
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git config user.name  "weekly auction lots"
+          git config user.email "actions@users.noreply.github.com"
+          git add -u data
+          if git diff --cached --quiet; then echo "nothing changed"; exit 0; fi
+          n=$(python3 -c "import json; print(len(json.load(open('data/data.json')).get('upcoming', [])))")
+          git commit -m "Weekly auction lots, $(date -u +%F): $n coming lots" -m "Automated: read the six auction houses' sales, merged, guarded, built and smoke-tested."
+          git push
+          gh workflow run pages.yml --ref main
