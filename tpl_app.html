@@ -477,7 +477,7 @@
       ? T("earlyband",{a: ordN(early[0].c+1), b: ordN(early[early.length-1].c+1)}) : "";
     const centHTML = g =>
       `<div class="cent" style="flex:${g.ds.length}">
-         <div class="cent-bars">${g.ds.map(d => cell(d, String(d).slice(2), d+"s")).join("")}</div>
+         <div class="cent-bars">${g.ds.map(d => cell(d, d % 100 === 0 ? String(d) : String(d).slice(2), d+"s")).join("")}</div>
          <div class="cent-lab"><span class="cl-full">${esc(T("century",{n:ordN(g.c+1)}))}</span><span class="cl-abbr">${g.c+1}.</span></div>
        </div>`;
     const earlyFolded = `<div class="cent early" style="flex:0 0 118px">
