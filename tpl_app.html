@@ -1831,7 +1831,12 @@
     state.sale = !state.sale; state.saleUp = false; state.open = null; state.expand.clear();
     if (state.sale && state.group !== "artist") setGroup("artist");   // and leaves the auction ledger, if that was open
     renderAll(); pushHash();
-    if (state.sale) $("register").scrollIntoView({behavior: "auto", block: "start"});
+    // land on the count line and the galleries / coming-sales switch, just clear of the
+    // sticky control bar -- not on the register's top, which the bar covers
+    if (state.sale){
+      const to = $("countline").hidden ? $("salesw") : $("countline");
+      window.scrollTo({top: Math.max(0, to.getBoundingClientRect().top + window.scrollY - (getComputedStyle(document.querySelector(".controls")).position === "sticky" ? document.querySelector(".controls").offsetHeight : 0) - 14), behavior: "auto"});
+    }
   });
   $("eras").addEventListener("click", e => {
     const b = e.target.closest(".era"); if (!b) return;
