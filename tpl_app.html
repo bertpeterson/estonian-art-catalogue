@@ -320,7 +320,7 @@
                   : s==="wd" ? '<span class="tag">Wikidata</span>' : s==="noba" ? '<span class="tag">NOBA</span>' : s==="vaal" ? '<span class="tag">Vaal</span>'
                   : s==="cca" ? '<span class="tag">CCA</span>' : '<span class="tag">MuIS</span>';
 
-  const state = {group:"decade", decOrder:"earliest", artOrder:"az", q:"", list:false, shared:null, sale:false,
+  const state = {group:"decade", decOrder:"earliest", q:"", list:false, shared:null, sale:false,
                  view:null, viewKey:"", wLimit:72,   // the artwall: chosen for one view (viewKey), or null for the rule
                  decade:null, media:new Set(), museums:new Set(), cats:new Set(), srcs:new Set(),
                  artist:null, letter:null, idxOpen:false, idxQ:"", idxLimit:120, idxSort:"az", showEarly:false, origins:new Set(), groups:new Set(), sort:"year", year:null, gLimit:50, from:null, to:null, undOnly:false, open:null, expand:new Set(),
@@ -338,10 +338,10 @@
     if (state.group !== "decade") p.set("group", state.group);
     // each group has its own defaults, left out of the link: decade earliest by year,
     // artist A-Z, auctions highest hammer price first
-    const ord = state.group === "artist" ? state.artOrder : state.decOrder;
-    const ordDefault = state.group === "artist" ? "az" : state.group === "auction" && state.sort !== "artist" ? "latest" : "earliest";
+    const ord = state.decOrder;
+    const ordDefault = state.group === "auction" && state.sort !== "artist" ? "latest" : "earliest";
     if (ord !== ordDefault) p.set("order", ord);
-    if (state.sort !== (state.group === "auction" ? "price" : "year")) p.set("sort", state.sort);
+    if (state.sort !== sortsFor()[0]) p.set("sort", state.sort);
     if (state.q) p.set("q", state.q);
     if (state.artist !== null) p.set("artist", slug(A[state.artist].n));
     if (state.decade !== null) p.set("decade", state.decade);
@@ -382,8 +382,8 @@
     state.group    = ["artist", "auction"].includes(p.get("group")) ? p.get("group") : "decade";
     const ord      = p.get("order");
     state.decOrder = ord === "latest" ? "latest" : "earliest";
-    state.artOrder = ord === "birth"  ? "birth"  : "az";
-    state.sort     = KEYS[p.get("sort")] ? p.get("sort") : (state.group === "auction" ? "price" : "year");
+    state.sort     = p.get("sort") in KEYS ? p.get("sort") : "";     // checked against the view once the artist is read
+    if (state.group === "artist" && ord === "birth" && !p.get("sort")) state.sort = "born";   // an older link's "By birth"
     if (state.group === "auction" && !p.get("order")) state.decOrder = state.sort === "artist" ? "earliest" : "latest";
     state.q        = p.get("q") || "";
     state.view     = ["wall", "list"].includes(p.get("view")) ? p.get("view") : null;
@@ -391,6 +391,7 @@
     const as = p.get("artist");
     const ai = as ? A.findIndex(x => slug(x.n) === as) : -1;
     state.artist = ai >= 0 ? ai : null;
+    if (!sortsFor().includes(state.sort)) state.sort = sortsFor()[0];
     const d = p.get("decade");
     state.decade = d ? (d === "und" ? "und" : (isFinite(+d) ? +d : null)) : null;
     const yr = p.get("year");
@@ -675,7 +676,8 @@
     medium: w => w.e,
     museum: w => w.mu,
     price:  w => w.ap || 0,
-    sale:   w => w.ad || ""       // the auction ledger only: sale by sale
+    sale:   w => w.ad || "",      // the auction ledger only: sale by sale
+    name: 0, born: 0, works: 0    // the artist view's: the order of the artists, not of works
   };
   // Every render sorted every dated work in every decade -- 48,000 of them -- with
   // Intl.Collator deciding ties on title and artist. The collator was 13% of all CPU
@@ -759,7 +761,12 @@
     }
     // Sorted by size, the alphabet is not the organising idea any more, so the
     // letter dividers go with it — they would break the ranking into meaningless runs.
-    const byWorks = state.idxSort === "works";
+    // In the artist view the index follows the view's own order -- ranked when the
+    // artists are by number of works, A-Z otherwise -- and its toggle steps aside: two
+    // "A-Z / most works" controls one above the other were one too many.
+    const inArt = state.group === "artist";
+    document.querySelector(".ai-sort").hidden = inArt;
+    const byWorks = inArt ? state.sort === "works" : state.idxSort === "works";
     if (byWorks) show = show.slice().sort((a,b)=> b.c - a.c || cmpStr(a.s, b.s));
     const total = show.length;
     show = show.slice(0, state.idxLimit);
@@ -1086,6 +1093,7 @@
     }
   }
   function renderInner(){
+    syncOrder();
     if (state.view && state.viewKey !== scopeKey()) state.view = null;   // a List / Artwall choice is for one view
     renderDoors(); renderListBar();
     // The count line and Reset describe and undo a selection; before there is one
@@ -1168,6 +1176,24 @@
     if (BAKED_LIVE){
       BAKED_LIVE = false;
       if (home && LANG === "en" && state.wLimit === 72 && reg.querySelector(".wall[data-seed]")) return;
+    }
+    // Artist and the wall together: the pictures artist by artist, each under their
+    // name, in the artists' chosen order -- not the mixed wall, on which the grouping
+    // and its order changed nothing that could be seen
+    if (wall && state.group === "artist" && state.artist === null){
+      const by = new Map(), nAll = new Map();
+      for (const w of set){ nAll.set(w.a, (nAll.get(w.a) || 0) + 1); if (wallPic(w)) (by.get(w.a) || by.set(w.a, []).get(w.a)).push(w); }
+      const all = artistOrder(set), order = all.filter(i => by.has(i)), shownA = order.slice(0, state.gLimit);
+      reg.innerHTML = shownA.map((i, k) => {
+        const ar = A[i], life = (ar.l[0] || ar.l[1]) ? `${ar.l[0]}–${ar.l[1] || ""}` : "";
+        const gutter = `<span class="g-name">${esc(ar.n)}</span>${life ? `<div class="g-dates">${esc(life)}</div>` : ""}
+          <div class="g-split">${esc(T("nworks", {n: fmt(nAll.get(i))}))} · ${esc(T("npics", {n: fmt(by.get(i).length)}))}</div>
+          <button class="showartist" data-artist="${i}">${esc(T("openartist"))}</button>`;
+        return `<section class="group" id="grp-a${i}"><div class="gutter">${gutter}</div><div>${wallHTML(by.get(i), -1, false, {limit: 10, cols: artCols(), lazy: k > 1})}</div></section>`;
+      }).join("")
+        + (order.length > shownA.length ? `<button class="more" id="more-artists" style="margin-top:18px">${esc(T("moreartists", {n: fmt(order.length - shownA.length)}))}</button>` : "")
+        + (all.length > order.length ? `<p class="tl-note">${esc(T("art_nopics", {n: fmt(all.length - order.length)}))}</p>` : "");
+      return;
     }
     const listSet = home ? [] : wall ? set.filter(w => !wallPic(w)) : set;
     let html = wall ? wallHTML(set.filter(wallPic), home ? -1 : listSet.length, state.artist === null) : "";
@@ -1252,17 +1278,13 @@
       // decade (57 groups, 74,000px before anyone asked); the histogram above is the
       // way in, and the register says so. A narrow view (an artist, a single decade)
       // is short enough to stay flat, and a search always is.
-      const compact = state.artist === null && !state.q && keys.length > 6 && listSet.length > 300;
+      const compact = state.artist === null && !state.q && !state.sale && keys.length > 6 && listSet.length > 300;
       if (!compact) html += keys.map(decSection).join("");
       else html += `<p class="empty">${esc(T("pickdecade_note", {n: fmt(listSet.length)}))}</p>`;
     } else {
       // The last word is not the surname when the name ends in a bracket -- "Johann
       // Willinges (1560-1625)" sorted under "(", ahead of every letter. surnameOf skips those.
-      const surname = surnameOf;
-      const birth = i => +(A[i].l[0]||9999);
-      const idxs = [...new Set(listSet.map(w=>w.a))].sort((x,y)=>
-        state.artOrder==="az" ? COLL.compare(surname(A[x].n), surname(A[y].n))
-                              : (birth(x)-birth(y)) || COLL.compare(surname(A[x].n), surname(A[y].n)));
+      const idxs = artistOrder(listSet);
       const shownIdxs = idxs.slice(0, state.gLimit);
       html += shownIdxs.map(i => {
         const ar = A[i];
@@ -1272,7 +1294,7 @@
         const gutter = `<span class="g-name">${esc(ar.n)}</span>
           <div class="g-dates">${esc(life)}${stag(ar.ls)}</div>${au ? `<div class="g-split">${esc(au)}</div>` : ""}
           ${bioFor(ar).t ? `<p class="g-blurb${bioFor(ar).t.length > 260 ? " clamp" : ""}">${esc(bioFor(ar).t)}</p>${bioFor(ar).t.length > 260 ? `<button class="bio-more g-more">${esc(T("readbio"))}</button>` : ""}` : ""}
-          <button class="showartist" data-artist="${i}">Open artist →</button>`;
+          <button class="showartist" data-artist="${i}">${esc(T("openartist"))}</button>`;
         return groupHTML("a"+i, gutter, items, false);
       }).join("");
       if (idxs.length > shownIdxs.length)
@@ -1488,12 +1510,33 @@
   let BAKED_LIVE = !!BAKED;
   const BAKED_KEYS = BAKED && BAKED.dataset.keys ? BAKED.dataset.keys.split(",") : null;
   const wallCols = () => { const w = reg.clientWidth || innerWidth; return w >= 1100 ? 6 : w >= 720 ? 4 : w >= 480 ? 3 : 2; };
+  // an artist's pictures beside their name: the column beside the gutter, or the full
+  // width once the gutter stacks above (860px)
+  const artCols = () => { const w = innerWidth; return w > 1180 ? 5 : w > 860 ? 3 : w >= 720 ? 4 : w >= 480 ? 3 : 2; };
+  // The artist view orders the artists: by name (surname), by year of birth (the
+  // unrecorded last, either way), or by how many works the view holds of them
+  function artistOrder(ws){
+    const n = new Map(); for (const w of ws) n.set(w.a, (n.get(w.a) || 0) + 1);
+    const rev = state.decOrder === "latest", byName = (x, y) => COLL.compare(surnameOf(A[x].n), surnameOf(A[y].n));
+    const born = i => +A[i].l[0] || 0;
+    return [...n.keys()].sort((x, y) => {
+      let r;
+      if (state.sort === "born"){ const bx = born(x), by = born(y); if (!bx !== !by) return bx ? -1 : 1; r = bx - by; }
+      else if (state.sort === "works") r = n.get(y) - n.get(x);
+      else r = byName(x, y);
+      return (rev ? -r : r) || byName(x, y);
+    });
+  }
   let wallRT = null;
   addEventListener("resize", () => {          // a new column count re-lays the wall; nothing else
     clearTimeout(wallRT);
-    wallRT = setTimeout(() => { const el = reg.querySelector(".wall"); if (el && +el.dataset.cols !== wallCols()) render(); }, 150);
+    wallRT = setTimeout(() => {
+      const el = reg.querySelector(".wall[data-cols]"), ea = reg.querySelector(".wall[data-acols]");
+      if ((el && +el.dataset.cols !== wallCols()) || (ea && +ea.dataset.acols !== artCols())) render();
+    }, 150);
   });
-  function wallHTML(pics, restN, showArtist){
+  // opt, for one artist's pictures in the artist view: limit (no "more"), cols, lazy
+  function wallHTML(pics, restN, showArtist, opt = {}){
     // Two impressions of one print, or two casts of one sculpture, are two records but
     // one picture: the wall shows it once, marked x2, opening the first. Only for the
     // multiples -- five drawings called "Mehe pea" are five drawings.
@@ -1520,7 +1563,7 @@
     // turns dealt in a fixed shuffle (a hash of the record key) rather than by year, so
     // Mägi, Wiiralt, Arrak, Estna and Leis sit side by side at the top of the 1920s or
     // the whole catalogue instead of twenty 1440s woodcuts.
-    const mixed = state.artist === null;
+    const mixed = state.artist === null && !opt.cols;
     const hl = w => (mixed ? 0 : (w.hl ?? 1e9));
     const tier = w => (!mixed ? 0 : (w.hl != null || CANON_SET.has(w.a)) ? 0 : 1);
     const hash = k => { let h = 2166136261; for (const c of String(k)) h = Math.imul(h ^ c.charCodeAt(0), 16777619); return h >>> 0; };
@@ -1539,7 +1582,7 @@
       const pos = new Map(BAKED_KEYS.map((k, i) => [k, i]));
       ordered.sort((a, b) => (pos.has(a.k) ? pos.get(a.k) : 1e9) - (pos.has(b.k) ? pos.get(b.k) : 1e9));
     }
-    const shown = ordered.slice(0, state.wLimit);
+    const shown = ordered.slice(0, opt.limit || state.wLimit);
     // the open record may be a picture beyond the tiles on show -- a drawing far down an
     // artist's wall, reached by a link -- and opens above the wall all the same
     const openW = state.open && ordered.find(w => w.k === state.open);
@@ -1560,17 +1603,17 @@
     const tile = (w, j) => {
       const src = imgSrc(picOf(w)), r = ratioOf(w);
       return `<button class="wt${state.open === w.k ? " on" : ""}" data-wt="${esc(w.k)}" title="${esc(w.t)} · ${esc(A[w.a].n)}">${src
-        ? `<img src="${esc(src)}" alt="${esc(w.t)}, ${esc(A[w.a].n)}" loading="${j < 2 ? "eager" : "lazy"}"${j < 2 ? ' fetchpriority="high"' : ""} style="aspect-ratio:1/${r.toFixed(3)}${cropPos(w)}" referrerpolicy="no-referrer-when-downgrade">`
+        ? `<img src="${esc(src)}" alt="${esc(w.t)}, ${esc(A[w.a].n)}" loading="${j < 2 && !opt.lazy ? "eager" : "lazy"}"${j < 2 && !opt.lazy ? ' fetchpriority="high"' : ""} style="aspect-ratio:1/${r.toFixed(3)}${cropPos(w)}" referrerpolicy="no-referrer-when-downgrade">`
         : `<span class="wt-ph" style="aspect-ratio:1/${r.toFixed(3)}"></span>`}<span class="wt-cap"><i>${esc(w.t)}${dups.has(w) ? `<span class="src-tag" title="${esc(T("wall_dup", {n: dups.get(w)}))}">×${dups.get(w)}</span>` : ""}</i><span>${showArtist ? esc(A[w.a].n) + " · " : ""}${w.y ?? esc(T("nd"))} · ${esc(abbr(w.mu))}</span></span></button>`;
     };
-    const nCols = wallCols(), cols = Array.from({length: nCols}, () => ({h: 0, t: []}));
+    const nCols = opt.cols || wallCols(), cols = Array.from({length: nCols}, () => ({h: 0, t: []}));
     shown.forEach(w => {
       const c = cols.reduce((a, b) => b.h < a.h ? b : a);
       c.h += ratioOf(w) + 0.32; c.t.push(w);        // the caption is about a third of the width
     });
     return (openW ? `<div class="wall-open rows">${rowHTML(openW, true)}</div>` : "")
-      + `<div class="wall" data-cols="${nCols}">${cols.map(c => `<div class="wcol">${c.t.map(tile).join("")}</div>`).join("")}</div>`
-      + (ordered.length > shown.length ? `<button class="more" data-wmore="1" style="margin-bottom:22px">${esc(T("wall_more", {n: fmt(Math.min(72, ordered.length - shown.length))}))}</button>` : "");
+      + `<div class="wall" data-${opt.cols ? "acols" : "cols"}="${nCols}">${cols.map(c => `<div class="wcol">${c.t.map(tile).join("")}</div>`).join("")}</div>`
+      + (!opt.limit && ordered.length > shown.length ? `<button class="more" data-wmore="1" style="margin-bottom:22px">${esc(T("wall_more", {n: fmt(Math.min(72, ordered.length - shown.length))}))}</button>` : "");
   }
   const SL_ICON = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 2h8v12l-4-3-4 3z"/></svg>';
   const slBtn = (k, cls) => {
@@ -1849,7 +1892,7 @@
   });
   $("stat-sale").addEventListener("click", () => {
     state.sale = !state.sale; state.saleUp = false; state.open = null; state.expand.clear();
-    if (state.sale && state.group !== "artist") setGroup("artist");   // and leaves the auction ledger, if that was open
+    if (state.sale && state.group === "auction") setGroup("decade");   // a lot under the hammer is not on sale
     renderAll(); pushHash();
     // land on the count line and the galleries / coming-sales switch, just clear of the
     // sticky control bar -- not on the register's top, which the bar covers
@@ -1988,6 +2031,9 @@
     if (g === "auction" && state.group !== "auction"){ state.sort = "price"; state.decOrder = "latest"; }
     if (g === "auction") state.sale = state.saleUp = false;     // a lot that went under the hammer is not on sale: the two never combine
     if (g !== "auction" && state.group === "auction"){ state.sort = "year"; state.decOrder = "earliest"; }
+    // the artist view opens A-Z; leaving it, the works go back to earliest first by year
+    if (g === "artist" && state.group !== "artist"){ state.sort = "name"; state.decOrder = "earliest"; }
+    if (g !== "artist" && state.group === "artist"){ state.sort = "year"; state.decOrder = "earliest"; }
     state.group = g;
     $("g-artist").setAttribute("aria-pressed", g==="artist");
     $("g-auc").setAttribute("aria-pressed", g==="auction");
@@ -1998,9 +2044,16 @@
   // list: every lot by hammer price; sale by sale; artist by artist. (It offered year,
   // artist and title too, which all drew the same sales in the same order.) A sort the
   // new group cannot use falls back to the group's first.
-  const SORTS_FOR = {decade: ["year", "artist", "title", "medium", "museum"], artist: ["year", "title", "medium", "museum"], auction: ["price", "sale", "artist"]};
+  // The artist view's sorts order the artists -- by name, by birth, by how many works --
+  // as the order toggle did; it offered year, title, medium and museum too, which
+  // sorted the works inside each artist, seen only in the list. Their works run
+  // earliest first.
+  const SORTS_FOR = {decade: ["year", "artist", "title", "medium", "museum"], artist: ["name", "born", "works"], auction: ["price", "sale", "artist"],
+                     one: ["year", "title", "medium", "museum"]};
+  // ...and one artist's own works, whichever group, sort as works do (not by artist)
+  function sortsFor(){ return state.group !== "auction" && state.artist !== null ? SORTS_FOR.one : SORTS_FOR[state.group] || SORTS_FOR.decade; }
   function syncSort(){
-    const ok = SORTS_FOR[state.group] || SORTS_FOR.decade;
+    const ok = sortsFor();
     if (!ok.includes(state.sort)) state.sort = ok[0];
     for (const o of [...$("sortby").options]){ o.hidden = !ok.includes(o.value); o.disabled = o.hidden; }
     for (const v of ok) $("sortby").appendChild($("sortby").querySelector(`option[value="${v}"]`));   // in the group's own order
@@ -2009,24 +2062,21 @@
   function syncOrder(){
     syncSort();
     const a = $("o-asc"), b = $("o-desc");
-    if (state.group !== "artist"){          // decade and auction views both run earliest/latest
-      // by price the same toggle reads lowest / highest; by artist in the ledger, A-Z / Z-A
-      const au = state.group === "auction";
-      a.textContent = T(au && state.sort === "price" ? "lowest" : au && state.sort === "artist" ? "az" : "earliest");
-      b.textContent = T(au && state.sort === "price" ? "highest" : au && state.sort === "artist" ? "za" : "latest");
-      a.setAttribute("aria-pressed", state.decOrder==="earliest");
-      b.setAttribute("aria-pressed", state.decOrder==="latest");
-    } else {
-      a.textContent = T("az"); b.textContent = T("bybirth");
-      a.setAttribute("aria-pressed", state.artOrder==="az");
-      b.setAttribute("aria-pressed", state.artOrder==="birth");
-    }
+    // one toggle, named for what it flips: earliest / latest by default; lowest / highest
+    // by price; A-Z / Z-A by name; most / fewest by number of works
+    const lab = state.sort === "price" ? ["lowest", "highest"]
+              : (state.sort === "name" || (state.group === "auction" && state.sort === "artist")) ? ["az", "za"]
+              : state.sort === "works" ? ["most", "fewest"] : ["earliest", "latest"];
+    a.textContent = T(lab[0]); b.textContent = T(lab[1]);
+    a.setAttribute("aria-pressed", state.decOrder === "earliest");
+    b.setAttribute("aria-pressed", state.decOrder === "latest");
   }
   $("sortby").addEventListener("change", e => {
     state.sort = e.target.value; state.expand.clear(); state.auLimit = 20;
     // in the ledger each sort opens the way it is read: highest price, latest sale, A-Z
     if (state.group === "auction") state.decOrder = state.sort === "artist" ? "earliest" : "latest";
-    syncOrder(); render(); pushHash();
+    if (state.group === "artist") state.decOrder = "earliest";      // A-Z, earliest born, most works
+    syncOrder(); render(); renderArtistIndex(); pushHash();
   });
   // Artist and Auctions are toggles: the decade view is what is left when neither is on,
   // so it needs no button of its own (it had one that, on the untouched page, did nothing)
@@ -2034,8 +2084,8 @@
     if (state.group === "artist") setGroup("decade"); else { setGroup("artist"); state.gLimit = 50; }
     state.expand.clear(); renderAll(); pushHash();
   });
-  $("o-asc").addEventListener("click", () => { state.group!=="artist" ? state.decOrder="earliest" : state.artOrder="az"; syncOrder(); render(); pushHash(); });
-  $("o-desc").addEventListener("click", () => { state.group!=="artist" ? state.decOrder="latest" : state.artOrder="birth"; syncOrder(); render(); pushHash(); });
+  $("o-asc").addEventListener("click", () => { state.decOrder = "earliest"; syncOrder(); render(); pushHash(); });
+  $("o-desc").addEventListener("click", () => { state.decOrder = "latest"; syncOrder(); render(); pushHash(); });
   $("g-auc").addEventListener("click", () => {
     if (state.group === "auction") setGroup("decade");
     else { setGroup("auction"); state.decOrder = "latest"; state.auLimit = 20; syncOrder(); }
@@ -2044,7 +2094,7 @@
   $("reset").addEventListener("click", () => {
     state.q=""; state.decade=null; state.media.clear(); state.museums.clear(); state.cats.clear(); state.srcs.clear(); state.origins.clear(); state.groups.clear();
     state.artist=null; state.letter=null; state.idxOpen=false; state.sort="year"; state.year=null; state.from=null; state.to=null; state.undOnly=false; $("sortby").value="year";
-    state.open=null; state.expand.clear(); state.decOrder="earliest"; state.artOrder="az";
+    state.open=null; state.expand.clear(); state.decOrder="earliest";
     state.list=false; state.shared=null; state.sale=false; state.saleUp=false; state.view=null; state.wLimit=72;
     $("q").value=""; setGroup("decade"); renderAll(); pushHash(); window.scrollTo({top:0,behavior:"auto"});
   });

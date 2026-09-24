@@ -417,6 +417,7 @@ footer a{border-bottom:1px solid var(--rule)}
 .ai-l[aria-pressed="true"]{background:var(--invert-bg);color:var(--invert-fg)}
 .ai-tools{display:flex;align-items:center;gap:12px}
 .ai-sort{display:inline-flex;border:1px solid var(--rule)}
+.ai-sort[hidden]{display:none}
 .ai-sort button{font-family:var(--mono);font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;
   background:none;border:0;color:var(--grey-6);padding:5px 9px;cursor:pointer;white-space:nowrap}
 .ai-sort button + button{border-left:1px solid var(--rule)}
@@ -674,6 +675,9 @@ footer a{border-bottom:1px solid var(--rule)}
         <option value="museum" data-i18n="s_museum"></option>
         <option value="price" data-i18n="s_price"></option>
         <option value="sale" data-i18n="s_sale"></option>
+        <option value="name" data-i18n="s_name"></option>
+        <option value="born" data-i18n="s_born"></option>
+        <option value="works" data-i18n="s_works"></option>
       </select>
       <div class="seg" role="group" aria-label="Order">
         <button id="o-asc" aria-pressed="true">Earliest</button>
