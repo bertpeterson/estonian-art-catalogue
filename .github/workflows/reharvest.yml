@@ -71,6 +71,8 @@ jobs:
           # the colour charts in the new museum photographs (numpy and PIL, reads each once);
           # the visual look-alikes need torch and stay a deliberate run on the Mac
           (cd data && python3 chart_side.py)
+          # the galleries' own 768-pixel copies of new stock, for the wall (checks each once)
+          (cd data && python3 img_small.py)
           ./build_site.sh
           node check_site.js site
           python3 data/readme_figures.py

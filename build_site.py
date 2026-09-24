@@ -47,7 +47,10 @@ LA = {}
 if os.path.exists("data/lookalikes.json"):
     for k, ks in json.load(open("data/lookalikes.json", encoding="utf-8")).items():
         if k in _kidx: LA[_kidx[k]] = [_kidx[x] for x in ks if x in _kidx]
-pics = {i: w["im"] for i, w in enumerate(W) if w.get("im")}
+# ...the gallery's own smaller copy where data/img_small.py found one: the tile is
+# under 300 pixels wide; the opened record reads the full picture from its shard
+SMALL = {k: v for k, v in (json.load(open("data/img_small.json", encoding="utf-8")) if os.path.exists("data/img_small.json") else {}).items() if v}
+pics = {i: SMALL.get(w["im"], w["im"]) for i, w in enumerate(W) if w.get("im")}
 json.dump(pics, open(f"{OUT}/data/pics.json", "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
 
 # the colour charts data/chart_side.py found in the museums' photographs: {picture: [side, fraction]}
