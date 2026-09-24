@@ -339,7 +339,7 @@
     // each group has its own defaults, left out of the link: decade earliest by year,
     // artist A-Z, auctions highest hammer price first
     const ord = state.group === "artist" ? state.artOrder : state.decOrder;
-    const ordDefault = state.group === "artist" ? "az" : state.group === "auction" ? "latest" : "earliest";
+    const ordDefault = state.group === "artist" ? "az" : state.group === "auction" && state.sort !== "artist" ? "latest" : "earliest";
     if (ord !== ordDefault) p.set("order", ord);
     if (state.sort !== (state.group === "auction" ? "price" : "year")) p.set("sort", state.sort);
     if (state.q) p.set("q", state.q);
@@ -384,7 +384,7 @@
     state.decOrder = ord === "latest" ? "latest" : "earliest";
     state.artOrder = ord === "birth"  ? "birth"  : "az";
     state.sort     = KEYS[p.get("sort")] ? p.get("sort") : (state.group === "auction" ? "price" : "year");
-    if (state.group === "auction" && !p.get("order")) state.decOrder = "latest";
+    if (state.group === "auction" && !p.get("order")) state.decOrder = state.sort === "artist" ? "earliest" : "latest";
     state.q        = p.get("q") || "";
     state.view     = ["wall", "list"].includes(p.get("view")) ? p.get("view") : null;
     state.viewKey  = "";   // set once the rest of the hash is read, below
@@ -674,7 +674,8 @@
     title:  w => w.t,
     medium: w => w.e,
     museum: w => w.mu,
-    price:  w => w.ap || 0
+    price:  w => w.ap || 0,
+    sale:   w => w.ad || ""       // the auction ledger only: sale by sale
   };
   // Every render sorted every dated work in every decade -- 48,000 of them -- with
   // Intl.Collator deciding ties on title and artist. The collator was 13% of all CPU
@@ -1301,6 +1302,25 @@
       return groupHTML("price", gutter, items, true) + `<p class="tl-note">${esc(T("au_note"))}</p>`;
     }
     const asc = state.decOrder === "earliest";
+    if (state.sort === "artist"){
+      // artist by artist: each one's lots, latest sale first, under their record
+      const by = new Map();
+      for (const w of lots) (by.get(w.a) || by.set(w.a, []).get(w.a)).push(w);
+      const arts = [...by.keys()].sort((x, y) => cmpStr(A[x].n, A[y].n) * (asc ? 1 : -1));
+      const shownA = arts.slice(0, state.auLimit);
+      return shownA.map(ai => {
+        // highest hammer first, as within a sale; the unsold after, latest sale first
+        const items = by.get(ai).slice().sort((x, y) => (y.ap || -1) - (x.ap || -1) || cmpStr(y.ad, x.ad));
+        const sold = items.filter(w => w.ao), ps = sold.filter(w => w.ap).map(w => w.ap).sort((a, b) => a - b);
+        const l = A[ai].l || [];
+        const gutter = `<span class="g-name"><span class="r-alink" data-artist="${ai}">${esc(A[ai].n)}</span></span>
+          ${l[0] || l[1] ? `<div class="g-dates">${esc(l[0] || "")}–${esc(l[1] || "")}</div>` : ""}
+          <div class="g-split">${esc(T(items.length === 1 ? "au_saleline1" : "au_saleline", {n: fmt(items.length), s: fmt(sold.length)}))}${ps.length ? ` · ${eur(ps[0])}${ps.length > 1 ? " – " + eur(ps[ps.length - 1]) : ""}` : ""}</div>`;
+        return groupHTML("a" + ai, gutter, items, false);
+      }).join("") + (arts.length > shownA.length
+        ? `<button class="more" id="more-sales" style="margin-top:18px">${esc(T("au_moreartists", {n: fmt(arts.length - shownA.length)}))}</button>` : "")
+        + `<p class="tl-note">${esc(T("au_note"))}</p>`;
+    }
     const order = [...sales.values()].sort((x, y) => asc ? x.ad.localeCompare(y.ad) : y.ad.localeCompare(x.ad));
     const shown = order.slice(0, state.auLimit);
     return shown.map((g, k) => {
@@ -1310,7 +1330,7 @@
       const when = g.ad.length > 7 ? g.ad.split("-").reverse().join(".") : (g.ad.slice(5, 7) ? `${g.ad.slice(5, 7)}.${g.ad.slice(0, 4)}` : g.ad);
       const gutter = `<span class="g-name">${esc(g.an)}</span>
         <div class="g-dates">${esc(musName(g.mu))} · ${esc(when)}</div>
-        <div class="g-split">${esc(T("au_saleline", {n: fmt(items.length), s: fmt(sold.length)}))}${total ? ` · ${esc(T("au_total", {p: eur(total)}))}` : ""}</div>
+        <div class="g-split">${esc(T(items.length === 1 ? "au_saleline1" : "au_saleline", {n: fmt(items.length), s: fmt(sold.length)}))}${total ? ` · ${esc(T("au_total", {p: eur(total)}))}` : ""}</div>
         ${top ? `<p class="g-blurb">${esc(T("au_top"))}: ${esc(A[top.a].n)}, <em>${esc(top.t)}</em> — ${esc(eur(top.ap))}</p>` : ""}`;
       return groupHTML("s" + k, gutter, items, true);
     }).join("") + (order.length > shown.length
@@ -1973,22 +1993,27 @@
     $("g-auc").setAttribute("aria-pressed", g==="auction");
     syncOrder();
   }
-  // Only the sorts that mean something for the group are offered: by price only in the
-  // auction ledger, by artist never inside one artist's works, by medium or museum not
-  // across sales. A sort the new group cannot use falls back to year.
-  const SORTS_FOR = {decade: ["year", "artist", "title", "medium", "museum"], artist: ["year", "title", "medium", "museum"], auction: ["year", "artist", "title", "price"]};
+  // Only the sorts that mean something for the group are offered: by artist never
+  // inside one artist's works. The auction ledger has its own three, each a different
+  // list: every lot by hammer price; sale by sale; artist by artist. (It offered year,
+  // artist and title too, which all drew the same sales in the same order.) A sort the
+  // new group cannot use falls back to the group's first.
+  const SORTS_FOR = {decade: ["year", "artist", "title", "medium", "museum"], artist: ["year", "title", "medium", "museum"], auction: ["price", "sale", "artist"]};
   function syncSort(){
     const ok = SORTS_FOR[state.group] || SORTS_FOR.decade;
-    if (!ok.includes(state.sort)) state.sort = "year";
-    for (const o of $("sortby").options){ o.hidden = !ok.includes(o.value); o.disabled = o.hidden; }
+    if (!ok.includes(state.sort)) state.sort = ok[0];
+    for (const o of [...$("sortby").options]){ o.hidden = !ok.includes(o.value); o.disabled = o.hidden; }
+    for (const v of ok) $("sortby").appendChild($("sortby").querySelector(`option[value="${v}"]`));   // in the group's own order
     $("sortby").value = state.sort;
   }
   function syncOrder(){
     syncSort();
     const a = $("o-asc"), b = $("o-desc");
     if (state.group !== "artist"){          // decade and auction views both run earliest/latest
-      // by price the same toggle reads lowest / highest
-      a.textContent = T(state.sort === "price" ? "lowest" : "earliest"); b.textContent = T(state.sort === "price" ? "highest" : "latest");
+      // by price the same toggle reads lowest / highest; by artist in the ledger, A-Z / Z-A
+      const au = state.group === "auction";
+      a.textContent = T(au && state.sort === "price" ? "lowest" : au && state.sort === "artist" ? "az" : "earliest");
+      b.textContent = T(au && state.sort === "price" ? "highest" : au && state.sort === "artist" ? "za" : "latest");
       a.setAttribute("aria-pressed", state.decOrder==="earliest");
       b.setAttribute("aria-pressed", state.decOrder==="latest");
     } else {
@@ -1998,7 +2023,10 @@
     }
   }
   $("sortby").addEventListener("change", e => {
-    state.sort = e.target.value; state.expand.clear(); syncOrder(); render(); pushHash();
+    state.sort = e.target.value; state.expand.clear(); state.auLimit = 20;
+    // in the ledger each sort opens the way it is read: highest price, latest sale, A-Z
+    if (state.group === "auction") state.decOrder = state.sort === "artist" ? "earliest" : "latest";
+    syncOrder(); render(); pushHash();
   });
   // Artist and Auctions are toggles: the decade view is what is left when neither is on,
   // so it needs no button of its own (it had one that, on the untouched page, did nothing)
