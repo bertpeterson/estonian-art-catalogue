@@ -323,7 +323,7 @@
   const state = {group:"decade", decOrder:"earliest", q:"", list:false, shared:null, sale:false,
                  view:null, viewKey:"", wLimit:72,   // the artwall: chosen for one view (viewKey), or null for the rule
                  decade:null, media:new Set(), museums:new Set(), cats:new Set(), srcs:new Set(),
-                 artist:null, letter:null, idxOpen:false, idxQ:"", idxLimit:120, idxSort:"az", showEarly:false, origins:new Set(), groups:new Set(), sort:"year", year:null, gLimit:50, from:null, to:null, undOnly:false, open:null, expand:new Set(),
+                 artist:null, letter:null, idxOpen:false, idxQ:"", idxLimit:120, idxSort:"az", showEarly:false, origins:new Set(), groups:new Set(), sort:"featured", onWall:false, year:null, gLimit:50, from:null, to:null, undOnly:false, open:null, expand:new Set(),
                  auLimit:20};     // sales drawn in the auction view before "more"
   const LIMIT_DEC = 50, LIMIT_ART = 18;
   const slug = s => (s||"").normalize("NFKD").replace(/[\u0300-\u036f]/g,"")
@@ -408,7 +408,6 @@
     state.origins = new Set(ORIGINS.filter(o => g("origin").includes(o===NOORIGIN?"none":o)));
     state.groups  = new Set(GROUPS.filter(x => g("grp").includes(x)));
     state.open    = p.get("open") || null;
-    if (state.view) state.viewKey = scopeKey();   // a linked choice is for the linked view
     // A list in the URL is yours if it matches what this browser holds, and someone
     // else's otherwise -- shown as a shared list, never merged into yours unasked.
     state.sale = p.get("sale") === "1" || p.get("sale") === "up";
@@ -424,6 +423,9 @@
     const ix = p.get("index");
     state.idxOpen = !!ix;
     state.letter  = (ix && ix !== "all") ? ix.toUpperCase() : null;
+    // a linked List / Artwall choice is for the linked view -- keyed once all of it is
+    // read (keyed before For sale and the list were, a linked "view=list" never held)
+    if (state.view) state.viewKey = scopeKey();
     state.expand.clear();
     // A shared link carries one record, but each group renders only its first 50 rows,
     // so anything deeper simply was not on the page and the link showed the catalogue
@@ -677,6 +679,7 @@
     museum: w => w.mu,
     price:  w => w.ap || 0,
     sale:   w => w.ad || "",      // the auction ledger only: sale by sale
+    featured: 0,                  // the wall's own order (SORTS_FOR)
     name: 0, born: 0, works: 0    // the artist view's: the order of the artists, not of works
   };
   // Every render sorted every dated work in every decade -- 48,000 of them -- with
@@ -700,7 +703,7 @@
     return r;
   }
   function sortRows(items, desc){
-    const sort = state.sort;
+    const sort = state.sort === "featured" ? "year" : state.sort;     // a list has no featured order: by year
     const prim = sort === "artist" ? SA : sort === "title" ? SK
                : sort === "medium" ? (w => skey(medName(w.e))) : sort === "museum" ? (w => skey(musName(w.mu))) : null;
     if (sort === "price"){                 // hammer price; a lot without one (unsold) always after, whichever way
@@ -1051,7 +1054,7 @@
     const gk = String(key);                       // dataset values are always strings
     const n = items.length, exp = state.expand.has(gk);
     const shown = exp ? items : items.slice(0, LIMIT);
-    const divide = state.group === "decade" && state.sort === "year"
+    const divide = state.group === "decade" && (state.sort === "year" || state.sort === "featured")
                    && state.year === null && gk !== "und";
     const more = (!exp && n > LIMIT)
       ? `<button class="more" data-exp="${esc(gk)}">${esc(T("showallentries",{n:fmt(n)}))}</button>` : "";
@@ -1163,6 +1166,7 @@
     // show which is on and how many pictures there are to see.
     const nPics = set.reduce((n, w) => n + (wallPic(w) ? 1 : 0), 0);
     const wall = wallMode(set, nPics);
+    state.onWall = wall; syncOrder();                // Featured is offered with a wall only
     $("viewctl").hidden = !nPics;
     $("v-list").setAttribute("aria-pressed", !wall);
     $("v-wall").setAttribute("aria-pressed", wall);
@@ -1221,7 +1225,7 @@
       if (listSet.some(w=>w.y==null)) keys.push("und");
       const decSection = d => {
         let items = sortedGroup(d, setByDec.get(d) || [], !asc);
-        if (d === "und" && state.sort === "year"){
+        if (d === "und" && (state.sort === "year" || state.sort === "featured")){
           // Nothing here has a year, but not everything is equally unknown: 174 records
           // are dated to a century by the museum. Use that where it exists — it beats
           // the artist-lifetime proxy — and fall back to when the artist worked.
@@ -1546,8 +1550,13 @@
     const dupKey = w => `${w.a}|${String(w.t).toLowerCase().replace(/[\s.,;:"'«»„“”]+/g, " ").trim()}|${w.hl != null ? "" : (w.y ?? "")}`;
     const seen = new Map(), dups = new Map();
     // the fold keeps the first it sees, so a masterpiece or highlight goes first
-    const unique = sortRows(pics, state.decOrder !== "earliest").map((w, i) => [w, i])
-      .sort((a, b) => (a[0].mp || 1e9) - (b[0].mp || 1e9) || (a[0].hl ?? 1e9) - (b[0].hl ?? 1e9) || a[1] - b[1]).map(x => x[0]).filter(w => {
+    // a sort chosen over the wall orders it exactly -- titles A-Z, the latest first --
+    // with none of the featured order's precedence (one artist's walls in the artist
+    // view keep theirs)
+    const strict = !opt.cols && WORK_SORTS.includes(state.sort);
+    const base = sortRows(pics, state.decOrder !== "earliest").map((w, i) => [w, i]);
+    const unique = (strict ? base : base
+      .sort((a, b) => (a[0].mp || 1e9) - (b[0].mp || 1e9) || (a[0].hl ?? 1e9) - (b[0].hl ?? 1e9) || a[1] - b[1])).map(x => x[0]).filter(w => {
       if (!MULTI.has(w.e) && (w.hl == null || w.e === "Painting")) return true;   // a painting is one work, however many share its title
       const k = dupKey(w);
       if (seen.has(k)){ dups.set(seen.get(k), (dups.get(seen.get(k)) || 1) + 1); return false; }
@@ -1575,10 +1584,10 @@
     // order, dealt a little differently each visit (a rank slips up to a dozen places),
     // so the wall opens on the same great works but not always the same first row
     const mp = w => (mixed && w.mp) ? w.mp + (hash(w.k + VISIT) % 12) : 1e9;
-    const ordered = inner.map(x => [x[0], x[1], medRank(x[0]), turn(x[0]), tier(x[0]), mixed ? hash(x[0].k) : 0])
+    const ordered = strict ? unique : inner.map(x => [x[0], x[1], medRank(x[0]), turn(x[0]), tier(x[0]), mixed ? hash(x[0].k) : 0])
       .sort((a, b) => mp(a[0]) - mp(b[0]) || hl(a[0]) - hl(b[0]) || a[4] - b[4] || a[3] - b[3] || a[2] - b[2] || a[5] - b[5] || a[1] - b[1]).map(x => x[0]);
     // on the untouched page the baked order leads, exactly, so nothing jumps
-    if (mixed && BAKED_KEYS && pristine() && !listKeys()){
+    if (mixed && !strict && BAKED_KEYS && pristine() && !listKeys()){
       const pos = new Map(BAKED_KEYS.map((k, i) => [k, i]));
       ordered.sort((a, b) => (pos.has(a.k) ? pos.get(a.k) : 1e9) - (pos.has(b.k) ? pos.get(b.k) : 1e9));
     }
@@ -2030,10 +2039,10 @@
     // decade view's own default, earliest first by year
     if (g === "auction" && state.group !== "auction"){ state.sort = "price"; state.decOrder = "latest"; }
     if (g === "auction") state.sale = state.saleUp = false;     // a lot that went under the hammer is not on sale: the two never combine
-    if (g !== "auction" && state.group === "auction"){ state.sort = "year"; state.decOrder = "earliest"; }
+    if (g !== "auction" && state.group === "auction"){ state.sort = "featured"; state.decOrder = "earliest"; }
     // the artist view opens A-Z; leaving it, the works go back to earliest first by year
     if (g === "artist" && state.group !== "artist"){ state.sort = "name"; state.decOrder = "earliest"; }
-    if (g !== "artist" && state.group === "artist"){ state.sort = "year"; state.decOrder = "earliest"; }
+    if (g !== "artist" && state.group === "artist"){ state.sort = "featured"; state.decOrder = "earliest"; }
     state.group = g;
     $("g-artist").setAttribute("aria-pressed", g==="artist");
     $("g-auc").setAttribute("aria-pressed", g==="auction");
@@ -2048,16 +2057,23 @@
   // as the order toggle did; it offered year, title, medium and museum too, which
   // sorted the works inside each artist, seen only in the list. Their works run
   // earliest first.
-  const SORTS_FOR = {decade: ["year", "artist", "title", "medium", "museum"], artist: ["name", "born", "works"], auction: ["price", "sale", "artist"],
-                     one: ["year", "title", "medium", "museum"]};
+  // Featured is the wall's own order -- the masterpieces, the key works, the artists
+  // taking turns -- and the default wherever there is a wall; any other sort orders
+  // the wall exactly by it. It said "Year · Earliest" over a wall in no year order,
+  // and Title or Artist barely moved it.
+  const SORTS_FOR = {decade: ["featured", "year", "artist", "title", "medium", "museum"], artist: ["name", "born", "works"], auction: ["price", "sale", "artist"],
+                     one: ["featured", "year", "title", "medium", "museum"]};
+  const WORK_SORTS = ["year", "artist", "title", "medium", "museum"];
   // ...and one artist's own works, whichever group, sort as works do (not by artist)
   function sortsFor(){ return state.group !== "auction" && state.artist !== null ? SORTS_FOR.one : SORTS_FOR[state.group] || SORTS_FOR.decade; }
   function syncSort(){
     const ok = sortsFor();
     if (!ok.includes(state.sort)) state.sort = ok[0];
-    for (const o of [...$("sortby").options]){ o.hidden = !ok.includes(o.value); o.disabled = o.hidden; }
+    // a list has no featured order and reads it as by year; the choice is kept for the wall
+    const feat = ok.includes("featured") && state.onWall;
+    for (const o of [...$("sortby").options]){ o.hidden = !ok.includes(o.value) || (o.value === "featured" && !feat); o.disabled = o.hidden; }
     for (const v of ok) $("sortby").appendChild($("sortby").querySelector(`option[value="${v}"]`));   // in the group's own order
-    $("sortby").value = state.sort;
+    $("sortby").value = state.sort === "featured" && !feat ? "year" : state.sort;
   }
   function syncOrder(){
     syncSort();
@@ -2070,6 +2086,7 @@
     a.textContent = T(lab[0]); b.textContent = T(lab[1]);
     a.setAttribute("aria-pressed", state.decOrder === "earliest");
     b.setAttribute("aria-pressed", state.decOrder === "latest");
+    a.parentElement.hidden = state.sort === "featured" && !!state.onWall;    // the wall's own order has no direction
   }
   $("sortby").addEventListener("change", e => {
     state.sort = e.target.value; state.expand.clear(); state.auLimit = 20;
@@ -2093,7 +2110,7 @@
   });
   $("reset").addEventListener("click", () => {
     state.q=""; state.decade=null; state.media.clear(); state.museums.clear(); state.cats.clear(); state.srcs.clear(); state.origins.clear(); state.groups.clear();
-    state.artist=null; state.letter=null; state.idxOpen=false; state.sort="year"; state.year=null; state.from=null; state.to=null; state.undOnly=false; $("sortby").value="year";
+    state.artist=null; state.letter=null; state.idxOpen=false; state.sort="featured"; state.year=null; state.from=null; state.to=null; state.undOnly=false; $("sortby").value="year";
     state.open=null; state.expand.clear(); state.decOrder="earliest";
     state.list=false; state.shared=null; state.sale=false; state.saleUp=false; state.view=null; state.wLimit=72;
     $("q").value=""; setGroup("decade"); renderAll(); pushHash(); window.scrollTo({top:0,behavior:"auto"});

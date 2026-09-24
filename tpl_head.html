@@ -418,6 +418,7 @@ footer a{border-bottom:1px solid var(--rule)}
 .ai-tools{display:flex;align-items:center;gap:12px}
 .ai-sort{display:inline-flex;border:1px solid var(--rule)}
 .ai-sort[hidden]{display:none}
+.seg[hidden]{display:none}
 .ai-sort button{font-family:var(--mono);font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;
   background:none;border:0;color:var(--grey-6);padding:5px 9px;cursor:pointer;white-space:nowrap}
 .ai-sort button + button{border-left:1px solid var(--rule)}
@@ -668,6 +669,7 @@ footer a{border-bottom:1px solid var(--rule)}
     </div>
     <div class="ctl">
       <select id="sortby" class="sortsel" aria-label="Sort rows by">
+        <option value="featured" data-i18n="s_featured"></option>
         <option value="year" data-i18n="s_year"></option>
         <option value="artist" data-i18n="s_artist"></option>
         <option value="title" data-i18n="s_title"></option>
