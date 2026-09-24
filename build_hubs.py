@@ -34,8 +34,10 @@ def val(w, f):
 _app = open("tpl_app.html", encoding="utf-8").read()
 BLURB_EN = {int(m.group(1)): m.group(2) for m in re.finditer(r'^\s+(\d{4}):"((?:[^"\\]|\\.)*)"', _app[_app.index("const BLURBS = {"):], re.M)}
 # the pictures and the shapes, as the app shows them
+SMALL = {k: v for k, v in (json.load(open("data/img_small.json", encoding="utf-8")) if os.path.exists("data/img_small.json") else {}).items() if v}   # data/img_small.py
 def imsrc(im):
     if not im: return ""
+    im = SMALL.get(im, im)
     if im.startswith("m:"): return f"https://www.muis.ee/digitaalhoidla/api/meedia/pisipilt?id={im[2:]}"
     if im.startswith("e:"): return "https://digikogu.ekm.ee/static/preview/image/" + re.sub(r"/([^/]+)$", r"/t2_\1", im[2:])
     return im[2:]

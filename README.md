@@ -456,6 +456,13 @@ dimensions, which found charts where there were none — a frame, an oval, a she
 and cut the painting itself. A photograph without a chart is shown whole. The monthly run reads the new
 photographs (only those not read before); `data/chart_sides.json` is committed.
 
+**The galleries' smaller copies.** A gallery's photograph was the file it uploaded — 1,300 to 2,700 pixels across,
+500 to 750 KB — for a tile under 300 pixels wide. The WordPress galleries (Allee, Vernissage, Kogo, Artrovert) keep
+a copy of every upload 768 pixels wide on their own servers; `data/img_small.py` works out each one's name from the
+picture's shape, checks it is there, and records it in `data/img_small.json` (committed; each picture checked once,
+in the monthly run). The wall, the landing page and the hub pages show the copy; an opened record the full picture.
+The For sale wall's first 72 tiles went from 35.5 MB to 14.5 MB. MuIS, NOBA and Tütar serve one size only.
+
 **What comes first on an artist's wall.** Paintings, then watercolours, sculpture, drawings and prints; and for
 thirteen artists whose key works are a matter of record — Wiiralt's *Põrgu* and *Kabaree*, Mägi's Norway and
 Saaremaa pictures, Köler's *Truu valvur*, Raud's and Kallis's Kalevipoeg cycles — those works come before the

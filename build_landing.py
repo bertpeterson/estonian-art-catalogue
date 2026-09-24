@@ -6,7 +6,7 @@ baked tile order for its first paint (data-keys), so nothing jumps. The order is
 app's: masterpieces first, each rank slipped up to a dozen places by a seed fixed at
 build time (data-seed), then the door's names and everyone else in turn.
 """
-import json, re, html, time
+import json, re, html, time, os
 
 d = json.load(open("data/data.json", encoding="utf-8")); A, W, V = d["artists"], d["works"], d["vocab"]
 L = json.load(open("site/data/index.json", encoding="utf-8"))["works"]          # r and rs live here
@@ -65,7 +65,9 @@ for i, w in enumerate(sorted(uniq, key=lambda w: (w.get("y") is None, w.get("y")
 rows.sort(key=lambda r: r[:6])
 shown = [r[6] for r in rows[:72]]
 
+SMALL = {k: v for k, v in (json.load(open("data/img_small.json", encoding="utf-8")) if os.path.exists("data/img_small.json") else {}).items() if v}   # data/img_small.py
 def imsrc(im):
+    im = SMALL.get(im, im)
     if im.startswith("m:"): return f"https://www.muis.ee/digitaalhoidla/api/meedia/pisipilt?id={im[2:]}"
     if im.startswith("e:"): return "https://digikogu.ekm.ee/static/preview/image/" + re.sub(r"/([^/]+)$", r"/t2_\1", im[2:])
     return im[2:]
