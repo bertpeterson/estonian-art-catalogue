@@ -9,7 +9,15 @@ build time (data-seed), then the door's names and everyone else in turn.
 import json, re, html, time, os
 
 d = json.load(open("data/data.json", encoding="utf-8")); A, W, V = d["artists"], d["works"], d["vocab"]
-L = json.load(open("site/data/index.json", encoding="utf-8"))["works"]          # r and rs live here
+_ix = json.load(open("site/data/index.json", encoding="utf-8"))                  # r and rs live here, column by column
+L = [{} for _ in range(_ix["n"])]
+for _f, _c in _ix["cols"].items():
+    if isinstance(_c, list):
+        for _i, _v in enumerate(_c):
+            if _v is not None: L[_i][_f] = _v
+    else:
+        _i = 0
+        for _g, _v in zip(_c["i"], _c["v"]): _i += _g; L[_i][_f] = _v
 I18N = json.load(open("i18n.json", encoding="utf-8"))
 e = html.escape
 name = lambda f, v: V[f][v] if isinstance(v, int) and f in V else v
@@ -79,10 +87,12 @@ POS = {"l": "100% 50%", "r": "0% 50%", "t": "50% 100%", "b": "50% 0%"}   # the c
 def tile(w, r, rs, j):
     lab = f'{w.get("y") if w.get("y") else "n.d."} · {e(name("mu", w["mu"]))}'
     zm = f';object-position:{POS[rs]}' if rs else ""
-    fp = ' fetchpriority="high"' if j < 2 else ""      # the top two of each column, before the index
-    # the top two tiles of each column are in view at once and load at once
+    # the first tile of each column loads at once; the rest as they come near the screen
+    # (window.__lz in tpl_head.html), so the pictures in view and the catalogue's data
+    # are not queued behind forty that are not
+    src = f'src="{e(imsrc(w["im"]))}"' if j < 1 else f'src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-src="{e(imsrc(w["im"]))}"'
     return (f'<a class="wt" data-wt="{e(key(w))}" href="#artist={slug(A[w["a"]]["n"])}&open={e(key(w))}" title="{e(w["t"])} · {e(A[w["a"]]["n"])}">'
-            f'<img src="{e(imsrc(w["im"]))}" alt="{e(w["t"])}, {e(A[w["a"]]["n"])}" loading="{"eager" if j < 2 else "lazy"}"{fp} style="aspect-ratio:1/{r:.3f}{zm}" referrerpolicy="no-referrer-when-downgrade">'
+            f'<img {src} alt="{e(w["t"])}, {e(A[w["a"]]["n"])}" style="aspect-ratio:1/{r:.3f}{zm}" referrerpolicy="no-referrer-when-downgrade">'
             f'<span class="wt-cap"><i>{e(w["t"])}</i><span>{e(A[w["a"]]["n"])} · {lab}</span></span></a>')
 npics = len(pics)
 bar = I18N["EN"]["wall_line_home"].replace("{p}", f"{npics:,}") + " · " + I18N["EN"]["wall_imgs"]

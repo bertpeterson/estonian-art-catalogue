@@ -75,7 +75,7 @@ jobs:
           grep -q 'http-equiv="Content-Security-Policy"' body || { echo "FAIL: no Content-Security-Policy"; exit 1; }
           v=$(grep -o 'data/index.json?v=[0-9a-f]*' body | head -1)
           [ -n "$v" ] || { echo "FAIL: page names no index"; exit 1; }
-          [ "$(get "$site/$v")" = 200 ] && grep -q '"works"' body || { echo "FAIL: $v"; exit 1; }
+          [ "$(get "$site/$v")" = 200 ] && grep -q '"cols"' body || { echo "FAIL: $v"; exit 1; }
           [ "$(get "$site/sw.js")" = 200 ] && grep -q 'museaal-v1' body || { echo "FAIL: sw.js"; exit 1; }
           [ "$(get "$site/data/bios.json?${v#*?}")" = 200 ] || { echo "FAIL: bios.json"; exit 1; }
           [ "$(get "$site/a/konrad-magi.html")" = 200 ] && grep -q 'og:image' body || { echo "FAIL: artist page"; exit 1; }

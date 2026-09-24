@@ -64,9 +64,10 @@ h = _re.sub(r'<(\w+)([^>]*?)data-i18n-html="([a-z_0-9]+)"([^>]*)></\1>', _fillh,
 a=a.replace('__V_INDEX__',V_INDEX).replace('__V_I18N__',V_I18N)
 # the index's download starts as the head is parsed, not when the script at the foot
 # of the page runs; crossorigin matches fetch()'s default mode, so the one download
-# serves both. Low priority: the first tiles' pictures come before the three
-# megabytes the baked landing page does not need yet
-h=h.replace('<meta property="og:type"', f'<link rel="preload" href="data/index.json?v={V_INDEX}" as="fetch" crossorigin fetchpriority="low">\n<meta property="og:type"',1)
+# serves both. Not low priority any more: the wall's pictures past the first row wait
+# until they near the screen (window.__lz), so the first row and the index share the
+# connection instead of forty pictures taking it
+h=h.replace('<meta property="og:type"', f'<link rel="preload" href="data/index.json?v={V_INDEX}" as="fetch" crossorigin>\n<meta property="og:type"',1)
 body=h.replace('<meta charset="utf-8">\n','',1)
 body=re.sub(r'<meta name="description"[^>]*>\n?','',body,count=1)   # the template's static copy
 # the shared-link card: the same description, and the first of the chosen works as its
