@@ -2,17 +2,23 @@
 (function(){
   "use strict";
   const boot = (DATA, I18N) => {
-  // repeated strings ship once in DATA.vocab and are referenced by index; rehydrate them
+  // The works arrive column by column (build_site.py, columns): a field most records
+  // carry as one array, null where a record has none; a rarer one as the gaps between
+  // the records that have it and their values. Rebuilt here into the records they were,
+  // the repeated strings (DATA.vocab, referenced by index) put back on the way.
   (function decode(){
-    const V = DATA.vocab; if (!V) return;
-    for (const f of Object.keys(V)){
-      const table = V[f];
-      for (const w of DATA.works){
-        const i = w[f];
-        if (typeof i === "number") w[f] = table[i];
+    const V = DATA.vocab || {}, N = DATA.n, C = DATA.cols, works = new Array(N);
+    for (let i = 0; i < N; i++) works[i] = {};
+    for (const f in C){
+      const c = C[f], t = V[f];
+      if (Array.isArray(c)){
+        for (let i = 0; i < N; i++){ const v = c[i]; if (v !== null) works[i][f] = t && typeof v === "number" ? t[v] : v; }
+      } else {
+        const I = c.i, vs = c.v; let i = 0;
+        for (let j = 0; j < I.length; j++){ i += I[j]; const v = vs[j]; works[i][f] = t && typeof v === "number" ? t[v] : v; }
       }
     }
-    delete DATA.vocab;
+    DATA.works = works; delete DATA.cols; delete DATA.vocab;
     // the light index leaves out what can be inferred: the position is the handle, a
     // count of one, a dating label equal to the year
     DATA.works.forEach((w, i) => { w.i = i; if (w.n == null) w.n = 1; if (w.yl == null && w.y != null) w.yl = String(w.y); });
@@ -1085,11 +1091,14 @@
   // A render replaces the register, and the groups above an open record are laid out
   // afresh -- as placeholders until scrolled to, since a group is laid out on demand
   // (content-visibility). The open record is kept where it was on the screen.
+  // a wall tile's placeholder until window.__lz gives it its picture
+  const PH = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
   function render(){
     const sel = state.open ? `.row-btn[data-id="${CSS.escape(state.open)}"]` : null;
     const was = sel && document.querySelector(sel);
     const top = was ? was.getBoundingClientRect().top : null;
     renderInner();
+    if (window.__lz) window.__lz(reg);             // the new wall's pictures, as they come near
     if (top != null){
       const el = document.querySelector(sel);
       if (el){ const d = el.getBoundingClientRect().top - top; if (Math.abs(d) > 1) window.scrollBy(0, d); }
@@ -1612,7 +1621,7 @@
     const tile = (w, j) => {
       const src = imgSrc(picOf(w)), r = ratioOf(w);
       return `<button class="wt${state.open === w.k ? " on" : ""}" data-wt="${esc(w.k)}" title="${esc(w.t)} · ${esc(A[w.a].n)}">${src
-        ? `<img src="${esc(src)}" alt="${esc(w.t)}, ${esc(A[w.a].n)}" loading="${j < 2 && !opt.lazy ? "eager" : "lazy"}"${j < 2 && !opt.lazy ? ' fetchpriority="high"' : ""} style="aspect-ratio:1/${r.toFixed(3)}${cropPos(w)}" referrerpolicy="no-referrer-when-downgrade">`
+        ? `<img ${j < 2 && !opt.lazy ? `src="${esc(src)}"` : `src="${PH}" data-src="${esc(src)}"`} alt="${esc(w.t)}, ${esc(A[w.a].n)}" style="aspect-ratio:1/${r.toFixed(3)}${cropPos(w)}" referrerpolicy="no-referrer-when-downgrade">`
         : `<span class="wt-ph" style="aspect-ratio:1/${r.toFixed(3)}"></span>`}<span class="wt-cap"><i>${esc(w.t)}${dups.has(w) ? `<span class="src-tag" title="${esc(T("wall_dup", {n: dups.get(w)}))}">×${dups.get(w)}</span>` : ""}</i><span>${showArtist ? esc(A[w.a].n) + " · " : ""}${w.y ?? esc(T("nd"))} · ${esc(abbr(w.mu))}</span></span></button>`;
     };
     const nCols = opt.cols || wallCols(), cols = Array.from({length: nCols}, () => ({h: 0, t: []}));
@@ -2274,6 +2283,7 @@
       reg.active.postMessage({warm: urls});
     }).catch(() => {});
   }
+  document.documentElement.dataset.ready = Math.round(performance.now());   // the app is up (and a test's signal)
   }   // end boot
 
   Promise.all([

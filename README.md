@@ -45,7 +45,7 @@ the original entry at its holding institution.
 
 ```
 site/                 the static site, built by ./build_site.sh — not committed, see below
-  data/index.json     everything the list, search and facets need
+  data/index.json     everything the list, search and facets need, column by column
   data/detail/<decade>.json  shards — descriptions, dimensions, collapsed duplicates
   a/<artist>.html     a static page per artist, plus redirects for retired spellings
   404.html            for stale addresses
@@ -426,6 +426,16 @@ stats pages follow the same rule. A link does not carry the theme.
 stale, and `sw.js` — a service worker — keeps them in the browser's Cache Storage: the second visit reads the
 index from disk and downloads nothing until the data changes, when the new file is a new address and the old
 one is dropped. Pages themselves always come from the network; the last copy opens offline.
+
+**The first visit.** Measured on a phone-speed processor at 10 Mbps, the catalogue took 9 s to answer, 18 s at
+5 Mbps: the landing wall's pictures loaded first — 25 of them, 7 MB, on a phone showing four — and took the
+connection from the data, which then parsed 19 MB. Now a wall's first row loads at once and the rest as it
+comes within 600px of the screen (`window.__lz` in `tpl_head.html`; the browser's own lazy loading fetched
+everything within 1,250–2,500px), the index is no longer queued at low priority, and the works ship column
+by column (`build_site.py`, `columns`; the app rebuilds the same records): 2.8 → 2.3 MB to download, 19 → 13 MB
+to parse. 4.8 s at 10 Mbps, 7.9 s at 5 Mbps. The baked landing wall, six columns, wraps to three or two on a
+narrower screen — on a phone it had been six tiles 48 pixels wide. `.dev/gzserve.js` serves `site/` gzipped
+as GitHub Pages does, for measuring (`MBPS`, `CPU` and `PROFILE` in `.dev/cdp.js`; `.dev/` is not committed).
 
 **Less on the page.** The masthead is the title, the two switches and the four figures (two of them doors:
 *for sale* and *auctioned*); the tagline, the standfirst and the source note went (the stats page and this
