@@ -255,6 +255,55 @@
         ${u.pr ? `<div class="up-pr">${esc(T("up_prior"))}: ${u.pr.map(p => `${esc(String(p[0]).slice(0, 4))} ${esc(musName(p[1]))} ${p[2] ? esc(eur(p[2])) : esc(T("up_unsold"))}`).join(" · ")}</div>` : ""}
       </div>`).join("")}<div class="up-note">${esc(T("up_note"))} <a href="${LANG === "et" ? "tulemas.html" : "upcoming.html"}">${esc(T("up_all"))} →</a></div></div>`;
   }
+  // "Eesti Kunsti Oksjonid 8–10 Oct" -- one per house, soonest first; two at most, then "+n"
+  function upSales(){
+    const by = new Map();
+    for (const u of UP) if (u.d) (by.get(u.h) || by.set(u.h, []).get(u.h)).push(String(u.d));
+    const mon = d => new Date(d.slice(0, 7) + "-01T12:00").toLocaleString(LANG === "et" ? "et" : "en-GB", {month: "short"}).replace(".", "");
+    const day = d => d.length > 7 ? String(+d.slice(8)) + (LANG === "et" ? "." : "") : "";
+    const span = ds => {
+      ds.sort(); const a = ds[0], b = ds[ds.length - 1];
+      if (a === b) return `${day(a)} ${mon(a)}`.trim();
+      if (a.slice(0, 7) === b.slice(0, 7) && a.length > 7 && b.length > 7) return `${day(a)}–${day(b)} ${mon(b)}`;
+      return `${day(a)} ${mon(a)} – ${day(b)} ${mon(b)}`.replace(/^ +/, "");
+    };
+    const houses = [...by.entries()].sort((x, y) => (x[1].slice().sort()[0] < y[1].slice().sort()[0] ? -1 : 1));
+    const out = houses.slice(0, 2).map(([h, ds]) => `${musName(h)} ${span(ds)}`);
+    return out.join(" · ") + (houses.length > 2 ? ` · +${houses.length - 2}` : "");
+  }
+  // the coming lots the view asks for: an artist chosen, or a search on name and title
+  function upLots(){
+    const q = skey(state.q);
+    return UP.filter(u => (state.artist === null || u.a === state.artist)
+      && (!q || skey(A[u.a].n + " " + (u.t || "")).includes(q)));
+  }
+  // the artist's record at auction from the catalogue, beside each lot
+  const upRec = ai => {
+    const L = W.filter(w => w.a === ai && w.kind === "auction");
+    if (!L.length) return T("up_rec0");
+    const ps = L.filter(w => w.ao && w.ap).map(w => w.ap).sort((a, b) => a - b);
+    return T("up_rec", {n: fmt(L.length), s: fmt(L.filter(w => w.ao).length)}) + (ps.length > 1 ? ` · ${eur(ps[0])}–${eur(ps[ps.length - 1])}` : ps.length ? ` · ${eur(ps[0])}` : "");
+  };
+  // by sale day and house, as the ledger groups past sales
+  function renderUpcoming(lots){
+    if (!lots.length) return `<p class="empty">${esc(T("noresults"))}</p>`;
+    const g = new Map(), rec = new Map();
+    for (const u of lots.slice().sort((x, y) => cmpStr(x.d || "9", y.d || "9") || cmpStr(x.h, y.h) || cmpStr(x.s || "", y.s || "") || cmpStr(A[x.a].n, A[y.a].n))){
+      const k = `${u.d}|${u.h}|${u.s || ""}`; (g.get(k) || g.set(k, []).get(k)).push(u);
+    }
+    return [...g.values()].map(items => {
+      const u0 = items[0];
+      return `<section class="group"><div class="gutter"><span class="g-name">${esc(dmy(u0.d))}</span>
+        <div class="g-dates">${esc(musName(u0.h))}</div>${u0.s ? `<div class="g-split">${esc(u0.s)}</div>` : ""}
+        <div class="g-count">${fmt(items.length)} ${esc(T("entries"))}</div></div><div class="rows">${items.map(u => {
+          if (!rec.has(u.a)) rec.set(u.a, upRec(u.a));
+          return `<div class="up-row"><div><a class="r-alink" href="#artist=${esc(slug(A[u.a].n))}" data-artist="${u.a}">${esc(A[u.a].n)}</a><span class="m">${esc(rec.get(u.a))}</span></div>
+            <div><i>${esc(u.t)}</i>${u.yl ? ", " + esc(u.yl) : ""}<span class="m">${esc([u.tc, u.dm].filter(Boolean).join(" · "))}</span>
+            ${u.pr ? `<span class="m">${esc(T("up_prior"))}: ${u.pr.map(p => `${esc(String(p[0]).slice(0, 4))} ${esc(musName(p[1]))} ${p[2] ? esc(eur(p[2])) : esc(T("up_unsold"))}`).join(" · ")}</span>` : ""}</div>
+            <div class="n">${u.p ? `${esc(T("up_start"))} ${esc(eur(u.p))}` : ""}${href(u.u) ? `<br><a href="${href(u.u)}" target="_blank" rel="noopener" title="${esc(musName(u.h))}">${esc(T("up_lot"))}</a>` : ""}</div></div>`;
+        }).join("")}</div></section>`;
+    }).join("") + `<p class="tl-note">${esc(T("up_note"))}</p>`;
+  }
   const auText = w => w.ao ? (w.ap ? T("au_sold", {p: eur(w.ap)}) : T("au_soldnp")) : T("au_unsold");
   // One line per artist: lots, sales, span, and the range of hammer prices.
   function auLine(i){
@@ -311,7 +360,7 @@
     if (state.idxOpen) p.set("index", state.letter || "all");
     // The list travels as its keys, so "Link to this view" of your own list is a link
     // anyone can open. An empty list is "mine" -- nothing to carry.
-    if (state.sale) p.set("sale", "1");
+    if (state.sale) p.set("sale", state.saleUp ? "up" : "1");
     if (state.shared) p.set("list", [...state.shared].join(","));
     else if (state.list) p.set("list", SL.size ? [...SL].join(",") : "mine");
     return p.toString().replace(/%3A/gi, ":").replace(/%2C/gi, ",");
@@ -361,7 +410,8 @@
     if (state.view) state.viewKey = scopeKey();   // a linked choice is for the linked view
     // A list in the URL is yours if it matches what this browser holds, and someone
     // else's otherwise -- shown as a shared list, never merged into yours unasked.
-    state.sale = p.get("sale") === "1";
+    state.sale = p.get("sale") === "1" || p.get("sale") === "up";
+    state.saleUp = p.get("sale") === "up";
     state.list = false; state.shared = null;
     const lv = p.get("list");
     if (lv === "mine") state.list = true;
@@ -1060,6 +1110,19 @@
     $("stat-au").textContent = fmt(AU_N);
     $("stat-auc").hidden = AU_N === 0;
     $("stat-auc").setAttribute("aria-pressed", state.group === "auction");
+    // inside For sale: the galleries' stock, or the lots of the coming sales
+    $("salesw").hidden = !state.sale || !UP.length;
+    if (state.sale && UP.length){
+      $("su-gal-n").textContent = fmt(FOR_SALE); $("su-up-n").textContent = fmt(UP.length); $("su-up-v").textContent = upSales();
+      $("su-gal").setAttribute("aria-pressed", !state.saleUp); $("su-up").setAttribute("aria-pressed", !!state.saleUp);
+    }
+    if (state.sale && state.saleUp && UP.length){
+      const lots = upLots();
+      $("countline").textContent = (lots.length === 1 ? T("up_count1") : T("up_count", {n: fmt(lots.length)})) + (state.artist !== null ? " · " + A[state.artist].n : "") + (state.q ? ` · “${state.q}”` : "");
+      $("countline").insertAdjacentHTML("beforeend", ` · <a class="hub-link" href="${LANG === "et" ? "tulemas.html" : "upcoming.html"}">${esc(T("hubpage"))}</a>`);
+      $("countline").hidden = false; $("reset").hidden = false;
+      reg.innerHTML = renderUpcoming(lots); $("viewctl").hidden = true; return;
+    }
 
     const scope = [];
     if (state.shared) scope.push(T("sl_shared", {n: state.shared.size}));
@@ -1387,7 +1450,7 @@
   // A List / Artwall choice belongs to the view it was made on: change the artist,
   // the decade, the search or a filter and the rule decides again.
   const scopeKey = () => JSON.stringify([state.group, state.artist, state.decade, state.year, state.q, state.from, state.to, state.undOnly,
-    state.sale, state.list, [...state.media], [...state.museums], [...state.cats], [...state.srcs], [...state.origins], [...state.groups]]);
+    state.sale, state.saleUp, state.list, [...state.media], [...state.museums], [...state.cats], [...state.srcs], [...state.origins], [...state.groups]]);
   function wallMode(set, nPics){
     if (state.group === "auction" || !nPics) return false;
     if (state.view) return state.view === "wall";
@@ -1554,6 +1617,7 @@
   const renderAll = () => { renderBars(); renderYearRange(); renderFacets(); renderActiveFilters(); renderArtistIndex(); renderMono(); render(); };
 
   function selectArtist(i){
+    if (state.saleUp){ state.sale = false; state.saleUp = false; }
     // "all works by" means all of them: a search term in the box would hide most
     state.artist = i; state.open = null; state.expand.clear(); state.q = ""; $("q").value = "";
     state.decade = null; state.idxOpen = false; state.letter = null;
@@ -1757,8 +1821,14 @@
     renderAll(); pushHash();
     $("register").scrollIntoView({behavior: "auto", block: "start"});
   });
+  $("salesw").addEventListener("click", e => {
+    const b = e.target.closest("button"); if (!b) return;
+    const up = b.id === "su-up"; if (up === !!state.saleUp) return;
+    state.saleUp = up; state.open = null; state.expand.clear();
+    renderAll(); pushHash();
+  });
   $("stat-sale").addEventListener("click", () => {
-    state.sale = !state.sale; state.open = null; state.expand.clear();
+    state.sale = !state.sale; state.saleUp = false; state.open = null; state.expand.clear();
     if (state.sale && state.group !== "artist") setGroup("artist");   // and leaves the auction ledger, if that was open
     renderAll(); pushHash();
     if (state.sale) $("register").scrollIntoView({behavior: "auto", block: "start"});
@@ -1891,7 +1961,7 @@
     // the ledger opens by hammer price, highest first; leaving it goes back to the
     // decade view's own default, earliest first by year
     if (g === "auction" && state.group !== "auction"){ state.sort = "price"; state.decOrder = "latest"; }
-    if (g === "auction") state.sale = false;      // a lot that went under the hammer is not on sale: the two never combine
+    if (g === "auction") state.sale = state.saleUp = false;     // a lot that went under the hammer is not on sale: the two never combine
     if (g !== "auction" && state.group === "auction"){ state.sort = "year"; state.decOrder = "earliest"; }
     state.group = g;
     $("g-artist").setAttribute("aria-pressed", g==="artist");
@@ -1942,7 +2012,7 @@
     state.q=""; state.decade=null; state.media.clear(); state.museums.clear(); state.cats.clear(); state.srcs.clear(); state.origins.clear(); state.groups.clear();
     state.artist=null; state.letter=null; state.idxOpen=false; state.sort="year"; state.year=null; state.from=null; state.to=null; state.undOnly=false; $("sortby").value="year";
     state.open=null; state.expand.clear(); state.decOrder="earliest"; state.artOrder="az";
-    state.list=false; state.shared=null; state.sale=false; state.view=null; state.wLimit=72;
+    state.list=false; state.shared=null; state.sale=false; state.saleUp=false; state.view=null; state.wLimit=72;
     $("q").value=""; setGroup("decade"); renderAll(); pushHash(); window.scrollTo({top:0,behavior:"auto"});
   });
 
