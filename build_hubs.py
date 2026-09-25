@@ -157,6 +157,9 @@ def wall(ws, lang, n=24):
 def artists_list(ws, lang, n=60):
     c = collections.Counter(w["a"] for w in ws)
     return '<ul class="cols">' + "".join(f'<li><a href="{BASE}/{L[lang]["art"]}/{ARTIST_SLUG[i]}.html">{e(A[i]["n"])}</a><span class="n">{fmt(k, lang)}</span></li>' for i, k in c.most_common(n)) + "</ul>"
+# the contact line every static page ends with: where to ask for a correction or a removal
+CONTACT = {"en": 'Corrections, removals, questions: <a href="mailto:info@museaal.ee">info@museaal.ee</a>',
+           "et": 'Parandused, eemaldamised, küsimused: <a href="mailto:info@museaal.ee">info@museaal.ee</a>'}
 def dec_label(dd, lang): return L[lang]["before"] if dd == "before" else (f"{dd}s" if lang == "en" else f"{dd}ndad")
 def dec_href(dd, lang): return f"{BASE}/{L[lang]['dec']}/{dd}.html"
 def med_href(m, lang): return f"{BASE}/{L[lang]['med']}/{slug(med_name(m, lang))}.html"
@@ -201,7 +204,7 @@ def page(lang, me, other, title, desc, h1, lede, ws, app_hash, facets, nb, xdefa
             + "".join(f'<h2>{h}</h2>{r}' for h, r in facets if r)
             + f'<p class="nb">{nb["links"]}</p>'
             + (embed_box(lang, embed_src, me, h1) if embed_src else "")
-            + f'<p class="m">{T["foot"]}</p></body></html>')
+            + f'<p class="m">{T["foot"]} {CONTACT[lang]}</p></body></html>')
 
 def main():
     # ---- write ----------------------------------------------------------------------------------
@@ -276,7 +279,7 @@ def main():
                 f'<link rel="canonical" href="{me}"><link rel="alternate" hreflang="{lang}" href="{me}"><link rel="alternate" hreflang="{"et" if lang == "en" else "en"}" href="{other}">'
                 f'<style>{CSS}</style>{GC}</head><body><nav><a href="{BASE}/{T["site_link"]}">{T["site"]}</a> › {e(h)} <span class="m">· <a href="{other}">{T["other"]}</a></span></nav>'
                 f'<h1>{e(h)}</h1>{lst}<p class="nb">' + " · ".join(f'<a href="{BASE}/{T[x]}/">{T[x + "_h"]}</a>' for x in ("dec", "med", "mus", "sub") if x != k)
-                + f' · <a href="{BASE}/{T["art"]}/">{"Artists A–Z" if lang == "en" else "Kunstnikud A–Ü"}</a></p></body></html>')
+                + f' · <a href="{BASE}/{T["art"]}/">{"Artists A–Z" if lang == "en" else "Kunstnikud A–Ü"}</a></p><p class="m">{CONTACT[lang]}</p></body></html>')
             urls.append((me, f"{BASE}/{L['en'][k]}/", f"{BASE}/{L['et'][k]}/"))
 
     # into the sitemap build_pages.py wrote

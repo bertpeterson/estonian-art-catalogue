@@ -74,7 +74,7 @@ def main():
                 f'<nav><a href="{BASE}/{"" if lang == "en" else "#lang=et"}">{t["site"]}</a> › {t["h"]} <span class="m">· <a href="{other}">{t["other_l"]}</a></span></nav>'
                 f'<h1>{t["h"]}</h1><p class="lede">{e(t["lede"])}</p>'
                 + (body or f'<p class="m">{e(t["none"])}</p>')
-                + f'<p class="m">{e(t["note"])}</p></body></html>')
+                + f'<p class="m">{e(t["note"])} {H.CONTACT[lang]}</p></body></html>')
         open(f"site/{t['file']}", "w", encoding="utf-8").write(page)
         urls.append(me)
     sm = open("site/sitemap.xml", encoding="utf-8").read()

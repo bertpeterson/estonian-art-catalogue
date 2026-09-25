@@ -10,6 +10,10 @@ says so with an *ed* tag.
 
 **Live site (canonical):** https://museaal.ee/
 
+**Contact:** [info@museaal.ee](mailto:info@museaal.ee) — corrections, removals and questions. A holder, a rights
+holder or an artist can ask for any record, picture or biographical detail to be corrected or taken down, and it
+will be.
+
 ---
 
 ## Sources
