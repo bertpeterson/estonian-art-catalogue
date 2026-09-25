@@ -489,8 +489,13 @@
   const inList = w => { const k = listKeys(); return (!k || k.has(w.k)) && (!state.sale || w.kind === "gallery"); };
   // a work offered at auction more than once is one row: the latest lot, with the
   // earlier results in its detail (the stats page still counts every lot)
-  const CHAIN = (() => { const m = new Map(); W.forEach(w => { if (w.ac){ if (!m.has(w.ac)) m.set(w.ac, []); m.get(w.ac).push(w); } }); m.forEach(l => l.sort((x, y) => String(x.ad).localeCompare(String(y.ad)))); return m; })();
-  const chainOf = w => (w.ac && CHAIN.get(w.ac)) || null;
+  // an auction lot's sales of the same work, chained when a record first asks (not at start)
+  let CHAIN = null;
+  const chainOf = w => {
+    if (!w.ac) return null;
+    if (!CHAIN){ CHAIN = new Map(); W.forEach(x => { if (x.ac){ if (!CHAIN.has(x.ac)) CHAIN.set(x.ac, []); CHAIN.get(x.ac).push(x); } }); CHAIN.forEach(l => l.sort((x, y) => String(x.ad).localeCompare(String(y.ad)))); }
+    return CHAIN.get(w.ac) || null;
+  };
   const latestLot = w => !w.ac || w.al;
   // the works, as distinct works: an earlier lot of a work sold again is in its history
   const NWORKS = W.reduce((n, w) => n + (latestLot(w) ? 1 : 0), 0);
@@ -1704,7 +1709,12 @@
     setTimeout(() => { btn.textContent = was; }, 2200);
   }
 
-  const renderAll = () => { renderBars(); renderYearRange(); renderFacets(); renderActiveFilters(); renderArtistIndex(); renderMono(); render(); };
+  // Every change redrew the Filters panel (its chips counted over every work) and the
+  // artist index, open or not -- 140 ms of a phone's start-up, and again on each click.
+  // They are drawn when shown: the panel when opened, the index when the view has it.
+  const panelOpen = () => !$("filterpanel").hidden;
+  const idxShown = () => state.group === "artist" || state.idxOpen || state.letter !== null;
+  const renderAll = () => { renderBars(); if (panelOpen()){ renderYearRange(); renderFacets(); } renderActiveFilters(); if (idxShown()) renderArtistIndex(); renderMono(); render(); };
 
   function selectArtist(i){
     if (state.saleUp){ state.sale = false; state.saleUp = false; }
@@ -1857,6 +1867,7 @@
     const p = $("filterpanel");
     p.hidden = !p.hidden;
     $("filters-toggle").setAttribute("aria-expanded", !p.hidden);
+    if (!p.hidden){ renderYearRange(); renderFacets(); }
     renderActiveFilters();
   });
   $("activefilters").addEventListener("click", e => {
@@ -1980,12 +1991,18 @@
     if (i < 0){ const j = k.indexOf("-" + q); if (j >= 0) i = j + 1; }
     return i < 0 ? esc(text) : esc(text.slice(0, i)) + "<mark>" + esc(text.slice(i, i + q.length)) + "</mark>" + esc(text.slice(i + q.length));
   };
-  const MCOUNT = {}, MUCOUNT = {}, DCOUNT = {}, TCOUNT = {};
-  W.forEach(w => { MCOUNT[w.e] = (MCOUNT[w.e] || 0) + 1; MUCOUNT[w.mu] = (MUCOUNT[w.mu] || 0) + 1;
-    if (w.y != null) DCOUNT[Math.floor(w.y / 10) * 10] = (DCOUNT[Math.floor(w.y / 10) * 10] || 0) + 1;
-    for (const tc of new Set([w.tc, w.tce])) if (tc && tc.length < 30) TCOUNT[tc] = (TCOUNT[tc] || 0) + 1; });   // both languages of the term
-  const TECHS = Object.entries(TCOUNT).filter(([, n]) => n >= 40).sort((a, b) => b[1] - a[1]);
+  // the suggestions' tallies, counted when the first suggestion is asked for rather than
+  // at start (a pass over every work, 50 ms of a phone's start-up)
+  const MCOUNT = {}, MUCOUNT = {}, DCOUNT = {}, TCOUNT = {}, TECHS = [];
+  let tallied = false;
+  const tally4 = () => { if (tallied) return; tallied = true;
+    W.forEach(w => { MCOUNT[w.e] = (MCOUNT[w.e] || 0) + 1; MUCOUNT[w.mu] = (MUCOUNT[w.mu] || 0) + 1;
+      if (w.y != null) DCOUNT[Math.floor(w.y / 10) * 10] = (DCOUNT[Math.floor(w.y / 10) * 10] || 0) + 1;
+      for (const tc of new Set([w.tc, w.tce])) if (tc && tc.length < 30) TCOUNT[tc] = (TCOUNT[tc] || 0) + 1; });   // both languages of the term
+    TECHS.push(...Object.entries(TCOUNT).filter(([, n]) => n >= 40).sort((a, b) => b[1] - a[1]));
+  };
   function suggest(raw){
+    tally4();
     const q = skey(raw.trim());
     sgItems = []; sgSel = -1;
     if (q.length < 2){ sugg.hidden = true; sugg.innerHTML = ""; qbox.setAttribute("aria-expanded", "false"); return; }
@@ -2211,7 +2228,7 @@
       ? `${DATA.meta.undated} of ${DATA.meta.works.toLocaleString(LANG === "en" ? "en-GB" : "et-EE")} records carry no dating; they sit in their own group rather than being guessed into a decade.`
       : `${DATA.meta.undated} kirjet ${DATA.meta.works.toLocaleString("et")}-st on dateerimata; need on omaette rühmas, mitte kümnendisse ära arvatud.`;
     fillYearSelects();
-    renderYearRange();
+    if (panelOpen()) renderYearRange();
     syncOrder();
   }
   function setLang(l, push){
@@ -2233,7 +2250,6 @@
     applyLang();
     $("q").value = state.q;
     $("sortby").value = state.sort;
-    renderYearRange();
     setGroup(state.group);
     renderAll();
     applying = false;
