@@ -790,6 +790,9 @@ for g in GAL:
     # A marketplace lists artists from the whole region. Its records are taken only
     # for artists the catalogue already has -- museum-held or in a gallery harvested
     # on its own -- and never add a name. The rest is a separate decision.
+    # the marketplace's own housekeeping -- a "system test" account (country: Eesti)
+    # listing a "Frontpage banner background" -- is not an artist and not a work
+    if g.get("only_known") and re.match(r"(system\s+)?test\b", g["artist"].strip(), re.I): continue
     if g.get("only_known") and toks(g["artist"]) not in by_tok:
         # ...unless NOBA's own artist page says the artist is based in Estonia. That
         # is the catalogue's line: art in Estonia, not art from the whole Baltic.

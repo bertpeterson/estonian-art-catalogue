@@ -97,7 +97,7 @@ print(f"  translated pairs folded: {folded}")
 AW = json.load(open("noba_artworks.json", encoding="utf-8")) if os.path.exists("noba_artworks.json") else {}
 ntitle = lambda t: re.sub(r"[^a-z0-9]", "", fold(html.unescape(t)))
 ndims  = lambda d: re.sub(r"[^0-9x]", "", (d or "").lower().replace("×", "x").replace(",", "."))
-relinked = 0
+relinked = sold_marked = 0
 for r in recs:
     a = AW.get(r["artist"])
     if not a or not a.get("slug"): continue
@@ -108,7 +108,41 @@ for r in recs:
     if len(c) == 1:
         r["url"] = f"https://noba.ac/{lang(r)}/{'kunst' if lang(r) == 'et' else 'artwork'}/{c[0]}/"; relinked += 1
         if ws[c[0]].get("img"): r["img"] = ws[c[0]]["img"]
-print(f"  linked to the artwork page: {relinked}")
+        # a third way NOBA shows a sale: the artwork page stays public, its card on the
+        # artist's page loses its price -- while the shop product still answers "1 in
+        # stock". Settled below, from the work's own page.
+        if ws[c[0]].get("sale") is False: r["_noprice"] = c[0]; sold_marked += 1
+print(f"  linked to the artwork page: {relinked}; of those, no price on the artist's page: {sold_marked}")
+# A card without a price is not for sale, but only the work's page says why: "See töö
+# on ära ostetud" (bought), or a page gone private (NOBA's other way of marking a sale),
+# is the gallery's word that it sold; a page that says neither is a work taken off
+# sale. Sold works stay, marked, and become past listings "sold"; the others leave the
+# stock and the ledger keeps them as no longer listed. Each page is read once
+# (noba_sold.json); one that said neither is read again next month.
+SOLD_F = "noba_sold.json"
+said = json.load(open(SOLD_F, encoding="utf-8")) if os.path.exists(SOLD_F) else {}
+def page_says(u):
+    try:
+        rq = urllib.request.Request(u, headers={"User-Agent": UA})
+        with urllib.request.urlopen(rq, timeout=45, context=ctx) as f:
+            return "sold" if "alert-artwork-sold" in f.read().decode("utf-8", "replace") else "unlisted"
+    except urllib.error.HTTPError as e:
+        return "sold" if e.code == 401 else None
+    except Exception:
+        return None
+checked = 0
+for r in recs:
+    slug = r.pop("_noprice", None)
+    if not slug: continue
+    if said.get(slug) != "sold":
+        v = page_says(r["url"]); checked += 1; time.sleep(0.8)
+        if v: said[slug] = v
+    if said.get(slug) == "sold": r["sold"] = True
+    elif said.get(slug) == "unlisted": r["_drop"] = True
+json.dump(said, open(SOLD_F, "w", encoding="utf-8"), ensure_ascii=False, indent=0)
+before_drop = len(recs)
+recs = [r for r in recs if not r.pop("_drop", False)]
+print(f"  no-price pages read {checked}: sold {sum(1 for r in recs if r.get('sold'))}, taken off sale {before_drop - len(recs)}")
 # Two products that resolve to one artwork page are one work -- the translated pair
 # the folding above could not settle because a sibling (Spruces I and II, same size,
 # same year) made the group too big to pair. The Estonian listing is kept.
