@@ -47,8 +47,12 @@ def parse(h):
         dims = re.search(r"(\d+(?:[.,]\d+)?\s*x\s*\d+(?:[.,]\d+)?(?:\s*x\s*\d+(?:[.,]\d+)?)?)\s*cm", typ)
         year = re.search(r"\b((?:19|20)\d\d)\b", typ)
         im = re.search(r'<img\s+src="([^"?]+)', body)
+        # A work still for sale shows its price on the artist's page; a sold one keeps its
+        # card and its page (which says "See töö on ära ostetud") but loses the price.
+        # Only whether there is one is kept -- never the price.
         out.append({"id": aid, "slug": slug, "title": title, "img": im.group(1) if im else "",
-                    "dims": re.sub(r"\s+", " ", dims.group(1)).strip() if dims else "", "year": year.group(1) if year else ""})
+                    "dims": re.sub(r"\s+", " ", dims.group(1)).strip() if dims else "", "year": year.group(1) if year else "",
+                    "sale": bool(re.search(r'class="price', body))})
     return out
 
 recs = (json.load(open("noba_raw.json", encoding="utf-8")) if os.path.exists("noba_raw.json")
@@ -74,8 +78,8 @@ for i, n in enumerate(todo, 1):
             h = get(base % s)
             if not h: failed = True
             for c in parse(h):
-                w = works.setdefault(c["slug"], {"id": c["id"], "dims": c["dims"], "year": c["year"], "title": {}, "img": c.get("img", "")})
-                w["title"][lang] = c["title"]
+                w = works.setdefault(c["slug"], {"id": c["id"], "dims": c["dims"], "year": c["year"], "title": {}, "img": c.get("img", ""), "sale": False})
+                w["title"][lang] = c["title"]; w["sale"] = w["sale"] or c["sale"]
             time.sleep(0.6)
     have[n] = prev[n] if failed and n in prev else {"slug": s, "works": works}
     if i % 50 == 0:
