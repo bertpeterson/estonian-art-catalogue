@@ -1709,6 +1709,18 @@
     const b = e.target.closest("[data-artist]");
     if (b){ e.preventDefault(); selectArtist(+b.dataset.artist); }
   });
+  // A jump lands clear of the sticky control bar (not sticky on a phone): the bar
+  // covered the top of whatever scrollIntoView brought up -- a decade's count line and
+  // heading, the auction ledger's first sale. The count line, when there is one, is the
+  // place to land: it says what the view is and how many.
+  const jumpTo = (el, smooth) => {
+    if (!el) return;
+    const bar = document.querySelector(".controls");
+    const off = bar && getComputedStyle(bar).position === "sticky" ? bar.offsetHeight : 0;
+    window.scrollTo({top: Math.max(0, el.getBoundingClientRect().top + window.scrollY - off - 14),
+                     behavior: smooth && !matchMedia("(prefers-reduced-motion:reduce)").matches ? "smooth" : "auto"});
+  };
+  const viewTop = fallback => $("countline").hidden ? fallback : $("countline");
   const setView = v => { state.view = v; state.viewKey = scopeKey(); state.open = null; state.wLimit = 72; render(); pushHash(); };
   $("v-list").addEventListener("click", () => setView("list"));
   $("v-wall").addEventListener("click", () => setView("wall"));
@@ -1784,9 +1796,7 @@
       render(); pushHash();
       // to the record's title, clear of the sticky toolbar; the shard may still be on
       // its way, so the aim is taken again once it lands
-      const aim = () => { const el = reg.querySelector(".wall-open"); if (!el) return;
-        const bar = document.querySelector(".controls"), off = bar ? bar.getBoundingClientRect().height + 8 : 0;
-        window.scrollTo({top: el.getBoundingClientRect().top + window.scrollY - off, behavior: matchMedia("(prefers-reduced-motion:reduce)").matches ? "auto" : "smooth"}); };
+      const aim = () => jumpTo(reg.querySelector(".wall-open"), true);
       aim();
       if (typeof loadShard === "function" && w && w.h && !detailOf(w)) loadShard(shardOf(w)).then(() => setTimeout(aim, 50));
       return;
@@ -1858,9 +1868,8 @@
     if (state.decade !== null) setGroup("decade");
     renderAll(); pushHash();
     if (state.decade !== null){
-      // to the decade's pictures when it opens on the artwall, else to its list
-      const t = reg.querySelector(".wall-bar") || document.getElementById("grp-" + state.decade);
-      if (t) t.scrollIntoView({behavior: matchMedia("(prefers-reduced-motion:reduce)").matches?"auto":"smooth", block:"start"});
+      // to the decade's count line, its heading and pictures or list beneath
+      jumpTo(viewTop(reg.querySelector(".wall-bar") || document.getElementById("grp-" + state.decade)), true);
     }
   });
 
@@ -1879,7 +1888,7 @@
   $("mylist").addEventListener("click", () => {
     state.shared = null; state.list = !state.list; state.open = null;
     renderAll(); pushHash();
-    if (state.list) $("listbar").scrollIntoView({behavior: "auto", block: "start"});
+    if (state.list) jumpTo($("listbar"));
   });
   $("listbar").addEventListener("click", e => {
     const b = e.target.closest("[data-sl-act]"); if (!b) return;
@@ -1900,7 +1909,7 @@
     if (state.group === "auction"){ setGroup("decade"); renderAll(); pushHash(); return; }
     setGroup("auction"); state.decOrder = "latest"; state.expand.clear(); state.auLimit = 20; state.open = null; syncOrder();
     renderAll(); pushHash();
-    $("register").scrollIntoView({behavior: "auto", block: "start"});
+    jumpTo(viewTop($("register")));
   });
   $("salesw").addEventListener("click", e => {
     const b = e.target.closest("button"); if (!b) return;
@@ -1914,10 +1923,7 @@
     renderAll(); pushHash();
     // land on the count line and the galleries / coming-sales switch, just clear of the
     // sticky control bar -- not on the register's top, which the bar covers
-    if (state.sale){
-      const to = $("countline").hidden ? $("salesw") : $("countline");
-      window.scrollTo({top: Math.max(0, to.getBoundingClientRect().top + window.scrollY - (getComputedStyle(document.querySelector(".controls")).position === "sticky" ? document.querySelector(".controls").offsetHeight : 0) - 14), behavior: "auto"});
-    }
+    if (state.sale) jumpTo(viewTop($("salesw")));
   });
   $("eras").addEventListener("click", e => {
     const b = e.target.closest(".era"); if (!b) return;
