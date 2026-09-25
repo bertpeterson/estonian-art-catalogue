@@ -6,7 +6,7 @@ baked tile order for its first paint (data-keys), so nothing jumps. The order is
 app's: masterpieces first, each rank slipped up to a dozen places by a seed fixed at
 build time (data-seed), then the door's names and everyone else in turn.
 """
-import json, re, html, time, os
+import json, re, html, time, os, collections
 
 d = json.load(open("data/data.json", encoding="utf-8")); A, W, V = d["artists"], d["works"], d["vocab"]
 _ix = json.load(open("site/data/index.json", encoding="utf-8"))                  # r and rs live here, column by column
@@ -98,5 +98,57 @@ npics = len(pics)
 bar = I18N["EN"]["wall_line_home"].replace("{p}", f"{npics:,}") + " · " + I18N["EN"]["wall_imgs"]
 wall = (f'<div class="wall" data-cols="6" data-seed="{SEED}" data-keys="{e(",".join(key(w) for w in shown))}">'
         + "".join('<div class="wcol">' + "".join(tile(*t, j) for j, t in enumerate(c["t"])) + "</div>" for c in cols) + "</div>")
-json.dump({"doors": door, "register": wall, "seed": SEED}, open("site/landing.json", "w", encoding="utf-8"), ensure_ascii=False)
+# The histogram and the eras, baked: the app draws them from the index, so for the
+# seconds before it arrives -- five on a phone -- the page had an empty band where they
+# go, and drawing them pushed everything under it down. The same markup as the app's
+# renderBars for the untouched page (EN), links where the app has buttons: a decade to
+# its static page, the early band to decades/before.html. The app redraws them in place.
+EN = I18N["EN"]
+ordn = lambda n: f"{n}" + ("th" if 11 <= n % 100 <= 13 else {1: "st", 2: "nd", 3: "rd"}.get(n % 10, "th"))
+rnd = lambda x: int(x + 0.5)
+live = [w for w in W if not (w.get("ac") and not w.get("al"))]               # the app's latestLot
+ys = [w["y"] for w in live if w.get("y") is not None]
+DEC = list(range(min(ys) // 10 * 10, max(ys) // 10 * 10 + 1, 10))
+cnt = collections.Counter((w["y"] // 10 * 10) if w.get("y") is not None else "und" for w in live)
+mx = max(1, max(cnt[d] for d in DEC))
+# the decades with a static page, by build_hubs.py's rule (it runs later in the build):
+# twenty works or more that are not auction lots
+_hd = collections.Counter(w["y"] // 10 * 10 for w in W if w.get("y") and (w.get("kind") or "held") in ("held", "shown", "gallery", "known"))
+HUB = {f"{d}.html" for d, n in _hd.items() if d >= 1800 and n >= 20}
+def cell(key, lab, title, cls=""):
+    c = cnt[key]; h = rnd(6 + (min(c, mx) / mx) * 66) if c else 2
+    href = f"decades/{key}.html" if f"{key}.html" in HUB else f"#decade={key}"
+    tip = f"{title} — " + (EN["oneworkc"] if c == 1 else EN["nworks"].replace("{n}", str(c)))
+    return (f'<a class="bar-btn {cls}" data-dec="{key}" href="{href}" title="{e(tip)}">'
+            f'<span class="bar-n">{c or ""}</span><span class="bar-fill" style="height:{h}px"></span><span class="bar-lab">{lab}</span></a>')
+cents = []
+for d in DEC:
+    if not cents or cents[-1][0] != d // 100: cents.append((d // 100, []))
+    cents[-1][1].append(d)
+total = sum(cnt[d] for d in DEC); lead = 0
+while lead < len(cents) - 1 and (cents[lead][0] <= 17 or sum(cnt[d] for d in cents[lead][1]) < total * 0.01): lead += 1
+early, rest = (cents[:lead], cents[lead:]) if lead >= 2 else ([], cents)
+cent = lambda c, ds: (f'<div class="cent" style="flex:{len(ds)}"><div class="cent-bars">'
+                      + "".join(cell(d, str(d) if d % 100 == 0 else str(d)[2:], f"{d}s") for d in ds)
+                      + f'</div><div class="cent-lab"><span class="cl-full">{e(EN["century"].replace("{n}", ordn(c + 1)))}</span><span class="cl-abbr">{c + 1}.</span></div></div>')
+bars = ""
+if early:
+    et = sum(cnt[d] for _, ds in early for d in ds)
+    lab = EN["earlyband"].replace("{a}", ordn(early[0][0] + 1)).replace("{b}", ordn(early[-1][0] + 1))
+    eh = max(3, rnd(6 + (min(et, mx) / mx) * 66)) if et else 2
+    bars += (f'<div class="cent early" style="flex:0 0 118px"><div class="cent-bars">'
+             f'<a class="early-btn" id="early-toggle" href="decades/before.html" title="{e(lab)} — {e(EN["nworks"].replace("{n}", str(et)))}">'
+             f'<span class="bar-n">{et or ""}</span><span class="early-fill" style="height:{eh}px"></span><span class="early-lab">{e(lab)}</span></a>'
+             f'</div><div class="cent-lab">&nbsp;</div></div>')
+bars += "".join(cent(c, ds) for c, ds in rest)
+bars += (f'<div class="cent nd" style="flex:1"><div class="cent-bars">{cell("und", EN["nd"], EN["undated"], "undated")}</div>'
+         f'<div class="cent-lab" title="Undated — works whose record carries no dating">&nbsp;</div></div>')
+# the eras as links to the periods (the app places them under their bars; until then a
+# phone shows them as its own wrapping row and a wider screen keeps their place empty)
+_app = open("tpl_app.html", encoding="utf-8").read()
+PER = [(None, 1699, EN["p_pre"])] + [(int(a), int(b), I18N["PERIOD_EN"][k]) for a, b, k in
+       re.findall(r'\[(\d{4}),(\d{4}),"(\w+)","[^"]+"\]', _app[_app.index("const PERIODS"):_app.index("const PERIOD_NOTE")])]
+eras = "".join(f'<a class="era" data-era="{i}" href="#{"from=" + str(lo) + "&" if lo else ""}{"to=" + str(hi) if hi != 2099 else ""}">{e(lab)}</a>'.replace("&\"", "\"")
+               for i, (lo, hi, lab) in enumerate(PER))
+json.dump({"doors": door, "register": wall, "bars": bars, "eras": eras, "seed": SEED}, open("site/landing.json", "w", encoding="utf-8"), ensure_ascii=False)
 print(f"  landing baked   {len(shown)} tiles, seed {SEED}, first: {shown[0]['t']} · {A[shown[0]['a']]['n']}")

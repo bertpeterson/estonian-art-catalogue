@@ -606,7 +606,7 @@
       return `<button class="era" data-era="${i}" aria-pressed="${on}" title="${esc(lab)}${esc(note)} — ${PCOUNT[i].toLocaleString(LANG==="en"?"en":"et")} ${esc(T("worksn"))}"
                 style="left:${l.toFixed(1)}px;width:${Math.max(0, r - l - 2).toFixed(1)}px">${esc(lab)}</button>`;
     });
-    el.innerHTML = segs.join("");
+    el.innerHTML = segs.join(""); el.classList.remove("baked");
     // A two-decade segment cannot hold "First Republic"; fall back to a short form, and
     // only then to an ellipsis (the title still carries the full name).
     el.querySelectorAll(".era").forEach(b => {
@@ -2267,7 +2267,11 @@
   try { const saved = localStorage.getItem("ekr:lang"); if (saved === "en" || saved === "et") LANG = saved; } catch(e){}
   try { const st = localStorage.getItem("ekr:theme"); if (st === "light" || st === "dark") THEME = st; } catch(e){}
   window.addEventListener("popstate", () => applyURL(false));
+  // a search typed in the seconds before the app arrived is run, not wiped: the box was
+  // there, empty-handed, and the first applyURL set it back to the link's (none)
+  const typed = $("q").value.trim();
   applyURL(true);
+  if (typed && !state.q){ state.q = typed; $("q").value = typed; state.open = null; renderAll(); pushHash(true); suggest(typed); }
 
   if (!location.hash.replace(/^#/, "") && loadLast()){
     const last = loadLast();

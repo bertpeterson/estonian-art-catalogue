@@ -41,6 +41,13 @@ const check = (name, ok, detail) => { console.log(`${ok ? "ok  " : "FAIL"} ${nam
   check("landing: the names are links a crawler can follow", (await ev(`document.querySelectorAll('a[data-door=a][href^="a/"]').length`)) === 16
         && (fs.readFileSync(path.join(DIR, "index.html"), "utf-8").match(/href="a\/[a-z0-9-]+\.html" data-door="a"/g) || []).length === 16);
   check("landing: seventy-two tiles", (await ev(`document.querySelectorAll(".wt").length`)) === 72);
+  {
+    // the baked histogram (build_landing.py): its decade links name pages that exist
+    const html = fs.readFileSync(path.join(DIR, "index.html"), "utf-8"), bars = (html.match(/<div class="bars" id="bars">[\s\S]*?<\/div>\s*<div class="eras/) || [""])[0];
+    const hrefs = [...bars.matchAll(/href="(decades\/[^"]+)"/g)].map(m => m[1]);
+    const missing = hrefs.filter(h => !fs.existsSync(path.join(DIR, h)));
+    check("landing: the baked histogram links to decade pages that exist", hrefs.length >= 20 && !missing.length, missing.join(" ") || `${hrefs.length} links`);
+  }
   check("landing: masthead figures", (await ev(`+document.querySelector("#stat-w").textContent.replace(/[^0-9]/g,"")`)) > 90000);
   // the worker stores the content-named data files on the first visit; a reload is then answered from the cache
   const cached = await ev(`(async () => { for (let i = 0; i < 40; i++){ const c = await caches.open("museaal-v1"); const ks = (await c.keys()).map(k => k.url); if (ks.some(u => /index\\.json\\?v=/.test(u))) return ks.length; await new Promise(r => setTimeout(r, 250)); } return 0; })()`);
