@@ -373,6 +373,9 @@ h1 a:hover{color:var(--grey-6)}
 @media(max-width:1099px){.wall[data-seed]{flex-wrap:wrap}.wall[data-seed] .wcol{flex:0 0 calc((100% - 20px) / 3)}}
 @media(max-width:479px){.wall[data-seed] .wcol{flex:0 0 calc((100% - 10px) / 2)}}
 a.wt{text-decoration:none}
+/* the baked histogram's decades and eras are links until the app makes them buttons */
+a.bar-btn,a.early-btn,a.era{text-decoration:none;line-height:normal}   /* as a button has it: no shift when the app swaps them */
+@media(min-width:1001px){.eras.baked{visibility:hidden}}   /* placed under their bars only by the app */
 .wt{display:block;width:100%;margin:0 0 10px;padding:0;border:0;background:var(--field);text-align:left;cursor:pointer;color:inherit;font:inherit}
 .wt{overflow:hidden}
 .wt img{display:block;width:100%;height:auto;object-fit:cover;object-position:center;background:var(--field)}
@@ -702,7 +705,7 @@ footer a{border-bottom:1px solid var(--rule)}
         <option value="born" data-i18n="s_born"></option>
         <option value="works" data-i18n="s_works"></option>
       </select>
-      <div class="seg" role="group" aria-label="Order">
+      <div class="seg" role="group" aria-label="Order" hidden>
         <button id="o-asc" aria-pressed="true">Earliest</button>
         <button id="o-desc" aria-pressed="false">Latest</button>
       </div>
@@ -713,9 +716,9 @@ footer a{border-bottom:1px solid var(--rule)}
         <button id="v-wall" aria-pressed="false"></button>
       </div>
     </div>
-    <button class="linkbtn" id="filters-toggle" aria-expanded="false" aria-controls="filterpanel">Show filters</button>
-    <button class="linkbtn" id="mylist" aria-pressed="false"></button>
-    <button class="linkbtn" id="reset" data-i18n="reset"></button>
+    <button class="linkbtn" id="filters-toggle" aria-expanded="false" aria-controls="filterpanel">Filters</button>
+    <button class="linkbtn" id="mylist" aria-pressed="false" data-i18n="mylist"></button>
+    <button class="linkbtn" id="reset" data-i18n="reset" hidden></button>
   </div>
 
   <div class="sharebar" id="sharebar">
@@ -724,7 +727,7 @@ footer a{border-bottom:1px solid var(--rule)}
     <span class="share-note" id="sharenote"></span>
   </div>
 
-  <div class="filterbar">
+  <div class="filterbar" hidden>
     <span class="ctl-label" data-i18n="filters"></span>
     <div class="active-filters" id="activefilters"></div>
   </div>
@@ -749,7 +752,7 @@ footer a{border-bottom:1px solid var(--rule)}
   <div class="facetbar"><span class="ctl-label" data-i18n="source"></span><div class="facets" id="f-src" role="group" aria-label="Filter by source catalogue"></div></div>
   </div>
 
-  <section class="aidx" id="aidx">
+  <section class="aidx" id="aidx" hidden>
     <div class="ai-head">
       <span class="eyebrow" data-i18n="artistindex"></span>
       <nav class="ai-rail" id="ai-rail" aria-label="Jump to artists by letter"></nav>
@@ -766,7 +769,7 @@ footer a{border-bottom:1px solid var(--rule)}
   </section>
 
   <div id="mono"></div>
-  <p class="count-line" id="countline"></p>
+  <p class="count-line" id="countline" hidden></p>
 
   <section class="doors" id="doors" hidden></section>
   <div class="listbar" id="listbar" hidden></div>

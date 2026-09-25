@@ -89,7 +89,9 @@ import json as _json, os as _os
 if _os.path.exists('site/landing.json'):
     _L=_json.load(open('site/landing.json',encoding='utf-8'))
     body=body.replace('<section class="doors" id="doors" hidden></section>','<section class="doors" id="doors">'+_L['doors']+'</section>',1)
-    body=body.replace('<main id="register"></main>','<main id="register">'+_L['register']+'</main>\n<script>if(location.hash&&!/^#(lang=\\w+|theme=\\w+)(&|$)/.test(location.hash)){document.getElementById("register").innerHTML="";document.getElementById("doors").hidden=true}</script>',1)
+    body=body.replace('<div class="bars" id="bars"></div>','<div class="bars" id="bars">'+_L.get('bars','')+'</div>',1)
+    body=body.replace('<div class="eras" id="eras"></div>','<div class="eras baked" id="eras">'+_L.get('eras','')+'</div>',1)
+    body=body.replace('<main id="register"></main>','<main id="register">'+_L['register']+'</main>\n<script>if(location.hash&&!/^#(lang=\\w+|theme=\\w+)(&|$)/.test(location.hash)){document.getElementById("register").innerHTML="";document.getElementById("doors").hidden=true;document.getElementById("bars").innerHTML="";document.getElementById("eras").innerHTML=""}</script>',1)
 open('site/index.html','w',encoding='utf-8').write(head+body+"\n"+a+"\n</body>\n</html>\n")
 import os
 print("MISSED:",miss if miss else "none")
