@@ -234,6 +234,11 @@ h1 a:hover{color:var(--grey-6)}
 .g-dates{font-family:var(--mono);font-size:.7rem;letter-spacing:.08em;color:var(--grey-6);margin-top:6px}
 .g-period{font-family:var(--mono);font-size:var(--fs-xs);letter-spacing:var(--ls-label);text-transform:uppercase;color:var(--grey-6);margin-top:10px;padding-top:8px;border-top:1px solid var(--rule)}
 .g-blurb{font-size:.82rem;line-height:1.55;color:var(--grey-6);margin-top:10px;max-width:32ch}
+/* a decade's name and note above its wall (the list's gutter keeps the year chart) */
+.dec-head{display:grid;grid-template-columns:auto minmax(0,1fr);gap:0 26px;align-items:start;margin:2px 0 18px}
+.dec-head .g-period{margin-top:4px}
+.dec-head .g-blurb{max-width:72ch;margin-top:8px}
+@media(max-width:620px){.dec-head{grid-template-columns:1fr}.dec-head .g-period{margin-top:10px}}
 /* ---- the mosaic: a column per century, a cell per decade, both proportional. A cell
    is a button; the pressed one is inverted, and its group renders below. Labels give
    way as cells shrink -- the count first, then the decade -- so nothing is clipped. ---- */
@@ -380,10 +385,9 @@ a.wt{text-decoration:none}
 .wt.on{outline:2px solid var(--ink);outline-offset:1px} .wt:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
 .wall-open{margin:0 0 18px} .wall-open .row{border-top:1px solid var(--rule)}
 .v-n{opacity:.55;font-size:.9em;margin-left:4px}
-/* the artwall button is pastel green while the wall is NOT showing -- the one coloured control on
-   the page, there to draw the eye to the pictures a list is hiding; pressed, it is the
-   ordinary inverted button like its neighbours */
-#v-wall[aria-pressed="false"]{background:#77dd77;color:#0B0C0E} #v-wall[aria-pressed="false"] .v-n{opacity:.75}
+/* the artwall button was pastel green while the wall was off -- green for "off", and, with the
+   wall now the default, a nudge against a List someone chose. It is an ordinary button;
+   its count says there are pictures to see */
 .more{width:100%;background:none;border:0;border-top:1px dashed var(--rule);color:var(--grey-6);font-family:var(--mono);font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;padding:11px;cursor:pointer}
 .more:hover{color:var(--ink);background:var(--field)}
 
