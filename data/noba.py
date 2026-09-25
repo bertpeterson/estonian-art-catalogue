@@ -15,7 +15,7 @@ catalogue -- museum-held or in the seven galleries -- and otherwise only when
 noba_artists.json says the artist is based in Estonia. Latvian, Lithuanian,
 Finnish and Swedish artists on NOBA stay out.
 """
-import json, re, ssl, time, urllib.request, os, unicodedata, html
+import json, re, ssl, time, urllib.request, os, unicodedata, html, datetime
 UA = "EstonianArtCatalogue/1.0 (research compile; contact via claude.ai)"
 API = "https://noba.ac/wp-json/wc/store/v1/products"
 ctx = ssl.create_default_context(); ctx.check_hostname = False; ctx.verify_mode = ssl.CERT_NONE
@@ -134,11 +134,15 @@ checked = 0
 for r in recs:
     slug = r.pop("_noprice", None)
     if not slug: continue
-    if said.get(slug) != "sold":
+    # "sold" stays sold; "unlisted" (off sale, not bought) is read again after four weeks,
+    # not on every weekly run -- a work back on sale shows its price on the artist's page
+    e = said.get(slug); v0 = e if isinstance(e, str) else (e or {}).get("v")
+    stale = v0 == "unlisted" and (isinstance(e, str) or (datetime.date.today() - datetime.date.fromisoformat(e.get("at", "2000-01-01"))).days >= 28)
+    if v0 is None or stale:
         v = page_says(r["url"]); checked += 1; time.sleep(0.8)
-        if v: said[slug] = v
-    if said.get(slug) == "sold": r["sold"] = True
-    elif said.get(slug) == "unlisted": r["_drop"] = True
+        if v: said[slug] = {"v": v, "at": datetime.date.today().isoformat()}; v0 = v
+    if v0 == "sold": r["sold"] = True
+    elif v0 == "unlisted": r["_drop"] = True
 json.dump(said, open(SOLD_F, "w", encoding="utf-8"), ensure_ascii=False, indent=0)
 before_drop = len(recs)
 recs = [r for r in recs if not r.pop("_drop", False)]

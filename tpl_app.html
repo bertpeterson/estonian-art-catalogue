@@ -1055,7 +1055,7 @@
           <div class="d-k">${esc(T("d_technique"))}</div><div class="d-v">${techName(w)?esc(cap(techName(w))):"—"}</div>
           <div class="d-k">${esc(T("d_material"))}</div><div class="d-v">${matName(w)?esc(cap(matName(w))):"—"}</div>
           ${(detailOf(w)||{}).dm?`<div class="d-k">${esc(T("d_dimensions"))}</div><div class="d-v">${esc(cap(dimsName(detailOf(w).dm)))}</div>`:""}
-          ${w.c?`<div class="d-k">${esc(T("d_category"))}</div><div class="d-v">${esc(catsOf(w).map(catName).join(" · "))}</div>`:""}
+          ${w.c?`<div class="d-k">${esc(T("d_category"))}</div><div class="d-v">${catsOf(w).map(c => `<a class="d-cat" href="#cat=${esc(slug(c))}" data-setcat="${esc(c)}" title="${esc(T("d_catall", {c: catName(c)}))}">${esc(catName(c))}</a>`).join(" · ")}</div>`:""}
           <div class="d-k">${esc(isHeld(w)?T("d_collection"):T("venue"))}</div><div class="d-v">${w.co?esc(collName(w.co))+"<br>":""}<em>${siteOf(w.mu) ? `<a class="permalink" href="${esc(siteOf(w.mu))}" target="_blank" rel="noopener">${esc(musName(w.mu))}</a>` : esc(musName(w.mu))}</em></div>
           <div class="d-k">${esc(T("kind"))}</div><div class="d-v">${esc(T(w.kind==="shown"?(w.s==="gallery"?"kind_shown_gal":"shown"):w.kind==="gallery"?"gallery":w.kind==="auction"?"kind_auction":w.kind==="sold"?"kind_sold":w.kind==="known"?"kind_known":"held"))}${w.kind==="known"?`<br><span class="d-sub">${esc(T("d_knownnote"))}</span>`:""}</div>
           ${w.kind==="sold" ? `<div class="d-k">${esc(T("d_status"))}</div><div class="d-v">${esc(pastText(w))}${w.gl ? `<br><span class="d-sub">${esc(T("d_lastseen", {d: w.gl}))}</span>` : ""}<br><span class="d-sub">${esc(T("d_pastnote"))}</span></div>` : ""}
@@ -1780,6 +1780,12 @@
                      behavior: smooth && !matchMedia("(prefers-reduced-motion:reduce)").matches ? "smooth" : "auto"});
   };
   const viewTop = fallback => $("countline").hidden ? fallback : $("countline");
+  document.addEventListener("click", e => {
+    const a = e.target.closest("[data-setcat]"); if (!a) return;
+    e.preventDefault();
+    state.cats = new Set([a.dataset.setcat]); state.open = null; state.artist = null; state.decade = null; state.year = null; state.expand.clear();
+    renderAll(); pushHash(); jumpTo(viewTop($("register")));
+  });
   const setView = v => { state.view = v; state.viewKey = scopeKey(); state.open = null; state.wLimit = 72; render(); pushHash(); };
   $("v-list").addEventListener("click", () => setView("list"));
   $("v-wall").addEventListener("click", () => setView("wall"));
