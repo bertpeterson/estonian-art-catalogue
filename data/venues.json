@@ -403,5 +403,26 @@
   "type": "museum",
   "url": "https://meremuuseum.ee",
   "holder": "Eesti Meremuuseum"
+ },
+ {
+  "n": "Artner",
+  "en": "Artner",
+  "city": "",
+  "type": "gallery",
+  "url": "https://artner.ee"
+ },
+ {
+  "n": "Tokko & Arrak",
+  "en": "Tokko & Arrak Gallery",
+  "city": "Tallinn",
+  "type": "gallery",
+  "url": "https://tokkoarrak.ee"
+ },
+ {
+  "n": "Art & Tonic",
+  "en": "Art & Tonic",
+  "city": "Tallinn",
+  "type": "gallery",
+  "url": "https://artandtonic.art"
  }
 ]

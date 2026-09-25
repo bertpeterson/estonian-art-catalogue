@@ -11,8 +11,8 @@ import re, sys, urllib.request
 
 HOSTS = ["haus.ee", "www.kogogallery.ee", "temnikova.ee", "www.tutar.ee", "www.artrovert.ee", "rukigalerii.ee",
          "alleegalerii.ee", "vernissage.ee", "eestikunstioksjonid.ee", "www.vaal.ee", "oksjon.vaal.ee",
-         "www.e-kunstisalong.ee", "noba.ac", "konradmagi.ee"]
-UA = "EstonianArtCatalogue/1.0 (research compile; contact via claude.ai)"
+         "www.e-kunstisalong.ee", "noba.ac", "konradmagi.ee", "artner.ee", "artandtonic.art", "tokkoarrak.ee"]
+UA = "EstonianArtCatalogue/1.0 (museaal.ee; contact info@museaal.ee)"
 OURS = {"*", "estonianartcatalogue", "claudebot", "claude-user", "claude-searchbot", "anthropic-ai"}
 
 def verdict(txt):
@@ -35,6 +35,40 @@ def verdict(txt):
             return False, f"Disallow: / for {', '.join(ags)}"
     return True, "ok"
 
+# The addresses the harvesters ask for, where a site's rules could close one path and
+# not the rest: Tokko & Arrak's closes "?format=json" to every agent -- the whole site is
+# open, the JSON view is not. Each is tested as this project's agent and as "*".
+PATHS = {"artner.ee": ["/wp-json/wc/store/v1/products?per_page=100&page=1"],
+         "artandtonic.art": ["/wp-json/wc/store/v1/products?per_page=100&page=1"],
+         "tokkoarrak.ee": ["/kunsti-muuk", "/kunsti-muuk?offset=200", "/kunsti-muuk/p/work"],
+         "noba.ac": ["/wp-json/wc/store/v1/products?per_page=100&page=1", "/et/kunstnik/artist/", "/et/kunst/work/"],
+         "vernissage.ee": ["/wp-json/wc/store/v1/products?per_page=100&page=1"]}
+def allowed(txt, agent, path):
+    """RFC 9309 with Google's wildcards: the group naming the agent, else "*"; the longest
+    matching rule wins, Allow on a tie; "*" matches anything, "$" ends the path. (Python's
+    urllib.robotparser knows no wildcards: it let "/*?format=json" through.)"""
+    groups, cur, last_ua = [], None, False
+    for raw in txt.splitlines():
+        line = raw.split("#", 1)[0].strip()
+        k, _, v = line.partition(":"); k, v = k.strip().lower(), v.strip()
+        if k == "user-agent":
+            if not last_ua: cur = ([], []); groups.append(cur)
+            cur[0].append(v.lower()); last_ua = True
+        elif k in ("allow", "disallow") and cur is not None:
+            cur[1].append((k, v)); last_ua = False
+        elif k: last_ua = False
+    mine = [g for g in groups if any(a != "*" and agent.lower().startswith(a) for a in g[0])] or [g for g in groups if "*" in g[0]]
+    rules = [r for g in mine for r in g[1] if r[1]]
+    def match(pat):
+        rx = "^" + re.escape(pat).replace(r"\*", ".*")
+        if rx.endswith(r"\$"): rx = rx[:-2] + "$"
+        return re.match(rx, path)
+    hits = sorted(((len(v), k == "allow") for k, v in rules if match(v)), reverse=True)
+    return not hits or hits[0][1]
+def paths_ok(h, txt):
+    shut = [p for p in PATHS.get(h, []) for ua in ("estonianartcatalogue", "*") if not allowed(txt, ua, p)]
+    return (False, f"closes {shut[0]}") if shut else (True, "ok")
+
 bad = []
 for h in HOSTS:
     try:
@@ -43,6 +77,7 @@ for h in HOSTS:
     except Exception as e:
         txt = ""
     ok, why = verdict(txt)
+    if ok: ok, why = paths_ok(h, txt)
     print(f"  {'ok ' if ok else 'NO '} {h:28} {why}")
     if not ok: bad.append((h, why))
 if bad:
