@@ -74,7 +74,9 @@ jobs:
           # the galleries' own 768-pixel copies of new stock, for the wall (checks each once)
           (cd data && python3 img_small.py)
           ./build_site.sh
-          node check_site.js site
+          # the smoke test once more before giving up: a headless browser on a shared runner
+          # can miss a beat (it failed once, 2026-09-25, and passed on a re-run and a clean clone)
+          node check_site.js site || { echo "site check failed; once more"; sleep 20; node check_site.js site; }
           python3 data/readme_figures.py
 
       - name: Commit if anything changed

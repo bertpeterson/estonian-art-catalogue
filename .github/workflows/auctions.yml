@@ -54,8 +54,9 @@ jobs:
           (cd data && python3 merge.py)
           python3 data/data_guard.py /tmp/data_before.json data/data.json
           ./build_site.sh
-          node check_site.js site
-
+          # the smoke test once more before giving up: a headless browser on a shared runner
+          # can miss a beat (it failed once, 2026-09-25, and passed on a re-run and a clean clone)
+          node check_site.js site || { echo "site check failed; once more"; sleep 20; node check_site.js site; }
       - name: Commit and deploy if anything changed
         env:
           GH_TOKEN: ${{ github.token }}

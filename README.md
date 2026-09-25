@@ -414,6 +414,12 @@ so the houses are read weekly (`.github/workflows/auctions.yml`, Mondays), past 
 the current month with no hammer price on any lot counts as coming, so it is never recorded as a sale
 where nothing sold.
 
+**For sale, weekly.** Gallery stock is read every Thursday (`.github/workflows/galleries.yml`): the ten
+galleries and NOBA afresh, the ledger, a merge, the same guards as the monthly run (a collapsed harvest or a
+merge that loses records stops it), and the deploy. Monthly, a work sold on the 3rd stayed for sale until the
+1st. The museum sources stay monthly. The three data jobs share one lock, so they never run side by side, and
+every job gives the smoke test one retry before failing: a headless browser on a shared runner can miss a beat.
+
 **Embeds.** Every artist, decade and subject has a strip for other people's pages — `/embed/<slug>.html`,
 `/embed/et/<slug>.html` (`build_embed.py`): six pictures from the holders' own servers, the count, a link
 back, nothing else — no prices, no auction line, no header. It follows the host page's light or dark scheme,
