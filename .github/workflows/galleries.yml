@@ -1,0 +1,78 @@
+# The galleries' stock, weekly: what is for sale, and what has sold since last week.
+# Monthly, a work sold on the 3rd stayed "for sale" until the 1st of the next month
+# (Emased, by Leonhard Lapin, on NOBA). This reads only the ten galleries and NOBA,
+# afresh, and keeps the museum sources to the monthly run. The same guards as that
+# run: a gallery whose harvest comes back empty or collapsed stops everything, and a
+# merge that loses records is refused. Thursdays, away from Monday's auction lots and
+# the 1st's monthly run, with which it shares a lock.
+name: Weekly gallery stock
+
+on:
+  schedule:
+    - cron: "0 5 * * 4"         # 05:00 UTC on Thursdays
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write               # to start the deploy: a push by this token starts no workflow
+
+concurrency:
+  group: reharvest             # never beside the monthly or the auction run: they write the same files
+  cancel-in-progress: false
+
+jobs:
+  galleries:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+      - run: pip install -q numpy
+
+      - name: Restore the museum harvest from data/raw
+        run: python3 data/unpack.py
+
+      - name: Snapshot gallery counts
+        working-directory: data
+        run: python3 harvest_guard.py before
+
+      - name: Read every source's robots.txt; stop if one says no
+        working-directory: data
+        run: python3 robots_check.py
+
+      - name: Fetch every gallery afresh
+        working-directory: data
+        run: |
+          for s in haus kogo temnikova tutar artrovert ruki allee eks vernissage konradmagi noba noba_artists noba_artworks noba; do
+            echo "=== $s ==="
+            python3 -u $s.py
+          done
+
+      - name: Refuse a collapsed harvest
+        working-directory: data
+        run: python3 harvest_guard.py after
+
+      - name: Merge, guard and build
+        run: |
+          git show HEAD:data/data.json > /tmp/data_before.json
+          (cd data && python3 ledger.py && python3 merge.py && python3 gallery_shapes.py && python3 merge.py)
+          python3 data/data_guard.py /tmp/data_before.json data/data.json
+          (cd data && python3 img_small.py)
+          ./build_site.sh
+          node check_site.js site || { echo "site check failed; once more"; sleep 20; node check_site.js site; }
+          python3 data/readme_figures.py
+
+      - name: Commit and deploy if anything changed
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git config user.name  "weekly gallery stock"
+          git config user.email "actions@users.noreply.github.com"
+          git add -u data README.md
+          if git diff --cached --quiet; then echo "nothing changed"; exit 0; fi
+          n=$(python3 -c "import json; print(sum(1 for w in json.load(open('data/data.json'))['works'] if w.get('kind') == 'gallery'))")
+          git commit -m "Weekly gallery stock, $(date -u +%F): $n for sale" -m "Automated: read the galleries and NOBA afresh, ledger, merged, guarded, built and smoke-tested."
+          git push
+          gh workflow run pages.yml --ref main

@@ -39,7 +39,9 @@ jobs:
       - name: Build
         run: ./build_site.sh
       - name: Open the built site in headless Chrome
-        run: node check_site.js site
+        # once more before giving up: a headless browser on a shared runner can miss a beat
+        # (it failed once, 2026-09-25, and passed on a re-run and on a clean clone)
+        run: node check_site.js site || { echo "site check failed; once more"; sleep 20; node check_site.js site; }
       - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
           path: site
