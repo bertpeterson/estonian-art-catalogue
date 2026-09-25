@@ -13,6 +13,8 @@ Pages 301-redirects the github.io address to a custom domain, so indexing done n
 carries over.
 """
 import json, os, re, html, unicodedata, datetime, collections
+# the page's last line: where to ask for a correction or a removal
+CONTACT = {"en": 'Corrections, removals, questions: <a href="mailto:info@museaal.ee">info@museaal.ee</a>', "et": 'Parandused, eemaldamised, küsimused: <a href="mailto:info@museaal.ee">info@museaal.ee</a>'}
 GC = '<script data-goatcounter="https://museaal.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>'   # GoatCounter: a page-view count, no cookies
 
 BASE = "https://museaal.ee"
@@ -397,7 +399,7 @@ def render(i, a, ws, lang):
            f"<th>{T['held']}</th></tr></thead><tbody>{rows}</tbody></table>"
            + neighbours(i, lang)
            + embed_box(lang, f"{BASE}/embed/{'' if lang == 'en' else 'et/'}{sl}.html", me, a["n"], T)
-           + f"<p class=\"m\">{T['foot']}<a href=\"{BASE}/{'' if lang == 'en' else '#lang=et'}\">{T['full']}</a></p></body></html>")
+           + f"<p class=\"m\">{T['foot']}<a href=\"{BASE}/{'' if lang == 'en' else '#lang=et'}\">{T['full']}</a> · {CONTACT[lang]}</p></body></html>")
 
 for i, a in enumerate(A):
     ws = by_artist.get(i, [])
