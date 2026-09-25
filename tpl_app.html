@@ -93,7 +93,7 @@
                    "Arhiivkogu":"Archive collection","Graafika":"Prints","Skulptuur":"Sculpture","Foto":"Photography","Fotokogu":"Photography collection",
                    "Tarbekunst":"Applied art","Tarbekunstikogu":"Applied art collection","Joonistuste kogu":"Drawings collection","Joonistus ja akvarell":"Drawing and watercolour"};
   const collName = c => LANG === "en" && c ? (COLL_EN[c] || c) : c;
-  const medName = e => LANG === "en" ? e : (I18N.MEDIUM_ET[e] || e);
+  const medName = e => LANG === "en" ? ((I18N.MEDIUM_EN || {})[e] || e) : (I18N.MEDIUM_ET[e] || e);
   const techName = w => LANG === "en" ? (w.tc || w.tce) : (w.tce || w.tc);
   const matName  = w => LANG === "en" ? (w.m  || w.me)  : (w.me  || w.m);
   function dateLabel(w){
@@ -214,7 +214,20 @@
     const n = new Map(); for (const w of W){ const v = w[f]; if (v != null) n.set(v, (n.get(v) || 0) + 1); }
     return [...n.keys()].sort((a, b) => n.get(b) - n.get(a));
   };
-  const MEDIA = bySize("e"), MUSEUMS = bySize("mu"), CATS = bySize("c");
+  // An EKM record in two categories carries them as one string, "A, B"; it belongs to
+  // each, not to a third category of its own
+  const catsOf = w => w.c ? String(w.c).split(/,\s*/) : [];
+  const MEDIA = bySize("e"), MUSEUMS = bySize("mu");
+  const CATS = (() => { const n = new Map(); for (const w of W) for (const c of catsOf(w)) n.set(c, (n.get(c) || 0) + 1);
+    return [...n.keys()].sort((a, b) => n.get(b) - n.get(a)); })();
+  // the holders by what they are: museums; galleries and auction houses (a gallery that
+  // also runs sales is both, and listed there); and the rest -- a private collection, a
+  // whereabouts unknown
+  const HOLDER_KIND = (() => { const k = new Map();
+    for (const w of W){ const t = w.kind === "auction" || w.kind === "gallery" || w.kind === "sold" || w.kind === "shown" ? "g" : "m";
+      if (t === "g" || !k.has(w.mu)) k.set(w.mu, t); }
+    for (const m of ["Erakogu", "Asukoht teadmata", "Veneetsia biennaal, Eesti paviljon"]) if (k.has(m)) k.set(m, "o");
+    return k; })();
   const SRCS = [["muis","MuIS"],["ekm","EKM Digital"],["ekmmuis","Both"],["ekkm","EKKM"],["cca","CCA / Venice"]];
   const NOORIGIN = "\u0000none";
   const originsOf = w => { const f = A[w.a].aff; return f ? [f] : [NOORIGIN]; };
@@ -230,7 +243,10 @@
   const MOVE_ET = {"Expressionism":"ekspressionism","Baroque":"barokk","Impressionism":"impressionism","Neoclassicism":"neoklassitsism","New Objectivity":"uusasjalikkus","Flemish Baroque painting":"flaami barokk","academic art":"akadeemiline kunst","Romanticism":"romantism","Realism":"realism","Symbolism":"sümbolism","Cubism":"kubism","Surrealism":"sürrealism","Pop art":"popkunst","Art Nouveau":"juugend","Biedermeier":"biidermeier","Rococo":"rokokoo","Mannerism":"manerism","Renaissance":"renessanss","Constructivism":"konstruktivism","Futurism":"futurism","Abstract art":"abstraktne kunst","Socialist realism":"sotsialistlik realism","Conceptual art":"kontseptualism"};
   const CIT_ET = {"Estonia":"Eesti","Russian Empire":"Vene keisririik","Germany":"Saksamaa","France":"Prantsusmaa","Sweden":"Rootsi","Finland":"Soome","United States":"Ameerika Ühendriigid","Canada":"Kanada","Dutch Republic":"Madalmaade Vabariik","Switzerland":"Šveits","Kingdom of Prussia":"Preisi kuningriik","Austria":"Austria","Russia":"Venemaa","United Kingdom of Great Britain and Ireland":"Suurbritannia","Austrian Empire":"Austria keisririik","Latvia":"Läti","Lithuania":"Leedu","Poland":"Poola","Italy":"Itaalia","Spain":"Hispaania","Netherlands":"Holland","Denmark":"Taani","Norway":"Norra","United Kingdom":"Suurbritannia","Belgium":"Belgia","Ukraine":"Ukraina","Australia":"Austraalia","Israel":"Iisrael","Hungary":"Ungari","Czech Republic":"Tšehhi","Kingdom of Bavaria":"Baieri kuningriik","Holy Roman Empire":"Saksa-Rooma riik","Weimar Republic":"Weimari vabariik","Nazi Germany":"Natsi-Saksamaa","West Germany":"Lääne-Saksamaa","German Empire":"Saksa keisririik"};
   const citName = c => LANG === "en" ? c : (CIT_ET[c] || c);
-  const grpLabel = g => { const i = g.indexOf(":"); const l = g.slice(i+1); return (LANG !== "en" && g.startsWith("movement:")) ? (MOVE_ET[l] || l) : l; };
+  const GRP_EN = {"Riia linna kunstikool": "Riga City Art School"};
+  const grpLabel = g => { const i = g.indexOf(":"); const l = g.slice(i+1);
+    if (LANG !== "en") return g.startsWith("movement:") ? (MOVE_ET[l] || l) : l;
+    const t = GRP_EN[l] || l; return t.charAt(0).toUpperCase() + t.slice(1); };
   const grpKind  = g => T("g_" + g.slice(0, g.indexOf(":")));
 
   const ORIGINS = (() => {
@@ -502,7 +518,7 @@
   const baseSet = () => textSet().filter(w => inList(w) && latestLot(w)
       && (state.media.size===0 || state.media.has(w.e))
       && (state.museums.size===0 || state.museums.has(w.mu))
-      && (state.cats.size===0 || state.cats.has(w.c))
+      && (state.cats.size===0 || catsOf(w).some(c=>state.cats.has(c)))
       && (state.srcs.size===0 || state.srcs.has(w.s))
       && (state.origins.size===0 || originsOf(w).some(o=>state.origins.has(o)))
       && (state.groups.size===0  || groupsOf(w).some(g=>state.groups.has(g)))
@@ -513,7 +529,7 @@
   const baseSetIgnoringYears = () => textSet().filter(w => inList(w)
       && (state.media.size===0 || state.media.has(w.e))
       && (state.museums.size===0 || state.museums.has(w.mu))
-      && (state.cats.size===0 || state.cats.has(w.c))
+      && (state.cats.size===0 || catsOf(w).some(c=>state.cats.has(c)))
       && (state.srcs.size===0 || state.srcs.has(w.s))
       && (state.artist===null || w.a===state.artist));
   const fullSet = () => baseSet().filter(w => (state.decade===null || decOf(w)===state.decade)
@@ -858,12 +874,19 @@
   }
 
   function renderFacets(){
-    const scoped = textSet().filter(w => (state.decade===null || decOf(w)===state.decade)
+    // counted within the view -- For sale or My list (inList), the auction ledger, the
+    // years chosen -- so a chip never offers what the view cannot show (EKM, 46,195, in
+    // For sale, which holds none)
+    const scoped = textSet().filter(w => inList(w) && latestLot(w)
+                            && (state.group !== "auction" || w.kind === "auction")
+                            && (state.decade===null || decOf(w)===state.decade)
+                            && (state.year===null || w.y===state.year)
+                            && (state.undOnly ? w.y==null : ((state.from===null || (w.y!=null && w.y>=state.from)) && (state.to===null || (w.y!=null && w.y<=state.to))))
                             && (state.artist===null || w.a===state.artist));
     const pass = (w, skip) =>
         (skip==="med" || state.media.size===0   || state.media.has(w.e))
      && (skip==="mus" || state.museums.size===0 || state.museums.has(w.mu))
-     && (skip==="cat" || state.cats.size===0    || state.cats.has(w.c))
+     && (skip==="cat" || state.cats.size===0    || catsOf(w).some(c=>state.cats.has(c)))
      && (skip==="src" || state.srcs.size===0    || state.srcs.has(w.s))
      && (skip==="org" || state.origins.size===0 || originsOf(w).some(o=>state.origins.has(o)))
      && (skip==="grp" || state.groups.size===0  || groupsOf(w).some(g=>state.groups.has(g)));
@@ -881,7 +904,10 @@
     const counts = {
       med: tally("med", w => w.e),
       mus: tally("mus", w => w.mu),
-      cat: tally("cat", w => w.c),
+      cat: (() => { const m=new Map();
+        for (const w of scoped){ if(!pass(w,"cat")) continue;
+          for (const c of catsOf(w)) m.set(c,(m.get(c)||0)+1); }
+        return m; })(),
       src: tally("src", w => w.s),
       org: (() => { const m=new Map();
         for (const w of scoped){ if(!pass(w,"org")) continue;
@@ -892,20 +918,30 @@
           for (const g of groupsOf(w)) m.set(g,(m.get(g)||0)+1); }
         return m; })()
     };
-    const chips = (el, list, attr, sel, lab, title) => {
-      $(el).innerHTML = list.map(v => {
+    const chipHTML = (list, attr, sel, lab, title) => list.map(v => {
         const key = Array.isArray(v) ? v[0] : v, text = Array.isArray(v) ? v[1] : lab(v);
         const c = counts[attr].get(key) || 0;
         if (!c && !sel.has(key)) return "";
         return `<button class="chip" data-${attr}="${esc(key)}" aria-pressed="${sel.has(key)}" title="${esc(title?title(v):text)}">${esc(text)}<span>${c}</span></button>`;
       }).join("");
+    const chips = (el, list, attr, sel, lab, title) => { $(el).innerHTML = chipHTML(list, attr, sel, lab, title); };
+    // a facet in parts, each under a small heading; a part with nothing to offer is left out
+    const parts = (el, groups, attr, sel, lab, title) => {
+      $(el).innerHTML = groups.map(([h, list]) => { const c = chipHTML(list, attr, sel, lab, title);
+        return c ? `<span class="facet-h">${esc(h)}</span>${c}` : ""; }).join("");
     };
-    chips("f-med", MEDIA,    "med", state.media,   v=>medName(v));
-    chips("f-mus", MUSEUMS,  "mus", state.museums, v=>abbr(v), v=>musName(v));
+    // the long tail of media waits behind "more": the twenty largest, and any chosen
+    const medTop = state.medAll ? MEDIA : MEDIA.filter((m, i) => i < 20 || state.media.has(m));
+    $("f-med").innerHTML = chipHTML(medTop, "med", state.media, v=>medName(v))
+      + (!state.medAll && MEDIA.length > medTop.length ? `<button class="linkbtn" id="med-more">${esc(T("med_more"))}</button>` : "");
+    parts("f-mus", [[T("h_museums"), MUSEUMS.filter(m => HOLDER_KIND.get(m) === "m")], [T("h_galleries"), MUSEUMS.filter(m => HOLDER_KIND.get(m) === "g")],
+                    [T("h_otherholders"), MUSEUMS.filter(m => HOLDER_KIND.get(m) === "o")]], "mus", state.museums, v=>musName(v), v=>musName(v) + " · " + abbr(v));
     chips("f-cat", CATS,     "cat", state.cats,    v=>catName(v));
     chips("f-src", SRCS,     "src", state.srcs,    v=>v);
     chips("f-org", ORIGINS,  "org", state.origins,  v=> v===NOORIGIN ? T("originunknown") : v);
-    chips("f-grp", GROUPS,   "grp", state.groups,   v=> grpLabel(v), v=> grpKind(v) + " " + grpLabel(v));
+    const kindOf = g => g.slice(0, g.indexOf(":"));
+    parts("f-grp", [["school", T("h_schools")], ["movement", T("h_movements")], ["member", T("h_members")]].map(([k, h]) => [h, GROUPS.filter(g => kindOf(g) === k)]),
+          "grp", state.groups, v=> grpLabel(v), v=> grpKind(v) + " " + grpLabel(v));
   }
 
   const sub = w => {
@@ -1019,7 +1055,7 @@
           <div class="d-k">${esc(T("d_technique"))}</div><div class="d-v">${techName(w)?esc(cap(techName(w))):"—"}</div>
           <div class="d-k">${esc(T("d_material"))}</div><div class="d-v">${matName(w)?esc(cap(matName(w))):"—"}</div>
           ${(detailOf(w)||{}).dm?`<div class="d-k">${esc(T("d_dimensions"))}</div><div class="d-v">${esc(cap(dimsName(detailOf(w).dm)))}</div>`:""}
-          ${w.c?`<div class="d-k">${esc(T("d_category"))}</div><div class="d-v">${esc(catName(w.c))}</div>`:""}
+          ${w.c?`<div class="d-k">${esc(T("d_category"))}</div><div class="d-v">${esc(catsOf(w).map(catName).join(" · "))}</div>`:""}
           <div class="d-k">${esc(isHeld(w)?T("d_collection"):T("venue"))}</div><div class="d-v">${w.co?esc(collName(w.co))+"<br>":""}<em>${siteOf(w.mu) ? `<a class="permalink" href="${esc(siteOf(w.mu))}" target="_blank" rel="noopener">${esc(musName(w.mu))}</a>` : esc(musName(w.mu))}</em></div>
           <div class="d-k">${esc(T("kind"))}</div><div class="d-v">${esc(T(w.kind==="shown"?(w.s==="gallery"?"kind_shown_gal":"shown"):w.kind==="gallery"?"gallery":w.kind==="auction"?"kind_auction":w.kind==="sold"?"kind_sold":w.kind==="known"?"kind_known":"held"))}${w.kind==="known"?`<br><span class="d-sub">${esc(T("d_knownnote"))}</span>`:""}</div>
           ${w.kind==="sold" ? `<div class="d-k">${esc(T("d_status"))}</div><div class="d-v">${esc(pastText(w))}${w.gl ? `<br><span class="d-sub">${esc(T("d_lastseen", {d: w.gl}))}</span>` : ""}<br><span class="d-sub">${esc(T("d_pastnote"))}</span></div>` : ""}
@@ -1144,7 +1180,11 @@
     }
     if (state.sale && state.saleUp && UP.length){
       const lots = upLots();
-      $("countline").textContent = (lots.length === 1 ? T("up_count1") : T("up_count", {n: fmt(lots.length)})) + (state.artist !== null ? " · " + A[state.artist].n : "") + (state.q ? ` · “${state.q}”` : "");
+      // the lots carry no medium, holder or date to filter on: say so rather than seem to obey
+      const ignored = state.decade !== null || state.year !== null || state.from !== null || state.to !== null || state.undOnly
+        || state.media.size || state.museums.size || state.cats.size || state.srcs.size || state.origins.size || state.groups.size;
+      $("countline").textContent = (lots.length === 1 ? T("up_count1") : T("up_count", {n: fmt(lots.length)})) + (state.artist !== null ? " · " + A[state.artist].n : "") + (state.q ? ` · “${state.q}”` : "")
+        + (ignored ? " · " + T("up_ignored") : "");
       $("countline").insertAdjacentHTML("beforeend", ` · <a class="hub-link" href="${LANG === "et" ? "tulemas.html" : "upcoming.html"}">${esc(T("hubpage"))}</a>`);
       $("countline").hidden = false; $("reset").hidden = false;
       reg.innerHTML = renderUpcoming(lots); $("viewctl").hidden = true; return;
@@ -1840,6 +1880,7 @@
     if (state.from !== null && state.to !== null && state.from > state.to){
       const s = state.from; state.from = state.to; state.to = s;
     }
+    if (state.from !== null || state.to !== null){ state.decade = null; state.year = null; }   // years replace a decade
     state.open = null; state.expand.clear(); renderAll(); pushHash();
   }
   $("yr-from").addEventListener("change", yrChanged);
@@ -1863,6 +1904,7 @@
     renderAll(); pushHash();
   }, true);
 
+  $("f-med").addEventListener("click", e => { if (e.target.closest("#med-more")){ state.medAll = true; renderFacets(); } });
   $("filters-toggle").addEventListener("click", () => {
     const p = $("filterpanel");
     p.hidden = !p.hidden;
@@ -1884,6 +1926,8 @@
     const raw = b.dataset.dec, d = raw === "und" ? "und" : +raw;
     state.decade = state.decade === d ? null : d;
     state.year = null;
+    // a decade replaces an era or a span of years: together they could only be empty
+    if (state.decade !== null){ state.from = state.to = null; state.undOnly = false; }
     state.open = null; state.expand.clear();
     if (state.decade !== null) setGroup("decade");
     renderAll(); pushHash();
@@ -1951,6 +1995,7 @@
     const [lo, hi] = DOOR_PERIODS[+b.dataset.era];
     const on = b.getAttribute("aria-pressed") === "true";
     state.from = on ? null : lo; state.to = on ? null : (hi === 2099 ? null : hi); state.undOnly = false;
+    if (!on){ state.decade = null; state.year = null; }       // an era replaces a decade
     renderAll(); pushHash();
   });
   $("doors").addEventListener("click", e => {
