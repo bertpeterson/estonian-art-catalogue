@@ -45,7 +45,7 @@ jobs:
       - name: Fetch every gallery afresh
         working-directory: data
         run: |
-          for s in haus kogo temnikova tutar artrovert ruki allee eks vernissage konradmagi noba noba_artists noba_artworks noba; do
+          for s in haus kogo temnikova tutar artrovert ruki allee eks vernissage konradmagi artner tokkoarrak artandtonic noba noba_artists noba_artworks noba; do
             echo "=== $s ==="
             python3 -u $s.py
           done

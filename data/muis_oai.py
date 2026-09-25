@@ -19,7 +19,7 @@ import re, json, os, sys, gzip, time, html, collections, urllib.request, urllib.
 from concurrent.futures import ThreadPoolExecutor
 
 OAI = "https://www.muis.ee/OAIService/OAIService"
-UA = "EstonianArtCatalogue/1.0 (research compile; contact via claude.ai)"
+UA = "EstonianArtCatalogue/1.0 (museaal.ee; contact info@museaal.ee)"
 CACHE = "oaicache"; os.makedirs(CACHE, exist_ok=True)
 # museum set -> the sub-collections that are art (from ListSets; names in the comment)
 SETS = {
@@ -29,7 +29,27 @@ SETS = {
     "AM":   ["AM:_:G"],                                          # Eesti Ajaloomuuseum · Kujutav kunst
     "TKM":  ["TKM:TR:G", "TKM:TR:B", "TKM:TR:M", "TKM:TR:A", "TKM:TR:H", "TKM:TR:E", "TKM:TR:GD",
              "TKM:TR:S", "TKM:TR:FV", "TKM:ASM:ASM B", "TKM:ASM:ASM S", "TKM:RF"],   # Tartu Kunstimuuseum
-    "EKM":  ["EKM:j:G", "EKM:j:M", "EKM:j:S", "EKM:j:B"],        # Eesti Kunstimuuseum · Graafika, Maal, Skulptuur, hõbe
+    "EKM":  ["EKM:j:G", "EKM:j:M", "EKM:j:S", "EKM:j:B",         # Eesti Kunstimuuseum · Graafika, Maal, Skulptuur, hõbe
+             "EKM:j:RN", "EKM:j:FV", "EKM:j:VM", "EKM:j:KR", "EKM:j:AE", "EKM:j:Mi"],   # rändnäitused, nüüdiskunst, välismaal, Raud, Adamson-Eric, Mikkel
+    # 2026-09-25: the museums' art collections the first harvest reached only in part or
+    # not at all (research: 25-record samples, 75-100% with a maker). Left out on purpose:
+    # EKM photographs (FK), graphic design (GD) and foreign prints (VG), Tartu University's
+    # old prints (KMM:GR) and casts (KMM:S) -- each a change of what the catalogue is, and
+    # a decision of its own; ETDM stays out (applied art)
+    "TLM":  ["TLM:_:G"],                                         # Tallinna Linnamuuseum · kunstikogu
+    "ETMM": ["ETMM:_:K", "ETMM:_:K:G", "ETMM:_:K:Gk", "ETMM:_:K:ML", "ETMM:_:K:Sk", "ETMM:_:K:KT"],   # Teatri- ja Muusikamuuseum
+    "UTKK": ["UTKK:K"],                                          # Underi ja Tuglase Kirjanduskeskus · kunstikogu
+    "VK":   ["VK:_:K"],                                          # Võrumaa Muuseum
+    "PM":   ["PM:_:K"],                                          # Järvamaa Muuseum
+    "SM":   ["SM:K", "SM:_:K:Kg", "SM:_:K:Km", "SM:_:K:Ks", "SM:_:K:Kv"],   # Saaremaa Muuseum
+    "EKAM": ["EKAM:M", "EKAM:G", "EKAM:J", "EKAM:SI"],           # Eesti Kunstiakadeemia muuseum
+    "UKM":  ["UKM:M", "UKM:GJ", "UKM:S"],                        # Uue Kunsti Muuseum
+    "KMM":  ["KMM:MA", "KMM:JO"],                                # Tartu Ülikooli kunstimuuseum · maal, joonistus
+    "HMK":  ["HMK:_:K"],                                         # Harjumaa Muuseum
+    "EVM":  ["EVM:K"],                                           # Eesti Vabaõhumuuseum
+    "VBM":  ["VBM:_:K"],                                         # Vabamu
+    "VaM":  ["VaM:Fp:K"],                                        # Valga Muuseum
+    "VM":   ["VM:K"], "HM": ["HM:_:K"], "NLM": ["NLM:_:K"], "HKM": ["HKM:_:K"], "PäMu": ["PäMu:_:K"], "RM": ["RM:_:K"],   # the regional museums' gaps
 }
 
 def get(url, tries=3):
@@ -47,7 +67,7 @@ def identifiers(mus):
     if os.path.exists(p) and time.time() - os.path.getmtime(p) < 30 * 86400:
         with gzip.open(p, "rt", encoding="utf-8") as f: x = f.read()
     else:
-        x = get(f"{OAI}?verb=ListIdentifiers&metadataPrefix=ese&set={mus}")
+        x = get(f"{OAI}?verb=ListIdentifiers&metadataPrefix=ese&set={urllib.parse.quote(mus)}")   # PäMu: the ä must be encoded
         if x:
             with gzip.open(p, "wt", encoding="utf-8") as f: f.write(x)
     return re.findall(r"<identifier>oai:muis\.ee:(\d+)</identifier><datestamp>[^<]*</datestamp><setSpec>(.*?)</setSpec>", x)
@@ -105,6 +125,17 @@ def parse(mid, x, subset):
             ed, ld = texts(a, "earliestDate"), texts(a, "latestDate")
             life = [ed[0] if ed else "", ld[0] if ld else ""] if (ed or ld) else None
             if role == "autor": break
+    # some museums (Under and Tuglas, Võrumaa) leave the making event empty and name the
+    # maker, as "autor", under another event -- a thematic classification. The role says
+    # who made it, wherever it is filed.
+    if author is None:
+        for a in block(x, "actorInRole"):
+            if "".join(texts(a, "term")).lower() != "autor": continue
+            name = next((U(v) for v in re.findall(r'lido:pref="preferred"[^>]*>([^<]*)</lido:appellationValue>', a)), "")
+            if name:
+                author = name; ed, ld = texts(a, "earliestDate"), texts(a, "latestDate")
+                life = [ed[0] if ed else "", ld[0] if ld else ""] if (ed or ld) else None
+                break
     if author: r["author"] = author; r["artist"] = display_name(author); r["artist_key"] = author
     if life and (life[0] or life[1]): r["life"] = life
     dm = re.search(r"<lido:eventDate>.*?<lido:earliestDate>([^<]*)</lido:earliestDate>.*?<lido:latestDate>([^<]*)</lido:latestDate>", ev, re.S)
@@ -142,6 +173,16 @@ def parse(mid, x, subset):
             break
     return r
 
+if __name__ == "__main__" and sys.argv[1:2] == ["--reparse"]:
+    # read every cached record again with the current parser (no request to MuIS)
+    out = json.load(open("oai_records.json", encoding="utf-8")); n = 0
+    for i, r in enumerate(out):
+        p = os.path.join(CACHE, f"lido_{r['id']}.xml.gz")
+        if not os.path.exists(p): continue
+        with gzip.open(p, "rt", encoding="utf-8") as f: new = parse(r["id"], f.read(), r.get("oai_set"))
+        if new and new != r: out[i] = new; n += 1
+    json.dump(out, open("oai_records.json", "w", encoding="utf-8"), ensure_ascii=False)
+    print(f"reparsed: {n:,} records changed; with a maker {sum(1 for r in out if r.get('author')):,} of {len(out):,}"); sys.exit()
 if __name__ == "__main__":
     which = sys.argv[1:] or list(SETS)
     have = {r["id"] for r in json.load(open("records.json", encoding="utf-8"))}

@@ -279,7 +279,15 @@ ANON = {"tundmatu kunstnik"}
 # (Verlag von Franz Kluge, F. Schwabe trükikoda, Visible Solutions OÜ). The workshop of
 # a named master -- Cranach, Notke, Goltzius -- is an attribution and stays.
 _FIRM = re.compile(r"\b(trükikoda|trükk|kirjastus|verlag|druckerei|tehas|tööstus|vabrik|kombinaat|aktsiaselts|osaühing|OÜ|O\.?/ü\.?|A/S|Ltd|GmbH|Solutions)\b|&", re.I)
-_anon = lambda n: n.strip().lower() in ANON or re.match(r"^\W*(tundmatu|teadmata|anonüüm)\b", n.strip(), re.I) is not None or not re.match(r"^\w", n.strip()) or (_FIRM.search(n) is not None and not re.search(r"töökoda|ateljee", n, re.I))
+# The museums the OAI harvest added in 2026-09 wrote a few more kinds of not-an-artist:
+# a porcelain or faience works (Vene Keiserlik Portselanimanufaktuur, a Delft workshop),
+# a photographer's studio, a museum or an office as the author, "tundmatu" after a
+# name, a follower or a circle ("Schongaueri jäljendaja", "Canova mõjukonnast"), and two
+# artists at once ("Arno Arrak / Jüri Arrak") -- none of them one hand.
+_WORKS = re.compile(r"portselan|fajans|manufaktuur|fotoateljee|villeroy|muuseum|talitus|\bSA\b", re.I)
+_anon = lambda n: (n.strip().lower() in ANON or re.match(r"^\W*(tundmatu|teadmata|anonüüm)\b", n.strip(), re.I) is not None or not re.match(r"^\w", n.strip())
+                   or (_FIRM.search(n) is not None and not re.search(r"töökoda|ateljee", n, re.I))
+                   or _WORKS.search(n) is not None or re.search(r"\btundmatu\b|jäljendaja|mõjukonnast|mõjuruumist|järgija\b", n, re.I) is not None or " / " in n)
 _before = [u for u in unified.values() if u["artist"] and u["t"]]
 recs = [u for u in _before
         if not UNCERTAIN.search(u["artist"]) and not _anon(u["artist"])]
@@ -800,6 +808,7 @@ for g in GAL:
         if na.get("country") != "Eesti": gal_unknown += 1; continue
         gal_new_est += 1
     if not g.get("title"): continue           # before the artist is added: a titleless listing must not create a name
+    if _anon(g["artist"]): continue           # an unknown hand, a firm, two artists at once: the museums' rule, for galleries too
     ai = artist_index(g["artist"])
     if ai is None: continue
     # a biography from the artist's NOBA page, for artists who have none elsewhere

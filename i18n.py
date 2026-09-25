@@ -275,6 +275,9 @@ BLURB_ET = {
 PERIOD_ET = {"Tsaariaeg":"Tsaariaeg","Vabariik":"Esimene vabariik","Okupatsioon":"Okupatsioon","Taasiseseisvus":"Taastatud vabariik"}
 PERIOD_EN = {"Tsaariaeg":"Imperial Russia","Vabariik":"First Republic","Okupatsioon":"Occupation","Taasiseseisvus":"Restored Republic"}
 MUSEUM_EN = {
+ "Underi ja Tuglase Kirjanduskeskus":"Under and Tuglas Literature Centre","Võrumaa Muuseum":"Võrumaa Museum","Järvamaa Muuseum":"Järvamaa Museum",
+ "Harjumaa Muuseum":"Harju County Museum","Eesti Vabaõhumuuseum":"Estonian Open Air Museum","Valga Muuseum":"Valga Museum",
+ "Okupatsioonide ja vabaduse muuseum Vabamu (Kistler-Ritso Eesti SA)":"Vabamu Museum of Occupations and Freedom",
  "Eesti Kunstimuuseum deposiit":"Art Museum of Estonia (deposit)",
  "Eesti Kunstimuuseum":"Art Museum of Estonia","Tartu Kunstimuuseum":"Tartu Art Museum",
  "Eesti Ajaloomuuseum":"Estonian History Museum","Eesti Kunstiakadeemia muuseum":"Estonian Academy of Arts Museum",
