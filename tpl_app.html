@@ -1868,8 +1868,10 @@
     if (state.decade !== null) setGroup("decade");
     renderAll(); pushHash();
     if (state.decade !== null){
-      // to the decade's count line, its heading and pictures or list beneath
-      jumpTo(viewTop(reg.querySelector(".wall-bar") || document.getElementById("grp-" + state.decade)), true);
+      // to the decade's list -- its heading, the decade and how many entries, clear of
+      // the bar -- past the wall when there is one; with no wall, the count line above it
+      const grp = document.getElementById("grp-" + state.decade);
+      jumpTo(reg.querySelector(".wall") && grp ? grp : viewTop(grp), true);
     }
   });
 
