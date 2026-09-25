@@ -24,7 +24,7 @@ ET = {
  "rl_shown":"Näitusel","d_shownlink":"Näitusel: {g} ↗","d_imgshown":"galerii foto oma näituse lehelt, näidatud galerii serverist","kind_shown_gal":"Eksponeeritud galeriis — müügisolek teadmata",
  "sg_filters":"Filtrid","works_pl":"teost",
  "pickdecade_note":"{n} teost — vali ülal kümnend, et neid nimekirjana näha.",
- "sort":"Järjesta","s_year":"Aasta","s_artist":"Kunstnik","s_title":"Pealkiri","s_medium":"Liik","s_museum":"Muuseum","s_price":"Haamrihind","s_sale":"Oksjon","s_featured":"Esiletõstetud","s_name":"Nimi","s_born":"Sünniaasta","s_works":"Teoste arv","most":"Enim","fewest":"Vähim","openartist":"Ava kunstnik →","npics":"{n} pildiga","art_nopics":"Veel {n} kunstnikku, kellel pole pilti — need on nimekirjas.","za":"Ü–A","au_moreartists":"Veel {n} kunstnikku","sg_artists":"Kunstnikud","sg_works":"Teosed","lowest":"Madalaim","highest":"Kõrgeim","au_byprice":"Kõik tulemused hinna järgi",
+ "sort":"Järjesta","s_year":"Aasta","s_artist":"Kunstnik","s_title":"Pealkiri","s_medium":"Liik","s_museum":"Muuseum","s_price":"Haamrihind","s_sale":"Oksjon","h_museums":"Muuseumid","h_galleries":"Galeriid ja oksjonimajad","h_otherholders":"Muu","h_schools":"Õppinud","h_movements":"Suunad","h_members":"Liige","med_more":"Kõik liigid","up_ignored":"muud filtrid tulevatele partiidele ei kehti","s_featured":"Esiletõstetud","s_name":"Nimi","s_born":"Sünniaasta","s_works":"Teoste arv","most":"Enim","fewest":"Vähim","openartist":"Ava kunstnik →","npics":"{n} pildiga","art_nopics":"Veel {n} kunstnikku, kellel pole pilti — need on nimekirjas.","za":"Ü–A","au_moreartists":"Veel {n} kunstnikku","sg_artists":"Kunstnikud","sg_works":"Teosed","lowest":"Madalaim","highest":"Kõrgeim","au_byprice":"Kõik tulemused hinna järgi",
  "earliest":"Varaseim","latest":"Hiliseim","az":"A–Ü","bybirth":"Sünniaasta",
  "linkview":"Link sellele vaatele","hidelink":"Peida link",
  "doctitle":"Eesti Kunstikataloog",
@@ -37,7 +37,7 @@ ET = {
  "sl_kept":"Salvestatud ainult selles brauseris.","sl_shared_note":"Kellegi teise nimekiri — sinu oma see ei muuda.",
 "d_gallerylink":"Vaata galeriis {g} ↗","rl_view":"Müügil ↗","doors_name":"Alusta nimest","doors_period":"Alusta ajajärgust",
  "p_pre":"Enne 1700","era_short_Vabariik":"Vabariik","era_short_Taasiseseisvus":"Taastatud", "reset":"Lähtesta","copy":"Kopeeri","copied":"Kopeeritud",
- "filters":"Filtrid","years":"Aastad","medium":"Liik","museum":"Muuseum","ekmcat":"EKM kategooria","source":"Allikas",
+ "filters":"Filtrid","years":"Aastad","medium":"Liik","museum":"Hoidja","ekmcat":"EKM kategooria","source":"Kataloogi allikas",
  "anyyear":"Kõik aastad","undated":"Dateerimata","earliestopt":"varaseim","latestopt":"hiliseim",
  "inview":"{a}–{b} vaates","undatedonlyshort":"ainult dateerimata",
  "artistindex":"Kunstnike register","showall":"Näita kõiki {n}","hideindex":"Peida register",
@@ -136,7 +136,7 @@ EN = {
  "rl_shown":"Shown","d_shownlink":"Shown at {g} ↗","d_imgshown":"the gallery's photograph from its own exhibition page, shown from the gallery's server","kind_shown_gal":"Exhibited at a gallery — availability not stated",
  "sg_filters":"Filters","works_pl":"works",
  "pickdecade_note":"{n} works — pick a decade above to list them.",
- "sort":"Sort","s_year":"Year","s_artist":"Artist","s_title":"Title","s_medium":"Medium","s_museum":"Museum","s_price":"Hammer price","s_sale":"Sale","s_featured":"Featured","s_name":"Name","s_born":"Born","s_works":"Number of works","most":"Most","fewest":"Fewest","openartist":"Open artist →","npics":"{n} with a picture","art_nopics":"{n} more artists without a picture — List shows them.","za":"Z–A","au_moreartists":"{n} more artists","sg_artists":"Artists","sg_works":"Works","lowest":"Lowest","highest":"Highest","au_byprice":"All results by price",
+ "sort":"Sort","s_year":"Year","s_artist":"Artist","s_title":"Title","s_medium":"Medium","s_museum":"Museum","s_price":"Hammer price","s_sale":"Sale","h_museums":"Museums","h_galleries":"Galleries and auction houses","h_otherholders":"Other","h_schools":"Trained at","h_movements":"Movements","h_members":"Member of","med_more":"All media","up_ignored":"other filters don't apply to coming lots","s_featured":"Featured","s_name":"Name","s_born":"Born","s_works":"Number of works","most":"Most","fewest":"Fewest","openartist":"Open artist →","npics":"{n} with a picture","art_nopics":"{n} more artists without a picture — List shows them.","za":"Z–A","au_moreartists":"{n} more artists","sg_artists":"Artists","sg_works":"Works","lowest":"Lowest","highest":"Highest","au_byprice":"All results by price",
  "earliest":"Earliest","latest":"Latest","az":"A–Z","bybirth":"By birth",
  "linkview":"Link to this view","hidelink":"Hide link",
  "doctitle":"Estonian Art Catalogue",
@@ -149,7 +149,7 @@ EN = {
  "sl_kept":"Kept in this browser only.","sl_shared_note":"Someone else's list — it does not change yours.",
 "d_gallerylink":"View at {g} ↗","rl_view":"For sale ↗","doors_name":"Start with a name","doors_period":"Start with a period",
  "p_pre":"Before 1700","era_short_Vabariik":"Republic","era_short_Taasiseseisvus":"Restored", "reset":"Reset","copy":"Copy","copied":"Copied",
- "filters":"Filters","years":"Years","medium":"Medium","museum":"Museum","ekmcat":"EKM category","source":"Source",
+ "filters":"Filters","years":"Years","medium":"Medium","museum":"Holder","ekmcat":"EKM category","source":"Catalogue source",
  "anyyear":"Any year","undated":"Undated","earliestopt":"earliest","latestopt":"latest",
  "inview":"{a}–{b} in view","undatedonlyshort":"undated only",
  "artistindex":"Artist index","showall":"Show all {n}","hideindex":"Hide index",
@@ -275,6 +275,7 @@ BLURB_ET = {
 PERIOD_ET = {"Tsaariaeg":"Tsaariaeg","Vabariik":"Esimene vabariik","Okupatsioon":"Okupatsioon","Taasiseseisvus":"Taastatud vabariik"}
 PERIOD_EN = {"Tsaariaeg":"Imperial Russia","Vabariik":"First Republic","Okupatsioon":"Occupation","Taasiseseisvus":"Restored Republic"}
 MUSEUM_EN = {
+ "Eesti Kunstimuuseum deposiit":"Art Museum of Estonia (deposit)",
  "Eesti Kunstimuuseum":"Art Museum of Estonia","Tartu Kunstimuuseum":"Tartu Art Museum",
  "Eesti Ajaloomuuseum":"Estonian History Museum","Eesti Kunstiakadeemia muuseum":"Estonian Academy of Arts Museum",
  "Eesti Arhitektuurimuuseum":"Estonian Museum of Architecture","Tartu Ülikooli kunstimuuseum":"University of Tartu Art Museum",
@@ -296,7 +297,19 @@ CAT_EN = {
  "Nüüdiskunst":"Contemporary art","Välis-Eesti kunst":"Art of the Estonian diaspora",
  "Foto- ja videokunst":"Photography and video art",
  "Klassikaline modernism, Kunst nõukogude perioodil":"Classical modernism; Art of the Soviet period",
+ "Väliskunst":"Foreign art","Kirikukunst":"Church art",
 }
+# media the museums named in Estonian only, which the English view showed as they came
+MEDIUM_EN = {"Lusikas":"Spoon","Peeker":"Beaker","Pakend":"Packaging","Pokaal":"Goblet","Pilttrükis":"Picture print",
+ "Siluett":"Silhouette","Väiketrükis":"Ephemera","Koomiks":"Comic","Etikett":"Label","Silt":"Sign","Lina":"Linen",
+ "Vaagen":"Platter","Küünlajalg":"Candlestick","Kahvel":"Fork","Paber":"Paper","Järjehoidja":"Bookmark",
+ "Linoollõige":"Linocut","Korv":"Basket","Tangid":"Tongs","Pliiats":"Pencil","Rätik":"Towel","Kutse":"Invitation",
+ "Diplom":"Diploma","Kalender":"Calendar","Labidas":"Spade","Nuga":"Knife","Kulp":"Ladle","Aukiri":"Certificate of honour",
+ "Tass":"Cup","Pudel":"Bottle","Rahakott":"Purse","Karikas":"Cup","Rõngas":"Ring","Helisalvestis":"Sound recording",
+ "Makett":"Model","Embleem":"Emblem","Ümbrik":"Envelope","Meene":"Souvenir","Nukk":"Doll","Tapeet":"Wallpaper",
+ "Valgusti":"Lamp","Käevõru":"Bracelet","Sall":"Scarf","Vorm (vahend)":"Mould","Vimpel":"Pennant","Sõlg":"Brooch",
+ "Sõrmus":"Ring","Failide kogum":"Set of files","Kiri":"Letter","Šabloon":"Stencil","Lehvik":"Fan","Nimekaart":"Name card",
+ "Peegel":"Mirror","Aken":"Window"}
 MEDIUM_ET = {"Design":"Kavand","Vessel":"Nõu","Caricature":"Karikatuur","Miniature":"Miniatuur","Poster":"Plakat","Figurine":"Figuur","Sketch":"Visand",
  "Book cover":"Kaaned","Plate":"Taldrik","Book":"Raamat","Video installation":"Videoinstallatsioon","Postcard":"Postkaart","Tile":"Plaat","Accessory":"Aksessuaar",
  "Jewellery":"Ehe","Bowl":"Kauss","Casket":"Laegas","Death mask":"Surimask","Vase":"Vaas","Printing plate":"Graafikaplaat","Stand":"Alus","Cover":"Ümbris",
@@ -315,6 +328,6 @@ DATEWORD_EN = {"Enne":"before","enne":"before","pärast":"after","Pärast":"afte
  "keskpaik":"mid","paiku":"around","sajand":"century","ndate":"s","ndad":"s","umbes":"around","u.":"c.","ca":"c."}
 out={"ET":ET,"EN":EN,"HTML_ET":HTML_ET,"HTML_EN":HTML_EN,"BLURB_ET":BLURB_ET,
      "PERIOD_ET":PERIOD_ET,"PERIOD_EN":PERIOD_EN,"MUSEUM_EN":MUSEUM_EN,"CAT_EN":CAT_EN,
-     "MEDIUM_ET":MEDIUM_ET,"DATEWORD_EN":DATEWORD_EN}
+     "MEDIUM_ET":MEDIUM_ET,"MEDIUM_EN":MEDIUM_EN,"DATEWORD_EN":DATEWORD_EN}
 open("i18n.json","w",encoding="utf-8").write(json.dumps(out,ensure_ascii=False,separators=(",",":")))
 print("i18n.json written:",sum(len(v) for v in out.values()),"entries")

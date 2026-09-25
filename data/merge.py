@@ -1254,6 +1254,18 @@ for r in UPC:
 print("  upcoming auction lots:", len(upcoming), "joined to catalogue artists;", up_unmatched, "by artists not in it;",
       sum(1 for u in upcoming if u["pr"]), "offered before")
 
+# One holder, one name: MuIS writes Virumaa Muuseumid both ways round ("muuseumid"), and
+# the two spellings were two holders -- two chips, the same short code. Names that differ
+# only in case take the spelling most records use.
+_mu = collections.Counter(w["mu"] for w in works if w.get("mu"))
+_canon = {}
+for m, n in _mu.most_common():
+    _canon.setdefault(m.casefold(), m)
+_folded = sum(1 for w in works if w.get("mu") and _canon[w["mu"].casefold()] != w["mu"])
+for w in works:
+    if w.get("mu"): w["mu"] = _canon[w["mu"].casefold()]
+print(f"  holder spellings folded: {_folded} records")
+
 data = {"meta": {"built": datetime.date.today().isoformat(),
                  "works": sum(1 for w in works if not _earlier(w)), "records": len(works), "objects": OBJECTS, "artists": len(artists),
                  "held": sum(1 for w in works if w["kind"]=="held"),
