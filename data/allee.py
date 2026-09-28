@@ -12,7 +12,7 @@ the frame's. Prices are in the payload and are not read.
 import re, json, os, time, html, urllib.request, ssl
 
 API = "https://alleegalerii.ee/wp-json/wc/store/v1/products"
-UA = "EstonianArtCatalogue/1.0 (research compile; contact via claude.ai)"
+UA = "EstonianArtCatalogue/1.0 (museaal.ee; contact info@museaal.ee)"
 ctx = ssl.create_default_context(); ctx.check_hostname = False; ctx.verify_mode = ssl.CERT_NONE
 
 def api(page, per=100):

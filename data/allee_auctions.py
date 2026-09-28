@@ -15,7 +15,7 @@ name places it in the year -- spring in May, autumn in November -- for ordering.
 import re, json, os, gzip, time, html, datetime, urllib.request, ssl
 
 BASE = "https://alleegalerii.ee"
-UA = "EstonianArtCatalogue/1.0 (research compile; contact via claude.ai)"
+UA = "EstonianArtCatalogue/1.0 (museaal.ee; contact info@museaal.ee)"
 CACHE = "gcache"
 os.makedirs(CACHE, exist_ok=True)
 ctx = ssl.create_default_context(); ctx.check_hostname = False; ctx.verify_mode = ssl.CERT_NONE

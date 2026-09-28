@@ -23,7 +23,7 @@ from concurrent.futures import ThreadPoolExecutor
 import urllib.request, urllib.parse
 import numpy as np
 
-UA = "EstonianArtCatalogue/1.0 (research compile; contact via claude.ai)"
+UA = "EstonianArtCatalogue/1.0 (museaal.ee; contact info@museaal.ee)"
 CACHE = "embcache"; OUT = "lookalikes.json"
 K, FLOOR, PER_ARTIST = 6, 0.6, 2
 os.makedirs(CACHE, exist_ok=True)

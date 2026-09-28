@@ -1,7 +1,7 @@
 import re, json, time, unicodedata, urllib.request, urllib.parse, http.cookiejar
 from concurrent.futures import ThreadPoolExecutor
 BASE="https://digikogu.ekm.ee"
-UA="EstonianArtRegister/1.0 (one-off research compile; contact via claude.ai)"
+UA="EstonianArtCatalogue/1.0 (museaal.ee; contact info@museaal.ee)"
 
 def opener():
     cj=http.cookiejar.CookieJar()

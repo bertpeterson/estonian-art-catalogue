@@ -22,7 +22,7 @@ import numpy as np
 from PIL import Image
 from shape_of import shape_of
 
-UA = "EstonianArtCatalogue/1.0 (research compile; contact via claude.ai)"
+UA = "EstonianArtCatalogue/1.0 (museaal.ee; contact info@museaal.ee)"
 OUT = "chart_sides.json"
 W = json.load(open("data.json", encoding="utf-8"))["works"]
 sides = json.load(open(OUT, encoding="utf-8")) if os.path.exists(OUT) else {}

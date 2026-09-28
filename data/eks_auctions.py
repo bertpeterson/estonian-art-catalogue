@@ -18,7 +18,7 @@ sale not yet held is fetched again each run until it has results.
 import re, json, os, gzip, time, html, datetime, urllib.request, ssl
 
 BASE = "https://www.e-kunstisalong.ee"
-UA = "EstonianArtCatalogue/1.0 (research compile; contact via claude.ai)"
+UA = "EstonianArtCatalogue/1.0 (museaal.ee; contact info@museaal.ee)"
 CACHE = "gcache"
 os.makedirs(CACHE, exist_ok=True)
 ctx = ssl.create_default_context(); ctx.check_hostname = False; ctx.verify_mode = ssl.CERT_NONE

@@ -1,6 +1,6 @@
 import json,re,subprocess
 from concurrent.futures import ThreadPoolExecutor
-UA="EstonianArtCatalogue/1.0 (one-off research compile; contact via claude.ai)"
+UA="EstonianArtCatalogue/1.0 (museaal.ee; contact info@museaal.ee)"
 def curl(u):
     try: return subprocess.run(["curl","-sL","-m","90","--compressed","-A",UA,u],
                                capture_output=True,timeout=120).stdout.decode("utf-8","replace")

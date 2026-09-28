@@ -12,7 +12,7 @@ The slug is guessed from the name (folded, hyphenated), which is how NOBA forms 
 a miss is looked up from one of the artist's listing pages instead.
 """
 import json, re, ssl, time, urllib.request, os, unicodedata, sys
-UA = "EstonianArtCatalogue/1.0 (research compile; contact via claude.ai)"
+UA = "EstonianArtCatalogue/1.0 (museaal.ee; contact info@museaal.ee)"
 ctx = ssl.create_default_context(); ctx.check_hostname = False; ctx.verify_mode = ssl.CERT_NONE
 OUT = "noba_artists.json"
 

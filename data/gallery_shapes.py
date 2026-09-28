@@ -10,7 +10,7 @@ before are fetched, so the monthly run is short.
 import json, os, re, struct, time, urllib.request
 from concurrent.futures import ThreadPoolExecutor
 
-UA = "EstonianArtCatalogue/1.0 (research compile; contact via claude.ai)"
+UA = "EstonianArtCatalogue/1.0 (museaal.ee; contact info@museaal.ee)"
 OUT = "gallery_shapes.json"
 works = json.load(open("data.json", encoding="utf-8"))["works"]
 urls = sorted({w["im"][2:] for w in works if str(w.get("im", "")).startswith("g:")})

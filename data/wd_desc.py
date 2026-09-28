@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import json, re, time, urllib.parse, urllib.request, collections
-UA="EstonianArtCatalogue/1.0 (one-off research compile; contact via claude.ai)"
+UA="EstonianArtCatalogue/1.0 (museaal.ee; contact info@museaal.ee)"
 EP="https://query.wikidata.org/sparql"
 d=json.load(open('data.json',encoding='utf-8'))
 A=[a for a in d['artists'] if a.get('c',0)>0]

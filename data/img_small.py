@@ -20,13 +20,15 @@ small files. A picture checked once is not checked again, found or not.
 import json, os, re, struct, urllib.request, urllib.parse
 from concurrent.futures import ThreadPoolExecutor
 
-UA = "EstonianArtCatalogue/1.0 (research compile; contact via claude.ai)"
+UA = "EstonianArtCatalogue/1.0 (museaal.ee; contact info@museaal.ee)"
 OUT = "img_small.json"
 WP = {"alleegalerii.ee", "vernissage.ee", "www.kogogallery.ee", "kogogallery.ee", "artrovert.ee", "www.artrovert.ee", "artner.ee", "artandtonic.art"}
 WIDTH = 768
 
 W = json.load(open("data.json", encoding="utf-8"))["works"]
 done = json.load(open(OUT, encoding="utf-8")) if os.path.exists(OUT) else {}
+# the -scaled / -rotated pictures found no copy before the rule above: once more (2026-09-28)
+done = {k: v for k, v in done.items() if v or not re.search(r"-(scaled|rotated)\.\w+$", k)}
 
 def get(url, rng=None):
     h = {"User-Agent": UA}
@@ -80,9 +82,13 @@ def small(im):
         return None                                 # unreadable today: try again next run
     if w <= WIDTH * 1.15: return ""                 # already about the size
     hh = round(h * WIDTH / w)
-    for c in (hh, hh - 1, hh + 1):                  # WordPress rounds; a pixel either way
-        cand = f"{base}-{WIDTH}x{c}{ext}"
-        if exists(cand): return "g:" + cand
+    # a large upload is served as <file>-scaled (or -rotated), but its sized copies are
+    # named after the upload itself: img-7470-scaled.jpg -> img-7470-768x1024.jpg
+    bases = [base] + ([re.sub(r"-(scaled|rotated)$", "", base)] if re.search(r"-(scaled|rotated)$", base) else [])
+    for bs in bases:
+        for c in (hh, hh - 1, hh + 1):              # WordPress rounds; a pixel either way
+            cand = f"{bs}-{WIDTH}x{c}{ext}"
+            if exists(cand): return "g:" + cand
     return ""
 
 todo = sorted({w["im"] for w in W if (w.get("im") or "").startswith("g:")

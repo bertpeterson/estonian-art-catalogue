@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Kogo Galerii (Tartu) -> appends to gallery_records.json. Metadata only, no prices."""
 import time, re, json, os, gzip, urllib.request, ssl
-UA = "EstonianArtCatalogue/1.0 (research compile; contact via claude.ai)"
+UA = "EstonianArtCatalogue/1.0 (museaal.ee; contact info@museaal.ee)"
 ctx = ssl.create_default_context(); ctx.check_hostname=False; ctx.verify_mode=ssl.CERT_NONE
 os.makedirs("gcache", exist_ok=True)
 

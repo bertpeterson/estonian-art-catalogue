@@ -15,7 +15,7 @@ work, birth must be 10-90 years before the earliest and death not before the med
 Ambiguity rejects, as before. The output has the shape merge.py already reads.
 """
 import json, re, time, urllib.parse, urllib.request, statistics, os
-UA = "EstonianArtCatalogue/1.0 (one-off research compile; contact via claude.ai)"
+UA = "EstonianArtCatalogue/1.0 (museaal.ee; contact info@museaal.ee)"
 EP = "https://query.wikidata.org/sparql"
 
 def sparql(query):

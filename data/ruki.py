@@ -8,7 +8,7 @@ The artist line is the anchor, so a work with no named artist is skipped rather 
 guessed at — the catalogue takes attributed work only.
 """
 import re, json, os, gzip, time, urllib.request, ssl
-UA="EstonianArtCatalogue/1.0 (research compile; contact via claude.ai)"
+UA="EstonianArtCatalogue/1.0 (museaal.ee; contact info@museaal.ee)"
 BASE="https://rukigalerii.ee"
 ctx=ssl.create_default_context(); ctx.check_hostname=False; ctx.verify_mode=ssl.CERT_NONE
 os.makedirs("gcache",exist_ok=True)
