@@ -11,7 +11,7 @@ The card's picture is the salon's own, taken while the work is for sale.
 import re, json, os, html, urllib.request
 
 BASE = "https://www.e-kunstisalong.ee"
-UA = "EstonianArtCatalogue/1.0 (research compile; contact via claude.ai)"
+UA = "EstonianArtCatalogue/1.0 (museaal.ee; contact info@museaal.ee)"
 r = urllib.request.Request(f"{BASE}/Teosed_702", headers={"User-Agent": UA})   # one page; robots.txt disallows query strings, so no filters
 with urllib.request.urlopen(r, timeout=60) as f: h = f.read().decode("iso-8859-4", "replace")
 CARD = re.compile(r"<a href=\"([^\"]+)\"[^>]*class=autor[^>]*>\s*<b><span class='toot_hr_jn alapealkiri'>(.*?)</span><span class='toot_hr_jn'>(.*?)</span></b><span class=toot_hr_jn>(.*?)</span>", re.S)

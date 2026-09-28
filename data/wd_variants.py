@@ -10,7 +10,7 @@ existing tables; merge.py's date-plausibility guard still filters them.
 """
 import json, re, time, urllib.parse, urllib.request, unicodedata
 
-UA = "EstonianArtCatalogue/1.0 (research compile; contact via claude.ai)"
+UA = "EstonianArtCatalogue/1.0 (museaal.ee; contact info@museaal.ee)"
 EP = "https://query.wikidata.org/sparql"
 d  = json.load(open("data.json", encoding="utf-8"))
 WD  = json.load(open("wd_artists.json", encoding="utf-8"))

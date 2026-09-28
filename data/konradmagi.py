@@ -14,7 +14,7 @@ import re, json, html, time, urllib.request
 
 BASE = "https://konradmagi.ee/et/work_category/"
 CATS = {"maalid": "painting", "eskiisid": "sketch", "kadunud": "lost"}
-UA = "EstonianArtCatalogue/1.0 (research compile; contact via claude.ai)"
+UA = "EstonianArtCatalogue/1.0 (museaal.ee; contact info@museaal.ee)"
 ITEM = re.compile(r'<li class="c-works-list-item[^"]*"[^>]*>(.*?)</li>', re.S)
 def field(it, pat):
     m = re.search(pat, it, re.S); return html.unescape(m.group(1)).strip() if m else ""

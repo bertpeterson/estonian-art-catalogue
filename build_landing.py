@@ -73,7 +73,8 @@ for i, w in enumerate(sorted(uniq, key=lambda w: (w.get("y") is None, w.get("y")
 rows.sort(key=lambda r: r[:6])
 shown = [r[6] for r in rows[:72]]
 
-SMALL = {k: v for k, v in (json.load(open("data/img_small.json", encoding="utf-8")) if os.path.exists("data/img_small.json") else {}).items() if v}   # data/img_small.py
+import sys; sys.path.insert(0, "data"); from thumbs import thumbs
+SMALL = thumbs(W)   # the lighter copy for a tile: data/thumbs.py
 def imsrc(im):
     im = SMALL.get(im, im)
     if im.startswith("m:"): return f"https://www.muis.ee/digitaalhoidla/api/meedia/pisipilt?id={im[2:]}"

@@ -14,7 +14,7 @@ import re, json, os, time, urllib.request, http.cookiejar, threading
 from concurrent.futures import ThreadPoolExecutor
 
 BASE = "https://digikogu.ekm.ee"
-UA = "EstonianArtCatalogue/1.0 (research compile; contact via claude.ai)"
+UA = "EstonianArtCatalogue/1.0 (museaal.ee; contact info@museaal.ee)"
 _t = {}
 def op():
     k = threading.get_ident()

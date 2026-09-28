@@ -16,7 +16,7 @@ noba_artists.json says the artist is based in Estonia. Latvian, Lithuanian,
 Finnish and Swedish artists on NOBA stay out.
 """
 import json, re, ssl, time, urllib.request, os, unicodedata, html, datetime
-UA = "EstonianArtCatalogue/1.0 (research compile; contact via claude.ai)"
+UA = "EstonianArtCatalogue/1.0 (museaal.ee; contact info@museaal.ee)"
 API = "https://noba.ac/wp-json/wc/store/v1/products"
 ctx = ssl.create_default_context(); ctx.check_hostname = False; ctx.verify_mode = ssl.CERT_NONE
 

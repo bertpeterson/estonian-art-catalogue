@@ -4,7 +4,7 @@ work-level catalogue (artist + title + dimensions), and rank what is worth harve
 NOBA lists venues, not websites, so the domains are inferred and most will miss."""
 import re, json, ssl, urllib.request
 from concurrent.futures import ThreadPoolExecutor
-UA="EstonianArtCatalogue/1.0 (research compile; contact via claude.ai)"
+UA="EstonianArtCatalogue/1.0 (museaal.ee; contact info@museaal.ee)"
 ctx=ssl.create_default_context(); ctx.check_hostname=False; ctx.verify_mode=ssl.CERT_NONE
 DIM=re.compile(r'\d+([.,]\d+)?\s*[x×]\s*\d+([.,]\d+)?\s*(cm|mm)',re.I)
 WANT=re.compile(r'(kunstnik|artist|teos|work|shop|pood|galerii|gallery|artwork|müük|store|kunst)',re.I)

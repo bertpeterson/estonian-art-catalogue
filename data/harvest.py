@@ -2,7 +2,7 @@ import re, json, os, sys, time, urllib.request, urllib.parse, http.cookiejar
 from concurrent.futures import ThreadPoolExecutor
 
 BASE = "https://www.muis.ee"
-UA = "EstonianArtRegister/1.0 (one-off research compile; contact via claude.ai)"
+UA = "EstonianArtCatalogue/1.0 (museaal.ee; contact info@museaal.ee)"
 MAXPAGES = int(os.environ.get("MAXPAGES", "3"))
 
 def opener():

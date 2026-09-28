@@ -11,7 +11,7 @@ import json, os, struct, time, urllib.request
 from concurrent.futures import ThreadPoolExecutor
 
 BASE = "https://digikogu.ekm.ee/static/preview/image/"
-UA = "EstonianArtCatalogue/1.0 (research compile; contact via claude.ai)"
+UA = "EstonianArtCatalogue/1.0 (museaal.ee; contact info@museaal.ee)"
 OUT = "ekm_shapes.json"
 imgs = json.load(open("ekm_images.json", encoding="utf-8"))
 shapes = json.load(open(OUT, encoding="utf-8")) if os.path.exists(OUT) else {}

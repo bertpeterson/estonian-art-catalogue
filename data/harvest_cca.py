@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import re, json, os, gzip, time, subprocess, urllib.request, urllib.parse, http.cookiejar
 from concurrent.futures import ThreadPoolExecutor
-UA = "EstonianArtCatalogue/1.0 (one-off research compile; contact via claude.ai)"
+UA = "EstonianArtCatalogue/1.0 (museaal.ee; contact info@museaal.ee)"
 class Redir308(urllib.request.HTTPRedirectHandler):
     # urllib does not follow 308 Permanent Redirect; ekkm.ee uses it
     def http_error_308(self, req, fp, code, msg, headers):

@@ -13,7 +13,7 @@ measurement, and what sits between them is title and medium. A record whose arti
 title cannot be identified is skipped rather than guessed at.
 """
 import re, json, os, time, urllib.request, ssl
-UA="EstonianArtCatalogue/1.0 (research compile; contact via claude.ai)"
+UA="EstonianArtCatalogue/1.0 (museaal.ee; contact info@museaal.ee)"
 API="https://vernissage.ee/wp-json/wc/store/v1/products"
 ctx=ssl.create_default_context(); ctx.check_hostname=False; ctx.verify_mode=ssl.CERT_NONE
 

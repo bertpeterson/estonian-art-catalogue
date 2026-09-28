@@ -16,7 +16,7 @@ one, and the only candidate that passes. One survivor or nothing.
 Writes wd_dates.json {qid: [birth, death]} and wd_matches2.json {name: {...}}.
 """
 import json, re, time, urllib.parse, urllib.request, statistics
-UA = "EstonianArtCatalogue/1.0 (one-off research compile; contact via claude.ai)"
+UA = "EstonianArtCatalogue/1.0 (museaal.ee; contact info@museaal.ee)"
 EP = "https://query.wikidata.org/sparql"
 
 def sparql(query):

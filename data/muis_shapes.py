@@ -11,7 +11,7 @@ fetched, so the monthly run is short.
 import json, os, struct, time, urllib.request
 from concurrent.futures import ThreadPoolExecutor
 
-UA = "EstonianArtCatalogue/1.0 (research compile; contact via claude.ai)"
+UA = "EstonianArtCatalogue/1.0 (museaal.ee; contact info@museaal.ee)"
 OUT = "muis_shapes.json"
 works = json.load(open("data.json", encoding="utf-8"))["works"]
 ids = sorted({w["im"][2:] for w in works if str(w.get("im", "")).startswith("m:")})

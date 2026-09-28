@@ -34,7 +34,8 @@ def val(w, f):
 _app = open("tpl_app.html", encoding="utf-8").read()
 BLURB_EN = {int(m.group(1)): m.group(2) for m in re.finditer(r'^\s+(\d{4}):"((?:[^"\\]|\\.)*)"', _app[_app.index("const BLURBS = {"):], re.M)}
 # the pictures and the shapes, as the app shows them
-SMALL = {k: v for k, v in (json.load(open("data/img_small.json", encoding="utf-8")) if os.path.exists("data/img_small.json") else {}).items() if v}   # data/img_small.py
+import sys; sys.path.insert(0, "data"); from thumbs import thumbs
+SMALL = thumbs(W)   # the lighter copy for a tile: data/thumbs.py
 def imsrc(im):
     if not im: return ""
     im = SMALL.get(im, im)
