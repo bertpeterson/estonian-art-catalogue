@@ -78,7 +78,8 @@ def imsrc(im):
     im = SMALL.get(im, im)
     if im.startswith("m:"): return f"https://www.muis.ee/digitaalhoidla/api/meedia/pisipilt?id={im[2:]}"
     if im.startswith("e:"): return "https://digikogu.ekm.ee/static/preview/image/" + re.sub(r"/([^/]+)$", r"/t2_\1", im[2:])
-    return im[2:]
+    u = im[2:]                                          # a gallery's own picture: https only
+    return re.sub(r"^http:", "https:", u) if re.match(r"https?://", u) else ""
 cols = [{"h": 0, "t": []} for _ in range(6)]
 for w in shown:
     lw = light.get(key(w), {}); r = (lw.get("r") or 100) / 100

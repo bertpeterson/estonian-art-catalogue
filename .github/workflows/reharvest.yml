@@ -57,15 +57,27 @@ jobs:
         run: python3 harvest_guard.py after
 
       # numpy for similar.py and chart_side.py, pillow for chart_side.py, anthropic for
-      # translate.py. The build needs numpy; the monthly run never installed it.
-      - run: pip install -q numpy pillow anthropic
+      # translate.py. The build needs numpy; the monthly run never installed it. Pinned:
+      # this job holds the API key and may push, so a new release is taken on purpose.
+      - run: pip install -q numpy==2.5.3 pillow==12.3.0 anthropic==1.8.0
 
-      - name: Merge and build
-        env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      - name: Merge
         run: |
           git show HEAD:data/data.json > /tmp/data_before.json
-          (cd data && python3 ledger.py && python3 muis_oai.py && gzip -c oai_records.json > raw/oai_records.json.gz && python3 ekm_images.py && python3 ekm_shapes.py && python3 merge.py && python3 gallery_shapes.py && python3 muis_shapes.py && python3 merge.py && python3 translate.py)
+          (cd data && python3 ledger.py && python3 muis_oai.py && gzip -c oai_records.json > raw/oai_records.json.gz && python3 ekm_images.py && python3 ekm_shapes.py && python3 merge.py && python3 gallery_shapes.py && python3 muis_shapes.py && python3 merge.py)
+
+      # the only step that sees the API key: the scripts that read the sources' pages
+      # and records run without it. Out of credit, the month's data still ships: the
+      # new texts stay Estonian until a run that has credit.
+      - name: Translate the new texts
+        working-directory: data
+        continue-on-error: true
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: python3 translate.py
+
+      - name: Check and build
+        run: |
           # a merge that quietly lost records stops here, before anything is committed
           python3 data/data_guard.py /tmp/data_before.json data/data.json
           # the colour charts in the new museum photographs (numpy and PIL, reads each once);
