@@ -90,8 +90,12 @@ def translate_batch(client, batch):
         except json.JSONDecodeError:
             if len(src) == 1 and text and not text.startswith(("[", "{")): return {batch[0][0]: text.strip('"').strip()}, r.usage
         except Exception as e:
-            # out of credit or a hard API error: stop asking, keep what is cached
-            if "credit" in str(e).lower() or "billing" in str(e).lower(): raise SystemExit("  API: " + str(e)[:120])
+            # out of credit, a missing or refused key, an unknown model: stop asking, keep
+            # what is cached. These never mend on a retry; retried one text at a time
+            # they held a run for hours without sending a thing (2026-09-26).
+            fatal = type(e).__name__ in ("AuthenticationError", "PermissionDeniedError", "NotFoundError", "TypeError")
+            if fatal or "credit" in str(e).lower() or "billing" in str(e).lower() or "api_key" in str(e).lower():
+                raise SystemExit("  API: " + type(e).__name__ + ": " + str(e)[:120])
         time.sleep(2 * (attempt + 1))
     if len(batch) == 1: print("  gave up on one text:", src[0][:60], flush=True); return {}, None
     # a batch that would not line up: one at a time

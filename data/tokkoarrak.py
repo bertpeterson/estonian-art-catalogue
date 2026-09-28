@@ -73,7 +73,7 @@ for s in slugs:
                  "dims": re.sub(r"\s*[x×]\s*", " x ", dm.group(1)) + " cm" if dm else "",
                  "gallery": "Tokko & Arrak", "city": "Tallinn", "url": f"{BASE}/kunsti-muuk/p/{s}",
                  **({"sold": True} if sold else {}),
-                 **({"img": img.group(1)} if img else {})})
+                 **({"img": re.sub(r"^http:", "https:", img.group(1))} if img else {})})
 
 prev = json.load(open("gallery_records.json", encoding="utf-8"))
 keep = [r for r in prev if not r["gid"].startswith("tokko-")]

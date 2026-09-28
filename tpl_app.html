@@ -846,7 +846,7 @@
             `<button class="showartist" style="margin:4px 6px 0 0" data-grp="${esc(g)}">${esc(grpKind(g))} ${esc(grpLabel(g))}</button>`).join("")}</div>` : ""}
         <p class="mono-bio${bio.t.length>420?" clamp":""}" id="mono-bio">${esc(bio.t)}${bio.s?stag(bio.s):""}${bio.mt?mtTag():""}${bio.alt?`<span class="tag">${esc(T("biofallback"))}</span>`:""}</p>
         ${bio.t.length>420?`<button class="bio-more" id="bio-more">${esc(T("readbio"))}</button>`:""}
-        ${ar.sim && ar.sim.length ? `<div class="mono-sim"><span class="mono-simlab" title="${esc(T("similar_how"))}">${esc(T("similar"))}</span>${ar.sim.map(j => `<button class="sim-chip" data-artist="${j}" title="${esc(A[j].n)}${(A[j].l[0]||A[j].l[1]) ? ` · ${A[j].l[0]}–${A[j].l[1]||""}` : ""}">${esc(A[j].n)}<span>${(A[j].l[0]||"").slice(0,4)}</span></button>`).join("")}</div>` : ""}
+        ${ar.sim && ar.sim.length ? `<div class="mono-sim"><span class="mono-simlab" title="${esc(T("similar_how"))}">${esc(T("similar"))}</span>${ar.sim.map(j => `<button class="sim-chip" data-artist="${j}" title="${esc(A[j].n)}${(A[j].l[0]||A[j].l[1]) ? ` · ${esc(A[j].l[0])}–${esc(A[j].l[1]||"")}` : ""}">${esc(A[j].n)}<span>${(A[j].l[0]||"").slice(0,4)}</span></button>`).join("")}</div>` : ""}
         <div class="mono-links">
           ${ar.ai?`<a class="permalink" href="https://digikogu.ekm.ee/authors/author_id-${esc(ar.ai)}" target="_blank" rel="noopener">${esc(T("d_artistrec"))}</a>`:""}
           ${ar.qid?`<a class="permalink" href="https://www.wikidata.org/wiki/${esc(ar.qid)}" target="_blank" rel="noopener">${esc(T("d_wd"))}</a>`:""}
@@ -1556,7 +1556,7 @@
   const imgSrc = im => !im ? ""
     : im.startsWith("m:") ? `https://www.muis.ee/digitaalhoidla/api/meedia/pisipilt?id=${encodeURIComponent(im.slice(2))}`
     : im.startsWith("e:") ? `https://digikogu.ekm.ee/static/preview/image/${im.slice(2).replace(/\/([^\/]+)$/, "/t2_$1")}`
-    : im.startsWith("g:") ? im.slice(2) : "";
+    : im.startsWith("g:") && /^https?:\/\//i.test(im.slice(2)) ? im.slice(2).replace(/^http:/i, "https:") : "";   // a gallery picture: web addresses only, over https
   // The wall opens by itself on a view with twelve pictures or more -- an artist, a
   // decade, a search -- never on the untouched page or the auction ledger. Chosen
   // with the List / Wall buttons, the choice holds and travels in the link.
@@ -2383,7 +2383,7 @@
   ]).then(([data, i18n]) => boot(data, i18n))
    .catch(err => {
      document.getElementById("register").innerHTML =
-       `<p class="empty">Could not load the catalogue data.<br><small>${String(err)}</small></p>`;
+       `<p class="empty">Could not load the catalogue data.<br><small>${esc(String(err))}</small></p>`;
    });
 })();
 </script>

@@ -40,7 +40,8 @@ def imsrc(im):
     im = SMALL.get(im, im)
     if im.startswith("m:"): return f"https://www.muis.ee/digitaalhoidla/api/meedia/pisipilt?id={im[2:]}"
     if im.startswith("e:"): return "https://digikogu.ekm.ee/static/preview/image/" + re.sub(r"/([^/]+)$", r"/t2_\1", im[2:])
-    return im[2:]
+    u = im[2:]                                          # a gallery's own picture: https only
+    return re.sub(r"^http:", "https:", u) if re.match(r"https?://", u) else ""
 key = lambda w: w.get("k") or re.sub(r"[^A-Z0-9:]", "", (w.get("nu") or "").upper())
 ARTIST_SLUG = {i: slug(a["n"]) for i, a in enumerate(A)}
 CHARTS = {k: v for k, v in (json.load(open("data/chart_sides.json", encoding="utf-8")) if os.path.exists("data/chart_sides.json") else {}).items() if v}
