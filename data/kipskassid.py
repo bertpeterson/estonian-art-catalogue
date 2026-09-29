@@ -18,6 +18,11 @@ acrylic, varnished, each one named -- from the artist's own site, lihtsadkipskas
   the festival and the artist's own portraits are not cats. A cat also in the shop is
   the shop's.
 
+No photograph with a person in it is shown: each is looked at first (kipskassid_check.py:
+Apple's Vision finds faces and figures, CLIP a person; either hides it) and the verdicts
+kept in kipskassid_photos.json. A photograph not yet looked at, or changed, is not shown
+until it has been; the record stays either way.
+
 The photographs weigh 0.4-3.5 MB; the site's own resizer (/_next/image, 640 px), which its
 pages use, gives 3-20 KB, and that is what the wall shows. Prices are never kept. Pages
 cached a day.
@@ -49,7 +54,15 @@ def get(path, key):
     time.sleep(1.5)
     return body
 
-fold = lambda s: re.sub(r"[^a-zõäöüšž0-9]", "", s.lower())
+# "Teet Tibar (kitarr)" in the shop is "TEET TIBAR" in the archive: the brackets and the case aside
+fold = lambda s: re.sub(r"[^a-zõäöüšž0-9]", "", re.sub(r"\(.*?\)", "", s).lower())
+PHOTOS = json.load(open("kipskassid_photos.json", encoding="utf-8")) if os.path.exists("kipskassid_photos.json") else {}
+unchecked = []
+def seen(photo, url):
+    """the picture, if its photograph has been looked at and shows no one"""
+    v = PHOTOS.get(photo)
+    if v is None: unchecked.append(photo)
+    return {"photo": photo, "photo_url": url, **({"img": url} if v == "ok" else {})}
 slug = lambda s: re.sub(r"-+", "-", re.sub(r"[^a-z0-9]+", "-", s.lower().translate(str.maketrans("õäöüšž", "oaousz")))).strip("-")
 # the site's own 640 px copy; the path as the site serves it (percent-encoded once, whether
 # the page wrote it encoded or not), then encoded again as the resizer's parameter
@@ -69,7 +82,7 @@ for src in dict.fromkeys(re.findall(r'(/kipskassid/[^"\\]+?\.(?:jpe?g|png|webp))
     sold = state.lower() == "müüdud"
     if not sold and not state.isdigit(): continue                      # "tulekul": a cat still to come
     recs.append(rec(f"kipskass-{slug(title)}", title, f"{BASE}/vota-kass",
-                    **({"sold": True} if sold else {"img": small(src)})))
+                    **({"sold": True} if sold else seen(urllib.parse.unquote(src), small(src)))))
 
 # the kittens, set by set
 h = get("/kassikesed", "kipskassid_kassikesed")
@@ -86,7 +99,7 @@ for src in dict.fromkeys(re.findall(r'(/kassikesed/grupp-\d+/[^"\\]+?\.png)', h)
     sold = state.lower() == "müüdud"
     if not sold and state.lower() != "saadaval": continue
     recs.append(rec(f"kipskass-kassike-{g}-{slug(title)}", title, f"{BASE}/kassikesed", series=sets.get(g),
-                    **({"sold": True} if sold else {"img": small(src)})))
+                    **({"sold": True} if sold else seen(urllib.parse.unquote(src), small(src)))))
 
 # the archive: cats shown
 shop = {fold(r["title"]) for r in recs}
@@ -100,18 +113,21 @@ for it in items:
     if k not in names: names[k] = {"title": title, "file": it["file"]}
     elif title != title.upper() and names[k]["title"] == names[k]["title"].upper():
         names[k]["title"] = title                                       # the spelling with small letters, where there are two
-# "Puhkus Nizzas ja Ühtsuse Vaikus": two cats that each have their own photographs
-for k in [k for k, v in names.items() if " ja " in v["title"] and all(fold(p) in names for p in v["title"].split(" ja "))]:
+# "Puhkus Nizzas ja Ühtsuse Vaikus": two cats that each have a record of their own, in the
+# archive or in the shop
+for k in [k for k, v in names.items() if re.search(r" ja ", v["title"], re.I)
+          and all(fold(p) in names or fold(p) in shop for p in re.split(r" ja ", v["title"], flags=re.I))]:
     del names[k]
 for k, v in names.items():
     if k in shop: continue
     recs.append(rec(f"kipskass-arhiiv-{slug(v['title'])}", v["title"], f"{BASE}/kassigalerii", shown=True,
-                    img=small_r2(v["file"])))
+                    **seen(re.sub(r"^.*?/kassigalerii/|^/+", "", v["file"]), small_r2(v["file"]))))
 
 prev = json.load(open("gallery_records.json", encoding="utf-8"))
 keep = [r for r in prev if not r["gid"].startswith("kipskass-")]
 json.dump(keep + recs, open("gallery_records.json", "w", encoding="utf-8"), ensure_ascii=False)
 on_sale = [r for r in recs if not r.get("sold") and not r.get("shown")]
+if unchecked: print(f"  {len(unchecked)} photographs not yet looked at, shown once they are: python3 kipskassid_check.py")
 print(f"LIHTSAD KIPSKASSID: {len(recs)} cats -- on sale {len(on_sale)}, sold {sum(1 for r in recs if r.get('sold'))}, "
       f"shown in the archive {sum(1 for r in recs if r.get('shown'))}; kitten sets {len(sets)}")
-for r in on_sale[:4]: print(f"   {r['title'][:34]:34} {r.get('series') or '':22} {r['img'][:70]}")
+for r in on_sale[:4]: print(f"   {r['title'][:34]:34} {r.get('series') or '':22} {(r.get('img') or 'no picture')[:70]}")
