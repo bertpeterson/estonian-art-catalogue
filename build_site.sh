@@ -23,8 +23,10 @@ python3 -u build_embed.py || exit 1
 python3 -u build_upcoming.py || exit 1
 # the catalogue in figures
 python3 -u build_stats.py
+# art by mood: the words a visitor picks, and the museum pictures that answer to them
+python3 -u build_mood.py || exit 1
 # the Content-Security-Policy, into every page, from the inline scripts as written
 python3 -u csp.py site || exit 1
 # a build that lost its pages must not ship: the artist pages went out missing once
 # when build_pages.py failed inside a pipe and the OK line hid it
-[ -f site/a/index.html ] && [ "$(ls site/a | wc -l)" -gt 1000 ] && [ -f site/stats.html ] && [ -f site/stats-et.html ] || { echo "BUILD FAILED: site/a or stats missing"; exit 1; }
+[ -f site/a/index.html ] && [ "$(ls site/a | wc -l)" -gt 1000 ] && [ -f site/stats.html ] && [ -f site/stats-et.html ] && [ -f site/mood.html ] && [ -f site/meeleolu.html ] && [ -f site/data/mood.json ] || { echo "BUILD FAILED: site/a, stats or mood missing"; exit 1; }

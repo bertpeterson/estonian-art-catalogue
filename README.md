@@ -56,6 +56,7 @@ site/                 the static site, built by ./build_site.sh — not committe
 data/data.json        the merged dataset (see Schema below); written by merge.py only — the build reads it, never writes it
 data/*.py             the harvest, enrichment and merge scripts
 data/lookalikes.py    visual look-alikes of the museum pictures (CLIP, local; run deliberately)
+data/moods.py         the museum pictures scored against 36 mood words (CLIP, local; after lookalikes.py)
 tpl_head.html         markup + CSS for the app
 tpl_app.html          the application itself
 i18n.py               the EN/ET dictionary — the source; i18n.json is generated from it on every build
@@ -237,6 +238,15 @@ changes monthly and a row pointing into it would go stale. Other artists only, a
 per title of theirs, and nothing below a similarity of 0.6. It is *similar artists* at the level of the
 single picture: a Mägi Otepää beside Laikmaa's Capri and a Burman spring. Computed deliberately, not
 monthly; `data/lookalikes.json` is committed, the embeddings are not.
+
+**Art by mood.** `mood.html` / `meeleolu.html`: a visitor picks up to three words from 36 (solemn, misty,
+tender, stormy…) or describes a feeling, and sees the museum pictures that answer to them. The same
+embeddings, against the words: `data/moods.py` writes each word as a few short phrases, embeds them with
+CLIP's text side and scores every picture by its cosine to them, taken relative to the picture's own mean
+over all 36 words (what it is more than anything else) and made z-scores per word, so two or three words
+add up evenly. Paintings, works on paper and all art are ranked apart; the best 400 of each are kept, by
+work key, in the committed `data/moods.json`. A typed feeling is matched to the words by stems in both
+languages (`build_mood.py`); no model runs in the browser. A guide to looking, not a judgement of the work.
 
 **Editorial.** The sixteen names on the landing page are chosen, not counted, and tagged *ed*. Decade
 notes and the English medium vocabulary are editorial. Everything else on a record is the holder's.
