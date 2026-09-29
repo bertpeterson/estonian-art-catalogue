@@ -159,7 +159,7 @@ h1{margin:0;font:500 clamp(2.1rem,4.6vw,3.2rem)/1 var(--serif);letter-spacing:-.
 .lede{margin:0;max-width:66ch;color:var(--ink-soft);font-size:1.02rem}
 form.describe{display:flex;flex-wrap:wrap;gap:8px;align-items:center;max-width:640px}
 form.describe label{font:500 .68rem/1 var(--mono);letter-spacing:.13em;text-transform:uppercase;color:var(--grey);flex-basis:100%}
-form.describe input{flex:1 1 260px;min-width:0;font:italic 400 1.1rem/1.2 var(--serif);color:var(--ink);background:var(--raise);border:1px solid var(--rule);padding:10px 12px}
+form.describe input{flex:1 1 260px;min-width:0;font:400 1.1rem/1.2 var(--serif);color:var(--ink);background:var(--raise);border:1px solid var(--rule);padding:10px 12px}
 form.describe input:focus{outline:2px solid var(--ink);outline-offset:1px}
 .btn{font:500 .74rem/1 var(--mono);letter-spacing:.07em;text-transform:uppercase;color:var(--ink);background:none;border:1px solid var(--rule);padding:10px 13px;cursor:pointer}
 .btn:hover{border-color:var(--grey)}.btn.solid{background:var(--on);color:var(--on-ink);border-color:var(--on)}
@@ -169,7 +169,7 @@ form.describe input:focus{outline:2px solid var(--ink);outline-offset:1px}
 @media (max-width:700px){.group{grid-template-columns:1fr;gap:6px}}
 .gname{font:500 .68rem/2.5 var(--mono);letter-spacing:.13em;text-transform:uppercase;color:var(--grey)}
 .chips{display:flex;flex-wrap:wrap;gap:7px}
-.chip{font:italic 400 1.02rem/1 var(--serif);color:var(--ink);background:var(--raise);border:1px solid var(--rule);padding:8px 13px 9px;border-radius:999px;cursor:pointer}
+.chip{font:400 1.02rem/1 var(--serif);color:var(--ink);background:var(--raise);border:1px solid var(--rule);padding:8px 13px 9px;border-radius:999px;cursor:pointer}
 .chip:hover{border-color:var(--grey)}.chip[aria-pressed=true]{background:var(--on);color:var(--on-ink);border-color:var(--on)}
 .bar{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;border-top:1px solid var(--rule);padding-top:14px}
 .seg{display:flex}.seg .btn+.btn{border-left:0}.seg .btn[aria-pressed=true]{background:var(--on);color:var(--on-ink);border-color:var(--on)}
