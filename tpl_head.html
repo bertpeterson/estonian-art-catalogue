@@ -167,6 +167,8 @@ h1 a:hover{color:var(--grey-6)}
 .seg button{font-family:var(--mono);font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;background:none;border:0;color:var(--grey-6);padding:8px 14px;cursor:pointer}
 .seg button + button{border-left:1px solid var(--rule)}
 .seg button[aria-pressed="true"]{background:var(--invert-bg);color:var(--invert-fg)}
+.moodlink{display:inline-flex;align-items:center;margin-left:10px;font-family:var(--mono);font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink);text-decoration:none;border:1px solid var(--rule);padding:8px 14px}
+.moodlink:hover{border-color:var(--grey-6)}
 .search{position:relative;flex:0 1 300px;max-width:100%}   /* a fixed-ish width: the controls after it must not shift when one of them hides */
 .search input{width:100%;background:var(--field);border:1px solid var(--rule);color:var(--ink);font-family:var(--sans);font-size:.92rem;padding:9px 12px 9px 34px}
 .search input::placeholder{color:var(--grey-4)}
@@ -695,6 +697,8 @@ footer a{border-bottom:1px solid var(--rule)}
         <button id="g-artist" aria-pressed="false" data-i18n="artist"></button>
         <button id="g-auc" aria-pressed="false" data-i18n="auctions"></button>
       </div>
+      <!-- the catalogue by feeling: a page of its own (build_mood.py) -->
+      <a class="moodlink" id="moodlink" href="mood.html" data-i18n="moodlink"></a>
     </div>
     <div class="ctl">
       <select id="sortby" class="sortsel" aria-label="Sort rows by">
@@ -792,10 +796,10 @@ footer a{border-bottom:1px solid var(--rule)}
          the per-artist pages that make the catalogue findable at all. Both languages
          are in the page for the crawler; a visitor sees the one the page is in. -->
     <p class="nav" lang="en"><a href="a/">Artists A–Z</a> — every artist on a page of their own ·
-       <a href="stats.html">The catalogue in figures</a> · <a href="upcoming.html">Coming up at auction</a><br>
+       <a href="stats.html">The catalogue in figures</a> · <a href="upcoming.html">Coming up at auction</a> · <a href="mood.html">Art by mood</a><br>
        By <a href="decades/">decade</a>, <a href="media/">medium</a>, <a href="museums/">museum</a> and <a href="subjects/">subject</a></p>
     <p class="nav" lang="et"><a href="k/" hreflang="et">Kunstnikud A–Ü</a> — iga kunstnik oma lehel ·
-       <a href="stats-et.html" hreflang="et">Kataloog arvudes</a> · <a href="tulemas.html" hreflang="et">Tulemas oksjonil</a><br>
+       <a href="stats-et.html" hreflang="et">Kataloog arvudes</a> · <a href="tulemas.html" hreflang="et">Tulemas oksjonil</a> · <a href="meeleolu.html" hreflang="et">Kunst meeleolu järgi</a><br>
        <a href="kumnendid/" hreflang="et">Kümnendi</a>, <a href="liigid/" hreflang="et">liigi</a>, <a href="muuseumid/" hreflang="et">muuseumi</a> ja <a href="ained/" hreflang="et">aine kaupa</a></p>
     <p class="foot1" data-i18n-html="foot"></p>
   </footer>

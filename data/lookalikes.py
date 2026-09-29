@@ -69,8 +69,9 @@ if todo:
             try:
                 r = urllib.request.Request(url_of(im), headers={"User-Agent": UA})
                 with urllib.request.urlopen(r, timeout=60) as resp: b = resp.read()
-                img = Image.open(io.BytesIO(b)).convert("RGB")
-                return im, pre(img)
+                img = Image.open(io.BytesIO(b))
+                img.draft("RGB", (448, 448))       # a JPEG decoded at a fraction of a 4,000-pixel scan: CLIP sees 224
+                return im, pre(img.convert("RGB"))
             except Exception as e:
                 time.sleep(2 + 2 * attempt)
         return im, None
