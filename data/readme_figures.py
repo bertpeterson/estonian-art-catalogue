@@ -21,7 +21,9 @@ subs = [
     (r"\*\*[\d,]+ artists\*\*",                         f"**{f(m['artists'])} artists**"),
     (r"\| [\d,]+ \| Muuseumide Infosüsteem",           f"| {f(m['muis'])} | Muuseumide Infosüsteem"),
     (r"\| [\d,]+ \| The Art Museum of Estonia's own", f"| {f(m['ekm'])} | The Art Museum of Estonia's own"),
-    (r"\| (\w+) commercial galleries and NOBA \| [\d,]+ \|", lambda mm: f"| {mm.group(1)} commercial galleries and NOBA | {f(m['gallery'])} |"),
+    # the row's label has been reworded before and the pattern stopped matching; any label
+    # ending ", and NOBA" is the row
+    (r"\| ([^|\n]+?), and NOBA \| [\d,]+ \|", lambda mm: f"| {mm.group(1)}, and NOBA | {f(m['gallery'])} |"),
     (r"\| Auction results: ([^|]+) \| [\d,]+ lots \|",      lambda mm: f"| Auction results: {mm.group(1)} | {f(m['auction'])} lots |"),
     (r"Of the works for sale, [\d,]+ are NOBA listings, [\d,]+ the galleries' own",
      f"Of the works for sale, {f(m['noba'])} are NOBA listings, {f(m['gallery'] - m['noba'])} the galleries' own"),

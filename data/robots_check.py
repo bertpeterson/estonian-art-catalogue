@@ -11,7 +11,8 @@ import re, sys, urllib.request
 
 HOSTS = ["haus.ee", "www.kogogallery.ee", "temnikova.ee", "www.tutar.ee", "www.artrovert.ee", "rukigalerii.ee",
          "alleegalerii.ee", "vernissage.ee", "eestikunstioksjonid.ee", "www.vaal.ee", "oksjon.vaal.ee",
-         "www.e-kunstisalong.ee", "noba.ac", "konradmagi.ee", "artner.ee", "artandtonic.art", "tokkoarrak.ee"]
+         "www.e-kunstisalong.ee", "noba.ac", "konradmagi.ee", "artner.ee", "artandtonic.art", "tokkoarrak.ee",
+         "www.lihtsadkipskassid.ee", "pub-f1ff4e6b13aa42b9a2f600dbf2dd13a5.r2.dev"]
 UA = "EstonianArtCatalogue/1.0 (museaal.ee; contact info@museaal.ee)"
 OURS = {"*", "estonianartcatalogue", "claudebot", "claude-user", "claude-searchbot", "anthropic-ai"}
 
@@ -42,7 +43,8 @@ PATHS = {"artner.ee": ["/wp-json/wc/store/v1/products?per_page=100&page=1"],
          "artandtonic.art": ["/wp-json/wc/store/v1/products?per_page=100&page=1"],
          "tokkoarrak.ee": ["/kunsti-muuk", "/kunsti-muuk?offset=200", "/kunsti-muuk/p/work"],
          "noba.ac": ["/wp-json/wc/store/v1/products?per_page=100&page=1", "/et/kunstnik/artist/", "/et/kunst/work/"],
-         "vernissage.ee": ["/wp-json/wc/store/v1/products?per_page=100&page=1"]}
+         "vernissage.ee": ["/wp-json/wc/store/v1/products?per_page=100&page=1"],
+         "www.lihtsadkipskassid.ee": ["/vota-kass", "/kassikesed", "/api/media/gallery", "/_next/image?url=%2Fkipskassid%2Fx.jpg&w=640&q=75"]}
 def allowed(txt, agent, path):
     """RFC 9309 with Google's wildcards: the group naming the agent, else "*"; the longest
     matching rule wins, Allow on a tie; "*" matches anything, "$" ends the path. (Python's

@@ -424,5 +424,13 @@
   "city": "Tallinn",
   "type": "gallery",
   "url": "https://artandtonic.art"
+ },
+ {
+  "n": "Lihtsad Kipskassid",
+  "en": "Lihtsad Kipskassid",
+  "city": "",
+  "type": "gallery",
+  "url": "https://www.lihtsadkipskassid.ee",
+  "note": "Taavi Eelmaa's own shop and archive of his painted plaster cats"
  }
 ]

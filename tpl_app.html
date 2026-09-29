@@ -134,6 +134,7 @@
     "Underi ja Tuglase Kirjanduskeskus":"UTKK","Võrumaa Muuseum":"VÕRU","Järvamaa Muuseum":"JÄRV","Harjumaa Muuseum":"HARJU",
     "Eesti Vabaõhumuuseum":"EVM","Okupatsioonide ja vabaduse muuseum Vabamu (Kistler-Ritso Eesti SA)":"VABAMU","Valga Muuseum":"VALGA",
     "Artner":"ARTNER","Tokko & Arrak":"TOKKO","Art & Tonic":"A&T",
+    "Lihtsad Kipskassid":"KIPSKASS",
     "Haus Galerii":"HAUS","Vernissage":"VERN","Allee galerii":"ALLEE","Vaal galerii":"VAAL","Eesti Kunsti Oksjonid":"EKO","E-Kunstisalong":"EKS","Balti Oksjon":"BALTI"};
   const abbr = m => MUS[m] || (m||"").slice(0,4).toUpperCase();
 
@@ -1274,8 +1275,15 @@
     if (state.artist !== null){
       const ar = A[state.artist], died = +(ar.l[1] || 0), born = +(ar.l[0] || 0), Y = new Date().getFullYear();
       const pd = died ? died <= Y - 71 : (born && born <= Y - 156);
-      if (!pd && (died || born))
-        html = `<div class="wall-bar cr-note">${esc(T("cr_note", {a: ar.n, d: died ? T("cr_d") + " " + died : T("cr_b") + " " + born, y: died ? died + 70 : "—"}))}${nPics === 1 ? esc(T("cr_note_g1")) : nPics ? esc(T("cr_note_g", {n: fmt(nPics)})) : ""}</div>` + html;
+      if (!pd && (died || born)){
+        // a living artist has no year to name: the term runs for their life and seventy
+        // years after. A picture from a portfolio page (an artist's own archive, a
+        // gallery's exhibitions) is shown as the page shows it, not only while on sale.
+        const lead = died ? T("cr_note", {a: ar.n, d: T("cr_d") + " " + died, y: died + 70}) : T("cr_note_live", {a: ar.n, d: T("cr_b") + " " + born});
+        const shownPics = set.reduce((n, w) => n + (wallPic(w) && w.kind === "shown" ? 1 : 0), 0);
+        const pics = shownPics ? T("cr_note_gs", {n: fmt(nPics)}) : nPics === 1 ? T("cr_note_g1") : nPics ? T("cr_note_g", {n: fmt(nPics)}) : "";
+        html = `<div class="wall-bar cr-note">${esc(lead)}${esc(pics)}</div>` + html;
+      }
     }
     const BASE = baseSet();          // hoisted: was recomputed once per decade
     // ...and bucket both by decade in one pass. These were being filtered once per
