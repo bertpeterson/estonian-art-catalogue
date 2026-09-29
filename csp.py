@@ -12,12 +12,15 @@ handlers went in the same change: a policy with hashes does not admit them.
 
 Runs last in build_site.sh, over every .html the build produced.
 """
-import base64, hashlib, os, re, sys
+import base64, hashlib, json, os, re, sys
 
 ROOT = sys.argv[1] if len(sys.argv) > 1 else "site"
+# the mood page's reader of typed descriptions (build_mood.py), when one is set up
+_api = (json.load(open("data/mood_api.json", encoding="utf-8")).get("url") or "") if os.path.exists("data/mood_api.json") else ""
+API = re.match(r"https://[^/]+", _api).group(0) if re.match(r"https://[^/]+", _api) else ""
 POLICY = ("default-src 'self'; script-src 'self' https://gc.zgo.at{hashes}; "
           "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; "
-          "img-src https: data:; connect-src 'self' https://museaal.goatcounter.com; "
+          "img-src https: data:; connect-src 'self' https://museaal.goatcounter.com" + (" " + API if API else "") + "; "
           "base-uri 'none'; form-action 'none'; object-src 'none'; upgrade-insecure-requests")
 INLINE = re.compile(r"<script(?![^>]*\bsrc=)([^>]*)>(.*?)</script>", re.S)
 

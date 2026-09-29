@@ -7,8 +7,15 @@ from data/moods.py (a CLIP image model on the Mac: each picture against each wor
 it after lookalikes.py); this only lays them out. The page asks for the data when it
 opens, so the catalogue's own first load is untouched.
 
-A typed feeling is matched to the vocabulary by word stems in both languages (STEMS
-below: "üksildane sügisõhtu" is lonely and autumnal) -- no model runs in the browser.
+A typed feeling is read by Claude Haiku through a small Cloudflare Worker (worker/, whose
+address is in data/mood_api.json): it answers with up to five of the vocabulary's words,
+most important first, and the page ranks with them. The Worker is generated here from the
+vocabulary (worker/mood-worker.js). Without it, or when it does not answer, the page
+matches the typed words to the vocabulary by stems in both languages (STEMS below:
+"üksildane sügisõhtu" is lonely and autumnal). No model runs in the browser.
+
+The chips show the moods and the subjects; the MORE words (hopeful, cosy, majestic ...)
+are reached by typing only.
 
 The tiles are the site's own: the holder's picture (a lighter copy where data/thumbs.py
 has one), the shape the photograph has without its colour chart, the chart's side
@@ -62,26 +69,43 @@ STEMS = {
  "spring": "spring blossom bloom april fresh kevad õitse õied värske",
  "summery": "summer meadow beach swim july heat suvi suve heinamaa rand",
  "autumnal": "autumn fall leaves harvest october november sügis lehed lõikus",
+ "sea": "sea seas seascape ocean coast shore meri mere rannik", "lake": "lake pond järv tiik", "river": "river stream brook jõgi oja",
+ "forest": "forest wood woods mets metsa", "trees": "tree birch pine oak puu kask mänd tamm", "fields": "field meadow farmland põld niit",
+ "garden": "garden park aed park", "mountains": "mountain hill alps mägi mäe mägede", "sky": "sky cloud taevas pilv",
+ "village": "village farm farmhouse küla talu", "city": "city town street urban linn tänav", "harbour": "harbour harbor port dock ship sadam laev",
+ "church": "church chapel cathedral kirik kabel", "interior": "interior room indoors inside interjöör tuba", "portrait": "portrait face faces portree nägu",
+ "children": "child kid boy girl laps poiss tüdruk", "family": "family mother father pere ema isa", "work": "work labour labor worker harvest töö tööli",
+ "music": "music musician violin song muusika viiul laul", "dance": "dance dancing dancer ballet tants balle", "horses": "horse hobu",
+ "animals": "animal cow dog cat loom lehm koer kass", "birds": "bird birds lind linnu", "flowers": "flower bouquet blossom lill lille",
+ "stilllife": "stilllife natüürmort vaikelu", "boats": "boat ship sail paat laev purje",
+ "hopeful": "hope hopeful lootus", "cosy": "cosy cozy snug hubane", "sacred": "sacred holy religio püha religioo", "majestic": "majest grand monument majesteet suursugu",
+ "fragile": "fragil delicat habras", "sensual": "sensual sensuous meeleli", "innocent": "innocen naive süütu", "energetic": "energ vigor vigour energi",
+ "proud": "proud pride uhke", "elegant": "elegan grace elegant", "lively": "livel bustl elav", "empty": "empty deserted tühi",
+ "spiritual": "spiritu vaimne", "idyllic": "idyll pastoral idüll", "wild": "wild untamed metsik", "harsh": "harsh severe karm",
+ "angry": "anger angry furious viha", "abstract": "abstract abstrakt", "expressive": "express ekspress", "decorative": "decorat ornament dekorat",
+ "simple": "simple plain minimal lihtne", "ornate": "ornate rikkali", "rustic": "rustic peasant talupoja maaläh", "modern": "modern modernis",
 }
 
 T = {"en": dict(file="mood.html", other="meeleolu.html", other_l="Eesti keeles", site="Estonian Art Catalogue",
-                h="Art by mood", lede="Pick up to three words, or describe a feeling. The wall shows the museum works whose pictures answer to it best. An image model has looked at every picture itself, not at the records, so it finds a mood the way you would: by looking.",
-                describe="Describe a feeling", ph="a quiet, misty morning", find="Find",
-                groups=dict(feeling="Feeling", light="Light", colour="Colour", weather="Season and weather"),
+                h="Art by mood", lede="Pick up to three words, or describe in your own words what you would like to see. The wall shows the museum works whose pictures answer to it best. An image model has looked at every picture itself, not at the records, so it finds a mood the way you would: by looking.",
+                describe="Describe what you would like to see", ph="a quiet morning after bad news", find="Find",
+                groups=dict(feeling="Feeling", light="Light", colour="Colour", weather="Season and weather", subject="Subject"), readas="Read as", reading="Reading…",
                 kinds=dict(paint="Paintings", paper="Works on paper", all="All art"),
                 surprise="Surprise me", clear="Clear", more="Show more", none="Pick a word to begin.",
-                nomatch="No mood word in that. Try one of the words below.", of="of", works="works", loading="Loading the pictures…",
-                note="The moods are read by CLIP, an image model, from the museums' own photographs of public-domain works: a guide to looking, not a judgement of the work. Each picture opens its record in the catalogue.",
+                nomatch="No mood word in that. Try one of the words below.", of="of", works="works", loading="Loading the pictures…", failed="The pictures could not be loaded. Reload the page to try again.",
+                note="The moods are read by CLIP, an image model, from the museums' own photographs of public-domain works: a guide to looking, not a judgement of the work. A typed description is read by Claude, which picks the words; the sentence is not stored. Each picture opens its record in the catalogue.",
                 hash=""),
      "et": dict(file="meeleolu.html", other="mood.html", other_l="In English", site="Eesti Kunstikataloog",
-                h="Kunst meeleolu järgi", lede="Vali kuni kolm sõna või kirjelda tunnet. Seinal on muuseumiteosed, mille pilt sellele kõige paremini vastab. Pildimudel on iga pilti ise vaadanud, mitte kirjet, nii et ta leiab meeleolu nagu sinagi: vaadates.",
-                describe="Kirjelda tunnet", ph="vaikne udune hommik", find="Otsi",
-                groups=dict(feeling="Tunne", light="Valgus", colour="Värv", weather="Aastaaeg ja ilm"),
+                h="Kunst meeleolu järgi", lede="Vali kuni kolm sõna või kirjelda oma sõnadega, mida tahaksid näha. Seinal on muuseumiteosed, mille pilt sellele kõige paremini vastab. Pildimudel on iga pilti ise vaadanud, mitte kirjet, nii et ta leiab meeleolu nagu sinagi: vaadates.",
+                describe="Kirjelda, mida tahaksid näha", ph="üksildane sügisõhtu mere ääres", find="Otsi",
+                groups=dict(feeling="Tunne", light="Valgus", colour="Värv", weather="Aastaaeg ja ilm", subject="Aine"), readas="Loetud kui", reading="Loen…",
                 kinds=dict(paint="Maalid", paper="Tööd paberil", all="Kõik"),
                 surprise="Üllata mind", clear="Tühjenda", more="Näita rohkem", none="Alusta sõna valimisega.",
-                nomatch="Selles ei olnud ühtki meeleolusõna. Proovi mõnda allolevat.", of="/", works="teost", loading="Pildid laadivad…",
-                note="Meeleolu loeb pildimudel CLIP muuseumide endi fotodelt vabakasutuses teostest: see on juhatus vaatamiseks, mitte hinnang teosele. Iga pilt avab teose kirje kataloogis.",
+                nomatch="Selles ei olnud ühtki meeleolusõna. Proovi mõnda allolevat.", of="/", works="teost", loading="Pildid laadivad…", failed="Pilte ei õnnestunud laadida. Proovi lehte uuesti laadida.",
+                note="Meeleolu loeb pildimudel CLIP muuseumide endi fotodelt vabakasutuses teostest: see on juhatus vaatamiseks, mitte hinnang teosele. Kirjeldust loeb Claude, kes valib sõnad; lauset ei salvestata. Iga pilt avab teose kirje kataloogis.",
                 hash="lang=et&")}
+
+LABEL_EN = {"stilllife": "still life"}
 
 def data():
     M = json.load(open("data/moods.json", encoding="utf-8"))
@@ -111,12 +135,13 @@ def data():
     for kind in ("paint", "paper", "all"):
         lists[kind] = {}
         for word, lst in M[kind].items():
-            lists[kind][word] = [[i, z] for i, z in ((ref(k), z) for k, z in lst) if i is not None]
+            lists[kind][word] = [[i, round(z, 1)] for i, z in ((ref(k), z) for k, z in lst) if i is not None]
     mus = sorted({x[7] for x in works})
     for x in works: x[7] = mus.index(x[7])
     stems = {w: s.split() for w, s in STEMS.items()}
-    return {"words": M["words"], "lists": lists, "works": works, "artists": arts,
-            "mu": mus, "mu_en": [H.MUSEUM_EN.get(m, m) for m in mus], "stems": stems}
+    for w in M["words"]: w["label"] = LABEL_EN.get(w["en"], w["en"])      # the English the page shows; "en" is the word's id
+    return ({"words": M["words"], "works": works, "artists": arts,
+             "mu": mus, "mu_en": [H.MUSEUM_EN.get(m, m) for m in mus], "stems": stems}, lists)
 
 CSS = """
 :root{--paper:#0B0C0E;--raise:#111316;--field:#15171A;--ink:#F1F2F4;--ink-soft:#C7CACE;--grey:#8B9098;--rule:#2B2E34;--on:#F1F2F4;--on-ink:#0B0C0E;
@@ -165,15 +190,21 @@ footer a{color:var(--ink)}
 JS = r"""
 (() => {
 const L = document.documentElement.lang === "et" ? "et" : "en", T = JSON.parse(document.getElementById("t").textContent);
-const $ = id => document.getElementById(id);
+const $ = id => document.getElementById(id), wallEl = $("wall"), API = wallEl.dataset.api || "";
 let D = null, sel = [], kind = "paint", shown = 48, lastCols = 0;
+const LISTS = {}, WEIGHT = [1, 0.85, 0.7, 0.6, 0.5];       // the first word counts most
 const src = im => im.startsWith("m:") ? "https://www.muis.ee/digitaalhoidla/api/meedia/pisipilt?id=" + encodeURIComponent(im.slice(2))
   : im.startsWith("e:") ? "https://digikogu.ekm.ee/static/preview/image/" + im.slice(2).replace(/\/([^\/]+)$/, "/t2_$1") : im.slice(2);
 const POS = {l: "100% 50%", r: "0% 50%", t: "50% 100%", b: "50% 0%"};
 const word = en => D.words.find(w => w.en === en);
+const label = en => { const w = word(en); return w ? (L === "et" ? w.et : w.label) : en; };
+function lists(k) {                                          // each kind's rankings, fetched the first time they are wanted
+  if (!LISTS[k]) LISTS[k] = fetch(wallEl.dataset.src.replace("mood.json", "mood-" + k + ".json")).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); });
+  return LISTS[k];
+}
 function readHash() {
   const p = new URLSearchParams(location.hash.slice(1));
-  sel = (p.get("w") || "").split(",").filter(w => D.words.some(x => x.en === w)).slice(0, 3);
+  sel = (p.get("w") || "").split(",").filter(w => D.words.some(x => x.en === w)).slice(0, 5);
   kind = ["paint", "paper", "all"].includes(p.get("k")) ? p.get("k") : "paint";
 }
 function writeHash() {
@@ -190,33 +221,37 @@ function chips() {
     const n = document.createElement("div"); n.className = "gname"; n.textContent = T.groups[key];
     const c = document.createElement("div"); c.className = "chips";
     for (const w of D.words.filter(w => w.g === key)) {
-      const b = document.createElement("button"); b.type = "button"; b.className = "chip"; b.textContent = w[L];
+      const b = document.createElement("button"); b.type = "button"; b.className = "chip"; b.textContent = label(w.en);
       b.setAttribute("aria-pressed", sel.includes(w.en));
-      b.onclick = () => { sel = sel.includes(w.en) ? sel.filter(x => x !== w.en) : [...sel, w.en].slice(-3); update(); };
+      b.onclick = () => { sel = sel.includes(w.en) ? sel.filter(x => x !== w.en) : [...sel, w.en].slice(-3); $("msg").hidden = true; update(); };
       c.append(b);
     }
     row.append(n, c); g.append(row);
   }
   document.querySelectorAll("[data-k]").forEach(b => b.setAttribute("aria-pressed", b.dataset.k === kind));
 }
-function ranked() {
-  const lists = sel.map(w => D.lists[kind][w] || []);
-  const maps = lists.map(l => new Map(l)), floors = lists.map(l => l.length ? l[l.length - 1][1] - 0.5 : 0);
+function ranked(ls) {
+  const per = sel.map(w => ls[w] || []);
+  const maps = per.map(l => new Map(l)), floors = per.map(l => l.length ? l[l.length - 1][1] - 0.5 : 0);
   const score = new Map();
-  lists.forEach(l => l.forEach(([i]) => score.set(i, 0)));
-  for (const i of score.keys()) score.set(i, maps.reduce((s, m, j) => s + (m.has(i) ? m.get(i) : floors[j]), 0));
+  per.forEach(l => l.forEach(([i]) => score.set(i, 0)));
+  for (const i of score.keys()) score.set(i, maps.reduce((s, m, j) => s + WEIGHT[j] * (m.has(i) ? m.get(i) : floors[j]), 0));
   return [...score.entries()].sort((a, b) => b[1] - a[1]).map(x => x[0]);
 }
-function wall() {
-  const el = $("wall"), st = $("status"); el.textContent = "";
-  if (!sel.length) { st.textContent = T.none; $("more").hidden = true; return; }
-  const all = ranked(), top = all.slice(0, shown);
+async function wall() {
+  const st = $("status");
+  if (!sel.length) { wallEl.textContent = ""; st.textContent = T.none; $("more").hidden = true; return; }
+  const want = kind, ls = await lists(want).catch(() => null);
+  if (want !== kind) return;                                  // a newer choice has been made meanwhile
+  wallEl.textContent = "";
+  if (!ls) { st.textContent = T.failed; return; }
+  const all = ranked(ls), top = all.slice(0, shown);
   st.textContent = "";
-  const b = document.createElement("b"); b.textContent = sel.map(w => word(w)[L]).join(" + ");
+  const b = document.createElement("b"); b.textContent = sel.map(label).join(" + ");
   st.append(b, ` · ${T.kinds[kind]} · ${top.length} ${T.of} ${all.length} ${T.works}`);
   // shortest column first, so the best matches run along the top, as on the site's wall
-  const n = Math.max(2, Math.min(6, Math.floor(el.clientWidth / 200))), cols = [], hs = [];
-  for (let j = 0; j < n; j++) { const c = document.createElement("div"); c.className = "col"; cols.push(c); hs.push(0); el.append(c); }
+  const n = Math.max(2, Math.min(6, Math.floor(wallEl.clientWidth / 200))), cols = [], hs = [];
+  for (let j = 0; j < n; j++) { const c = document.createElement("div"); c.className = "col"; cols.push(c); hs.push(0); wallEl.append(c); }
   lastCols = n;
   for (const i of top) {
     const [t, ai, y, im, r, rs, k, mu] = D.works[i], [an, as] = D.artists[ai];
@@ -234,41 +269,59 @@ function wall() {
   }
   $("more").hidden = shown >= Math.min(all.length, 192);
 }
-function update(keepShown) { if (!keepShown) shown = 48; chips(); wall(); writeHash(); $("msg").hidden = true; }
-// a typed feeling: each word that begins with one of a mood's stems counts for it
-function describe(text) {
+function update(keepShown) { if (!keepShown) shown = 48; chips(); wall(); writeHash(); }
+function say(text) { $("msg").textContent = text; $("msg").hidden = !text; }
+// the typed words, matched by stems: the way in when the reader is not there
+function byStems(text) {
   const toks = text.toLowerCase().normalize("NFC").match(/[a-zõäöüšž]+/g) || [], hits = new Map();
   // a stem of three letters or fewer takes only a short ending: "sun" is sunny, not Sunday; "kuu" is kuul, not kuulus
   const fits = (tok, s) => s.length <= 3 ? tok.startsWith(s) && tok.length <= s.length + 2 : tok.startsWith(s);
   toks.forEach((tok, n) => { for (const [w, st] of Object.entries(D.stems)) if (st.some(s => fits(tok, s))) if (!hits.has(w)) hits.set(w, n); });
-  const got = [...hits.entries()].sort((a, b) => a[1] - b[1]).map(x => x[0]).slice(0, 3);
-  if (!got.length) { $("msg").textContent = T.nomatch; $("msg").hidden = false; return; }
-  sel = got; update();
+  return [...hits.entries()].sort((a, b) => a[1] - b[1]).map(x => x[0]).slice(0, 5);
+}
+async function describe(text) {
+  text = text.trim(); if (!text) return;
+  let got = null, k = "keep";
+  if (API) {
+    say(T.reading);
+    try {
+      const ctl = new AbortController(), timer = setTimeout(() => ctl.abort(), 6000);
+      const r = await fetch(API, {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({q: text}), signal: ctl.signal});
+      clearTimeout(timer);
+      if (r.ok) { const j = await r.json(); got = (j.words || []).filter(w => word(w)); k = j.kind || "keep"; }
+    } catch (e) {}
+  }
+  if (!got || !got.length) got = byStems(text);
+  if (!got.length) { say(T.nomatch); return; }
+  sel = got; if (["paint", "paper", "all"].includes(k)) kind = k;
+  say(`${T.readas}: ${got.map(label).join(", ")}`);
+  update();
 }
 $("describe").addEventListener("submit", ev => { ev.preventDefault(); describe($("feel").value); });
 document.querySelectorAll("[data-k]").forEach(b => b.onclick = () => { kind = b.dataset.k; update(); });
 $("surprise").onclick = () => {
-  const ws = D.words.map(w => w.en), a = ws[Math.random() * ws.length | 0];
-  let b = ws[Math.random() * ws.length | 0]; sel = Math.random() < 0.6 && b !== a ? [a, b] : [a]; update();
+  const ws = D.words.filter(w => w.g !== "more").map(w => w.en), a = ws[Math.random() * ws.length | 0];
+  let b = ws[Math.random() * ws.length | 0]; sel = Math.random() < 0.6 && b !== a ? [a, b] : [a]; say(""); update();
 };
-$("clear").onclick = () => { sel = []; $("feel").value = ""; update(); };
+$("clear").onclick = () => { sel = []; $("feel").value = ""; say(""); update(); };
 $("more").onclick = () => { shown += 48; update(true); };
 $("status").textContent = T.loading;
-fetch($("wall").dataset.src).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }).then(d => {
+fetch(wallEl.dataset.src).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }).then(d => {
   D = d; readHash();
   if (!sel.length && !location.hash) sel = ["serene"];          // the page opens on a wall, not an empty shell
   chips(); wall();
-}).catch(err => { $("status").textContent = String(err); });
+}).catch(err => { $("status").textContent = T.failed; });
 let rt = 0;
-addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => { if (D && sel.length && Math.max(2, Math.min(6, Math.floor($("wall").clientWidth / 200))) !== lastCols) wall(); }, 150); });
+addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => { if (D && sel.length && Math.max(2, Math.min(6, Math.floor(wallEl.clientWidth / 200))) !== lastCols) wall(); }, 150); });
 addEventListener("hashchange", () => { if (D) { readHash(); shown = 48; chips(); wall(); } });
 })();
 """
 
-def page(lang, ver):
+def page(lang, ver, api):
     t = T[lang]
     me, other = f"{BASE}/{t['file']}", f"{BASE}/{t['other']}"
-    tj = json.dumps({k: t[k] for k in ("groups", "kinds", "none", "nomatch", "of", "works", "loading", "hash")}, ensure_ascii=False).replace("</", "<\\/")
+    tj = json.dumps({k: t[k] for k in ("groups", "kinds", "none", "nomatch", "of", "works", "loading", "hash", "readas", "reading", "failed")}, ensure_ascii=False).replace("</", "<\\/")
+    api_attr = f' data-api="{e(api)}"' if api else ""        # the Worker that reads a typed description
     kinds = "".join(f'<button type="button" class="btn" data-k="{k}" aria-pressed="{str(k == "paint").lower()}">{e(v)}</button>' for k, v in t["kinds"].items())
     return (f'<!doctype html><html lang="{lang}"><head><meta charset="utf-8">{H.STAMP}<meta name="viewport" content="width=device-width,initial-scale=1">'
             f'<title>{e(t["h"])} · museaal.ee</title><meta name="description" content="{e(t["lede"][:290])}">'
@@ -286,24 +339,40 @@ def page(lang, ver):
             f'<div class="bar"><div class="seg" role="group">{kinds}</div>'
             f'<button type="button" class="btn" id="surprise">{e(t["surprise"])}</button><button type="button" class="btn" id="clear">{e(t["clear"])}</button>'
             f'<span class="status" id="status" aria-live="polite"></span></div>'
-            f'<div class="wall" id="wall" data-src="data/mood.json?v={ver}"></div>'
+            f'<div class="wall" id="wall" data-src="data/mood.json?v={ver}"{api_attr}></div>'
             f'<button type="button" class="btn more" id="more" hidden>{e(t["more"])}</button>'
             f'<footer>{e(t["note"])} {H.CONTACT[lang]}</footer></div>'
             f'<script type="application/json" id="t">{tj}</script><script>{JS}</script></body></html>')
 
+API = (json.load(open("data/mood_api.json", encoding="utf-8")).get("url") or "") if os.path.exists("data/mood_api.json") else ""
+
+def worker():
+    """worker/mood-worker.js: the template with this vocabulary written in; paste it into the Worker"""
+    words = [w["en"] for w in json.load(open("data/moods.json", encoding="utf-8"))["words"]]
+    js = open("worker/template.js", encoding="utf-8").read().replace("__WORDS__", json.dumps(words))
+    js = js.replace("// GENERATED by build_mood.py", "// GENERATED by build_mood.py -- do not edit;", 1)
+    old = open("worker/mood-worker.js", encoding="utf-8").read() if os.path.exists("worker/mood-worker.js") else ""
+    if js != old:
+        open("worker/mood-worker.js", "w", encoding="utf-8").write(js)
+        print("  by mood        worker/mood-worker.js changed: paste it into the Worker again (worker/README.md)")
+
 def main():
-    d = data()
+    d, lists = data()
     blob = json.dumps(d, ensure_ascii=False, separators=(",", ":"))
-    ver = hashlib.sha1(blob.encode()).hexdigest()[:8]
+    parts = {k: json.dumps(v, ensure_ascii=False, separators=(",", ":")) for k, v in lists.items()}
+    ver = hashlib.sha1((blob + "".join(parts.values())).encode()).hexdigest()[:8]
     open("site/data/mood.json", "w", encoding="utf-8").write(blob)
+    for k, v in parts.items(): open(f"site/data/mood-{k}.json", "w", encoding="utf-8").write(v)
     urls = []
     for lang in ("en", "et"):
-        open(f"site/{T[lang]['file']}", "w", encoding="utf-8").write(page(lang, ver)); urls.append(f"{BASE}/{T[lang]['file']}")
+        open(f"site/{T[lang]['file']}", "w", encoding="utf-8").write(page(lang, ver, API)); urls.append(f"{BASE}/{T[lang]['file']}")
     sm = open("site/sitemap.xml", encoding="utf-8").read()
     today = datetime.date.today().isoformat()
     add = "".join(f'<url><loc>{u}</loc><lastmod>{today}</lastmod><changefreq>monthly</changefreq></url>' for u in urls)
     open("site/sitemap.xml", "w", encoding="utf-8").write(sm.replace("</urlset>", add + "</urlset>"))
-    print(f"  by mood        {len(d['words'])} words, {len(d['works']):,} works; mood.json {len(blob) // 1024} KB; mood.html, meeleolu.html")
+    if os.path.exists("worker/template.js"): worker()
+    print(f"  by mood        {len(d['words'])} words, {len(d['works']):,} works; mood.json {len(blob) // 1024} KB, "
+          + ", ".join(f"{k} {len(v) // 1024} KB" for k, v in parts.items()) + f"; typed text read by {'the Worker' if API else 'stems only'}")
 
 if __name__ == "__main__":
     main()

@@ -239,14 +239,19 @@ per title of theirs, and nothing below a similarity of 0.6. It is *similar artis
 single picture: a Mägi Otepää beside Laikmaa's Capri and a Burman spring. Computed deliberately, not
 monthly; `data/lookalikes.json` is committed, the embeddings are not.
 
-**Art by mood.** `mood.html` / `meeleolu.html`: a visitor picks up to three words from 36 (solemn, misty,
-tender, stormy…) or describes a feeling, and sees the museum pictures that answer to them. The same
+**Art by mood.** `mood.html` / `meeleolu.html`: a visitor picks up to three words from 36 moods and 26
+subjects (solemn, misty, tender, stormy… sea, horses, still life…) or describes in their own words what they
+would like to see, and sees the museum pictures that answer to them. The same
 embeddings, against the words: `data/moods.py` writes each word as a few short phrases, embeds them with
 CLIP's text side and scores every picture by its cosine to them, taken relative to the picture's own mean
-over all 36 words (what it is more than anything else) and made z-scores per word, so two or three words
-add up evenly. Paintings, works on paper and all art are ranked apart; the best 400 of each are kept, by
-work key, in the committed `data/moods.json`. A typed feeling is matched to the words by stems in both
-languages (`build_mood.py`); no model runs in the browser. A guide to looking, not a judgement of the work.
+over its set (moods against moods, subjects against subjects: what it is more than anything else) and made
+z-scores per word, so several words add up evenly. Another 24 moods (hopeful, cosy, majestic…) are not chips;
+typed descriptions reach them. Paintings, works on paper and all art are ranked apart; the best 400 of each are kept, by
+work key, in the committed `data/moods.json`. A typed description goes to a small Cloudflare Worker
+(`worker/`, set up as `worker/README.md` says; its address in `data/mood_api.json`), which asks Claude Haiku
+for up to five of the 86 words, most important first — about $0.0012 a search; the sentence is not stored.
+Without the Worker, typed words are matched to the vocabulary by stems in both languages (`build_mood.py`).
+No model runs in the browser. A guide to looking, not a judgement of the work.
 
 **Editorial.** The sixteen names on the landing page are chosen, not counted, and tagged *ed*. Decade
 notes and the English medium vocabulary are editorial. Everything else on a record is the holder's.
