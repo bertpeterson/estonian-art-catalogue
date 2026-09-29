@@ -463,7 +463,7 @@ def term(v, table):
 TECHMAT = {**MAT, **TECH, "lõuendil": "on canvas", "paberil": "on paper", "papil": "on board", "kartongil": "on card",
            "vineeril": "on plywood", "masoniidil": "on masonite", "puidul": "on wood", "klaasil": "on glass", "metallil": "on metal",
            "siidil": "on silk", "plaadil": "on panel", "graafika": "print", "maal": "painting", "skulptuur": "sculpture", "joonistus": "drawing",
-           "foto": "photograph", "printmaking": "print", "painting": "painting", "oil on canvas": "oil on canvas"}
+           "foto": "photograph", "printmaking": "print", "painting": "painting", "oil on canvas": "oil on canvas", "lakk": "varnish"}
 # the museums' material phrases carry qualifiers the tables do not know: "paber
 # (dubleeritud lõuendile)", "kips (patineeritud; pronksi imitatsioon)". Word by word
 # after the phrase tables, so the English side reads "paper (laid down on canvas)"
@@ -474,7 +474,7 @@ MATWORD = {"dubleeritud": "laid down", "kleebitud": "mounted", "papile": "on boa
            "portselan": "porcelain", "fotopaber": "photographic paper", "tsink": "zinc", "akvarellpaber": "watercolour paper", "tselluloid": "celluloid",
            "kalka": "tracing paper", "taimparknahk": "vegetable-tanned leather", "puu": "wood", "terrakota": "terracotta", "fajanss": "faience", "luu": "bone",
            "tehismaterjal": "synthetic material", "akrüül": "acrylic", "riie": "cloth", "kartong": "card", "papp": "board", "paber": "paper", "lõuend": "canvas",
-           "kips": "plaster", "vineer": "plywood", "masoniit": "masonite", "klaas": "glass", "metall": "metal", "puit": "wood", "pronks": "bronze", "savi": "clay",
+           "kips": "plaster", "lakk": "varnish", "vineer": "plywood", "masoniit": "masonite", "klaas": "glass", "metall": "metal", "puit": "wood", "pronks": "bronze", "savi": "clay",
            "siid": "silk", "vill": "wool", "lina": "linen", "nahk": "leather", "teras": "steel", "vask": "copper", "hõbe": "silver", "kuld": "gold", "kivi": "stone",
            "graniit": "granite", "marmor": "marble", "dolomiit": "dolomite", "paekivi": "limestone", "betoon": "concrete", "plastik": "plastic", "kumm": "rubber",
            "email": "enamel", "keraamika": "ceramic", "tekstiil": "textile", "kangas": "fabric", "puuvill": "cotton", "ja": "and", "või": "or", "peal": "on",
@@ -819,9 +819,11 @@ for g in GAL:
     tech = g.get("tech") or None
     works.append({"a": ai, "t": g["title"], "y": y,
         "yl": g.get("year") or None, "dsrc": "gallery" if y else None,
-        "e": infer_med(None, tech, tech), "ee": None,
+        # the category a harvester states (a painted plaster cat is sculpture, though
+        # "akrüül" in its technique would read as painting), else read off the technique
+        "e": g.get("cat") or infer_med(None, tech, tech), "ee": None,
         "tc": term_gal(tech), "tce": tech, "m": None, "me": None,
-        "dm": g.get("dims") or None, "mu": g["gallery"], "co": None,
+        "dm": g.get("dims") or None, "mu": g["gallery"], "co": g.get("series") or None,   # a set the gallery sells in (the kittens' sevens)
         "nu": None, "d": None, "c": None, "s": "gallery", "mi": None, "oi": None,
         "k": "G" + re.sub(r'[^A-Za-z0-9]', '', g["gid"]), "n": 1,
         # an exhibition or portfolio page says a work was shown, not that it is for sale
