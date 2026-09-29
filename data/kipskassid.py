@@ -11,6 +11,12 @@ acrylic, varnished, each one named -- from the artist's own site, lihtsadkipskas
 - /kassikesed, the kittens, in sets of seven ("7 LIHTSAT TOITU", each with a piece of music
   and a scenographer, Liisi Eelmaa): "grupp-NNN/<title>--<price>--<saadaval | müüdud>.png".
   The set is the kitten's collection.
+- /collab-kassid, the collaborations: each month other artists paint one of his cats and
+  it is sold by bids on the site. The months are in the page's own data ("sections": the
+  painter, the cat, its photograph, its status), the August 2026 Supercollab in
+  /api/supercollab/archive. The painter is the artist; the month is the year and, with
+  the collab's name, the collection. A closed month sold (the bids are never read); a
+  month still open is on sale.
 - /api/media/gallery, the archive the page /kassigalerii shows: one photograph a file,
   "<title> (n).jpg", kept in the site's storage bucket (R2), from which its page shows it. A cat the artist shows, not one he offers: kept as shown, with its
   photograph, as a gallery's portfolio page is. Several photographs of one cat are one
@@ -101,7 +107,36 @@ for src in dict.fromkeys(re.findall(r'(/kassikesed/grupp-\d+/[^"\\]+?\.png)', h)
     recs.append(rec(f"kipskass-kassike-{g}-{slug(title)}", title, f"{BASE}/kassikesed", series=sets.get(g),
                     **({"sold": True} if sold else seen(urllib.parse.unquote(src), small(src)))))
 
-# the archive: cats shown
+# the collaborations, month by month
+KUU = {"jaanuar": 1, "veebruar": 2, "märts": 3, "aprill": 4, "mai": 5, "juuni": 6, "juuli": 7, "august": 8,
+       "september": 9, "oktoober": 10, "november": 11, "detsember": 12}
+def collab(artist, title, label, kind, done, photo=None):
+    title = re.sub(r'^["„“]+|["”“]+\.?$', "", (title or "").strip()).strip()      # '"Hiie. Mateeria enne vormi".'
+    m = re.match(r"(\w+)\s+(\d{4})", (label or "").strip().lower())
+    if not (artist and title and m): return
+    year, month = m.group(2), m.group(1)
+    r = rec(f"kipskass-{kind}-{slug(month)}-{year}-{slug(title)}", title, f"{BASE}/collab-kassid",
+            series=f"{kind}, {month} {year}", **({"sold": True} if done else (seen(photo, small(photo)) if photo else {})))
+    r["artist"], r["year"] = artist.strip(), year
+    recs.append(r)
+h = get("/collab-kassid", "kipskassid_collab")
+data = "".join(json.loads('"' + c + '"') for c in re.findall(r'self\.__next_f\.push\(\[1,"(.*?)"\]\)</script>', h, flags=re.S))
+i = data.find('"sections":[')
+sections = json.JSONDecoder().raw_decode(data[i + len('"sections":'):])[0] if i >= 0 else []
+for sec in sections:
+    for it in sec.get("items", []):
+        done = sec.get("mode") == "archive" or (it.get("meta") or {}).get("status") == "müüdud"
+        collab(it.get("name"), it.get("catName"), sec.get("title"), "collab", done,
+               f"/collab/cats/{it['catFile']}" if it.get("catFile") else None)
+try: supers = json.loads(get("/api/supercollab/archive", "kipskassid_supercollab")).get("archives", [])
+except ValueError: supers = []
+for a in supers:
+    for lot in a.get("lots", []):
+        collab(lot.get("artist"), lot.get("catName"), a.get("label"), "supercollab", True)
+print(f"  collaborations: {sum(1 for r in recs if r['gid'].startswith(('kipskass-collab', 'kipskass-supercollab')))} works in "
+      f"{len(sections)} months and {len(supers)} Supercollab(s)")
+
+# the archive: cats shown -- none that the shop or a collaboration already has
 shop = {fold(r["title"]) for r in recs}
 try: items = json.loads(get("/api/media/gallery", "kipskassid_gallery")).get("items", [])
 except ValueError: items = []
