@@ -63,7 +63,65 @@ VOCAB = [
     ("weather", "summery", "suvine", ["summery", "a summer day"]),
     ("weather", "autumnal", "sügisene", ["autumnal", "autumn colours"]),
 ]
+# what a picture shows, a second axis: shown as chips under "Subject" and read by the
+# free-text search; scored against each other, not against the moods
+SUBJECTS = [
+    ("subject", "sea", "meri", ["the sea", "a seascape"]),
+    ("subject", "lake", "järv", ["a lake", "a lakeside"]),
+    ("subject", "river", "jõgi", ["a river", "a stream"]),
+    ("subject", "forest", "mets", ["a forest", "woods"]),
+    ("subject", "trees", "puud", ["trees", "a tree"]),
+    ("subject", "fields", "põllud", ["fields", "farmland and meadows"]),
+    ("subject", "garden", "aed", ["a garden", "a park"]),
+    ("subject", "mountains", "mäed", ["mountains", "hills and mountains"]),
+    ("subject", "sky", "taevas", ["the sky and clouds", "a big sky"]),
+    ("subject", "village", "küla", ["a village", "farmhouses"]),
+    ("subject", "city", "linn", ["a city street", "town houses"]),
+    ("subject", "harbour", "sadam", ["a harbour", "a port with ships"]),
+    ("subject", "church", "kirik", ["a church", "a church interior"]),
+    ("subject", "interior", "interjöör", ["a room interior", "inside a house"]),
+    ("subject", "portrait", "portree", ["a portrait", "a person's face"]),
+    ("subject", "children", "lapsed", ["children", "a child"]),
+    ("subject", "family", "pere", ["a family", "mother and child"]),
+    ("subject", "work", "töö", ["people working", "labour in the fields"]),
+    ("subject", "music", "muusika", ["music", "a musician"]),
+    ("subject", "dance", "tants", ["dancing", "dancers"]),
+    ("subject", "horses", "hobused", ["horses", "a horse"]),
+    ("subject", "animals", "loomad", ["animals", "cattle and dogs"]),
+    ("subject", "birds", "linnud", ["birds", "a bird"]),
+    ("subject", "flowers", "lilled", ["flowers", "a bouquet"]),
+    ("subject", "stilllife", "vaikelu", ["a still life", "objects on a table"]),
+    ("subject", "boats", "paadid", ["boats", "a sailing boat"]),
+]
+# moods the chips do not show, for the free-text search to reach
+MORE = [
+    ("more", "hopeful", "lootusrikas", ["hopeful", "full of hope"]),
+    ("more", "cosy", "hubane", ["cosy", "warm and homely"]),
+    ("more", "sacred", "püha", ["sacred", "holy and religious"]),
+    ("more", "majestic", "majesteetlik", ["majestic", "grand and monumental"]),
+    ("more", "fragile", "habras", ["fragile", "delicate"]),
+    ("more", "sensual", "meeleline", ["sensual", "sensuous"]),
+    ("more", "innocent", "süütu", ["innocent", "pure and naive"]),
+    ("more", "energetic", "energiline", ["energetic", "full of energy and movement"]),
+    ("more", "proud", "uhke", ["proud", "self-assured"]),
+    ("more", "elegant", "elegantne", ["elegant", "refined and graceful"]),
+    ("more", "lively", "elav", ["lively", "bustling with people"]),
+    ("more", "empty", "tühi", ["empty", "deserted"]),
+    ("more", "spiritual", "vaimne", ["spiritual", "transcendent"]),
+    ("more", "idyllic", "idülliline", ["idyllic", "pastoral and peaceful"]),
+    ("more", "wild", "metsik", ["wild", "untamed nature"]),
+    ("more", "harsh", "karm", ["harsh", "hard and severe"]),
+    ("more", "angry", "vihane", ["angry", "furious"]),
+    ("more", "abstract", "abstraktne", ["abstract", "non-figurative"]),
+    ("more", "expressive", "ekspressiivne", ["expressive", "expressionist brushwork"]),
+    ("more", "decorative", "dekoratiivne", ["decorative", "ornamental pattern"]),
+    ("more", "simple", "lihtne", ["simple", "plain and minimal"]),
+    ("more", "ornate", "rikkalik", ["ornate", "richly detailed"]),
+    ("more", "rustic", "maalähedane", ["rustic", "peasant life"]),
+    ("more", "modern", "modernne", ["modernist", "modern art"]),
+]
 TEMPLATES = ["a {} painting", "a painting that feels {}", "an artwork: {}", "a {} scene, fine art"]
+SUBJECT_TEMPLATES = ["a painting of {}", "a picture of {}", "{}, fine art", "an artwork showing {}"]
 # what a visitor can narrow to, by the record's category; objects (jugs, spoons, boxes),
 # photographs, albums and printed ephemera answer to no mood and are left out
 PAINT = {"Painting", "Watercolour", "Mixed media", "Miniature"}
@@ -93,25 +151,31 @@ def main():
 
     model, _, _ = open_clip.create_model_and_transforms("ViT-B-32", pretrained="laion2b_s34b_b79k")
     tok = open_clip.get_tokenizer("ViT-B-32"); model.eval()
-    T = []
-    with torch.no_grad():
-        for _, en, _, words in VOCAB:
-            ph = [t.format(x) for x in words for t in TEMPLATES]
-            f = model.encode_text(tok(ph)).float(); f = f / f.norm(dim=-1, keepdim=True)
-            m = f.mean(0); T.append((m / m.norm()).numpy())
-    T = np.stack(T)                                       # words x 512
-    S = X @ T.T                                           # pictures x words
-    S = S - S.mean(axis=1, keepdims=True)                 # what a picture is more than anything else
-    Z = (S - S.mean(axis=0)) / (S.std(axis=0) + 1e-9)     # words on one scale
+    def embed(vocab, templates):
+        T = []
+        with torch.no_grad():
+            for _, en, _, words in vocab:
+                ph = [t.format(x) for x in words for t in templates]
+                f = model.encode_text(tok(ph)).float(); f = f / f.norm(dim=-1, keepdim=True)
+                m = f.mean(0); T.append((m / m.norm()).numpy())
+        return np.stack(T)                                # words x 512
+    def zscores(T):
+        S = X @ T.T                                       # pictures x words
+        S = S - S.mean(axis=1, keepdims=True)             # what a picture is more than anything else in its set
+        return (S - S.mean(axis=0)) / (S.std(axis=0) + 1e-9)   # words on one scale
+    # moods against moods, subjects against subjects: a picture's subject does not
+    # decide its mood, nor the reverse
+    Z = np.concatenate([zscores(embed(VOCAB + MORE, TEMPLATES)), zscores(embed(SUBJECTS, SUBJECT_TEMPLATES))], axis=1)
+    ALL = VOCAB + MORE + SUBJECTS
 
     tnorm = lambda w: re.sub(r"[^a-zõäöüšž0-9]+", " ", (w.get("t") or "").lower()).strip()
     kinds = {"all": lambda w: True,
              "paint": lambda w: cat(w) in PAINT or w.get("kind") == "known",
              "paper": lambda w: cat(w) in PAPER}
-    out = {"words": [{"g": g, "en": en, "et": et} for g, en, et, _ in VOCAB]}
+    out = {"words": [{"g": g, "en": en, "et": et} for g, en, et, _ in ALL]}
     for kn, ok in kinds.items():
         out[kn] = {}
-        for j, (_, en, _, _) in enumerate(VOCAB):
+        for j, (_, en, _, _) in enumerate(ALL):
             order = np.argsort(-Z[:, j]); picked, seen, per = [], set(), {}
             for r in order:
                 w = W[wi[r]]
@@ -124,7 +188,7 @@ def main():
                 if len(picked) == KEEP: break
             out[kn][en] = picked
     json.dump(out, open(os.path.join(HERE, "moods.json"), "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
-    print(f"moods.json: {len(VOCAB)} words x {len(kinds)} kinds, {KEEP} works each", flush=True)
+    print(f"moods.json: {len(ALL)} words x {len(kinds)} kinds, {KEEP} works each", flush=True)
 
 if __name__ == "__main__":
     main()
