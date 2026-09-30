@@ -815,6 +815,10 @@ for g in GAL:
     na = NOBA_ARTISTS.get(g["artist"]) or {}
     if na.get("bio") and not artists[ai].get("b") and not artists[ai].get("ben"):
         artists[ai]["b"], artists[ai]["bs"] = na["bio"], "noba"
+    # ...or from the page that shows the work: Lihtsad Kipskassid introduces each painter
+    # of a collaboration (tagged "kk"), again only where there is no biography at all
+    elif g.get("bio") and not artists[ai].get("b") and not artists[ai].get("ben"):
+        artists[ai]["b"], artists[ai]["bs"] = g["bio"], "kk"
     y = int(g["year"]) if g.get("year") and g["year"].isdigit() else None
     tech = g.get("tech") or None
     works.append({"a": ai, "t": g["title"], "y": y,

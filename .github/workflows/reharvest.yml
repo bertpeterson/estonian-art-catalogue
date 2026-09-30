@@ -52,6 +52,17 @@ jobs:
             python3 -u $s.py
           done
 
+      # a new Lihtsad Kipskassid photograph is shown only once looked at for people
+      # (data/kipskassid_check.py); the models are installed only in a week that has one
+      - name: Look at new plaster-cat photographs
+        working-directory: data
+        run: |
+          if python3 kipskassid_check.py --todo; then
+            pip install -q --index-url https://download.pytorch.org/whl/cpu torch==2.8.0
+            pip install -q open_clip_torch==3.3.0 opencv-python-headless==5.0.0.93 pillow==12.3.0 numpy==2.5.3
+            python3 kipskassid_check.py && python3 kipskassid.py
+          fi
+
       - name: Refuse a collapsed harvest
         working-directory: data
         run: python3 harvest_guard.py after
