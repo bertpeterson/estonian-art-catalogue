@@ -22,7 +22,7 @@ has one), the shape the photograph has without its colour chart, the chart's sid
 cropped away, and a link to the record in the catalogue.
 Run after build_stats.py (it adds to the sitemap) and before csp.py.
 """
-import json, os, re, hashlib, datetime
+import json, os, re, hashlib, datetime, urllib.parse
 import build_hubs as H
 import sys; sys.path.insert(0, "data")
 from shape_of import shape_of
@@ -108,14 +108,13 @@ T = {"en": dict(file="mood.html", other="meeleolu.html", other_l="Eesti keeles",
 LABEL_EN = {"stilllife": "still life"}
 
 def data():
+    """the page's own data (words, artists, holders, stems) and, apart, each kind's works and
+    rankings -- a visitor on Paintings fetches only the paintings (was every kind's works
+    in one 1.1 MB file before the first picture)"""
     M = json.load(open("data/moods.json", encoding="utf-8"))
     by_key = {H.key(w): w for w in W if w.get("im")}
-    aidx, arts = {}, []
-    works, wi = [], {}
-    def ref(k):
-        if k in wi: return wi[k]
-        w = by_key.get(k)
-        if not w: return None
+    aidx, arts, mus = {}, [], {}
+    def tile(w, k):
         im = H.SMALL.get(w["im"], w["im"])
         if im.startswith("g:"):
             u = re.sub(r"^http:", "https:", im[2:])
@@ -128,20 +127,26 @@ def data():
         a = w["a"]
         if a not in aidx: aidx[a] = len(arts); arts.append([A[a]["n"], H.ARTIST_SLUG[a]])
         mu = V["mu"][w["mu"]] if isinstance(w.get("mu"), int) else (w.get("mu") or "")
-        wi[k] = len(works)
-        works.append([w.get("t") or "", aidx[a], w.get("y") or "", im, round(min(2.2, max(0.45, r)) * 100), ch[0] if ch else "", k, mu])
-        return wi[k]
-    lists = {}
+        mus.setdefault(mu, len(mus))
+        return [w.get("t") or "", aidx[a], w.get("y") or "", im, round(min(2.2, max(0.45, r)) * 100), ch[0] if ch else "", k, mus[mu]]
+    kinds = {}
     for kind in ("paint", "paper", "all"):
-        lists[kind] = {}
+        works, wi, lists = [], {}, {}
         for word, lst in M[kind].items():
-            lists[kind][word] = [[i, round(z, 1)] for i, z in ((ref(k), z) for k, z in lst) if i is not None]
-    mus = sorted({x[7] for x in works})
-    for x in works: x[7] = mus.index(x[7])
+            out = []
+            for k, z in lst:
+                if k not in wi:
+                    w = by_key.get(k); t = tile(w, k) if w else None
+                    if t is None: wi[k] = None; continue
+                    wi[k] = len(works); works.append(t)
+                if wi[k] is not None: out.append([wi[k], round(z, 1)])
+            lists[word] = out
+        kinds[kind] = {"works": works, "lists": lists}
+    mu_names = sorted(mus, key=mus.get)
     stems = {w: s.split() for w, s in STEMS.items()}
     for w in M["words"]: w["label"] = LABEL_EN.get(w["en"], w["en"])      # the English the page shows; "en" is the word's id
-    return ({"words": M["words"], "works": works, "artists": arts,
-             "mu": mus, "mu_en": [H.MUSEUM_EN.get(m, m) for m in mus], "stems": stems}, lists)
+    return ({"words": M["words"], "artists": arts, "mu": mu_names, "mu_en": [H.MUSEUM_EN.get(m, m) for m in mu_names],
+             "stems": stems}, kinds)
 
 CSS = """
 :root{--paper:#0B0C0E;--raise:#111316;--field:#15171A;--ink:#F1F2F4;--ink-soft:#C7CACE;--grey:#8B9098;--rule:#2B2E34;--on:#F1F2F4;--on-ink:#0B0C0E;
@@ -175,7 +180,8 @@ form.describe input:focus{outline:2px solid var(--ink);outline-offset:1px}
 .seg{display:flex}.seg .btn+.btn{border-left:0}.seg .btn[aria-pressed=true]{background:var(--on);color:var(--on-ink);border-color:var(--on)}
 .status{font:500 .78rem/1.4 var(--mono);color:var(--grey);letter-spacing:.03em;font-variant-numeric:tabular-nums}
 .status b{color:var(--ink);font-weight:500}
-.wall{display:flex;gap:14px;align-items:flex-start}.col{flex:1 1 0;min-width:0;display:grid;gap:18px}
+.wall{display:flex;gap:14px;align-items:flex-start}
+.wall.static{display:block;columns:5 190px;column-gap:14px}.wall.static .t{break-inside:avoid;margin:0 0 18px}.col{flex:1 1 0;min-width:0;display:grid;gap:18px}
 .t{display:block;text-decoration:none}
 .t img{display:block;width:100%;height:auto;object-fit:cover;background:var(--field)}
 .t span{display:block;padding-top:6px;font-size:.76rem;line-height:1.3;color:var(--grey)}
@@ -231,7 +237,7 @@ function chips() {
   document.querySelectorAll("[data-k]").forEach(b => b.setAttribute("aria-pressed", b.dataset.k === kind));
 }
 function ranked(ls) {
-  const per = sel.map(w => ls[w] || []);
+  const per = sel.map(w => ls.lists[w] || []);
   const maps = per.map(l => new Map(l)), floors = per.map(l => l.length ? l[l.length - 1][1] - 0.5 : 0);
   const score = new Map();
   per.forEach(l => l.forEach(([i]) => score.set(i, 0)));
@@ -243,7 +249,7 @@ async function wall() {
   if (!sel.length) { wallEl.textContent = ""; st.textContent = T.none; $("more").hidden = true; return; }
   const want = kind, ls = await lists(want).catch(() => null);
   if (want !== kind) return;                                  // a newer choice has been made meanwhile
-  wallEl.textContent = "";
+  wallEl.textContent = ""; wallEl.classList.remove("static");
   if (!ls) { st.textContent = T.failed; return; }
   const all = ranked(ls), top = all.slice(0, shown);
   st.textContent = "";
@@ -254,7 +260,7 @@ async function wall() {
   for (let j = 0; j < n; j++) { const c = document.createElement("div"); c.className = "col"; cols.push(c); hs.push(0); wallEl.append(c); }
   lastCols = n;
   for (const i of top) {
-    const [t, ai, y, im, r, rs, k, mu] = D.works[i], [an, as] = D.artists[ai];
+    const [t, ai, y, im, r, rs, k, mu] = ls.works[i], [an, as] = D.artists[ai];
     const a = document.createElement("a"); a.className = "t";
     a.href = "./#" + T.hash + "artist=" + as + "&open=" + encodeURIComponent(k);
     a.title = `${t} · ${an}${y ? ", " + y : ""} · ${(L === "en" ? D.mu_en : D.mu)[mu]}`;
@@ -317,8 +323,37 @@ addEventListener("hashchange", () => { if (D) { readHash(); shown = 48; chips();
 })();
 """
 
-def page(lang, ver, api):
+START = "serene"          # the word the page opens on, written into the HTML as it will look
+
+def imsrc(im):
+    return ("https://www.muis.ee/digitaalhoidla/api/meedia/pisipilt?id=" + urllib.parse.quote(im[2:], safe="")) if im.startswith("m:") \
+        else ("https://digikogu.ekm.ee/static/preview/image/" + re.sub(r"/([^/]+)$", r"/t2_\1", im[2:])) if im.startswith("e:") else im[2:]
+
+def baked(lang, d, kinds):
+    """the chips and the opening wall, written out: what a search engine (or a reader
+    without the script) sees; the script lays them out again when it runs"""
+    t, label = T[lang], (lambda w: w["et"] if lang == "et" else w["label"])
+    chips = "".join(f'<div class="group"><div class="gname">{e(t["groups"][g])}</div><div class="chips">'
+                    + "".join(f'<button type="button" class="chip" aria-pressed="{str(w["en"] == START).lower()}">{e(label(w))}</button>'
+                              for w in d["words"] if w["g"] == g) + "</div></div>" for g in t["groups"])
+    K = kinds["paint"]; top = K["lists"].get(START, [])[:48]
+    tiles = []
+    for n, (i, _) in enumerate(top):
+        ti, ai, y, im, r, rs, k, mu = K["works"][i]; an, as_ = d["artists"][ai]
+        pos = {"l": "100% 50%", "r": "0% 50%", "t": "50% 100%", "b": "50% 0%"}.get(rs)
+        style = f"aspect-ratio:1 / {r / 100:.3f}" + (f";object-position:{pos}" if pos else "")
+        lazy = "" if n < 10 else ' loading="lazy"'           # the first row at once, the rest as they come near
+        tiles.append(f'<a class="t" href="./#{t["hash"]}artist={as_}&amp;open={e(urllib.parse.quote(k))}">'
+                     f'<img src="{e(imsrc(im))}" alt="{e(ti)}, {e(an)}"{lazy} decoding="async" '
+                     f'referrerpolicy="no-referrer-when-downgrade" style="{style}">'
+                     f'<span><i>{e(ti)}</i>{e(an)}{", " + str(y) if y else ""}</span></a>')
+    word = next((label(w) for w in d["words"] if w["en"] == START), START)
+    status = f'<b>{e(word)}</b> · {e(t["kinds"]["paint"])} · {len(top)} {e(t["of"])} {len(K["lists"].get(START, []))} {e(t["works"])}'
+    return chips, "".join(tiles), status
+
+def page(lang, ver, api, d, kinds):
     t = T[lang]
+    chips, tiles, status = baked(lang, d, kinds)
     me, other = f"{BASE}/{t['file']}", f"{BASE}/{t['other']}"
     tj = json.dumps({k: t[k] for k in ("groups", "kinds", "none", "nomatch", "of", "works", "loading", "hash", "readas", "reading", "failed")}, ensure_ascii=False).replace("</", "<\\/")
     api_attr = f' data-api="{e(api)}"' if api else ""        # the Worker that reads a typed description
@@ -335,11 +370,11 @@ def page(lang, ver, api):
             f'<form class="describe" id="describe"><label for="feel">{e(t["describe"])}</label>'
             f'<input id="feel" type="text" autocomplete="off" placeholder="{e(t["ph"])}"><button class="btn solid" type="submit">{e(t["find"])}</button>'
             f'<p class="msg" id="msg" hidden></p></form>'
-            f'<div class="groups" id="groups"></div>'
+            f'<div class="groups" id="groups">{chips}</div>'
             f'<div class="bar"><div class="seg" role="group">{kinds}</div>'
             f'<button type="button" class="btn" id="surprise">{e(t["surprise"])}</button><button type="button" class="btn" id="clear">{e(t["clear"])}</button>'
-            f'<span class="status" id="status" aria-live="polite"></span></div>'
-            f'<div class="wall" id="wall" data-src="data/mood.json?v={ver}"{api_attr}></div>'
+            f'<span class="status" id="status" aria-live="polite">{status}</span></div>'
+            f'<div class="wall static" id="wall" data-src="data/mood.json?v={ver}"{api_attr}>{tiles}</div>'
             f'<button type="button" class="btn more" id="more" hidden>{e(t["more"])}</button>'
             f'<footer>{e(t["note"])} {H.CONTACT[lang]}</footer></div>'
             f'<script type="application/json" id="t">{tj}</script><script>{JS}</script></body></html>')
@@ -365,14 +400,14 @@ def main():
     for k, v in parts.items(): open(f"site/data/mood-{k}.json", "w", encoding="utf-8").write(v)
     urls = []
     for lang in ("en", "et"):
-        open(f"site/{T[lang]['file']}", "w", encoding="utf-8").write(page(lang, ver, API)); urls.append(f"{BASE}/{T[lang]['file']}")
+        open(f"site/{T[lang]['file']}", "w", encoding="utf-8").write(page(lang, ver, API, d, lists)); urls.append(f"{BASE}/{T[lang]['file']}")
     sm = open("site/sitemap.xml", encoding="utf-8").read()
     today = datetime.date.today().isoformat()
     add = "".join(f'<url><loc>{u}</loc><lastmod>{today}</lastmod><changefreq>monthly</changefreq></url>' for u in urls)
     open("site/sitemap.xml", "w", encoding="utf-8").write(sm.replace("</urlset>", add + "</urlset>"))
     if os.path.exists("worker/template.js"): worker()
-    print(f"  by mood        {len(d['words'])} words, {len(d['works']):,} works; mood.json {len(blob) // 1024} KB, "
-          + ", ".join(f"{k} {len(v) // 1024} KB" for k, v in parts.items()) + f"; typed text read by {'the Worker' if API else 'stems only'}")
+    print(f"  by mood        {len(d['words'])} words; mood.json {len(blob) // 1024} KB, "
+          + ", ".join(f"{k} {len(lists[k]['works']):,} works {len(v) // 1024} KB" for k, v in parts.items()) + f"; typed text read by {'the Worker' if API else 'stems only'}")
 
 if __name__ == "__main__":
     main()

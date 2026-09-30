@@ -344,7 +344,7 @@
   }
   const SRCFULL = {muis:"catalogued in MuIS only", ekm:"catalogued in the EKM Digital Collection only", ekmmuis:"in both catalogues, merged on inventory number", cca:"Estonian Centre for Contemporary Art", ekkm:"Contemporary Art Museum of Estonia"};
   const stag = s => s==="ed" ? '<span class="tag">ed</span>' : s==="ekm" ? '<span class="tag">EKM</span>'
-                  : s==="wd" ? '<span class="tag">Wikidata</span>' : s==="noba" ? '<span class="tag">NOBA</span>' : s==="vaal" ? '<span class="tag">Vaal</span>'
+                  : s==="wd" ? '<span class="tag">Wikidata</span>' : s==="noba" ? '<span class="tag">NOBA</span>' : s==="kk" ? '<span class="tag">Kipskassid</span>' : s==="vaal" ? '<span class="tag">Vaal</span>'
                   : s==="cca" ? '<span class="tag">CCA</span>' : '<span class="tag">MuIS</span>';
 
   const state = {group:"decade", decOrder:"earliest", q:"", list:false, shared:null, sale:false,
@@ -1055,7 +1055,7 @@
           <div class="d-k">${esc(T("d_artist"))}</div><div class="d-v">${state.artist === null ? `<span class="r-alink" data-artist="${w.a}" title="${esc(T("allworksby", {n: ar.n}))}">${esc(ar.n)}</span>` : esc(ar.n)} <em>${esc(life)}</em>${stag(ar.ls)}${ar.ai?` <a class="permalink" style="margin-left:8px" href="https://digikogu.ekm.ee/authors/author_id-${esc(ar.ai)}" target="_blank" rel="noopener">${esc(T("d_artistrec"))}</a>`:""}</div>
           <div class="d-k">${esc(T("d_dating"))}</div><div class="d-v">${
             w.yl ? esc(dateLabel(w)) + (w.dsrc==="title" ? ` <em>${esc(T("d_fromtitle"))}</em>` : w.dsrc==="artist" ? ` <em>${esc(T("d_fromartist"))}</em>` : w.dsrc==="impression" ? ` <em>${esc(T("d_fromimpression"))}</em>` : "")
-                 : `<em>${esc(T("d_nodate",{n:ar.n,l:(ar.l[0]||"?")+"–"+(ar.l[1]||"")}))}</em>`}${
+                 : `<em>${esc(T(w.kind === "auction" ? "d_nodate_a" : w.s === "gallery" ? "d_nodate_g" : "d_nodate",{n:ar.n,l:(ar.l[0]||"?")+"–"+(ar.l[1]||"")}))}</em>`}${
             w.f ? `<br><em>${esc(T(w.f === "pre" ? (w.y == null ? "d_prebirth_u" : "d_prebirth") : (w.y == null ? "d_postdeath_u" : "d_postdeath"), {l:(ar.l[0]||"?")+"–"+(ar.l[1]||"")}))}</em>` : ""}</div>
           <div class="d-k">${esc(T("d_technique"))}</div><div class="d-v">${techName(w)?esc(cap(techName(w))):"—"}</div>
           <div class="d-k">${esc(T("d_material"))}</div><div class="d-v">${matName(w)?esc(cap(matName(w))):"—"}</div>

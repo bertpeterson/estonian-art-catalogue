@@ -110,7 +110,12 @@ for src in dict.fromkeys(re.findall(r'(/kassikesed/grupp-\d+/[^"\\]+?\.png)', h)
 # the collaborations, month by month
 KUU = {"jaanuar": 1, "veebruar": 2, "märts": 3, "aprill": 4, "mai": 5, "juuni": 6, "juuli": 7, "august": 8,
        "september": 9, "oktoober": 10, "november": 11, "detsember": 12}
-def collab(artist, title, label, kind, done, photo=None):
+def clean_bio(t):
+    """the painter's biography as the collab page gives it, without its link lines"""
+    lines = [l.strip() for l in (t or "").splitlines()]
+    lines = [l for l in lines if l and not re.match(r"(https?://|www\.)\S+$", l)]
+    return re.sub(r"\s*(https?://|www\.)\S+", "", " ".join(lines)).strip() or None
+def collab(artist, title, label, kind, done, photo=None, bio=None):
     title = re.sub(r'^["„“]+|["”“]+\.?$', "", (title or "").strip()).strip()      # '"Hiie. Mateeria enne vormi".'
     m = re.match(r"(\w+)\s+(\d{4})", (label or "").strip().lower())
     if not (artist and title and m): return
@@ -118,6 +123,7 @@ def collab(artist, title, label, kind, done, photo=None):
     r = rec(f"kipskass-{kind}-{slug(month)}-{year}-{slug(title)}", title, f"{BASE}/collab-kassid",
             series=f"{kind}, {month} {year}", **({"sold": True} if done else (seen(photo, small(photo)) if photo else {})))
     r["artist"], r["year"] = artist.strip(), year
+    if clean_bio(bio): r["bio"] = clean_bio(bio)
     recs.append(r)
 h = get("/collab-kassid", "kipskassid_collab")
 data = "".join(json.loads('"' + c + '"') for c in re.findall(r'self\.__next_f\.push\(\[1,"(.*?)"\]\)</script>', h, flags=re.S))
@@ -127,7 +133,7 @@ for sec in sections:
     for it in sec.get("items", []):
         done = sec.get("mode") == "archive" or (it.get("meta") or {}).get("status") == "müüdud"
         collab(it.get("name"), it.get("catName"), sec.get("title"), "collab", done,
-               f"/collab/cats/{it['catFile']}" if it.get("catFile") else None)
+               f"/collab/cats/{it['catFile']}" if it.get("catFile") else None, it.get("bio"))
 try: supers = json.loads(get("/api/supercollab/archive", "kipskassid_supercollab")).get("archives", [])
 except ValueError: supers = []
 for a in supers:
