@@ -11,7 +11,7 @@ import re, sys, urllib.request
 
 HOSTS = ["haus.ee", "www.kogogallery.ee", "temnikova.ee", "www.tutar.ee", "www.artrovert.ee", "rukigalerii.ee",
          "alleegalerii.ee", "vernissage.ee", "eestikunstioksjonid.ee", "www.vaal.ee", "oksjon.vaal.ee",
-         "www.e-kunstisalong.ee", "noba.ac", "konradmagi.ee", "artner.ee", "artandtonic.art", "tokkoarrak.ee",
+         "www.e-kunstisalong.ee", "noba.ac", "konradmagi.ee", "artner.ee", "artandtonic.art", "tokkoarrak.ee", "www.artman.ee",
          "www.lihtsadkipskassid.ee", "pub-f1ff4e6b13aa42b9a2f600dbf2dd13a5.r2.dev"]
 UA = "EstonianArtCatalogue/1.0 (museaal.ee; contact info@museaal.ee)"
 OURS = {"*", "estonianartcatalogue", "claudebot", "claude-user", "claude-searchbot", "anthropic-ai"}
@@ -39,7 +39,7 @@ def verdict(txt):
 # The addresses the harvesters ask for, where a site's rules could close one path and
 # not the rest: Tokko & Arrak's closes "?format=json" to every agent -- the whole site is
 # open, the JSON view is not. Each is tested as this project's agent and as "*".
-PATHS = {"artner.ee": ["/wp-json/wc/store/v1/products?per_page=100&page=1"],
+PATHS = {"artner.ee": ["/wp-json/wc/store/v1/products?per_page=100&page=1"], "www.artman.ee": ["/wp-json/wc/store/v1/products?per_page=100&page=1"],
          "artandtonic.art": ["/wp-json/wc/store/v1/products?per_page=100&page=1"],
          "tokkoarrak.ee": ["/kunsti-muuk", "/kunsti-muuk?offset=200", "/kunsti-muuk/p/work"],
          "noba.ac": ["/wp-json/wc/store/v1/products?per_page=100&page=1", "/et/kunstnik/artist/", "/et/kunst/work/"],
