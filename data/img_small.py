@@ -22,7 +22,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 UA = "EstonianArtCatalogue/1.0 (museaal.ee; contact info@museaal.ee)"
 OUT = "img_small.json"
-WP = {"alleegalerii.ee", "vernissage.ee", "www.kogogallery.ee", "kogogallery.ee", "artrovert.ee", "www.artrovert.ee", "artner.ee", "artandtonic.art"}
+WP = {"alleegalerii.ee", "vernissage.ee", "www.kogogallery.ee", "kogogallery.ee", "artrovert.ee", "www.artrovert.ee", "artner.ee", "artandtonic.art", "www.artman.ee"}
 WIDTH = 768
 
 W = json.load(open("data.json", encoding="utf-8"))["works"]
