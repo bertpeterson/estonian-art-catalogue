@@ -77,6 +77,83 @@ const SCHEMA_ASK = {
   additionalProperties: false,
 };
 
+// a photo of the visitor's room: where on the walls a work could hang, and how big that is. The
+// model marks the empty areas and one object of known size (the "ruler"); the centimetres are
+// worked out here from the pixels -- it places things in a picture better than it does sums
+const CORNERS = ["tl_x", "tl_y", "tr_x", "tr_y", "br_x", "br_y", "bl_x", "bl_y"];
+const WALL = {
+  type: "object",
+  properties: Object.assign(Object.fromEntries(CORNERS.map(k => [k, { type: "integer" }])),
+    { width_cm: { type: "integer" }, height_cm: { type: "integer" }, where: { type: "string" } }),
+  required: [...CORNERS, "width_cm", "height_cm", "where"],
+  additionalProperties: false,
+};
+const SCHEMA_ROOM = JSON.parse(JSON.stringify(SCHEMA_ASK));
+Object.assign(SCHEMA_ROOM.properties, {
+  room: { type: "string" },
+  walls: { type: "array", items: WALL },
+  ruler: { type: "object", properties: { object: { type: "string" }, x1: { type: "integer" }, y1: { type: "integer" },
+    x2: { type: "integer" }, y2: { type: "integer" }, cm: { type: "integer" } },
+    required: ["object", "x1", "y1", "x2", "y2", "cm"], additionalProperties: false },
+});
+const LINE = { type: "object", properties: { x1: { type: "integer" }, y1: { type: "integer" }, x2: { type: "integer" }, y2: { type: "integer" } },
+  required: ["x1", "y1", "x2", "y2"], additionalProperties: false };
+SCHEMA_ROOM.properties.lines = { type: "array", items: LINE };
+SCHEMA_ROOM.required.push("room", "walls", "ruler", "lines");
+const ROOM = (w, h) => "The visitor's last message comes with a photo of their room, " + w + " x " + h + " pixels (x from the left, " +
+  "y from the top). Find up to three empty areas of wall where a picture could hang: plain wall with nothing on it, typically " +
+  "above a sofa, bed, desk or sideboard, never over a window, door, mirror, shelf, radiator or TV. For each, give the four corners " +
+  "of the empty area in pixels (top-left, top-right, bottom-right, bottom-left), keeping a margin from furniture, the ceiling " +
+  "and corners. Follow the wall's perspective: the area's top and bottom edges run parallel to the wall's own horizontal lines " +
+  "in the photo (the skirting board, the ceiling line, the top of the sofa, a window frame), so in a photo taken at an angle " +
+  "the area is a trapezoid whose far side is shorter, not a rectangle; its left and right edges stay vertical. Estimate its width and height in cm; and say in a few words where it is " +
+  "('above the sofa'). Most promising area first. Also give a ruler: one horizontal edge of an object of known size against the " +
+  "same wall -- the width of a door (80 cm) if one is visible, else a sofa, bed, window or radiator -- its two end points in " +
+  "pixels and its real length in cm. Also give lines: two edges that are level in the room and run along the same wall as " +
+  "the first area -- the skirting board, the ceiling line, the top of the sofa, a shelf or window frame -- each by two end points " +
+  "as far apart as the photo shows; the page takes the wall's perspective from them. Set room to the kind of room in a word or two. Pick the search words from the room's " +
+  "colours, light and style, and set size from the largest area. In the reply, say briefly what you see and what would suit " +
+  "the space, and show works (show: true). Say nothing about any people in the photo.";
+// the wall's perspective from two of its level lines: they meet at its vanishing point (or are parallel,
+// in a photo taken straight on). Each area's top and bottom edges are turned to run towards it, about the
+// area's middle; an area the lines would turn inside out keeps the model's own corners
+function perspective(q, L) {
+  if (!Array.isArray(L) || L.length < 2) return q;
+  const [a, b] = L, d = (a.x1 - a.x2) * (b.y1 - b.y2) - (a.y1 - a.y2) * (b.x1 - b.x2);
+  const xl = (q[0][0] + q[3][0]) / 2, xr = (q[1][0] + q[2][0]) / 2, xm = (xl + xr) / 2;
+  const yt = (q[0][1] + q[1][1]) / 2, yb = (q[3][1] + q[2][1]) / 2;
+  let at;
+  if (Math.abs(d) < 1e-6 * Math.max(1, Math.abs(a.x1 - a.x2) * Math.abs(b.x1 - b.x2))) {
+    const s = ((a.y2 - a.y1) / (a.x2 - a.x1 || 1) + (b.y2 - b.y1) / (b.x2 - b.x1 || 1)) / 2;
+    at = (y, x) => y + s * (x - xm);
+  } else {
+    const p = a.x1 * a.y2 - a.y1 * a.x2, r = b.x1 * b.y2 - b.y1 * b.x2;
+    const vx = (p * (b.x1 - b.x2) - (a.x1 - a.x2) * r) / d, vy = (p * (b.y1 - b.y2) - (a.y1 - a.y2) * r) / d;
+    if (vx > xl - 50 && vx < xr + 50) return q;           // a vanishing point inside the area: the lines are wrong
+    at = (y, x) => y + (vy - y) * (x - xm) / (vx - xm);
+  }
+  const n = [[xl, at(yt, xl)], [xr, at(yt, xr)], [xr, at(yb, xr)], [xl, at(yb, xl)]];
+  const hl = n[3][1] - n[0][1], hr = n[2][1] - n[1][1];
+  if (!(hl > 10 && hr > 10 && hl / hr > 0.4 && hl / hr < 2.5)) return q;
+  return n.map(([x, y]) => [Math.round(x), Math.round(y)]);
+}
+
+// pixels to centimetres with the ruler; the model's own estimate where the ruler is unusable
+function walls(out, w, h) {
+  const R = out.ruler || {}, pxcm = R.cm >= 20 ? Math.hypot(R.x2 - R.x1, R.y2 - R.y1) / R.cm : 0;
+  const len = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
+  return (out.walls || []).slice(0, 3).map(x => {
+    const q = perspective([[x.tl_x, x.tl_y], [x.tr_x, x.tr_y], [x.br_x, x.br_y], [x.bl_x, x.bl_y]], out.lines)
+      .map(([a, b]) => [Math.max(0, Math.min(w, a | 0)), Math.max(0, Math.min(h, b | 0))]);
+    let wc = (len(q[0], q[1]) + len(q[3], q[2])) / 2, hc = (len(q[0], q[3]) + len(q[1], q[2])) / 2;
+    if (wc < 10 || hc < 10) return null;
+    if (pxcm >= 0.2 && pxcm <= 30 && wc / pxcm >= 20 && wc / pxcm <= 1000) { wc /= pxcm; hc /= pxcm; }
+    else { wc = x.width_cm; hc = x.height_cm; }
+    if (!(wc >= 30 && hc >= 30)) return null;           // a strip under the ceiling is no place for a picture
+    return { q, w_cm: Math.round(wc), h_cm: Math.round(hc), where: String(x.where || "").slice(0, 80) };
+  }).filter(Boolean);
+}
+
 // the conversation as the page sends it: user first, turns alternating, short
 function conversation(body) {
   const m = Array.isArray(body && body.messages) ? body.messages.slice(-12) : [];
@@ -128,14 +205,22 @@ async function ask(body, env, reply) {
   // the reply's language is decided here, not left to the model (it drifted): the visitor's last
   // message if it reads as one language, else the page's
   const et = langOf(messages[messages.length - 1].content, body.lang) === "et";
+  // a photo: a JPEG the page has shrunk (and so stripped of its location data), on the last message only
+  const img = typeof body.image === "string" && body.image.length < 4000000 && /^[A-Za-z0-9+/=]+$/.test(body.image) ? body.image : "";
+  const w = Math.round(Number(body.w) || 0), h = Math.round(Number(body.h) || 0), photo = !!img && w >= 100 && h >= 100 && w <= 4000 && h <= 4000;
+  if (photo) {
+    const last = messages[messages.length - 1];
+    last.content = [{ type: "image", source: { type: "base64", media_type: "image/jpeg", data: img } }, { type: "text", text: last.content }];
+  }
   const system = SYSTEM_ASK + "\n\n" + (et
     ? "Reply in Estonian: everyday spoken Estonian, addressing the visitor as 'sina', no exclamations."
-    : "Reply in English.");
-  try { out = await claude(env, system, messages, SCHEMA_ASK, et ? 800 : 400, et ? SONNET : MODEL); }
+    : "Reply in English.") + (photo ? "\n\n" + ROOM(w, h) : "");
+  try { out = await claude(env, system, messages, photo ? SCHEMA_ROOM : SCHEMA_ASK, photo ? 1500 : et ? 800 : 400, photo || et ? SONNET : MODEL); }
   catch (e) { return reply({ error: String(e.message || "The assistant could not be reached.") }, 502); }
   if (!out) return reply({ reply: "", show: false, words: [], kind: "any", size: "any", budget_min: 0, budget_max: 0 });
   const int = v => Math.max(0, Math.min(10000000, Math.round(Number(v) || 0)));
   return reply({
+    ...(photo ? { room: String(out.room || "").slice(0, 40), walls: walls(out, w, h) } : {}),
     reply: String(out.reply || "").slice(0, 600),
     show: !!out.show,
     words: [...new Set((out.words || []).filter(w => WORDS.includes(w)))].slice(0, 5),
@@ -151,6 +236,14 @@ function tooMany(ip) {
   t.push(now); seen.set(ip, t);
   if (seen.size > 5000) seen.clear();
   return t.length > PER_MINUTE;
+}
+
+const photos = new Map();        // visitor -> times of their recent photos: 6 a minute
+function tooManyPhotos(ip) {
+  const now = Date.now(), t = (photos.get(ip) || []).filter(x => now - x < 60000);
+  t.push(now); photos.set(ip, t);
+  if (photos.size > 5000) photos.clear();
+  return t.length > 6;
 }
 
 export default {
@@ -172,7 +265,10 @@ export default {
     let body = {};
     try { body = await request.json(); } catch (e) {}
     if (!env.ANTHROPIC_API_KEY) return reply({ error: "The service is not set up." }, 503);
-    if (new URL(request.url).pathname === "/ask") return ask(body, env, reply);
+    if (new URL(request.url).pathname === "/ask") {
+      if (body.image && tooManyPhotos(request.headers.get("CF-Connecting-IP") || "?")) return reply({ error: "Too many photos; wait a minute." }, 429);
+      return ask(body, env, reply);
+    }
 
     let q = "";
     try { q = String(body.q || "").replace(/\s+/g, " ").trim().slice(0, 200); } catch (e) {}
