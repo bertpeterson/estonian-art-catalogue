@@ -1,6 +1,6 @@
 # Estonian Art Catalogue · Eesti Kunstikataloog
 
-A browsable catalogue of **119,838 artworks** by **7,696 artists** — museum holdings from **32 Estonian public
+A browsable catalogue of **119,953 artworks** by **7,699 artists** — museum holdings from **32 Estonian public
 collections**, plus what twelve commercial galleries and dealers, one artist's own shop and the NOBA marketplace are selling right now,
 aggregated from the national museum databases and the galleries' own listings and presented as a static site.
 
@@ -26,17 +26,17 @@ will be.
 | [EKKM](https://ekkm.ee) | — | Contemporary Art Museum of Estonia |
 | Vaal galerii | 115 artists | Life dates printed beside every lot's artist in its sales, taken for artists no museum, Wikidata or biography dates, tagged *Vaal* |
 | [Wikidata](https://www.wikidata.org) | 1,629 artists | Dates, birthplace, description, training and art-historical affiliation — matched on name, gated on dates and occupation (see *Rules*) |
-| Twelve galleries and dealers, an artist's shop, and NOBA | 7,671 | Haus, Vernissage, Allee, E-Kunstisalong, Temnikova & Kasela, Tütar, Artrovert, Kogo, Ruki, Tokko & Arrak, Art & Tonic and the dealer Artner — current stock from each gallery's own site; Taavi Eelmaa's [Lihtsad Kipskassid](https://www.lihtsadkipskassid.ee), his painted plaster cats on sale and in his archive; and [NOBA](https://noba.ac), the Nordic-Baltic marketplace, for artists the catalogue already holds or whose NOBA page places them in Estonia. Metadata, and the asking price of a work still for sale where the gallery states one; never what a work sold for |
+| Twelve galleries and dealers, an artist's shop, and NOBA | 7,682 | Haus, Vernissage, Allee, E-Kunstisalong, Temnikova & Kasela, Tütar, Artrovert, Kogo, Ruki, Tokko & Arrak, Art & Tonic and the dealer Artner — current stock from each gallery's own site; Taavi Eelmaa's [Lihtsad Kipskassid](https://www.lihtsadkipskassid.ee), his painted plaster cats on sale and in his archive; and [NOBA](https://noba.ac), the Nordic-Baltic marketplace, for artists the catalogue already holds or whose NOBA page places them in Estonia. Metadata, and the asking price of a work still for sale where the gallery states one; never what a work sold for |
 | Auction results: Haus Galerii, E-Kunstisalong, Allee galerii, Vernissage, Vaal galerii, Eesti Kunsti Oksjonid | 13,122 lots | Every lot in Haus Galerii's hundred sales since 1998, E-Kunstisalong's thirty-five since 2008, Allee galerii's fifteen since 2020, Vernissage's fifteen since 2021, Vaal galerii's nine since 2022 and Eesti Kunsti Oksjonid's eighteen since 2023, as the house published it, plus five earlier record prices as the press reported them (`data/press_results.json`): starting price, hammer price, sold or unsold. A record of what happened at auction, not a valuation |
 | Konrad Mägi Foundation — catalogue of works | 99 works | The foundation's list of every Mägi painting, sketch and lost work it knows of (konradmagi.ee); the works in Estonian museums are here already, the rest enter as *known*: in a private collection, unnamed, or of unknown whereabouts |
 
-Of the works for sale, 2,859 are NOBA listings, 4,812 the galleries' own. NOBA also supplies a short
+Of the works for sale, 2,854 are NOBA listings, 4,828 the galleries' own. NOBA also supplies a short
 biography, written by the artist or NOBA, for 544 artists who have none from a museum, and a birth year
 read from that biography for 301 — both tagged *NOBA* on the page.
 
 21,675 objects appear in both MuIS and the EKM database and are merged on inventory number
 (MuIS `Number` = digikogu `Tulmenumber` + `Kogunumber`), which is why 109,929 source objects
-collapse to 119,838 works.
+collapse to 119,953 works.
 
 **Only attributed works are included.** Anonymous and unattributed objects are excluded by design — including 485 objects catalogued under the name *Tundmatu kunstnik* ("unknown artist"), which is the absence of an attribution written into the name field rather than a name. Notnames stay: *Püha Lucia legendi meister* and its kind identify a hand recognised across several works, and art history treats that as an attribution.
 
@@ -290,8 +290,8 @@ catalogue outgrew it at around 52,000 works.
 `data/data.json` is dictionary-encoded and nested, which suits the site and suits
 nobody else. Flat exports with every value resolved, one row per work:
 
-    site/data/export/works.csv.gz      120,240 rows
-    site/data/export/artists.csv.gz     7,696 rows
+    site/data/export/works.csv.gz      120,355 rows
+    site/data/export/artists.csv.gz     7,699 rows
     site/data/export/works.jsonl.gz     one JSON object per line
 
 Rebuild them with `python3 data/export_csv.py`. `data/validate.py` runs the sanity
@@ -516,7 +516,7 @@ a person.
 Code: MIT (see `LICENSE`).
 
 **Data is mixed, and the split is in the data itself.** Records marked `kind: held` —
-96,945 of them, 80.9% — derive from museum metadata published under CC0, which carries no
+96,945 of them, 80.8% — derive from museum metadata published under CC0, which carries no
 restriction on reuse, commercial included. The 9,985 records marked `kind: gallery` come from
 commercial galleries and the NOBA marketplace, which grant no licence; they are included as a
 public catalogue of current work, and anyone reusing this dataset should decide for themselves

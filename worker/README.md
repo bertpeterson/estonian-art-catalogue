@@ -36,5 +36,7 @@ is not stored.
 
 `/ask` (Find a work): the last twelve turns, 400 characters a visitor message; Claude's reply
 is capped at 600 characters and shown as plain text, never as HTML; the search fields are
-checked against the vocabulary and the allowed values. Each message is one Haiku call, about
-$0.002, under the same key and its monthly spend limit. Nothing is stored.
+checked against the vocabulary and the allowed values. Each message is one call: Haiku for
+English (about $0.002), Sonnet 5.5 for Estonian, where Haiku's Estonian was clumsy (about $0.004,
+thinking off, with Anthropic's server-side fallback for a mistaken safety decline). The Worker,
+not the model, picks the reply's language. Same key and monthly spend limit. Nothing is stored.
