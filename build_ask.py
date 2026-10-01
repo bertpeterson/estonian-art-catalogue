@@ -53,7 +53,7 @@ T = {"en": dict(file="find.html", other="leia.html", other_l="Eesti keeles", sit
                 h="Find a work", lede="Looking for something for your wall? Tell the assistant where it will hang, what you would like to spend and the feeling you are after, or send a photo of the wall: it finds the space, picks works that fit it and hangs them there for you to see. It looks through the works the catalogue's galleries have for sale now, and each one links to the gallery that sells it.",
                 hello="Looking for something? Tell me the room, your budget and the mood, or send a photo of the wall.",
                 photo="Photo of your wall", yourroom="Your room", looking="Looking at your room…", photomsg="(a photo of my room)",
-                wallw="Wall space, width", drag="Drag the room to look around it; scroll or pinch to step closer. Drag a work to move it along the wall, or onto another outlined space. If the sizes look wrong, set the wall's width.", reset="Reset view", onwall="On my wall",
+                wallw="Wall space, width", drag="Drag the room to look around it; scroll or pinch to step closer. Drag a work to move it along the wall, or onto another outlined space. If the sizes look wrong, set the wall's width.", reset="Reset view", ar="See it on your wall (AR)", arwait="Making the model…", arfail="AR could not be opened", onwall="On my wall",
                 choose="Tap a work to hang it", hangmore="Hang another", remove="Take it down", together="{n} works on the wall",
                 frames=dict(none="No frame", black="Black", oak="Oak", white="White", gold="Gold"),
                 fits="fits", roomnote="Room", nowall="I couldn't find a clear stretch of wall in that photo. Try one taken straight on, with the empty wall in view.",
@@ -70,7 +70,7 @@ T = {"en": dict(file="find.html", other="leia.html", other_l="Eesti keeles", sit
                 h="Leia teos", lede="Otsid midagi seinale? Ütle abilisele, kuhu see tuleb, kui palju tahad kulutada ja millist tunnet otsid, või saada foto seinast: ta leiab vaba koha, valib sinna sobivad teosed ja riputab need pildile, et saaksid vaadata. Ta vaatab läbi teosed, mis kataloogi galeriidel praegu müügil on, ja iga teos viib seda müüva galerii lehele.",
                 hello="Otsid midagi? Ütle, mis tuppa, mis eelarvega ja mis meeleoluga, või saada foto seinast.",
                 photo="Foto seinast", yourroom="Sinu tuba", looking="Vaatan su tuba…", photomsg="(foto minu toast)",
-                wallw="Vaba seinaosa laius", drag="Lohista tuba, et ringi vaadata; keri või näpista, et lähemale astuda. Lohista teost, et seda seinal liigutada või teisele märgitud kohale viia. Kui suurused tunduvad valed, sea seina laius õigeks.", reset="Algvaade", onwall="Minu seinale",
+                wallw="Vaba seinaosa laius", drag="Lohista tuba, et ringi vaadata; keri või näpista, et lähemale astuda. Lohista teost, et seda seinal liigutada või teisele märgitud kohale viia. Kui suurused tunduvad valed, sea seina laius õigeks.", reset="Algvaade", ar="Vaata oma seinal (AR)", arwait="Teen mudelit…", arfail="AR-i ei õnnestunud avada", onwall="Minu seinale",
                 choose="Puuduta teost, et see seinale riputada", hangmore="Riputa veel üks", remove="Võta maha", together="Seinal {n} teost",
                 frames=dict(none="Raamita", black="Must", oak="Tamm", white="Valge", gold="Kuld"),
                 fits="mahub", roomnote="Tuba", nowall="Ma ei leidnud sellelt fotolt vaba seinaosa. Proovi fotot, mis on tehtud otse seina poole ja kus tühi sein on näha.",
@@ -152,9 +152,15 @@ function look(r,yaw,pitch,zoom){var o=r.view;r.view={yaw:yaw,pitch:pitch,zoom:Ma
   var H=viewH(r);if(!covers(r,H)){r.view=o;return false}r.VH=H;r.VHi=homography([[0,0],[r.W,0],[r.W,r.H],[0,r.H]].map(function(p){return apply(H,p)}),[[0,0],[r.W,0],[r.W,r.H],[0,r.H]]);
   var M=H;r.scene.style.transform='scale('+(r.stage.clientWidth/r.W)+') matrix3d('+[M[0],M[3],0,M[6],M[1],M[4],0,M[7],0,0,1,0,M[2],M[5],0,1].join(',')+')';return true}
 function wallCm(r,i){var w=r.walls[i];return [w.w_cm*r.scale,w.h_cm*r.scale]}
-// outer size in cm: the long side from the record, the other from the picture's own shape, then mat and frame
-function size(it){var d=it.w[13],n=it.pic,k=n.naturalHeight/n.naturalWidth,land=k<=1;
-  var aw=land?d[0]:d[0]/k, ah=land?d[0]*k:d[0], f=FRAMES[it.frame], m=f&&it.w[7]==='paper'?Math.max(4,Math.min(9,Math.max(aw,ah)*.12)):0;
+// the picture to hang: the gallery's full one (NOBA's "_thumb" is a square crop of the work)
+function full(w){return w[3].replace(/_thumb(\.\w+)$/,'$1')}
+// the work's shape: the picture's, unless it disagrees with the record by over a quarter -- a crop or a
+// photograph with room round it -- when the record's sides win and the picture is cropped to them
+function shape(w,n){var d=w[13],k=n.naturalHeight/n.naturalWidth,land=k<=1,rec=d[1]/d[0],img=land?k:1/k;
+  var fit=Math.abs(Math.log(img/rec))<=Math.log(1.25);if(!fit)k=land?rec:1/rec;
+  return {aw:land?d[0]:d[0]/k,ah:land?d[0]*k:d[0],crop:!fit}}
+// outer size in cm: the work, then mat and frame
+function size(it){var sh=shape(it.w,it.pic),aw=sh.aw,ah=sh.ah,f=FRAMES[it.frame], m=f&&it.w[7]==='paper'?Math.max(4,Math.min(9,Math.max(aw,ah)*.12)):0;
   return {f:f,m:m,W:aw+2*(m+f),H:ah+2*(m+f)}}
 // the work's four corners in the photo; dx, dy move it on the wall, in cm (its shadow)
 function quadOf(r,it,s,dx,dy){var c=wallCm(r,it.wall),H=r.walls[it.wall].H,fw=s.W/c[0],fh=s.H/c[1],u=it.u+(dx||0)/c[0],v=it.v+(dy||0)/c[1];
@@ -163,7 +169,7 @@ function m3d(e,w,h,q){var M=homography([[0,0],[w,0],[w,h],[0,h]],q);e.style.widt
   e.style.transform='matrix3d('+[M[0],M[3],0,M[6],M[1],M[4],0,M[7],0,0,1,0,M[2],M[5],0,1].join(',')+')'}
 function inPhoto(r,q){return q.every(function(p){return p[0]>=-4&&p[1]>=-4&&p[0]<=r.W+4&&p[1]<=r.H+4})}
 function layout(r,it){if(!it.pic.naturalWidth)return;var s=size(it);
-  it.el.className='hang f-'+it.frame+(it===r.sel&&r.items.length>1?' sel':'');
+  it.el.className='hang f-'+it.frame+(it===r.sel&&r.items.length>1?' sel':'')+(shape(it.w,it.pic).crop?' crop':'');
   it.el.style.setProperty('--f',s.f*PX+'px');it.el.style.setProperty('--m',s.m*PX+'px');
   m3d(it.el,s.W*PX,s.H*PX,quadOf(r,it,s));m3d(it.shade,s.W*PX,s.H*PX,quadOf(r,it,s,1.2,2.5));
   it.el.hidden=it.shade.hidden=false}
@@ -181,6 +187,7 @@ function caption(r){
   var l=el('a',null,(w[8]?eur(w[8]):T.noprice)+' '+(T.at?T.at+' ':'')+g+' ↗');l.href=w[10];l.target='_blank';l.rel='noopener';
   l.addEventListener('click',function(){if(window.goatcounter&&goatcounter.count)goatcounter.count({path:'find-out',title:g,event:true})});
   p.appendChild(l);c.appendChild(p);
+  if(AR&&w[13])c.appendChild(arButton(w,function(){return it.frame}));
   if(r.items.length>1){
     var sum=r.items.reduce(function(a,x){return a+(x.w[8]||0)},0),all=r.items.every(function(x){return x.w[8]});
     c.appendChild(el('p','total',T.together.replace('{n}',r.items.length)+(all?' · '+eur(sum):'')));
@@ -220,7 +227,7 @@ function hang(r,w,add){
       var cands=[right+gap+half,left-gap-half,it.u+.08];
       for(var i=0;i<cands.length;i++){it.u=cands[i];if(inPhoto(r,quadOf(r,it,s)))break}}
     draw(r)};
-  it.pic.src=w[3];draw(r)}
+  it.pic.src=full(w);draw(r)}
 // the suggestions under the photo: tap one to put it on the wall
 function fill(r,list){
   r.list=list.filter(function(w){return w[13]});r.n=0;r.strip.textContent='';
@@ -271,6 +278,43 @@ function roomView(b,photo,walls){
   b.appendChild(v);r.v=v;rooms.push(r);draw(r);return r}
 window.addEventListener('resize',function(){rooms.forEach(draw)});
 
+// ---- AR: the work as a small 3D model at its real size, for the phone's own AR viewer to hang on a real wall ----
+// iPhone and iPad: AR Quick Look takes a USDZ file (three.js writes it here, in the browser) anchored to a wall,
+// at true scale (no pinching it bigger). The picture's pixels must be readable, so it comes through the
+// page's own origin (data-img), fetched as asked for, never kept. Built only when tapped.
+var ARDEBUG=/ardebug/.test(location.hash), AR=ARDEBUG||(function(){var a=document.createElement('a');return !!(a.relList&&a.relList.supports&&a.relList.supports('ar'))})();
+function viaUs(u){return page.dataset.img?page.dataset.img+encodeURIComponent(u):u}
+function loadImg(u){return new Promise(function(ok,no){var i=new Image();i.crossOrigin='anonymous';i.onload=function(){ok(i)};i.onerror=no;i.src=u})}
+var FRAME_COL={black:[0x161616,.55,0],oak:[0xb88a52,.7,0],white:[0xf0eee8,.6,0],gold:[0xc9a13b,.35,.7]};
+function usdz(w,frame){
+  return Promise.all([import('three'),import('three/addons/exporters/USDZExporter.js'),loadImg(viaUs(full(w)))]).then(function(m){
+    var THREE=m[0],img=m[2],sh=shape(w,img);
+    var aw=sh.aw/100,ah=sh.ah/100,f=FRAMES[frame]/100,mt=f&&w[7]==='paper'?Math.max(.04,Math.min(.09,Math.max(aw,ah)*.12)):0,D=.03;
+    var g=new THREE.Group(),mesh=function(geo,mat,x,y,z){var o=new THREE.Mesh(geo,mat);o.position.set(x,y,z);g.add(o);return o};
+    // a picture cropped to the record's shape is cut on a canvas (the exporter writes no texture offsets)
+    var src=img;if(sh.crop){var iw=img.naturalWidth,ih=img.naturalHeight,rw=aw/ah,cw=Math.min(iw,ih*rw),ch=cw/rw;
+      src=document.createElement('canvas');src.width=Math.round(cw);src.height=Math.round(ch);src.getContext('2d').drawImage(img,(iw-cw)/2,(ih-ch)/2,cw,ch,0,0,src.width,src.height)}
+    var tex=new THREE.Texture(src);tex.colorSpace=THREE.SRGBColorSpace;tex.needsUpdate=true;
+    // the picture on the front (+z, facing the room), on a board: the mat, or a canvas's own edge
+    mesh(new THREE.PlaneGeometry(aw,ah),new THREE.MeshStandardMaterial({map:tex,roughness:.9,metalness:0}),0,0,D/2+.0015);
+    mesh(new THREE.BoxGeometry(aw+2*mt,ah+2*mt,D),new THREE.MeshStandardMaterial({color:mt?0xf5f2ea:0xe8e4dc,roughness:.95}),0,0,0);
+    if(f){var c=FRAME_COL[frame],fm=new THREE.MeshStandardMaterial({color:c[0],roughness:c[1],metalness:c[2]}),W=aw+2*(mt+f),H=ah+2*(mt+f),Df=D+.012;
+      mesh(new THREE.BoxGeometry(W,f,Df),fm,0,(H-f)/2,.006);mesh(new THREE.BoxGeometry(W,f,Df),fm,0,-(H-f)/2,.006);
+      mesh(new THREE.BoxGeometry(f,H-2*f,Df),fm,-(W-f)/2,0,.006);mesh(new THREE.BoxGeometry(f,H-2*f,Df),fm,(W-f)/2,0,.006)}
+    var scene=new THREE.Scene();scene.add(g);
+    return new m[1].USDZExporter().parseAsync(scene,{ar:{anchoring:{type:'plane'},planeAnchoring:{alignment:'vertical'}},quickLookCompatible:true,maxTextureSize:2048})})
+  .then(function(buf){return new Blob([buf],{type:'model/vnd.usdz+zip'})})}
+function arButton(w,frameOf){
+  var b=el('button','btn arbtn',T.ar);b.type='button';
+  b.addEventListener('click',function(){if(b.disabled)return;b.disabled=true;b.textContent=T.arwait;
+    usdz(w,frameOf()).then(function(blob){
+      if(ARDEBUG){return fetch('/save',{method:'POST',body:blob}).then(function(){b.textContent='saved '+blob.size})}
+      var a=document.createElement('a');a.rel='ar';a.href=URL.createObjectURL(blob)+'#allowsContentScaling=0';a.appendChild(document.createElement('img'));
+      document.body.appendChild(a);a.click();setTimeout(function(){a.remove()},1000);b.textContent=T.ar;
+      if(window.goatcounter&&goatcounter.count)goatcounter.count({path:'find-ar',title:D.galleries[w[9]],event:true})})
+    .catch(function(){b.textContent=T.arfail}).then(function(){b.disabled=false})});
+  return b}
+
 function rank(q){
   var wt=[1,.8,.65,.5,.4], out=[], ws=R&&wallCm(R,R.sel?R.sel.wall:0);
   D.works.forEach(function(w){
@@ -306,6 +350,7 @@ function card(w){
   c.appendChild(out);
   if(R&&w[13]){var r=R,on=el('button','btn onwall',T.onwall);on.type='button';
     on.addEventListener('click',function(){hang(r,w);r.v.scrollIntoView({block:'center',behavior:'smooth'})});c.appendChild(on)}
+  if(AR&&w[13])c.appendChild(arButton(w,function(){return R&&R.sel?R.sel.frame:'black'}));
   var rec=el('a','rec',T.record);rec.href='./#'+T.hash+'artist='+a[1]+'&open='+encodeURIComponent(w[11]);c.appendChild(rec);
   return c}
 function show(b,q){
@@ -399,6 +444,7 @@ form.ask input:focus{outline:2px solid var(--ink);outline-offset:1px}
 .hang .fr,.hang .mat{box-sizing:border-box;width:100%;height:100%}
 .hang .fr{padding:var(--f)}.hang .mat{padding:var(--m);background:#f5f2ea}
 .hang img{display:block;width:100%;height:100%;pointer-events:none;box-shadow:-2px -2px 4px rgba(0,0,0,.28)}
+.hang.crop img{object-fit:cover}
 .hang::after{content:"";position:absolute;left:0;top:0;right:0;bottom:0;pointer-events:none;background:linear-gradient(165deg,rgba(255,255,255,.08),rgba(0,0,0,.1))}
 .hang.sel{outline:5px solid rgba(255,255,255,.9);outline-offset:8px}
 .f-none .mat{background:none}.f-none img{box-shadow:none}
@@ -425,6 +471,7 @@ form.ask input:focus{outline:2px solid var(--ink);outline-offset:1px}
 .room .placed,.room .total{margin:0;font-size:.9rem;color:var(--ink-soft)}.room .placed i{font:italic 400 1.02rem var(--serif);color:var(--ink)}.room .placed a{color:var(--ink)}
 .room .total{font:500 .78rem/1.4 var(--mono);color:var(--grey)}
 .room .caption .btn{padding:6px 9px;font-size:.64rem}
+.btn.arbtn{padding:6px 9px;font-size:.64rem;margin-top:2px;justify-self:start}
 .btn.onwall{justify-self:start;padding:6px 9px;font-size:.64rem;margin-top:2px}
 """
 
@@ -433,7 +480,7 @@ def page(lang, ver, api, labels):
     me, other = f"{BASE}/{t['file']}", f"{BASE}/{t['other']}"
     tj = json.dumps({k: t[k] for k in ("more", "at", "noprice", "none", "thinking", "failed", "record", "kinds", "sizes", "under", "over", "shown", "hash",
                                        "yourroom", "looking", "photomsg", "wallw", "drag", "onwall", "fits", "roomnote", "nowall", "badphoto",
-                                       "choose", "hangmore", "remove", "together", "frames", "reset")}, ensure_ascii=False).replace("</", "<\\/")
+                                       "choose", "hangmore", "remove", "together", "frames", "reset", "ar", "arwait", "arfail")}, ensure_ascii=False).replace("</", "<\\/")
     lj = json.dumps(labels, ensure_ascii=False).replace("</", "<\\/")
     ask = (api.rstrip("/") + "/ask") if api else ""
     starters = "".join(f'<button type="button" class="chip starter">{e(s)}</button>' for s in t["starters"])
@@ -451,6 +498,7 @@ def page(lang, ver, api, labels):
             f'<button class="btn solid" type="submit">{e(t["send"])}</button>'
             f'<input id="photo" type="file" accept="image/*" hidden><label for="photo" class="btn photobtn" role="button" tabindex="0">{e(t["photo"])}</label></form></section>'
             f'<footer>{e(t["note"])} {H.CONTACT[lang]}</footer></div>'
+            f'<script type="importmap">{{"imports":{{"three":"https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/"}}}}</script>'
             f'<script type="application/json" id="t">{tj}</script><script type="application/json" id="labels">{lj}</script><script>{JS}</script></body></html>')
 
 def main():
