@@ -6,9 +6,10 @@ sale in September 2026: Alo Valge, Rauno Thomas Moss, Alar Tuul, Marko Mäetamm)
 Read through the WooCommerce Store API; robots.txt permits everything. The artist is
 the product's category; the short description gives size, technique and year
 ("120×80 cm, õlimaal lõuendil, 2026"). A product out of stock is sold: kept, flagged.
-Prices are not read.
+The asking price of current stock is read (asking_price.py); a sold work's never.
 """
 import json, re, ssl, time, html, urllib.request
+from asking_price import asking
 UA = "EstonianArtCatalogue/1.0 (museaal.ee; contact info@museaal.ee)"
 API = "https://artandtonic.art/wp-json/wc/store/v1/products"
 ctx = ssl.create_default_context()
@@ -38,7 +39,7 @@ while True:
         tech = re.sub(r"(\d+(?:[.,]\d+)?\s*[x×]\s*\d+(?:[.,]\d+)?(?:\s*[x×]\s*\d+(?:[.,]\d+)?)?)\s*cm|\b(19|20)\d\d\b", "", sd.split(".")[0])
         tech = re.sub(r"\s*,\s*,+", ",", tech).strip(" ,.;")
         img = (p.get("images") or [{}])[0].get("src")
-        recs.append({"gid": f"aat-{p['id']}", "artist": artist, "title": U(p.get("name")).strip('“”"„'), "year": ym.group(1) if ym else None,
+        recs.append({**asking(p), "gid": f"aat-{p['id']}", "artist": artist, "title": U(p.get("name")).strip('“”"„'), "year": ym.group(1) if ym else None,
                      "tech": tech[:80], "dims": re.sub(r"\s*[x×]\s*", " x ", dm.group(1)) + " cm" if dm else "",
                      "gallery": "Art & Tonic", "city": "Tallinn", "url": p.get("permalink") or "https://artandtonic.art",
                      **({"sold": True} if not p.get("is_in_stock", True) else {}),

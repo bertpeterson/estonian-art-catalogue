@@ -7,10 +7,11 @@ and collectors, ~750 on sale in September 2026, strong on the post-war generatio
 (/wp-json/wc/store/v1/products), the read-only endpoint its own pages use; robots.txt
 permits it. Each product carries the artist as an attribute ("MEEL, Raul"), the title
 and year in its name ("Eesti saared II", 1986), the technique as another attribute, and
-a size in centimetres only now and then. Prices are not read. A product out of stock is
+a size in centimetres only now and then. The asking price of current stock is read (asking_price.py); a sold work's never. A product out of stock is
 the dealer's word that it sold: kept, flagged, for the ledger.
 """
 import json, re, ssl, time, html, urllib.request
+from asking_price import asking
 UA = "EstonianArtCatalogue/1.0 (museaal.ee; contact info@museaal.ee)"
 API = "https://artner.ee/wp-json/wc/store/v1/products"
 ctx = ssl.create_default_context()
@@ -55,7 +56,7 @@ while True:
         tech = next((t["name"] for a in p.get("attributes", []) if a.get("taxonomy") == "pa_tehnika" or a.get("name") == "Tehnika" for t in a.get("terms", [])), "")
         if not tech: tech = next((c["name"] for c in p.get("categories", [])), "")
         img = (p.get("images") or [{}])[0].get("src")
-        recs.append({"gid": f"artner-{p['id']}", "artist": artist, "title": title.strip(), "year": year,
+        recs.append({**asking(p), "gid": f"artner-{p['id']}", "artist": artist, "title": title.strip(), "year": year,
                      "tech": tech[:80], "dims": re.sub(r"\s*[x×]\s*", " x ", dm.group(1)) + " cm" if dm else "",
                      "gallery": "Artner", "city": "", "url": p.get("permalink") or "https://artner.ee",
                      **({"sold": True} if not p.get("is_in_stock", True) else {}),

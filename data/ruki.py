@@ -3,11 +3,12 @@
 
 robots.txt allows all but /files/ and /admin/ (it blocks adsbot and Barkrowler by name,
 not us). Works are listed per category as four lines: title with year, artist with
-birth year, technique with dimensions, price. The price line is discarded.
+birth year, technique with dimensions, price. The asking price is read (asking_price.py).
 The artist line is the anchor, so a work with no named artist is skipped rather than
 guessed at — the catalogue takes attributed work only.
 """
 import re, json, os, gzip, time, urllib.request, ssl
+from asking_price import euros
 UA="EstonianArtCatalogue/1.0 (museaal.ee; contact info@museaal.ee)"
 BASE="https://rukigalerii.ee"
 ctx=ssl.create_default_context(); ctx.check_hostname=False; ctx.verify_mode=ssl.CERT_NONE
@@ -53,15 +54,15 @@ for cat in CATS:
         tm=re.match(r'^(.*?),\s*(\d{4})\s*$', prev)
         title, year = (tm.group(1).strip(), tm.group(2)) if tm else (prev.strip(), None)
         if not title or ARTIST.match(prev) or PRICE.match(prev): continue
-        tech=dims=""
+        tech=dims=""; price={}
         for nx in L[i+1:i+4]:
-            if PRICE.match(nx): break
+            if PRICE.match(nx): price=euros(nx); break
             d=DIM.search(nx)
             if d and not dims:
                 dims=f"{d.group(1).strip()} {d.group(2).lower()}"
                 nx=nx.replace(d.group(0),"")
             if not tech and nx.strip(" ,."): tech=nx.strip(" ,.")
-        recs.append({"gid":"ruki-"+re.sub(r'[^a-z0-9]','',(artist+title).lower())[:40],
+        recs.append({**price,"gid":"ruki-"+re.sub(r'[^a-z0-9]','',(artist+title).lower())[:40],
                      "artist":artist,"title":title,"year":year,
                      "tech":clean_tech(tech),"dims":dims,
                      "gallery":"Ruki galerii","city":"Tallinn","url":f"{BASE}/teosed/{cat}"})

@@ -10,13 +10,18 @@
 // worker/mood-worker.js. After a change to the vocabulary, paste mood-worker.js into
 // the Worker again (worker/README.md).
 //
+// A second door, POST /ask, is the "Find a work" page's assistant: the conversation so far
+// comes in, and Claude answers with a short reply and the search it implies -- words from
+// the same vocabulary, a kind, a size and a budget. The page picks the works for sale
+// itself from those, and shows them under the reply. Nothing is stored here either.
+//
 // Needs one secret, ANTHROPIC_API_KEY (Settings > Variables and Secrets).
 // Calls the Messages API with fetch: the dashboard's editor takes one file, no build step.
 
 const WORDS = ["solemn", "serene", "contemplative", "melancholy", "lonely", "nostalgic", "tender", "intimate", "joyful", "playful", "festive", "romantic", "dreamy", "mysterious", "eerie", "anxious", "gloomy", "dramatic", "heroic", "bright", "dark", "sunny", "golden", "twilight", "moonlit", "misty", "vivid", "muted", "warm", "cold", "stormy", "still", "wintry", "spring", "summery", "autumnal", "hopeful", "cosy", "sacred", "majestic", "fragile", "sensual", "innocent", "energetic", "proud", "elegant", "lively", "empty", "spiritual", "idyllic", "wild", "harsh", "angry", "abstract", "expressive", "decorative", "simple", "ornate", "rustic", "modern", "sea", "lake", "river", "forest", "trees", "fields", "garden", "mountains", "sky", "village", "city", "harbour", "church", "interior", "portrait", "children", "family", "work", "music", "dance", "horses", "animals", "birds", "flowers", "stilllife", "boats"];
 const MODEL = "claude-haiku-4-5";
 const ORIGINS = ["https://museaal.ee", "https://www.museaal.ee"];
-const PER_MINUTE = 20;          // searches per visitor per minute, per Worker instance
+const PER_MINUTE = 20;          // requests per visitor per minute, per Worker instance (both doors)
 
 const SYSTEM = "You match a visitor's words to a museum's picture search. The museum has scored every picture in " +
   "its collection of Estonian art against a fixed list of words: moods, light, colour, season and weather, and " +
@@ -35,6 +40,99 @@ const SCHEMA = {
   required: ["words", "kind"],
   additionalProperties: false,
 };
+
+const SYSTEM_ASK = "You are the assistant on museaal.ee, a catalogue of Estonian art. On this page visitors look for a " +
+  "work to buy among the several thousand works the catalogue's galleries have for sale now, at asking prices from " +
+  "tens of euros to tens of thousands (most paintings between a few hundred and a few thousand). Each turn you write a short reply and fill in a search; " +
+  "the page picks the works from your search and shows them under your reply. You do not see them before they are shown, " +
+  "so never name or describe a particular work or artist, and never say what is available or what things cost; earlier turns may note what was shown.\n\n" +
+  "Reply in one to three short sentences, warm and plain, never pushy. " +
+  "Help them find out what they want: the place it will hang (which sets the size), the budget, and the mood or subject. " +
+  "Ask one question at a time and only when it would change the search. As soon as there is anything to go on, search " +
+  "(show: true) and end with the one short question that would narrow it most. Set show to false only when there is nothing to " +
+  "search on yet or the visitor is just saying thanks or goodbye.\n\n" +
+  "The search. words: up to five from the list below, most important first, for the mood, light, colour, season and " +
+  "subject they are after; read the feeling behind what they say (a bedroom: serene, tender; an office: calm, simple). " +
+  "kind: 'paint' for paintings, 'paper' for prints, drawings and watercolours, 'sculpture', 'photo', or 'any'. " +
+  "size: 'small' up to 40 cm (a shelf, a hallway, a gift), 'medium' 40-100 cm (above a desk, a bed, a dresser), " +
+  "'large' over 100 cm (a living-room wall, above a sofa), 'any' if unknown. budget_max and budget_min in euros, " +
+  "0 for none ('under 500': max 500; 'around 1000': 700 and 1300; 'not more than two thousand': max 2000). " +
+  "Keep what earlier turns established unless the visitor changes it.\n\n" +
+  "Prices, delivery, framing and how to buy are the gallery's: each work links to its page. Do not promise discounts, " +
+  "availability or anything about a work's value as an investment. If asked something else, answer in a sentence and " +
+  "come back to the search. Words: " + WORDS.join(", ");
+
+const SCHEMA_ASK = {
+  type: "object",
+  properties: {
+    reply: { type: "string" },
+    show: { type: "boolean" },
+    words: { type: "array", items: { type: "string", enum: WORDS } },
+    kind: { type: "string", enum: ["any", "paint", "paper", "sculpture", "photo"] },
+    size: { type: "string", enum: ["any", "small", "medium", "large"] },
+    budget_min: { type: "integer" },
+    budget_max: { type: "integer" },
+  },
+  required: ["reply", "show", "words", "kind", "size", "budget_min", "budget_max"],
+  additionalProperties: false,
+};
+
+// the conversation as the page sends it: user first, turns alternating, short
+function conversation(body) {
+  const m = Array.isArray(body && body.messages) ? body.messages.slice(-12) : [];
+  const out = [];
+  for (const x of m) {
+    const role = x && x.role === "assistant" ? "assistant" : "user";
+    const text = String((x && x.content) || "").replace(/\s+/g, " ").trim().slice(0, role === "user" ? 400 : 900);
+    if (!text) continue;
+    if (out.length && out[out.length - 1].role === role) out[out.length - 1].content += " " + text;
+    else out.push({ role, content: text });
+  }
+  while (out.length && out[0].role !== "user") out.shift();
+  return out.length && out[out.length - 1].role === "user" ? out : [];
+}
+
+async function claude(env, system, messages, schema, max_tokens) {
+  const r = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: { "x-api-key": env.ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01", "content-type": "application/json" },
+    body: JSON.stringify({ model: MODEL, max_tokens, system, messages, output_config: { format: { type: "json_schema", schema } } }),
+  });
+  if (!r.ok) throw new Error("The reader answered " + r.status + ".");
+  const m = await r.json();
+  if (m.stop_reason === "refusal") return null;
+  return JSON.parse((m.content || []).filter(b => b.type === "text").map(b => b.text).join(""));
+}
+
+const ET = /[õäöüšž]|\b(ja|ning|mis|midagi|kas|tahan|otsin|pilt|pildi|maal|maali|seinale|seina|alla|umbes|kuni|tere|aitäh|väike|suur|tuppa|kingituseks|eurot?)\b/i;
+const EN = /\b(the|a|an|for|and|something|want|looking|painting|picture|print|wall|under|around|about|hi|hello|thanks|room|gift|my)\b/i;
+function langOf(text, page) {
+  const et = ET.test(text), en = EN.test(text);
+  return et && !en ? "et" : en && !et ? "en" : page === "et" ? "et" : "en";
+}
+
+async function ask(body, env, reply) {
+  const messages = conversation(body);
+  if (!messages.length) return reply({ error: "Nothing to read." }, 400);
+  let out;
+  // the reply's language is decided here, not left to the model (it drifted): the visitor's last
+  // message if it reads as one language, else the page's
+  const system = SYSTEM_ASK + "\n\n" + (langOf(messages[messages.length - 1].content, body.lang) === "et"
+    ? "Reply in Estonian: everyday spoken Estonian, addressing the visitor as 'sina', no exclamations."
+    : "Reply in English.");
+  try { out = await claude(env, system, messages, SCHEMA_ASK, 400); }
+  catch (e) { return reply({ error: String(e.message || "The assistant could not be reached.") }, 502); }
+  if (!out) return reply({ reply: "", show: false, words: [], kind: "any", size: "any", budget_min: 0, budget_max: 0 });
+  const int = v => Math.max(0, Math.min(10000000, Math.round(Number(v) || 0)));
+  return reply({
+    reply: String(out.reply || "").slice(0, 600),
+    show: !!out.show,
+    words: [...new Set((out.words || []).filter(w => WORDS.includes(w)))].slice(0, 5),
+    kind: ["paint", "paper", "sculpture", "photo"].includes(out.kind) ? out.kind : "any",
+    size: ["small", "medium", "large"].includes(out.size) ? out.size : "any",
+    budget_min: int(out.budget_min), budget_max: int(out.budget_max),
+  });
+}
 
 const seen = new Map();          // visitor -> times of their recent searches
 function tooMany(ip) {
@@ -60,10 +158,14 @@ export default {
     if (request.method !== "POST" || !ok) return reply({ error: "This service answers museaal.ee only." }, 403);
     if (tooMany(request.headers.get("CF-Connecting-IP") || "?")) return reply({ error: "Too many searches; wait a minute." }, 429);
 
-    let q = "";
-    try { q = String((await request.json()).q || "").replace(/\s+/g, " ").trim().slice(0, 200); } catch (e) {}
-    if (!q) return reply({ error: "Nothing to read." }, 400);
+    let body = {};
+    try { body = await request.json(); } catch (e) {}
     if (!env.ANTHROPIC_API_KEY) return reply({ error: "The service is not set up." }, 503);
+    if (new URL(request.url).pathname === "/ask") return ask(body, env, reply);
+
+    let q = "";
+    try { q = String(body.q || "").replace(/\s+/g, " ").trim().slice(0, 200); } catch (e) {}
+    if (!q) return reply({ error: "Nothing to read." }, 400);
 
     let r;
     try {

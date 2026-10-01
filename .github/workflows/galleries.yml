@@ -71,6 +71,8 @@ jobs:
           (cd data && python3 ledger.py && python3 merge.py && python3 gallery_shapes.py && python3 merge.py)
           python3 data/data_guard.py /tmp/data_before.json data/data.json
           (cd data && python3 img_small.py)
+          # the moods of new stock pictures, for Find a work (data/stock_moods.py); CLIP only in a week that has some
+          (cd data && if python3 stock_moods.py --todo; then pip install -q --index-url https://download.pytorch.org/whl/cpu torch==2.8.0 && pip install -q open_clip_torch==3.3.0 pillow==12.3.0 numpy==2.5.3 && python3 stock_moods.py; fi)
           ./build_site.sh
           node check_site.js site || { echo "site check failed; once more"; sleep 20; node check_site.js site; }
           python3 data/readme_figures.py

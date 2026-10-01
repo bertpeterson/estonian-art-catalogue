@@ -8,7 +8,7 @@ served Vernissage. robots.txt permits it. Every product name is one line in one
 shape, "Title, Artist, Year, Medium WxHcm", which is parsed here.
 
 Metadata only: artist, title, year, technique, dimensions, and a link to the listing.
-Prices are not read. The seller is not in the API, so the holder is NOBA itself.
+The asking price of current stock is read (asking_price.py); a sold work's never. The seller is not in the API, so the holder is NOBA itself.
 
 Records carry only_known=True: merge.py takes them for artists already in the
 catalogue -- museum-held or in the seven galleries -- and otherwise only when
@@ -16,6 +16,7 @@ noba_artists.json says the artist is based in Estonia. Latvian, Lithuanian,
 Finnish and Swedish artists on NOBA stay out.
 """
 import json, re, ssl, time, urllib.request, os, unicodedata, html, datetime
+from asking_price import asking
 UA = "EstonianArtCatalogue/1.0 (museaal.ee; contact info@museaal.ee)"
 API = "https://noba.ac/wp-json/wc/store/v1/products"
 ctx = ssl.create_default_context(); ctx.check_hostname = False; ctx.verify_mode = ssl.CERT_NONE
@@ -54,7 +55,7 @@ while True:
         k = key(artist, title, dims)
         if k in seen: dup += 1; continue        # the same listing under both languages
         seen.add(k)
-        recs.append({"gid": "noba-" + str(p["id"]), "artist": artist, "title": title, "year": year,
+        recs.append({**asking(p), "gid": "noba-" + str(p["id"]), "artist": artist, "title": title, "year": year,
                      "tech": tech, "dims": dims, "gallery": "NOBA", "city": "Tallinn",
                      "url": p.get("permalink") or "https://noba.ac", "only_known": True})
     if page % 20 == 0: print(f"  page {page}  kept {len(recs)}", flush=True)
