@@ -1,27 +1,75 @@
 {
 "anxiety-3": "sold",
 "memories-make-movies": "sold",
-"the-sea-of-memory": "unlisted",
-"beloved-dress": "unlisted",
-"tears-i": "unlisted",
+"the-sea-of-memory": {
+"v": "unlisted",
+"at": "2026-10-01"
+},
+"beloved-dress": {
+"v": "unlisted",
+"at": "2026-10-01"
+},
+"tears-i": {
+"v": "unlisted",
+"at": "2026-10-01"
+},
 "untitled-73": "sold",
-"tears-ii": "unlisted",
+"tears-ii": {
+"v": "unlisted",
+"at": "2026-10-01"
+},
 "two-women": "sold",
-"frontpage-banner-background": "unlisted",
+"frontpage-banner-background": {
+"v": "unlisted",
+"at": "2026-10-01"
+},
 "acineta-superba": "sold",
 "life-is-a-ball-but-im-that-shrimp": "sold",
-"combinatorial-composition": "unlisted",
+"combinatorial-composition": {
+"v": "unlisted",
+"at": "2026-10-01"
+},
 "supleja-3": "sold",
-"knight-2": "unlisted",
-"surge-3": "unlisted",
-"surge-1": "unlisted",
-"surge-2": "unlisted",
-"cleanse-me-of-my-sins": "unlisted",
-"your-fist-full-of-thunder-knocking-for-a-beat-to-lay-a-rhyme-the-oppressors-are-confused": "unlisted",
-"the-shape-of-love-changing": "unlisted",
-"deal-with-the-glitch-on-your-shoulder": "unlisted",
-"a-tangle-of-tender-hunger": "unlisted",
-"summer-4": "unlisted",
+"knight-2": {
+"v": "unlisted",
+"at": "2026-10-01"
+},
+"surge-3": {
+"v": "unlisted",
+"at": "2026-10-01"
+},
+"surge-1": {
+"v": "unlisted",
+"at": "2026-10-01"
+},
+"surge-2": {
+"v": "unlisted",
+"at": "2026-10-01"
+},
+"cleanse-me-of-my-sins": {
+"v": "unlisted",
+"at": "2026-10-01"
+},
+"your-fist-full-of-thunder-knocking-for-a-beat-to-lay-a-rhyme-the-oppressors-are-confused": {
+"v": "unlisted",
+"at": "2026-10-01"
+},
+"the-shape-of-love-changing": {
+"v": "unlisted",
+"at": "2026-10-01"
+},
+"deal-with-the-glitch-on-your-shoulder": {
+"v": "unlisted",
+"at": "2026-10-01"
+},
+"a-tangle-of-tender-hunger": {
+"v": "unlisted",
+"at": "2026-10-01"
+},
+"summer-4": {
+"v": "unlisted",
+"at": "2026-10-01"
+},
 "sus": "sold",
 "northern-lights-2": "sold",
 "dusk": "sold",
@@ -45,9 +93,18 @@
 "clouds-2": "sold",
 "position-4": "sold",
 "inspiration-to-life": "sold",
-"remote-control-i-2": "unlisted",
-"remote-control-ii-2": "unlisted",
-"remote-control-iii-2": "unlisted",
+"remote-control-i-2": {
+"v": "unlisted",
+"at": "2026-10-01"
+},
+"remote-control-ii-2": {
+"v": "unlisted",
+"at": "2026-10-01"
+},
+"remote-control-iii-2": {
+"v": "unlisted",
+"at": "2026-10-01"
+},
 "meadow-languages-maiden-pink": "sold",
 "meadow-languages-rosehip": "sold",
 "birds-of-eternity": "sold",
@@ -55,12 +112,18 @@
 "exhausted-jaw-2025": "sold",
 "the-woman-with-doves": "sold",
 "a-grain-of-truth": "sold",
-"estonian-folk-dances": "unlisted",
+"estonian-folk-dances": {
+"v": "unlisted",
+"at": "2026-10-01"
+},
 "a-breath-of-fresh-air": "sold",
 "early-morning-ride-home": "sold",
 "soft-silence": "sold",
 "cathedral": "sold",
-"libertango": "unlisted",
+"libertango": {
+"v": "unlisted",
+"at": "2026-10-01"
+},
 "to-leave": "sold",
 "reality-is-in-the-vision": "sold",
 "post-vanitatem": "sold",
@@ -79,10 +142,19 @@
 "vision-towers-iii": "sold",
 "vision-towers-i": "sold",
 "friendship-with-squirrels": "sold",
-"perpetuum-mobile-colored": "unlisted",
+"perpetuum-mobile-colored": {
+"v": "unlisted",
+"at": "2026-10-01"
+},
 "sacristan": "sold",
-"movement-i": "unlisted",
-"mythological-landscape-i-triangle": "unlisted",
+"movement-i": {
+"v": "unlisted",
+"at": "2026-10-01"
+},
+"mythological-landscape-i-triangle": {
+"v": "unlisted",
+"at": "2026-10-01"
+},
 "nature-morte-3433": "sold",
 "heart-note-of-the-smoldering-lilacs": "sold",
 "swaying-dream": "sold",
@@ -98,24 +170,57 @@
 "soul-hare": "sold",
 "in-the-bathroom-2": "sold",
 "flying-saucer": "sold",
-"the-boy-and-the-shadow": "unlisted",
-"youth-raw-honest-and-uncontainable-by-any-formula": "unlisted",
-"uncle": "unlisted",
-"untitled-66": "unlisted",
+"the-boy-and-the-shadow": {
+"v": "unlisted",
+"at": "2026-10-01"
+},
+"youth-raw-honest-and-uncontainable-by-any-formula": {
+"v": "unlisted",
+"at": "2026-10-01"
+},
+"uncle": {
+"v": "unlisted",
+"at": "2026-10-01"
+},
+"untitled-66": {
+"v": "unlisted",
+"at": "2026-10-01"
+},
 "the-magic-of-a-moment-of-silence": "sold",
 "an-ancient-beast": "sold",
 "monas-scarf": "sold",
 "vertical-ii": "sold",
 "fears": "sold",
 "old-man": "sold",
-"holder": "unlisted",
-"lucky-seven": "unlisted",
-"turf-burner": "unlisted",
+"holder": {
+"v": "unlisted",
+"at": "2026-10-01"
+},
+"lucky-seven": {
+"v": "unlisted",
+"at": "2026-10-01"
+},
+"turf-burner": {
+"v": "unlisted",
+"at": "2026-10-01"
+},
 "females": "sold",
-"spring-ceasefire": "unlisted",
-"edasilukatud-rahutus": "unlisted",
-"over-the-garden-wall": "unlisted",
-"march-cats": "unlisted",
+"spring-ceasefire": {
+"v": "unlisted",
+"at": "2026-10-01"
+},
+"edasilukatud-rahutus": {
+"v": "unlisted",
+"at": "2026-10-01"
+},
+"over-the-garden-wall": {
+"v": "unlisted",
+"at": "2026-10-01"
+},
+"march-cats": {
+"v": "unlisted",
+"at": "2026-10-01"
+},
 "nakinaer-helisemas-murakateni": "sold",
 "tallinn-lights": "sold",
 "from-autumn-to-winter": "sold",
@@ -164,16 +269,31 @@
 "the-growth": "sold",
 "abstraction-4": "sold",
 "unity-umka": "sold",
-"miniature-christmas-meditation-no-1": "unlisted",
-"miniatuurne-joulumeditatsioon-nr-3": "unlisted",
-"miniature-christmas-meditation-no-2": "unlisted",
-"miniature-christmas-meditation-no-5": "unlisted",
+"miniature-christmas-meditation-no-1": {
+"v": "unlisted",
+"at": "2026-10-01"
+},
+"miniatuurne-joulumeditatsioon-nr-3": {
+"v": "unlisted",
+"at": "2026-10-01"
+},
+"miniature-christmas-meditation-no-2": {
+"v": "unlisted",
+"at": "2026-10-01"
+},
+"miniature-christmas-meditation-no-5": {
+"v": "unlisted",
+"at": "2026-10-01"
+},
 "femme-fiasco-no-1": "sold",
 "on-my-way-to-the-blue-mountains": "sold",
 "breaking-beige": "sold",
 "greenhouse-special-vegetary-operation-v": "sold",
 "i-am-not-a-robot": "sold",
-"this-isnt-love": "unlisted",
+"this-isnt-love": {
+"v": "unlisted",
+"at": "2026-10-01"
+},
 "two-svan-boys-on-horseback": "sold",
 "the-wind": "sold",
 "greenhouse-pandemic-next-wave-i-3": "sold",
@@ -181,12 +301,18 @@
 "september": "sold",
 "moths": "sold",
 "dream-big-little-one": "sold",
-"living-room-2": "unlisted",
+"living-room-2": {
+"v": "unlisted",
+"at": "2026-10-01"
+},
 "u-tube": "sold",
 "absolute-tenderness-calm-strength": "sold",
 "greenhouse-spice-rebellion-iii": "sold",
 "the-carrot": "sold",
-"body-language-v-come-on": "unlisted",
+"body-language-v-come-on": {
+"v": "unlisted",
+"at": "2026-10-01"
+},
 "embroidered-tablecloth-plastic-electric-lights-wooden-table-clay-figurines-bird-cup-potted-plant": "sold",
 "pleasure-i-and-ii": "sold",
 "mistress-of-tears": "sold",
@@ -197,21 +323,48 @@
 "girl-in-stockings": "sold",
 "work-in-dark-copperplate-engraving-chine-colle-linocut-2023": "sold",
 "fish-ii": "sold",
-"trapped-i-hand-colored": "unlisted",
+"trapped-i-hand-colored": {
+"v": "unlisted",
+"at": "2026-10-01"
+},
 "landscape-by-car": "sold",
 "summer-in-tuscany": "sold",
 "left-looking": "sold",
 "3-bodies": "sold",
 "la-venus-de-club": "sold",
 "cotton-field": "sold",
-"dzungel": "unlisted",
-"maasikad": "unlisted",
-"kauge-liikumine": "unlisted",
-"turkiissinise-linna-joepeegel": "unlisted",
-"ametust": "unlisted",
-"mikromaailmad": "unlisted",
-"teleportatsioon": "unlisted",
-"barokk": "unlisted",
+"dzungel": {
+"v": "unlisted",
+"at": "2026-10-01"
+},
+"maasikad": {
+"v": "unlisted",
+"at": "2026-10-01"
+},
+"kauge-liikumine": {
+"v": "unlisted",
+"at": "2026-10-01"
+},
+"turkiissinise-linna-joepeegel": {
+"v": "unlisted",
+"at": "2026-10-01"
+},
+"ametust": {
+"v": "unlisted",
+"at": "2026-10-01"
+},
+"mikromaailmad": {
+"v": "unlisted",
+"at": "2026-10-01"
+},
+"teleportatsioon": {
+"v": "unlisted",
+"at": "2026-10-01"
+},
+"barokk": {
+"v": "unlisted",
+"at": "2026-10-01"
+},
 "break-through": "sold",
 "amaryllis-2": "sold",
 "vialao-da-praia": "sold",
@@ -256,25 +409,43 @@
 "mossy-tree-trunk": "sold",
 "where-the-road-leads-is-a-secret": "sold",
 "listening-to-the-silence": "sold",
-"movement-iii": "unlisted",
-"movement-ii": "unlisted",
+"movement-iii": {
+"v": "unlisted",
+"at": "2026-10-01"
+},
+"movement-ii": {
+"v": "unlisted",
+"at": "2026-10-01"
+},
 "animal-instinct-3": "sold",
 "greenhouse-special-vegetary-operation-ii": "sold",
 "under-the-spell-of-sleep-i": "sold",
 "eduard-vilde-museum": "sold",
 "invisible-iii": "sold",
-"untitled-2-4": "unlisted",
-"untitled-1-5": "unlisted",
+"untitled-2-4": {
+"v": "unlisted",
+"at": "2026-10-01"
+},
+"untitled-1-5": {
+"v": "unlisted",
+"at": "2026-10-01"
+},
 "light-yellow-glow": "sold",
 "near-rome": "sold",
 "avanemine": "sold",
 "avanemine-viii": "sold",
 "organism-i": "sold",
 "organism-ii": "sold",
-"organism-ii-hand-colored": "unlisted",
+"organism-ii-hand-colored": {
+"v": "unlisted",
+"at": "2026-10-01"
+},
 "sculptor-freeing-a-fine-owl-from-the-block-of-stone": "sold",
 "cosmic-labyrinth-iii": "sold",
-"trapped-ii": "unlisted",
+"trapped-ii": {
+"v": "unlisted",
+"at": "2026-10-01"
+},
 "hedgehog-in-smog": "sold",
 "dreaming": "sold",
 "silver-lining-premium": "sold",
@@ -283,10 +454,16 @@
 "snapchat": "sold",
 "arms-iii": "sold",
 "message-2": "sold",
-"landscape-4": "unlisted",
+"landscape-4": {
+"v": "unlisted",
+"at": "2026-10-01"
+},
 "up-down-i": "sold",
 "up-down-iv": "sold",
-"fence": "unlisted",
+"fence": {
+"v": "unlisted",
+"at": "2026-10-01"
+},
 "view-from-the-plane": "sold",
 "isolation": "sold",
 "pabaigos-grozybes-fine-pulchritudinis-puikus-grozis": "sold",
@@ -311,7 +488,10 @@
 "contemporary-sexuality-1": "sold",
 "walrus-svalbard-2017": "sold",
 "photo-painting-copy-original-5": "sold",
-"anna-trell": "unlisted",
+"anna-trell": {
+"v": "unlisted",
+"at": "2026-10-01"
+},
 "winter-is-coming": "sold",
 "the-blink-of-an-eye-2": "sold",
 "lottery": "sold",
@@ -339,15 +519,27 @@
 "there-it-is-this-vargamae": "sold",
 "how-am-i-doing": "sold",
 "time-climbs-1": "sold",
-"anastasis": "unlisted",
+"anastasis": {
+"v": "unlisted",
+"at": "2026-10-01"
+},
 "yesterday-today-tomorrow": "sold",
-"water-games": "unlisted",
+"water-games": {
+"v": "unlisted",
+"at": "2026-10-01"
+},
 "mandala-xxxv": "sold",
 "mandala-x": "sold",
 "initium-est-dimidium-bonum-opus-gera-pradzia-puse-darbo": "sold",
-"volume-knot": "unlisted",
+"volume-knot": {
+"v": "unlisted",
+"at": "2026-10-01"
+},
 "aliennne": "sold",
-"nimeamaton-left-without-a-title": "unlisted",
+"nimeamaton-left-without-a-title": {
+"v": "unlisted",
+"at": "2026-10-01"
+},
 "melancholic-progress-i": "sold",
 "potato-1": "sold",
 "mind-travels-in-nature-i": "sold",
@@ -357,12 +549,21 @@
 "mystery": "sold",
 "after-hammershoi": "sold",
 "orelikontsert-niguliste-kirikus-26-augustil-1991": "sold",
-"iii-stages-of-fire-i": "unlisted",
+"iii-stages-of-fire-i": {
+"v": "unlisted",
+"at": "2026-10-01"
+},
 "sun-salutation-sunna": "sold",
-"akkavalta-girl-power": "unlisted",
+"akkavalta-girl-power": {
+"v": "unlisted",
+"at": "2026-10-01"
+},
 "kas-mu-suda-ihkab-tormi-ja-hing-rahu": "sold",
 "mutua-caritate_abipuse-meile": "sold",
-"feast-ii": "unlisted",
+"feast-ii": {
+"v": "unlisted",
+"at": "2026-10-01"
+},
 "sola": "sold",
 "what-the-mermaid-gave-to-me": "sold",
 "melancholy-3": "sold",
@@ -373,9 +574,15 @@
 "breathing-rhythm-i-inhaling": "sold",
 "inadequate-use-of-reality": "sold",
 "nude-i": "sold",
-"bird-2": "unlisted",
+"bird-2": {
+"v": "unlisted",
+"at": "2026-10-01"
+},
 "alien-encounter": "sold",
-"money": "unlisted",
+"money": {
+"v": "unlisted",
+"at": "2026-10-01"
+},
 "river-2": "sold",
 "suscipe-non-nolueritis-imk-tau-nieko-nebus": "sold",
 "mama-marilyn": "sold",
@@ -386,17 +593,32 @@
 "untitled-26": "sold",
 "do-electric-sheep-dream": "sold",
 "demokritos-vs-anon": "sold",
-"looking-at-single-point": "unlisted",
+"looking-at-single-point": {
+"v": "unlisted",
+"at": "2026-10-01"
+},
 "ruinenlust-lasnamael-viii": "sold",
 "in-nomine-boni-gerio-vardu": "sold",
 "rannavarava-magi": "sold",
-"mythological-landscape-cloud": "unlisted",
-"back": "unlisted",
-"good-morning": "unlisted",
+"mythological-landscape-cloud": {
+"v": "unlisted",
+"at": "2026-10-01"
+},
+"back": {
+"v": "unlisted",
+"at": "2026-10-01"
+},
+"good-morning": {
+"v": "unlisted",
+"at": "2026-10-01"
+},
 "everlasting-meeting": "sold",
 "melancholy-1": "sold",
 "melancholy-2-2": "sold",
-"red-blanket": "unlisted",
+"red-blanket": {
+"v": "unlisted",
+"at": "2026-10-01"
+},
 "lumine-lapsepolv": "sold",
 "daffodils": "sold",
 "abstract-flower": "sold",
@@ -410,27 +632,55 @@
 "t-shirt-die-dog": "sold",
 "altinho-ipanema": "sold",
 "untitled-11": "sold",
-"eye-roll": "unlisted",
+"eye-roll": {
+"v": "unlisted",
+"at": "2026-10-01"
+},
 "st-olafs-church": "sold",
-"landscape-with-touchstone": "unlisted",
+"landscape-with-touchstone": {
+"v": "unlisted",
+"at": "2026-10-01"
+},
 "viljandi-boatman-2": "sold",
-"leave-me-alone": "unlisted",
+"leave-me-alone": {
+"v": "unlisted",
+"at": "2026-10-01"
+},
 "key-to-understanding": "sold",
 "belladonna": "sold",
 "night-wisdom": "sold",
 "hits-the-ceiling": "sold",
-"meteorite-01": "unlisted",
+"meteorite-01": {
+"v": "unlisted",
+"at": "2026-10-01"
+},
 "self-portrait-nr-5": "sold",
 "falcon": "sold",
 "nightshift": "sold",
 "xx-3": "sold",
 "lageda-song-2": "sold",
-"touchstone": "unlisted",
+"touchstone": {
+"v": "unlisted",
+"at": "2026-10-01"
+},
 "the-fairy-gardener-and-the-wind": "sold",
 "fish-bites-hatespeaker-from-the-leg": "sold",
 "living-room": "sold",
-"space-junk": "unlisted",
-"million-dollar-view": "unlisted",
-"with-a-prom-dress": "unlisted",
-"woman-in-fur-%d1%95elected-works-from-1995-2020": "sold"
+"space-junk": {
+"v": "unlisted",
+"at": "2026-10-01"
+},
+"million-dollar-view": {
+"v": "unlisted",
+"at": "2026-10-01"
+},
+"with-a-prom-dress": {
+"v": "unlisted",
+"at": "2026-10-01"
+},
+"woman-in-fur-%d1%95elected-works-from-1995-2020": "sold",
+"holding-on-to-something-real": {
+"v": "sold",
+"at": "2026-10-01"
+}
 }

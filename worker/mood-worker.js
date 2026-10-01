@@ -92,16 +92,26 @@ function conversation(body) {
   return out.length && out[out.length - 1].role === "user" ? out : [];
 }
 
-async function claude(env, system, messages, schema, max_tokens) {
-  const r = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: { "x-api-key": env.ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01", "content-type": "application/json" },
-    body: JSON.stringify({ model: MODEL, max_tokens, system, messages, output_config: { format: { type: "json_schema", schema } } }),
-  });
+// Estonian replies come from Sonnet, whose Estonian is much better than Haiku's (about twice the
+// price a reply): thinking off (between_tools, Sonnet 5.5 only), low effort, and Anthropic's
+// server-side fallback, which re-runs a mistaken safety decline on another model
+const SONNET = "claude-sonnet-5-5";
+async function claude(env, system, messages, schema, max_tokens, model = MODEL) {
+  const sonnet = model === SONNET;
+  const headers = { "x-api-key": env.ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01", "content-type": "application/json" };
+  const body = { model, max_tokens, system, messages, output_config: { format: { type: "json_schema", schema } } };
+  if (sonnet) {
+    headers["anthropic-beta"] = "server-side-fallback-2026-07-01";
+    Object.assign(body, { thinking: { type: "between_tools" }, fallbacks: "default" });
+    body.output_config.effort = "low";
+  }
+  const r = await fetch("https://api.anthropic.com/v1/messages", { method: "POST", headers, body: JSON.stringify(body) });
   if (!r.ok) throw new Error("The reader answered " + r.status + ".");
   const m = await r.json();
   if (m.stop_reason === "refusal") return null;
-  return JSON.parse((m.content || []).filter(b => b.type === "text").map(b => b.text).join(""));
+  // after a fallback, only the blocks past the last "fallback" marker are the answer
+  const c = m.content || [], at = c.map(b => b.type).lastIndexOf("fallback");
+  return JSON.parse(c.slice(at + 1).filter(b => b.type === "text").map(b => b.text).join(""));
 }
 
 const ET = /[õäöüšž]|\b(ja|ning|mis|midagi|kas|tahan|otsin|pilt|pildi|maal|maali|seinale|seina|alla|umbes|kuni|tere|aitäh|väike|suur|tuppa|kingituseks|eurot?)\b/i;
@@ -117,10 +127,11 @@ async function ask(body, env, reply) {
   let out;
   // the reply's language is decided here, not left to the model (it drifted): the visitor's last
   // message if it reads as one language, else the page's
-  const system = SYSTEM_ASK + "\n\n" + (langOf(messages[messages.length - 1].content, body.lang) === "et"
+  const et = langOf(messages[messages.length - 1].content, body.lang) === "et";
+  const system = SYSTEM_ASK + "\n\n" + (et
     ? "Reply in Estonian: everyday spoken Estonian, addressing the visitor as 'sina', no exclamations."
     : "Reply in English.");
-  try { out = await claude(env, system, messages, SCHEMA_ASK, 400); }
+  try { out = await claude(env, system, messages, SCHEMA_ASK, et ? 800 : 400, et ? SONNET : MODEL); }
   catch (e) { return reply({ error: String(e.message || "The assistant could not be reached.") }, 502); }
   if (!out) return reply({ reply: "", show: false, words: [], kind: "any", size: "any", budget_min: 0, budget_max: 0 });
   const int = v => Math.max(0, Math.min(10000000, Math.round(Number(v) || 0)));
