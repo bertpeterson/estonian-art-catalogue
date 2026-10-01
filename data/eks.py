@@ -3,12 +3,13 @@
 
 Beside its auctions (eks_auctions.py) the salon sells directly; "Teosed" lists every
 work with a card: artist and title in two spans, then "2026. Õli, lõuend. 20x20." --
-year, medium, size in centimetres -- and a price, which is not read. One page holds
+year, medium, size in centimetres -- and the asking price, read after it (asking_price.py). One page holds
 the whole stock; the robots file forbids query strings and asks a two-minute delay, and
 this reads one page. The pages are ISO-8859-4, like the auction ones.
 The card's picture is the salon's own, taken while the work is for sale.
 """
 import re, json, os, html, urllib.request
+from asking_price import euros
 
 BASE = "https://www.e-kunstisalong.ee"
 UA = "EstonianArtCatalogue/1.0 (museaal.ee; contact info@museaal.ee)"
@@ -36,7 +37,9 @@ for k, c in enumerate(cards):
     # the card's picture is the nearest data-src before this card's text
     before = [p for p in pics if p.start() < c.start()]
     img = BASE + before[-1].group(1) if before else None
-    recs.append({"gid": "eks-" + pid, "artist": artist, "title": title, "year": year[:4] if year else None,
+    hm = re.search(r"Hind:\s*(.*?)</span>", h[c.end():c.end() + 300], re.S)
+    price = euros(clean(re.sub(r"<[^>]+>", " ", hm.group(1)))) if hm else {}
+    recs.append({**price, "gid": "eks-" + pid, "artist": artist, "title": title, "year": year[:4] if year else None,
                  "tech": medium, "dims": dims, "gallery": "E-Kunstisalong", "city": "Tallinn",
                  "url": f"{BASE}/{slug}", **({"img": img} if img else {})})
 prev = json.load(open("gallery_records.json", encoding="utf-8")) if os.path.exists("gallery_records.json") else []

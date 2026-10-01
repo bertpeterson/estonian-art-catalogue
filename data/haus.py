@@ -2,10 +2,11 @@
 """Haus Galerii artwork catalogue -> gallery_records.json
 
 Metadata only: artist, title, year, technique, dimensions, and a link back to the
-gallery's own page for every record. Prices are deliberately NOT collected — a price
-index is a different object from a catalogue of works.
+gallery's own page for every record, and the asking price of a work for sale
+(asking_price.py) -- never what a work sold for.
 """
 import re, json, os, gzip, time, urllib.request, ssl
+from asking_price import euros
 from concurrent.futures import ThreadPoolExecutor
 
 BASE = "https://haus.ee"
@@ -48,6 +49,7 @@ def parse(h):
         tec = re.search(r'<p class="tech[^"]*">(.*?)</p>', b, re.S)
         slug = re.search(r'href="(\?c=(?:all-artworks|teosed)[^"]*id=\d+)"', b)
         img = re.search(r'<img class="pilt_t t" src="([^"?]+)', b)
+        pr = re.search(r'<strong class="price[^"]*">(.*?)</strong>', b, re.S)
         if not (aut and ttl): continue
         title = txt(ttl.group(1))
         if yr: title = re.sub(r'\s*' + yr.group(1) + r'\s*$', '', title).strip()
@@ -61,7 +63,7 @@ def parse(h):
         dm = re.search(r'([\d.,]+\s*[×x]\s*[\d.,]+(?:\s*[×x]\s*[\d.,]+)?\s*(?:cm|mm))', tech, re.I)
         dims = dm.group(1).strip() if dm else ""
         if dims: tech = tech.replace(dm.group(1), "").strip(" .,")
-        out.append({"gid": m.group(1), "artist": aut.group(1).strip(), "title": title,
+        out.append({**(euros(txt(pr.group(1))) if pr else {}), "gid": m.group(1), "artist": aut.group(1).strip(), "title": title,
                     "year": yr.group(1) if yr else None, "tech": tech, "dims": dims,
                     "gallery": "Haus Galerii", "city": "Tallinn",
                     "url": BASE + "/" + slug.group(1).replace("&amp;", "&") if slug else BASE,

@@ -3,8 +3,8 @@
 
 Uses WooCommerce's public Store API rather than scraping: the product grid is
 JS-rendered, but /wp-json/wc/store/v1/products is a documented read-only endpoint
-meant for machine access, and returns clean JSON. Prices are present in the payload
-and are deliberately not read.
+meant for machine access, and returns clean JSON. The asking price of current stock
+is read (asking_price.py); a sold work's never.
 
 Product names are period-separated and pack several fields into one string:
   "Liisi Örd. Valgus. Rabajärv. 2026. Õli. Lõuend. 60 × 50 cm. MÜÜDUD"
@@ -13,6 +13,7 @@ measurement, and what sits between them is title and medium. A record whose arti
 title cannot be identified is skipped rather than guessed at.
 """
 import re, json, os, time, urllib.request, ssl
+from asking_price import asking
 UA="EstonianArtCatalogue/1.0 (museaal.ee; contact info@museaal.ee)"
 API="https://vernissage.ee/wp-json/wc/store/v1/products"
 ctx=ssl.create_default_context(); ctx.check_hostname=False; ctx.verify_mode=ssl.CERT_NONE
@@ -46,7 +47,7 @@ while True:
         # a shop item the house marks sold is not stock, but it passed through the
         # gallery: kept, flagged sold. An unpurchasable item with no such mark is skipped.
         if not p.get("is_purchasable") and not is_sold: skipped+=1; continue
-        # p also carries prices; they are not read, and the name must not carry one
+        # p also carries prices (only asking_price.py reads them), and the name must not carry one
         # either: "Alghind: 1800 € Haamrihind: 1800 €" is a price in disguise.
         name=re.sub(r'\b(alghind|haamrihind|hind|price|starting price|hammer price)\s*:?\s*[\d\s.,]*\s*(€|eur)?', ' ', p.get("name") or "", flags=re.I)
         got=parse(name)
@@ -55,7 +56,7 @@ while True:
         gid="vern-"+str(p.get("id"))
         if gid in seen: continue
         seen.add(gid)
-        recs.append({"gid":gid,"artist":artist,"title":title,"year":year,"tech":tech,
+        recs.append({**asking(p, is_sold), "gid":gid,"artist":artist,"title":title,"year":year,"tech":tech,
                      "dims":dims,"gallery":"Vernissage","city":"Tallinn",
                      "url":p.get("permalink") or "https://vernissage.ee", **({"sold": True} if is_sold else {}),
                      **({"img": p["images"][0].get("src")} if p.get("images") and p["images"][0].get("src") else {})})

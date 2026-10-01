@@ -1,6 +1,8 @@
 # The mood page's reader (Cloudflare Worker)
 
-`mood.html` / `meeleolu.html` send a visitor's typed description here. The Worker asks
+`mood.html` / `meeleolu.html` send a visitor's typed description here, and `find.html` / `leia.html`
+(build_ask.py) send their conversation to the same Worker at `/ask`: Claude answers with a short
+reply and a search (mood words, kind, size, budget), and the page picks the works for sale itself. The Worker asks
 Claude Haiku which of the catalogue's 86 mood and subject words fit it, and returns them;
 the page ranks the pictures itself. About $0.0012 a search, from the Anthropic Console
 credit. Without the Worker the page still works: typed words are matched by stems.
@@ -31,3 +33,8 @@ Answers museaal.ee only (the browser's Origin header); 20 searches a minute per 
 200 characters; the answer can only be words from the vocabulary (a JSON schema with
 the words as an enum), so no text a visitor types comes back to the page. The sentence
 is not stored.
+
+`/ask` (Find a work): the last twelve turns, 400 characters a visitor message; Claude's reply
+is capped at 600 characters and shown as plain text, never as HTML; the search fields are
+checked against the vocabulary and the allowed values. Each message is one Haiku call, about
+$0.002, under the same key and its monthly spend limit. Nothing is stored.

@@ -3,9 +3,10 @@
 
 robots.txt is "Allow: /". The site is Next.js and ships its data as JSON in the page,
 so this reads the payload rather than guessing at markup. Metadata only: the details
-field carries technique, dimensions and a price line, and the price line is discarded.
+field carries technique, dimensions and a price line; the asking price is read (asking_price.py).
 """
 import re, json, os, gzip, time, urllib.request, ssl
+from asking_price import euros
 
 UA = "EstonianArtCatalogue/1.0 (museaal.ee; contact info@museaal.ee)"
 BASE = "https://www.tutar.ee"
@@ -52,15 +53,16 @@ for sl in slugs:
         year = ym.group(1) if ym else None
         if ym: title = title[:ym.start()].strip()
         lines = [x.strip() for x in re.split(r'<br\s*/?>|\n', af.get("details") or "") if x.strip()]
-        tech, dims = "", ""
+        tech, dims, price = "", "", {}
         for ln in lines:
             m = DIM.search(ln)
             if m and not dims: dims = f"{m.group(1).strip()} {m.group(2).lower()}"
-            # the price line is not collected
+            elif re.search(r'hind|price|päringu|request|€|eur\b', ln, re.I):
+                price = price or euros(ln)
             elif not tech and not re.search(r'hind|price|päringu|request|€|eur\b', ln, re.I):
                 tech = ln
         if not title: continue
-        recs.append({"gid": "tutar-"+str(w.get("id") or w.get("slug")), "artist": name,
+        recs.append({**price, "gid": "tutar-"+str(w.get("id") or w.get("slug")), "artist": name,
                      "title": title, "year": year, "tech": tech, "dims": dims,
                      "gallery": "Tütar galerii", "city": "Tallinn",
                      **({"img": ((w.get("featuredImage") or {}).get("node") or {}).get("sourceUrl")} if ((w.get("featuredImage") or {}).get("node") or {}).get("sourceUrl") else {}),

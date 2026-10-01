@@ -2,6 +2,7 @@
 """Artrovert (Tallinn) -> appends to gallery_records.json. WooCommerce; metadata only.
 robots.txt permits product pages (only wp-admin, wc-logs and add-to-cart are disallowed)."""
 import re, json, os, gzip, time, urllib.request, ssl
+from asking_price import euros
 UA="EstonianArtCatalogue/1.0 (museaal.ee; contact info@museaal.ee)"
 BASE="https://www.artrovert.ee"
 ctx=ssl.create_default_context(); ctx.check_hostname=False; ctx.verify_mode=ssl.CERT_NONE
@@ -59,7 +60,9 @@ for sl in sorted(slugs):
     main = re.search(r'<(?:article|div)[^>]*class="[^"]*\bast-article-single\b[^"]*"', h)   # the work itself, not the related-works row
     is_sold = bool(main and "outofstock" in main.group(0))
     og = re.search(r'property="og:image" content="([^"]+)"', h)
-    recs.append({"gid":"artro-"+sl,"artist":artist.strip(" ,"),"title":title.strip(),
+    pm = re.search(r'<p class="price">(.*?)</p>', h[main.start():] if main else h, re.S)   # the work's own, before the related row
+    price = {} if is_sold or not pm else euros(re.sub(r"<[^>]+>", " ", pm.group(1)))
+    recs.append({**price, "gid":"artro-"+sl,"artist":artist.strip(" ,"),"title":title.strip(),
                  "year":year,"tech":tech,"dims":dims,
                  "gallery":"Artrovert","city":"Tallinn","url":f"{BASE}/en/toode/{sl}/", **({"sold": True} if is_sold else {}),
                  **({"img": re.sub(r"-\d+x\d+(?=\.\w+$)", "", og.group(1))} if og else {})})

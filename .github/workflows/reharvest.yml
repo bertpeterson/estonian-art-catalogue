@@ -96,6 +96,8 @@ jobs:
           (cd data && python3 chart_side.py)
           # the galleries' own 768-pixel copies of new stock, for the wall (checks each once)
           (cd data && python3 img_small.py)
+          # the moods of new stock pictures, for Find a work (data/stock_moods.py); CLIP only in a week that has some
+          (cd data && if python3 stock_moods.py --todo; then pip install -q --index-url https://download.pytorch.org/whl/cpu torch==2.8.0 && pip install -q open_clip_torch==3.3.0 pillow==12.3.0 numpy==2.5.3 && python3 stock_moods.py; fi)
           ./build_site.sh
           # the smoke test once more before giving up: a headless browser on a shared runner
           # can miss a beat (it failed once, 2026-09-25, and passed on a re-run and a clean clone)

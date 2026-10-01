@@ -159,14 +159,22 @@ def main():
                 f = model.encode_text(tok(ph)).float(); f = f / f.norm(dim=-1, keepdim=True)
                 m = f.mean(0); T.append((m / m.norm()).numpy())
         return np.stack(T)                                # words x 512
+    scale = []
     def zscores(T):
         S = X @ T.T                                       # pictures x words
         S = S - S.mean(axis=1, keepdims=True)             # what a picture is more than anything else in its set
+        scale.append((T, S.mean(axis=0), S.std(axis=0) + 1e-9))
         return (S - S.mean(axis=0)) / (S.std(axis=0) + 1e-9)   # words on one scale
     # moods against moods, subjects against subjects: a picture's subject does not
     # decide its mood, nor the reverse
     Z = np.concatenate([zscores(embed(VOCAB + MORE, TEMPLATES)), zscores(embed(SUBJECTS, SUBJECT_TEMPLATES))], axis=1)
     ALL = VOCAB + MORE + SUBJECTS
+    # the words and the museum pictures' scale, for stock_moods.py: a gallery's picture
+    # is scored on the same scale without the museum embeddings (CI has none)
+    (T1, m1, s1), (T2, m2, s2) = scale
+    np.savez_compressed(os.path.join(HERE, "mood_words.npz"), T=np.concatenate([T1, T2]).astype(np.float32),
+                        mu=np.concatenate([m1, m2]), sd=np.concatenate([s1, s2]), split=len(T1),
+                        words=np.array([en for _, en, _, _ in ALL]))
 
     tnorm = lambda w: re.sub(r"[^a-zõäöüšž0-9]+", " ", (w.get("t") or "").lower()).strip()
     kinds = {"all": lambda w: True,

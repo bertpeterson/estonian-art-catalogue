@@ -768,7 +768,8 @@ print("  wikidata dropped as unresolvable conflict:", WD_CONFLICT)
 # These are NOT museum holdings: the work is in private hands or for sale, and the
 # gallery is its current venue rather than an owner with an accession number. They
 # carry kind="gallery" so a visitor can always tell the two apart, and every record
-# links back to the gallery's own page. Prices are deliberately not collected.
+# links back to the gallery's own page, with the asking price of a work for sale (pr)
+# where the gallery states one; never the price a work sold for.
 GAL = json.load(open("gallery_records.json", encoding="utf-8")) if os.path.exists("gallery_records.json") else []
 # ...and the listings that have left: a work a gallery marks sold, or one that was
 # listed and is not any more (ledger.py). A past listing is a record of a work that
@@ -837,7 +838,10 @@ for g in GAL:
         # the gallery named, while the listing is live -- what the gallery wants of a work it
         # is selling. A past listing keeps no image: the sale is over and the picture is theirs.
         "im": ("g:" + g["img"]) if g.get("img") and not (g.get("sold") or g.get("past")) else None,
-        "gl": g.get("last")})                                                             # last month seen for sale
+        "gl": g.get("last"),                                                              # last month seen for sale
+        # the asking price of a work for sale, as its gallery's page states it; a past
+        # listing keeps none -- what a work sold for stays between the gallery and the buyer
+        **({"pr": int(g["price"])} if g.get("price") and not (g.get("sold") or g.get("past") or g.get("shown")) else {})})
     gal_added += 1
 # NOBA publishes no birth years, but the biographies its artists write usually state
 # one -- "sündinud 1987", "born 1974", "(s. 1962)". Read from the biography only for

@@ -7,9 +7,10 @@ category "E-pood": what is purchasable and in stock now. The name is the lot lin
 the house uses everywhere -- "Endel Kõks “Théme-timide”, 1968" -- and the short
 description opens with the medium and the size: "Söövitus paberil. Raamitud.
 Mõõdud: plm 17,4 x 15 cm, raamiga 41 x 38 cm." The work's own size is taken, not
-the frame's. Prices are in the payload and are not read.
+the frame's. The asking price of current stock is read (asking_price.py); a sold work's never.
 """
 import re, json, os, time, html, urllib.request, ssl
+from asking_price import asking
 
 API = "https://alleegalerii.ee/wp-json/wc/store/v1/products"
 UA = "EstonianArtCatalogue/1.0 (museaal.ee; contact info@museaal.ee)"
@@ -66,7 +67,7 @@ while True:
         gid = "allee-" + str(p.get("id"))
         if gid in seen: continue
         seen.add(gid)
-        recs.append({"gid": gid, "artist": artist, "title": title, "year": y4.group(1) if y4 else None,
+        recs.append({**asking(p, is_sold), "gid": gid, "artist": artist, "title": title, "year": y4.group(1) if y4 else None,
                      "tech": medium, "dims": dims, "gallery": "Allee galerii", "city": "Tallinn",
                      "url": p.get("permalink") or "https://alleegalerii.ee", **({"sold": True} if is_sold else {}),
                      **({"img": p["images"][0].get("src")} if p.get("images") and p["images"][0].get("src") else {})})
