@@ -53,7 +53,7 @@ T = {"en": dict(file="find.html", other="leia.html", other_l="Eesti keeles", sit
                 h="Find a work", lede="Looking for something for your wall? Tell the assistant where it will hang, what you would like to spend and the feeling you are after, or send a photo of the wall: it finds the space, picks works that fit it and hangs them there for you to see. It looks through the works the catalogue's galleries have for sale now, and each one links to the gallery that sells it.",
                 hello="Looking for something? Tell me the room, your budget and the mood, or send a photo of the wall.",
                 photo="Photo of your wall", yourroom="Your room", looking="Looking at your room…", photomsg="(a photo of my room)",
-                wallw="Wall space, width", drag="Drag the room to look around it; scroll or pinch to step closer. Drag a work to move it along the wall, or onto another outlined space. If the sizes look wrong, set the wall's width.", reset="Reset view", ar="See it on your wall (AR)", arwait="Making the model…", arfail="AR could not be opened", onwall="On my wall",
+                wallw="Wall space, width", drag="Drag the room to look around it; scroll or pinch to step closer. Drag a work to move it along the wall, or onto another outlined space. If the sizes look wrong, set the wall's width.", reset="Reset view", ar="See it on your wall (AR)", arsafari="To see a work on your real wall in AR, open this page in Safari.", arwait="Making the model…", arfail="AR could not be opened", onwall="On my wall",
                 choose="Tap a work to hang it", hangmore="Hang another", remove="Take it down", together="{n} works on the wall",
                 frames=dict(none="No frame", black="Black", oak="Oak", white="White", gold="Gold"),
                 fits="fits", roomnote="Room", nowall="I couldn't find a clear stretch of wall in that photo. Try one taken straight on, with the empty wall in view.",
@@ -70,7 +70,7 @@ T = {"en": dict(file="find.html", other="leia.html", other_l="Eesti keeles", sit
                 h="Leia teos", lede="Otsid midagi seinale? Ütle abilisele, kuhu see tuleb, kui palju tahad kulutada ja millist tunnet otsid, või saada foto seinast: ta leiab vaba koha, valib sinna sobivad teosed ja riputab need pildile, et saaksid vaadata. Ta vaatab läbi teosed, mis kataloogi galeriidel praegu müügil on, ja iga teos viib seda müüva galerii lehele.",
                 hello="Otsid midagi? Ütle, mis tuppa, mis eelarvega ja mis meeleoluga, või saada foto seinast.",
                 photo="Foto seinast", yourroom="Sinu tuba", looking="Vaatan su tuba…", photomsg="(foto minu toast)",
-                wallw="Vaba seinaosa laius", drag="Lohista tuba, et ringi vaadata; keri või näpista, et lähemale astuda. Lohista teost, et seda seinal liigutada või teisele märgitud kohale viia. Kui suurused tunduvad valed, sea seina laius õigeks.", reset="Algvaade", ar="Vaata oma seinal (AR)", arwait="Teen mudelit…", arfail="AR-i ei õnnestunud avada", onwall="Minu seinale",
+                wallw="Vaba seinaosa laius", drag="Lohista tuba, et ringi vaadata; keri või näpista, et lähemale astuda. Lohista teost, et seda seinal liigutada või teisele märgitud kohale viia. Kui suurused tunduvad valed, sea seina laius õigeks.", reset="Algvaade", ar="Vaata oma seinal (AR)", arsafari="Et näha teost AR-is oma päris seinal, ava see leht Safaris.", arwait="Teen mudelit…", arfail="AR-i ei õnnestunud avada", onwall="Minu seinale",
                 choose="Puuduta teost, et see seinale riputada", hangmore="Riputa veel üks", remove="Võta maha", together="Seinal {n} teost",
                 frames=dict(none="Raamita", black="Must", oak="Tamm", white="Valge", gold="Kuld"),
                 fits="mahub", roomnote="Tuba", nowall="Ma ei leidnud sellelt fotolt vaba seinaosa. Proovi fotot, mis on tehtud otse seina poole ja kus tühi sein on näha.",
@@ -187,7 +187,9 @@ function caption(r){
   var l=el('a',null,(w[8]?eur(w[8]):T.noprice)+' '+(T.at?T.at+' ':'')+g+' ↗');l.href=w[10];l.target='_blank';l.rel='noopener';
   l.addEventListener('click',function(){if(window.goatcounter&&goatcounter.count)goatcounter.count({path:'find-out',title:g,event:true})});
   p.appendChild(l);c.appendChild(p);
-  if(AR&&w[13])c.appendChild(arButton(w,function(){return it.frame}));
+  r.arSlot.textContent='';
+  if(AR&&w[13]){var ab=arButton(w,function(){return it.frame});ab.classList.add('arbig');r.arSlot.appendChild(ab)}
+  else if(IOS)r.arSlot.appendChild(el('p','arhint',T.arsafari));
   if(r.items.length>1){
     var sum=r.items.reduce(function(a,x){return a+(x.w[8]||0)},0),all=r.items.every(function(x){return x.w[8]});
     c.appendChild(el('p','total',T.together.replace('{n}',r.items.length)+(all?' · '+eur(sum):'')));
@@ -260,6 +262,7 @@ function roomView(b,photo,walls){
   function up(e){delete pts[e.pointerId];if(Object.keys(pts).length<2)pinch=null;if(!Object.keys(pts).length){turn=null;st.classList.remove('turning')}}
   st.addEventListener('pointerup',up);st.addEventListener('pointercancel',up);
   st.addEventListener('wheel',function(e){e.preventDefault();look(r,r.view.yaw,r.view.pitch,r.view.zoom*Math.exp(-e.deltaY*.0015))},{passive:false});
+  r.arSlot=el('div','arslot');v.appendChild(r.arSlot);
   r.strip=el('div','strip');v.appendChild(el('p','hint',T.choose));v.appendChild(r.strip);
   var tools=el('div','tools');
   r.frames=el('div','seg');Object.keys(FRAMES).forEach(function(f){var x=el('button','btn',T.frames[f]);x.type='button';x.dataset.f=f;
@@ -282,6 +285,7 @@ window.addEventListener('resize',function(){rooms.forEach(draw)});
 // iPhone and iPad: AR Quick Look takes a USDZ file (three.js writes it here, in the browser) anchored to a wall,
 // at true scale (no pinching it bigger). The picture's pixels must be readable, so it comes through the
 // page's own origin (data-img), fetched as asked for, never kept. Built only when tapped.
+var IOS=/iP(hone|ad|od)/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
 var ARDEBUG=/ardebug/.test(location.hash), AR=ARDEBUG||(function(){var a=document.createElement('a');return !!(a.relList&&a.relList.supports&&a.relList.supports('ar'))})();
 function viaUs(u){return page.dataset.img?page.dataset.img+encodeURIComponent(u):u}
 function loadImg(u){return new Promise(function(ok,no){var i=new Image();i.crossOrigin='anonymous';i.onload=function(){ok(i)};i.onerror=no;i.src=u})}
@@ -294,14 +298,21 @@ function usdz(w,frame){
     // a picture cropped to the record's shape is cut on a canvas (the exporter writes no texture offsets)
     var src=img;if(sh.crop){var iw=img.naturalWidth,ih=img.naturalHeight,rw=aw/ah,cw=Math.min(iw,ih*rw),ch=cw/rw;
       src=document.createElement('canvas');src.width=Math.round(cw);src.height=Math.round(ch);src.getContext('2d').drawImage(img,(iw-cw)/2,(ih-ch)/2,cw,ch,0,0,src.width,src.height)}
-    var tex=new THREE.Texture(src);tex.colorSpace=THREE.SRGBColorSpace;tex.needsUpdate=true;
-    // the picture on the front (+z, facing the room), on a board: the mat, or a canvas's own edge
-    mesh(new THREE.PlaneGeometry(aw,ah),new THREE.MeshStandardMaterial({map:tex,roughness:.9,metalness:0}),0,0,D/2+.0015);
+    var tex=new THREE.Texture(src);tex.colorSpace=THREE.SRGBColorSpace;tex.needsUpdate=true;tex.userData.mimeType='image/jpeg';   // a photograph: JPEG, not a 9 MB PNG
+    // the picture on both faces of a board (the mat, or a canvas's own edge): AR Quick Look turns the side
+    // it calls the back towards the room when it hangs a model on a wall (seen 2026-10-01), and a model
+    // with no front and back looks right whichever way it is hung
+    var pm=new THREE.MeshStandardMaterial({map:tex,roughness:.9,metalness:0});
+    mesh(new THREE.PlaneGeometry(aw,ah),pm,0,0,D/2+.0015);
+    mesh(new THREE.PlaneGeometry(aw,ah),pm,0,0,-D/2-.0015).rotation.y=Math.PI;
     mesh(new THREE.BoxGeometry(aw+2*mt,ah+2*mt,D),new THREE.MeshStandardMaterial({color:mt?0xf5f2ea:0xe8e4dc,roughness:.95}),0,0,0);
     if(f){var c=FRAME_COL[frame],fm=new THREE.MeshStandardMaterial({color:c[0],roughness:c[1],metalness:c[2]}),W=aw+2*(mt+f),H=ah+2*(mt+f),Df=D+.012;
-      mesh(new THREE.BoxGeometry(W,f,Df),fm,0,(H-f)/2,.006);mesh(new THREE.BoxGeometry(W,f,Df),fm,0,-(H-f)/2,.006);
-      mesh(new THREE.BoxGeometry(f,H-2*f,Df),fm,-(W-f)/2,0,.006);mesh(new THREE.BoxGeometry(f,H-2*f,Df),fm,(W-f)/2,0,.006)}
-    var scene=new THREE.Scene();scene.add(g);
+      mesh(new THREE.BoxGeometry(W,f,Df),fm,0,(H-f)/2,0);mesh(new THREE.BoxGeometry(W,f,Df),fm,0,-(H-f)/2,0);
+      mesh(new THREE.BoxGeometry(f,H-2*f,Df),fm,-(W-f)/2,0,0);mesh(new THREE.BoxGeometry(f,H-2*f,Df),fm,(W-f)/2,0,0)}
+    // AR Quick Look hangs a model with its up axis (+y) out of the wall -- the first try stood out from
+    // the wall like a shelf (2026-10-01) -- so the work is tipped back to face +y, its top along -z (up the wall)
+    g.rotation.x=-Math.PI/2;
+    var scene=new THREE.Scene();scene.add(g);scene.updateMatrixWorld(true);   // the exporter writes each part's .matrix, set only by this
     return new m[1].USDZExporter().parseAsync(scene,{ar:{anchoring:{type:'plane'},planeAnchoring:{alignment:'vertical'}},quickLookCompatible:true,maxTextureSize:2048})})
   .then(function(buf){return new Blob([buf],{type:'model/vnd.usdz+zip'})})}
 function arButton(w,frameOf){
@@ -471,6 +482,9 @@ form.ask input:focus{outline:2px solid var(--ink);outline-offset:1px}
 .room .placed,.room .total{margin:0;font-size:.9rem;color:var(--ink-soft)}.room .placed i{font:italic 400 1.02rem var(--serif);color:var(--ink)}.room .placed a{color:var(--ink)}
 .room .total{font:500 .78rem/1.4 var(--mono);color:var(--grey)}
 .room .caption .btn{padding:6px 9px;font-size:.64rem}
+.arslot:empty{display:none}
+.btn.arbtn.arbig{width:100%;padding:13px;font-size:.78rem;background:var(--on);color:var(--on-ink);border-color:var(--on);margin:0}
+.arhint{margin:0;font-size:.85rem;color:var(--ink-soft)}
 .btn.arbtn{padding:6px 9px;font-size:.64rem;margin-top:2px;justify-self:start}
 .btn.onwall{justify-self:start;padding:6px 9px;font-size:.64rem;margin-top:2px}
 """
@@ -480,7 +494,7 @@ def page(lang, ver, api, labels):
     me, other = f"{BASE}/{t['file']}", f"{BASE}/{t['other']}"
     tj = json.dumps({k: t[k] for k in ("more", "at", "noprice", "none", "thinking", "failed", "record", "kinds", "sizes", "under", "over", "shown", "hash",
                                        "yourroom", "looking", "photomsg", "wallw", "drag", "onwall", "fits", "roomnote", "nowall", "badphoto",
-                                       "choose", "hangmore", "remove", "together", "frames", "reset", "ar", "arwait", "arfail")}, ensure_ascii=False).replace("</", "<\\/")
+                                       "choose", "hangmore", "remove", "together", "frames", "reset", "ar", "arwait", "arfail", "arsafari")}, ensure_ascii=False).replace("</", "<\\/")
     lj = json.dumps(labels, ensure_ascii=False).replace("</", "<\\/")
     ask = (api.rstrip("/") + "/ask") if api else ""
     starters = "".join(f'<button type="button" class="chip starter">{e(s)}</button>' for s in t["starters"])
