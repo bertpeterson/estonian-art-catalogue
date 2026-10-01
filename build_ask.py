@@ -53,7 +53,9 @@ T = {"en": dict(file="find.html", other="leia.html", other_l="Eesti keeles", sit
                 h="Find a work", lede="Looking for something for your wall? Tell the assistant where it will hang, what you would like to spend and the feeling you are after, or send a photo of the wall: it finds the space, picks works that fit it and hangs them there for you to see. It looks through the works the catalogue's galleries have for sale now, and each one links to the gallery that sells it.",
                 hello="Looking for something? Tell me the room, your budget and the mood, or send a photo of the wall.",
                 photo="Photo of your wall", yourroom="Your room", looking="Looking at your room…", photomsg="(a photo of my room)",
-                wallw="Wall space, width", drag="Drag the work to move it. If the sizes look wrong, set the wall's width.", onwall="On my wall",
+                wallw="Wall space, width", drag="Drag a work to move it along the wall, or onto another outlined space. If the sizes look wrong, set the wall's width.", onwall="On my wall",
+                choose="Tap a work to hang it", hangmore="Hang another", remove="Take it down", together="{n} works on the wall",
+                frames=dict(none="No frame", black="Black", oak="Oak", white="White", gold="Gold"),
                 fits="fits", roomnote="Room", nowall="I couldn't find a clear stretch of wall in that photo. Try one taken straight on, with the empty wall in view.",
                 badphoto="That photo could not be read. Try a JPEG or PNG.",
                 starters=["A calm sea painting for the bedroom, under €1,000", "Something bright and joyful for a big living-room wall", "A small print as a gift, around €200"],
@@ -68,7 +70,9 @@ T = {"en": dict(file="find.html", other="leia.html", other_l="Eesti keeles", sit
                 h="Leia teos", lede="Otsid midagi seinale? Ütle abilisele, kuhu see tuleb, kui palju tahad kulutada ja millist tunnet otsid, või saada foto seinast: ta leiab vaba koha, valib sinna sobivad teosed ja riputab need pildile, et saaksid vaadata. Ta vaatab läbi teosed, mis kataloogi galeriidel praegu müügil on, ja iga teos viib seda müüva galerii lehele.",
                 hello="Otsid midagi? Ütle, mis tuppa, mis eelarvega ja mis meeleoluga, või saada foto seinast.",
                 photo="Foto seinast", yourroom="Sinu tuba", looking="Vaatan su tuba…", photomsg="(foto minu toast)",
-                wallw="Vaba seinaosa laius", drag="Lohista teost, et seda liigutada. Kui suurused tunduvad valed, sea seina laius õigeks.", onwall="Minu seinale",
+                wallw="Vaba seinaosa laius", drag="Lohista teost, et seda seinal liigutada või teisele märgitud kohale viia. Kui suurused tunduvad valed, sea seina laius õigeks.", onwall="Minu seinale",
+                choose="Puuduta teost, et see seinale riputada", hangmore="Riputa veel üks", remove="Võta maha", together="Seinal {n} teost",
+                frames=dict(none="Raamita", black="Must", oak="Tamm", white="Valge", gold="Kuld"),
                 fits="mahub", roomnote="Tuba", nowall="Ma ei leidnud sellelt fotolt vaba seinaosa. Proovi fotot, mis on tehtud otse seina poole ja kus tühi sein on näha.",
                 badphoto="Seda fotot ei õnnestunud lugeda. Proovi JPEG- või PNG-faili.",
                 starters=["Rahulik merepilt magamistuppa, alla 1000 €", "Midagi heledat ja rõõmsat suurele elutoa seinale", "Väike graafikaleht kingituseks, umbes 200 €"],
@@ -127,59 +131,119 @@ function homography(s,d){var A=[],b=[];for(var k=0;k<4;k++){var x=s[k][0],y=s[k]
   A.push([x,y,1,0,0,0,-x*X,-y*X]);b.push(X);A.push([0,0,0,x,y,1,-x*Y,-y*Y]);b.push(Y)}return solve(A,b)}
 function apply(H,p){var w=H[6]*p[0]+H[7]*p[1]+1;return [(H[0]*p[0]+H[1]*p[1]+H[2])/w,(H[3]*p[0]+H[4]*p[1]+H[5])/w]}
 var SQ=[[0,0],[1,0],[1,1],[0,1]];
-function clamp(x,f){return f>=1?.5:Math.max(f/2,Math.min(1-f/2,x))}
 
-// ---- the room: the visitor's photo, the wall spaces found in it, and a work on one of them ----
-function wallSize(r){var w=r.walls[r.active];return [w.w_cm*r.scale,w.h_cm*r.scale]}
+// ---- the room: the visitor's photo, the wall spaces found in it, and the works hung on it ----
+// A hung work is laid out at PX pixels a centimetre -- frame, mat and picture at their real sizes -- and
+// that rectangle is mapped onto the wall in the photo, so everything follows the wall's perspective.
+var PX=10, FRAMES={none:0,black:2.5,oak:3,white:2.5,gold:5};
+function inside(p,q){var c=false;for(var i=0,j=3;i<4;j=i++)if((q[i][1]>p[1])!==(q[j][1]>p[1])&&p[0]<(q[j][0]-q[i][0])*(p[1]-q[i][1])/(q[j][1]-q[i][1])+q[i][0])c=!c;return c}
+function wallCm(r,i){var w=r.walls[i];return [w.w_cm*r.scale,w.h_cm*r.scale]}
+// outer size in cm: the long side from the record, the other from the picture's own shape, then mat and frame
+function size(it){var d=it.w[13],n=it.pic,k=n.naturalHeight/n.naturalWidth,land=k<=1;
+  var aw=land?d[0]:d[0]/k, ah=land?d[0]*k:d[0], f=FRAMES[it.frame], m=f&&it.w[7]==='paper'?Math.max(4,Math.min(9,Math.max(aw,ah)*.12)):0;
+  return {f:f,m:m,W:aw+2*(m+f),H:ah+2*(m+f)}}
+// the work's four corners in the photo; dx, dy move it on the wall, in cm (its shadow)
+function quadOf(r,it,s,dx,dy){var c=wallCm(r,it.wall),H=r.walls[it.wall].H,fw=s.W/c[0],fh=s.H/c[1],u=it.u+(dx||0)/c[0],v=it.v+(dy||0)/c[1];
+  return [[u-fw/2,v-fh/2],[u+fw/2,v-fh/2],[u+fw/2,v+fh/2],[u-fw/2,v+fh/2]].map(function(p){return apply(H,p)})}
+function m3d(e,w,h,q){var M=homography([[0,0],[w,0],[w,h],[0,h]],q);e.style.width=w+'px';e.style.height=h+'px';
+  e.style.transform='matrix3d('+[M[0],M[3],0,M[6],M[1],M[4],0,M[7],0,0,1,0,M[2],M[5],0,1].join(',')+')'}
+function inPhoto(r,q){return q.every(function(p){return p[0]>=-4&&p[1]>=-4&&p[0]<=r.W+4&&p[1]<=r.H+4})}
+function layout(r,it){if(!it.pic.naturalWidth)return;var s=size(it);
+  it.el.className='hang f-'+it.frame+(it===r.sel&&r.items.length>1?' sel':'');
+  it.el.style.setProperty('--f',s.f*PX+'px');it.el.style.setProperty('--m',s.m*PX+'px');
+  m3d(it.el,s.W*PX,s.H*PX,quadOf(r,it,s));m3d(it.shade,s.W*PX,s.H*PX,quadOf(r,it,s,1.2,2.5));
+  it.el.hidden=it.shade.hidden=false}
 function draw(r){
-  var wall=r.walls[r.active], q=wall.q;
-  r.poly.setAttribute('points',q.map(function(p){return p.join(',')}).join(' '));
   r.layer.style.transform='scale('+(r.stage.clientWidth/r.W)+')';
-  var ws=wallSize(r);r.out.textContent=Math.round(ws[0])+' cm';
-  var a=r.art, w=r.work; if(!w||!a.naturalWidth)return;
-  var land=a.naturalWidth>=a.naturalHeight, aw=land?w[13][0]:w[13][1], ah=land?w[13][1]:w[13][0];
-  var fw=aw/ws[0], fh=ah/ws[1]; r.cu=clamp(r.cu,fw); r.cv=clamp(r.cv,fh);
-  var Hq=homography(SQ,q), quad=[[r.cu-fw/2,r.cv-fh/2],[r.cu+fw/2,r.cv-fh/2],[r.cu+fw/2,r.cv+fh/2],[r.cu-fw/2,r.cv+fh/2]].map(function(p){return apply(Hq,p)});
-  var iw=a.naturalWidth, ih=a.naturalHeight, M=homography([[0,0],[iw,0],[iw,ih],[0,ih]],quad);
-  a.style.width=iw+'px';a.style.height=ih+'px';
-  a.style.transform='matrix3d('+[M[0],M[3],0,M[6],M[1],M[4],0,M[7],0,0,1,0,M[2],M[5],0,1].join(',')+')';
-  a.hidden=false}
-function put(r,w){
-  r.work=w;r.cu=.5;r.cv=.5;r.art.hidden=true;r.art.onload=function(){draw(r)};r.art.alt=w[0]+', '+D.artists[w[1]][0];r.art.src=w[3];
-  var g=D.galleries[w[9]], c=r.cap; c.textContent='';
-  c.appendChild(el('i',null,w[0]));c.appendChild(document.createTextNode(', '+D.artists[w[1]][0]+' · '+cm(w[13])+' · '));
+  r.polys.forEach(function(p,i){p.setAttribute('points',r.walls[i].q.map(function(x){return x.join(',')}).join(' '))});
+  var cur=r.sel?r.sel.wall:0;r.range.value=Math.round(wallCm(r,cur)[0]);r.out.textContent=r.range.value+' cm';
+  r.items.forEach(function(it){layout(r,it)});caption(r)}
+function caption(r){
+  var c=r.cap,it=r.sel;c.textContent='';
+  r.strip&&Array.prototype.forEach.call(r.strip.children,function(b){if(b.w){b.setAttribute('aria-pressed',String(!!it&&b.w===it.w));b.classList.toggle('hung',r.items.some(function(x){return x.w===b.w}))}});
+  Array.prototype.forEach.call(r.frames.children,function(b){b.setAttribute('aria-pressed',String(!!it&&b.dataset.f===it.frame))});
+  if(!it)return;var w=it.w,g=D.galleries[w[9]],p=el('p','placed');
+  p.appendChild(el('i',null,w[0]));p.appendChild(document.createTextNode(', '+D.artists[w[1]][0]+' · '+cm(w[13])+' · '));
   var l=el('a',null,(w[8]?eur(w[8]):T.noprice)+' '+(T.at?T.at+' ':'')+g+' ↗');l.href=w[10];l.target='_blank';l.rel='noopener';
   l.addEventListener('click',function(){if(window.goatcounter&&goatcounter.count)goatcounter.count({path:'find-out',title:g,event:true})});
-  c.appendChild(l)}
+  p.appendChild(l);c.appendChild(p);
+  if(r.items.length>1){
+    var sum=r.items.reduce(function(a,x){return a+(x.w[8]||0)},0),all=r.items.every(function(x){return x.w[8]});
+    c.appendChild(el('p','total',T.together.replace('{n}',r.items.length)+(all?' · '+eur(sum):'')));
+    var x=el('button','btn',T.remove);x.type='button';x.addEventListener('click',function(){takeDown(r,it)});c.appendChild(x)}}
+function select(r,it){r.sel=it;draw(r)}
+function takeDown(r,it){r.items.splice(r.items.indexOf(it),1);it.el.remove();it.shade.remove();r.sel=r.items[r.items.length-1]||null;draw(r)}
+function photoPt(r,e){var b=r.stage.getBoundingClientRect(),k=b.width/r.W;return [(e.clientX-b.left)/k,(e.clientY-b.top)/k]}
+// hang a work: in place of the selected one, or (add) as another, beside those already on the wall
+function hang(r,w,add){
+  if(!w||!w[13])return;
+  var it=!add&&r.sel, fresh=!it;
+  if(fresh){
+    it={wall:r.sel?r.sel.wall:0,u:.5,v:.5,frame:r.sel?r.sel.frame:'black'};
+    it.el=el('div','hang');var fr=el('div','fr'),mat=el('div','mat');it.pic=el('img');it.pic.draggable=false;it.pic.referrerPolicy='no-referrer-when-downgrade';
+    mat.appendChild(it.pic);fr.appendChild(mat);it.el.appendChild(fr);it.shade=el('div','shade');it.el.hidden=it.shade.hidden=true;
+    r.shades.appendChild(it.shade);r.hangs.appendChild(it.el);r.items.push(it);
+    // dragged, it slides along the wall in perspective, and onto another wall area when the pointer reaches one
+    it.el.addEventListener('pointerdown',function(e){e.preventDefault();it.el.setPointerCapture(e.pointerId);
+      var uv=apply(r.walls[it.wall].Hi,photoPt(r,e));it.drag=[it.u-uv[0],it.v-uv[1]];if(r.sel!==it)select(r,it)});
+    it.el.addEventListener('pointermove',function(e){if(!it.drag)return;var p=photoPt(r,e);
+      for(var i=0;i<r.walls.length;i++)if(i!==it.wall&&inside(p,r.walls[i].q)){it.wall=i;it.drag=[0,0];break}
+      var uv=apply(r.walls[it.wall].Hi,p),u=it.u,v=it.v;it.u=uv[0]+it.drag[0];it.v=uv[1]+it.drag[1];
+      if(!inPhoto(r,quadOf(r,it,size(it)))){it.u=u;it.v=v}layout(r,it)});
+    it.el.addEventListener('pointerup',function(){it.drag=null;draw(r)});it.el.addEventListener('pointercancel',function(){it.drag=null});
+  }
+  it.w=w;it.pic.alt=w[0]+', '+D.artists[w[1]][0];r.sel=it;
+  it.pic.onload=function(){
+    if(fresh&&r.items.length>1){
+      // a row, centred in the empty area, when the works fit in it side by side
+      var c=wallCm(r,it.wall),row=r.items.filter(function(x){return x.wall===it.wall&&x.pic.naturalWidth}).sort(function(a,b){return a===it?1:b===it?-1:a.u-b.u});
+      var ws=row.map(function(x){return size(x).W/c[0]}),g=12/c[0],tot=ws.reduce(function(a,b){return a+b},0)+g*(row.length-1);
+      if(tot<=.98&&row.length>1){var x0=.5-tot/2,v=row[0].v;row.forEach(function(o,i){o.u=x0+ws[i]/2;o.v=v;x0+=ws[i]+g});draw(r);return}
+      // else beside the rightmost on its wall, else the leftmost, else a little off the centre
+      var s=size(it),others=r.items.filter(function(x){return x!==it&&x.wall===it.wall&&x.pic.naturalWidth});
+      var ext=others.map(function(x){var o=size(x);return [x.u-o.W/c[0]/2,x.u+o.W/c[0]/2]}), gap=12/c[0], half=s.W/c[0]/2;
+      var right=Math.max.apply(null,ext.map(function(e){return e[1]}).concat([-1])), left=Math.min.apply(null,ext.map(function(e){return e[0]}).concat([2]));
+      var cands=[right+gap+half,left-gap-half,it.u+.08];
+      for(var i=0;i<cands.length;i++){it.u=cands[i];if(inPhoto(r,quadOf(r,it,s)))break}}
+    draw(r)};
+  it.pic.src=w[3];draw(r)}
+// the suggestions under the photo: tap one to put it on the wall
+function fill(r,list){
+  r.list=list.filter(function(w){return w[13]});r.n=0;r.strip.textContent='';
+  function more(){r.list.slice(r.n,r.n+12).forEach(function(w){
+      var b=el('button');b.type='button';b.w=w;var i=el('img');i.src=w[3];i.alt=w[0];i.loading='lazy';i.referrerPolicy='no-referrer-when-downgrade';
+      b.appendChild(i);b.appendChild(el('span',null,w[8]?eur(w[8]):cm(w[13])));b.title=w[0]+', '+D.artists[w[1]][0]+' · '+cm(w[13]);
+      b.addEventListener('click',function(){hang(r,w)});r.strip.insertBefore(b,r.moreBtn)});
+    r.n+=12;r.moreBtn.hidden=r.n>=r.list.length;caption(r)}
+  r.moreBtn=el('button','more',T.more);r.moreBtn.type='button';r.moreBtn.addEventListener('click',more);r.strip.appendChild(r.moreBtn);more()}
 function roomView(b,photo,walls){
-  var r={W:photo.w,H:photo.h,walls:walls,active:0,scale:1,cu:.5,cv:.5,work:null};
-  var v=el('div','room'), st=el('div','stage'), ph=el('img','photo'), NS='http://www.w3.org/2000/svg';
-  ph.src=photo.url;ph.alt=T.yourroom;ph.onload=function(){draw(r)};
+  var r={W:photo.w,H:photo.h,walls:walls,scale:1,items:[],sel:null,polys:[]},NS='http://www.w3.org/2000/svg';
+  walls.forEach(function(w){w.H=homography(SQ,w.q);w.Hi=homography(w.q,SQ)});
+  var v=el('div','room'),st=el('div','stage'),ph=el('img','photo');ph.src=photo.url;ph.alt=T.yourroom;ph.onload=function(){draw(r)};
   var svg=document.createElementNS(NS,'svg');svg.setAttribute('viewBox','0 0 '+r.W+' '+r.H);svg.setAttribute('preserveAspectRatio','none');svg.setAttribute('class','outline');
-  r.poly=document.createElementNS(NS,'polygon');svg.appendChild(r.poly);
+  walls.forEach(function(){var p=document.createElementNS(NS,'polygon');svg.appendChild(p);r.polys.push(p)});
   r.layer=el('div','layer');r.layer.style.width=r.W+'px';r.layer.style.height=r.H+'px';
-  r.art=el('img','art');r.art.hidden=true;r.art.draggable=false;r.art.referrerPolicy='no-referrer-when-downgrade';r.layer.appendChild(r.art);
+  r.shades=el('div');r.hangs=el('div');r.layer.appendChild(r.shades);r.layer.appendChild(r.hangs);
   st.appendChild(ph);st.appendChild(svg);st.appendChild(r.layer);r.stage=st;v.appendChild(st);
-  // move the work by dragging it: the pointer read back onto the wall, so it slides in perspective
-  var drag=null;
-  function unit(e){var b=st.getBoundingClientRect(),k=b.width/r.W;return apply(homography(r.walls[r.active].q,SQ),[(e.clientX-b.left)/k,(e.clientY-b.top)/k])}
-  r.art.addEventListener('pointerdown',function(e){e.preventDefault();r.art.setPointerCapture(e.pointerId);drag={p:unit(e),c:[r.cu,r.cv]}});
-  r.art.addEventListener('pointermove',function(e){if(!drag)return;var p=unit(e);r.cu=drag.c[0]+p[0]-drag.p[0];r.cv=drag.c[1]+p[1]-drag.p[1];draw(r)});
-  r.art.addEventListener('pointerup',function(){drag=null});r.art.addEventListener('pointercancel',function(){drag=null});
+  r.strip=el('div','strip');v.appendChild(el('p','hint',T.choose));v.appendChild(r.strip);
   var tools=el('div','tools');
-  if(walls.length>1){var seg=el('div','seg');walls.forEach(function(w,i){var x=el('button','btn',(i+1)+' · '+w.where);x.type='button';x.setAttribute('aria-pressed',String(i===0));
-    x.addEventListener('click',function(){r.active=i;r.scale=1;r.cu=.5;r.cv=.5;r.range.value=w.w_cm;Array.prototype.forEach.call(seg.children,function(y,j){y.setAttribute('aria-pressed',String(j===i))});draw(r)});seg.appendChild(x)});tools.appendChild(seg)}
+  r.frames=el('div','seg');Object.keys(FRAMES).forEach(function(f){var x=el('button','btn',T.frames[f]);x.type='button';x.dataset.f=f;
+    x.addEventListener('click',function(){if(r.sel){r.sel.frame=f;draw(r)}});r.frames.appendChild(x)});
+  tools.appendChild(r.frames);
+  var add=el('button','btn',T.hangmore);add.type='button';
+  add.addEventListener('click',function(){var w=(r.list||[]).filter(function(x){return !r.items.some(function(i){return i.w===x})})[0];hang(r,w,true)});
+  tools.appendChild(add);
   // the width is an estimate from the photo: the visitor can set it right, and every size follows
   var lab=el('label','width');lab.appendChild(document.createTextNode(T.wallw+' '));
-  r.range=el('input');r.range.type='range';r.range.min=30;r.range.max=600;r.range.step=5;r.range.value=walls[0].w_cm;
-  r.range.addEventListener('input',function(){r.scale=r.range.value/r.walls[r.active].w_cm;draw(r)});
+  r.range=el('input');r.range.type='range';r.range.min=30;r.range.max=600;r.range.step=5;
+  r.range.addEventListener('input',function(){r.scale=r.range.value/r.walls[r.sel?r.sel.wall:0].w_cm;draw(r)});
   r.out=el('output');lab.appendChild(r.range);lab.appendChild(r.out);tools.appendChild(lab);
-  v.appendChild(tools);v.appendChild(el('p','hint',T.drag));r.cap=el('p','placed');v.appendChild(r.cap);
+  v.appendChild(tools);v.appendChild(el('p','hint',T.drag));r.cap=el('div','caption');v.appendChild(r.cap);
   b.appendChild(v);r.v=v;rooms.push(r);draw(r);return r}
 window.addEventListener('resize',function(){rooms.forEach(draw)});
 
 function rank(q){
-  var wt=[1,.8,.65,.5,.4], out=[], ws=R&&wallSize(R);
+  var wt=[1,.8,.65,.5,.4], out=[], ws=R&&wallCm(R,R.sel?R.sel.wall:0);
   D.works.forEach(function(w){
     if(q.kind!=='any'&&w[7]!==q.kind)return;
     if(q.budget_max>0&&!(w[8]&&w[8]<=q.budget_max*1.05))return;
@@ -212,13 +276,13 @@ function card(w){
   var pr=el('span','price');pr.appendChild(el('b',null,w[8]?eur(w[8]):T.noprice));pr.appendChild(document.createTextNode(' '+(T.at?T.at+' ':'')+g+' ↗'));out.appendChild(pr);
   c.appendChild(out);
   if(R&&w[13]){var r=R,on=el('button','btn onwall',T.onwall);on.type='button';
-    on.addEventListener('click',function(){put(r,w);r.v.scrollIntoView({block:'center',behavior:'smooth'})});c.appendChild(on)}
+    on.addEventListener('click',function(){hang(r,w);r.v.scrollIntoView({block:'center',behavior:'smooth'})});c.appendChild(on)}
   var rec=el('a','rec',T.record);rec.href='./#'+T.hash+'artist='+a[1]+'&open='+encodeURIComponent(w[11]);c.appendChild(rec);
   return c}
 function show(b,q){
   var list=rank(q), n=0, grid=el('div','grid'), more=el('button','btn more',T.more);more.type='button';
   var bits=[];if(q.kind!=='any')bits.push(T.kinds[q.kind]);
-  if(R){var ws=wallSize(R);bits.push(T.fits+' '+Math.round(ws[0])+' × '+Math.round(ws[1])+' cm')}else if(q.size!=='any')bits.push(T.sizes[q.size]);
+  if(R){var ws=wallCm(R,R.sel?R.sel.wall:0);bits.push(T.fits+' '+Math.round(ws[0])+' × '+Math.round(ws[1])+' cm')}else if(q.size!=='any')bits.push(T.sizes[q.size]);
   if(q.budget_max>0)bits.push((q.budget_min>0?eur(q.budget_min)+'–':T.under+' ')+eur(q.budget_max));else if(q.budget_min>0)bits.push(T.over+' '+eur(q.budget_min));
   bits=bits.concat(q.words.map(function(x){return labels[x]||x}));
   if(bits.length)b.appendChild(el('p','search',bits.join(' · ')));
@@ -244,7 +308,7 @@ function send(text,photo){
       else b.appendChild(el('p','none',T.nowall));
     }
     var s=q.show||photo?show(b,q):{note:'',list:[]};
-    if(photo&&R&&R.v.parentNode===b&&s.list.length)put(R,s.list[0]);
+    if(R&&s.list.length){fill(R,s.list);if(photo&&R.v.parentNode===b)hang(R,R.list[0])}
     msgs.push({role:'assistant',content:(q.reply||'')+extra+(s.note?' ('+T.shown+': '+s.note+')':'')});
     if(window.goatcounter&&goatcounter.count)goatcounter.count({path:'find-turn',title:photo?'photo':q.show?'search':'talk',event:true});
   }).catch(function(){b.classList.remove('wait');b.firstChild.textContent=T.failed;msgs.pop()})
@@ -298,15 +362,38 @@ form.ask input:focus{outline:2px solid var(--ink);outline-offset:1px}
 .stage svg.outline{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none}
 .outline polygon{fill:rgba(255,255,255,.05);stroke:#fff;stroke-width:2;stroke-dasharray:10 7;opacity:.75;vector-effect:non-scaling-stroke}
 .layer{position:absolute;left:0;top:0;transform-origin:0 0;pointer-events:none}
-.layer .art{position:absolute;left:0;top:0;max-width:none;transform-origin:0 0;pointer-events:auto;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;box-shadow:0 10px 40px rgba(0,0,0,.4)}
-.layer .art:active{cursor:grabbing}
+.hang,.shade{position:absolute;left:0;top:0;transform-origin:0 0}
+.hang{pointer-events:auto;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none}
+.hang:active{cursor:grabbing}
+.hang .fr,.hang .mat{box-sizing:border-box;width:100%;height:100%}
+.hang .fr{padding:var(--f)}.hang .mat{padding:var(--m);background:#f5f2ea}
+.hang img{display:block;width:100%;height:100%;pointer-events:none;box-shadow:-2px -2px 4px rgba(0,0,0,.28)}
+.hang::after{content:"";position:absolute;left:0;top:0;right:0;bottom:0;pointer-events:none;background:linear-gradient(165deg,rgba(255,255,255,.08),rgba(0,0,0,.1))}
+.hang.sel{outline:5px solid rgba(255,255,255,.9);outline-offset:8px}
+.f-none .mat{background:none}.f-none img{box-shadow:none}
+.f-none::after{box-shadow:inset -10px -8px 12px -8px rgba(0,0,0,.5)}
+.f-black .fr{background:linear-gradient(135deg,#4a4a4a,#161616 35%,#050505);box-shadow:inset 2px 2px 3px rgba(255,255,255,.2),inset -3px -3px 5px rgba(0,0,0,.75)}
+.f-oak .fr{background:repeating-linear-gradient(95deg,rgba(95,58,22,.13) 0 3px,transparent 3px 10px),linear-gradient(135deg,#e6c18a,#bb8d55 55%,#93663a);box-shadow:inset 2px 2px 3px rgba(255,255,255,.4),inset -3px -3px 5px rgba(60,35,10,.55)}
+.f-white .fr{background:linear-gradient(135deg,#fff,#e6e2d9);box-shadow:inset 2px 2px 3px #fff,inset -3px -3px 5px rgba(0,0,0,.2)}
+.f-gold .fr{background:linear-gradient(135deg,#f7e4a3,#d4ad4d 28%,#8e6b1f 52%,#e7c970 78%,#a9842d);box-shadow:inset 3px 3px 4px rgba(255,255,255,.5),inset -4px -4px 6px rgba(70,45,5,.6)}
+.shade{background:rgba(0,0,0,.5);filter:blur(24px);pointer-events:none}
+.strip{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;scroll-snap-type:x proximity}
+.strip button{flex:0 0 auto;width:96px;padding:0;border:1px solid var(--rule);background:var(--raise);color:var(--ink);cursor:pointer;display:grid;gap:4px;text-align:left;scroll-snap-align:start}
+.strip button img{display:block;width:100%;height:76px;object-fit:cover;background:var(--field)}
+.strip button span{font:500 .68rem/1.2 var(--mono);padding:0 6px 6px;color:var(--grey)}
+.strip button.hung{border-color:var(--grey)}.strip button.hung span::before{content:"\2713  "}
+.strip button[aria-pressed=true]{border-color:var(--ink);box-shadow:0 0 0 1px var(--ink)}
+.strip .more{width:auto;padding:0 12px;font:500 .7rem/1 var(--mono);text-transform:uppercase;letter-spacing:.06em;align-content:center}
 .tools{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center}
-.tools .seg .btn{text-transform:none;letter-spacing:0;font-size:.74rem}
+.tools .seg .btn{text-transform:none;letter-spacing:0;font-size:.74rem;padding:8px 10px}
 .tools .width{display:flex;align-items:center;gap:8px;font:500 .72rem/1.4 var(--mono);color:var(--grey);text-transform:uppercase;letter-spacing:.06em}
-.tools .width input{width:170px}
+.tools .width input{width:160px}
 .tools output{color:var(--ink);min-width:6ch}
 .room .hint{margin:0;font-size:.78rem;color:var(--grey)}
-.room .placed{margin:0;font-size:.9rem;color:var(--ink-soft)}.room .placed i{font:italic 400 1.02rem var(--serif);color:var(--ink)}.room .placed a{color:var(--ink)}
+.room .caption{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:baseline}
+.room .placed,.room .total{margin:0;font-size:.9rem;color:var(--ink-soft)}.room .placed i{font:italic 400 1.02rem var(--serif);color:var(--ink)}.room .placed a{color:var(--ink)}
+.room .total{font:500 .78rem/1.4 var(--mono);color:var(--grey)}
+.room .caption .btn{padding:6px 9px;font-size:.64rem}
 .btn.onwall{justify-self:start;padding:6px 9px;font-size:.64rem;margin-top:2px}
 """
 
@@ -314,7 +401,8 @@ def page(lang, ver, api, labels):
     t = T[lang]
     me, other = f"{BASE}/{t['file']}", f"{BASE}/{t['other']}"
     tj = json.dumps({k: t[k] for k in ("more", "at", "noprice", "none", "thinking", "failed", "record", "kinds", "sizes", "under", "over", "shown", "hash",
-                                       "yourroom", "looking", "photomsg", "wallw", "drag", "onwall", "fits", "roomnote", "nowall", "badphoto")}, ensure_ascii=False).replace("</", "<\\/")
+                                       "yourroom", "looking", "photomsg", "wallw", "drag", "onwall", "fits", "roomnote", "nowall", "badphoto",
+                                       "choose", "hangmore", "remove", "together", "frames")}, ensure_ascii=False).replace("</", "<\\/")
     lj = json.dumps(labels, ensure_ascii=False).replace("</", "<\\/")
     ask = (api.rstrip("/") + "/ask") if api else ""
     starters = "".join(f'<button type="button" class="chip starter">{e(s)}</button>' for s in t["starters"])
