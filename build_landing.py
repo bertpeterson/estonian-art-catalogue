@@ -152,7 +152,7 @@ PER = [(None, 1699, EN["p_pre"])] + [(int(a), int(b), I18N["PERIOD_EN"][k]) for 
        re.findall(r'\[(\d{4}),(\d{4}),"(\w+)","[^"]+"\]', _app[_app.index("const PERIODS"):_app.index("const PERIOD_NOTE")])]
 eras = "".join(f'<a class="era" data-era="{i}" href="#{"from=" + str(lo) + "&" if lo else ""}{"to=" + str(hi) if hi != 2099 else ""}">{e(lab)}</a>'.replace("&\"", "\"")
                for i, (lo, hi, lab) in enumerate(PER))
-# Find art for your home, baked: six works for sale with a picture and a price, one an artist, from the sixty
+# Buy art for your home, baked: six works for sale with a picture and a price, one an artist, from the sixty
 # artists the museums hold most of (the names a visitor is likeliest to know), turned by the build's seed
 import random as _random
 _rng = _random.Random(SEED)

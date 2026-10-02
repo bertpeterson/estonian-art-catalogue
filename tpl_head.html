@@ -114,7 +114,7 @@ h1 a:hover{color:var(--grey-6)}
 .histo{padding:20px 0 18px;border-bottom:1px solid var(--rule)}
 .histo-head{display:flex;justify-content:space-between;align-items:baseline;gap:20px;margin-bottom:16px}
 
-/* Find art for your home: a quiet door under the masthead -- a line of text and a search on the left, six works
+/* Buy art for your home: a quiet door under the masthead -- a line of text and a search on the left, six works
    for sale in a row on the right */
 .forsale{display:grid;grid-template-columns:minmax(250px,2fr) minmax(0,5fr);gap:28px;align-items:center;padding:18px 0 20px;border-bottom:1px solid var(--rule)}
 @media(max-width:900px){.forsale{grid-template-columns:1fr;gap:14px}}
@@ -198,7 +198,7 @@ h1 a:hover{color:var(--grey-6)}
 .seg button[aria-pressed="true"]{background:var(--invert-bg);color:var(--invert-fg)}
 .moodlink{display:inline-flex;align-items:center;margin-left:10px;font-family:var(--mono);font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink);text-decoration:none;border:1px solid var(--rule);padding:8px 14px}
 .moodlink:hover{border-color:var(--grey-6)}
-.moodlink{white-space:nowrap}   /* "Find art for your home" stood four lines tall in a phone's row */
+.moodlink{white-space:nowrap}   /* "Buy art for your home" stood four lines tall in a phone's row */
 .search{position:relative;flex:0 1 300px;max-width:100%}   /* a fixed-ish width: the controls after it must not shift when one of them hides */
 .search input{width:100%;background:var(--field);border:1px solid var(--rule);color:var(--ink);font-family:var(--sans);font-size:.92rem;padding:9px 12px 9px 34px}
 .search input::placeholder{color:var(--grey-4)}
@@ -727,7 +727,7 @@ footer a{border-bottom:1px solid var(--rule)}
     <div class="eras" id="eras"></div>
   </section>
   <script>
-  // works before the catalogue's index has arrived: the search box and the link go to Find art for your home, in
+  // works before the catalogue's index has arrived: the search box and the link go to Buy art for your home, in
   // the page's language
   (function(){
     var page=function(){return document.documentElement.lang==="et"?"leia.html":"find.html"};
@@ -848,10 +848,10 @@ footer a{border-bottom:1px solid var(--rule)}
          the per-artist pages that make the catalogue findable at all. Both languages
          are in the page for the crawler; a visitor sees the one the page is in. -->
     <p class="nav" lang="en"><a href="a/">Artists A–Z</a> — every artist on a page of their own ·
-       <a href="stats.html">The catalogue in figures</a> · <a href="upcoming.html">Coming up at auction</a> · <a href="mood.html">Art by mood</a> · <a href="find.html">Find art for your home</a><br>
+       <a href="stats.html">The catalogue in figures</a> · <a href="upcoming.html">Coming up at auction</a> · <a href="mood.html">Art by mood</a> · <a href="find.html">Buy art for your home</a><br>
        By <a href="decades/">decade</a>, <a href="media/">medium</a>, <a href="museums/">museum</a> and <a href="subjects/">subject</a></p>
     <p class="nav" lang="et"><a href="k/" hreflang="et">Kunstnikud A–Ü</a> — iga kunstnik oma lehel ·
-       <a href="stats-et.html" hreflang="et">Kataloog arvudes</a> · <a href="tulemas.html" hreflang="et">Tulemas oksjonil</a> · <a href="meeleolu.html" hreflang="et">Kunst meeleolu järgi</a> · <a href="leia.html" hreflang="et">Leia kunsti oma koju</a><br>
+       <a href="stats-et.html" hreflang="et">Kataloog arvudes</a> · <a href="tulemas.html" hreflang="et">Tulemas oksjonil</a> · <a href="meeleolu.html" hreflang="et">Kunst meeleolu järgi</a> · <a href="leia.html" hreflang="et">Osta kunsti oma koju</a><br>
        <a href="kumnendid/" hreflang="et">Kümnendi</a>, <a href="liigid/" hreflang="et">liigi</a>, <a href="muuseumid/" hreflang="et">muuseumi</a> ja <a href="ained/" hreflang="et">aine kaupa</a></p>
     <p class="foot1" data-i18n-html="foot"></p>
   </footer>

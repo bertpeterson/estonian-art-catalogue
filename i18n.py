@@ -11,9 +11,9 @@ import json
 ET = {
  "sub":"Kunst Eesti avalikes kogudes ja galeriides · 1835–2024",
  "works":"teost","artists":"kunstnikku","museums":"muuseumi","forsale":"müügil","auctioned":"oksjonil","forsale_chip":"Müügil",
- "srcsummary":"Allikad ja meetod","statslink":"Kataloog arvudes","moodlink":"Meeleolu järgi","findlink":"Leia kunsti oma koju",
+ "srcsummary":"Allikad ja meetod","statslink":"Kataloog arvudes","moodlink":"Meeleolu järgi","findlink":"Osta kunsti oma koju",
  "tagline":"Vaata Eesti kunsti muuseumide kogudes ja osta teoseid galeriidest.",
- "fs_eye":"Müügil praegu","fs_h":"Leia kunsti oma koju","fs_lede":"{n} teost {g} galeriis, koos küsitud hindadega.",
+ "fs_eye":"Müügil praegu","fs_h":"Osta kunsti oma koju","fs_lede":"{n} teost {g} galeriis, koos küsitud hindadega.",
  "fs_ph":"nt rahulik merepilt alla 1000 €","fs_go":"Otsi","fs_all":"Kõik müügil teosed →",
  "worksperdecade":"Teoseid kümnendite kaupa",
  "selectdecade":"Vali kümnend, et filtreerida",
@@ -126,9 +126,9 @@ ET = {
 EN = {
  "sub":"Art in Estonia's public collections and galleries · 1835–2024",
  "works":"works","artists":"artists","museums":"museums","forsale":"for sale","auctioned":"auctioned","forsale_chip":"For sale",
- "srcsummary":"Sources & method","statslink":"The catalogue in figures","moodlink":"By mood","findlink":"Find art for your home",
+ "srcsummary":"Sources & method","statslink":"The catalogue in figures","moodlink":"By mood","findlink":"Buy art for your home",
  "tagline":"Look up Estonian art in the museums, and buy works from the galleries.",
- "fs_eye":"For sale now","fs_h":"Find art for your home","fs_lede":"{n} works at {g} galleries, with their asking prices.",
+ "fs_eye":"For sale now","fs_h":"Buy art for your home","fs_lede":"{n} works at {g} galleries, with their asking prices.",
  "fs_ph":"e.g. a calm sea painting under €1,000","fs_go":"Search","fs_all":"All works for sale →",
  "worksperdecade":"Works per decade",
  "selectdecade":"Select a decade to filter",
