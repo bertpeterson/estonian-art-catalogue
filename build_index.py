@@ -62,6 +62,7 @@ def _fillh(m):
     return f'<{tag}{attrs}data-i18n-html="{key}"{m.group(4)}>{_I["HTML_EN"].get(key, "")}</{tag}>'
 h = _re.sub(r'<(\w+)([^>]*?)data-i18n-html="([a-z_0-9]+)"([^>]*)></\1>', _fillh, h)
 a=a.replace('__V_INDEX__',V_INDEX).replace('__V_I18N__',V_I18N)
+h=h.replace('__V_I18N__',V_I18N)      # the head's early Estonian reads the same strings file
 # the index's download starts as the head is parsed, not when the script at the foot
 # of the page runs; crossorigin matches fetch()'s default mode, so the one download
 # serves both. Not low priority any more: the wall's pictures past the first row wait
