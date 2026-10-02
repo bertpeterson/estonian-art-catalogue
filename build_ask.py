@@ -235,7 +235,7 @@ function caption(r){
   p.appendChild(l);c.appendChild(p);
   r.arSlot.textContent='';
   if(AR&&w[13]){var ab=arButton(w,function(){return it.frame});ab.classList.add('arbig');r.arSlot.appendChild(ab)}
-  else if(IOS)r.arSlot.appendChild(el('p','arhint',T.arsafari));
+  else if(IOS&&page.dataset.img)r.arSlot.appendChild(el('p','arhint',T.arsafari));
   if(r.items.length>1){
     var sum=r.items.reduce(function(a,x){return a+(x.w[8]||0)},0),all=r.items.every(function(x){return x.w[8]});
     c.appendChild(el('p','total',T.together.replace('{n}',r.items.length)+(all?' · '+eur(sum):'')));
@@ -332,7 +332,9 @@ window.addEventListener('resize',function(){rooms.forEach(draw)});
 // at true scale (no pinching it bigger). The picture's pixels must be readable, so it comes through the
 // page's own origin (data-img), fetched as asked for, never kept. Built only when tapped.
 var IOS=/iP(hone|ad|od)/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
-var ARDEBUG=/ardebug/.test(location.hash), AR=ARDEBUG||(function(){var a=document.createElement('a');return !!(a.relList&&a.relList.supports&&a.relList.supports('ar'))})();
+// only where the picture can come through this origin (data-img): on the published site, without that route and with
+// three.js outside the Content-Security-Policy, the button could only fail
+var ARDEBUG=/ardebug/.test(location.hash), AR=ARDEBUG||!!page.dataset.img&&(function(){var a=document.createElement('a');return !!(a.relList&&a.relList.supports&&a.relList.supports('ar'))})();
 function viaUs(u){return page.dataset.img?page.dataset.img+encodeURIComponent(u):u}
 function loadImg(u){return new Promise(function(ok,no){var i=new Image();i.crossOrigin='anonymous';i.onload=function(){ok(i)};i.onerror=no;i.src=u})}
 var FRAME_COL={black:[0x161616,.55,0],oak:[0xb88a52,.7,0],white:[0xf0eee8,.6,0],gold:[0xc9a13b,.35,.7]};
