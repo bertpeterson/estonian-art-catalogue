@@ -2349,7 +2349,8 @@
     }
   });
 
-  try { const saved = localStorage.getItem("ekr:lang"); if (saved === "en" || saved === "et") LANG = saved; } catch(e){}
+  try { const saved = localStorage.getItem("ekr:lang"); if (saved === "en" || saved === "et") LANG = saved;
+        else if ([].concat(navigator.languages || [], navigator.language || []).some(l => /^et\b/i.test(l))) LANG = "et"; } catch(e){}   // an Estonian browser: Estonian, until English is chosen
   try { const st = localStorage.getItem("ekr:theme"); if (st === "light" || st === "dark") THEME = st; } catch(e){}
   window.addEventListener("popstate", () => applyURL(false));
   // a search typed in the seconds before the app arrived is run, not wiped: the box was
