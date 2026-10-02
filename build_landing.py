@@ -152,5 +152,22 @@ PER = [(None, 1699, EN["p_pre"])] + [(int(a), int(b), I18N["PERIOD_EN"][k]) for 
        re.findall(r'\[(\d{4}),(\d{4}),"(\w+)","[^"]+"\]', _app[_app.index("const PERIODS"):_app.index("const PERIOD_NOTE")])]
 eras = "".join(f'<a class="era" data-era="{i}" href="#{"from=" + str(lo) + "&" if lo else ""}{"to=" + str(hi) if hi != 2099 else ""}">{e(lab)}</a>'.replace("&\"", "\"")
                for i, (lo, hi, lab) in enumerate(PER))
-json.dump({"doors": door, "register": wall, "bars": bars, "eras": eras, "seed": SEED}, open("site/landing.json", "w", encoding="utf-8"), ensure_ascii=False)
+# Find art for your home, baked: six works for sale with a picture and a price, one an artist, from the sixty
+# artists the museums hold most of (the names a visitor is likeliest to know), turned by the build's seed
+import random as _random
+_rng = _random.Random(SEED)
+_held = collections.Counter(w["a"] for w in W if (w.get("kind") or "held") in ("held", "shown"))
+_sale = [w for w in W if w.get("kind") == "gallery" and (w.get("im") or "").startswith("g:https://") and (w.get("url") or "").startswith("http")]
+_galleries = {name("mu", w.get("mu")) for w in _sale}
+_ok = [w for w in _sale if 150 <= (w.get("pr") or 0) <= 20000 and not re.search(r"müüdud|\bsold\b", str(name("tc", w.get("tc")) or ""), re.I)]
+_by = collections.defaultdict(list)
+for w in _ok: _by[w["a"]].append(w)
+_top = sorted(_by, key=lambda a: -_held[a])[:60]; _rng.shuffle(_top)
+eurf = lambda n: "€" + f"{n:,}".replace(",", " ")
+fs_works = "".join(
+    f'<a class="fs-w" href="{e(w["url"])}" target="_blank" rel="noopener"><img src="{e(w["im"][2:])}" alt="{e(w.get("t") or "")}, {e(A[w["a"]]["n"])}" decoding="async" referrerpolicy="no-referrer-when-downgrade">'
+    f'<span class="fs-cap"><i>{e(w.get("t") or "")}</i>{e(A[w["a"]]["n"])}<b>{eurf(w["pr"])}</b></span></a>'
+    for w in (_rng.choice(_by[a]) for a in _top[:6]))
+fs_lede = f'<p class="fs-lede" id="fs-lede" data-n="{len(_sale)}" data-g="{len(_galleries)}">' + e(EN["fs_lede"].replace("{n}", f"{len(_sale):,}").replace("{g}", str(len(_galleries)))) + "</p>"
+json.dump({"doors": door, "register": wall, "bars": bars, "eras": eras, "seed": SEED, "fs_works": fs_works, "fs_lede": fs_lede}, open("site/landing.json", "w", encoding="utf-8"), ensure_ascii=False)
 print(f"  landing baked   {len(shown)} tiles, seed {SEED}, first: {shown[0]['t']} · {A[shown[0]['a']]['n']}")
