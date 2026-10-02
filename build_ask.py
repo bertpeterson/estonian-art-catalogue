@@ -59,20 +59,27 @@ PRINT = re.compile(r"graafika|lino|serigraaf|siiditrükk|printmaking|\bprint|gic
                    r"monotüüp|monotyp|kollagraaf|drypoint|engraving", re.I)
 PAINTISH = re.compile(r"õli|\boil|akrüül|acryl|tempera|guaš|gouache|akvarell|watercol|segatehnika|mixed", re.I)
 SCULPT = re.compile(r"skulpt|sculpt|pronks|bronze|keraamika|ceramic|portselan|graniit|marmor", re.I)
-MEDIA = ["oil", "print", "sculpture", "painting", "drawing", "photo"]       # bits 1, 2, 4, 8, 16, 32
+ACRYL = re.compile(r"akrüül|acryl", re.I)
+WATER = re.compile(r"akvarell|watercol", re.I)
+MIXED = re.compile(r"segatehnika|mixed|autoritehnika|kollaaž|collage", re.I)
+DRAW = re.compile(r"joonistus|pliiats|tušš|\bsöe|\bsüsi|charcoal|pencil|\bink\b|pastell|pastel|drawing|grafiit|sangviin|sepia", re.I)
+# the controls show the eight first: the six media the stock names most (2026-10-02), then sculpture and photography.
+# "painting" (any medium) shows only when the chat asks for "a painting"
+MEDIA = ["oil", "acrylic", "watercolour", "mixed", "print", "drawing", "sculpture", "photo", "painting"]
+BIT = {"oil": 1, "print": 2, "sculpture": 4, "painting": 8, "drawing": 16, "photo": 32, "acrylic": 64, "watercolour": 128, "mixed": 256}
 
 def media_of(kind, tech):
     m = 0
-    if kind != "photo" and OIL.search(tech): m |= 1
-    if kind != "photo" and PRINT.search(tech): m |= 2
-    if kind == "sculpture" or SCULPT.search(tech): m |= 4
-    if kind == "paint" and not (m & 2 and not PAINTISH.search(tech)): m |= 8      # a giclée on canvas is a print
-    if kind == "paper" and not m & 2: m |= 16
-    if kind == "photo": m |= 32
+    if kind == "photo": return BIT["photo"]
+    for k, r in (("oil", OIL), ("acrylic", ACRYL), ("watercolour", WATER), ("mixed", MIXED), ("print", PRINT), ("drawing", DRAW)):
+        if r.search(tech): m |= BIT[k]
+    if kind == "sculpture" or SCULPT.search(tech): m |= BIT["sculpture"]
+    if kind == "paint" and not (m & BIT["print"] and not PAINTISH.search(tech)): m |= BIT["painting"]    # a giclée on canvas is a print
+    if kind == "paper" and not m: m |= BIT["drawing"]          # on paper, and neither printed nor painted
     return m
 
 T = {"en": dict(file="find.html", other="leia.html", other_l="Eesti keeles", site="Estonian Art Catalogue",
-                h="Find a work", lede="Search the works the catalogue's galleries have for sale now. Set the price, medium, size and mood, or describe what you need; a photo of the wall finds the space and hangs works that fit it. Each work links to the gallery that sells it.",
+                h="Find art for your home", lede="Search the works the catalogue's galleries have for sale now. Set the price, medium, size and mood, or describe what you need; a photo of the wall finds the space and hangs works that fit it. Each work links to the gallery that sells it.",
                 hello="Set the filters, or describe what you need: the room, size, budget, subject or mood. A photo of the wall finds works that fit the space.",
                 photo="Photo of your wall", yourroom="Your room", looking="Looking at your room…", photomsg="(a photo of my room)",
                 wallw="Wall space, width", drag="Drag the room to look around it; scroll or pinch to step closer. Drag a work to move it along the wall, or onto another outlined space. If the sizes look wrong, set the wall's width.", reset="Reset view", ar="See it on your wall (AR)", arsafari="To see a work on your real wall in AR, open this page in Safari.", arwait="Making the model…", arfail="AR could not be opened", onwall="On my wall",
@@ -85,7 +92,8 @@ T = {"en": dict(file="find.html", other="leia.html", other_l="Eesti keeles", sit
                 thinking="Thinking…", failed="The assistant could not be reached. Try again in a moment.", record="In the catalogue",
                 kinds=dict(paint="paintings", paper="works on paper", sculpture="sculpture", photo="photographs"),
                 sizes=dict(small="small", medium="medium", large="large"), under="under", over="over", shown="Shown",
-                media=dict(oil="Oil", print="Print", sculpture="Sculpture", painting="Paintings", drawing="Drawings", photo="Photographs"),
+                media=dict(oil="Oil", acrylic="Acrylic", watercolour="Watercolour", mixed="Mixed media", print="Print", drawing="Drawing",
+                           sculpture="Sculpture", photo="Photography", painting="Paintings, any medium"),
                 price="Price", anyprice="Any price", upto="up to", from_="from", lowest="Lowest price", highest="Highest price",
                 medium="Medium", size="Size", sizeany="Any", sizehint=dict(small="up to 40 cm", medium="40–100 cm", large="over 100 cm"),
                 mood="Mood", moremoods="More words", fewer="Fewer", clear="Clear", count="{n} works", count1="1 work",
@@ -95,7 +103,7 @@ T = {"en": dict(file="find.html", other="leia.html", other_l="Eesti keeles", sit
                 note="The works are the galleries' current stock with their asking prices, read weekly from each gallery's own site; the gallery's page is the one to trust. Your messages are read by Claude to choose the search and are not stored. A photo of your room is shrunk in your browser, which also removes its location data, then read by Claude to find the wall space, and is not stored; the works are shown on it from the galleries' own pictures, at a size estimated from the photo. The moods are read from the gallery's photograph by CLIP, an image model: a guide, not a judgement of the work.",
                 hash=""),
      "et": dict(file="leia.html", other="find.html", other_l="In English", site="Eesti Kunstikataloog",
-                h="Leia teos", lede="Otsi teoseid, mis kataloogi galeriidel praegu müügil on. Sea hind, tehnika, suurus ja meeleolu või kirjelda, mida vajad; foto seinast leiab vaba koha ja riputab sinna mahtuvad teosed. Iga teos viib seda müüva galerii lehele.",
+                h="Leia kunsti oma koju", lede="Otsi teoseid, mis kataloogi galeriidel praegu müügil on. Sea hind, tehnika, suurus ja meeleolu või kirjelda, mida vajad; foto seinast leiab vaba koha ja riputab sinna mahtuvad teosed. Iga teos viib seda müüva galerii lehele.",
                 hello="Sea filtrid või kirjelda, mida vajad: tuba, suurus, eelarve, teema või meeleolu. Foto seinast leiab teosed, mis sinna mahuvad.",
                 photo="Foto seinast", yourroom="Sinu tuba", looking="Vaatan su tuba…", photomsg="(foto minu toast)",
                 wallw="Vaba seinaosa laius", drag="Lohista tuba, et ringi vaadata; keri või näpista, et lähemale astuda. Lohista teost, et seda seinal liigutada või teisele märgitud kohale viia. Kui suurused tunduvad valed, sea seina laius õigeks.", reset="Algvaade", ar="Vaata oma seinal (AR)", arsafari="Et näha teost AR-is oma päris seinal, ava see leht Safaris.", arwait="Teen mudelit…", arfail="AR-i ei õnnestunud avada", onwall="Minu seinale",
@@ -108,7 +116,8 @@ T = {"en": dict(file="find.html", other="leia.html", other_l="Eesti keeles", sit
                 thinking="Mõtlen…", failed="Abilist ei õnnestunud kätte saada. Proovi hetke pärast uuesti.", record="Kataloogis",
                 kinds=dict(paint="maalid", paper="tööd paberil", sculpture="skulptuur", photo="fotod"),
                 sizes=dict(small="väike", medium="keskmine", large="suur"), under="alla", over="üle", shown="Näidatud",
-                media=dict(oil="Õli", print="Graafika", sculpture="Skulptuur", painting="Maalid", drawing="Joonistused", photo="Fotod"),
+                media=dict(oil="Õli", acrylic="Akrüül", watercolour="Akvarell", mixed="Segatehnika", print="Graafika", drawing="Joonistus",
+                           sculpture="Skulptuur", photo="Foto", painting="Maalid, iga tehnika"),
                 price="Hind", anyprice="Iga hind", upto="kuni", from_="alates", lowest="Madalaim hind", highest="Kõrgeim hind",
                 medium="Tehnika", size="Suurus", sizeany="Kõik", sizehint=dict(small="kuni 40 cm", medium="40–100 cm", large="üle 100 cm"),
                 mood="Meeleolu", moremoods="Rohkem sõnu", fewer="Vähem", clear="Tühjenda", count="{n} teost", count1="1 teos",
@@ -365,7 +374,7 @@ function arButton(w,frameOf){
 
 // ---- the search: one state, which the controls show and set, and the assistant reads and sets ----
 function blank(){return {words:[],terms:[],media:[],min:0,max:0,size:'any',artist:''}}
-var Q=blank(), MB={oil:1,print:2,sculpture:4,painting:8,drawing:16,photo:32};
+var Q=blank(), MB={};             // each medium's bit in a work's field 14, from the page (build_ask.py BIT)
 function fold(s){return s.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase()}
 function esc(s){return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}
 // every work the search admits, best first; a search that names something (words, title words) admits only what answers to it
@@ -438,6 +447,7 @@ function show(box,q){
 // ---- the controls: price range, medium, size, mood words ----
 var F=document.getElementById('filters'), plo=document.getElementById('plo'), phi=document.getElementById('phi'), pout=document.getElementById('pout');
 var dual=F.querySelector('.dual'), moods=document.getElementById('moods'), fcount=document.getElementById('fcount'), chatset=document.getElementById('chatset');
+MB=JSON.parse(F.dataset.bits);
 var PR=JSON.parse(plo.dataset.stops), N=PR.length-1, WIDE=window.matchMedia('(min-width:980px)');   // PR's last stop: no limit
 function lowAt(v){var i=0;while(v>0&&i<N-1&&PR[i+1]<=v)i++;return i}
 function highAt(v){var i=1;if(!v)return N;while(i<N&&PR[i]<v)i++;return i}
@@ -635,7 +645,7 @@ def panel(t, labels, M):
     """the controls, written out; the script keeps them and the search in step. Media past the three asked
     for, and mood words past the first twelve, show when chosen (by hand or by the assistant)"""
     chip = lambda attr, v, label, x="": f'<button type="button" class="chip{x}" data-{attr}="{v}" aria-pressed="false">{e(label)}</button>'
-    media = "".join(chip("m", m, t["media"][m], "" if i < 3 else " x") for i, m in enumerate(MEDIA))
+    media = "".join(chip("m", m, t["media"][m], "" if i < 8 else " x") for i, m in enumerate(MEDIA))
     sizes = "".join(f'<button type="button" class="btn" data-s="{k}" aria-pressed="{str(k == "any").lower()}"'
                     + (f' title="{e(t["sizehint"][k])}"' if k != "any" else "") + f'>{e(t["sizeany"] if k == "any" else t["sizes"][k])}</button>'
                     for k in ("any", "small", "medium", "large"))
@@ -646,7 +656,7 @@ def panel(t, labels, M):
         if rest: moods += f'<span class="gname">{e(t["groups"][g])}</span>' + "".join(chip("w", w, labels[w], " x") for w in rest)
     moods += f'<button type="button" class="linkbtn" id="moremoods" aria-expanded="false" aria-controls="moods">{e(t["moremoods"])}</button>'
     n = len(PRICE_STOPS) - 1
-    return (f'<div class="filters" id="filters" role="group" aria-label="{e(t["filters"])}">'
+    return (f'<div class="filters" id="filters" role="group" aria-label="{e(t["filters"])}" data-bits="{e(json.dumps(BIT))}">'
             f'<div class="f-row"><div class="f-name">{e(t["price"])} <output id="pout">{e(t["anyprice"])}</output></div>'
             f'<div class="dual" style="--a:0;--b:1"><span class="track"></span><span class="fill"></span>'
             f'<input type="range" id="plo" min="0" max="{n}" step="1" value="0" aria-label="{e(t["lowest"])}" data-stops="{json.dumps(PRICE_STOPS)}">'

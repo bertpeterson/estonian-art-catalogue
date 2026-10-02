@@ -10,7 +10,7 @@
 // worker/mood-worker.js. After a change to the vocabulary, paste mood-worker.js into
 // the Worker again (worker/README.md).
 //
-// A second door, POST /ask, is the "Find a work" page's assistant: the conversation so far
+// A second door, POST /ask, is the "Find art for your home" page's assistant (find.html): the conversation so far
 // comes in with the page's own controls (price, medium, size, mood) as the visitor has set
 // them, and Claude answers with a short reply and the whole search it implies -- words from
 // the same vocabulary, title words, media, a size, a budget, an artist. The page sets its
@@ -65,10 +65,10 @@ const SYSTEM_ASK = "You are the search desk on museaal.ee, a catalogue of Estoni
   "sea: meri, mere, sea; horses: hobu, horse; Tallinn: tallinn; birches: kask, kase, birch; a still life: natüürmort, " +
   "vaikelu, still life; a landscape: maastik, landscape; a portrait: portree, portrait. Only stems for what the visitor " +
   "named, not for the subjects it might include. Empty for moods, colours and styles.\n" +
-  "- media: what the visitor asks for, any of 'oil' (oil paintings), 'print' (etchings, lithographs, linocuts, " +
-  "screenprints, giclée), 'sculpture', 'painting' (paintings in any medium: whenever they ask for a painting without " +
-  "naming oil), 'drawing' " +
-  "(drawings, watercolours, pastels), 'photo'. Empty for no preference.\n" +
+  "- media: what the visitor asks for, any of 'oil', 'acrylic', 'watercolour', 'mixed' (mixed media, collage), 'print' " +
+  "(etchings, lithographs, linocuts, screenprints, giclée), 'drawing' (pencil, ink, charcoal, pastel), 'sculpture', " +
+  "'photo', and 'painting' (paintings in any medium: whenever they ask for a painting without naming its medium). " +
+  "Empty for no preference.\n" +
   "- size: 'small' up to 40 cm (a shelf, a hallway, a gift), 'medium' 40-100 cm (above a desk, a bed, a dresser), " +
   "'large' over 100 cm (a living-room wall, above a sofa), 'any' if unknown.\n" +
   "- budget_min and budget_max in euros, 0 for none ('under 500': max 500; 'around 1000': 800 and 1200; 'not more than " +
@@ -81,7 +81,7 @@ const SYSTEM_ASK = "You are the search desk on museaal.ee, a catalogue of Estoni
   "availability or anything about a work's value as an investment. If asked something else, answer in one sentence and " +
   "return to the search. Words: " + WORDS.join(", ");
 
-const MEDIA = ["oil", "print", "sculpture", "painting", "drawing", "photo"];
+const MEDIA = ["oil", "acrylic", "watercolour", "mixed", "print", "drawing", "sculpture", "photo", "painting"];
 const SCHEMA_ASK = {
   type: "object",
   properties: {
@@ -262,7 +262,7 @@ async function ask(body, env, reply) {
   if (!out) return reply({ reply: "", show: false, words: [], terms: [], media: [], kind: "any", size: "any", budget_min: 0, budget_max: 0, artist: "" });
   const media = [...new Set((out.media || []).filter(m => MEDIA.includes(m)))];
   // kind: what the page before the controls read (one medium, else any)
-  const kind = media.length === 1 ? { oil: "paint", painting: "paint", print: "paper", drawing: "paper", sculpture: "sculpture", photo: "photo" }[media[0]] : "any";
+  const kind = media.length === 1 ? { oil: "paint", acrylic: "paint", painting: "paint", watercolour: "paper", mixed: "any", print: "paper", drawing: "paper", sculpture: "sculpture", photo: "photo" }[media[0]] : "any";
   const size = ["small", "medium", "large"].includes(out.size) ? out.size : "any", lo = int(out.budget_min), hi = int(out.budget_max);
   const words = [...new Set((out.words || []).filter(w => WORDS.includes(w)))].slice(0, 5);
   const terms = [...new Set((out.terms || []).map(t => short(t, 30).toLowerCase()).filter(t => t.length >= 3))].slice(0, 8);

@@ -180,7 +180,7 @@ listing was first and last seen. The masthead figure is therefore the number of 
 ever verified with a holder, and only grows; the *for sale* figure is current stock and moves both ways.
 A sale price is never taken: what a gallery work sold for stays between the gallery and the buyer. The asking price
 of a work still for sale is kept where the gallery's own page states it (`data/asking_price.py`) and dropped when the
-work sells; the [Find a work](https://museaal.ee/find.html) page uses it for a visitor's budget.
+work sells; the [Find art for your home](https://museaal.ee/find.html) page uses it for a visitor's budget.
 
 **Auction results** are a kind of their own, neither a holding nor stock. Haus Galerii publishes its
 whole archive — a page per sale since 1997, a figure per lot with starting price, last bid and hammer
