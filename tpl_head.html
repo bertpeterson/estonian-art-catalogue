@@ -109,21 +109,8 @@ h1 a:hover{color:var(--grey-6)}
 .srcline a{border-bottom:1px solid var(--rule)}
 .srcline a:hover{border-bottom-color:var(--ink);color:var(--ink)}
 
-/* the works per decade, folded into one line with a small sketch of the bars; it opens over the page on hover
-   (or a tap, or the keyboard) and closes when the pointer leaves */
-.histo{position:relative;z-index:30;padding:0;border-bottom:1px solid var(--rule)}
+.histo{padding:20px 0 18px;border-bottom:1px solid var(--rule)}
 .histo-head{display:flex;justify-content:space-between;align-items:baseline;gap:20px;margin-bottom:16px}
-.histo-mini{display:flex;align-items:center;gap:18px;width:100%;background:none;border:0;padding:12px 0;color:inherit;cursor:pointer;text-align:left;font:inherit}
-.histo-mini>.eyebrow:first-child::after{content:"  ▾";letter-spacing:0}
-.hm-bars{flex:1;display:flex;align-items:flex-end;gap:2px;height:20px;min-width:60px;max-width:520px}
-.hm-bars span{flex:1;background:var(--bar);min-height:1px;transition:background .15s ease}
-.histo-mini #histo-hint{margin-left:auto;text-align:right}
-.histo:hover .hm-bars span,.histo.open .hm-bars span{background:var(--ink)}
-.histo-pop{position:absolute;left:-16px;right:-16px;top:100%;padding:20px 16px 16px;background:var(--paper);border:1px solid var(--rule);
-  box-shadow:0 26px 44px -20px rgba(0,0,0,.6);opacity:0;visibility:hidden;transform:translateY(-6px);
-  transition:opacity .16s ease,transform .16s ease,visibility 0s linear .16s}
-.histo:hover .histo-pop,.histo.open .histo-pop,.histo:has(:focus-visible) .histo-pop{opacity:1;visibility:visible;transform:none;transition-delay:.12s,.12s,0s}
-@media (prefers-reduced-motion:reduce){.histo-pop{transition:none}}
 
 /* Find art for your home: a quiet door under the masthead -- a line of text and a search on the left, six works
    for sale in a row on the right */
@@ -728,28 +715,22 @@ footer a{border-bottom:1px solid var(--rule)}
     <div class="fs-works" id="fs-works"></div>
   </section>
 
-  <section class="histo" id="histo">
-    <button class="histo-mini" id="histo-mini" type="button" aria-expanded="false" aria-controls="histo-pop">
-      <span class="eyebrow" data-i18n="worksperdecade"></span>
-      <span class="hm-bars" id="hm-bars" aria-hidden="true"></span>
+  <section class="histo">
+    <div class="histo-head">
+      <span><span class="eyebrow" data-i18n="worksperdecade"></span></span>
       <span class="eyebrow" id="histo-hint">Select a decade to filter</span>
-    </button>
-    <div class="histo-pop" id="histo-pop">
-      <div class="bars" id="bars"></div>
-      <div class="eras" id="eras"></div>
     </div>
+    <div class="bars" id="bars"></div>
+    <div class="eras" id="eras"></div>
   </section>
   <script>
-  // works before the catalogue's index has arrived: the search box and chips go to Find art for your home (in the
-  // page's language), and a tap opens or closes the works per decade (hover does it with a mouse)
+  // works before the catalogue's index has arrived: the search box and the link go to Find art for your home, in
+  // the page's language
   (function(){
     var page=function(){return document.documentElement.lang==="et"?"leia.html":"find.html"};
     document.getElementById("fs-ask").addEventListener("submit",function(e){e.preventDefault();
       var v=document.getElementById("fs-q").value.replace(/\s+/g," ").trim();location.href=page()+(v?"#q="+encodeURIComponent(v):"")});
     document.getElementById("forsale").addEventListener("click",function(e){var a=e.target.closest("a[data-fs]");if(a)a.href=page()+a.dataset.fs});
-    var h=document.getElementById("histo");
-    document.getElementById("histo-mini").addEventListener("click",function(){this.setAttribute("aria-expanded",String(h.classList.toggle("open")))});
-    document.addEventListener("click",function(e){if(!h.contains(e.target)&&h.classList.contains("open")){h.classList.remove("open");document.getElementById("histo-mini").setAttribute("aria-expanded","false")}});
   })();
   </script>
 

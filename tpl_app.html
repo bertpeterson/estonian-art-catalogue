@@ -603,9 +603,6 @@
            <div class="cent-bars">${cell("und",T("nd"),T("undated"),"undated")}</div>
            <div class="cent-lab" title="Undated — works whose record carries no dating">&nbsp;</div>
          </div>`;
-    // the folded line's sketch: the same counts, from 1800 (the earlier centuries are a sliver)
-    const hm = DECADES.filter(d => d >= 1800), hmx = Math.max(1, ...hm.map(d => counts[d]));
-    $("hm-bars").innerHTML = hm.map(d => `<span style="height:${Math.max(4, Math.round(counts[d] / hmx * 100))}%"></span>`).join("");
     $("histo-hint").textContent = state.decade===null ? T("selectdecade")
       : (state.decade==="und" ? T("undatedonly") : T("filteredto",{x:state.decade+"s"}));
     renderEras();
