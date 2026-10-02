@@ -169,8 +169,5 @@ fs_works = "".join(
     f'<span class="fs-cap"><i>{e(w.get("t") or "")}</i>{e(A[w["a"]]["n"])}<b>{eurf(w["pr"])}</b></span></a>'
     for w in (_rng.choice(_by[a]) for a in _top[:6]))
 fs_lede = f'<p class="fs-lede" id="fs-lede" data-n="{len(_sale)}" data-g="{len(_galleries)}">' + e(EN["fs_lede"].replace("{n}", f"{len(_sale):,}").replace("{g}", str(len(_galleries)))) + "</p>"
-# the folded histogram's sketch, from 1800 (the app redraws it with the bars)
-_hm = [d for d in DEC if d >= 1800]; _hmx = max(1, max(cnt[d] for d in _hm))
-hm = "".join(f'<span style="height:{max(4, rnd(cnt[d] / _hmx * 100))}%"></span>' for d in _hm)
-json.dump({"doors": door, "register": wall, "bars": bars, "eras": eras, "seed": SEED, "fs_works": fs_works, "fs_lede": fs_lede, "hm": hm}, open("site/landing.json", "w", encoding="utf-8"), ensure_ascii=False)
+json.dump({"doors": door, "register": wall, "bars": bars, "eras": eras, "seed": SEED, "fs_works": fs_works, "fs_lede": fs_lede}, open("site/landing.json", "w", encoding="utf-8"), ensure_ascii=False)
 print(f"  landing baked   {len(shown)} tiles, seed {SEED}, first: {shown[0]['t']} · {A[shown[0]['a']]['n']}")
