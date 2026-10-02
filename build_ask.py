@@ -16,7 +16,7 @@ is sold.
 Only current stock with the gallery's picture; a work without a price is shown only
 while no budget is set. Run after build_mood.py (it adds to the sitemap) and before csp.py.
 """
-import json, os, re, hashlib, datetime, urllib.parse
+import json, os, re, hashlib, datetime, urllib.parse, collections
 import build_hubs as H
 import build_mood as BM
 
@@ -98,7 +98,7 @@ T = {"en": dict(file="find.html", other="leia.html", other_l="Eesti keeles", sit
                 medium="Medium", size="Size", sizeany="Any", sizehint=dict(small="up to 40 cm", medium="40–100 cm", large="over 100 cm"),
                 mood="Mood", moremoods="More words", fewer="Fewer", clear="Clear", count="{n} works", count1="1 work",
                 artistonly="{who}: {n} for sale outside these settings.", showthem="Show them",
-                fromchat="From the chat", artist="Artist", artistph="Type a name", artistlist="Artists with works for sale", titlew="In the title", filters="Filters",
+                daily="today's selection", fromchat="From the chat", artist="Artist", artistph="Type a name", artistlist="Artists with works for sale", titlew="In the title", filters="Filters",
                 groups=dict(feeling="Feeling", light="Light", colour="Colour", weather="Season and weather", subject="Subject"),
                 note="The works are the galleries' current stock with their asking prices, read weekly from each gallery's own site; the gallery's page is the one to trust. Your messages are read by Claude to choose the search and are not stored. The moods are read from the gallery's photograph by CLIP, an image model: a guide, not a judgement of the work.",
                 hash=""),
@@ -122,12 +122,14 @@ T = {"en": dict(file="find.html", other="leia.html", other_l="Eesti keeles", sit
                 medium="Tehnika", size="Suurus", sizeany="Kõik", sizehint=dict(small="kuni 40 cm", medium="40–100 cm", large="üle 100 cm"),
                 mood="Meeleolu", moremoods="Rohkem sõnu", fewer="Vähem", clear="Tühjenda", count="{n} teost", count1="1 teos",
                 artistonly="{who}: väljaspool neid seadeid müügil {n}.", showthem="Näita",
-                fromchat="Vestlusest", artist="Kunstnik", artistph="Kirjuta nimi", artistlist="Kunstnikud, kelle teoseid on müügil", titlew="Pealkirjas", filters="Filtrid",
+                daily="tänane valik", fromchat="Vestlusest", artist="Kunstnik", artistph="Kirjuta nimi", artistlist="Kunstnikud, kelle teoseid on müügil", titlew="Pealkirjas", filters="Filtrid",
                 groups=dict(feeling="Tunne", light="Valgus", colour="Värv", weather="Aastaaeg ja ilm", subject="Aine"),
                 note="Teosed on galeriide praegune müügivalik ja nende küsitud hinnad, loetud iga nädal galeriide endi lehtedelt; usaldusväärne on galerii leht. Sinu sõnumeid loeb Claude otsingu valimiseks ja neid ei salvestata. Meeleolu loeb galerii fotolt pildimudel CLIP: see on juhatus, mitte hinnang teosele.",
                 hash="lang=et&")}
 
 def data():
+    # how many works the museums hold by each artist: the daily selection leans to names a visitor may know
+    held = collections.Counter(w["a"] for w in W if (w.get("kind") or "held") in ("held", "shown"))
     S = json.load(open("data/stock_moods.json", encoding="utf-8")) if os.path.exists("data/stock_moods.json") else {}
     words = [w["en"] for w in json.load(open("data/moods.json", encoding="utf-8"))["words"]]
     aidx, arts, gals, works = {}, [], {}, []
@@ -140,7 +142,7 @@ def data():
         if k in seen: continue
         seen.add(k)
         a = w["a"]
-        if a not in aidx: aidx[a] = len(arts); arts.append([A[a]["n"], H.ARTIST_SLUG[a]])
+        if a not in aidx: aidx[a] = len(arts); arts.append([A[a]["n"], H.ARTIST_SLUG[a], held[a]])
         g = H.val(w, "mu") or ""
         gals.setdefault(g, len(gals))
         tech = H.val(w, "tce") or H.val(w, "tc") or ""
@@ -160,6 +162,7 @@ var D=null, P=null, msgs=[], shownKeys={}, busy=false, labels=JSON.parse(documen
 var R=null, rooms=[];                              // the room on view (the latest photo), and every one shown
 function stock(){ return P=P||fetch(src).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(d){
   var af=d.af=d.artists.map(function(a){return fold(a[0])});
+  d.fame=d.artists.map(function(a){return Math.min(1,Math.log10(1+(a[2]||0))/3.3)});   // ~2,000 works in the museums: 1
   d.works.forEach(function(w){var m={},f=w[12];for(var i=0;i<f.length;i+=2)m[d.words[f[i]]]=f[i+1]/10;w.m=m;w.af=af[w[1]]}); D=d; tally(); return d}).catch(function(e){P=null;throw e})}
 function el(tag,cls,text){var x=document.createElement(tag);if(cls)x.className=cls;if(text!=null)x.textContent=text;return x}
 function eur(n){return '€'+String(n).replace(/\B(?=(\d{3})+(?!\d))/g,' ')}
@@ -376,6 +379,7 @@ function arButton(w,frameOf){
 
 // ---- the search: one state, which the controls show and set, and the assistant reads and sets ----
 function blank(){return {words:[],terms:[],media:[],min:0,max:0,size:'any',artist:''}}
+var DAY=new Date().toISOString().slice(0,10);
 var Q=blank(), MB={};             // each medium's bit in a work's field 14, from the page (build_ask.py BIT)
 function fold(s){return s.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase()}
 function esc(s){return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}
@@ -392,7 +396,7 @@ function rank(q){
     if(who.length&&!who.every(function(x){return w.af.indexOf(x)>=0}))return;
     var s=0;q.words.forEach(function(x,i){s+=(wt[i]||.3)*(w.m[x]||0)});
     if(tr.length&&tr.some(function(r){return r.test(w[0])}))s+=20;     // the subject the visitor named, in the title: first
-    if(!q.words.length&&!tr.length)s=hash(w[11]);
+    if(!q.words.length&&!tr.length)s=.6*hash(w[11]+DAY)+(w[8]?.25:0)+.35*D.fame[w[1]];   // nothing named: the day's selection
     else if(s<=0&&!who.length)return;
     if(ws){                                       // a wall on view: what fits it, best near half its width
       var d=w[13];if(!d||w[7]==='sculpture'||w[14]&4)return;
@@ -434,6 +438,7 @@ function show(box,q){
   if(q.min||q.max)bits.push(priceText(q.min,q.max));
   bits=bits.concat(q.words.map(function(x){return labels[x]||x}));
   if(q.terms.length)bits.push(T.titlew+': '+q.terms.join(', '));
+  if(bits.length===1&&!q.artist)bits.push(T.daily);
   if(q.artist)bits.push(q.artist);
   box.appendChild(el('p','search',bits.join(' · ')));
   if(!list.length){box.appendChild(el('p','none',T.none));
@@ -487,13 +492,13 @@ ain.addEventListener('keydown',function(e){var it=alist.children;
 ain.addEventListener('blur',function(){alist.hidden=true;ain.setAttribute('aria-expanded','false');ain.value=Q.artist});
 // the block that changes made by hand redraw in place; after the assistant's turn the next change opens one of its own
 var live=null;
-function refresh(){
+function refresh(quiet){
   if(!D){stock().then(refresh,function(){});return}
   if(!live||live.turn){var b=el('div','msg them');log.appendChild(b);live={b:b,box:el('div')};b.appendChild(live.box)}
   else live.keys.forEach(function(k){delete shownKeys[k]});
   live.box.textContent='';var s=show(live.box,Q);live.keys=s.keys;
   if(R&&s.list.length)fill(R,s.list);
-  if(WIDE.matches)live.b.scrollIntoView({block:'nearest',behavior:'smooth'})}
+  if(quiet!==true&&WIDE.matches)live.b.scrollIntoView({block:'nearest',behavior:'smooth'})}
 function changed(){sync();refresh()}
 function slid(e){var a=+plo.value,b=+phi.value;
   if(a>=b){if(e.target===plo)plo.value=a=b-1;else phi.value=b=a+1}
@@ -566,7 +571,10 @@ function handoff(){var h;try{h=new URLSearchParams(location.hash.slice(1))}catch
   try{history.replaceState(null,'',location.pathname+location.search)}catch(e){}
   if(set){sync();refresh()}
   var q=(h.get('q')||'').slice(0,400);if(q&&api)send(q)}
+var arrived=!!location.hash&&/(^|[#&])(q|m|w|min|max|s|a)=/.test(location.hash);
 handoff();window.addEventListener('hashchange',handoff);
+// ten works on arrival, before any click (YC: the shortest way to the moment it pays off)
+if(!arrived)stock().then(function(){if(!live)refresh(true)},function(){});
 })();
 """
 
@@ -724,7 +732,7 @@ def page(lang, ver, api, labels, M):
     t = T[lang]
     me, other = f"{BASE}/{t['file']}", f"{BASE}/{t['other']}"
     tj = json.dumps({k: t[k] for k in ("more", "at", "noprice", "none", "thinking", "failed", "record", "sizes", "shown", "hash",
-                                       "media", "anyprice", "upto", "from_", "count", "count1", "moremoods", "fewer", "clear", "artist", "titlew", "artistonly", "showthem",
+                                       "media", "anyprice", "upto", "from_", "count", "count1", "moremoods", "fewer", "clear", "artist", "titlew", "artistonly", "showthem", "daily",
                                        "yourroom", "looking", "photomsg", "wallw", "drag", "onwall", "fits", "roomnote", "nowall", "badphoto",
                                        "choose", "hangmore", "remove", "together", "frames", "reset", "ar", "arwait", "arfail", "arsafari")}, ensure_ascii=False).replace("</", "<\\/")
     lj = json.dumps(labels, ensure_ascii=False).replace("</", "<\\/")
