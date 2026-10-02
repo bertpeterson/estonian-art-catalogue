@@ -823,6 +823,21 @@
     body.innerHTML = out;
   }
 
+  // what the galleries have for sale by an artist now, with the asking prices' range, and the way to those works in
+  // Buy art for your home (the artist's static page shows them too; most visitors open an artist here)
+  function saleHTML(i){
+    const S = W.filter(w => w.a === i && w.kind === "gallery" && w.url);
+    if (!S.length) return "";
+    const ps = S.map(w => w.pr).filter(Boolean).sort((x, y) => x - y);
+    const eur = n => LANG === "en" ? "€" + n.toLocaleString("en-GB") : n.toLocaleString("et-EE") + " €";
+    const gals = [...new Set(S.map(w => w.mu).filter(Boolean))];
+    const rng = ps.length > 1 && ps[0] !== ps[ps.length - 1] ? ` · ${eur(ps[0])}–${eur(ps[ps.length - 1])}` : ps.length ? ` · ${eur(ps[0])}` : "";
+    const href = (LANG === "en" ? "find.html" : "leia.html") + "#a=" + encodeURIComponent(A[i].n);
+    return `<div class="mono-sale"><span class="mono-salehead">${esc(T("forsalenow"))}</span>`
+      + `<span class="mono-salen">${esc(S.length === 1 ? T("oneworkc") : T("nworks", {n: S.length.toLocaleString(LANG === "en" ? "en-GB" : "et-EE")}))}${esc(rng)}</span>`
+      + `<span class="mono-salegal">${esc(gals.slice(0, 4).join(", "))}${gals.length > 4 ? " …" : ""}</span>`
+      + `<a class="mono-salelink" href="${href}">${esc(T(S.length === 1 ? "seeinbuy1" : "seeinbuy"))} →</a></div>`;
+  }
   function renderMono(){
     const el = $("mono");
     if (state.artist === null){ el.innerHTML = ""; return; }
@@ -859,6 +874,7 @@
       <div class="mono-side">
         <div class="mono-fig">${mine.length}</div>
         <div class="mono-figlab">${esc(T("worksinregister"))}${shown!==mine.length?` · ${esc(T("shown_n",{n:shown}))}`:""}</div>
+        ${saleHTML(state.artist)}
         ${auLine(state.artist) ? `<div class="mono-au">${esc(auLine(state.artist))}</div>` : ""}
         ${upHTML(state.artist)}
         <div class="mono-tl">
