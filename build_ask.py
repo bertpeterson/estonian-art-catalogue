@@ -79,7 +79,7 @@ def media_of(kind, tech):
     return m
 
 T = {"en": dict(file="find.html", other="leia.html", other_l="Eesti keeles", site="Estonian Art Catalogue",
-                h="Buy art for your home", lede="Search the works the catalogue's galleries have for sale now. Set the price, medium, size, mood and artist, or describe what you need. Each work links to the gallery that sells it.",
+                h="Buy art", title="Buy Estonian art: {n} works for sale, with prices", lede="Art for your home from the catalogue's galleries, for sale now. Set the price, medium, size, mood and artist, or describe what you need. Each work links to the gallery that sells it.",
                 hello="Set the filters, or describe what you need: the room, size, budget, subject or mood.",
                 photo="Photo of your wall", yourroom="Your room", looking="Looking at your room…", photomsg="(a photo of my room)",
                 wallw="Wall space, width", drag="Drag the room to look around it; scroll or pinch to step closer. Drag a work to move it along the wall, or onto another outlined space. If the sizes look wrong, set the wall's width.", reset="Reset view", ar="See it on your wall (AR)", arsafari="To see a work on your real wall in AR, open this page in Safari.", arwait="Making the model…", arfail="AR could not be opened", onwall="On my wall",
@@ -104,7 +104,7 @@ T = {"en": dict(file="find.html", other="leia.html", other_l="Eesti keeles", sit
                 note="The works are the galleries' current stock with their asking prices, read weekly from each gallery's own site; the gallery's page is the one to trust. Your messages are read by Claude to choose the search and are not stored. The auction figures under a work are its artist's record as the houses published it, hammer prices: a record, not a valuation. The moods are read from the gallery's photograph by CLIP, an image model: a guide, not a judgement of the work.",
                 hash=""),
      "et": dict(file="leia.html", other="find.html", other_l="In English", site="Eesti Kunstikataloog",
-                h="Osta kunsti oma koju", lede="Otsi teoseid, mis kataloogi galeriidel praegu müügil on. Sea hind, tehnika, suurus, meeleolu ja kunstnik või kirjelda, mida vajad. Iga teos viib seda müüva galerii lehele.",
+                h="Osta kunsti", title="Osta Eesti kunsti: müügil {n} teost koos hindadega", lede="Kunst sinu koju kataloogi galeriidest, praegu müügil. Sea hind, tehnika, suurus, meeleolu ja kunstnik või kirjelda, mida vajad. Iga teos viib seda müüva galerii lehele.",
                 hello="Sea filtrid või kirjelda, mida vajad: tuba, suurus, eelarve, teema või meeleolu.",
                 photo="Foto seinast", yourroom="Sinu tuba", looking="Vaatan su tuba…", photomsg="(foto minu toast)",
                 wallw="Vaba seinaosa laius", drag="Lohista tuba, et ringi vaadata; keri või näpista, et lähemale astuda. Lohista teost, et seda seinal liigutada või teisele märgitud kohale viia. Kui suurused tunduvad valed, sea seina laius õigeks.", reset="Algvaade", ar="Vaata oma seinal (AR)", arsafari="Et näha teost AR-is oma päris seinal, ava see leht Safaris.", arwait="Teen mudelit…", arfail="AR-i ei õnnestunud avada", onwall="Minu seinale",
@@ -747,7 +747,7 @@ def panel(t, labels, M):
 # lede, hello and note that told of it are in git history (commit 9c3e4a1), to be put back with it
 PHOTO = False
 
-def page(lang, ver, api, labels, M):
+def page(lang, ver, api, labels, M, n=0):
     t = T[lang]
     me, other = f"{BASE}/{t['file']}", f"{BASE}/{t['other']}"
     tj = json.dumps({k: t[k] for k in ("more", "at", "noprice", "none", "thinking", "failed", "record", "sizes", "shown", "hash",
@@ -757,7 +757,7 @@ def page(lang, ver, api, labels, M):
     lj = json.dumps(labels, ensure_ascii=False).replace("</", "<\\/")
     ask = (api.rstrip("/") + "/ask") if api else ""
     return (f'<!doctype html><html lang="{lang}"><head><meta charset="utf-8">{H.STAMP}<meta name="viewport" content="width=device-width,initial-scale=1">'
-            f'<title>{e(t["h"])} · museaal.ee</title><meta name="description" content="{e(t["lede"][:290])}">'
+            f'<title>{e(t["title"].format(n=f"{n:,}".replace(",", " " if lang == "et" else ",")))} · museaal.ee</title><meta name="description" content="{e(t["lede"][:290])}">'
             f'<link rel="canonical" href="{me}"><link rel="alternate" hreflang="{lang}" href="{me}"><link rel="alternate" hreflang="{"et" if lang == "en" else "en"}" href="{other}">'
             '<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>'
             '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..600&family=Archivo:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">'
@@ -794,11 +794,11 @@ SALE = [  # key, the controls' address, English slug and heading, Estonian slug 
 ]
 SALE_DIR = {"en": "for-sale", "et": "muugil"}
 ST = {"en": dict(lede="{n} works at {g} Estonian galleries, with their asking prices. Each links to the gallery that sells it.",
-                 lede1="1 work at an Estonian gallery, with its asking price.", more="Filter these in Buy art for your home →",
-                 browse="Browse what is for sale", first="The first {k} of {n} here; all of them in Buy art for your home.", artist="Artist's page"),
+                 lede1="1 work at an Estonian gallery, with its asking price.", more="Filter these in Buy art →",
+                 browse="Browse what is for sale", first="The first {k} of {n} here; all of them in Buy art.", artist="Artist's page"),
       "et": dict(lede="{n} teost {g} Eesti galeriis koos küsitud hindadega. Iga teos viib seda müüva galerii lehele.",
-                 lede1="1 teos Eesti galeriis koos küsitud hinnaga.", more="Vali neist lehel Osta kunsti oma koju →",
-                 browse="Sirvi müügil olevat", first="Siin esimesed {k} teost {n}-st; kõik lehel Osta kunsti oma koju.", artist="Kunstniku leht")}
+                 lede1="1 teos Eesti galeriis koos küsitud hinnaga.", more="Vali neist lehel Osta kunsti →",
+                 browse="Sirvi müügil olevat", first="Siin esimesed {k} teost {n}-st; kõik lehel Osta kunsti.", artist="Kunstniku leht")}
 
 def browse_links(lang, here=None):
     i = 3 if lang == "en" else 5
@@ -859,7 +859,7 @@ def main():
     urls = []
     for lang in ("en", "et"):
         labels = {w["en"]: (w["et"] if lang == "et" else BM.LABEL_EN.get(w["en"], w["en"])) for w in M}
-        open(f"site/{T[lang]['file']}", "w", encoding="utf-8").write(page(lang, ver, API, labels, M)); urls.append(f"{BASE}/{T[lang]['file']}")
+        open(f"site/{T[lang]['file']}", "w", encoding="utf-8").write(page(lang, ver, API, labels, M, len(d["works"]))); urls.append(f"{BASE}/{T[lang]['file']}")
     urls += sale_pages(d)
     sm = open("site/sitemap.xml", encoding="utf-8").read()
     today = datetime.date.today().isoformat()

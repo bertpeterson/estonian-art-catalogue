@@ -824,7 +824,7 @@
   }
 
   // what the galleries have for sale by an artist now, with the asking prices' range, and the way to those works in
-  // Buy art for your home (the artist's static page shows them too; most visitors open an artist here)
+  // Buy art (the artist's static page shows them too; most visitors open an artist here)
   function saleHTML(i){
     const S = W.filter(w => w.a === i && w.kind === "gallery" && w.url);
     if (!S.length) return "";
@@ -1505,7 +1505,7 @@
     const el = $("doors");
     // the names are a way in, for the untouched page only: once anything is chosen --
     // a filter, a search, a view -- the results come first
-    $("forsale").hidden = !pristine();               // Buy art for your home: on the untouched page, like the door
+    $("forsale").hidden = !pristine();               // Buy art: on the untouched page, like the door
     if (!pristine() || state.group !== "decade"){ el.hidden = true; el.innerHTML = ""; return; }
     const num = n => n.toLocaleString(LANG === "en" ? "en-GB" : "et-EE");
     const col = (head, items, cls, tag) => `<div class="${cls || ""}"><h2>${esc(T(head))}${tag ? ` <span class="tag">${esc(tag)}</span>` : ""}</h2><ul>` + items.map(
