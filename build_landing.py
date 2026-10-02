@@ -152,14 +152,18 @@ PER = [(None, 1699, EN["p_pre"])] + [(int(a), int(b), I18N["PERIOD_EN"][k]) for 
        re.findall(r'\[(\d{4}),(\d{4}),"(\w+)","[^"]+"\]', _app[_app.index("const PERIODS"):_app.index("const PERIOD_NOTE")])]
 eras = "".join(f'<a class="era" data-era="{i}" href="#{"from=" + str(lo) + "&" if lo else ""}{"to=" + str(hi) if hi != 2099 else ""}">{e(lab)}</a>'.replace("&\"", "\"")
                for i, (lo, hi, lab) in enumerate(PER))
-# Buy art for your home, baked: six works for sale with a picture and a price, one an artist, from the sixty
-# artists the museums hold most of (the names a visitor is likeliest to know), turned by the build's seed
+# Buy art for your home, baked: six paintings for sale with a picture and a price, one an artist, from the sixty
+# artists the museums hold most of (the names a visitor is likeliest to know), turned by the build's seed. Paintings
+# only (2026-10-02): the best-held names are often printmakers, and the row read as a print shop
 import random as _random
 _rng = _random.Random(SEED)
 _held = collections.Counter(w["a"] for w in W if (w.get("kind") or "held") in ("held", "shown"))
 _sale = [w for w in W if w.get("kind") == "gallery" and (w.get("im") or "").startswith("g:https://") and (w.get("url") or "").startswith("http")]
 _galleries = {name("mu", w.get("mu")) for w in _sale}
-_ok = [w for w in _sale if 150 <= (w.get("pr") or 0) <= 20000 and not re.search(r"müüdud|\bsold\b", str(name("tc", w.get("tc")) or ""), re.I)]
+from moods import PAINT as _PAINT
+_PRINTED = re.compile(r"müüdud|\bsold\b|giclée|giclee|serigraaf|litograaf|digitrük|\bprint", re.I)
+_ok = [w for w in _sale if 150 <= (w.get("pr") or 0) <= 20000 and name("e", w.get("e")) in _PAINT
+       and not _PRINTED.search(f'{name("tc", w.get("tc")) or ""} {name("tce", w.get("tce")) or ""}')]
 _by = collections.defaultdict(list)
 for w in _ok: _by[w["a"]].append(w)
 _top = sorted(_by, key=lambda a: -_held[a])[:60]; _rng.shuffle(_top)
