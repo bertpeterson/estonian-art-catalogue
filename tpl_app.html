@@ -603,6 +603,9 @@
            <div class="cent-bars">${cell("und",T("nd"),T("undated"),"undated")}</div>
            <div class="cent-lab" title="Undated — works whose record carries no dating">&nbsp;</div>
          </div>`;
+    // the folded line's sketch: the same counts, from 1800 (the earlier centuries are a sliver)
+    const hm = DECADES.filter(d => d >= 1800), hmx = Math.max(1, ...hm.map(d => counts[d]));
+    $("hm-bars").innerHTML = hm.map(d => `<span style="height:${Math.max(4, Math.round(counts[d] / hmx * 100))}%"></span>`).join("");
     $("histo-hint").textContent = state.decade===null ? T("selectdecade")
       : (state.decade==="und" ? T("undatedonly") : T("filteredto",{x:state.decade+"s"}));
     renderEras();
@@ -1489,6 +1492,7 @@
     const el = $("doors");
     // the names are a way in, for the untouched page only: once anything is chosen --
     // a filter, a search, a view -- the results come first
+    $("forsale").hidden = !pristine();               // Find art for your home: on the untouched page, like the door
     if (!pristine() || state.group !== "decade"){ el.hidden = true; el.innerHTML = ""; return; }
     const num = n => n.toLocaleString(LANG === "en" ? "en-GB" : "et-EE");
     const col = (head, items, cls, tag) => `<div class="${cls || ""}"><h2>${esc(T(head))}${tag ? ` <span class="tag">${esc(tag)}</span>` : ""}</h2><ul>` + items.map(
@@ -2279,6 +2283,9 @@
     document.querySelectorAll('a[data-i18n="statslink"]').forEach(a => { a.href = LANG === "en" ? "stats.html" : "stats-et.html"; });   // the figures page exists in both languages
     $("moodlink").href = LANG === "en" ? "mood.html" : "meeleolu.html";
     $("findlink").href = LANG === "en" ? "find.html" : "leia.html";
+    $("fs-q").placeholder = T("fs_ph");
+    const fl = $("fs-lede");
+    if (fl && fl.dataset.n) fl.textContent = T("fs_lede", {n: (+fl.dataset.n).toLocaleString(LANG === "en" ? "en-GB" : "et-EE"), g: fl.dataset.g});
     document.querySelectorAll("[data-i18n-html]").forEach(el => { el.innerHTML = I18N[LANG === "en" ? "HTML_EN" : "HTML_ET"][el.dataset.i18nHtml] || ""; });
     $("q").placeholder = T("searchph");
     applyTheme();
