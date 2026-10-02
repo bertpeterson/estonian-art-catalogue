@@ -735,6 +735,22 @@ footer a{border-bottom:1px solid var(--rule)}
       var v=document.getElementById("fs-q").value.replace(/\s+/g," ").trim();location.href=page()+(v?"#q="+encodeURIComponent(v):"")});
     document.getElementById("forsale").addEventListener("click",function(e){var a=e.target.closest("a[data-fs]");if(a)a.href=page()+a.dataset.fs});
   })();
+  // a visitor whose browser asks for Estonian, and who has not chosen English here, gets the page in Estonian
+  // before the index arrives (the app, when it boots, keeps to the same choice); the link's #lang and a choice made
+  // on the page come first
+  (function(){
+    var l=(location.hash.match(/(?:^#|&)lang=(\w+)/)||[])[1],s=null;try{s=localStorage.getItem("ekr:lang")}catch(e){}
+    var et=l?l==="et":s?s==="et":[].concat(navigator.languages||[],navigator.language||[]).some(function(x){return /^et\b/i.test(x)});
+    if(!et)return;document.documentElement.lang="et";
+    var go=function(I){var E=I.ET||{},H=I.HTML_ET||{};
+      document.querySelectorAll("[data-i18n]").forEach(function(el){var v=E[el.dataset.i18n];if(v!=null)el.textContent=v});
+      document.querySelectorAll("[data-i18n-html]").forEach(function(el){var v=H[el.dataset.i18nHtml];if(v!=null)el.innerHTML=v});
+      var fl=document.getElementById("fs-lede");if(fl&&fl.dataset.n&&E.fs_lede)fl.textContent=E.fs_lede.replace("{n}",(+fl.dataset.n).toLocaleString("et-EE")).replace("{g}",fl.dataset.g);
+      var q=document.getElementById("q");if(q&&E.searchph)q.placeholder=E.searchph;
+      var f=document.getElementById("fs-q");if(f&&E.fs_ph)f.placeholder=E.fs_ph};
+    fetch("data/i18n.json?v=__V_I18N__").then(function(r){return r.json()}).then(function(I){
+      if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",function(){go(I)});else go(I)}).catch(function(){});
+  })();
   </script>
 
   <div class="controls">

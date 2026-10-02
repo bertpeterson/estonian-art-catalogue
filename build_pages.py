@@ -12,7 +12,7 @@ BASE is the only thing that changes when the site moves to its own domain; GitHu
 Pages 301-redirects the github.io address to a custom domain, so indexing done now
 carries over.
 """
-import json, os, re, html, unicodedata, datetime, collections
+import json, os, re, html, unicodedata, datetime, collections, urllib.parse
 # the page's last line: where to ask for a correction or a removal
 CONTACT = {"en": 'Corrections, removals, questions: <a href="mailto:info@museaal.ee">info@museaal.ee</a>', "et": 'Parandused, eemaldamised, küsimused: <a href="mailto:info@museaal.ee">info@museaal.ee</a>'}
 GC = '<script data-goatcounter="https://museaal.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>'   # GoatCounter: a page-view count, no cookies
@@ -108,6 +108,7 @@ CSS = ("body{margin:0;padding:28px;font:15px/1.55 -apple-system,BlinkMacSystemFo
        ".rel{font-size:.85rem;color:#666;margin:6px 0;max-width:80ch;line-height:1.7}"
        ".rel.nb{margin-top:22px;padding-top:12px;border-top:1px solid #e3e5e9}"
        ":root:not([data-theme=light]) .rel{color:#8b9098}:root:not([data-theme=light]) .rel.nb{border-color:#2b2e34}"
+       "h2.sh{font-size:1.05rem;margin:22px 0 4px;font-weight:600}.wall.sale{margin-top:8px}.wt span b{font-weight:600;color:inherit}"
        ".wall{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin:14px 0 6px}"
        ".wt{display:block;background:#f1f2f4;text-decoration:none;color:inherit}.wt img{display:block;width:100%;aspect-ratio:1/1;object-fit:cover}.wt{overflow:hidden}"
        ".wt span{display:block;font-size:.72rem;line-height:1.3;padding:5px 6px 6px;color:#666}.wt span i{font-style:italic;color:#111}"
@@ -287,6 +288,36 @@ def up_line(i, lang):
     items = " · ".join(f'{d(u.get("d"))} {e(H.mus_name(u["h"], lang))}: <i>{e(u["t"])}</i>' + (f', {start} €{u["p"]:,}' if u.get("p") else "") for u in L[:6])
     return f'<p class="m">{lab}: {items} — <a href="{BASE}/{page}">{"all coming sales" if lang == "en" else "kõik tulevad oksjonid"}</a></p>'
 
+def sale_block(i, a, ws, lang):
+    """the artist's works for sale now, with the galleries' asking prices, each linking to the gallery that sells
+    it, and the way into Buy art for your home kept to this artist: what a searcher typing the name and "buy" is
+    after, in the page itself (the Buy art page draws its works in the browser, where a search engine does not look)"""
+    seen, S = set(), []
+    for w in ws:
+        if w.get("kind") != "gallery" or not (w.get("url") or "").startswith("http") or not (w.get("im") or "").startswith("g:https://"): continue
+        if re.search(r"müüdud|\bsold\b", f"{val(w, 'tc') or ''} {val(w, 'tce') or ''}", re.I): continue
+        k = ((w.get("t") or "").lower().strip(), val(w, "mu"))
+        if k in seen: continue
+        seen.add(k); S.append(w)
+    if not S: return "", 0
+    S.sort(key=lambda w: (not w.get("pr"), w.get("pr") or 0))
+    en = lang == "en"
+    price = lambda p: (f"€{p:,}" if en else f"{p:,} €".replace(",", " ")) if p else ("price on request" if en else "hind päringul")
+    gals = sorted({val(w, "mu") for w in S if val(w, "mu")})
+    pr = sorted(w["pr"] for w in S if w.get("pr"))
+    rng = (f", {price(pr[0])}–{price(pr[-1])}" if len(pr) > 1 and pr[0] != pr[-1] else f", {price(pr[0])}" if pr else "")
+    head = ("For sale now" if en else "Müügil praegu")
+    line = (f"{len(S)} {'work' if len(S) == 1 else 'works'} at {', '.join(gals)}{rng}. Prices as the galleries state them."
+            if en else f"{len(S)} {'teos' if len(S) == 1 else 'teost'}: {', '.join(gals)}{rng}. Hinnad nii, nagu galeriid need avaldavad.")
+    tiles = "".join(
+        f'<a class="wt" href="{e(w["url"])}" target="_blank" rel="noopener" title="{e(w.get("t") or "")}">'
+        f'<img src="{e(imsrc(w["im"]))}" alt="{e(w.get("t") or "")}, {e(a["n"])}" loading="lazy" referrerpolicy="no-referrer-when-downgrade">'
+        f'<span><i>{e(w.get("t") or "")}</i><br><b>{price(w.get("pr"))}</b> · {e(val(w, "mu") or "")} ↗</span></a>' for w in S[:12])
+    find = f'{BASE}/{"find" if en else "leia"}.html#a={urllib.parse.quote(a["n"])}'
+    more = (f"See {'it' if len(S) == 1 else 'them'} in Buy art for your home" if en else "Vaata neid lehel Osta kunsti oma koju")
+    return (f'<h2 class="sh">{head}</h2><p class="m">{e(line)}</p><div class="wall sale">{tiles}</div>'
+            f'<p><a class="cta" href="{e(find)}">{more} →</a></p>'), len(S)
+
 def embed_box(lang, src, back, name, T):
     """the two lines to paste: the iframe, and the plain link that carries the credit"""
     code = (f'<iframe src="{src}" width="100%" height="230" loading="lazy" title="{name} – museaal.ee"></iframe>\n'
@@ -318,6 +349,10 @@ def render(i, a, ws, lang):
     d_ = dict(name=a["n"], dates=f" ({dates})" if dates else "", n=n, gal=gal, span=span, media=media_phrase(ws, lang) or T["works"],
               holders=", ".join(top_holders) if top_holders else "—")
     desc = (T["desc"] if span else T["desc_nospan"]).format(**d_)[:300]
+    sale, n_sale = sale_block(i, a, ws, lang)
+    if n_sale:                                   # the snippet says so too, when there is room
+        extra = (f" {n_sale} for sale now." if lang == "en" else f" Müügil {n_sale} {'teos' if n_sale == 1 else 'teost'}.")
+        if len(desc) + len(extra) <= 300: desc += extra
 
     def holder(w):
         if w.get("kind") == "sold": return f"{e(val(w, 'mu'))} · {T['sold'] if w.get('gs') else T['gone']}"
@@ -386,6 +421,7 @@ def render(i, a, ws, lang):
            + ((f"<p class=\"bio\">{e(bio)}" + bio_note + "</p>") if bio else "")
            + (f"<p class=\"m\">{e(au_line)}</p>" if au_line else "")
            + up_line(i, lang)
+           + sale
            + f"<p><a class=\"cta\" href=\"{app}\">{e(T['browse'].format(n=n))}</a></p>"
            + wall
            + related(i, lang)
