@@ -152,26 +152,33 @@ PER = [(None, 1699, EN["p_pre"])] + [(int(a), int(b), I18N["PERIOD_EN"][k]) for 
        re.findall(r'\[(\d{4}),(\d{4}),"(\w+)","[^"]+"\]', _app[_app.index("const PERIODS"):_app.index("const PERIOD_NOTE")])]
 eras = "".join(f'<a class="era" data-era="{i}" href="#{"from=" + str(lo) + "&" if lo else ""}{"to=" + str(hi) if hi != 2099 else ""}">{e(lab)}</a>'.replace("&\"", "\"")
                for i, (lo, hi, lab) in enumerate(PER))
-# Buy art for your home, baked: six paintings for sale with a picture and a price, one an artist, from the sixty
-# artists the museums hold most of (the names a visitor is likeliest to know), turned by the build's seed. Paintings
-# only (2026-10-02): the best-held names are often printmakers, and the row read as a print shop
+# Buy art for your home, baked: six works for sale with a picture and a price, one an artist, from the sixty
+# artists the museums hold most of (the names a visitor is likeliest to know), turned by the build's seed. Four
+# paintings and two other works, alternating (2026-10-02: the best-held names are often printmakers and the row
+# read as a print shop; then paintings alone read as too narrow)
 import random as _random
 _rng = _random.Random(SEED)
 _held = collections.Counter(w["a"] for w in W if (w.get("kind") or "held") in ("held", "shown"))
 _sale = [w for w in W if w.get("kind") == "gallery" and (w.get("im") or "").startswith("g:https://") and (w.get("url") or "").startswith("http")]
 _galleries = {name("mu", w.get("mu")) for w in _sale}
 from moods import PAINT as _PAINT
-_PRINTED = re.compile(r"müüdud|\bsold\b|giclée|giclee|serigraaf|litograaf|digitrük|\bprint", re.I)
-_ok = [w for w in _sale if 150 <= (w.get("pr") or 0) <= 20000 and name("e", w.get("e")) in _PAINT
-       and not _PRINTED.search(f'{name("tc", w.get("tc")) or ""} {name("tce", w.get("tce")) or ""}')]
-_by = collections.defaultdict(list)
-for w in _ok: _by[w["a"]].append(w)
-_top = sorted(_by, key=lambda a: -_held[a])[:60]; _rng.shuffle(_top)
+_PRINTED = re.compile(r"giclée|giclee|serigraaf|litograaf|digitrük|\bprint", re.I)
+_tech = lambda w: f'{name("tc", w.get("tc")) or ""} {name("tce", w.get("tce")) or ""}'
+_ok = [w for w in _sale if 150 <= (w.get("pr") or 0) <= 20000 and not re.search(r"müüdud|\bsold\b", _tech(w), re.I)]
+_painting = lambda w: name("e", w.get("e")) in _PAINT and not _PRINTED.search(_tech(w))
+def _six():
+    by_p, by_o = collections.defaultdict(list), collections.defaultdict(list)
+    for w in _ok: (by_p if _painting(w) else by_o)[w["a"]].append(w)
+    top = lambda by: sorted(by, key=lambda a: -_held[a])[:60]
+    tp, to = top(by_p), top(by_o); _rng.shuffle(tp); _rng.shuffle(to)
+    ps = [_rng.choice(by_p[a]) for a in tp[:4]]
+    os_ = [_rng.choice(by_o[a]) for a in to if a not in tp[:4]][:2]
+    return [ps[0], ps[1], os_[0], ps[2], os_[1], ps[3]] if len(ps) == 4 and len(os_) == 2 else (ps + os_)[:6]
 eurf = lambda n: "€" + f"{n:,}".replace(",", " ")
 fs_works = "".join(
     f'<a class="fs-w" href="{e(w["url"])}" target="_blank" rel="noopener"><img src="{e(w["im"][2:])}" alt="{e(w.get("t") or "")}, {e(A[w["a"]]["n"])}" decoding="async" referrerpolicy="no-referrer-when-downgrade">'
     f'<span class="fs-cap"><i>{e(w.get("t") or "")}</i>{e(A[w["a"]]["n"])}<b>{eurf(w["pr"])}</b></span></a>'
-    for w in (_rng.choice(_by[a]) for a in _top[:6]))
+    for w in _six())
 fs_lede = f'<p class="fs-lede" id="fs-lede" data-n="{len(_sale)}" data-g="{len(_galleries)}">' + e(EN["fs_lede"].replace("{n}", f"{len(_sale):,}").replace("{g}", str(len(_galleries)))) + "</p>"
 json.dump({"doors": door, "register": wall, "bars": bars, "eras": eras, "seed": SEED, "fs_works": fs_works, "fs_lede": fs_lede}, open("site/landing.json", "w", encoding="utf-8"), ensure_ascii=False)
 print(f"  landing baked   {len(shown)} tiles, seed {SEED}, first: {shown[0]['t']} · {A[shown[0]['a']]['n']}")
