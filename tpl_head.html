@@ -125,28 +125,29 @@ h1 a:hover{color:var(--grey-6)}
 .histo:hover .histo-pop,.histo.open .histo-pop,.histo:has(:focus-visible) .histo-pop{opacity:1;visibility:visible;transform:none;transition-delay:.12s,.12s,0s}
 @media (prefers-reduced-motion:reduce){.histo-pop{transition:none}}
 
-/* Find art for your home: the catalogue's own door to what can be bought, under the masthead */
-.forsale{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:34px;align-items:center;padding:30px 0 32px;border-bottom:1px solid var(--rule)}
-@media(max-width:860px){.forsale{grid-template-columns:1fr;gap:22px}}
+/* Find art for your home: a quiet door under the masthead -- a line of text and a search on the left, six works
+   for sale in a row on the right */
+.forsale{display:grid;grid-template-columns:minmax(250px,2fr) minmax(0,5fr);gap:28px;align-items:center;padding:18px 0 20px;border-bottom:1px solid var(--rule)}
+@media(max-width:900px){.forsale{grid-template-columns:1fr;gap:14px}}
 .forsale[hidden]{display:none}
-.forsale h2{margin:8px 0 10px;font-family:var(--serif-text);font-weight:500;font-size:clamp(2rem,4.2vw,3.1rem);line-height:1;letter-spacing:-.015em}
-.fs-lede{margin:0 0 16px;color:var(--ink-soft);font-size:.98rem;max-width:52ch}
-.fs-ask{display:flex;gap:0;max-width:560px}
-.fs-ask input{flex:1;min-width:0;font:400 1.08rem/1.2 var(--serif-text);color:var(--ink);background:var(--raise);border:1px solid var(--ink);border-right:0;padding:12px 13px;border-radius:0}
+.forsale h2{margin:5px 0 4px;font-family:var(--serif-text);font-weight:500;font-size:1.45rem;line-height:1.1;letter-spacing:-.01em}
+.fs-lede{margin:0 0 10px;color:var(--grey-6);font-size:.82rem;max-width:44ch}
+.fs-ask{display:flex;max-width:420px}
+.fs-ask input{flex:1;min-width:0;font:400 .95rem/1.2 var(--serif-text);color:var(--ink);background:var(--raise);border:1px solid var(--rule);border-right:0;padding:8px 10px;border-radius:0}
 .fs-ask input:focus{outline:2px solid var(--focus);outline-offset:1px}
-.fs-go{font-family:var(--mono);font-size:.74rem;letter-spacing:.1em;text-transform:uppercase;background:var(--invert-bg);color:var(--invert-fg);border:1px solid var(--invert-bg);padding:0 18px;cursor:pointer}
-.fs-chips{display:flex;flex-wrap:wrap;gap:6px 7px;margin-top:12px;align-items:center}
-.fs-chips a{font-family:var(--serif-text);font-size:.95rem;color:var(--ink);text-decoration:none;border:1px solid var(--rule);border-radius:999px;padding:5px 12px 6px}
-.fs-chips a:hover{border-color:var(--ink)}
-.fs-chips a.fs-all{border:0;padding:5px 2px;font-family:var(--mono);font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;border-bottom:1px solid var(--rule);border-radius:0;margin-left:6px}
-.fs-works{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
-.fs-w{display:block;text-decoration:none;color:inherit}
+.fs-go{font-family:var(--mono);font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;background:none;color:var(--ink);border:1px solid var(--rule);padding:0 12px;cursor:pointer}
+.fs-go:hover{border-color:var(--ink)}
+.fs-all{display:inline-block;margin-top:9px;font-family:var(--mono);font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;color:var(--grey-6);text-decoration:none;border-bottom:1px solid var(--rule);padding-bottom:2px}
+.fs-all:hover{color:var(--ink);border-bottom-color:var(--ink)}
+.fs-works{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px}
+.fs-w{display:block;text-decoration:none;color:inherit;min-width:0}
 .fs-w img{display:block;width:100%;aspect-ratio:1;object-fit:cover;background:var(--field)}
-.fs-cap{display:block;padding-top:6px;font-size:.72rem;line-height:1.3;color:var(--grey-6)}
-.fs-cap i{display:block;font-family:var(--serif-text);font-size:.9rem;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.fs-cap b{font-family:var(--mono);font-weight:500;color:var(--ink);font-size:.76rem;margin-left:4px}
+.fs-cap{display:block;padding-top:5px;font-size:.66rem;line-height:1.3;color:var(--grey-6);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fs-cap i{display:block;font-family:var(--serif-text);font-size:.8rem;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fs-cap b{font-family:var(--mono);font-weight:500;color:var(--ink);font-size:.68rem;margin-left:3px}
 .fs-w:hover .fs-cap i{text-decoration:underline}
-@media(max-width:520px){.fs-works{grid-template-columns:repeat(2,minmax(0,1fr))}.fs-works .fs-w:nth-child(n+5){display:none}}
+@media(max-width:620px){.fs-works{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:38%;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:4px}
+  .fs-w{scroll-snap-align:start}}
 .vh{position:absolute;left:-9999px}
 /* the controls' door to it: the one filled button in the row */
 .moodlink#findlink{background:var(--invert-bg);color:var(--invert-fg);border-color:var(--invert-bg)}
@@ -721,7 +722,7 @@ footer a{border-bottom:1px solid var(--rule)}
       <h2 id="fs-h" data-i18n="fs_h"></h2>
       <p class="fs-lede" id="fs-lede"></p>
       <form class="fs-ask" id="fs-ask" role="search"><label for="fs-q" class="vh" data-i18n="fs_h"></label><input id="fs-q" type="text" maxlength="400" autocomplete="off" placeholder="e.g. a calm sea painting under €1,000"><button class="fs-go" type="submit" data-i18n="fs_go"></button></form>
-      <div class="fs-chips"><a href="find.html#m=oil" data-fs="#m=oil" data-i18n="fs_oil"></a><a href="find.html#m=print" data-fs="#m=print" data-i18n="fs_print"></a><a href="find.html#m=sculpture" data-fs="#m=sculpture" data-i18n="fs_sculpt"></a><a href="find.html#max=500" data-fs="#max=500" data-i18n="fs_u500"></a><a href="find.html#max=1500" data-fs="#max=1500" data-i18n="fs_u1500"></a><a href="find.html#s=large" data-fs="#s=large" data-i18n="fs_large"></a><a class="fs-all" href="find.html" data-fs="" data-i18n="fs_all"></a></div>
+      <a class="fs-all" href="find.html" data-fs="" data-i18n="fs_all"></a>
     </div>
     <div class="fs-works" id="fs-works"></div>
   </section>
