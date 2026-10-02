@@ -290,7 +290,7 @@ def up_line(i, lang):
 
 def sale_block(i, a, ws, lang):
     """the artist's works for sale now, with the galleries' asking prices, each linking to the gallery that sells
-    it, and the way into Buy art for your home kept to this artist: what a searcher typing the name and "buy" is
+    it, and the way into Buy art kept to this artist: what a searcher typing the name and "buy" is
     after, in the page itself (the Buy art page draws its works in the browser, where a search engine does not look)"""
     seen, S = set(), []
     for w in ws:
@@ -314,7 +314,7 @@ def sale_block(i, a, ws, lang):
         f'<img src="{e(imsrc(w["im"]))}" alt="{e(w.get("t") or "")}, {e(a["n"])}" loading="lazy" referrerpolicy="no-referrer-when-downgrade">'
         f'<span><i>{e(w.get("t") or "")}</i><br><b>{price(w.get("pr"))}</b> · {e(val(w, "mu") or "")} ↗</span></a>' for w in S[:12])
     find = f'{BASE}/{"find" if en else "leia"}.html#a={urllib.parse.quote(a["n"])}'
-    more = (f"See {'it' if len(S) == 1 else 'them'} in Buy art for your home" if en else "Vaata neid lehel Osta kunsti oma koju")
+    more = (f"See {'it' if len(S) == 1 else 'them'} in Buy art" if en else "Vaata neid lehel Osta kunsti")
     return (f'<h2 class="sh">{head}</h2><p class="m">{e(line)}</p><div class="wall sale">{tiles}</div>'
             f'<p><a class="cta" href="{e(find)}">{more} →</a></p>'), len(S)
 
