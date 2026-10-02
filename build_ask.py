@@ -1,15 +1,17 @@
 # -*- coding: utf-8 -*-
 """Find a work: /find.html and /leia.html, and the stock they read, /data/stock.json.
 
-A visitor says what they are looking for -- the room, the budget, the mood -- and an
-assistant answers in a sentence or two while the page shows works the galleries have for
-sale now. The assistant is Claude Haiku behind the mood page's Worker (its /ask door,
-worker/template.js): it gets the conversation and answers with a reply and a search --
-mood words from the same vocabulary, a kind, a size and a budget. It never sees the
-works. The page ranks the stock itself from that search: the mood scores of the gallery's
-own picture (data/stock_moods.py, on the museum pictures' scale), the asking price the
-gallery's page states, and the size read off the dimensions. Every card links to the
-gallery's own page, where the work is sold.
+A visitor sets the controls -- a price range, the medium, the size, mood words -- or says
+what they are looking for, and the page shows ten works the galleries have for sale now.
+The assistant is Claude Haiku behind the mood page's Worker (its /ask door,
+worker/template.js): it gets the conversation and the controls as they are, and answers
+with a short, factual reply and the whole search -- mood words from the same vocabulary,
+title words, media, a size, a budget, an artist -- which the controls then show. It never
+sees the works. The page ranks the stock itself from that search: the mood scores of the
+gallery's own picture (data/stock_moods.py, on the museum pictures' scale), the title,
+the medium read off the technique, the asking price the gallery's page states, and the
+size read off the dimensions. Every card links to the gallery's own page, where the work
+is sold.
 
 Only current stock with the gallery's picture; a work without a price is shown only
 while no budget is set. Run after build_mood.py (it adds to the sitemap) and before csp.py.
@@ -49,38 +51,70 @@ def dims_of(dm):
     L, S = max(n), min(n)
     return [round(L, 1), round(S, 1)] if 5 <= L <= 600 and S >= 2 else None
 
+# the medium, from the technique as the gallery states it: a bit each, a work may have two (an oil painting is
+# also a painting). Only what the technique says: a painting that names no medium is not "oil".
+OIL = re.compile(r"õli|\boil\b|ölmal", re.I)
+PRINT = re.compile(r"graafika|lino|serigraaf|siiditrükk|printmaking|\bprint|giclée|giclee|litograaf|\blito|kuivnõel|söövitus|ofort|gravüür|"
+                   r"puulõige|digitrük|trükk|trükis|etching|lithograph|screen ?print|woodcut|linocut|aquatint|akvatint|mezzotint|metsotint|"
+                   r"monotüüp|monotyp|kollagraaf|drypoint|engraving", re.I)
+PAINTISH = re.compile(r"õli|\boil|akrüül|acryl|tempera|guaš|gouache|akvarell|watercol|segatehnika|mixed", re.I)
+SCULPT = re.compile(r"skulpt|sculpt|pronks|bronze|keraamika|ceramic|portselan|graniit|marmor", re.I)
+MEDIA = ["oil", "print", "sculpture", "painting", "drawing", "photo"]       # bits 1, 2, 4, 8, 16, 32
+
+def media_of(kind, tech):
+    m = 0
+    if kind != "photo" and OIL.search(tech): m |= 1
+    if kind != "photo" and PRINT.search(tech): m |= 2
+    if kind == "sculpture" or SCULPT.search(tech): m |= 4
+    if kind == "paint" and not (m & 2 and not PAINTISH.search(tech)): m |= 8      # a giclée on canvas is a print
+    if kind == "paper" and not m & 2: m |= 16
+    if kind == "photo": m |= 32
+    return m
+
 T = {"en": dict(file="find.html", other="leia.html", other_l="Eesti keeles", site="Estonian Art Catalogue",
-                h="Find a work", lede="Looking for something for your wall? Tell the assistant where it will hang, what you would like to spend and the feeling you are after, or send a photo of the wall: it finds the space, picks works that fit it and hangs them there for you to see. It looks through the works the catalogue's galleries have for sale now, and each one links to the gallery that sells it.",
-                hello="Looking for something? Tell me the room, your budget and the mood, or send a photo of the wall.",
+                h="Find a work", lede="Search the works the catalogue's galleries have for sale now. Set the price, medium, size and mood, or describe what you need; a photo of the wall finds the space and hangs works that fit it. Each work links to the gallery that sells it.",
+                hello="Set the filters, or describe what you need: the room, size, budget, subject or mood. A photo of the wall finds works that fit the space.",
                 photo="Photo of your wall", yourroom="Your room", looking="Looking at your room…", photomsg="(a photo of my room)",
                 wallw="Wall space, width", drag="Drag the room to look around it; scroll or pinch to step closer. Drag a work to move it along the wall, or onto another outlined space. If the sizes look wrong, set the wall's width.", reset="Reset view", ar="See it on your wall (AR)", arsafari="To see a work on your real wall in AR, open this page in Safari.", arwait="Making the model…", arfail="AR could not be opened", onwall="On my wall",
                 choose="Tap a work to hang it", hangmore="Hang another", remove="Take it down", together="{n} works on the wall",
                 frames=dict(none="No frame", black="Black", oak="Oak", white="White", gold="Gold"),
                 fits="fits", roomnote="Room", nowall="I couldn't find a clear stretch of wall in that photo. Try one taken straight on, with the empty wall in view.",
                 badphoto="That photo could not be read. Try a JPEG or PNG.",
-                starters=["A calm sea painting for the bedroom, under €1,000", "Something bright and joyful for a big living-room wall", "A small print as a gift, around €200"],
                 label="Your message", ph="e.g. a misty landscape above the sofa, up to €2,000", send="Send",
-                more="Show more", at="at", noprice="Price on request", none="Nothing for sale matches all of that. Try a wider budget or another size.",
+                more="Show more", at="at", noprice="Price on request", none="No work for sale matches this search. Widen the price range or clear a filter.",
                 thinking="Thinking…", failed="The assistant could not be reached. Try again in a moment.", record="In the catalogue",
                 kinds=dict(paint="paintings", paper="works on paper", sculpture="sculpture", photo="photographs"),
                 sizes=dict(small="small", medium="medium", large="large"), under="under", over="over", shown="Shown",
+                media=dict(oil="Oil", print="Print", sculpture="Sculpture", painting="Paintings", drawing="Drawings", photo="Photographs"),
+                price="Price", anyprice="Any price", upto="up to", from_="from", lowest="Lowest price", highest="Highest price",
+                medium="Medium", size="Size", sizeany="Any", sizehint=dict(small="up to 40 cm", medium="40–100 cm", large="over 100 cm"),
+                mood="Mood", moremoods="More words", fewer="Fewer", clear="Clear", count="{n} works", count1="1 work",
+                artistonly="{who}: {n} for sale outside these settings.", showthem="Show them",
+                fromchat="From the chat", artist="Artist", titlew="In the title", filters="Filters",
+                groups=dict(feeling="Feeling", light="Light", colour="Colour", weather="Season and weather", subject="Subject"),
                 note="The works are the galleries' current stock with their asking prices, read weekly from each gallery's own site; the gallery's page is the one to trust. Your messages are read by Claude to choose the search and are not stored. A photo of your room is shrunk in your browser, which also removes its location data, then read by Claude to find the wall space, and is not stored; the works are shown on it from the galleries' own pictures, at a size estimated from the photo. The moods are read from the gallery's photograph by CLIP, an image model: a guide, not a judgement of the work.",
                 hash=""),
      "et": dict(file="leia.html", other="find.html", other_l="In English", site="Eesti Kunstikataloog",
-                h="Leia teos", lede="Otsid midagi seinale? Ütle abilisele, kuhu see tuleb, kui palju tahad kulutada ja millist tunnet otsid, või saada foto seinast: ta leiab vaba koha, valib sinna sobivad teosed ja riputab need pildile, et saaksid vaadata. Ta vaatab läbi teosed, mis kataloogi galeriidel praegu müügil on, ja iga teos viib seda müüva galerii lehele.",
-                hello="Otsid midagi? Ütle, mis tuppa, mis eelarvega ja mis meeleoluga, või saada foto seinast.",
+                h="Leia teos", lede="Otsi teoseid, mis kataloogi galeriidel praegu müügil on. Sea hind, tehnika, suurus ja meeleolu või kirjelda, mida vajad; foto seinast leiab vaba koha ja riputab sinna mahtuvad teosed. Iga teos viib seda müüva galerii lehele.",
+                hello="Sea filtrid või kirjelda, mida vajad: tuba, suurus, eelarve, teema või meeleolu. Foto seinast leiab teosed, mis sinna mahuvad.",
                 photo="Foto seinast", yourroom="Sinu tuba", looking="Vaatan su tuba…", photomsg="(foto minu toast)",
                 wallw="Vaba seinaosa laius", drag="Lohista tuba, et ringi vaadata; keri või näpista, et lähemale astuda. Lohista teost, et seda seinal liigutada või teisele märgitud kohale viia. Kui suurused tunduvad valed, sea seina laius õigeks.", reset="Algvaade", ar="Vaata oma seinal (AR)", arsafari="Et näha teost AR-is oma päris seinal, ava see leht Safaris.", arwait="Teen mudelit…", arfail="AR-i ei õnnestunud avada", onwall="Minu seinale",
                 choose="Puuduta teost, et see seinale riputada", hangmore="Riputa veel üks", remove="Võta maha", together="Seinal {n} teost",
                 frames=dict(none="Raamita", black="Must", oak="Tamm", white="Valge", gold="Kuld"),
                 fits="mahub", roomnote="Tuba", nowall="Ma ei leidnud sellelt fotolt vaba seinaosa. Proovi fotot, mis on tehtud otse seina poole ja kus tühi sein on näha.",
                 badphoto="Seda fotot ei õnnestunud lugeda. Proovi JPEG- või PNG-faili.",
-                starters=["Rahulik merepilt magamistuppa, alla 1000 €", "Midagi heledat ja rõõmsat suurele elutoa seinale", "Väike graafikaleht kingituseks, umbes 200 €"],
                 label="Sinu sõnum", ph="nt udune maastik diivani kohale, kuni 2000 €", send="Saada",
-                more="Näita rohkem", at="", noprice="Hind päringul", none="Müügil pole midagi, mis kõigele vastaks. Proovi laiemat eelarvet või muud suurust.",
+                more="Näita rohkem", at="", noprice="Hind päringul", none="Müügil pole ühtki teost, mis sellele otsingule vastaks. Laienda hinnavahemikku või eemalda mõni filter.",
                 thinking="Mõtlen…", failed="Abilist ei õnnestunud kätte saada. Proovi hetke pärast uuesti.", record="Kataloogis",
                 kinds=dict(paint="maalid", paper="tööd paberil", sculpture="skulptuur", photo="fotod"),
                 sizes=dict(small="väike", medium="keskmine", large="suur"), under="alla", over="üle", shown="Näidatud",
+                media=dict(oil="Õli", print="Graafika", sculpture="Skulptuur", painting="Maalid", drawing="Joonistused", photo="Fotod"),
+                price="Hind", anyprice="Iga hind", upto="kuni", from_="alates", lowest="Madalaim hind", highest="Kõrgeim hind",
+                medium="Tehnika", size="Suurus", sizeany="Kõik", sizehint=dict(small="kuni 40 cm", medium="40–100 cm", large="üle 100 cm"),
+                mood="Meeleolu", moremoods="Rohkem sõnu", fewer="Vähem", clear="Tühjenda", count="{n} teost", count1="1 teos",
+                artistonly="{who}: väljaspool neid seadeid müügil {n}.", showthem="Näita",
+                fromchat="Vestlusest", artist="Kunstnik", titlew="Pealkirjas", filters="Filtrid",
+                groups=dict(feeling="Tunne", light="Valgus", colour="Värv", weather="Aastaaeg ja ilm", subject="Aine"),
                 note="Teosed on galeriide praegune müügivalik ja nende küsitud hinnad, loetud iga nädal galeriide endi lehtedelt; usaldusväärne on galerii leht. Sinu sõnumeid loeb Claude otsingu valimiseks ja neid ei salvestata. Toa foto vähendatakse sinu brauseris, mis eemaldab ka asukohaandmed, seejärel loeb Claude sellelt vaba seinaosa ning fotot ei salvestata; teosed näidatakse sellel galeriide endi piltidelt, fotolt hinnatud suuruses. Meeleolu loeb galerii fotolt pildimudel CLIP: see on juhatus, mitte hinnang teosele.",
                 hash="lang=et&")}
 
@@ -101,10 +135,12 @@ def data():
         g = H.val(w, "mu") or ""
         gals.setdefault(g, len(gals))
         tech = H.val(w, "tce") or H.val(w, "tc") or ""
+        if re.search(r"\bmüüdud\b|\bsold\b", tech, re.I): continue          # a gallery's "sold" read as the technique
         works.append([w.get("t") or "", aidx[a], w.get("y") or "", u, tech[:60], w.get("dm") or "",
                       size_of(w.get("dm")), kind_of(w), w.get("pr") or 0, gals[g], w["url"], k,
                       [x for j, z in S.get(w["im"], [])[:8] if z >= 1.0 for x in (j, round(z * 10))],   # word, z x 10, flat
-                      dims_of(w.get("dm")) or 0])
+                      dims_of(w.get("dm")) or 0,
+                      media_of(kind_of(w), " ".join(filter(None, (H.val(w, "tce"), H.val(w, "tc")))))])
     return {"words": words, "artists": arts, "galleries": list(gals), "works": works}
 
 JS = r"""
@@ -114,7 +150,8 @@ var api=page.dataset.api, src=page.dataset.src, log=document.getElementById('log
 var D=null, P=null, msgs=[], shownKeys={}, busy=false, labels=JSON.parse(document.getElementById('labels').textContent);
 var R=null, rooms=[];                              // the room on view (the latest photo), and every one shown
 function stock(){ return P=P||fetch(src).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(d){
-  d.works.forEach(function(w){var m={},f=w[12];for(var i=0;i<f.length;i+=2)m[d.words[f[i]]]=f[i+1]/10;w.m=m}); D=d; return d}).catch(function(e){P=null;throw e})}
+  var af=d.artists.map(function(a){return fold(a[0])});
+  d.works.forEach(function(w){var m={},f=w[12];for(var i=0;i<f.length;i+=2)m[d.words[f[i]]]=f[i+1]/10;w.m=m;w.af=af[w[1]]}); D=d; tally(); return d}).catch(function(e){P=null;throw e})}
 function el(tag,cls,text){var x=document.createElement(tag);if(cls)x.className=cls;if(text!=null)x.textContent=text;return x}
 function eur(n){return '€'+String(n).replace(/\B(?=(\d{3})+(?!\d))/g,' ')}
 function cm(d){return d?Math.round(d[0])+(d[1]!==d[0]?' × '+Math.round(d[1]):'')+' cm':''}
@@ -326,17 +363,28 @@ function arButton(w,frameOf){
     .catch(function(){b.textContent=T.arfail}).then(function(){b.disabled=false})});
   return b}
 
+// ---- the search: one state, which the controls show and set, and the assistant reads and sets ----
+function blank(){return {words:[],terms:[],media:[],min:0,max:0,size:'any',artist:''}}
+var Q=blank(), MB={oil:1,print:2,sculpture:4,painting:8,drawing:16,photo:32};
+function fold(s){return s.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase()}
+function esc(s){return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}
+// every work the search admits, best first; a search that names something (words, title words) admits only what answers to it
 function rank(q){
-  var wt=[1,.8,.65,.5,.4], out=[], ws=R&&wallCm(R,R.sel?R.sel.wall:0);
+  var wt=[1,.8,.65,.5,.4], out=[], ws=R&&wallCm(R,R.sel?R.sel.wall:0), mm=0;
+  q.media.forEach(function(m){mm|=MB[m]||0});
+  var tr=q.terms.map(function(t){return new RegExp('(^|[^\\p{L}\\p{N}])'+esc(t),'iu')});
+  var who=q.artist?fold(q.artist).split(/[\s.,-]+/).filter(function(x){return x.length>1}):[];
   D.works.forEach(function(w){
-    if(q.kind!=='any'&&w[7]!==q.kind)return;
-    if(q.budget_max>0&&!(w[8]&&w[8]<=q.budget_max*1.05))return;
-    if(q.budget_min>0&&!(w[8]&&w[8]>=q.budget_min))return;
-    if(shownKeys[w[11]])return;                   // shown earlier in the conversation
-    var s=0;q.words.forEach(function(x,i){s+=wt[i]*(w.m[x]||0)});
-    if(!q.words.length)s=hash(w[11]);
+    if(mm&&!(w[14]&mm))return;
+    if(q.max>0&&!(w[8]&&w[8]<=q.max))return;
+    if(q.min>0&&!(w[8]&&w[8]>=q.min))return;
+    if(who.length&&!who.every(function(x){return w.af.indexOf(x)>=0}))return;
+    var s=0;q.words.forEach(function(x,i){s+=(wt[i]||.3)*(w.m[x]||0)});
+    if(tr.length&&tr.some(function(r){return r.test(w[0])}))s+=20;     // the subject the visitor named, in the title: first
+    if(!q.words.length&&!tr.length)s=hash(w[11]);
+    else if(s<=0&&!who.length)return;
     if(ws){                                       // a wall on view: what fits it, best near half its width
-      var d=w[13];if(!d||w[7]==='sculpture')return;
+      var d=w[13];if(!d||w[7]==='sculpture'||w[14]&4)return;
       if(!((d[0]<=.9*ws[0]&&d[1]<=.9*ws[1])||(d[1]<=.9*ws[0]&&d[0]<=.9*ws[1])))return;
       var share=d[0]/Math.max(ws[0],ws[1]);if(share<.25)return;   // a postcard on a big wall: not a suggestion
       s+=2.5*(1-2*Math.abs(share-.5));
@@ -346,10 +394,12 @@ function rank(q){
     }
     out.push([s,w])});
   out.sort(function(a,b){return b[0]-a[0]});
-  // one work per artist in each row of six, as far as the list allows
+  // one work per artist in each row of ten, as far as the list allows
   var picked=[],per={},rest=[];
-  out.forEach(function(p){var a=p[1][1];if(per[a]>=Math.floor(picked.length/6)+1){rest.push(p[1]);return}per[a]=(per[a]||0)+1;picked.push(p[1])});
+  out.forEach(function(p){var a=p[1][1];if(per[a]>=Math.floor(picked.length/10)+1){rest.push(p[1]);return}per[a]=(per[a]||0)+1;picked.push(p[1])});
   return picked.concat(rest)}
+function count(n){return n===1?T.count1:T.count.replace('{n}',String(n).replace(/\B(?=(\d{3})+(?!\d))/g,' '))}
+function priceText(lo,hi){return lo&&hi?eur(lo)+' – '+eur(hi):hi?T.upto+' '+eur(hi):lo?T.from_+' '+eur(lo):T.anyprice}
 function card(w){
   var a=D.artists[w[1]], g=D.galleries[w[9]], c=el('article','card');
   var out=el('a','out');out.href=w[10];out.target='_blank';out.rel='noopener';
@@ -364,17 +414,76 @@ function card(w){
   if(AR&&w[13])c.appendChild(arButton(w,function(){return R&&R.sel?R.sel.frame:'black'}));
   var rec=el('a','rec',T.record);rec.href='./#'+T.hash+'artist='+a[1]+'&open='+encodeURIComponent(w[11]);c.appendChild(rec);
   return c}
-function show(b,q){
-  var list=rank(q), n=0, grid=el('div','grid'), more=el('button','btn more',T.more);more.type='button';
-  var bits=[];if(q.kind!=='any')bits.push(T.kinds[q.kind]);
+// the search's results into box: what it was, how many answer to it, and ten at a time, leaving out works an
+// earlier turn showed
+function show(box,q){
+  var all=rank(q), list=all.filter(function(w){return !shownKeys[w[11]]}), n=0, keys=[], grid=el('div','grid'), more=el('button','btn more',T.more);more.type='button';
+  var bits=[count(all.length)].concat(q.media.map(function(m){return T.media[m]}));
   if(R){var ws=wallCm(R,R.sel?R.sel.wall:0);bits.push(T.fits+' '+Math.round(ws[0])+' × '+Math.round(ws[1])+' cm')}else if(q.size!=='any')bits.push(T.sizes[q.size]);
-  if(q.budget_max>0)bits.push((q.budget_min>0?eur(q.budget_min)+'–':T.under+' ')+eur(q.budget_max));else if(q.budget_min>0)bits.push(T.over+' '+eur(q.budget_min));
+  if(q.min||q.max)bits.push(priceText(q.min,q.max));
   bits=bits.concat(q.words.map(function(x){return labels[x]||x}));
-  if(bits.length)b.appendChild(el('p','search',bits.join(' · ')));
-  if(!list.length){b.appendChild(el('p','none',T.none));return {note:'',list:list}}
-  function page(){list.slice(n,n+6).forEach(function(w){grid.appendChild(card(w));shownKeys[w[11]]=1});n+=6;more.hidden=n>=list.length}
-  page();b.appendChild(grid);b.appendChild(more);more.addEventListener('click',page);
-  return {list:list,note:list.slice(0,6).map(function(w){return w[0]+' — '+D.artists[w[1]][0]+(w[8]?', '+eur(w[8]):'')+(w[13]?', '+cm(w[13]):'')}).join('; ')}}
+  if(q.terms.length)bits.push(T.titlew+': '+q.terms.join(', '));
+  if(q.artist)bits.push(q.artist);
+  box.appendChild(el('p','search',bits.join(' · ')));
+  if(!list.length){box.appendChild(el('p','none',T.none));
+    // an artist with works for sale outside the other settings: say how many, and offer them
+    var solo=blank();solo.artist=q.artist;var k=q.artist&&(q.media.length||q.min||q.max||q.size!=='any'||q.words.length||q.terms.length)?rank(solo).length:0;
+    if(k){var p=el('p','none',T.artistonly.replace('{who}',q.artist).replace('{n}',count(k))+' '),go=el('button','linkbtn',T.showthem);go.type='button';
+      go.addEventListener('click',function(){Q=solo;changed()});p.appendChild(go);box.appendChild(p)}
+    return {note:k?T.artistonly.replace('{who}',q.artist).replace('{n}',count(k)):'',list:list,keys:keys}}
+  function page(){list.slice(n,n+10).forEach(function(w){grid.appendChild(card(w));shownKeys[w[11]]=1;keys.push(w[11])});n+=10;more.hidden=n>=list.length}
+  page();box.appendChild(grid);box.appendChild(more);more.addEventListener('click',page);
+  return {list:list,keys:keys,note:T.shown+' '+Math.min(10,list.length)+' / '+all.length+': '+list.slice(0,10).map(function(w){return w[0]+' — '+D.artists[w[1]][0]+(w[8]?', '+eur(w[8]):'')+(w[13]?', '+cm(w[13]):'')}).join('; ')}}
+
+// ---- the controls: price range, medium, size, mood words ----
+var F=document.getElementById('filters'), plo=document.getElementById('plo'), phi=document.getElementById('phi'), pout=document.getElementById('pout');
+var dual=F.querySelector('.dual'), moods=document.getElementById('moods'), fcount=document.getElementById('fcount'), chatset=document.getElementById('chatset');
+var PR=JSON.parse(plo.dataset.stops), N=PR.length-1, WIDE=window.matchMedia('(min-width:980px)');   // PR's last stop: no limit
+function lowAt(v){var i=0;while(v>0&&i<N-1&&PR[i+1]<=v)i++;return i}
+function highAt(v){var i=1;if(!v)return N;while(i<N&&PR[i]<v)i++;return i}
+function rail(){dual.style.setProperty('--a',plo.value/N);dual.style.setProperty('--b',phi.value/N);
+  plo.setAttribute('aria-valuetext',Q.min?eur(Q.min):T.anyprice);phi.setAttribute('aria-valuetext',Q.max?eur(Q.max):T.anyprice)}
+function tally(){fcount.textContent=D?count(rank(Q).length)+' ↓':''}
+// the controls as the search is
+function sync(){
+  plo.value=lowAt(Q.min);phi.value=highAt(Q.max);pout.textContent=priceText(Q.min,Q.max);rail();
+  Array.prototype.forEach.call(F.querySelectorAll('[data-m]'),function(b){b.setAttribute('aria-pressed',String(Q.media.indexOf(b.dataset.m)>=0))});
+  Array.prototype.forEach.call(F.querySelectorAll('[data-s]'),function(b){b.setAttribute('aria-pressed',String(b.dataset.s===Q.size))});
+  Array.prototype.forEach.call(F.querySelectorAll('[data-w]'),function(b){b.setAttribute('aria-pressed',String(Q.words.indexOf(b.dataset.w)>=0))});
+  var cs=chatset.querySelector('.bits');cs.textContent='';
+  [['artist',Q.artist],['terms',Q.terms.join(', ')]].forEach(function(x){if(!x[1])return;
+    var p=el('span','bit',(x[0]==='artist'?T.artist:T.titlew)+': '+x[1]),b=el('button','x','×');b.type='button';b.dataset.clear=x[0];b.setAttribute('aria-label',T.clear);p.appendChild(b);cs.appendChild(p)});
+  chatset.hidden=!cs.firstChild;tally()}
+// the block that changes made by hand redraw in place; after the assistant's turn the next change opens one of its own
+var live=null;
+function refresh(){
+  if(!D){stock().then(refresh,function(){});return}
+  if(!live||live.turn){var b=el('div','msg them');log.appendChild(b);live={b:b,box:el('div')};b.appendChild(live.box)}
+  else live.keys.forEach(function(k){delete shownKeys[k]});
+  live.box.textContent='';var s=show(live.box,Q);live.keys=s.keys;
+  if(R&&s.list.length)fill(R,s.list);
+  if(WIDE.matches)live.b.scrollIntoView({block:'nearest',behavior:'smooth'})}
+function changed(){sync();refresh()}
+function slid(e){var a=+plo.value,b=+phi.value;
+  if(a>=b){if(e.target===plo)plo.value=a=b-1;else phi.value=b=a+1}
+  Q.min=PR[a];Q.max=b===N?0:PR[b];pout.textContent=priceText(Q.min,Q.max);rail();tally()}
+[plo,phi].forEach(function(x){x.addEventListener('input',slid);x.addEventListener('change',changed)});
+function toggle(a,x){var i=a.indexOf(x);if(i>=0)a.splice(i,1);else a.push(x)}
+F.addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;
+  if(b.dataset.m)toggle(Q.media,b.dataset.m);
+  else if(b.dataset.w)toggle(Q.words,b.dataset.w);          // in the order chosen: the first weighs most
+  else if(b.dataset.s)Q.size=b.dataset.s;
+  else if(b.dataset.clear==='artist')Q.artist='';
+  else if(b.dataset.clear==='terms')Q.terms=[];
+  else if(b.id==='fclear')Q=blank();
+  else if(b.id==='moremoods'){var o=moods.classList.toggle('open');b.textContent=o?T.fewer:T.moremoods;b.setAttribute('aria-expanded',String(o));return}
+  else if(b===fcount){if(live)live.b.scrollIntoView({block:'start',behavior:'smooth'});else refresh();return}
+  else return;
+  changed()});
+// the assistant's search, into the controls (a Worker from before the controls answers with one kind)
+function take(q){var m=q.media||({paint:['painting'],paper:['print','drawing'],sculpture:['sculpture'],photo:['photo']}[q.kind]||[]);
+  Q={words:(q.words||[]).slice(),terms:(q.terms||[]).slice(),media:m.filter(function(x){return MB[x]}),min:q.budget_min||0,max:q.budget_max||0,size:q.size||'any',artist:q.artist||''};sync()}
+
 function send(text,photo){
   text=text.replace(/\s+/g,' ').trim(); if((!text&&!photo)||busy)return; busy=true;
   var ub=bubble('you',text);
@@ -382,19 +491,20 @@ function send(text,photo){
   var said=(photo?T.photomsg+(text?' ':''):'')+text;
   msgs.push({role:'user',content:said}); input.value='';
   var b=bubble('them',photo?T.looking:T.thinking); b.classList.add('wait');
-  var body={messages:msgs.slice(-12),lang:document.documentElement.lang};
+  var body={messages:msgs.slice(-12),lang:document.documentElement.lang,filters:Q};
   if(photo){body.image=photo.data;body.w=photo.w;body.h=photo.h}
   Promise.all([fetch(api,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).then(function(r){return r.json().then(function(j){if(!r.ok)throw j;return j})}),stock()])
-  .then(function(res){var q=res[0], extra='';
+  .then(function(res){var q=res[0], extra='', s={note:'',list:[]};
     b.classList.remove('wait'); b.firstChild.textContent=q.reply||'…';
     if(photo){
       if(q.walls&&q.walls.length){R=roomView(b,photo,q.walls);
         extra=' ('+T.roomnote+': '+(q.room||'')+'; '+q.walls.map(function(w){return w.where+' '+w.w_cm+' × '+w.h_cm+' cm'}).join('; ')+')'}
       else b.appendChild(el('p','none',T.nowall));
     }
-    var s=q.show||photo?show(b,q):{note:'',list:[]};
+    if(q.show||photo){take(q);var box=el('div');b.appendChild(box);s=show(box,Q);live={b:b,box:box,keys:s.keys,turn:true}}
+    else if(live)live.turn=true;
     if(R&&s.list.length){fill(R,s.list);if(photo&&R.v.parentNode===b)hang(R,R.list[0])}
-    msgs.push({role:'assistant',content:(q.reply||'')+extra+(s.note?' ('+T.shown+': '+s.note+')':'')});
+    msgs.push({role:'assistant',content:(q.reply||'')+extra+(s.note?' ('+s.note+')':'')});
     if(window.goatcounter&&goatcounter.count)goatcounter.count({path:'find-turn',title:photo?'photo':q.show?'search':'talk',event:true});
   }).catch(function(){b.classList.remove('wait');b.firstChild.textContent=T.failed;msgs.pop()})
   .then(function(){busy=false})}
@@ -408,14 +518,42 @@ function shrink(f){
 file.addEventListener('change',function(){var f=file.files&&file.files[0];file.value='';if(!f||busy)return;
   stock().catch(function(){});shrink(f).then(function(p){send(input.value,p)}).catch(function(){bubble('them',T.badphoto)})});
 form.addEventListener('submit',function(ev){ev.preventDefault();send(input.value)});
-Array.prototype.forEach.call(document.querySelectorAll('.starter'),function(s){s.addEventListener('click',function(){send(s.textContent)})});
 if(!api){form.hidden=true}
-input.addEventListener('focus',function(){stock().catch(function(){})},{once:true});   // the stock as the visitor starts typing
+// the stock (2 MB) as the visitor first reaches for a control or the message box
+['pointerdown','focusin'].forEach(function(t){page.addEventListener(t,function(){stock().catch(function(){})},{once:true})});
+sync();
 })();
 """
 
 CSS = BM.CSS + """
-.chat{display:grid;gap:18px;max-width:1040px}
+.chat{display:grid;gap:18px 32px}
+@media (min-width:980px){.chat{grid-template-columns:270px minmax(0,1fr);align-items:start}
+  .filters{grid-row:1 / span 2;position:sticky;top:16px;max-height:calc(100vh - 32px);overflow:auto}.log,form.ask{grid-column:2}}
+.filters{display:grid;gap:18px;align-content:start;border:1px solid var(--rule);background:var(--raise);padding:16px}
+.f-name{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:9px;font:500 .68rem/1 var(--mono);letter-spacing:.13em;text-transform:uppercase;color:var(--grey)}
+.f-name output{font:500 .8rem/1 var(--mono);letter-spacing:.02em;text-transform:none;color:var(--ink);font-variant-numeric:tabular-nums}
+.filters .chips{gap:6px}
+.filters .chip{font-size:.92rem;padding:6px 11px 7px}
+#media .x:not([aria-pressed=true]),#moods:not(.open) .x:not([aria-pressed=true]),#moods:not(.open) .gname{display:none}
+.gname{flex-basis:100%;margin-top:8px;font:500 .62rem/1 var(--mono);letter-spacing:.13em;text-transform:uppercase;color:var(--grey)}
+.linkbtn{background:none;border:0;padding:6px 2px;font:500 .68rem/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--grey);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.linkbtn:hover{color:var(--ink)}
+.filters .seg .btn{flex:1;padding:9px 4px;font-size:.66rem}
+.dual{position:relative;height:28px;margin:0 2px}
+.dual .track,.dual .fill{position:absolute;top:13px;height:2px;pointer-events:none}
+.dual .track{left:0;right:0;background:var(--rule)}
+.dual .fill{left:calc(9px + (100% - 18px) * var(--a));right:calc(9px + (100% - 18px) * (1 - var(--b)));background:var(--ink)}
+.dual input{position:absolute;left:0;top:0;width:100%;height:28px;margin:0;background:none;pointer-events:none;-webkit-appearance:none;appearance:none}
+.dual input::-webkit-slider-runnable-track{height:2px;background:none}
+.dual input::-moz-range-track{height:2px;background:none}
+.dual input::-webkit-slider-thumb{pointer-events:auto;-webkit-appearance:none;appearance:none;width:18px;height:18px;margin-top:-8px;border-radius:50%;background:var(--on);border:3px solid var(--raise);box-shadow:0 0 0 1px var(--grey);cursor:pointer}
+.dual input::-moz-range-thumb{pointer-events:auto;width:12px;height:12px;border-radius:50%;background:var(--on);border:3px solid var(--raise);box-shadow:0 0 0 1px var(--grey);cursor:pointer}
+.dual input:focus-visible{outline:none}.dual input:focus-visible::-webkit-slider-thumb{box-shadow:0 0 0 2px var(--ink)}.dual input:focus-visible::-moz-range-thumb{box-shadow:0 0 0 2px var(--ink)}
+#chatset .bits{display:flex;flex-wrap:wrap;gap:6px}
+#chatset .bit{display:inline-flex;align-items:center;gap:4px;font-size:.85rem;border:1px solid var(--rule);padding:3px 4px 3px 9px}
+#chatset .x{background:none;border:0;color:var(--grey);font-size:1rem;line-height:1;padding:2px 5px;cursor:pointer}#chatset .x:hover{color:var(--ink)}
+.f-foot{display:flex;justify-content:space-between;align-items:center;gap:8px;border-top:1px solid var(--rule);padding-top:12px}
+.count{background:none;border:0;padding:4px 0;font:500 .8rem/1 var(--mono);color:var(--ink);font-variant-numeric:tabular-nums;cursor:pointer}.count:empty{visibility:hidden}
 .log{display:grid;gap:16px}
 .msg p{margin:0}
 .msg.you{justify-self:end;max-width:min(560px,90%);background:var(--raise);border:1px solid var(--rule);padding:10px 14px;font:400 1.05rem/1.4 var(--serif)}
@@ -423,8 +561,7 @@ CSS = BM.CSS + """
 .msg.wait>p:first-child{color:var(--grey)}
 .search{margin:10px 0 0!important;font:500 .72rem/1.4 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--grey)}
 .none{margin-top:10px!important;color:var(--grey)}
-.starters{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:18px 14px;margin-top:14px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:18px 14px;margin-top:14px}
 .card{display:grid;align-content:start;gap:4px}
 .card .out{display:grid;gap:3px;text-decoration:none}
 .card img{display:block;width:100%;aspect-ratio:1;object-fit:contain;background:var(--field)}
@@ -489,15 +626,47 @@ form.ask input:focus{outline:2px solid var(--ink);outline-offset:1px}
 .btn.onwall{justify-self:start;padding:6px 9px;font-size:.64rem;margin-top:2px}
 """
 
-def page(lang, ver, api, labels):
+PRICE_STOPS = [0, 50, 100, 150, 200, 250, 300, 400, 500, 600, 700, 800, 900, 1000, 1250, 1500, 1750, 2000, 2500, 3000, 3500,
+               4000, 5000, 6000, 7500, 10000, 12500, 15000, 20000, 30000, 50000, 0]     # the last: no limit
+TOP_MOODS = ["serene", "contemplative", "melancholy", "nostalgic", "joyful", "playful", "romantic", "dreamy", "mysterious",
+             "dramatic", "bright", "dark"]
+
+def panel(t, labels, M):
+    """the controls, written out; the script keeps them and the search in step. Media past the three asked
+    for, and mood words past the first twelve, show when chosen (by hand or by the assistant)"""
+    chip = lambda attr, v, label, x="": f'<button type="button" class="chip{x}" data-{attr}="{v}" aria-pressed="false">{e(label)}</button>'
+    media = "".join(chip("m", m, t["media"][m], "" if i < 3 else " x") for i, m in enumerate(MEDIA))
+    sizes = "".join(f'<button type="button" class="btn" data-s="{k}" aria-pressed="{str(k == "any").lower()}"'
+                    + (f' title="{e(t["sizehint"][k])}"' if k != "any" else "") + f'>{e(t["sizeany"] if k == "any" else t["sizes"][k])}</button>'
+                    for k in ("any", "small", "medium", "large"))
+    grp = {w["en"]: ("feeling" if w["g"] == "more" else w["g"]) for w in M}
+    moods = "".join(chip("w", w, labels[w]) for w in TOP_MOODS)
+    for g in t["groups"]:
+        rest = [w["en"] for w in M if grp[w["en"]] == g and w["en"] not in TOP_MOODS]
+        if rest: moods += f'<span class="gname">{e(t["groups"][g])}</span>' + "".join(chip("w", w, labels[w], " x") for w in rest)
+    moods += f'<button type="button" class="linkbtn" id="moremoods" aria-expanded="false" aria-controls="moods">{e(t["moremoods"])}</button>'
+    n = len(PRICE_STOPS) - 1
+    return (f'<div class="filters" id="filters" role="group" aria-label="{e(t["filters"])}">'
+            f'<div class="f-row"><div class="f-name">{e(t["price"])} <output id="pout">{e(t["anyprice"])}</output></div>'
+            f'<div class="dual" style="--a:0;--b:1"><span class="track"></span><span class="fill"></span>'
+            f'<input type="range" id="plo" min="0" max="{n}" step="1" value="0" aria-label="{e(t["lowest"])}" data-stops="{json.dumps(PRICE_STOPS)}">'
+            f'<input type="range" id="phi" min="0" max="{n}" step="1" value="{n}" aria-label="{e(t["highest"])}"></div></div>'
+            f'<div class="f-row"><div class="f-name">{e(t["medium"])}</div><div class="chips" id="media">{media}</div></div>'
+            f'<div class="f-row"><div class="f-name">{e(t["size"])}</div><div class="seg">{sizes}</div></div>'
+            f'<div class="f-row"><div class="f-name">{e(t["mood"])}</div><div class="chips" id="moods">{moods}</div></div>'
+            f'<div class="f-row" id="chatset" hidden><div class="f-name">{e(t["fromchat"])}</div><div class="bits"></div></div>'
+            f'<div class="f-foot"><button type="button" class="count" id="fcount"></button><button type="button" class="linkbtn" id="fclear">{e(t["clear"])}</button></div>'
+            '</div>')
+
+def page(lang, ver, api, labels, M):
     t = T[lang]
     me, other = f"{BASE}/{t['file']}", f"{BASE}/{t['other']}"
-    tj = json.dumps({k: t[k] for k in ("more", "at", "noprice", "none", "thinking", "failed", "record", "kinds", "sizes", "under", "over", "shown", "hash",
+    tj = json.dumps({k: t[k] for k in ("more", "at", "noprice", "none", "thinking", "failed", "record", "sizes", "shown", "hash",
+                                       "media", "anyprice", "upto", "from_", "count", "count1", "moremoods", "fewer", "clear", "artist", "titlew", "artistonly", "showthem",
                                        "yourroom", "looking", "photomsg", "wallw", "drag", "onwall", "fits", "roomnote", "nowall", "badphoto",
                                        "choose", "hangmore", "remove", "together", "frames", "reset", "ar", "arwait", "arfail", "arsafari")}, ensure_ascii=False).replace("</", "<\\/")
     lj = json.dumps(labels, ensure_ascii=False).replace("</", "<\\/")
     ask = (api.rstrip("/") + "/ask") if api else ""
-    starters = "".join(f'<button type="button" class="chip starter">{e(s)}</button>' for s in t["starters"])
     return (f'<!doctype html><html lang="{lang}"><head><meta charset="utf-8">{H.STAMP}<meta name="viewport" content="width=device-width,initial-scale=1">'
             f'<title>{e(t["h"])} · museaal.ee</title><meta name="description" content="{e(t["lede"][:290])}">'
             f'<link rel="canonical" href="{me}"><link rel="alternate" hreflang="{lang}" href="{me}"><link rel="alternate" hreflang="{"et" if lang == "en" else "en"}" href="{other}">'
@@ -507,7 +676,7 @@ def page(lang, ver, api, labels):
             f'<nav><a href="{BASE}/{"" if lang == "en" else "#lang=et"}">{e(t["site"])}</a> › {e(t["h"])} · <a href="{other}" hreflang="{"et" if lang == "en" else "en"}">{e(t["other_l"])}</a></nav>'
             f'<header><h1>{e(t["h"])}</h1><p class="lede">{e(t["lede"])}</p></header>'
             f'<section class="chat" id="chat" data-api="{e(ask)}" data-src="data/stock.json?v={ver}">'
-            f'<div class="log" id="log" aria-live="polite"><div class="msg them"><p>{e(t["hello"])}</p><div class="starters">{starters}</div></div></div>'
+            f'{panel(t, labels, M)}<div class="log" id="log" aria-live="polite"><div class="msg them"><p>{e(t["hello"])}</p></div></div>'
             f'<form class="ask" id="ask"><label for="q">{e(t["label"])}</label><input id="q" type="text" maxlength="400" autocomplete="off" placeholder="{e(t["ph"])}">'
             f'<button class="btn solid" type="submit">{e(t["send"])}</button>'
             f'<input id="photo" type="file" accept="image/*" hidden><label for="photo" class="btn photobtn" role="button" tabindex="0">{e(t["photo"])}</label></form></section>'
@@ -524,7 +693,7 @@ def main():
     urls = []
     for lang in ("en", "et"):
         labels = {w["en"]: (w["et"] if lang == "et" else BM.LABEL_EN.get(w["en"], w["en"])) for w in M}
-        open(f"site/{T[lang]['file']}", "w", encoding="utf-8").write(page(lang, ver, API, labels)); urls.append(f"{BASE}/{T[lang]['file']}")
+        open(f"site/{T[lang]['file']}", "w", encoding="utf-8").write(page(lang, ver, API, labels, M)); urls.append(f"{BASE}/{T[lang]['file']}")
     sm = open("site/sitemap.xml", encoding="utf-8").read()
     today = datetime.date.today().isoformat()
     add = "".join(f'<url><loc>{u}</loc><lastmod>{today}</lastmod><changefreq>weekly</changefreq></url>' for u in urls)

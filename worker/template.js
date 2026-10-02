@@ -11,9 +11,11 @@
 // the Worker again (worker/README.md).
 //
 // A second door, POST /ask, is the "Find a work" page's assistant: the conversation so far
-// comes in, and Claude answers with a short reply and the search it implies -- words from
-// the same vocabulary, a kind, a size and a budget. The page picks the works for sale
-// itself from those, and shows them under the reply. Nothing is stored here either.
+// comes in with the page's own controls (price, medium, size, mood) as the visitor has set
+// them, and Claude answers with a short reply and the whole search it implies -- words from
+// the same vocabulary, title words, media, a size, a budget, an artist. The page sets its
+// controls to that, picks the works for sale itself, and shows them under the reply.
+// Nothing is stored here either.
 //
 // Needs one secret, ANTHROPIC_API_KEY (Settings > Variables and Secrets).
 // Calls the Messages API with fetch: the dashboard's editor takes one file, no build step.
@@ -41,39 +43,59 @@ const SCHEMA = {
   additionalProperties: false,
 };
 
-const SYSTEM_ASK = "You are the assistant on museaal.ee, a catalogue of Estonian art. On this page visitors look for a " +
+const SYSTEM_ASK = "You are the search desk on museaal.ee, a catalogue of Estonian art. On this page visitors look for a " +
   "work to buy among the several thousand works the catalogue's galleries have for sale now, at asking prices from " +
-  "tens of euros to tens of thousands (most paintings between a few hundred and a few thousand). Each turn you write a short reply and fill in a search; " +
-  "the page picks the works from your search and shows them under your reply. You do not see them before they are shown, " +
-  "so never name or describe a particular work or artist, and never say what is available or what things cost; earlier turns may note what was shown.\n\n" +
-  "Reply in one to three short sentences, warm and plain, never pushy. " +
-  "Help them find out what they want: the place it will hang (which sets the size), the budget, and the mood or subject. " +
-  "Ask one question at a time and only when it would change the search. As soon as there is anything to go on, search " +
-  "(show: true) and end with the one short question that would narrow it most. Set show to false only when there is nothing to " +
-  "search on yet or the visitor is just saying thanks or goodbye.\n\n" +
-  "The search. words: up to five from the list below, most important first, for the mood, light, colour, season and " +
-  "subject they are after; read the feeling behind what they say (a bedroom: serene, tender; an office: calm, simple). " +
-  "kind: 'paint' for paintings, 'paper' for prints, drawings and watercolours, 'sculpture', 'photo', or 'any'. " +
-  "size: 'small' up to 40 cm (a shelf, a hallway, a gift), 'medium' 40-100 cm (above a desk, a bed, a dresser), " +
-  "'large' over 100 cm (a living-room wall, above a sofa), 'any' if unknown. budget_max and budget_min in euros, " +
-  "0 for none ('under 500': max 500; 'around 1000': 700 and 1300; 'not more than two thousand': max 2000). " +
-  "Keep what earlier turns established unless the visitor changes it.\n\n" +
+  "tens of euros to tens of thousands (most paintings between a few hundred and a few thousand). The page also has " +
+  "controls the visitor sets by hand: a price range, the medium, the size and mood words. Each turn you write a short " +
+  "reply and return the whole search; the page sets its controls to your search and shows the ten works that match it " +
+  "best under your reply. You do not see the works before they are shown, so never name or describe a particular work, " +
+  "and never say what is available or what things cost; earlier turns note what was shown and how many works matched.\n\n" +
+  "The reply: one or two short sentences, neutral and factual, like a catalogue's search desk. Say in plain words what the " +
+  "search now covers; if one fact would narrow it most, ask for it in a direct question. No greetings, compliments, " +
+  "exclamations, enthusiasm or small talk, and no remarks on the visitor's taste, room or plans (never 'How lovely', " +
+  "'great choice', 'something that sings'), and do not announce that you are searching. Ask only when the answer would " +
+  "change the search. As soon as there is anything to go on, even only a size or a budget, search (show: true). Set show to false only when there is nothing to search on yet or the visitor " +
+  "is just saying thanks or goodbye; then answer in a few words and return the search unchanged. The reply is never empty.\n\n" +
+  "The search, exact rather than broad:\n" +
+  "- words: one to five from the list below, most important first, for the mood, light, colour, season and subject the " +
+  "visitor asks for. Use their own words first; add a word for a room only when they give nothing else (a bedroom: " +
+  "serene; an office: simple). Do not pad with loosely related words: two right words beat five vague ones.\n" +
+  "- terms: when the visitor names a concrete subject a title would name (a place, a thing, an animal, a plant, a " +
+  "season), up to eight short lowercase stems that would begin a word in such a title, in Estonian and in English: the " +
+  "sea: meri, mere, sea; horses: hobu, horse; Tallinn: tallinn; birches: kask, kase, birch; a still life: natüürmort, " +
+  "vaikelu, still life; a landscape: maastik, landscape; a portrait: portree, portrait. Only stems for what the visitor " +
+  "named, not for the subjects it might include. Empty for moods, colours and styles.\n" +
+  "- media: what the visitor asks for, any of 'oil' (oil paintings), 'print' (etchings, lithographs, linocuts, " +
+  "screenprints, giclée), 'sculpture', 'painting' (paintings in any medium: whenever they ask for a painting without " +
+  "naming oil), 'drawing' " +
+  "(drawings, watercolours, pastels), 'photo'. Empty for no preference.\n" +
+  "- size: 'small' up to 40 cm (a shelf, a hallway, a gift), 'medium' 40-100 cm (above a desk, a bed, a dresser), " +
+  "'large' over 100 cm (a living-room wall, above a sofa), 'any' if unknown.\n" +
+  "- budget_min and budget_max in euros, 0 for none ('under 500': max 500; 'around 1000': 800 and 1200; 'not more than " +
+  "two thousand': max 2000).\n" +
+  "- artist: the artist's name, only when the visitor asks for works by a particular artist; else empty. Asking for an " +
+  "artist starts a new search: keep only the medium and budget said in the same message, and clear size, words and terms.\n" +
+  "Keep everything the controls and earlier turns set unless the visitor changes it; when they ask for something else " +
+  "entirely, clear what no longer applies.\n\n" +
   "Prices, delivery, framing and how to buy are the gallery's: each work links to its page. Do not promise discounts, " +
-  "availability or anything about a work's value as an investment. If asked something else, answer in a sentence and " +
-  "come back to the search. Words: " + WORDS.join(", ");
+  "availability or anything about a work's value as an investment. If asked something else, answer in one sentence and " +
+  "return to the search. Words: " + WORDS.join(", ");
 
+const MEDIA = ["oil", "print", "sculpture", "painting", "drawing", "photo"];
 const SCHEMA_ASK = {
   type: "object",
   properties: {
     reply: { type: "string" },
     show: { type: "boolean" },
     words: { type: "array", items: { type: "string", enum: WORDS } },
-    kind: { type: "string", enum: ["any", "paint", "paper", "sculpture", "photo"] },
+    terms: { type: "array", items: { type: "string" } },
+    media: { type: "array", items: { type: "string", enum: MEDIA } },
     size: { type: "string", enum: ["any", "small", "medium", "large"] },
     budget_min: { type: "integer" },
     budget_max: { type: "integer" },
+    artist: { type: "string" },
   },
-  required: ["reply", "show", "words", "kind", "size", "budget_min", "budget_max"],
+  required: ["reply", "show", "words", "terms", "media", "size", "budget_min", "budget_max", "artist"],
   additionalProperties: false,
 };
 
@@ -111,9 +133,10 @@ const ROOM = (w, h) => "The visitor's last message comes with a photo of their r
   "same wall -- the width of a door (80 cm) if one is visible, else a sofa, bed, window or radiator -- its two end points in " +
   "pixels and its real length in cm. Also give lines: two edges that are level in the room and run along the same wall as " +
   "the first area -- the skirting board, the ceiling line, the top of the sofa, a shelf or window frame -- each by two end points " +
-  "as far apart as the photo shows; the page takes the wall's perspective from them. Set room to the kind of room in a word or two. Pick the search words from the room's " +
-  "colours, light and style, and set size from the largest area. In the reply, say briefly what you see and what would suit " +
-  "the space, and show works (show: true). Say nothing about any people in the photo.";
+  "as far apart as the photo shows; the page takes the wall's perspective from them. Set room to the kind of room in a word or two. Unless the visitor's controls or words already " +
+  "say otherwise, pick the search words from the room's colours, light and style, and set size from the largest area. In " +
+  "the reply, state in one sentence the wall space found -- where it is and its approximate size -- with no remarks on " +
+  "how the room looks, and show works (show: true). Say nothing about any people in the photo.";
 // the wall's perspective from two of its level lines: they meet at its vanishing point (or are parallel,
 // in a photo taken straight on). Each area's top and bottom edges are turned to run towards it, about the
 // area's middle; an area the lines would turn inside out keeps the model's own corners
@@ -160,7 +183,7 @@ function conversation(body) {
   const out = [];
   for (const x of m) {
     const role = x && x.role === "assistant" ? "assistant" : "user";
-    const text = String((x && x.content) || "").replace(/\s+/g, " ").trim().slice(0, role === "user" ? 400 : 900);
+    const text = String((x && x.content) || "").replace(/\s+/g, " ").trim().slice(0, role === "user" ? 400 : 1400);
     if (!text) continue;
     if (out.length && out[out.length - 1].role === role) out[out.length - 1].content += " " + text;
     else out.push({ role, content: text });
@@ -191,11 +214,29 @@ async function claude(env, system, messages, schema, max_tokens, model = MODEL) 
   return JSON.parse(c.slice(at + 1).filter(b => b.type === "text").map(b => b.text).join(""));
 }
 
-const ET = /[õäöüšž]|\b(ja|ning|mis|midagi|kas|tahan|otsin|pilt|pildi|maal|maali|seinale|seina|alla|umbes|kuni|tere|aitäh|väike|suur|tuppa|kingituseks|eurot?)\b/i;
-const EN = /\b(the|a|an|for|and|something|want|looking|painting|picture|print|wall|under|around|about|hi|hello|thanks|room|gift|my)\b/i;
+// the language of a message: its common words counted; letters like ä alone (an Estonian name in English) do not decide it
+const ET = /(?<![\p{L}])(ja|ning|mis|midagi|kas|tahan|otsin|pilt|pildi|maal|maali|maale|seinale|seina|alla|umbes|kuni|tere|aitäh|väike|väikest|suur|suurt|tuppa|kingituseks|eurot?|on|ei|see|selle|mulle|mul|ma|mina|palun|näita|veel|rohkem|või|aga|kui|ka|tööd|teoseid|teos)(?![\p{L}])/giu;
+const EN = /\b(the|a|an|for|and|or|something|anything|want|looking|painting|paintings|picture|print|prints|wall|under|around|about|hi|hello|thanks|room|gift|my|me|show|by|with|of|is|it|i|you|please|any|some|more|less|works?|like|can|do|have|what|which|from|to|in|on|no|yes|actually)\b/gi;
 function langOf(text, page) {
-  const et = ET.test(text), en = EN.test(text);
-  return et && !en ? "et" : en && !et ? "en" : page === "et" ? "et" : "en";
+  const et = (text.match(ET) || []).length + (/[õäöü]/i.test(text) ? 0.5 : 0), en = (text.match(EN) || []).length;
+  return et > en ? "et" : en > et ? "en" : page === "et" ? "et" : "en";
+}
+
+// a search as one string, to tell whether a turn changed it
+const key = q => JSON.stringify([[...q.media].sort(), q.words, [...q.terms].sort(), q.lo, q.hi, q.size, q.artist.toLowerCase()]);
+// the page's controls as the visitor left them, read defensively: they arrive from the browser
+const int = v => Math.max(0, Math.min(10000000, Math.round(Number(v) || 0)));
+const short = (v, n) => String(v || "").replace(/\s+/g, " ").trim().slice(0, n);
+function controls(f) {
+  f = f && typeof f === "object" ? f : {};
+  const list = (v, ok) => Array.isArray(v) ? [...new Set(v.map(x => short(x, 30)).filter(ok))].slice(0, 8) : [];
+  const media = list(f.media, x => MEDIA.includes(x)), words = list(f.words, x => WORDS.includes(x)), terms = list(f.terms, x => x);
+  const lo = int(f.min), hi = int(f.max), size = ["small", "medium", "large"].includes(f.size) ? f.size : "any";
+  const price = lo && hi ? "€" + lo + "–" + hi : hi ? "up to €" + hi : lo ? "from €" + lo : "any";
+  const artist = short(f.artist, 60);
+  return { key: key({ media, words, terms, lo, hi, size, artist }), text: "The page's controls are now set to: medium: " + (media.join(", ") || "any") + "; price: " + price + "; size: " + size +
+    "; words: " + (words.join(", ") || "none") + "; title terms: " + (terms.join(", ") || "none") + "; artist: " +
+    (artist || "none") + ". This is the visitor's current search: start from it." };
 }
 
 async function ask(body, env, reply) {
@@ -212,21 +253,28 @@ async function ask(body, env, reply) {
     const last = messages[messages.length - 1];
     last.content = [{ type: "image", source: { type: "base64", media_type: "image/jpeg", data: img } }, { type: "text", text: last.content }];
   }
-  const system = SYSTEM_ASK + "\n\n" + (et
-    ? "Reply in Estonian: everyday spoken Estonian, addressing the visitor as 'sina', no exclamations."
+  const was = controls(body.filters);
+  const system = SYSTEM_ASK + "\n\n" + was.text + "\n\n" + (et
+    ? "Reply in Estonian: plain, neutral, matter-of-fact Estonian, addressing the visitor as 'sina'; no exclamations or compliments."
     : "Reply in English.") + (photo ? "\n\n" + ROOM(w, h) : "");
   try { out = await claude(env, system, messages, photo ? SCHEMA_ROOM : SCHEMA_ASK, photo ? 1500 : et ? 800 : 400, photo || et ? SONNET : MODEL); }
   catch (e) { return reply({ error: String(e.message || "The assistant could not be reached.") }, 502); }
-  if (!out) return reply({ reply: "", show: false, words: [], kind: "any", size: "any", budget_min: 0, budget_max: 0 });
-  const int = v => Math.max(0, Math.min(10000000, Math.round(Number(v) || 0)));
+  if (!out) return reply({ reply: "", show: false, words: [], terms: [], media: [], kind: "any", size: "any", budget_min: 0, budget_max: 0, artist: "" });
+  const media = [...new Set((out.media || []).filter(m => MEDIA.includes(m)))];
+  // kind: what the page before the controls read (one medium, else any)
+  const kind = media.length === 1 ? { oil: "paint", painting: "paint", print: "paper", drawing: "paper", sculpture: "sculpture", photo: "photo" }[media[0]] : "any";
+  const size = ["small", "medium", "large"].includes(out.size) ? out.size : "any", lo = int(out.budget_min), hi = int(out.budget_max);
+  const words = [...new Set((out.words || []).filter(w => WORDS.includes(w)))].slice(0, 5);
+  const terms = [...new Set((out.terms || []).map(t => short(t, 30).toLowerCase()).filter(t => t.length >= 3))].slice(0, 8);
+  const artist = short(out.artist, 60);
+  // a turn that changes the search shows what it finds: the model tended to ask its question first and show nothing.
+  // A search emptied by a turn that shows nothing ("thanks") is a slip, not a change: the page keeps its controls
+  const now = key({ media, words, terms, lo, hi, size, artist }), empty = now === key({ media: [], words: [], terms: [], lo: 0, hi: 0, size: "any", artist: "" });
+  const show = !!out.show && !(empty && !String(out.reply || "").trim()) || (now !== was.key && !empty);
   return reply({
     ...(photo ? { room: String(out.room || "").slice(0, 40), walls: walls(out, w, h) } : {}),
     reply: String(out.reply || "").slice(0, 600),
-    show: !!out.show,
-    words: [...new Set((out.words || []).filter(w => WORDS.includes(w)))].slice(0, 5),
-    kind: ["paint", "paper", "sculpture", "photo"].includes(out.kind) ? out.kind : "any",
-    size: ["small", "medium", "large"].includes(out.size) ? out.size : "any",
-    budget_min: int(out.budget_min), budget_max: int(out.budget_max),
+    show, words, terms, media, kind, artist, size, budget_min: lo, budget_max: hi,
   });
 }
 
