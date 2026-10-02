@@ -79,8 +79,8 @@ def media_of(kind, tech):
     return m
 
 T = {"en": dict(file="find.html", other="leia.html", other_l="Eesti keeles", site="Estonian Art Catalogue",
-                h="Find art for your home", lede="Search the works the catalogue's galleries have for sale now. Set the price, medium, size and mood, or describe what you need; a photo of the wall finds the space and hangs works that fit it. Each work links to the gallery that sells it.",
-                hello="Set the filters, or describe what you need: the room, size, budget, subject or mood. A photo of the wall finds works that fit the space.",
+                h="Find art for your home", lede="Search the works the catalogue's galleries have for sale now. Set the price, medium, size, mood and artist, or describe what you need. Each work links to the gallery that sells it.",
+                hello="Set the filters, or describe what you need: the room, size, budget, subject or mood.",
                 photo="Photo of your wall", yourroom="Your room", looking="Looking at your room…", photomsg="(a photo of my room)",
                 wallw="Wall space, width", drag="Drag the room to look around it; scroll or pinch to step closer. Drag a work to move it along the wall, or onto another outlined space. If the sizes look wrong, set the wall's width.", reset="Reset view", ar="See it on your wall (AR)", arsafari="To see a work on your real wall in AR, open this page in Safari.", arwait="Making the model…", arfail="AR could not be opened", onwall="On my wall",
                 choose="Tap a work to hang it", hangmore="Hang another", remove="Take it down", together="{n} works on the wall",
@@ -98,13 +98,13 @@ T = {"en": dict(file="find.html", other="leia.html", other_l="Eesti keeles", sit
                 medium="Medium", size="Size", sizeany="Any", sizehint=dict(small="up to 40 cm", medium="40–100 cm", large="over 100 cm"),
                 mood="Mood", moremoods="More words", fewer="Fewer", clear="Clear", count="{n} works", count1="1 work",
                 artistonly="{who}: {n} for sale outside these settings.", showthem="Show them",
-                fromchat="From the chat", artist="Artist", titlew="In the title", filters="Filters",
+                fromchat="From the chat", artist="Artist", artistph="Type a name", artistlist="Artists with works for sale", titlew="In the title", filters="Filters",
                 groups=dict(feeling="Feeling", light="Light", colour="Colour", weather="Season and weather", subject="Subject"),
-                note="The works are the galleries' current stock with their asking prices, read weekly from each gallery's own site; the gallery's page is the one to trust. Your messages are read by Claude to choose the search and are not stored. A photo of your room is shrunk in your browser, which also removes its location data, then read by Claude to find the wall space, and is not stored; the works are shown on it from the galleries' own pictures, at a size estimated from the photo. The moods are read from the gallery's photograph by CLIP, an image model: a guide, not a judgement of the work.",
+                note="The works are the galleries' current stock with their asking prices, read weekly from each gallery's own site; the gallery's page is the one to trust. Your messages are read by Claude to choose the search and are not stored. The moods are read from the gallery's photograph by CLIP, an image model: a guide, not a judgement of the work.",
                 hash=""),
      "et": dict(file="leia.html", other="find.html", other_l="In English", site="Eesti Kunstikataloog",
-                h="Leia kunsti oma koju", lede="Otsi teoseid, mis kataloogi galeriidel praegu müügil on. Sea hind, tehnika, suurus ja meeleolu või kirjelda, mida vajad; foto seinast leiab vaba koha ja riputab sinna mahtuvad teosed. Iga teos viib seda müüva galerii lehele.",
-                hello="Sea filtrid või kirjelda, mida vajad: tuba, suurus, eelarve, teema või meeleolu. Foto seinast leiab teosed, mis sinna mahuvad.",
+                h="Leia kunsti oma koju", lede="Otsi teoseid, mis kataloogi galeriidel praegu müügil on. Sea hind, tehnika, suurus, meeleolu ja kunstnik või kirjelda, mida vajad. Iga teos viib seda müüva galerii lehele.",
+                hello="Sea filtrid või kirjelda, mida vajad: tuba, suurus, eelarve, teema või meeleolu.",
                 photo="Foto seinast", yourroom="Sinu tuba", looking="Vaatan su tuba…", photomsg="(foto minu toast)",
                 wallw="Vaba seinaosa laius", drag="Lohista tuba, et ringi vaadata; keri või näpista, et lähemale astuda. Lohista teost, et seda seinal liigutada või teisele märgitud kohale viia. Kui suurused tunduvad valed, sea seina laius õigeks.", reset="Algvaade", ar="Vaata oma seinal (AR)", arsafari="Et näha teost AR-is oma päris seinal, ava see leht Safaris.", arwait="Teen mudelit…", arfail="AR-i ei õnnestunud avada", onwall="Minu seinale",
                 choose="Puuduta teost, et see seinale riputada", hangmore="Riputa veel üks", remove="Võta maha", together="Seinal {n} teost",
@@ -122,9 +122,9 @@ T = {"en": dict(file="find.html", other="leia.html", other_l="Eesti keeles", sit
                 medium="Tehnika", size="Suurus", sizeany="Kõik", sizehint=dict(small="kuni 40 cm", medium="40–100 cm", large="üle 100 cm"),
                 mood="Meeleolu", moremoods="Rohkem sõnu", fewer="Vähem", clear="Tühjenda", count="{n} teost", count1="1 teos",
                 artistonly="{who}: väljaspool neid seadeid müügil {n}.", showthem="Näita",
-                fromchat="Vestlusest", artist="Kunstnik", titlew="Pealkirjas", filters="Filtrid",
+                fromchat="Vestlusest", artist="Kunstnik", artistph="Kirjuta nimi", artistlist="Kunstnikud, kelle teoseid on müügil", titlew="Pealkirjas", filters="Filtrid",
                 groups=dict(feeling="Tunne", light="Valgus", colour="Värv", weather="Aastaaeg ja ilm", subject="Aine"),
-                note="Teosed on galeriide praegune müügivalik ja nende küsitud hinnad, loetud iga nädal galeriide endi lehtedelt; usaldusväärne on galerii leht. Sinu sõnumeid loeb Claude otsingu valimiseks ja neid ei salvestata. Toa foto vähendatakse sinu brauseris, mis eemaldab ka asukohaandmed, seejärel loeb Claude sellelt vaba seinaosa ning fotot ei salvestata; teosed näidatakse sellel galeriide endi piltidelt, fotolt hinnatud suuruses. Meeleolu loeb galerii fotolt pildimudel CLIP: see on juhatus, mitte hinnang teosele.",
+                note="Teosed on galeriide praegune müügivalik ja nende küsitud hinnad, loetud iga nädal galeriide endi lehtedelt; usaldusväärne on galerii leht. Sinu sõnumeid loeb Claude otsingu valimiseks ja neid ei salvestata. Meeleolu loeb galerii fotolt pildimudel CLIP: see on juhatus, mitte hinnang teosele.",
                 hash="lang=et&")}
 
 def data():
@@ -159,7 +159,7 @@ var api=page.dataset.api, src=page.dataset.src, log=document.getElementById('log
 var D=null, P=null, msgs=[], shownKeys={}, busy=false, labels=JSON.parse(document.getElementById('labels').textContent);
 var R=null, rooms=[];                              // the room on view (the latest photo), and every one shown
 function stock(){ return P=P||fetch(src).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(d){
-  var af=d.artists.map(function(a){return fold(a[0])});
+  var af=d.af=d.artists.map(function(a){return fold(a[0])});
   d.works.forEach(function(w){var m={},f=w[12];for(var i=0;i<f.length;i+=2)m[d.words[f[i]]]=f[i+1]/10;w.m=m;w.af=af[w[1]]}); D=d; tally(); return d}).catch(function(e){P=null;throw e})}
 function el(tag,cls,text){var x=document.createElement(tag);if(cls)x.className=cls;if(text!=null)x.textContent=text;return x}
 function eur(n){return '€'+String(n).replace(/\B(?=(\d{3})+(?!\d))/g,' ')}
@@ -462,10 +462,29 @@ function sync(){
   Array.prototype.forEach.call(F.querySelectorAll('[data-m]'),function(b){b.setAttribute('aria-pressed',String(Q.media.indexOf(b.dataset.m)>=0))});
   Array.prototype.forEach.call(F.querySelectorAll('[data-s]'),function(b){b.setAttribute('aria-pressed',String(b.dataset.s===Q.size))});
   Array.prototype.forEach.call(F.querySelectorAll('[data-w]'),function(b){b.setAttribute('aria-pressed',String(Q.words.indexOf(b.dataset.w)>=0))});
+  if(document.activeElement!==ain)ain.value=Q.artist;aclr.hidden=!Q.artist;
   var cs=chatset.querySelector('.bits');cs.textContent='';
-  [['artist',Q.artist],['terms',Q.terms.join(', ')]].forEach(function(x){if(!x[1])return;
-    var p=el('span','bit',(x[0]==='artist'?T.artist:T.titlew)+': '+x[1]),b=el('button','x','×');b.type='button';b.dataset.clear=x[0];b.setAttribute('aria-label',T.clear);p.appendChild(b);cs.appendChild(p)});
+  if(Q.terms.length){var p=el('span','bit',T.titlew+': '+Q.terms.join(', ')),b=el('button','x','×');b.type='button';b.dataset.clear='terms';b.setAttribute('aria-label',T.clear);p.appendChild(b);cs.appendChild(p)}
   chatset.hidden=!cs.firstChild;tally()}
+// ---- the artist: a name typed, and chosen from those with work for sale (with how many) ----
+var ain=document.getElementById('artist'), alist=document.getElementById('artists'), aclr=document.getElementById('aclear'), act=-1;
+function names(s){var f=fold(s.trim());if(!D||f.length<2)return [];
+  if(!D.n){D.n=D.artists.map(function(){return 0});D.works.forEach(function(w){D.n[w[1]]++})}
+  var out=[];D.af.forEach(function(n,i){var k=n.indexOf(f);if(k<0||k>0&&!/[\s-]/.test(n[k-1]))return;   // from the start of a name's part
+    out.push([k?1:0,D.artists[i][0],D.n[i]])});
+  out.sort(function(a,b){return a[0]-b[0]||b[2]-a[2]||a[1].localeCompare(b[1])});return out.slice(0,8)}
+function suggest(){var m=names(ain.value);alist.textContent='';act=-1;ain.removeAttribute('aria-activedescendant');
+  m.forEach(function(x,i){var li=el('li',null,x[1]);li.id='an'+i;li.setAttribute('role','option');li.appendChild(el('span',null,String(x[2])));
+    li.addEventListener('mousedown',function(e){e.preventDefault();pick(x[1])});alist.appendChild(li)});
+  alist.hidden=!m.length;ain.setAttribute('aria-expanded',String(!!m.length))}
+function pick(n){Q.artist=n;alist.hidden=true;ain.setAttribute('aria-expanded','false');ain.value=n;changed()}
+ain.addEventListener('input',function(){if(!ain.value.trim()&&Q.artist){Q.artist='';changed()}if(D)suggest();else stock().then(suggest,function(){})});
+ain.addEventListener('keydown',function(e){var it=alist.children;
+  if((e.key==='ArrowDown'||e.key==='ArrowUp')&&!alist.hidden&&it.length){e.preventDefault();act=(act+(e.key==='ArrowDown'?1:it.length-1))%it.length;
+    Array.prototype.forEach.call(it,function(li,i){li.setAttribute('aria-selected',String(i===act))});ain.setAttribute('aria-activedescendant','an'+act)}
+  else if(e.key==='Enter'){e.preventDefault();var m=names(ain.value);if(m.length)pick(m[act>=0?act:0][1])}
+  else if(e.key==='Escape'){alist.hidden=true;ain.setAttribute('aria-expanded','false')}});
+ain.addEventListener('blur',function(){alist.hidden=true;ain.setAttribute('aria-expanded','false');ain.value=Q.artist});
 // the block that changes made by hand redraw in place; after the assistant's turn the next change opens one of its own
 var live=null;
 function refresh(){
@@ -527,7 +546,7 @@ function shrink(f){
   .then(function(im){var w=im.width,h=im.height,k=Math.min(1,1280/Math.max(w,h));w=Math.round(w*k);h=Math.round(h*k);
     var c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(im,0,0,w,h);
     var url=c.toDataURL('image/jpeg',.85);return {url:url,data:url.slice(url.indexOf(',')+1),w:w,h:h}})}
-file.addEventListener('change',function(){var f=file.files&&file.files[0];file.value='';if(!f||busy)return;
+if(file)file.addEventListener('change',function(){var f=file.files&&file.files[0];file.value='';if(!f||busy)return;
   stock().catch(function(){});shrink(f).then(function(p){send(input.value,p)}).catch(function(){bubble('them',T.badphoto)})});
 form.addEventListener('submit',function(ev){ev.preventDefault();send(input.value)});
 if(!api){form.hidden=true}
@@ -561,6 +580,15 @@ CSS = BM.CSS + """
 .dual input::-webkit-slider-thumb{pointer-events:auto;-webkit-appearance:none;appearance:none;width:18px;height:18px;margin-top:-8px;border-radius:50%;background:var(--on);border:3px solid var(--raise);box-shadow:0 0 0 1px var(--grey);cursor:pointer}
 .dual input::-moz-range-thumb{pointer-events:auto;width:12px;height:12px;border-radius:50%;background:var(--on);border:3px solid var(--raise);box-shadow:0 0 0 1px var(--grey);cursor:pointer}
 .dual input:focus-visible{outline:none}.dual input:focus-visible::-webkit-slider-thumb{box-shadow:0 0 0 2px var(--ink)}.dual input:focus-visible::-moz-range-thumb{box-shadow:0 0 0 2px var(--ink)}
+.acomp{position:relative}
+.acomp input{width:100%;font:400 1rem/1.2 var(--serif);color:var(--ink);background:var(--paper);border:1px solid var(--rule);border-radius:0;padding:8px 30px 8px 10px;-webkit-appearance:none;appearance:none}
+.acomp input::-webkit-search-cancel-button{display:none}
+.acomp input:focus{outline:2px solid var(--ink);outline-offset:1px}
+.acomp .x{position:absolute;right:2px;top:50%;transform:translateY(-50%);background:none;border:0;color:var(--grey);font-size:1.1rem;line-height:1;padding:4px 7px;cursor:pointer}.acomp .x:hover{color:var(--ink)}
+.acomp ul{position:absolute;left:0;right:0;top:100%;z-index:5;margin:3px 0 0;padding:4px 0;list-style:none;background:var(--raise);border:1px solid var(--grey);max-height:264px;overflow:auto}
+.acomp li{display:flex;justify-content:space-between;gap:10px;padding:7px 10px;cursor:pointer;font-size:.92rem}
+.acomp li span{font:500 .72rem/1.6 var(--mono);color:var(--grey);font-variant-numeric:tabular-nums}
+.acomp li:hover,.acomp li[aria-selected=true]{background:var(--field)}
 #chatset .bits{display:flex;flex-wrap:wrap;gap:6px}
 #chatset .bit{display:inline-flex;align-items:center;gap:4px;font-size:.85rem;border:1px solid var(--rule);padding:3px 4px 3px 9px}
 #chatset .x{background:none;border:0;color:var(--grey);font-size:1rem;line-height:1;padding:2px 5px;cursor:pointer}#chatset .x:hover{color:var(--ink)}
@@ -665,10 +693,18 @@ def panel(t, labels, M):
             f'<input type="range" id="phi" min="0" max="{n}" step="1" value="{n}" aria-label="{e(t["highest"])}"></div></div>'
             f'<div class="f-row"><div class="f-name">{e(t["medium"])}</div><div class="chips" id="media">{media}</div></div>'
             f'<div class="f-row"><div class="f-name">{e(t["size"])}</div><div class="seg">{sizes}</div></div>'
+            f'<div class="f-row"><label class="f-name" for="artist">{e(t["artist"])}</label><div class="acomp">'
+            f'<input id="artist" type="search" autocomplete="off" spellcheck="false" placeholder="{e(t["artistph"])}" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="artists">'
+            f'<button type="button" class="x" id="aclear" data-clear="artist" aria-label="{e(t["clear"])}" hidden>×</button>'
+            f'<ul id="artists" role="listbox" aria-label="{e(t["artistlist"])}" hidden></ul></div></div>'
             f'<div class="f-row"><div class="f-name">{e(t["mood"])}</div><div class="chips" id="moods">{moods}</div></div>'
             f'<div class="f-row" id="chatset" hidden><div class="f-name">{e(t["fromchat"])}</div><div class="bits"></div></div>'
             f'<div class="f-foot"><button type="button" class="count" id="fcount"></button><button type="button" class="linkbtn" id="fclear">{e(t["clear"])}</button></div>'
             '</div>')
+
+# "Photo of your wall" (the room view): off for now, 2026-10-02. The code stays; True brings the button back, and the
+# lede, hello and note that told of it are in git history (commit 9c3e4a1), to be put back with it
+PHOTO = False
 
 def page(lang, ver, api, labels, M):
     t = T[lang]
@@ -691,7 +727,8 @@ def page(lang, ver, api, labels, M):
             f'{panel(t, labels, M)}<div class="log" id="log" aria-live="polite"><div class="msg them"><p>{e(t["hello"])}</p></div></div>'
             f'<form class="ask" id="ask"><label for="q">{e(t["label"])}</label><input id="q" type="text" maxlength="400" autocomplete="off" placeholder="{e(t["ph"])}">'
             f'<button class="btn solid" type="submit">{e(t["send"])}</button>'
-            f'<input id="photo" type="file" accept="image/*" hidden><label for="photo" class="btn photobtn" role="button" tabindex="0">{e(t["photo"])}</label></form></section>'
+            + (f'<input id="photo" type="file" accept="image/*" hidden><label for="photo" class="btn photobtn" role="button" tabindex="0">{e(t["photo"])}</label>' if PHOTO else '')
+            + '</form></section>'
             f'<footer>{e(t["note"])} {H.CONTACT[lang]}</footer></div>'
             f'<script type="importmap">{{"imports":{{"three":"https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/"}}}}</script>'
             f'<script type="application/json" id="t">{tj}</script><script type="application/json" id="labels">{lj}</script><script>{JS}</script></body></html>')
