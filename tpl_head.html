@@ -109,8 +109,47 @@ h1 a:hover{color:var(--grey-6)}
 .srcline a{border-bottom:1px solid var(--rule)}
 .srcline a:hover{border-bottom-color:var(--ink);color:var(--ink)}
 
-.histo{padding:20px 0 18px;border-bottom:1px solid var(--rule)}
+/* the works per decade, folded into one line with a small sketch of the bars; it opens over the page on hover
+   (or a tap, or the keyboard) and closes when the pointer leaves */
+.histo{position:relative;z-index:30;padding:0;border-bottom:1px solid var(--rule)}
 .histo-head{display:flex;justify-content:space-between;align-items:baseline;gap:20px;margin-bottom:16px}
+.histo-mini{display:flex;align-items:center;gap:18px;width:100%;background:none;border:0;padding:12px 0;color:inherit;cursor:pointer;text-align:left;font:inherit}
+.histo-mini>.eyebrow:first-child::after{content:"  ▾";letter-spacing:0}
+.hm-bars{flex:1;display:flex;align-items:flex-end;gap:2px;height:20px;min-width:60px;max-width:520px}
+.hm-bars span{flex:1;background:var(--bar);min-height:1px;transition:background .15s ease}
+.histo-mini #histo-hint{margin-left:auto;text-align:right}
+.histo:hover .hm-bars span,.histo.open .hm-bars span{background:var(--ink)}
+.histo-pop{position:absolute;left:-16px;right:-16px;top:100%;padding:20px 16px 16px;background:var(--paper);border:1px solid var(--rule);
+  box-shadow:0 26px 44px -20px rgba(0,0,0,.6);opacity:0;visibility:hidden;transform:translateY(-6px);
+  transition:opacity .16s ease,transform .16s ease,visibility 0s linear .16s}
+.histo:hover .histo-pop,.histo.open .histo-pop,.histo:has(:focus-visible) .histo-pop{opacity:1;visibility:visible;transform:none;transition-delay:.12s,.12s,0s}
+@media (prefers-reduced-motion:reduce){.histo-pop{transition:none}}
+
+/* Find art for your home: the catalogue's own door to what can be bought, under the masthead */
+.forsale{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:34px;align-items:center;padding:30px 0 32px;border-bottom:1px solid var(--rule)}
+@media(max-width:860px){.forsale{grid-template-columns:1fr;gap:22px}}
+.forsale[hidden]{display:none}
+.forsale h2{margin:8px 0 10px;font-family:var(--serif-text);font-weight:500;font-size:clamp(2rem,4.2vw,3.1rem);line-height:1;letter-spacing:-.015em}
+.fs-lede{margin:0 0 16px;color:var(--ink-soft);font-size:.98rem;max-width:52ch}
+.fs-ask{display:flex;gap:0;max-width:560px}
+.fs-ask input{flex:1;min-width:0;font:400 1.08rem/1.2 var(--serif-text);color:var(--ink);background:var(--raise);border:1px solid var(--ink);border-right:0;padding:12px 13px;border-radius:0}
+.fs-ask input:focus{outline:2px solid var(--focus);outline-offset:1px}
+.fs-go{font-family:var(--mono);font-size:.74rem;letter-spacing:.1em;text-transform:uppercase;background:var(--invert-bg);color:var(--invert-fg);border:1px solid var(--invert-bg);padding:0 18px;cursor:pointer}
+.fs-chips{display:flex;flex-wrap:wrap;gap:6px 7px;margin-top:12px;align-items:center}
+.fs-chips a{font-family:var(--serif-text);font-size:.95rem;color:var(--ink);text-decoration:none;border:1px solid var(--rule);border-radius:999px;padding:5px 12px 6px}
+.fs-chips a:hover{border-color:var(--ink)}
+.fs-chips a.fs-all{border:0;padding:5px 2px;font-family:var(--mono);font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;border-bottom:1px solid var(--rule);border-radius:0;margin-left:6px}
+.fs-works{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.fs-w{display:block;text-decoration:none;color:inherit}
+.fs-w img{display:block;width:100%;aspect-ratio:1;object-fit:cover;background:var(--field)}
+.fs-cap{display:block;padding-top:6px;font-size:.72rem;line-height:1.3;color:var(--grey-6)}
+.fs-cap i{display:block;font-family:var(--serif-text);font-size:.9rem;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fs-cap b{font-family:var(--mono);font-weight:500;color:var(--ink);font-size:.76rem;margin-left:4px}
+.fs-w:hover .fs-cap i{text-decoration:underline}
+@media(max-width:520px){.fs-works{grid-template-columns:repeat(2,minmax(0,1fr))}.fs-works .fs-w:nth-child(n+5){display:none}}
+.vh{position:absolute;left:-9999px}
+/* the controls' door to it: the one filled button in the row */
+.moodlink#findlink{background:var(--invert-bg);color:var(--invert-fg);border-color:var(--invert-bg)}
 .eyebrow{font-family:var(--mono);font-size:var(--fs-sm);letter-spacing:var(--ls-label);text-transform:uppercase;color:var(--grey-6)}
 .bars{display:flex;gap:26px;align-items:stretch}
 .cent{display:flex;flex-direction:column;gap:0;min-width:0}
@@ -676,14 +715,41 @@ footer a{border-bottom:1px solid var(--rule)}
     </div>
   </header>
 
-  <section class="histo">
-    <div class="histo-head">
-      <span><span class="eyebrow" data-i18n="worksperdecade"></span></span>
-      <span class="eyebrow" id="histo-hint">Select a decade to filter</span>
+  <section class="forsale" id="forsale" aria-labelledby="fs-h">
+    <div class="fs-text">
+      <span class="eyebrow" data-i18n="fs_eye"></span>
+      <h2 id="fs-h" data-i18n="fs_h"></h2>
+      <p class="fs-lede" id="fs-lede"></p>
+      <form class="fs-ask" id="fs-ask" role="search"><label for="fs-q" class="vh" data-i18n="fs_h"></label><input id="fs-q" type="text" maxlength="400" autocomplete="off" placeholder="e.g. a calm sea painting under €1,000"><button class="fs-go" type="submit" data-i18n="fs_go"></button></form>
+      <div class="fs-chips"><a href="find.html#m=oil" data-fs="#m=oil" data-i18n="fs_oil"></a><a href="find.html#m=print" data-fs="#m=print" data-i18n="fs_print"></a><a href="find.html#m=sculpture" data-fs="#m=sculpture" data-i18n="fs_sculpt"></a><a href="find.html#max=500" data-fs="#max=500" data-i18n="fs_u500"></a><a href="find.html#max=1500" data-fs="#max=1500" data-i18n="fs_u1500"></a><a href="find.html#s=large" data-fs="#s=large" data-i18n="fs_large"></a><a class="fs-all" href="find.html" data-fs="" data-i18n="fs_all"></a></div>
     </div>
-    <div class="bars" id="bars"></div>
-    <div class="eras" id="eras"></div>
+    <div class="fs-works" id="fs-works"></div>
   </section>
+
+  <section class="histo" id="histo">
+    <button class="histo-mini" id="histo-mini" type="button" aria-expanded="false" aria-controls="histo-pop">
+      <span class="eyebrow" data-i18n="worksperdecade"></span>
+      <span class="hm-bars" id="hm-bars" aria-hidden="true"></span>
+      <span class="eyebrow" id="histo-hint">Select a decade to filter</span>
+    </button>
+    <div class="histo-pop" id="histo-pop">
+      <div class="bars" id="bars"></div>
+      <div class="eras" id="eras"></div>
+    </div>
+  </section>
+  <script>
+  // works before the catalogue's index has arrived: the search box and chips go to Find art for your home (in the
+  // page's language), and a tap opens or closes the works per decade (hover does it with a mouse)
+  (function(){
+    var page=function(){return document.documentElement.lang==="et"?"leia.html":"find.html"};
+    document.getElementById("fs-ask").addEventListener("submit",function(e){e.preventDefault();
+      var v=document.getElementById("fs-q").value.replace(/\s+/g," ").trim();location.href=page()+(v?"#q="+encodeURIComponent(v):"")});
+    document.getElementById("forsale").addEventListener("click",function(e){var a=e.target.closest("a[data-fs]");if(a)a.href=page()+a.dataset.fs});
+    var h=document.getElementById("histo");
+    document.getElementById("histo-mini").addEventListener("click",function(){this.setAttribute("aria-expanded",String(h.classList.toggle("open")))});
+    document.addEventListener("click",function(e){if(!h.contains(e.target)&&h.classList.contains("open")){h.classList.remove("open");document.getElementById("histo-mini").setAttribute("aria-expanded","false")}});
+  })();
+  </script>
 
   <div class="controls">
     <div class="search">

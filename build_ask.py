@@ -553,6 +553,20 @@ if(!api){form.hidden=true}
 // the stock (2 MB) as the visitor first reaches for a control or the message box
 ['pointerdown','focusin'].forEach(function(t){page.addEventListener(t,function(){stock().catch(function(){})},{once:true})});
 sync();
+// a search handed over in the address, from the home page's box and chips: #q=a sentence for the assistant, or the
+// controls -- m=oil,print  min=  max=  s=large  w=serene,misty  a=an artist
+function handoff(){var h;try{h=new URLSearchParams(location.hash.slice(1))}catch(e){return}if(!location.hash)return;
+  var list=function(k){return (h.get(k)||'').split(',').filter(Boolean)}, set=false;
+  if(h.get('m')){Q.media=list('m').filter(function(x){return MB[x]});set=true}
+  if(h.get('w')){Q.words=list('w').filter(function(x){return labels[x]});set=true}
+  if(h.get('min')){Q.min=Math.max(0,parseInt(h.get('min'),10)||0);set=true}
+  if(h.get('max')){Q.max=Math.max(0,parseInt(h.get('max'),10)||0);set=true}
+  if(/^(small|medium|large)$/.test(h.get('s')||'')){Q.size=h.get('s');set=true}
+  if(h.get('a')){Q.artist=h.get('a').slice(0,60);set=true}
+  try{history.replaceState(null,'',location.pathname+location.search)}catch(e){}
+  if(set){sync();refresh()}
+  var q=(h.get('q')||'').slice(0,400);if(q&&api)send(q)}
+handoff();window.addEventListener('hashchange',handoff);
 })();
 """
 
