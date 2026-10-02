@@ -1489,6 +1489,7 @@
     const el = $("doors");
     // the names are a way in, for the untouched page only: once anything is chosen --
     // a filter, a search, a view -- the results come first
+    $("forsale").hidden = !pristine();               // Find art for your home: on the untouched page, like the door
     if (!pristine() || state.group !== "decade"){ el.hidden = true; el.innerHTML = ""; return; }
     const num = n => n.toLocaleString(LANG === "en" ? "en-GB" : "et-EE");
     const col = (head, items, cls, tag) => `<div class="${cls || ""}"><h2>${esc(T(head))}${tag ? ` <span class="tag">${esc(tag)}</span>` : ""}</h2><ul>` + items.map(
@@ -2279,6 +2280,9 @@
     document.querySelectorAll('a[data-i18n="statslink"]').forEach(a => { a.href = LANG === "en" ? "stats.html" : "stats-et.html"; });   // the figures page exists in both languages
     $("moodlink").href = LANG === "en" ? "mood.html" : "meeleolu.html";
     $("findlink").href = LANG === "en" ? "find.html" : "leia.html";
+    $("fs-q").placeholder = T("fs_ph");
+    const fl = $("fs-lede");
+    if (fl && fl.dataset.n) fl.textContent = T("fs_lede", {n: (+fl.dataset.n).toLocaleString(LANG === "en" ? "en-GB" : "et-EE"), g: fl.dataset.g});
     document.querySelectorAll("[data-i18n-html]").forEach(el => { el.innerHTML = I18N[LANG === "en" ? "HTML_EN" : "HTML_ET"][el.dataset.i18nHtml] || ""; });
     $("q").placeholder = T("searchph");
     applyTheme();

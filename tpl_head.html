@@ -83,6 +83,8 @@ h1 a:hover{color:var(--grey-6)}
   border:1px solid var(--rule);padding:8px 11px;margin:14px 0 0;max-width:78ch}
 .snapshot a{color:var(--ink);border-bottom:1px solid var(--rule)}
 .snapshot a:hover{border-bottom-color:var(--ink)}
+/* the one line that says what the site is for (YC: what it is and who it is for, in five seconds) */
+.mast-tag{margin:10px 0 0;font-family:var(--serif-text);font-size:1.08rem;line-height:1.4;color:var(--ink-soft);max-width:50ch}
 .mast-sub{font-family:var(--mono);font-size:var(--fs-sm);letter-spacing:var(--ls-label);text-transform:uppercase;color:var(--grey-6);margin:16px 0 0}
 .mast-stats{display:flex;gap:26px;font-family:var(--mono);font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:var(--grey-6);padding-bottom:6px}
 .stat-btn{background:none;border:0;padding:0 0 0 22px;margin-left:-4px;border-left:1px solid var(--rule);
@@ -111,6 +113,33 @@ h1 a:hover{color:var(--grey-6)}
 
 .histo{padding:20px 0 18px;border-bottom:1px solid var(--rule)}
 .histo-head{display:flex;justify-content:space-between;align-items:baseline;gap:20px;margin-bottom:16px}
+
+/* Find art for your home: a quiet door under the masthead -- a line of text and a search on the left, six works
+   for sale in a row on the right */
+.forsale{display:grid;grid-template-columns:minmax(250px,2fr) minmax(0,5fr);gap:28px;align-items:center;padding:18px 0 20px;border-bottom:1px solid var(--rule)}
+@media(max-width:900px){.forsale{grid-template-columns:1fr;gap:14px}}
+.forsale[hidden]{display:none}
+.forsale h2{margin:5px 0 4px;font-family:var(--serif-text);font-weight:500;font-size:1.45rem;line-height:1.1;letter-spacing:-.01em}
+.fs-lede{margin:0 0 10px;color:var(--grey-6);font-size:.82rem;max-width:44ch}
+.fs-ask{display:flex;max-width:420px}
+.fs-ask input{flex:1;min-width:0;font:400 .95rem/1.2 var(--serif-text);color:var(--ink);background:var(--raise);border:1px solid var(--rule);border-right:0;padding:8px 10px;border-radius:0}
+.fs-ask input:focus{outline:2px solid var(--focus);outline-offset:1px}
+.fs-go{font-family:var(--mono);font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;background:none;color:var(--ink);border:1px solid var(--rule);padding:0 12px;cursor:pointer}
+.fs-go:hover{border-color:var(--ink)}
+.fs-all{display:inline-block;margin-top:9px;font-family:var(--mono);font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;color:var(--grey-6);text-decoration:none;border-bottom:1px solid var(--rule);padding-bottom:2px}
+.fs-all:hover{color:var(--ink);border-bottom-color:var(--ink)}
+.fs-works{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px}
+.fs-w{display:block;text-decoration:none;color:inherit;min-width:0}
+.fs-w img{display:block;width:100%;aspect-ratio:1;object-fit:cover;background:var(--field)}
+.fs-cap{display:block;padding-top:5px;font-size:.66rem;line-height:1.3;color:var(--grey-6);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fs-cap i{display:block;font-family:var(--serif-text);font-size:.8rem;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fs-cap b{font-family:var(--mono);font-weight:500;color:var(--ink);font-size:.68rem;margin-left:3px}
+.fs-w:hover .fs-cap i{text-decoration:underline}
+@media(max-width:620px){.fs-works{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:38%;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:4px}
+  .fs-w{scroll-snap-align:start}}
+.vh{position:absolute;left:-9999px}
+/* the controls' door to it: the one filled button in the row */
+.moodlink#findlink{background:var(--invert-bg);color:var(--invert-fg);border-color:var(--invert-bg)}
 .eyebrow{font-family:var(--mono);font-size:var(--fs-sm);letter-spacing:var(--ls-label);text-transform:uppercase;color:var(--grey-6)}
 .bars{display:flex;gap:26px;align-items:stretch}
 .cent{display:flex;flex-direction:column;gap:0;min-width:0}
@@ -651,6 +680,7 @@ footer a{border-bottom:1px solid var(--rule)}
     <div class="mast-grid">
       <div>
         <h1><a href="./" data-i18n-html="wordmark"></a></h1>
+        <p class="mast-tag" data-i18n="tagline"></p>
         <div class="switches">
           <div class="langsw" role="group" aria-label="Language">
             <button id="lang-en" aria-pressed="true">ENG</button>
@@ -677,6 +707,17 @@ footer a{border-bottom:1px solid var(--rule)}
     </div>
   </header>
 
+  <section class="forsale" id="forsale" aria-labelledby="fs-h">
+    <div class="fs-text">
+      <span class="eyebrow" data-i18n="fs_eye"></span>
+      <h2 id="fs-h" data-i18n="fs_h"></h2>
+      <p class="fs-lede" id="fs-lede"></p>
+      <form class="fs-ask" id="fs-ask" role="search"><label for="fs-q" class="vh" data-i18n="fs_h"></label><input id="fs-q" type="text" maxlength="400" autocomplete="off" placeholder="e.g. a calm sea painting under €1,000"><button class="fs-go" type="submit" data-i18n="fs_go"></button></form>
+      <a class="fs-all" href="find.html" data-fs="" data-i18n="fs_all"></a>
+    </div>
+    <div class="fs-works" id="fs-works"></div>
+  </section>
+
   <section class="histo">
     <div class="histo-head">
       <span><span class="eyebrow" data-i18n="worksperdecade"></span></span>
@@ -685,6 +726,16 @@ footer a{border-bottom:1px solid var(--rule)}
     <div class="bars" id="bars"></div>
     <div class="eras" id="eras"></div>
   </section>
+  <script>
+  // works before the catalogue's index has arrived: the search box and the link go to Find art for your home, in
+  // the page's language
+  (function(){
+    var page=function(){return document.documentElement.lang==="et"?"leia.html":"find.html"};
+    document.getElementById("fs-ask").addEventListener("submit",function(e){e.preventDefault();
+      var v=document.getElementById("fs-q").value.replace(/\s+/g," ").trim();location.href=page()+(v?"#q="+encodeURIComponent(v):"")});
+    document.getElementById("forsale").addEventListener("click",function(e){var a=e.target.closest("a[data-fs]");if(a)a.href=page()+a.dataset.fs});
+  })();
+  </script>
 
   <div class="controls">
     <div class="search">

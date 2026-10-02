@@ -91,7 +91,9 @@ if _os.path.exists('site/landing.json'):
     body=body.replace('<section class="doors" id="doors" hidden></section>','<section class="doors" id="doors">'+_L['doors']+'</section>',1)
     body=body.replace('<div class="bars" id="bars"></div>','<div class="bars" id="bars">'+_L.get('bars','')+'</div>',1)
     body=body.replace('<div class="eras" id="eras"></div>','<div class="eras baked" id="eras">'+_L.get('eras','')+'</div>',1)
-    body=body.replace('<main id="register"></main>','<main id="register">'+_L['register']+'</main>\n<script>if(location.hash&&!/^#(lang=\\w+|theme=\\w+)(&|$)/.test(location.hash)){document.getElementById("register").innerHTML="";document.getElementById("doors").hidden=true;document.getElementById("bars").innerHTML="";document.getElementById("eras").innerHTML=""}</script>',1)
+    body=body.replace('<div class="fs-works" id="fs-works"></div>','<div class="fs-works" id="fs-works">'+_L.get('fs_works','')+'</div>',1)
+    body=body.replace('<p class="fs-lede" id="fs-lede"></p>',_L.get('fs_lede','<p class="fs-lede" id="fs-lede"></p>'),1)
+    body=body.replace('<main id="register"></main>','<main id="register">'+_L['register']+'</main>\n<script>if(location.hash&&!/^#(lang=\\w+|theme=\\w+)(&|$)/.test(location.hash)){document.getElementById("register").innerHTML="";document.getElementById("doors").hidden=true;document.getElementById("bars").innerHTML="";document.getElementById("eras").innerHTML="";document.getElementById("forsale").hidden=true}</script>',1)
 open('site/index.html','w',encoding='utf-8').write(head+body+"\n"+a+"\n</body>\n</html>\n")
 import os
 print("MISSED:",miss if miss else "none")
