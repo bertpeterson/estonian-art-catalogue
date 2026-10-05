@@ -177,7 +177,9 @@ def _six():
 eurf = lambda n: "€" + f"{n:,}".replace(",", " ")
 fs_works = "".join(
     f'<a class="fs-w" href="{e(w["url"])}" target="_blank" rel="noopener"><img src="{e(w["im"][2:])}" alt="{e(w.get("t") or "")}, {e(A[w["a"]]["n"])}" decoding="async" referrerpolicy="no-referrer-when-downgrade">'
-    f'<span class="fs-cap"><i>{e(w.get("t") or "")}</i>{e(A[w["a"]]["n"])}<b>{eurf(w["pr"])}</b></span></a>'
+    f'<span class="fs-cap"><i>{e(w.get("t") or "")}</i>{e(A[w["a"]]["n"])}<b>{eurf(w["pr"])}</b></span>'
+    # the whole picture, uncropped, while the pointer is on the card (the same file, so no second download)
+    f'<span class="fs-pop"><img src="{e(w["im"][2:])}" alt="" decoding="async" referrerpolicy="no-referrer-when-downgrade"></span></a>'
     for w in _six())
 fs_lede = f'<p class="fs-lede" id="fs-lede" data-n="{len(_sale)}" data-g="{len(_galleries)}">' + e(EN["fs_lede"].replace("{n}", f"{len(_sale):,}").replace("{g}", str(len(_galleries)))) + "</p>"
 json.dump({"doors": door, "register": wall, "bars": bars, "eras": eras, "seed": SEED, "fs_works": fs_works, "fs_lede": fs_lede}, open("site/landing.json", "w", encoding="utf-8"), ensure_ascii=False)
