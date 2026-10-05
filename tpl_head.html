@@ -142,7 +142,9 @@ h1 a:hover{color:var(--grey-6)}
   .fs-w{position:relative}
   .fs-pop{display:block;position:absolute;top:calc(100% + 10px);left:0;z-index:30;padding:6px;background:var(--raise);border:1px solid var(--rule);box-shadow:0 12px 32px rgba(0,0,0,.35);pointer-events:none;opacity:0;visibility:hidden;transition:opacity .15s,visibility .15s}
   .fs-w:nth-child(n+4) .fs-pop{left:auto;right:0}
-  .fs-pop img{display:block;width:auto;height:auto;max-width:min(416px,35.2vw);max-height:min(51.2vh,480px)}
+  /* not the card's square crop; sized to its box from the picture's shape (--r, set by the script below the
+     band), so a small file grows too */
+  .fs-pop img{display:block;aspect-ratio:auto;object-fit:contain;height:auto;max-width:none;width:min(416px,35.2vw,calc(min(51.2vh,480px) * var(--r,1)));max-height:min(51.2vh,480px)}
   .fs-w:hover .fs-pop{opacity:1;visibility:visible}}
 @media(max-width:620px){.fs-works{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:38%;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:4px}
   .fs-w{scroll-snap-align:start}}
@@ -748,6 +750,10 @@ footer a{border-bottom:1px solid var(--rule)}
     document.getElementById("fs-ask").addEventListener("submit",function(e){e.preventDefault();
       var v=document.getElementById("fs-q").value.replace(/\s+/g," ").trim();location.href=page()+(v?"#q="+encodeURIComponent(v):"")});
     document.getElementById("forsale").addEventListener("click",function(e){var a=e.target.closest("a[data-fs]");if(a)a.href=page()+a.dataset.fs});
+    // each hover picture's width/height, for its size (see .fs-pop img)
+    document.querySelectorAll(".fs-pop img").forEach(function(i){
+      var r=function(){if(i.naturalHeight)i.style.setProperty("--r",i.naturalWidth/i.naturalHeight)};
+      if(i.complete)r();else i.addEventListener("load",r)});
   })();
   // a visitor whose browser asks for Estonian, and who has not chosen English here, gets the page in Estonian
   // before the index arrives (the app, when it boots, keeps to the same choice); the link's #lang and a choice made
