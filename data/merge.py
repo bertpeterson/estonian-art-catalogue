@@ -343,8 +343,11 @@ def au_bio(a):
     if a.get("Surnud"):   parts.append("surnud " + a["Surnud"] + (", " + a["Surmakoht"] if a.get("Surmakoht") else ""))
     head = "; ".join(parts)
     edu = a.get("Haridus", "")
-    if edu: head += (". " if head else "") + "Haridus: " + "; ".join(x.strip() for x in edu.split("\n") if x.strip())[:320]
-    return head.strip() or None
+    # birth and death alone are no biography: the life line already shows them, and for
+    # Kristjan Raud they stood in place of the editorial note on the Kalevipoeg cycle
+    if not edu: return None
+    head += (". " if head else "") + "Haridus: " + "; ".join(x.strip() for x in edu.split("\n") if x.strip())[:320]
+    return head.strip()
 DK_LIFE = {}
 for r in DK:
     a = r.get("Autor") or ""
