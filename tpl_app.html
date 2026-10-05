@@ -63,8 +63,8 @@
   let BIOS = DATA.artists.some(a => a.b || a.ben) ? [] : null, biosP = null, bioWanted = false;   // inline already in the single-file snapshot
   function loadBios(){
     if (biosP) return biosP;
-    biosP = fetch("data/bios.json?v=__V_INDEX__").then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
-      .then(b => { b.forEach((x, i) => { if (x && A[i]) Object.assign(A[i], x); }); BIOS = b; if (bioWanted) render(); })
+    biosP = fetch("data/bios.json?v=__V_BIOS__").then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+      .then(b => { b.forEach((x, i) => { if (x && A[i]) Object.assign(A[i], x); }); BIOS = b; if (bioWanted){ renderMono(); render(); } })   // the artist header too: render() leaves it, and a page opened on an artist drew it bio-less
       .catch(() => { biosP = null; });
     return biosP;
   }

@@ -1343,6 +1343,10 @@ for w in data["works"]:
 data["vocab"] = vocab
 data["meta"]["encoded"] = DICT_FIELDS
 data["meta"]["sites"] = SITES
+# the editorial notes are written in English: they are the English biography too, or the
+# English page shows them tagged "in Estonian"
+for a in data["artists"]:
+    if a.get("bs") == "ed" and a.get("b") and not a.get("ben"): a["ben"], a["bens"] = a["b"], "ed"
 # English renderings of the Estonian prose, where translate.py has made them
 from translate import apply_translations
 _na, _nw = apply_translations(data)

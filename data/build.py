@@ -93,6 +93,7 @@ ED_BIO = {
 "Kristjan Raud":"National romantic draughtsman; his charcoal Kalevipoeg cycle defined how Estonians picture their epic.",
 "Kuno Veeber":"Cubist-influenced Pallas painter; died at 31.",
 "Lola Liivat":"Abstract painter; worked in Tartu from the 1950s to her nineties.",
+"Lepo Mikko":"Painter of the Thaw years' geometric still lifes, notably a musical-instrument series; taught painting in Tallinn from 1944 until his death.",
 "Mall Nukke":"Collagist and painter reworking Soviet and religious imagery.",
 "Malle Leis":"Silkscreen and watercolour flowers with pop clarity.",
 "Marge Monko":"Photographer and video artist on labour, desire and the display window.",
