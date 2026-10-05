@@ -135,6 +135,15 @@ h1 a:hover{color:var(--grey-6)}
 .fs-cap i{display:block;font-family:var(--serif-text);font-size:.8rem;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .fs-cap b{font-family:var(--mono);font-weight:500;color:var(--ink);font-size:.68rem;margin-left:3px}
 .fs-w:hover .fs-cap i{text-decoration:underline}
+/* on hover, the whole picture, uncropped and larger, opens under the row: from the card's left edge for
+   the first three, its right edge for the last three; the pointer passes through it to the cards */
+.fs-pop{display:none}
+@media(hover:hover) and (min-width:621px){
+  .fs-w{position:relative}
+  .fs-pop{display:block;position:absolute;top:calc(100% + 10px);left:0;z-index:30;padding:6px;background:var(--raise);border:1px solid var(--rule);box-shadow:0 12px 32px rgba(0,0,0,.35);pointer-events:none;opacity:0;visibility:hidden;transition:opacity .15s,visibility .15s}
+  .fs-w:nth-child(n+4) .fs-pop{left:auto;right:0}
+  .fs-pop img{display:block;width:auto;height:auto;max-width:min(520px,44vw);max-height:min(64vh,600px)}
+  .fs-w:hover .fs-pop{opacity:1;visibility:visible}}
 @media(max-width:620px){.fs-works{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:38%;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:4px}
   .fs-w{scroll-snap-align:start}}
 .vh{position:absolute;left:-9999px}
