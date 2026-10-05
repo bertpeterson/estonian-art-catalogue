@@ -91,6 +91,8 @@ h1 a:hover{color:var(--grey-6)}
   font:inherit;letter-spacing:inherit;text-transform:inherit;color:inherit;text-align:left;cursor:pointer}
 .stat-btn:hover b,.stat-btn[aria-pressed="true"] b{text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:5px}
 .stat-btn:focus-visible{outline:2px solid var(--focus);outline-offset:3px}
+/* a door among the counts, so no rule before it: the rule marks off what can be bought */
+.stat-btn.stat-in{border-left:0;padding-left:0;margin-left:0}
 .mast-stats b{display:block;font-family:var(--serif-text);font-weight:500;font-size:1.6rem;line-height:1.05;letter-spacing:0;color:var(--ink);font-variant-numeric:tabular-nums}
 .standfirst{max-width:78ch;margin:16px 0 0;color:var(--ink-soft);font-size:.95rem;line-height:1.55}
 /* two small links on one line under the standfirst: the sources note (which opens
@@ -710,7 +712,8 @@ footer a{border-bottom:1px solid var(--rule)}
       </div>
       <div class="mast-stats">
         <div><b id="stat-w">0</b><span data-i18n="works"></span></div>
-        <div><b id="stat-a">0</b><span data-i18n="artists"></span></div>
+        <!-- a door too: the register regrouped by artist, the same toggle as By artist -->
+        <button class="stat-btn stat-in" id="stat-art"><b id="stat-a">0</b><span data-i18n="artists"></span></button>
         <!-- museums and galleries are counted in the sources note, not here: four
              figures read as a masthead, six as a table -->
         <div id="stat-mwrap" hidden><b id="stat-m">0</b><span data-i18n="museums"></span></div>

@@ -1193,6 +1193,7 @@
     $("stat-au").textContent = fmt(AU_N);
     $("stat-auc").hidden = AU_N === 0;
     $("stat-auc").setAttribute("aria-pressed", state.group === "auction");
+    $("stat-art").setAttribute("aria-pressed", state.group === "artist");
     // inside For sale: the galleries' stock, or the lots of the coming sales
     $("salesw").hidden = !state.sale || !UP.length;
     if (state.sale && UP.length){
@@ -2010,6 +2011,10 @@
     setGroup("auction"); state.decOrder = "latest"; state.expand.clear(); state.auLimit = 20; state.open = null; syncOrder();
     renderAll(); pushHash();
     jumpTo(viewTop($("register")));
+  });
+  $("stat-art").addEventListener("click", () => {
+    $("g-artist").click();     // the control bar's By artist, so the two never drift apart
+    if (state.group === "artist") jumpTo(viewTop($("register")));
   });
   $("salesw").addEventListener("click", e => {
     const b = e.target.closest("button"); if (!b) return;
