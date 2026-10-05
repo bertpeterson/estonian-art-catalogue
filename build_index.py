@@ -15,6 +15,7 @@ def _v(p):
     # immediately, while an unchanged one stays cached.
     return hashlib.sha1(open(p,'rb').read()).hexdigest()[:8]
 V_INDEX, V_I18N = _v('site/data/index.json'), _v('site/data/i18n.json')
+V_BIOS = _v('site/data/bios.json')     # its own key: a biography can change while the index does not
 import json, re
 _m = json.load(open('data/data.json',encoding='utf-8'))
 _meta, _ys = _m['meta'], [w['y'] for w in _m['works'] if w.get('y')]
@@ -61,7 +62,7 @@ def _fillh(m):
     tag, attrs, key = m.group(1), m.group(2), m.group(3)
     return f'<{tag}{attrs}data-i18n-html="{key}"{m.group(4)}>{_I["HTML_EN"].get(key, "")}</{tag}>'
 h = _re.sub(r'<(\w+)([^>]*?)data-i18n-html="([a-z_0-9]+)"([^>]*)></\1>', _fillh, h)
-a=a.replace('__V_INDEX__',V_INDEX).replace('__V_I18N__',V_I18N)
+a=a.replace('__V_BIOS__',V_BIOS).replace('__V_INDEX__',V_INDEX).replace('__V_I18N__',V_I18N)
 h=h.replace('__V_I18N__',V_I18N)      # the head's early Estonian reads the same strings file
 # the index's download starts as the head is parsed, not when the script at the foot
 # of the page runs; crossorigin matches fetch()'s default mode, so the one download
