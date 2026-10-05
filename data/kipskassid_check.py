@@ -56,7 +56,7 @@ def main():
             print("  could not read", photo, repr(e)[:60])
         time.sleep(0.5)
     vision = {}
-    if shutil.which("swiftc"):                                    # the Mac: Apple's Vision
+    if sys.platform == "darwin" and shutil.which("swiftc"):       # the Mac: Apple's Vision (GitHub's Linux runners have swiftc too, but no Vision)
         tool = os.path.join(tmp, "people")
         open(tool + ".swift", "w").write(SWIFT)
         subprocess.run(["swiftc", "-O", tool + ".swift", "-o", tool], check=True, capture_output=True)

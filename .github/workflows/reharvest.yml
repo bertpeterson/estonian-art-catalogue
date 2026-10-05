@@ -25,7 +25,7 @@ concurrency:
 jobs:
   reharvest:
     runs-on: ubuntu-latest
-    timeout-minutes: 180          # Artrovert and Tokko & Arrak serve ~500 product pages each at ~3 s a page; the 1 Oct 2026 run timed out at 90
+    timeout-minutes: 350          # the galleries alone took 164 min on 1 Oct 2026 (this run was stopped at 90), the auction houses over 60; GitHub stops any job at 360
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
