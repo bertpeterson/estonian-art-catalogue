@@ -1148,6 +1148,17 @@ print("  wikidata: newly matched", WD_MATCHED, "/ life dates filled", WD_DATED, 
 # the artist's activity span, where a single 1478 would stretch Šiškin to the 1400s.
 def _yr(s):
     m = re.search(r'\d{4}', str(s or "")); return int(m.group()) if m else None
+# ...unless it is the life dates that slipped: MuIS gives Heldur Laretei "1993-1994",
+# and all 54 of his dated works in the museums come from 1958-1974. Where every one of
+# five or more museum dates comes before the birth year, the dates go, not the works.
+_by_artist = collections.defaultdict(list)
+for w in works:
+    if w["y"] is not None and (w.get("kind") or "held") == "held": _by_artist[w["a"]].append(w["y"])
+for i, ys in _by_artist.items():
+    b = _yr(artists[i]["l"][0])
+    if b and len(ys) >= 5 and max(ys) < b:
+        print(f"  life dates dropped, after all {len(ys)} dated works: {artists[i]['n']} {artists[i]['l']}")
+        artists[i]["l"], artists[i]["ls"] = ["", ""], "ed"
 FLAGGED = {"pre": 0, "post": 0}
 for w in works:
     if w["y"] is None: continue
@@ -1160,6 +1171,11 @@ for w in works:
     # Kristjan Raud (d. 1943) stood in 1993 and 1994 on his own page for a "Portaal"
     # and a "Põgeneja" that MuIS dates so. The note on the record says why.
     if w.get("f") and w.get("e") in ("Watercolour", "Painting", "Drawing") and (w.get("kind") or "held") == "held":
+        w["yl"] = w.get("yl") or str(w["y"]); w["y"] = None; FLAGGED["u"] = FLAGGED.get("u", 0) + 1
+    # A gallery's or an auction house's date before the artist was born is a typing slip
+    # -- EKO lists Tõnis Vint's Z3 (b. 1942) as "1884/96a" -- and put Vint in the 1880s.
+    # The lot keeps the house's label; the timeline does not take the year.
+    elif w.get("f") == "pre" and w.get("kind") in ("auction", "gallery", "sold"):
         w["yl"] = w.get("yl") or str(w["y"]); w["y"] = None; FLAGGED["u"] = FLAGGED.get("u", 0) + 1
 print("  flagged: dated before birth", FLAGGED["pre"], "/ after death", FLAGGED["post"], "/ unique works left the timeline", FLAGGED.get("u", 0))
 
