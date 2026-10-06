@@ -16,7 +16,7 @@ is sold.
 Only current stock with the gallery's picture; a work without a price is shown only
 while no budget is set. Run after build_mood.py (it adds to the sitemap) and before csp.py.
 """
-import json, os, re, hashlib, datetime, urllib.parse, collections
+import json, os, re, hashlib, datetime, urllib.parse, collections, base64, shutil
 import build_hubs as H
 import build_mood as BM
 
@@ -102,6 +102,10 @@ T = {"en": dict(file="find.html", other="leia.html", other_l="Eesti keeles", sit
                 daily="today's selection", fromchat="From the chat", artist="Artist", artistph="Type a name", artistlist="Artists with works for sale", titlew="In the title", filters="Filters",
                 groups=dict(feeling="Feeling", light="Light", colour="Colour", weather="Season and weather", subject="Subject"),
                 note="The works are the galleries' current stock with their asking prices, read weekly from each gallery's own site; the gallery's page is the one to trust. Your messages are read by Claude, which runs the searches and picks the works it suggests; they are not stored. The auction figures under a work are its artist's record as the houses published it, hammer prices: a record, not a valuation. The moods are read from the gallery's photograph by CLIP, an image model: a guide, not a judgement of the work.",
+                sl_add="Add to my list", sl_remove="Remove from my list", fy="For you", fybtn="From My list ({n})",
+                fyhint="Bookmark three works, here, on the mood wall or in the catalogue, and this puts first what looks like them.",
+                fysee="See My list", fybit="for you, from My list", fylike="Like “{t}”, {a}, in My list", fyby="By {a}, as in My list",
+                fynone="nothing in My list to go by yet",
                 hash=""),
      "et": dict(file="leia.html", other="find.html", other_l="In English", site="Eesti Kunstikataloog",
                 h="Osta kunsti", title="Osta Eesti kunsti: müügil {n} teost koos hindadega", lede="Kunst sinu koju kataloogi galeriidest, praegu müügil. Sea hind, tehnika, suurus, meeleolu ja kunstnik või kirjelda, mida vajad. Iga teos viib seda müüva galerii lehele.",
@@ -127,6 +131,10 @@ T = {"en": dict(file="find.html", other="leia.html", other_l="Eesti keeles", sit
                 daily="tänane valik", fromchat="Vestlusest", artist="Kunstnik", artistph="Kirjuta nimi", artistlist="Kunstnikud, kelle teoseid on müügil", titlew="Pealkirjas", filters="Filtrid",
                 groups=dict(feeling="Tunne", light="Valgus", colour="Värv", weather="Aastaaeg ja ilm", subject="Aine"),
                 note="Teosed on galeriide praegune müügivalik ja nende küsitud hinnad, loetud iga nädal galeriide endi lehtedelt; usaldusväärne on galerii leht. Sinu sõnumeid loeb Claude, kes teeb otsingud ja valib soovitatavad teosed; neid ei salvestata. Teose all olevad oksjoniandmed on kunstniku tulemused nii, nagu oksjonimajad need avaldasid (haamrihinnad): ülevaade, mitte hinnang. Meeleolu loeb galerii fotolt pildimudel CLIP: see on juhatus, mitte hinnang teosele.",
+                sl_add="Lisa minu nimekirja", sl_remove="Eemalda minu nimekirjast", fy="Sulle", fybtn="Minu nimekirja järgi ({n})",
+                fyhint="Märgi järjehoidjaga kolm teost, siin, meeleolu seinal või kataloogis, ja ette tulevad nendega sarnased.",
+                fysee="Vaata minu nimekirja", fybit="sulle, minu nimekirja järgi", fylike="Sarnane: „{t}“, {a}, minu nimekirjas", fyby="{a}, nagu minu nimekirjas",
+                fynone="minu nimekirjas pole veel millegi järgi minna",
                 hash="lang=et&")}
 
 def data():
@@ -144,7 +152,7 @@ def data():
         return [len(L), sum(1 for w in L if w.get("ao")), lo, hi, int(q)]
     S = json.load(open("data/stock_moods.json", encoding="utf-8")) if os.path.exists("data/stock_moods.json") else {}
     words = [w["en"] for w in json.load(open("data/moods.json", encoding="utf-8"))["words"]]
-    aidx, arts, gals, works = {}, [], {}, []
+    aidx, arts, gals, works, ims = {}, [], {}, [], []
     seen = set()
     for w in W:
         if w.get("kind") != "gallery" or not (w.get("im") or "").startswith("g:"): continue
@@ -164,7 +172,8 @@ def data():
                       [x for j, z in S.get(w["im"], [])[:8] if z >= 1.0 for x in (j, round(z * 10))],   # word, z x 10, flat
                       dims_of(w.get("dm")) or 0,
                       media_of(kind_of(w), " ".join(filter(None, (H.val(w, "tce"), H.val(w, "tc")))))])
-    return {"words": words, "artists": arts, "galleries": list(gals), "works": works}
+        ims.append(w["im"])
+    return {"words": words, "artists": arts, "galleries": list(gals), "works": works, "_ims": ims, "_aidx": aidx}
 
 JS = r"""
 (function(){
@@ -181,7 +190,7 @@ var R=null, rooms=[];                              // the room on view (the late
 function stock(){ return P=P||fetch(src).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(d){
   var af=d.af=d.artists.map(function(a){return fold(a[0])});
   d.fame=d.artists.map(function(a){return Math.min(1,Math.log10(1+(a[2]||0))/3.3)});   // ~2,000 works in the museums: 1
-  d.works.forEach(function(w,k){var m={},f=w[12];for(var i=0;i<f.length;i+=2)m[d.words[f[i]]]=f[i+1]/10;w.m=m;w.af=af[w[1]];w.i=k}); D=d; tally(); return d}).catch(function(e){P=null;throw e})}
+  d.byKey={};d.works.forEach(function(w,k){var m={},f=w[12];for(var i=0;i<f.length;i+=2)m[d.words[f[i]]]=f[i+1]/10;w.m=m;w.af=af[w[1]];w.i=k;d.byKey[w[11]]=w}); D=d; tally(); return d}).catch(function(e){P=null;throw e})}
 function el(tag,cls,text){var x=document.createElement(tag);if(cls)x.className=cls;if(text!=null)x.textContent=text;return x}
 function eur(n){return '€'+String(n).replace(/\B(?=(\d{3})+(?!\d))/g,' ')}
 function cm(d){return d?Math.round(d[0])+(d[1]!==d[0]?' × '+Math.round(d[1]):'')+' cm':''}
@@ -396,7 +405,7 @@ function arButton(w,frameOf){
   return b}
 
 // ---- the search: one state, which the controls show and set, and the assistant reads and sets ----
-function blank(){return {words:[],terms:[],media:[],min:0,max:0,size:'any',artist:''}}
+function blank(){return {words:[],terms:[],media:[],min:0,max:0,size:'any',artist:'',you:false}}
 var DAY=new Date().toISOString().slice(0,10);
 var Q=blank(), MB={};             // each medium's bit in a work's field 14, from the page (build_ask.py BIT)
 function fold(s){return s.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase()}
@@ -405,7 +414,7 @@ function hitName(af,x){return af.indexOf(x)>=0||af.split(' ').some(function(n){r
 function esc(s){return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}
 // every work the search admits, best first; a search that names something (words, title words) admits only what answers to it
 function rank(q){
-  var wt=[1,.8,.65,.5,.4], out=[], ws=R&&wallCm(R,R.sel?R.sel.wall:0), mm=0;
+  var wt=[1,.8,.65,.5,.4], out=[], ws=R&&wallCm(R,R.sel?R.sel.wall:0), mm=0, ty=q.you&&TASTE&&TASTE.n?TASTE:null;
   q.media.forEach(function(m){mm|=MB[m]||0});
   var tr=q.terms.map(function(t){return new RegExp('(^|[^\\p{L}\\p{N}])'+esc(t),'iu')});
   var who=q.artist?fold(q.artist).split(/[\s.,-]+/).filter(function(x){return x.length>1}):[];
@@ -414,10 +423,12 @@ function rank(q){
     if(q.max>0&&!(w[8]&&w[8]<=q.max))return;
     if(q.min>0&&!(w[8]&&w[8]>=q.min))return;
     if(who.length&&!who.every(function(x){return hitName(w.af,x)}))return;
+    if(ty&&ty.in[w[11]])return;                   // For you: what is on the list already is not news
     var s=0;q.words.forEach(function(x,i){s+=(wt[i]||.3)*(w.m[x]||0)});
     if(tr.length&&tr.some(function(r){return r.test(w[0])}))s+=20;     // the subject the visitor named, in the title: first
-    if(!q.words.length&&!tr.length)s=.6*hash(w[11]+DAY)+(w[8]?.25:0)+.35*D.fame[w[1]]+(w[14]&8?.3:0);   // nothing named: the day's selection, paintings first
+    if(!q.words.length&&!tr.length)s=ty?ty.s[w.i]:.6*hash(w[11]+DAY)+(w[8]?.25:0)+.35*D.fame[w[1]]+(w[14]&8?.3:0);   // nothing named: the day's selection, paintings first
     else if(s<=0&&!who.length)return;
+    if(ty&&(q.words.length||tr.length))s+=1.5*ty.s[w.i];   // For you with words: the words admit, the list orders
     if(ws){                                       // a wall on view: what fits it, best near half its width
       var d=w[13];if(!d||w[7]==='sculpture'||w[14]&4)return;
       if(!((d[0]<=.9*ws[0]&&d[1]<=.9*ws[1])||(d[1]<=.9*ws[0]&&d[0]<=.9*ws[1])))return;
@@ -435,6 +446,47 @@ function rank(q){
   return picked.concat(rest)}
 function count(n){return n===1?T.count1:T.count.replace('{n}',String(n).replace(/\B(?=(\d{3})+(?!\d))/g,' '))}
 function priceText(lo,hi){return lo&&hi?eur(lo)+' – '+eur(hi):hi?T.upto+' '+eur(hi):lo?T.from_+' '+eur(lo):T.anyprice}
+// ---- For you: the works for sale ranked by My list (data/taste.py) ----
+// The list is the only taste the page knows: read from this browser, never sent. A work for sale scores by its picture's
+// nearness to the nearest picture on the list (and a little to the next), 48 bytes a picture in one space for museum
+// and stock, and by its artist being on the list; its card says which. The stock's bytes are one file, fetched the
+// first time For you is on; the list's other works come from a shard each, by key (build_ask.py taste_files).
+var TS=page.dataset.taste, TSH=page.dataset.tshard, TSV=page.dataset.tver, NV=48, SV=null, TASTE=null, tasteP=null, SHARDS={};
+var fyb=document.getElementById('foryou'), fyh=document.getElementById('fyhint');
+function listNow(){return slGet().slice(-60)}       // the latest sixty
+function tasteFresh(){return !!TASTE&&TASTE.sig===listNow().join(',')}
+function shardOf(k){var h=0;for(var i=0;i<k.length;i++)h=(h*31+k.charCodeAt(i))|0;return ('0'+(h&255).toString(16)).slice(-2)}
+function unit(b){var v=new Float32Array(b.length),n=0,i;for(i=0;i<b.length;i++){v[i]=b[i];n+=b[i]*b[i]}if(!n)return null;n=Math.sqrt(n);for(i=0;i<v.length;i++)v[i]/=n;return v}
+function unb64(s){if(!s)return null;var t=atob(s),b=new Int8Array(t.length);for(var i=0;i<t.length;i++)b[i]=t.charCodeAt(i)<<24>>24;return unit(b)}
+function getJSON(u){return fetch(u).then(function(r){if(!r.ok)throw 0;return r.json()})}
+function buildTaste(){var keys=listNow(), need={};
+  keys.forEach(function(k){if(!D.byKey[k]&&!SHARDS[shardOf(k)])need[shardOf(k)]=1});
+  return Promise.all([SV||fetch(TS).then(function(r){if(!r.ok)throw 0;return r.arrayBuffer()}).then(function(b){var a=new Int8Array(b);
+      SV=D.works.map(function(w,i){return unit(a.subarray(i*NV,i*NV+NV))});return SV})]
+    .concat(Object.keys(need).map(function(h){return getJSON(TSH+h+'.json?v='+TSV).then(function(x){SHARDS[h]=x})}))).then(function(){
+    var items=[], inl={}, arts={};
+    keys.forEach(function(k){inl[k]=1;var w=D.byKey[k],x;
+      if(w)items.push({v:SV[w.i],a:w[1],t:w[0],an:D.artists[w[1]][0]});
+      else if((x=(SHARDS[shardOf(k)]||{})[k]))items.push({v:unb64(x[1]),a:x[0],t:x[2],an:x[3]})});
+    items.forEach(function(it){if(it.a>=0)arts[it.a]=1});
+    var vs=items.filter(function(it){return it.v}), n=D.works.length, s=new Float32Array(n), why=[], max=0;
+    // each kept picture ranks every work for sale by nearness, and a work scores by its place, 1/(10 + place): the
+    // kept works take turns at the top. By nearness itself one gallery photograph on the list outweighed two museum
+    // scans (photographs are nearer photographs), and as z-scores the scans outweighed it
+    vs.forEach(function(it){var c=new Float32Array(n),o=[],r=it.r=new Float32Array(n),i,d,x;
+      for(i=0;i<n;i++){o.push(i);if(!SV[i]){c[i]=-9;continue}x=0;for(d=0;d<NV;d++)x+=SV[i][d]*it.v[d];c[i]=x}
+      o.sort(function(a,b){return c[b]-c[a]});for(i=0;i<n;i++)r[o[i]]=SV[o[i]]?1/(10+i):0});
+    D.works.forEach(function(w,i){if(inl[w[11]])return;var b1=0,b2=0,bj=null,sc;
+      vs.forEach(function(it){var c=it.r[i];if(c>b1){b2=b1;b1=c;bj=it}else if(c>b2)b2=c});
+      sc=b1+.3*b2;
+      if(arts[w[1]]){sc+=.055;why[i]=T.fyby.replace('{a}',D.artists[w[1]][0])}   // as a kept work's fourth nearest
+      else if(bj)why[i]=T.fylike.replace('{t}',bj.t).replace('{a}',bj.an);
+      s[i]=sc;if(sc>max)max=sc});
+    if(max)for(var i=0;i<n;i++)s[i]/=max;
+    TASTE={sig:keys.join(','),s:s,why:why,in:inl,n:max?items.length:0};return TASTE})}
+// the control: how many are on the list, on from three; under three, how to begin; and the way to the list itself
+function syncYou(){var n=slGet().length;fyb.textContent=T.fybtn.replace('{n}',n);fyb.disabled=n<3&&!Q.you;fyb.setAttribute('aria-pressed',String(!!Q.you));
+  fyh.textContent=n<3?T.fyhint+' ':'';if(n){var a=el('a',null,T.fysee);a.href='./#'+T.hash+'list=mine';fyh.appendChild(a)}fyh.hidden=!fyh.firstChild}
 // ---- the assistant's tools: Claude asks (through the Worker), the page answers from the stock it has ----
 function wid(w){return 'w'+w.i}
 function byId(id){var w=D.works[+String(id||'').slice(1)];return w&&wid(w)===id?w:null}
@@ -474,17 +526,18 @@ function step(c,r){var i=c.input||{};
   if(c.name==='search')return describe(asQ(i))+' → '+count(r.matched||0);
   if(c.name==='artist')return T.artist+': '+(r.name||String(i.name||''))+(r.for_sale?' → '+count(r.for_sale):'');
   return T.like+' '+(r.of?r.of.title+' — '+r.of.artist:'')}
-function card(w,why){
+function card(w,why,fy){
   var a=D.artists[w[1]], g=D.galleries[w[9]], c=el('article','card');
   var out=el('a','out');out.href=w[10];out.target='_blank';out.rel='noopener';
   // every click out by gallery; and per version: conversations that led to a click out, and clicks on a pick
-  out.addEventListener('click',function(){gc('find-out',g);if(talked&&!wentOut){wentOut=true;gc('find-conv-out-'+V)}if(why)gc('find-pick-'+V)});
+  out.addEventListener('click',function(){gc('find-out',g);if(talked&&!wentOut){wentOut=true;gc('find-conv-out-'+V)}if(why)gc('find-pick-'+V);if(Q.you)gc('find-foryou-out')});
   var img=el('img');img.src=w[3];img.alt=w[0]+', '+a[0];img.loading='lazy';img.decoding='async';img.referrerPolicy='no-referrer-when-downgrade';out.appendChild(img);
   var cap=el('span','cap');cap.appendChild(el('i',null,w[0]));cap.appendChild(document.createTextNode(a[0]+(w[2]?', '+w[2]:'')));out.appendChild(cap);
   var meta=[w[4],w[5]].filter(Boolean).join(' · ');if(meta)out.appendChild(el('span','meta',meta));
   var pr=el('span','price');pr.appendChild(el('b',null,w[8]?eur(w[8]):T.noprice));pr.appendChild(document.createTextNode(' '+(T.at?T.at+' ':'')+g+' ↗'));out.appendChild(pr);
   c.appendChild(out);
   if(why)c.appendChild(el('p','why',why));
+  if(fy)c.appendChild(el('p','fy',fy));
   // the artist's record beside the asking price: the museums' holdings and the auction record (not a valuation)
   var ctx=[];
   if(a[4])ctx.push(T.auc.replace('{s}',a[4]).replace('{n}',a[3])+(a[5]?(a[7]?', '+T.mostly+' ':' · ')+(a[6]>a[5]?eur(a[5])+'–'+eur(a[6]):eur(a[5])):''));
@@ -495,17 +548,19 @@ function card(w,why){
     on.addEventListener('click',function(){hang(r,w);r.v.scrollIntoView({block:'center',behavior:'smooth'})});c.appendChild(on)}
   if(AR&&w[13])c.appendChild(arButton(w,function(){return R&&R.sel?R.sel.frame:'black'}));
   var rec=el('a','rec',T.record);rec.href='./#'+T.hash+'artist='+a[1]+'&open='+encodeURIComponent(w[11]);c.appendChild(rec);
+  c.appendChild(slBtn(w[11],T,'list-add-find',syncYou));
   return c}
 // the search's results into box: what it was, how many answer to it, and ten at a time, leaving out works an
 // earlier turn showed
 function show(box,q,picks){
-  var why={}, pk=(picks||[]).map(function(p){var w=byId(p.id);if(w)why[w.i]=p.why;return w}).filter(Boolean);
+  var ty=q.you&&TASTE&&TASTE.n?TASTE:null, why={}, pk=(picks||[]).map(function(p){var w=byId(p.id);if(w)why[w.i]=p.why;return w}).filter(Boolean);
   var all=rank(q), list=pk.concat(all.filter(function(w){return !shownKeys[w[11]]&&!(w.i in why)})), n=0, keys=[], grid=el('div','grid'), more=el('button','btn more',T.more);more.type='button';
   var bits=[count(all.length)].concat(q.media.map(function(m){return T.media[m]}));
   if(R){var ws=wallCm(R,R.sel?R.sel.wall:0);bits.push(T.fits+' '+Math.round(ws[0])+' × '+Math.round(ws[1])+' cm')}else if(q.size!=='any')bits.push(T.sizes[q.size]);
   if(q.min||q.max)bits.push(priceText(q.min,q.max));
   bits=bits.concat(q.words.map(function(x){return labels[x]||x}));
   if(q.terms.length)bits.push(T.titlew+': '+q.terms.join(', '));
+  if(q.you)bits.push(ty?T.fybit:T.fynone);
   if(bits.length===1&&!q.artist)bits.push(T.daily);
   if(q.artist)bits.push(q.artist);
   box.appendChild(el('p','search',bits.join(' · ')));
@@ -515,7 +570,7 @@ function show(box,q,picks){
     if(k){var p=el('p','none',T.artistonly.replace('{who}',q.artist).replace('{n}',count(k))+' '),go=el('button','linkbtn',T.showthem);go.type='button';
       go.addEventListener('click',function(){Q=solo;changed()});p.appendChild(go);box.appendChild(p)}
     return {note:k?T.artistonly.replace('{who}',q.artist).replace('{n}',count(k)):'',list:list,keys:keys}}
-  function page(){list.slice(n,n+10).forEach(function(w){grid.appendChild(card(w,why[w.i]));shownKeys[w[11]]=1;keys.push(w[11])});n+=10;more.hidden=n>=list.length}
+  function page(){list.slice(n,n+10).forEach(function(w){grid.appendChild(card(w,why[w.i],ty&&ty.why[w.i]));shownKeys[w[11]]=1;keys.push(w[11])});n+=10;more.hidden=n>=list.length}
   page();box.appendChild(grid);box.appendChild(more);more.addEventListener('click',page);
   return {list:list,keys:keys,note:T.shown+' '+Math.min(10,list.length)+' / '+all.length+': '+list.slice(0,10).map(function(w){return w[0]+' — '+D.artists[w[1]][0]+(w[8]?', '+eur(w[8]):'')+(w[13]?', '+cm(w[13]):'')+' ['+wid(w)+']'}).join('; ')}}
 
@@ -538,7 +593,7 @@ function sync(){
   if(document.activeElement!==ain)ain.value=Q.artist;aclr.hidden=!Q.artist;
   var cs=chatset.querySelector('.bits');cs.textContent='';
   if(Q.terms.length){var p=el('span','bit',T.titlew+': '+Q.terms.join(', ')),b=el('button','x','×');b.type='button';b.dataset.clear='terms';b.setAttribute('aria-label',T.clear);p.appendChild(b);cs.appendChild(p)}
-  chatset.hidden=!cs.firstChild;tally()}
+  chatset.hidden=!cs.firstChild;syncYou();tally()}
 // ---- the artist: a name typed, and chosen from those with work for sale (with how many) ----
 var ain=document.getElementById('artist'), alist=document.getElementById('artists'), aclr=document.getElementById('aclear'), act=-1;
 function names(s){var f=fold(s.trim());if(!D||f.length<2)return [];
@@ -562,6 +617,7 @@ ain.addEventListener('blur',function(){alist.hidden=true;ain.setAttribute('aria-
 var live=null;
 function refresh(quiet){
   if(!D){stock().then(refresh,function(){});return}
+  if(Q.you&&!tasteFresh()){if(!tasteP)tasteP=buildTaste().then(function(){tasteP=null;refresh(quiet)},function(){tasteP=null;Q.you=false;sync();refresh(quiet)});return}
   if(!live||live.turn){var b=el('div','msg them');log.appendChild(b);live={b:b,box:el('div')};b.appendChild(live.box)}
   else live.keys.forEach(function(k){delete shownKeys[k]});
   live.box.textContent='';var s=show(live.box,Q);live.keys=s.keys;
@@ -579,6 +635,7 @@ F.addEventListener('click',function(e){var b=e.target.closest('button');if(!b)re
   else if(b.dataset.s)Q.size=b.dataset.s;
   else if(b.dataset.clear==='artist')Q.artist='';
   else if(b.dataset.clear==='terms')Q.terms=[];
+  else if(b.id==='foryou'){Q.you=!Q.you;if(Q.you)gc('find-foryou')}
   else if(b.id==='fclear')Q=blank();
   else if(b.id==='moremoods'){var o=moods.classList.toggle('open');b.textContent=o?T.fewer:T.moremoods;b.setAttribute('aria-expanded',String(o));return}
   else if(b===fcount){if(live)live.b.scrollIntoView({block:'start',behavior:'smooth'});else refresh();return}
@@ -586,7 +643,7 @@ F.addEventListener('click',function(e){var b=e.target.closest('button');if(!b)re
   changed()});
 // the assistant's search, into the controls (a Worker from before the controls answers with one kind)
 function take(q){var m=q.media||({paint:['painting'],paper:['print','drawing'],sculpture:['sculpture'],photo:['photo']}[q.kind]||[]);
-  Q={words:(q.words||[]).slice(),terms:(q.terms||[]).slice(),media:m.filter(function(x){return MB[x]}),min:q.budget_min||0,max:q.budget_max||0,size:q.size||'any',artist:q.artist||''};sync()}
+  Q={words:(q.words||[]).slice(),terms:(q.terms||[]).slice(),media:m.filter(function(x){return MB[x]}),min:q.budget_min||0,max:q.budget_max||0,size:q.size||'any',artist:q.artist||'',you:Q.you};sync()}
 
 function send(text,photo){
   text=text.replace(/\s+/g,' ').trim(); if((!text&&!photo)||busy)return; busy=true;
@@ -718,6 +775,9 @@ CSS = BM.CSS + """
 .card .out:hover .cap i{text-decoration:underline}
 .card .meta{font-size:.74rem;color:var(--grey);line-height:1.3}
 .card .price{font-size:.78rem;color:var(--grey)}.card .price b{font:500 .86rem/1.3 var(--mono);color:var(--ink);margin-right:4px}
+.card .fy{margin:2px 0 0;font-size:.74rem;line-height:1.3;color:var(--grey)}
+.filters .chip:disabled{opacity:.45;cursor:default}
+.f-hint{margin:8px 0 0;font-size:.8rem;line-height:1.4;color:var(--grey)}.f-hint a{color:var(--ink)}
 .card .rec{font-size:.72rem;color:var(--grey)}
 .card .ctx{font:500 .66rem/1.35 var(--mono);color:var(--grey);letter-spacing:.02em}
 .card .why{margin:2px 0 0;font-size:.78rem;line-height:1.35;color:var(--ink)}
@@ -798,6 +858,8 @@ def panel(t, labels, M):
     moods += f'<button type="button" class="linkbtn" id="moremoods" aria-expanded="false" aria-controls="moods">{e(t["moremoods"])}</button>'
     n = len(PRICE_STOPS) - 1
     return (f'<div class="filters" id="filters" role="group" aria-label="{e(t["filters"])}" data-bits="{e(json.dumps(BIT))}">'
+            f'<div class="f-row" id="fyou"><div class="f-name">{e(t["fy"])}</div><div class="chips"><button type="button" class="chip" id="foryou" aria-pressed="false" disabled>{e(t["fybtn"].format(n=0))}</button></div>'
+            f'<p class="f-hint" id="fyhint" hidden></p></div>'
             f'<div class="f-row"><div class="f-name">{e(t["price"])} <output id="pout">{e(t["anyprice"])}</output></div>'
             f'<div class="dual" style="--a:0;--b:1"><span class="track"></span><span class="fill"></span>'
             f'<input type="range" id="plo" min="0" max="{n}" step="1" value="0" aria-label="{e(t["lowest"])}" data-stops="{json.dumps(PRICE_STOPS)}">'
@@ -817,13 +879,14 @@ def panel(t, labels, M):
 # lede, hello and note that told of it are in git history (commit 9c3e4a1), to be put back with it
 PHOTO = False
 
-def page(lang, ver, api, labels, M, n=0):
+def page(lang, ver, api, labels, M, n=0, tver=""):
     t = T[lang]
     me, other = f"{BASE}/{t['file']}", f"{BASE}/{t['other']}"
     tj = json.dumps({k: t[k] for k in ("more", "at", "noprice", "none", "thinking", "how", "like", "choosing", "failed", "record", "sizes", "shown", "hash",
                                        "media", "anyprice", "upto", "from_", "count", "count1", "moremoods", "fewer", "clear", "artist", "titlew", "artistonly", "showthem", "daily", "auc", "auc0", "inmus", "mostly",
                                        "yourroom", "looking", "photomsg", "wallw", "drag", "onwall", "fits", "roomnote", "nowall", "badphoto",
-                                       "choose", "hangmore", "remove", "together", "frames", "reset", "ar", "arwait", "arfail", "arsafari")}, ensure_ascii=False).replace("</", "<\\/")
+                                       "choose", "hangmore", "remove", "together", "frames", "reset", "ar", "arwait", "arfail", "arsafari",
+                                       "sl_add", "sl_remove", "fybtn", "fyhint", "fysee", "fybit", "fylike", "fyby", "fynone")}, ensure_ascii=False).replace("</", "<\\/")
     lj = json.dumps(labels, ensure_ascii=False).replace("</", "<\\/")
     ask = (api.rstrip("/") + "/ask") if api else ""
     return (f'<!doctype html><html lang="{lang}"><head><meta charset="utf-8">{H.STAMP}<meta name="viewport" content="width=device-width,initial-scale=1">'
@@ -834,7 +897,7 @@ def page(lang, ver, api, labels, M, n=0):
             f'<style>{CSS}</style>{H.GC}</head><body><div class="wrap">'
             f'<nav><a href="{BASE}/{"" if lang == "en" else "#lang=et"}">{e(t["site"])}</a> › {e(t["h"])} · <a href="{other}" hreflang="{"et" if lang == "en" else "en"}">{e(t["other_l"])}</a></nav>'
             f'<header><h1>{e(t["h"])}</h1><p class="lede">{e(t["lede"])}</p></header>'
-            f'<section class="chat" id="chat" data-api="{e(ask)}" data-src="data/stock.json?v={ver}">'
+            f'<section class="chat" id="chat" data-api="{e(ask)}" data-src="data/stock.json?v={ver}" data-taste="data/taste-stock.bin?v={tver}" data-tshard="data/taste/" data-tver="{tver}">'
             f'{panel(t, labels, M)}<div class="log" id="log" aria-live="polite"><div class="msg them"><p>{e(t["hello"])}</p></div></div>'
             f'<form class="ask" id="ask"><label for="q">{e(t["label"])}</label><input id="q" type="text" maxlength="400" autocomplete="off" placeholder="{e(t["ph"])}">'
             f'<button class="btn solid" type="submit">{e(t["send"])}</button>'
@@ -843,7 +906,7 @@ def page(lang, ver, api, labels, M, n=0):
             + browse_links(lang)
             + f'<footer>{e(t["note"])} {H.CONTACT[lang]}</footer></div>'
             f'<script type="importmap">{{"imports":{{"three":"https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/"}}}}</script>'
-            f'<script type="application/json" id="t">{tj}</script><script type="application/json" id="labels">{lj}</script><script>{JS}</script></body></html>')
+            f'<script type="application/json" id="t">{tj}</script><script type="application/json" id="labels">{lj}</script><script>{BM.SL_JS}{JS}</script></body></html>')
 
 # Pages a search engine can read: the works for sale by medium and by price, in both languages. Buy art for your
 # home draws its works in the browser, so a search for "oil paintings for sale" found nothing of them; these list
@@ -920,8 +983,39 @@ def sale_pages(d):
             open(f"site/{SALE_DIR[lang]}/{sl}.html", "w", encoding="utf-8").write(html_); urls.append(me)
     return urls
 
+def taste_files(d):
+    """For you's data (data/taste.py): the stock's 48 bytes a work in stock.json's order (zeros: no picture read yet),
+    and, in 256 shards by key, every other work the register can list that has a museum picture or an artist with work
+    for sale: [that artist in stock.json or -1, the picture's bytes or "", title, artist]. A page fetches only the shards
+    its list's keys fall in. Returns the files' version."""
+    ims, aidx = d.pop("_ims"), d.pop("_aidx")
+    rd = lambda f: json.load(open(f, encoding="utf-8")) if os.path.exists(f) else {}
+    TV, ST = rd("data/taste_vecs.json"), rd("data/stock_taste.json")
+    blob = b"".join(base64.b64decode(ST[im]) if im in ST else bytes(48) for im in ims)
+    stock = {w[11] for w in d["works"]}
+    shards = collections.defaultdict(dict)
+    for w in W:
+        k = H.key(w)
+        if not k or k in stock: continue
+        v, a = TV.get(w.get("im") or "", ""), aidx.get(w["a"], -1)
+        if not v and a < 0: continue
+        h = 0
+        for c in k: h = (h * 31 + ord(c)) & 0xFFFFFFFF              # as the page's shardOf
+        shards[f"{h & 255:02x}"].setdefault(k, [a, v, (w.get("t") or "")[:80], A[w["a"]]["n"]])
+    shutil.rmtree("site/data/taste", ignore_errors=True); os.makedirs("site/data/taste")
+    sha = hashlib.sha1(blob)
+    open("site/data/taste-stock.bin", "wb").write(blob)
+    for h, x in sorted(shards.items()):
+        b = json.dumps(x, ensure_ascii=False, separators=(",", ":"))
+        open(f"site/data/taste/{h}.json", "w", encoding="utf-8").write(b); sha.update(b.encode())
+    n = sum(len(x) for x in shards.values())
+    print(f"  for you        {sum(1 for im in ims if im in ST):,} of {len(ims):,} works for sale with a picture read; {n:,} other works in {len(shards)} shards "
+          f"(~{sum(len(json.dumps(x)) for x in shards.values()) // max(1, len(shards)) // 1024} KB each)")
+    return sha.hexdigest()[:8]
+
 def main():
     d = data()
+    tver = taste_files(d)
     blob = json.dumps(d, ensure_ascii=False, separators=(",", ":"))
     ver = hashlib.sha1(blob.encode()).hexdigest()[:8]
     open("site/data/stock.json", "w", encoding="utf-8").write(blob)
@@ -929,7 +1023,7 @@ def main():
     urls = []
     for lang in ("en", "et"):
         labels = {w["en"]: (w["et"] if lang == "et" else BM.LABEL_EN.get(w["en"], w["en"])) for w in M}
-        open(f"site/{T[lang]['file']}", "w", encoding="utf-8").write(page(lang, ver, API, labels, M, len(d["works"]))); urls.append(f"{BASE}/{T[lang]['file']}")
+        open(f"site/{T[lang]['file']}", "w", encoding="utf-8").write(page(lang, ver, API, labels, M, len(d["works"]), tver)); urls.append(f"{BASE}/{T[lang]['file']}")
     urls += sale_pages(d)
     sm = open("site/sitemap.xml", encoding="utf-8").read()
     today = datetime.date.today().isoformat()

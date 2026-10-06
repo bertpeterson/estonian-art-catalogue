@@ -11,12 +11,15 @@ embcache/ where lookalikes.py already read it (on the Mac), else fetched from th
 gallery's server and discarded, as the shapes are -- and its scores kept by picture, so
 a week's run reads only the new stock. A picture no longer for sale leaves the file.
 Kept per picture: the words it answers to best (z >= 0.8), at most 16, one decimal.
+And in stock_taste.json the picture as taste.py's 48 bytes, in the museum pictures' space,
+for Buy art's For you; a picture missing from either file is read again.
 
     python3 stock_moods.py --todo    exit 0 if there are pictures to read (CI installs CLIP only then)
     .venv-clip/bin/python stock_moods.py
 """
 import json, os, sys, io, time, urllib.request
 import numpy as np
+import taste
 from concurrent.futures import ThreadPoolExecutor
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -28,7 +31,10 @@ W = json.load(open(os.path.join(HERE, "data.json"), encoding="utf-8"))["works"]
 ims = sorted({w["im"] for w in W if w.get("kind") == "gallery" and (w.get("im") or "").startswith("g:")})
 have = json.load(open(OUT, encoding="utf-8")) if os.path.exists(OUT) else {}
 have = {im: v for im, v in have.items() if im in set(ims)}          # gone from stock: gone from here
-todo = [im for im in ims if im not in have]
+TOUT = os.path.join(HERE, "stock_taste.json")
+tv = json.load(open(TOUT, encoding="utf-8")) if os.path.exists(TOUT) else {}
+tv = {im: v for im, v in tv.items() if im in set(ims)}
+todo = [im for im in ims if im not in have or im not in tv]
 if "--todo" in sys.argv:
     print(f"{len(todo)} stock pictures to score"); sys.exit(0 if todo else 1)
 
@@ -71,5 +77,7 @@ if rest:
             for (im, _), v in zip(b, f): vec[im] = v
     print(f"{len(got):,} of {len(rest):,} fetched and embedded", flush=True)
 for im, v in vec.items(): have[im] = score(v)
+if vec: tv.update(zip(vec, taste.encode(np.stack(list(vec.values())), *taste.load())))
 json.dump(dict(sorted(have.items())), open(OUT, "w", encoding="utf-8"), separators=(",", ":"))
-print(f"stock_moods.json: {len(have):,} pictures for sale scored", flush=True)
+json.dump(dict(sorted(tv.items())), open(TOUT, "w", encoding="utf-8"), separators=(",", ":"))
+print(f"stock_moods.json: {len(have):,} pictures for sale scored; stock_taste.json: {len(tv):,}", flush=True)
