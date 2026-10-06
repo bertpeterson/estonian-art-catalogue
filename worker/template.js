@@ -61,15 +61,16 @@ const LOOK = "Before you answer you can look at the stock with three tools, whic
   "title, artist, technique, size, asking price, gallery and its strongest mood words), artist (one artist's works for sale, " +
   "how many works the museums hold, and their auction record) and similar (the works for sale closest to one work in mood " +
   "and medium). When there is anything to search on, search before you answer and look at what it found. If it found " +
-  "nothing or only poor matches, change one thing -- a wider budget, one word fewer, a related medium or subject -- and " +
-  "search again. When the visitor names an artist, call artist in the same round as the first search. Call similar only " +
+  "nothing or only poor matches, change one thing -- a wider budget, one mood word fewer, a related medium -- and " +
+  "search again, keeping the title terms for what the visitor named (a season, a place, a subject): a title is the surest " +
+  "sign of a subject, the mood words only a guess. When the visitor names an artist, call artist in the same round as the first search. Call similar only " +
   "when the visitor asks for works like one they have seen. One round is usually enough; there are at most two. Then answer with up " +
   "to five picks from the works the tools returned in this turn, best first, by id, each with why: one short factual " +
   "phrase in plain words on what it shows and its mood ('two doves, quiet and hopeful', 'an oil, calm sea under a low " +
   "grey sky'), from its technique and mood words, never a list of them. The page shows the title, artist, year, size and price " +
   "beside it: never mention those in why, and never translate a title. No praise, and nothing about an artist's style or " +
-  "tradition beyond what the tools said. State counts and " +
-  "prices exactly as the tools gave them. Return as the search the one your picks came from, so the page shows the rest of its works under " +
+  "tradition beyond what the tools said. Never give a number of works in the reply -- not 'Found 68 " +
+  "winter landscapes', not 'The search covers 127 works': the page shows the count under it. A price in the reply is one a tool gave, exactly. Return as the search the one your picks came from, so the page shows the rest of its works under " +
   "them. Name works, prices and facts only from what the tools returned in this turn, never from memory. Earlier turns " +
   "list the works shown with their ids; to say more about one of them, or find more like it, call similar with its id. " +
   "If what the visitor asked for is not there (nothing by that artist for sale, nothing near the budget), say so plainly " +
@@ -86,7 +87,7 @@ const ASK_TAIL = "The reply: one or two short sentences, neutral and factual, li
   "serene; an office: simple). Do not pad with loosely related words: two right words beat five vague ones.\n" +
   "- terms: when the visitor names a concrete subject a title would name (a place, a thing, an animal, a plant, a " +
   "season), up to eight short lowercase stems that would begin a word in such a title, in Estonian and in English: the " +
-  "sea: meri, mere, sea; horses: hobu, horse; Tallinn: tallinn; birches: kask, kase, birch; a still life: natüürmort, " +
+  "sea: meri, mere, sea; winter: talv, talve, winter; autumn: sügis, sügise, autumn; horses: hobu, horse; Tallinn: tallinn; birches: kask, kase, birch; a still life: natüürmort, " +
   "vaikelu, still life; a landscape: maastik, landscape; a portrait: portree, portrait. Only stems for what the visitor " +
   "named, not for the subjects it might include. Empty for moods, colours and styles.\n" +
   "- media: what the visitor asks for, any of 'oil', 'acrylic', 'watercolour', 'mixed' (mixed media, collage), 'print' " +
@@ -97,7 +98,8 @@ const ASK_TAIL = "The reply: one or two short sentences, neutral and factual, li
   "'large' over 100 cm (a living-room wall, above a sofa), 'any' if unknown.\n" +
   "- budget_min and budget_max in euros, 0 for none ('under 500': max 500; 'around 1000': 800 and 1200; 'not more than " +
   "two thousand': max 2000).\n" +
-  "- artist: the artist's name, only when the visitor asks for works by a particular artist; else empty. Asking for an " +
+  "- artist: the artist's name in its basic form (Malle Leis, not Malle Leisi or Leisilt), only when the visitor asks " +
+  "for works by a particular artist; else empty. Asking for an " +
   "artist starts a new search: keep only the medium and budget said in the same message, and clear size, words and terms.\n" +
   "Keep everything the controls and earlier turns set unless the visitor changes it; when they ask for something else " +
   "entirely, clear what no longer applies.\n\n" +
@@ -343,6 +345,8 @@ async function ask(body, env, reply) {
       const calls = m.content.filter(b => b.type === "tool_use");
       if (m.stop === "tool_use" && calls.length) return reply({ calls: calls.map(b => ({ id: b.id, name: b.name, input: b.input })), content: m.content });
       out = answer(m.content);
+      // an answer with no reply (seen once, Sonnet, no search made): the one-call answer instead
+      if (!String(out.reply || "").trim()) out = await claude(env, system.replace(SYSTEM_TOOLS, SYSTEM_ASK), messages, SCHEMA_ASK, et ? 800 : 400, et ? SONNET : MODEL);
     } else out = await claude(env, system, messages, photo ? SCHEMA_ROOM : SCHEMA_ASK, photo ? 1500 : et ? 800 : 400, photo || et ? SONNET : MODEL);
   }
   catch (e) { return reply({ error: String(e.message || "The assistant could not be reached.") }, 502); }

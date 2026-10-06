@@ -89,7 +89,7 @@ T = {"en": dict(file="find.html", other="leia.html", other_l="Eesti keeles", sit
                 badphoto="That photo could not be read. Try a JPEG or PNG.",
                 label="Your message", ph="e.g. a misty landscape above the sofa, up to €2,000", send="Send",
                 more="Show more", at="at", noprice="Price on request", none="No work for sale matches this search. Widen the price range or clear a filter.",
-                thinking="Thinking…", how="How it searched", like="Works like", failed="The assistant could not be reached. Try again in a moment.", record="In the catalogue",
+                thinking="Thinking…", how="How it searched", like="Works like", choosing="Choosing from these", failed="The assistant could not be reached. Try again in a moment.", record="In the catalogue",
                 kinds=dict(paint="paintings", paper="works on paper", sculpture="sculpture", photo="photographs"),
                 sizes=dict(small="small", medium="medium", large="large"), under="under", over="over", shown="Shown",
                 media=dict(oil="Oil", acrylic="Acrylic", watercolour="Watercolour", mixed="Mixed media", print="Print", drawing="Drawing",
@@ -114,7 +114,7 @@ T = {"en": dict(file="find.html", other="leia.html", other_l="Eesti keeles", sit
                 badphoto="Seda fotot ei õnnestunud lugeda. Proovi JPEG- või PNG-faili.",
                 label="Sinu sõnum", ph="nt udune maastik diivani kohale, kuni 2000 €", send="Saada",
                 more="Näita rohkem", at="", noprice="Hind päringul", none="Müügil pole ühtki teost, mis sellele otsingule vastaks. Laienda hinnavahemikku või eemalda mõni filter.",
-                thinking="Mõtlen…", how="Kuidas otsisin", like="Sarnased teosele", failed="Abilist ei õnnestunud kätte saada. Proovi hetke pärast uuesti.", record="Kataloogis",
+                thinking="Mõtlen…", how="Kuidas otsisin", like="Sarnased teosele", choosing="Valin nende seast", failed="Abilist ei õnnestunud kätte saada. Proovi hetke pärast uuesti.", record="Kataloogis",
                 kinds=dict(paint="maalid", paper="tööd paberil", sculpture="skulptuur", photo="fotod"),
                 sizes=dict(small="väike", medium="keskmine", large="suur"), under="alla", over="üle", shown="Näidatud",
                 media=dict(oil="Õli", acrylic="Akrüül", watercolour="Akvarell", mixed="Segatehnika", print="Graafika", drawing="Joonistus",
@@ -400,6 +400,8 @@ function blank(){return {words:[],terms:[],media:[],min:0,max:0,size:'any',artis
 var DAY=new Date().toISOString().slice(0,10);
 var Q=blank(), MB={};             // each medium's bit in a work's field 14, from the page (build_ask.py BIT)
 function fold(s){return s.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase()}
+// a name as typed, in any case form: 'leisi' or 'leisilt' finds Malle Leis
+function hitName(af,x){return af.indexOf(x)>=0||af.split(' ').some(function(n){return n.length>=3&&x.indexOf(n)===0&&x.length-n.length<=3})}
 function esc(s){return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}
 // every work the search admits, best first; a search that names something (words, title words) admits only what answers to it
 function rank(q){
@@ -411,7 +413,7 @@ function rank(q){
     if(mm&&!(w[14]&mm))return;
     if(q.max>0&&!(w[8]&&w[8]<=q.max))return;
     if(q.min>0&&!(w[8]&&w[8]>=q.min))return;
-    if(who.length&&!who.every(function(x){return w.af.indexOf(x)>=0}))return;
+    if(who.length&&!who.every(function(x){return hitName(w.af,x)}))return;
     var s=0;q.words.forEach(function(x,i){s+=(wt[i]||.3)*(w.m[x]||0)});
     if(tr.length&&tr.some(function(r){return r.test(w[0])}))s+=20;     // the subject the visitor named, in the title: first
     if(!q.words.length&&!tr.length)s=.6*hash(w[11]+DAY)+(w[8]?.25:0)+.35*D.fame[w[1]]+(w[14]&8?.3:0);   // nothing named: the day's selection, paintings first
@@ -449,7 +451,7 @@ var TOOL={
     if(!all.length&&q.artist){var s=blank();s.artist=q.artist;r.by_artist_any_settings=rank(s).length}
     return r},
   artist:function(i){var f=fold(String(i.name||'')).split(/[\s.,-]+/).filter(function(x){return x.length>1}),hits=[];
-    if(f.length)D.artists.forEach(function(a,k){if(f.every(function(x){return D.af[k].indexOf(x)>=0}))hits.push(k)});
+    if(f.length)D.artists.forEach(function(a,k){if(f.every(function(x){return hitName(D.af[k],x)}))hits.push(k)});
     var exact=hits.filter(function(k){return D.af[k]===f.join(' ')});if(exact.length)hits=exact;
     if(!hits.length)return {found:false,note:'No artist of that name has works for sale here.'};
     if(hits.length>1)return {found:false,did_you_mean:hits.slice(0,8).map(function(k){return D.artists[k][0]})};
@@ -595,6 +597,9 @@ function send(text,photo){
   var b=bubble('them',photo?T.looking:T.thinking); b.classList.add('wait');
   // the controls as they were when the message was sent, the same for each of its rounds
   var body={messages:msgs.slice(-12),lang:document.documentElement.lang,filters:JSON.parse(JSON.stringify(Q))}, steps=[];
+  // the first search's works, shown as soon as Claude asks for it (as fast as one call) while it chooses; its answer replaces them
+  var early=null;
+  if(!talked){talked=true;gc('find-conv-'+V)}
   if(photo){body.image=photo.data;body.w=photo.w;body.h=photo.h}else if(V==='a'){body.tools=1;body.trail=[]}
   // a round: the Worker answers, or asks for searches, which run here on the stock and go back with the next round
   function round(){return Promise.all([fetch(api,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).then(function(r){return r.json().then(function(j){if(!r.ok)throw j;return j})}),stock()])
@@ -603,11 +608,16 @@ function send(text,photo){
       var out=q.calls.map(function(c){var r;try{r=TOOL.hasOwnProperty(c.name)?TOOL[c.name](c.input||{}):{error:'No such tool.'}}catch(e){r={error:'The search failed.'}}
         steps.push(step(c,r));return {type:'tool_result',tool_use_id:c.id,content:JSON.stringify(r)}});
       body.trail.push({role:'assistant',content:q.content},{role:'user',content:out});
-      b.firstChild.textContent=steps[steps.length-1]+'…';
+      var first=!early&&q.calls.filter(function(c){return c.name==='search'})[0];
+      if(first){var eb=el('div');b.appendChild(eb);var es=show(eb,asQ(first.input||{}));
+        es.keys.forEach(function(k){delete shownKeys[k]});early={box:eb,s:es}}     // not yet "shown": later searches still see them
+      b.firstChild.textContent=(first?T.choosing:steps[steps.length-1])+'…';
       return round()})}
   round().then(function(res){var q=res[0], extra='', s={note:'',list:[]};
     b.classList.remove('wait'); b.firstChild.textContent=q.reply||'…';
-    if(steps.length){var how=el('details','steps');how.appendChild(el('summary',null,T.how));steps.forEach(function(x){how.appendChild(el('p',null,x))});b.appendChild(how)}
+    if(steps.length){var how=el('details','steps');how.appendChild(el('summary',null,T.how));steps.forEach(function(x){how.appendChild(el('p',null,x))});b.insertBefore(how,b.firstChild.nextSibling)}
+    if(early){early.s.keys.forEach(function(k){delete shownKeys[k]});
+      if(q.show||photo)early.box.remove();else{early.s.keys.forEach(function(k){shownKeys[k]=1});live={b:b,box:early.box,keys:early.s.keys,turn:true}}}
     if(photo){
       if(q.walls&&q.walls.length){R=roomView(b,photo,q.walls);
         extra=' ('+T.roomnote+': '+(q.room||'')+'; '+q.walls.map(function(w){return w.where+' '+w.w_cm+' × '+w.h_cm+' cm'}).join('; ')+')'}
@@ -617,7 +627,6 @@ function send(text,photo){
     else if(live)live.turn=true;
     if(R&&s.list.length){fill(R,s.list);if(photo&&R.v.parentNode===b)hang(R,R.list[0])}
     msgs.push({role:'assistant',content:(q.reply||'')+extra+(s.note?' ('+s.note+')':'')});
-    if(!talked){talked=true;gc('find-conv-'+V)}
     gc('find-turn-'+V,photo?'photo':q.show?'search':'talk');
   }).catch(function(){b.classList.remove('wait');b.firstChild.textContent=T.failed;msgs.pop()})
   .then(function(){busy=false})}
@@ -811,7 +820,7 @@ PHOTO = False
 def page(lang, ver, api, labels, M, n=0):
     t = T[lang]
     me, other = f"{BASE}/{t['file']}", f"{BASE}/{t['other']}"
-    tj = json.dumps({k: t[k] for k in ("more", "at", "noprice", "none", "thinking", "how", "like", "failed", "record", "sizes", "shown", "hash",
+    tj = json.dumps({k: t[k] for k in ("more", "at", "noprice", "none", "thinking", "how", "like", "choosing", "failed", "record", "sizes", "shown", "hash",
                                        "media", "anyprice", "upto", "from_", "count", "count1", "moremoods", "fewer", "clear", "artist", "titlew", "artistonly", "showthem", "daily", "auc", "auc0", "inmus", "mostly",
                                        "yourroom", "looking", "photomsg", "wallw", "drag", "onwall", "fits", "roomnote", "nowall", "badphoto",
                                        "choose", "hangmore", "remove", "together", "frames", "reset", "ar", "arwait", "arfail", "arsafari")}, ensure_ascii=False).replace("</", "<\\/")
