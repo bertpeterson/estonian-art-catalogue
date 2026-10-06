@@ -94,6 +94,7 @@ T = {"en": dict(file="mood.html", other="meeleolu.html", other_l="Eesti keeles",
                 surprise="Surprise me", clear="Clear", more="Show more", none="Pick a word to begin.",
                 nomatch="No mood word in that. Try one of the words below.", of="of", works="works", loading="Loading the pictures…", failed="The pictures could not be loaded. Reload the page to try again.",
                 note="The moods are read by CLIP, an image model, from the museums' own photographs of public-domain works: a guide to looking, not a judgement of the work. A typed description is read by Claude, which picks the words; the sentence is not stored. Each picture opens its record in the catalogue.",
+                sl_add="Add to my list", sl_remove="Remove from my list",
                 hash=""),
      "et": dict(file="meeleolu.html", other="mood.html", other_l="In English", site="Eesti Kunstikataloog",
                 h="Kunst meeleolu järgi", lede="Vali kuni kolm sõna või kirjelda oma sõnadega, mida tahaksid näha. Seinal on muuseumiteosed, mille pilt sellele kõige paremini vastab. Pildimudel on iga pilti ise vaadanud, mitte kirjet, nii et ta leiab meeleolu nagu sinagi: vaadates.",
@@ -103,6 +104,7 @@ T = {"en": dict(file="mood.html", other="meeleolu.html", other_l="Eesti keeles",
                 surprise="Üllata mind", clear="Tühjenda", more="Näita rohkem", none="Alusta sõna valimisega.",
                 nomatch="Selles ei olnud ühtki meeleolusõna. Proovi mõnda allolevat.", of="/", works="teost", loading="Pildid laadivad…", failed="Pilte ei õnnestunud laadida. Proovi lehte uuesti laadida.",
                 note="Meeleolu loeb pildimudel CLIP muuseumide endi fotodelt vabakasutuses teostest: see on juhatus vaatamiseks, mitte hinnang teosele. Kirjeldust loeb Claude, kes valib sõnad; lauset ei salvestata. Iga pilt avab teose kirje kataloogis.",
+                sl_add="Lisa minu nimekirja", sl_remove="Eemalda minu nimekirjast",
                 hash="lang=et&")}
 
 LABEL_EN = {"stilllife": "still life"}
@@ -187,10 +189,33 @@ form.describe input:focus{outline:2px solid var(--ink);outline-offset:1px}
 .t span{display:block;padding-top:6px;font-size:.76rem;line-height:1.3;color:var(--grey)}
 .t span i{display:block;font:italic 400 .98rem/1.2 var(--serif);color:var(--ink)}
 .t:hover span i{text-decoration:underline}
+/* My list's bookmark on a picture, as in the register (tpl_app.html .sl): Buy art's cards share it */
+.tw,.card{position:relative}
+.sl{position:absolute;top:6px;right:6px;width:30px;height:30px;display:flex;align-items:center;justify-content:center;padding:0;border:0;border-radius:50%;
+  background:color-mix(in srgb,var(--paper) 78%,transparent);color:var(--ink);cursor:pointer;opacity:.8}
+.sl svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.4;stroke-linejoin:round}
+.sl:hover,.sl[aria-pressed=true]{opacity:1}.sl[aria-pressed=true] svg{fill:currentColor}
+.sl:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
 .more{justify-self:center}
 footer{border-top:1px solid var(--rule);padding-top:14px;font-size:.82rem;color:var(--grey);max-width:78ch}
 footer a{color:var(--ink)}
 :focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+"""
+
+# My list: the register's bookmark (tpl_app.html, museaal.shortlist) on the mood wall and Buy art's cards. One list,
+# kept in this browser and never sent; the register shows it, exports it and shares it. T: the page's sl_add, sl_remove;
+# ev: the GoatCounter event an addition counts as.
+SL_JS = r"""
+var SL_KEY='museaal.shortlist', SL_SVG='<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 2h8v12l-4-3-4 3z"/></svg>';
+function slGet(){try{var a=JSON.parse(localStorage.getItem(SL_KEY)||'[]');return Array.isArray(a)?a.filter(function(k){return typeof k==='string'}):[]}catch(e){return []}}
+function slMark(b,on,T){var lab=on?T.sl_remove:T.sl_add;b.setAttribute('aria-pressed',String(on));b.title=lab;b.setAttribute('aria-label',lab)}
+function slBtn(k,T,ev,after){var b=document.createElement('button');b.type='button';b.className='sl';b.dataset.sl=k;b.innerHTML=SL_SVG;slMark(b,slGet().indexOf(k)>=0,T);
+  b.addEventListener('click',function(e){e.preventDefault();var a=slGet(),i=a.indexOf(k);if(i>=0)a.splice(i,1);else a.push(k);
+    try{localStorage.setItem(SL_KEY,JSON.stringify(a))}catch(x){}
+    document.querySelectorAll('.sl[data-sl="'+CSS.escape(k)+'"]').forEach(function(x){slMark(x,i<0,T)});
+    if(i<0&&window.goatcounter&&goatcounter.count)goatcounter.count({path:ev,title:ev,event:true});
+    if(after)after(i<0)});
+  return b}
 """
 
 JS = r"""
@@ -267,11 +292,12 @@ async function wall() {
     const img = document.createElement("img"); img.loading = "lazy"; img.decoding = "async"; img.alt = `${t}, ${an}`;
     img.referrerPolicy = "no-referrer-when-downgrade"; img.src = src(im);
     img.style.aspectRatio = `1 / ${(r / 100).toFixed(3)}`; if (rs) img.style.objectPosition = POS[rs];
-    img.addEventListener("error", () => a.remove(), {once: true});      // a picture the holder no longer gives takes its tile with it
+    const tw = document.createElement("div"); tw.className = "tw";
+    img.addEventListener("error", () => tw.remove(), {once: true});     // a picture the holder no longer gives takes its tile with it
     const c = document.createElement("span"), ti = document.createElement("i"); ti.textContent = t;
     c.append(ti, `${an}${y ? ", " + y : ""}`);
-    a.append(img, c);
-    const j = hs.indexOf(Math.min(...hs)); cols[j].append(a); hs[j] += r / 100 + 0.3;
+    a.append(img, c); tw.append(a, slBtn(k, T, "list-add-mood"));
+    const j = hs.indexOf(Math.min(...hs)); cols[j].append(tw); hs[j] += r / 100 + 0.3;
   }
   $("more").hidden = shown >= Math.min(all.length, 192);
 }
@@ -355,7 +381,7 @@ def page(lang, ver, api, d, kinds):
     t = T[lang]
     chips, tiles, status = baked(lang, d, kinds)
     me, other = f"{BASE}/{t['file']}", f"{BASE}/{t['other']}"
-    tj = json.dumps({k: t[k] for k in ("groups", "kinds", "none", "nomatch", "of", "works", "loading", "hash", "readas", "reading", "failed")}, ensure_ascii=False).replace("</", "<\\/")
+    tj = json.dumps({k: t[k] for k in ("groups", "kinds", "none", "nomatch", "of", "works", "loading", "hash", "readas", "reading", "failed", "sl_add", "sl_remove")}, ensure_ascii=False).replace("</", "<\\/")
     api_attr = f' data-api="{e(api)}"' if api else ""        # the Worker that reads a typed description
     kinds = "".join(f'<button type="button" class="btn" data-k="{k}" aria-pressed="{str(k == "paint").lower()}">{e(v)}</button>' for k, v in t["kinds"].items())
     return (f'<!doctype html><html lang="{lang}"><head><meta charset="utf-8">{H.STAMP}<meta name="viewport" content="width=device-width,initial-scale=1">'
@@ -377,7 +403,7 @@ def page(lang, ver, api, d, kinds):
             f'<div class="wall static" id="wall" data-src="data/mood.json?v={ver}"{api_attr}>{tiles}</div>'
             f'<button type="button" class="btn more" id="more" hidden>{e(t["more"])}</button>'
             f'<footer>{e(t["note"])} {H.CONTACT[lang]}</footer></div>'
-            f'<script type="application/json" id="t">{tj}</script><script>{JS}</script></body></html>')
+            f'<script type="application/json" id="t">{tj}</script><script>{SL_JS}{JS}</script></body></html>')
 
 API = (json.load(open("data/mood_api.json", encoding="utf-8")).get("url") or "") if os.path.exists("data/mood_api.json") else ""
 
