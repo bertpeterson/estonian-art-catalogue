@@ -824,6 +824,11 @@ for g in GAL:
     elif g.get("bio") and not artists[ai].get("b") and not artists[ai].get("ben"):
         artists[ai]["b"], artists[ai]["bs"] = g["bio"], "kk"
     y = int(g["year"]) if g.get("year") and g["year"].isdigit() else None
+    # A gallery that writes MÜÜDUD into a listing's technique (Ruki, 13 in 2026-10) has
+    # said it is sold: a past listing, not one for sale, and the word leaves the technique
+    if g.get("tech") and re.search(r"\b(müüdud|sold)\b", g["tech"], re.I):
+        if not g.get("past"): g["sold"] = True
+        g["tech"] = re.sub(r"\s*\b(müüdud|sold)\b\s*", " ", g["tech"], flags=re.I).strip()
     tech = g.get("tech") or None
     works.append({"a": ai, "t": g["title"], "y": y,
         "yl": g.get("year") or None, "dsrc": "gallery" if y else None,
