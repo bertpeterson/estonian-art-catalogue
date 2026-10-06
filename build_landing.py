@@ -42,10 +42,15 @@ def slug(n):    # the same slug build_pages.py gives the artist's page
     n = unicodedata.normalize("NFKD", n or "").encode("ascii", "ignore").decode()
     return re.sub(r"^-+|-+$", "", re.sub(r"[^a-z0-9]+", "-", n.lower())) or "artist"
 num = lambda n: f"{n:,}"
+# the door's names: artists a public collection holds (ten works or more) and a gallery is
+# selling now, the most works on offer first -- the same rule as TOP_ART in tpl_app.html
+_dsale = collections.Counter(w["a"] for w in W if w.get("kind") == "gallery")
+_dheld = collections.Counter(w["a"] for w in W if (w.get("kind") or "held") in ("held", "shown"))
+door_art = sorted(((i, c) for i, c in _dsale.items() if _dheld[i] >= 10), key=lambda x: (-x[1], A[x[0]]["n"]))[:16]
 door = ('<div class="d-names"><h2>' + e(I18N["EN"]["doors_name"]) + '</h2><ul>'
         # a link each, to the artist's own page: what a crawler follows from the landing
         # page, and what a reader gets before the app is here; the app intercepts the click
-        + "".join(f'<li><a href="a/{slug(A[i]["n"])}.html" data-door="a" data-v="{i}"><span>{e(A[i]["n"])}</span></a></li>' for i in canon) + "</ul></div>")
+        + "".join(f'<li><a href="a/{slug(A[i]["n"])}.html" data-door="a" data-v="{i}"><span>{e(A[i]["n"])}</span><span class="n">{e(I18N["EN"]["nforsale"].replace("{n}", num(c)))}</span></a></li>' for i, c in door_art) + "</ul></div>")
 # ...and the themes and moods beside them, read from the app's own lists
 _app = open("tpl_app.html", encoding="utf-8").read()
 WAYS = json.loads(re.search(r"const DOOR_WAYS = (\[.*?\]);", _app, re.S).group(1))
