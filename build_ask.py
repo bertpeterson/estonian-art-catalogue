@@ -170,6 +170,12 @@ JS = r"""
 (function(){
 var T=JSON.parse(document.getElementById('t').textContent), page=document.getElementById('chat');
 var api=page.dataset.api, src=page.dataset.src, log=document.getElementById('log'), form=document.getElementById('ask'), input=document.getElementById('q'), file=document.getElementById('photo');
+// the A/B test of the assistant: each browser gets one version and keeps it -- 'a' looks with its tools first, 'o' answers
+// in one call -- and the counts carry it; ?v=a or ?v=o picks one (the side-by-side comparison)
+var V=(/[?&]v=([ao])(&|$)/.exec(location.search)||[])[1];
+if(!V){try{V=localStorage.getItem('find-v')}catch(e){}if(V!=='a'&&V!=='o'){V=Math.random()<.5?'a':'o';try{localStorage.setItem('find-v',V)}catch(e){}}}
+var talked=false, wentOut=false;
+function gc(p,t){if(window.goatcounter&&goatcounter.count)goatcounter.count({path:p,title:t||p,event:true})}
 var D=null, P=null, msgs=[], shownKeys={}, busy=false, labels=JSON.parse(document.getElementById('labels').textContent);
 var R=null, rooms=[];                              // the room on view (the latest photo), and every one shown
 function stock(){ return P=P||fetch(src).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(d){
@@ -469,7 +475,8 @@ function step(c,r){var i=c.input||{};
 function card(w,why){
   var a=D.artists[w[1]], g=D.galleries[w[9]], c=el('article','card');
   var out=el('a','out');out.href=w[10];out.target='_blank';out.rel='noopener';
-  out.addEventListener('click',function(){if(window.goatcounter&&goatcounter.count)goatcounter.count({path:'find-out',title:g,event:true})});
+  // every click out by gallery; and per version: conversations that led to a click out, and clicks on a pick
+  out.addEventListener('click',function(){gc('find-out',g);if(talked&&!wentOut){wentOut=true;gc('find-conv-out-'+V)}if(why)gc('find-pick-'+V)});
   var img=el('img');img.src=w[3];img.alt=w[0]+', '+a[0];img.loading='lazy';img.decoding='async';img.referrerPolicy='no-referrer-when-downgrade';out.appendChild(img);
   var cap=el('span','cap');cap.appendChild(el('i',null,w[0]));cap.appendChild(document.createTextNode(a[0]+(w[2]?', '+w[2]:'')));out.appendChild(cap);
   var meta=[w[4],w[5]].filter(Boolean).join(' · ');if(meta)out.appendChild(el('span','meta',meta));
@@ -588,7 +595,7 @@ function send(text,photo){
   var b=bubble('them',photo?T.looking:T.thinking); b.classList.add('wait');
   // the controls as they were when the message was sent, the same for each of its rounds
   var body={messages:msgs.slice(-12),lang:document.documentElement.lang,filters:JSON.parse(JSON.stringify(Q))}, steps=[];
-  if(photo){body.image=photo.data;body.w=photo.w;body.h=photo.h}else{body.tools=1;body.trail=[]}
+  if(photo){body.image=photo.data;body.w=photo.w;body.h=photo.h}else if(V==='a'){body.tools=1;body.trail=[]}
   // a round: the Worker answers, or asks for searches, which run here on the stock and go back with the next round
   function round(){return Promise.all([fetch(api,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).then(function(r){return r.json().then(function(j){if(!r.ok)throw j;return j})}),stock()])
     .then(function(res){var q=res[0];
@@ -610,7 +617,8 @@ function send(text,photo){
     else if(live)live.turn=true;
     if(R&&s.list.length){fill(R,s.list);if(photo&&R.v.parentNode===b)hang(R,R.list[0])}
     msgs.push({role:'assistant',content:(q.reply||'')+extra+(s.note?' ('+s.note+')':'')});
-    if(window.goatcounter&&goatcounter.count)goatcounter.count({path:'find-turn',title:photo?'photo':q.show?'search':'talk',event:true});
+    if(!talked){talked=true;gc('find-conv-'+V)}
+    gc('find-turn-'+V,photo?'photo':q.show?'search':'talk');
   }).catch(function(){b.classList.remove('wait');b.firstChild.textContent=T.failed;msgs.pop()})
   .then(function(){busy=false})}
 // a photo is shrunk to 1280 pixels and re-encoded here, which also drops its location data, before it is sent
