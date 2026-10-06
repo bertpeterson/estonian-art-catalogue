@@ -41,6 +41,12 @@ English (about $0.002), Sonnet 5.5 for Estonian, where Haiku's Estonian was clum
 thinking off, with Anthropic's server-side fallback for a mistaken safety decline). The Worker,
 not the model, picks the reply's language. Same key and monthly spend limit. Nothing is stored.
 
+With `tools: 1` (find.html sends it) Claude may first call search, artist and similar, in up to two
+rounds a message. The page runs them on its own stock.json and posts the conversation again with the
+results; the Worker passes Claude's turns back unchanged and accepts picks only from works the results
+named. Each round is a call, so a message costs a few times more. 20 messages and 60 requests a minute
+per visitor.
+
 A photo (Find a work's "Photo of your wall"): the page shrinks it to 1280 px and re-encodes it, which
 drops its location data, and sends it with the message. Sonnet 5.5 marks up to three empty wall areas,
 an object of known size (a door is 80 cm) and two level lines along the wall; the Worker turns those
