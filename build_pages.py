@@ -48,7 +48,8 @@ L = {
             year="Year", title="Title", tech="Technique", dims="Dimensions", held="Held by", browse="Browse {n} works in the catalogue →",
             sold="sold", gone="no longer listed", soldp="Sold €{p}", soldnp="Sold", unsold="Unsold",
             first600="Showing the first 600 of {n} works — <a href=\"{u}\">see all in the catalogue</a>.",
-            pics="{p} works with a picture; the first {k} here, all in the catalogue. Pictures for public-domain works and live gallery listings only, from the holders' own servers.",
+            pics="{p} works with a picture; the first {k} here, all in the catalogue. Pictures for public-domain works, live gallery listings and the works galleries and artists show on their own pages, from those servers.",
+            wallh="Artwall", shownat="shown at {g}",
             sim="Similar artists — same period, media and subjects: ", school="Also trained at {g}", movement="Also working in {g}", member="Also in {g}",
             contemp="Contemporaries in {h}: ", allaz="All artists A&ndash;Z",
             au="{n} auction lots · {s} sold · {y}{r} — as the auction houses published them; not a valuation",
@@ -63,7 +64,8 @@ L = {
             year="Aasta", title="Pealkiri", tech="Tehnika", dims="Mõõdud", held="Hoidja", browse="Sirvi {n} teost kataloogis →",
             sold="müüdud", gone="enam ei pakuta", soldp="Müüdud €{p}", soldnp="Müüdud", unsold="Müümata",
             first600="Esimesed 600 teost {n}-st — <a href=\"{u}\">vaata kõiki kataloogis</a>.",
-            pics="{p} pildiga teost; siin esimesed {k}, kõik kataloogis. Pilte näidatakse ainult autoriõiguse alt vabade teoste ja galeriides müügil olevate teoste kohta, hoidjate endi serveritest.",
+            pics="{p} pildiga teost; siin esimesed {k}, kõik kataloogis. Pilte näidatakse ainult autoriõiguse alt vabade teoste, galeriides müügil olevate teoste ning galeriide ja kunstnike endi lehtedel näidatud teoste kohta, nende serveritest.",
+            wallh="Kunstisein", shownat="{g} näitusel",
             sim="Sarnased kunstnikud — sama aeg, liigid ja ained: ", school="Samuti õppinud: {g}", movement="Samuti: {g}", member="Samuti {g} liige",
             contemp="Kaasaegsed kogus {h}: ", allaz="Kõik kunstnikud A&ndash;Ü",
             au="{n} oksjonipartiid · {s} müüdud · {y}{r} — nii, nagu oksjonimajad avaldasid; mitte hinnang",
@@ -376,10 +378,12 @@ def render(i, a, ws, lang):
         seen_t.add(k); tiles.append(w)
         if len(tiles) == 48: break
     key = lambda w: w.get('k') or re.sub(r'[^A-Z0-9:]', '', (w.get('nu') or '').upper())
-    wall = ("<div class=\"wall\">" + "".join(
+    # under its own heading: it follows "For sale now", and a gallery's exhibition
+    # picture (Temnikova & Kasela's, Kogo's) there read as one more work on sale
+    wall = (f"<h2 class=\"sh\">{T['wallh']}</h2><div class=\"wall\">" + "".join(
         f"<a class=\"wt\" href=\"{BASE}/#{T['hash']}artist={sl}&open={e(key(w))}\" title=\"{e(w.get('t') or '')}\">"
         f"<img src=\"{e(imsrc(w['im']))}\" alt=\"{e(w.get('t') or '')}, {e(a['n'])}\" loading=\"lazy\"{crop(w['im'])} referrerpolicy=\"no-referrer-when-downgrade\">"
-        f"<span><i>{e(w.get('t') or '')}</i><br>{e(str(w.get('y') or ''))}{' · ' if w.get('y') else ''}{e(val(w, 'mu') or '')}</span></a>"
+        f"<span><i>{e(w.get('t') or '')}</i><br>{e(str(w.get('y') or ''))}{' · ' if w.get('y') else ''}{e(T['shownat'].format(g=val(w, 'mu')) if w.get('kind') == 'shown' else val(w, 'mu') or '')}</span></a>"
         for w in tiles) + "</div>"
         + f"<p class=\"m\">{e(T['pics'].format(p=f'{len(pics):,}', k=len(tiles)))}</p>") if pics else ""
     lots = [w for w in ws if w.get("kind") == "auction"]
