@@ -461,7 +461,7 @@ function unb64(s){if(!s)return null;var t=atob(s),b=new Int8Array(t.length);for(
 function getJSON(u){return fetch(u).then(function(r){if(!r.ok)throw 0;return r.json()})}
 function buildTaste(){var keys=listNow(), need={};
   keys.forEach(function(k){if(!D.byKey[k]&&!SHARDS[shardOf(k)])need[shardOf(k)]=1});
-  return Promise.all([SV||fetch(TS).then(function(r){if(!r.ok)throw 0;return r.arrayBuffer()}).then(function(b){var a=new Int8Array(b);
+  return Promise.all([SV||tasteBin().then(function(b){var a=new Int8Array(b);
       SV=D.works.map(function(w,i){return unit(a.subarray(i*NV,i*NV+NV))});return SV})]
     .concat(Object.keys(need).map(function(h){return getJSON(TSH+h+'.json?v='+TSV).then(function(x){SHARDS[h]=x})}))).then(function(){
     var items=[], inl={}, arts={};
@@ -484,6 +484,15 @@ function buildTaste(){var keys=listNow(), need={};
       s[i]=sc;if(sc>max)max=sc});
     if(max)for(var i=0;i<n;i++)s[i]/=max;
     TASTE={sig:keys.join(','),s:s,why:why,in:inl,n:max?items.length:0};return TASTE})}
+// On by default from three works on the list, unless this browser turned it off (find-fy: off); the stock's bytes
+// are fetched at once, beside stock.json, so the first ten wait for little more than the ranking. Default use counts
+// apart from chosen: find-foryou-auto, find-foryou, find-foryou-off.
+var TSB=null, fyAuto=false;
+function tasteBin(){return TSB=TSB||fetch(TS).then(function(r){if(!r.ok)throw 0;return r.arrayBuffer()}).catch(function(e){TSB=null;throw e})}
+function fyOff(){try{return localStorage.getItem('find-fy')==='off'}catch(e){return false}}
+function fyKeep(on){try{if(on)localStorage.removeItem('find-fy');else localStorage.setItem('find-fy','off')}catch(e){}}
+function fyDefault(){return slGet().length>=3&&!fyOff()}
+if(fyDefault()){Q.you=fyAuto=true;tasteBin().catch(function(){})}
 // the control: how many are on the list, on from three; under three, how to begin; and the way to the list itself
 function syncYou(){var n=slGet().length;fyb.textContent=T.fybtn.replace('{n}',n);fyb.disabled=n<3&&!Q.you;fyb.setAttribute('aria-pressed',String(!!Q.you));
   fyh.textContent=n<3?T.fyhint+' ':'';if(n){var a=el('a',null,T.fysee);a.href='./#'+T.hash+'list=mine';fyh.appendChild(a)}fyh.hidden=!fyh.firstChild}
@@ -617,7 +626,7 @@ ain.addEventListener('blur',function(){alist.hidden=true;ain.setAttribute('aria-
 var live=null;
 function refresh(quiet){
   if(!D){stock().then(refresh,function(){});return}
-  if(Q.you&&!tasteFresh()){if(!tasteP)tasteP=buildTaste().then(function(){tasteP=null;refresh(quiet)},function(){tasteP=null;Q.you=false;sync();refresh(quiet)});return}
+  if(Q.you&&!tasteFresh()){if(!tasteP)tasteP=buildTaste().then(function(){tasteP=null;if(fyAuto){fyAuto=false;gc('find-foryou-auto')}refresh(quiet)},function(){tasteP=null;Q.you=false;sync();refresh(quiet)});return}
   if(!live||live.turn){var b=el('div','msg them');log.appendChild(b);live={b:b,box:el('div')};b.appendChild(live.box)}
   else live.keys.forEach(function(k){delete shownKeys[k]});
   live.box.textContent='';var s=show(live.box,Q);live.keys=s.keys;
@@ -635,8 +644,8 @@ F.addEventListener('click',function(e){var b=e.target.closest('button');if(!b)re
   else if(b.dataset.s)Q.size=b.dataset.s;
   else if(b.dataset.clear==='artist')Q.artist='';
   else if(b.dataset.clear==='terms')Q.terms=[];
-  else if(b.id==='foryou'){Q.you=!Q.you;if(Q.you)gc('find-foryou')}
-  else if(b.id==='fclear')Q=blank();
+  else if(b.id==='foryou'){Q.you=!Q.you;fyAuto=false;fyKeep(Q.you);gc(Q.you?'find-foryou':'find-foryou-off')}
+  else if(b.id==='fclear'){Q=blank();Q.you=fyDefault()}      // the filters cleared; For you as this browser has it
   else if(b.id==='moremoods'){var o=moods.classList.toggle('open');b.textContent=o?T.fewer:T.moremoods;b.setAttribute('aria-expanded',String(o));return}
   else if(b===fcount){if(live)live.b.scrollIntoView({block:'start',behavior:'smooth'});else refresh();return}
   else return;
