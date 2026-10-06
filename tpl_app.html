@@ -1282,7 +1282,7 @@
       reg.innerHTML = shownA.map((i, k) => {
         const ar = A[i], life = (ar.l[0] || ar.l[1]) ? `${ar.l[0]}–${ar.l[1] || ""}` : "";
         const gutter = `<span class="g-name">${esc(ar.n)}</span>${life ? `<div class="g-dates">${esc(life)}</div>` : ""}
-          <div class="g-split">${esc(T("nworks", {n: fmt(nAll.get(i))}))} · ${esc(T("npics", {n: fmt(by.get(i).length)}))}</div>
+          <div class="g-split">${esc(T("nworks", {n: fmt(nAll.get(i))}))} · ${esc(T("npics", {n: fmt(by.get(i).length)}))}${state.sort === "forsale" && SALE_N.get(i) ? ` · ${esc(T("nforsale", {n: fmt(SALE_N.get(i))}))}` : ""}</div>
           <button class="showartist" data-artist="${i}">${esc(T("openartist"))}</button>`;
         return `<section class="group" id="grp-a${i}"><div class="gutter">${gutter}</div><div>${wallHTML(by.get(i), -1, false, {limit: 10, cols: artCols(), lazy: k > 1})}</div></section>`;
       }).join("")
@@ -2270,6 +2270,12 @@
   $("g-artist").addEventListener("click", () => {
     if (state.group === "artist") setGroup("decade"); else { setGroup("artist"); state.gLimit = 50; }
     state.expand.clear(); renderAll(); pushHash();
+  });
+  // Buy art's "By artist": the artist view, the artists a gallery is selling most of first
+  $("fs-byartist").addEventListener("click", e => {
+    e.preventDefault();
+    setGroup("artist"); state.sort = "forsale"; state.decOrder = "earliest"; state.gLimit = 50;
+    state.expand.clear(); renderAll(); pushHash(); jumpTo(viewTop(reg));
   });
   $("o-asc").addEventListener("click", () => { state.decOrder = "earliest"; syncOrder(); render(); pushHash(); });
   $("o-desc").addEventListener("click", () => { state.decOrder = "latest"; syncOrder(); render(); pushHash(); });

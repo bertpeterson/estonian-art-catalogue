@@ -130,6 +130,7 @@ h1 a:hover{color:var(--grey-6)}
 .fs-go:hover{border-color:var(--ink)}
 .fs-all{display:inline-block;margin-top:9px;font-family:var(--mono);font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;color:var(--grey-6);text-decoration:none;border-bottom:1px solid var(--rule);padding-bottom:2px}
 .fs-all:hover{color:var(--ink);border-bottom-color:var(--ink)}
+.fs-all + .fs-all{margin-left:18px}
 .fs-works{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px}
 .fs-w{display:block;text-decoration:none;color:inherit;min-width:0}
 .fs-w img{display:block;width:100%;aspect-ratio:1;object-fit:cover;background:var(--field)}
@@ -748,6 +749,7 @@ footer a{border-bottom:1px solid var(--rule)}
       <p class="fs-lede" id="fs-lede"></p>
       <form class="fs-ask" id="fs-ask" role="search"><label for="fs-q" class="vh" data-i18n="fs_h"></label><input id="fs-q" type="text" maxlength="400" autocomplete="off" placeholder="e.g. a calm sea painting under €1,000"><button class="fs-go" type="submit" data-i18n="fs_go"></button></form>
       <a class="fs-all" href="find.html" data-fs="" data-i18n="fs_all"></a>
+      <a class="fs-all" id="fs-byartist" href="#group=artist&amp;sort=forsale" data-i18n="fs_byartist"></a>
     </div>
     <div class="fs-works" id="fs-works"></div>
   </section>
