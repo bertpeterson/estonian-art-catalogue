@@ -712,7 +712,7 @@
     price:  w => w.ap || 0,
     sale:   w => w.ad || "",      // the auction ledger only: sale by sale
     featured: 0,                  // the wall's own order (SORTS_FOR)
-    name: 0, born: 0, works: 0    // the artist view's: the order of the artists, not of works
+    name: 0, born: 0, works: 0, forsale: 0    // the artist view's: the order of the artists, not of works
   };
   // Every render sorted every dated work in every decade -- 48,000 of them -- with
   // Intl.Collator deciding ties on title and artist. The collator was 13% of all CPU
@@ -781,11 +781,19 @@
   }
   function renderArtistIndex(){
     const {items, letters} = artistIndexData();
+    // Before a letter or a search, a short way in: the names the landing page offers
+    // under "Start with a name", ahead of 7,000 others
+    const keys = $("ai-keys");
+    keys.hidden = !!(state.letter || state.idxQ) || !TOP_ART.length;
+    keys.innerHTML = keys.hidden ? "" : `<span class="ctl-label">${esc(T("doors_name"))}</span>` + TOP_ART.map(([i]) =>
+      `<a class="ai-key" href="${LANG === "et" ? "k" : "a"}/${esc(slug(A[i].n))}.html" data-artist="${i}">${esc(A[i].n)}</a>`).join("");
     $("ai-rail").innerHTML = letters.map(L =>
       `<button class="ai-l" data-letter="${esc(L)}" aria-pressed="${state.letter===L}">${esc(L)}</button>`).join("");
     const t = $("ai-toggle");
     t.textContent = state.idxOpen ? T("hideindex") : T("showall",{n:items.length.toLocaleString(LANG === "en" ? "en-GB" : "et-EE")});
     t.setAttribute("aria-expanded", state.idxOpen);
+    const inArt = state.group === "artist";
+    document.querySelector(".ai-sort").hidden = inArt;
     const body = $("ai-body");
     body.hidden = !state.idxOpen;
     if (!state.idxOpen){ body.innerHTML = ""; return; }
@@ -799,10 +807,11 @@
     // In the artist view the index follows the view's own order -- ranked when the
     // artists are by number of works, A-Z otherwise -- and its toggle steps aside: two
     // "A-Z / most works" controls one above the other were one too many.
-    const inArt = state.group === "artist";
-    document.querySelector(".ai-sort").hidden = inArt;
-    const byWorks = inArt ? state.sort === "works" : state.idxSort === "works";
-    if (byWorks) show = show.slice().sort((a,b)=> b.c - a.c || cmpStr(a.s, b.s));
+    const bySale = inArt ? state.sort === "forsale" : state.idxSort === "sale";
+    const byWorks = bySale || (inArt ? state.sort === "works" : state.idxSort === "works");
+    // for sale now: only the artists a gallery is selling, most works on offer first
+    if (bySale) show = show.filter(x => SALE_N.get(x.i)).sort((a,b)=> SALE_N.get(b.i) - SALE_N.get(a.i) || cmpStr(a.s, b.s));
+    else if (byWorks) show = show.slice().sort((a,b)=> b.c - a.c || cmpStr(a.s, b.s));
     const total = show.length;
     show = show.slice(0, state.idxLimit);
     let cur = "", out = `<div class="ai-count">${esc(T("idxcount",{n:total.toLocaleString(LANG === "en" ? "en-GB" : "et-EE")}))}</div>`;
@@ -814,7 +823,7 @@
       }
       out += `<button class="ai-item" data-artist="${x.i}">
         <span><span class="ai-nm">${esc(x.n)}</span><br><span class="ai-dt">${esc(x.l||"")}</span></span>
-        <span class="ai-rt"><span class="ai-n">${x.c}</span></span>
+        <span class="ai-rt"><span class="ai-n">${bySale ? esc(T("nforsale",{n:SALE_N.get(x.i)})) : x.c}</span></span>
       </button>`;
     });
     if (total > show.length)
@@ -957,6 +966,12 @@
       + (!state.medAll && MEDIA.length > medTop.length ? `<button class="linkbtn" id="med-more">${esc(T("med_more"))}</button>` : "");
     parts("f-mus", [[T("h_museums"), MUSEUMS.filter(m => HOLDER_KIND.get(m) === "m")], [T("h_galleries"), MUSEUMS.filter(m => HOLDER_KIND.get(m) === "g")],
                     [T("h_otherholders"), MUSEUMS.filter(m => HOLDER_KIND.get(m) === "o")]], "mus", state.museums, v=>musName(v), v=>musName(v) + " · " + abbr(v));
+    // the specialist facets: open on asking, or while one of them is in use
+    const moreOn = !!(state.cats.size || state.srcs.size || state.origins.size || state.groups.size);
+    $("morefacets").hidden = !(state.moreFacets || moreOn);
+    $("facets-more").hidden = moreOn;
+    $("facets-more").textContent = T(state.moreFacets ? "fewerfilters" : "morefilters");
+    $("facets-more").setAttribute("aria-expanded", !$("morefacets").hidden);
     chips("f-cat", CATS,     "cat", state.cats,    v=>catName(v));
     chips("f-src", SRCS,     "src", state.srcs,    v=>v);
     chips("f-org", ORIGINS,  "org", state.origins,  v=> v===NOORIGIN ? T("originunknown") : v);
@@ -1481,6 +1496,8 @@
   const CANON_SET = new Set(CANON.map(n => A.findIndex(a => a.n === n)).filter(i => i >= 0));
   // Artists a public collection has accessioned AND a gallery is selling right now.
   const FOR_SALE = W.reduce((n, w) => n + (w.kind === "gallery" ? 1 : 0), 0);
+  // works a gallery is selling now, per artist (the index's and the artist view's "For sale now")
+  const SALE_N = W.reduce((m, w) => (w.kind === "gallery" && m.set(w.a, (m.get(w.a) || 0) + 1), m), new Map());
   const TOP_ART = (() => {
     const c = new Map(); W.forEach(w => c.set(w.a, (c.get(w.a) || 0) + 1));
     const byName = new Map(A.map((a, i) => [a.n, i]));
@@ -1620,6 +1637,7 @@
       let r;
       if (state.sort === "born"){ const bx = born(x), by = born(y); if (!bx !== !by) return bx ? -1 : 1; r = bx - by; }
       else if (state.sort === "works") r = n.get(y) - n.get(x);
+      else if (state.sort === "forsale") r = (SALE_N.get(y) || 0) - (SALE_N.get(x) || 0);
       else r = byName(x, y);
       return (rev ? -r : r) || byName(x, y);
     });
@@ -1828,12 +1846,14 @@
   let iq = null;
   const setIdxSort = mode => {
     state.idxSort = mode; state.idxLimit = 120; state.idxOpen = true;   // choosing an order is asking to see the list
-    $("ais-az").setAttribute("aria-pressed", mode !== "works");
+    $("ais-az").setAttribute("aria-pressed", mode === "az");
     $("ais-works").setAttribute("aria-pressed", mode === "works");
+    $("ais-sale").setAttribute("aria-pressed", mode === "sale");
     renderArtistIndex(); pushHash(true);
   };
   $("ais-az").addEventListener("click", () => setIdxSort("az"));
   $("ais-works").addEventListener("click", () => setIdxSort("works"));
+  $("ais-sale").addEventListener("click", () => setIdxSort("sale"));
   $("ai-q").addEventListener("input", e => {
     clearTimeout(iq);
     iq = setTimeout(() => {
@@ -1941,6 +1961,7 @@
   }, true);
 
   $("f-med").addEventListener("click", e => { if (e.target.closest("#med-more")){ state.medAll = true; renderFacets(); } });
+  $("facets-more").addEventListener("click", () => { state.moreFacets = !state.moreFacets; renderFacets(); });
   $("filters-toggle").addEventListener("click", () => {
     const p = $("filterpanel");
     p.hidden = !p.hidden;
@@ -2188,7 +2209,7 @@
   // taking turns -- and the default wherever there is a wall; any other sort orders
   // the wall exactly by it. It said "Year · Earliest" over a wall in no year order,
   // and Title or Artist barely moved it.
-  const SORTS_FOR = {decade: ["featured", "year", "artist", "title", "medium", "museum"], artist: ["name", "born", "works"], auction: ["price", "sale", "artist"],
+  const SORTS_FOR = {decade: ["featured", "year", "artist", "title", "medium", "museum"], artist: ["name", "born", "works", "forsale"], auction: ["price", "sale", "artist"],
                      one: ["featured", "year", "title", "medium", "museum"]};
   const WORK_SORTS = ["year", "artist", "title", "medium", "museum"];
   // ...and one artist's own works, whichever group, sort as works do (not by artist)
@@ -2209,7 +2230,7 @@
     // by price; A-Z / Z-A by name; most / fewest by number of works
     const lab = state.sort === "price" ? ["lowest", "highest"]
               : (state.sort === "name" || (state.group === "auction" && state.sort === "artist")) ? ["az", "za"]
-              : state.sort === "works" ? ["most", "fewest"] : ["earliest", "latest"];
+              : (state.sort === "works" || state.sort === "forsale") ? ["most", "fewest"] : ["earliest", "latest"];
     a.textContent = T(lab[0]); b.textContent = T(lab[1]);
     a.setAttribute("aria-pressed", state.decOrder === "earliest");
     b.setAttribute("aria-pressed", state.decOrder === "latest");
