@@ -17,13 +17,18 @@
 // controls to that, picks the works for sale itself, and shows them under the reply.
 // Nothing is stored here either.
 //
+// A page that sends tools: 1 lets Claude look first: it may call search, artist and similar in
+// up to two rounds a turn. The page runs them on the stock it has loaded (2 MB, too much to read
+// here) and posts the conversation again with the results; the last answer adds up to five picks.
+//
 // Needs one secret, ANTHROPIC_API_KEY (Settings > Variables and Secrets).
 // Calls the Messages API with fetch: the dashboard's editor takes one file, no build step.
 
 const WORDS = __WORDS__;
 const MODEL = "claude-haiku-4-5";
 const ORIGINS = ["https://museaal.ee", "https://www.museaal.ee"];
-const PER_MINUTE = 20;          // requests per visitor per minute, per Worker instance (both doors)
+const PER_MINUTE = 20;          // searches and turns per visitor per minute, per Worker instance (both doors)
+const CALLS_PER_MINUTE = 60;    // all requests, a turn's tool rounds included
 
 const SYSTEM = "You match a visitor's words to a museum's picture search. The museum has scored every picture in " +
   "its collection of Estonian art against a fixed list of words: moods, light, colour, season and weather, and " +
@@ -43,14 +48,33 @@ const SCHEMA = {
   additionalProperties: false,
 };
 
-const SYSTEM_ASK = "You are the search desk on museaal.ee, a catalogue of Estonian art. On this page visitors look for a " +
+const ASK_HEAD = "You are the search desk on museaal.ee, a catalogue of Estonian art. On this page visitors look for a " +
   "work to buy among the several thousand works the catalogue's galleries have for sale now, at asking prices from " +
   "tens of euros to tens of thousands (most paintings between a few hundred and a few thousand). The page also has " +
   "controls the visitor sets by hand: a price range, the medium, the size and mood words. Each turn you write a short " +
   "reply and return the whole search; the page sets its controls to your search and shows the ten works that match it " +
-  "best under your reply. You do not see the works before they are shown, so never name or describe a particular work, " +
-  "and never say what is available or what things cost; earlier turns note what was shown and how many works matched.\n\n" +
-  "The reply: one or two short sentences, neutral and factual, like a catalogue's search desk. Say in plain words what the " +
+  "best under your reply. ";
+const BLIND = "You do not see the works before they are shown, so never name or describe a particular work, " +
+  "and never say what is available or what things cost; earlier turns note what was shown and how many works matched.\n\n";
+const LOOK = "Before you answer you can look at the stock with three tools, which the page runs on the list it shows: search " +
+  "(the works a search admits, best first: how many, and the first ten not yet shown in this conversation, each with an id, " +
+  "title, artist, technique, size, asking price, gallery and its strongest mood words), artist (one artist's works for sale, " +
+  "how many works the museums hold, and their auction record) and similar (the works for sale closest to one work in mood " +
+  "and medium). When there is anything to search on, search before you answer and look at what it found. If it found " +
+  "nothing or only poor matches, change one thing -- a wider budget, one word fewer, a related medium or subject -- and " +
+  "search again. When the visitor names an artist, call artist in the same round as the first search. Call similar only " +
+  "when the visitor asks for works like one they have seen. One round is usually enough; there are at most two. Then answer with up " +
+  "to five picks from the works the tools returned in this turn, best first, by id, each with why: one short factual " +
+  "phrase in plain words on what it shows and its mood ('two doves, quiet and hopeful', 'an oil, calm sea under a low " +
+  "grey sky'), from its technique and mood words, never a list of them. The page shows the title, artist, year, size and price " +
+  "beside it: never mention those in why, and never translate a title. No praise, and nothing about an artist's style or " +
+  "tradition beyond what the tools said. State counts and " +
+  "prices exactly as the tools gave them. Return as the search the one your picks came from, so the page shows the rest of its works under " +
+  "them. Name works, prices and facts only from what the tools returned in this turn, never from memory. Earlier turns " +
+  "list the works shown with their ids; to say more about one of them, or find more like it, call similar with its id. " +
+  "If what the visitor asked for is not there (nothing by that artist for sale, nothing near the budget), say so plainly " +
+  "and pick the closest alternatives.\n\n";
+const ASK_TAIL = "The reply: one or two short sentences, neutral and factual, like a catalogue's search desk. Say in plain words what the " +
   "search now covers; if one fact would narrow it most, ask for it in a direct question. No greetings, compliments, " +
   "exclamations, enthusiasm or small talk, and no remarks on the visitor's taste, room or plans (never 'How lovely', " +
   "'great choice', 'something that sings'), and do not announce that you are searching. Ask only when the answer would " +
@@ -80,6 +104,7 @@ const SYSTEM_ASK = "You are the search desk on museaal.ee, a catalogue of Estoni
   "Prices, delivery, framing and how to buy are the gallery's: each work links to its page. Do not promise discounts, " +
   "availability or anything about a work's value as an investment. If asked something else, answer in one sentence and " +
   "return to the search. Words: " + WORDS.join(", ");
+const SYSTEM_ASK = ASK_HEAD + BLIND + ASK_TAIL, SYSTEM_TOOLS = ASK_HEAD + LOOK + ASK_TAIL;
 
 const MEDIA = ["oil", "acrylic", "watercolour", "mixed", "print", "drawing", "sculpture", "photo", "painting"];
 const SCHEMA_ASK = {
@@ -98,6 +123,28 @@ const SCHEMA_ASK = {
   required: ["reply", "show", "words", "terms", "media", "size", "budget_min", "budget_max", "artist"],
   additionalProperties: false,
 };
+
+// the tools: search takes the same fields as the answer's search; the answer adds the picks
+const ROUNDS = 2;                // tool rounds a turn, then Claude must answer (each Haiku round is ~4 s)
+const FIELDS = ["words", "terms", "media", "size", "budget_min", "budget_max", "artist"];
+const obj = (properties, required = Object.keys(properties)) => ({ type: "object", properties, required, additionalProperties: false });
+const TOOLS = [
+  { name: "search", strict: true, description: "Run a search over the works for sale, exactly as the page runs it. Returns how many " +
+    "works match and the first ten not yet shown, best first: id, title, artist, year, technique, size in cm, asking price in " +
+    "euros (null if on request), gallery, strongest mood words. by_artist_any_settings: when nothing matches a search with an " +
+    "artist, how many of their works are for sale outside the other settings.",
+    input_schema: obj(Object.fromEntries(FIELDS.map(k => [k, SCHEMA_ASK.properties[k]]))) },
+  { name: "artist", strict: true, description: "One artist's record: works for sale and their asking-price range, how many works " +
+    "the museums hold, the auction record (lots, sold, hammer prices: the middle half from four sales up, else lowest and " +
+    "highest), and up to ten of their works for sale. Takes a name or part of one; several matches return did_you_mean.",
+    input_schema: obj({ name: { type: "string" } }) },
+  { name: "similar", strict: true, description: "The works for sale closest to one work (by its id) in mood and medium, up to " +
+    "ten not yet shown; of: the work itself. budget_max in euros, 0 for none.",
+    input_schema: obj({ id: { type: "string" }, budget_max: { type: "integer" } }) },
+];
+const SCHEMA_PICKS = JSON.parse(JSON.stringify(SCHEMA_ASK));
+SCHEMA_PICKS.properties.picks = { type: "array", items: obj({ id: { type: "string" }, why: { type: "string" } }) };
+SCHEMA_PICKS.required.push("picks");
 
 // a photo of the visitor's room: where on the walls a work could hang, and how big that is. The
 // model marks the empty areas and one object of known size (the "ruler"); the centimetres are
@@ -196,10 +243,12 @@ function conversation(body) {
 // price a reply): thinking off (between_tools, Sonnet 5.5 only), low effort, and Anthropic's
 // server-side fallback, which re-runs a mistaken safety decline on another model
 const SONNET = "claude-sonnet-5-5";
-async function claude(env, system, messages, schema, max_tokens, model = MODEL) {
+// The message and its content blocks; null for a decline. After a fallback, only the blocks past the last
+// "fallback" marker are the answer. extra: tools, tool_choice, cache_control
+async function call(env, system, messages, schema, max_tokens, model = MODEL, extra = {}) {
   const sonnet = model === SONNET;
   const headers = { "x-api-key": env.ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01", "content-type": "application/json" };
-  const body = { model, max_tokens, system, messages, output_config: { format: { type: "json_schema", schema } } };
+  const body = { model, max_tokens, system, messages, output_config: { format: { type: "json_schema", schema } }, ...extra };
   if (sonnet) {
     headers["anthropic-beta"] = "server-side-fallback-2026-07-01";
     Object.assign(body, { thinking: { type: "between_tools" }, fallbacks: "default" });
@@ -208,10 +257,33 @@ async function claude(env, system, messages, schema, max_tokens, model = MODEL) 
   const r = await fetch("https://api.anthropic.com/v1/messages", { method: "POST", headers, body: JSON.stringify(body) });
   if (!r.ok) throw new Error("The reader answered " + r.status + ".");
   const m = await r.json();
+  if (extra.tools) console.log("ask", model, m.stop_reason, JSON.stringify(m.usage || {}));
   if (m.stop_reason === "refusal") return null;
-  // after a fallback, only the blocks past the last "fallback" marker are the answer
   const c = m.content || [], at = c.map(b => b.type).lastIndexOf("fallback");
-  return JSON.parse(c.slice(at + 1).filter(b => b.type === "text").map(b => b.text).join(""));
+  return { stop: m.stop_reason, content: c.slice(at + 1) };
+}
+const answer = content => JSON.parse(content.filter(b => b.type === "text").map(b => b.text).join(""));
+async function claude(env, system, messages, schema, max_tokens, model = MODEL) {
+  const m = await call(env, system, messages, schema, max_tokens, model);
+  return m && answer(m.content);
+}
+
+// the turn's tool rounds so far, as the page sends them back: Claude's turns (unchanged, thinking blocks
+// included: Sonnet needs them back as they were) and the page's results, alternating. Also the ids of
+// every work the results named: the only works Claude may pick
+function trailOf(t) {
+  if (!Array.isArray(t) || t.length > 2 * ROUNDS || t.length % 2 || JSON.stringify(t).length > 80000) return null;
+  const ids = new Set();
+  for (let i = 0; i < t.length; i++) {
+    const m = t[i], c = m && m.content;
+    if (!m || m.role !== (i % 2 ? "user" : "assistant") || !Array.isArray(c) || !c.length) return null;
+    if (i % 2 === 0 && !c.every(b => b && ["text", "thinking", "redacted_thinking", "tool_use"].includes(b.type))) return null;
+    if (i % 2 === 1) {
+      if (!c.every(b => b && b.type === "tool_result" && typeof b.content === "string" && b.content.length <= 10000)) return null;
+      for (const b of c) for (const x of b.content.matchAll(/"id":"(w\d+)"/g)) ids.add(x[1]);
+    }
+  }
+  return { t: t.map(m => ({ role: m.role, content: m.content })), ids };
 }
 
 // the language of a message: its common words counted; letters like ä alone (an Estonian name in English) do not decide it
@@ -254,12 +326,27 @@ async function ask(body, env, reply) {
     last.content = [{ type: "image", source: { type: "base64", media_type: "image/jpeg", data: img } }, { type: "text", text: last.content }];
   }
   const was = controls(body.filters);
-  const system = SYSTEM_ASK + "\n\n" + was.text + "\n\n" + (et
+  // a page that runs the tools, on a turn without a photo: Claude looks before it answers
+  const trail = body.tools && !photo ? trailOf(body.trail || []) : null;
+  if (body.tools && !photo && !trail) return reply({ error: "Unreadable search steps." }, 400);
+  const system = (trail ? SYSTEM_TOOLS : SYSTEM_ASK) + "\n\n" + was.text + "\n\n" + (et
     ? "Reply in Estonian: plain, neutral, matter-of-fact Estonian, addressing the visitor as 'sina'; no exclamations or compliments."
     : "Reply in English.") + (photo ? "\n\n" + ROOM(w, h) : "");
-  try { out = await claude(env, system, messages, photo ? SCHEMA_ROOM : SCHEMA_ASK, photo ? 1500 : et ? 800 : 400, photo || et ? SONNET : MODEL); }
+  const none = { reply: "", show: false, words: [], terms: [], media: [], kind: "any", size: "any", budget_min: 0, budget_max: 0, artist: "" };
+  try {
+    if (trail) {
+      // the same system, tools and messages every round, with the rounds appended: the cache and Sonnet's
+      // thinking blocks hold. After the last round the tools stay listed but cannot be called
+      const m = await call(env, system, messages.concat(trail.t), SCHEMA_PICKS, et ? 1500 : 1000, et ? SONNET : MODEL,
+        { tools: TOOLS, tool_choice: { type: trail.t.length / 2 >= ROUNDS ? "none" : "auto" }, cache_control: { type: "ephemeral" } });
+      if (!m) return reply(none);
+      const calls = m.content.filter(b => b.type === "tool_use");
+      if (m.stop === "tool_use" && calls.length) return reply({ calls: calls.map(b => ({ id: b.id, name: b.name, input: b.input })), content: m.content });
+      out = answer(m.content);
+    } else out = await claude(env, system, messages, photo ? SCHEMA_ROOM : SCHEMA_ASK, photo ? 1500 : et ? 800 : 400, photo || et ? SONNET : MODEL);
+  }
   catch (e) { return reply({ error: String(e.message || "The assistant could not be reached.") }, 502); }
-  if (!out) return reply({ reply: "", show: false, words: [], terms: [], media: [], kind: "any", size: "any", budget_min: 0, budget_max: 0, artist: "" });
+  if (!out) return reply(none);
   const media = [...new Set((out.media || []).filter(m => MEDIA.includes(m)))];
   // kind: what the page before the controls read (one medium, else any)
   const kind = media.length === 1 ? { oil: "paint", acrylic: "paint", painting: "paint", watercolour: "paper", mixed: "any", print: "paper", drawing: "paper", sculpture: "sculpture", photo: "photo" }[media[0]] : "any";
@@ -270,20 +357,25 @@ async function ask(body, env, reply) {
   // a turn that changes the search shows what it finds: the model tended to ask its question first and show nothing.
   // A search emptied by a turn that shows nothing ("thanks") is a slip, not a change: the page keeps its controls
   const now = key({ media, words, terms, lo, hi, size, artist }), empty = now === key({ media: [], words: [], terms: [], lo: 0, hi: 0, size: "any", artist: "" });
-  const show = !!out.show && !(empty && !String(out.reply || "").trim()) || (now !== was.key && !empty);
+  // picks: only works the tools returned this turn, each once
+  const picks = [];
+  for (const p of trail && Array.isArray(out.picks) ? out.picks : [])
+    if (p && trail.ids.has(p.id) && !picks.some(x => x.id === p.id) && picks.length < 5) picks.push({ id: p.id, why: short(p.why, 200) });
+  const show = !!out.show && !(empty && !String(out.reply || "").trim()) || (now !== was.key && !empty) || picks.length > 0;
   return reply({
     ...(photo ? { room: String(out.room || "").slice(0, 40), walls: walls(out, w, h) } : {}),
+    ...(trail ? { picks } : {}),
     reply: String(out.reply || "").slice(0, 600),
     show, words, terms, media, kind, artist, size, budget_min: lo, budget_max: hi,
   });
 }
 
-const seen = new Map();          // visitor -> times of their recent searches
-function tooMany(ip) {
-  const now = Date.now(), t = (seen.get(ip) || []).filter(x => now - x < 60000);
-  t.push(now); seen.set(ip, t);
-  if (seen.size > 5000) seen.clear();
-  return t.length > PER_MINUTE;
+const seen = new Map(), rounds = new Map();   // visitor -> times of their recent searches; of all their requests
+function tooMany(ip, map = seen, limit = PER_MINUTE) {
+  const now = Date.now(), t = (map.get(ip) || []).filter(x => now - x < 60000);
+  t.push(now); map.set(ip, t);
+  if (map.size > 5000) map.clear();
+  return t.length > limit;
 }
 
 const photos = new Map();        // visitor -> times of their recent photos: 6 a minute
@@ -308,10 +400,11 @@ export default {
     const reply = (body, status = 200) => new Response(JSON.stringify(body), { status, headers: { ...cors, "Content-Type": "application/json" } });
     if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: cors });
     if (request.method !== "POST" || !ok) return reply({ error: "This service answers museaal.ee only." }, 403);
-    if (tooMany(request.headers.get("CF-Connecting-IP") || "?")) return reply({ error: "Too many searches; wait a minute." }, 429);
-
     let body = {};
     try { body = await request.json(); } catch (e) {}
+    // a turn's later tool rounds count against the wider limit only
+    const ip = request.headers.get("CF-Connecting-IP") || "?", round = Array.isArray(body.trail) && body.trail.length > 0;
+    if (tooMany(ip, rounds, CALLS_PER_MINUTE) || !round && tooMany(ip)) return reply({ error: "Too many searches; wait a minute." }, 429);
     if (!env.ANTHROPIC_API_KEY) return reply({ error: "The service is not set up." }, 503);
     if (new URL(request.url).pathname === "/ask") {
       if (body.image && tooManyPhotos(request.headers.get("CF-Connecting-IP") || "?")) return reply({ error: "Too many photos; wait a minute." }, 429);

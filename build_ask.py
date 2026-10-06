@@ -89,7 +89,7 @@ T = {"en": dict(file="find.html", other="leia.html", other_l="Eesti keeles", sit
                 badphoto="That photo could not be read. Try a JPEG or PNG.",
                 label="Your message", ph="e.g. a misty landscape above the sofa, up to €2,000", send="Send",
                 more="Show more", at="at", noprice="Price on request", none="No work for sale matches this search. Widen the price range or clear a filter.",
-                thinking="Thinking…", failed="The assistant could not be reached. Try again in a moment.", record="In the catalogue",
+                thinking="Thinking…", how="How it searched", like="Works like", failed="The assistant could not be reached. Try again in a moment.", record="In the catalogue",
                 kinds=dict(paint="paintings", paper="works on paper", sculpture="sculpture", photo="photographs"),
                 sizes=dict(small="small", medium="medium", large="large"), under="under", over="over", shown="Shown",
                 media=dict(oil="Oil", acrylic="Acrylic", watercolour="Watercolour", mixed="Mixed media", print="Print", drawing="Drawing",
@@ -101,7 +101,7 @@ T = {"en": dict(file="find.html", other="leia.html", other_l="Eesti keeles", sit
                 auc="At auction: {s} of {n} sold", auc0="At auction: {n} lots, none sold", inmus="{n} works in museums", mostly="mostly",
                 daily="today's selection", fromchat="From the chat", artist="Artist", artistph="Type a name", artistlist="Artists with works for sale", titlew="In the title", filters="Filters",
                 groups=dict(feeling="Feeling", light="Light", colour="Colour", weather="Season and weather", subject="Subject"),
-                note="The works are the galleries' current stock with their asking prices, read weekly from each gallery's own site; the gallery's page is the one to trust. Your messages are read by Claude to choose the search and are not stored. The auction figures under a work are its artist's record as the houses published it, hammer prices: a record, not a valuation. The moods are read from the gallery's photograph by CLIP, an image model: a guide, not a judgement of the work.",
+                note="The works are the galleries' current stock with their asking prices, read weekly from each gallery's own site; the gallery's page is the one to trust. Your messages are read by Claude, which runs the searches and picks the works it suggests; they are not stored. The auction figures under a work are its artist's record as the houses published it, hammer prices: a record, not a valuation. The moods are read from the gallery's photograph by CLIP, an image model: a guide, not a judgement of the work.",
                 hash=""),
      "et": dict(file="leia.html", other="find.html", other_l="In English", site="Eesti Kunstikataloog",
                 h="Osta kunsti", title="Osta Eesti kunsti: müügil {n} teost koos hindadega", lede="Kunst sinu koju kataloogi galeriidest, praegu müügil. Sea hind, tehnika, suurus, meeleolu ja kunstnik või kirjelda, mida vajad. Iga teos viib seda müüva galerii lehele.",
@@ -114,7 +114,7 @@ T = {"en": dict(file="find.html", other="leia.html", other_l="Eesti keeles", sit
                 badphoto="Seda fotot ei õnnestunud lugeda. Proovi JPEG- või PNG-faili.",
                 label="Sinu sõnum", ph="nt udune maastik diivani kohale, kuni 2000 €", send="Saada",
                 more="Näita rohkem", at="", noprice="Hind päringul", none="Müügil pole ühtki teost, mis sellele otsingule vastaks. Laienda hinnavahemikku või eemalda mõni filter.",
-                thinking="Mõtlen…", failed="Abilist ei õnnestunud kätte saada. Proovi hetke pärast uuesti.", record="Kataloogis",
+                thinking="Mõtlen…", how="Kuidas otsisin", like="Sarnased teosele", failed="Abilist ei õnnestunud kätte saada. Proovi hetke pärast uuesti.", record="Kataloogis",
                 kinds=dict(paint="maalid", paper="tööd paberil", sculpture="skulptuur", photo="fotod"),
                 sizes=dict(small="väike", medium="keskmine", large="suur"), under="alla", over="üle", shown="Näidatud",
                 media=dict(oil="Õli", acrylic="Akrüül", watercolour="Akvarell", mixed="Segatehnika", print="Graafika", drawing="Joonistus",
@@ -126,7 +126,7 @@ T = {"en": dict(file="find.html", other="leia.html", other_l="Eesti keeles", sit
                 auc="Oksjonil: {n}-st müüdud {s}", auc0="Oksjonil: {n} partiid, müümata", inmus="muuseumides {n} teost", mostly="enamasti",
                 daily="tänane valik", fromchat="Vestlusest", artist="Kunstnik", artistph="Kirjuta nimi", artistlist="Kunstnikud, kelle teoseid on müügil", titlew="Pealkirjas", filters="Filtrid",
                 groups=dict(feeling="Tunne", light="Valgus", colour="Värv", weather="Aastaaeg ja ilm", subject="Aine"),
-                note="Teosed on galeriide praegune müügivalik ja nende küsitud hinnad, loetud iga nädal galeriide endi lehtedelt; usaldusväärne on galerii leht. Sinu sõnumeid loeb Claude otsingu valimiseks ja neid ei salvestata. Teose all olevad oksjoniandmed on kunstniku tulemused nii, nagu oksjonimajad need avaldasid (haamrihinnad): ülevaade, mitte hinnang. Meeleolu loeb galerii fotolt pildimudel CLIP: see on juhatus, mitte hinnang teosele.",
+                note="Teosed on galeriide praegune müügivalik ja nende küsitud hinnad, loetud iga nädal galeriide endi lehtedelt; usaldusväärne on galerii leht. Sinu sõnumeid loeb Claude, kes teeb otsingud ja valib soovitatavad teosed; neid ei salvestata. Teose all olevad oksjoniandmed on kunstniku tulemused nii, nagu oksjonimajad need avaldasid (haamrihinnad): ülevaade, mitte hinnang. Meeleolu loeb galerii fotolt pildimudel CLIP: see on juhatus, mitte hinnang teosele.",
                 hash="lang=et&")}
 
 def data():
@@ -175,7 +175,7 @@ var R=null, rooms=[];                              // the room on view (the late
 function stock(){ return P=P||fetch(src).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(d){
   var af=d.af=d.artists.map(function(a){return fold(a[0])});
   d.fame=d.artists.map(function(a){return Math.min(1,Math.log10(1+(a[2]||0))/3.3)});   // ~2,000 works in the museums: 1
-  d.works.forEach(function(w){var m={},f=w[12];for(var i=0;i<f.length;i+=2)m[d.words[f[i]]]=f[i+1]/10;w.m=m;w.af=af[w[1]]}); D=d; tally(); return d}).catch(function(e){P=null;throw e})}
+  d.works.forEach(function(w,k){var m={},f=w[12];for(var i=0;i<f.length;i+=2)m[d.words[f[i]]]=f[i+1]/10;w.m=m;w.af=af[w[1]];w.i=k}); D=d; tally(); return d}).catch(function(e){P=null;throw e})}
 function el(tag,cls,text){var x=document.createElement(tag);if(cls)x.className=cls;if(text!=null)x.textContent=text;return x}
 function eur(n){return '€'+String(n).replace(/\B(?=(\d{3})+(?!\d))/g,' ')}
 function cm(d){return d?Math.round(d[0])+(d[1]!==d[0]?' × '+Math.round(d[1]):'')+' cm':''}
@@ -427,7 +427,46 @@ function rank(q){
   return picked.concat(rest)}
 function count(n){return n===1?T.count1:T.count.replace('{n}',String(n).replace(/\B(?=(\d{3})+(?!\d))/g,' '))}
 function priceText(lo,hi){return lo&&hi?eur(lo)+' – '+eur(hi):hi?T.upto+' '+eur(hi):lo?T.from_+' '+eur(lo):T.anyprice}
-function card(w){
+// ---- the assistant's tools: Claude asks (through the Worker), the page answers from the stock it has ----
+function wid(w){return 'w'+w.i}
+function byId(id){var w=D.works[+String(id||'').slice(1)];return w&&wid(w)===id?w:null}
+function row(w){var a=D.artists[w[1]];return {id:wid(w),title:w[0],artist:a[0],year:w[2]||'',technique:w[4]||'',size:w[13]?cm(w[13]):(w[5]||''),
+  price:w[8]||null,gallery:D.galleries[w[9]],moods:Object.keys(w.m).sort(function(x,y){return w.m[y]-w.m[x]}).slice(0,3)}}
+function fresh(list){return list.filter(function(w){return !shownKeys[w[11]]}).slice(0,10).map(row)}
+function asQ(i){var a=function(v){return Array.isArray(v)?v.map(String):[]};
+  return {words:a(i.words).filter(function(x){return labels[x]}).slice(0,5),terms:a(i.terms).map(function(t){return t.toLowerCase()}).filter(function(t){return t.length>=3}).slice(0,8),
+    media:a(i.media).filter(function(x){return MB[x]}),min:Math.max(0,+i.budget_min||0),max:Math.max(0,+i.budget_max||0),
+    size:/^(small|medium|large)$/.test(i.size)?i.size:'any',artist:String(i.artist||'').slice(0,60)}}
+function norm(m){var s=0;for(var k in m)s+=m[k]*m[k];return Math.sqrt(s)||1}
+var TOOL={
+  search:function(i){var q=asQ(i),all=rank(q),r={matched:all.length,works:fresh(all)};
+    if(!all.length&&q.artist){var s=blank();s.artist=q.artist;r.by_artist_any_settings=rank(s).length}
+    return r},
+  artist:function(i){var f=fold(String(i.name||'')).split(/[\s.,-]+/).filter(function(x){return x.length>1}),hits=[];
+    if(f.length)D.artists.forEach(function(a,k){if(f.every(function(x){return D.af[k].indexOf(x)>=0}))hits.push(k)});
+    var exact=hits.filter(function(k){return D.af[k]===f.join(' ')});if(exact.length)hits=exact;
+    if(!hits.length)return {found:false,note:'No artist of that name has works for sale here.'};
+    if(hits.length>1)return {found:false,did_you_mean:hits.slice(0,8).map(function(k){return D.artists[k][0]})};
+    var k=hits[0],a=D.artists[k],ws=D.works.filter(function(w){return w[1]===k}),ps=ws.map(function(w){return w[8]}).filter(Boolean).sort(function(x,y){return x-y});
+    var s=blank();s.artist=a[0];
+    return {name:a[0],for_sale:ws.length,asking_prices:ps.length?[ps[0],ps[ps.length-1]]:null,museum_works:a[2],
+      auction:{lots:a[3],sold:a[4],hammer:a[5]?[a[5],a[6]]:null,hammer_is:a[7]?'middle half of hammer prices':'lowest and highest'},
+      works:fresh(rank(s).filter(function(w){return w[1]===k}))}},
+  similar:function(i){var w=byId(i.id);if(!w)return {error:'No work with that id.'};
+    var max=Math.max(0,+i.budget_max||0),n=norm(w.m);
+    var out=D.works.filter(function(x){return x!==w&&(!max||x[8]&&x[8]<=max)}).map(function(x){var s=0;
+      for(var k in w.m)if(x.m[k])s+=w.m[k]*x.m[k];s=s/(n*norm(x.m));if(x[14]&w[14])s+=.3;if(x[1]===w[1])s+=.1;return [s,x]});
+    out.sort(function(a,b){return b[0]-a[0]});
+    return {of:row(w),works:fresh(out.map(function(p){return p[1]}))}}};
+function describe(q){var b=q.media.map(function(m){return T.media[m]});if(q.size!=='any')b.push(T.sizes[q.size]);
+  if(q.min||q.max)b.push(priceText(q.min,q.max));b=b.concat(q.words.map(function(x){return labels[x]||x}));
+  if(q.terms.length)b.push(T.titlew+': '+q.terms.join(', '));if(q.artist)b.push(q.artist);return b.join(' · ')||T.daily}
+// one line of "How it searched" for a tool call and its result
+function step(c,r){var i=c.input||{};
+  if(c.name==='search')return describe(asQ(i))+' → '+count(r.matched||0);
+  if(c.name==='artist')return T.artist+': '+(r.name||String(i.name||''))+(r.for_sale?' → '+count(r.for_sale):'');
+  return T.like+' '+(r.of?r.of.title+' — '+r.of.artist:'')}
+function card(w,why){
   var a=D.artists[w[1]], g=D.galleries[w[9]], c=el('article','card');
   var out=el('a','out');out.href=w[10];out.target='_blank';out.rel='noopener';
   out.addEventListener('click',function(){if(window.goatcounter&&goatcounter.count)goatcounter.count({path:'find-out',title:g,event:true})});
@@ -436,6 +475,7 @@ function card(w){
   var meta=[w[4],w[5]].filter(Boolean).join(' · ');if(meta)out.appendChild(el('span','meta',meta));
   var pr=el('span','price');pr.appendChild(el('b',null,w[8]?eur(w[8]):T.noprice));pr.appendChild(document.createTextNode(' '+(T.at?T.at+' ':'')+g+' ↗'));out.appendChild(pr);
   c.appendChild(out);
+  if(why)c.appendChild(el('p','why',why));
   // the artist's record beside the asking price: the museums' holdings and the auction record (not a valuation)
   var ctx=[];
   if(a[4])ctx.push(T.auc.replace('{s}',a[4]).replace('{n}',a[3])+(a[5]?(a[7]?', '+T.mostly+' ':' · ')+(a[6]>a[5]?eur(a[5])+'–'+eur(a[6]):eur(a[5])):''));
@@ -449,8 +489,9 @@ function card(w){
   return c}
 // the search's results into box: what it was, how many answer to it, and ten at a time, leaving out works an
 // earlier turn showed
-function show(box,q){
-  var all=rank(q), list=all.filter(function(w){return !shownKeys[w[11]]}), n=0, keys=[], grid=el('div','grid'), more=el('button','btn more',T.more);more.type='button';
+function show(box,q,picks){
+  var why={}, pk=(picks||[]).map(function(p){var w=byId(p.id);if(w)why[w.i]=p.why;return w}).filter(Boolean);
+  var all=rank(q), list=pk.concat(all.filter(function(w){return !shownKeys[w[11]]&&!(w.i in why)})), n=0, keys=[], grid=el('div','grid'), more=el('button','btn more',T.more);more.type='button';
   var bits=[count(all.length)].concat(q.media.map(function(m){return T.media[m]}));
   if(R){var ws=wallCm(R,R.sel?R.sel.wall:0);bits.push(T.fits+' '+Math.round(ws[0])+' × '+Math.round(ws[1])+' cm')}else if(q.size!=='any')bits.push(T.sizes[q.size]);
   if(q.min||q.max)bits.push(priceText(q.min,q.max));
@@ -465,9 +506,9 @@ function show(box,q){
     if(k){var p=el('p','none',T.artistonly.replace('{who}',q.artist).replace('{n}',count(k))+' '),go=el('button','linkbtn',T.showthem);go.type='button';
       go.addEventListener('click',function(){Q=solo;changed()});p.appendChild(go);box.appendChild(p)}
     return {note:k?T.artistonly.replace('{who}',q.artist).replace('{n}',count(k)):'',list:list,keys:keys}}
-  function page(){list.slice(n,n+10).forEach(function(w){grid.appendChild(card(w));shownKeys[w[11]]=1;keys.push(w[11])});n+=10;more.hidden=n>=list.length}
+  function page(){list.slice(n,n+10).forEach(function(w){grid.appendChild(card(w,why[w.i]));shownKeys[w[11]]=1;keys.push(w[11])});n+=10;more.hidden=n>=list.length}
   page();box.appendChild(grid);box.appendChild(more);more.addEventListener('click',page);
-  return {list:list,keys:keys,note:T.shown+' '+Math.min(10,list.length)+' / '+all.length+': '+list.slice(0,10).map(function(w){return w[0]+' — '+D.artists[w[1]][0]+(w[8]?', '+eur(w[8]):'')+(w[13]?', '+cm(w[13]):'')}).join('; ')}}
+  return {list:list,keys:keys,note:T.shown+' '+Math.min(10,list.length)+' / '+all.length+': '+list.slice(0,10).map(function(w){return w[0]+' — '+D.artists[w[1]][0]+(w[8]?', '+eur(w[8]):'')+(w[13]?', '+cm(w[13]):'')+' ['+wid(w)+']'}).join('; ')}}
 
 // ---- the controls: price range, medium, size, mood words ----
 var F=document.getElementById('filters'), plo=document.getElementById('plo'), phi=document.getElementById('phi'), pout=document.getElementById('pout');
@@ -545,17 +586,27 @@ function send(text,photo){
   var said=(photo?T.photomsg+(text?' ':''):'')+text;
   msgs.push({role:'user',content:said}); input.value='';
   var b=bubble('them',photo?T.looking:T.thinking); b.classList.add('wait');
-  var body={messages:msgs.slice(-12),lang:document.documentElement.lang,filters:Q};
-  if(photo){body.image=photo.data;body.w=photo.w;body.h=photo.h}
-  Promise.all([fetch(api,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).then(function(r){return r.json().then(function(j){if(!r.ok)throw j;return j})}),stock()])
-  .then(function(res){var q=res[0], extra='', s={note:'',list:[]};
+  // the controls as they were when the message was sent, the same for each of its rounds
+  var body={messages:msgs.slice(-12),lang:document.documentElement.lang,filters:JSON.parse(JSON.stringify(Q))}, steps=[];
+  if(photo){body.image=photo.data;body.w=photo.w;body.h=photo.h}else{body.tools=1;body.trail=[]}
+  // a round: the Worker answers, or asks for searches, which run here on the stock and go back with the next round
+  function round(){return Promise.all([fetch(api,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).then(function(r){return r.json().then(function(j){if(!r.ok)throw j;return j})}),stock()])
+    .then(function(res){var q=res[0];
+      if(!q.calls||!q.calls.length||!body.trail||body.trail.length>=8)return res;
+      var out=q.calls.map(function(c){var r;try{r=TOOL.hasOwnProperty(c.name)?TOOL[c.name](c.input||{}):{error:'No such tool.'}}catch(e){r={error:'The search failed.'}}
+        steps.push(step(c,r));return {type:'tool_result',tool_use_id:c.id,content:JSON.stringify(r)}});
+      body.trail.push({role:'assistant',content:q.content},{role:'user',content:out});
+      b.firstChild.textContent=steps[steps.length-1]+'…';
+      return round()})}
+  round().then(function(res){var q=res[0], extra='', s={note:'',list:[]};
     b.classList.remove('wait'); b.firstChild.textContent=q.reply||'…';
+    if(steps.length){var how=el('details','steps');how.appendChild(el('summary',null,T.how));steps.forEach(function(x){how.appendChild(el('p',null,x))});b.appendChild(how)}
     if(photo){
       if(q.walls&&q.walls.length){R=roomView(b,photo,q.walls);
         extra=' ('+T.roomnote+': '+(q.room||'')+'; '+q.walls.map(function(w){return w.where+' '+w.w_cm+' × '+w.h_cm+' cm'}).join('; ')+')'}
       else b.appendChild(el('p','none',T.nowall));
     }
-    if(q.show||photo){take(q);var box=el('div');b.appendChild(box);s=show(box,Q);live={b:b,box:box,keys:s.keys,turn:true}}
+    if(q.show||photo){take(q);var box=el('div');b.appendChild(box);s=show(box,Q,q.picks);live={b:b,box:box,keys:s.keys,turn:true}}
     else if(live)live.turn=true;
     if(R&&s.list.length){fill(R,s.list);if(photo&&R.v.parentNode===b)hang(R,R.list[0])}
     msgs.push({role:'assistant',content:(q.reply||'')+extra+(s.note?' ('+s.note+')':'')});
@@ -652,6 +703,8 @@ CSS = BM.CSS + """
 .card .price{font-size:.78rem;color:var(--grey)}.card .price b{font:500 .86rem/1.3 var(--mono);color:var(--ink);margin-right:4px}
 .card .rec{font-size:.72rem;color:var(--grey)}
 .card .ctx{font:500 .66rem/1.35 var(--mono);color:var(--grey);letter-spacing:.02em}
+.card .why{margin:2px 0 0;font-size:.78rem;line-height:1.35;color:var(--ink)}
+.steps{margin:6px 0 0;font-size:.74rem;color:var(--grey)}.steps summary{cursor:pointer}.msg .steps p{margin:3px 0 0 1em}
 .more{justify-self:start;margin-top:12px}
 form.ask{position:sticky;bottom:0;background:var(--paper);padding:12px 0 6px;border-top:1px solid var(--rule);display:flex;gap:8px;flex-wrap:wrap}
 form.ask label[for=q]{position:absolute;left:-9999px}
@@ -750,7 +803,7 @@ PHOTO = False
 def page(lang, ver, api, labels, M, n=0):
     t = T[lang]
     me, other = f"{BASE}/{t['file']}", f"{BASE}/{t['other']}"
-    tj = json.dumps({k: t[k] for k in ("more", "at", "noprice", "none", "thinking", "failed", "record", "sizes", "shown", "hash",
+    tj = json.dumps({k: t[k] for k in ("more", "at", "noprice", "none", "thinking", "how", "like", "failed", "record", "sizes", "shown", "hash",
                                        "media", "anyprice", "upto", "from_", "count", "count1", "moremoods", "fewer", "clear", "artist", "titlew", "artistonly", "showthem", "daily", "auc", "auc0", "inmus", "mostly",
                                        "yourroom", "looking", "photomsg", "wallw", "drag", "onwall", "fits", "roomnote", "nowall", "badphoto",
                                        "choose", "hangmore", "remove", "together", "frames", "reset", "ar", "arwait", "arfail", "arsafari")}, ensure_ascii=False).replace("</", "<\\/")
