@@ -46,6 +46,14 @@ door = ('<div class="d-names"><h2>' + e(I18N["EN"]["doors_name"]) + '</h2><ul>'
         # a link each, to the artist's own page: what a crawler follows from the landing
         # page, and what a reader gets before the app is here; the app intercepts the click
         + "".join(f'<li><a href="a/{slug(A[i]["n"])}.html" data-door="a" data-v="{i}"><span>{e(A[i]["n"])}</span></a></li>' for i in canon) + "</ul></div>")
+# ...and the themes and moods beside them, read from the app's own lists
+_app = open("tpl_app.html", encoding="utf-8").read()
+WAYS = json.loads(re.search(r"const DOOR_WAYS = (\[.*?\]);", _app, re.S).group(1))
+MOODS = json.loads(re.search(r"const DOOR_MOODS = (\[.*?\]);", _app, re.S).group(1))
+door += ('<div class="d-ways"><div><h2>' + e(I18N["EN"]["doors_theme"]) + '</h2><p>'
+         + " ".join(f'<a href="{e(x["href"])}"' + (f' data-door="{x["door"]}" data-v="{e(x["v"])}"' if x.get("door") else "") + f'>{e(x["en"])}</a>' for x in WAYS)
+         + '</p></div><div><h2>' + e(I18N["EN"]["doors_mood"]) + '</h2><p>'
+         + " ".join(f'<a href="mood.html#w={en}">{e(en[:1].upper() + en[1:])}</a>' for en, _et in MOODS) + '</p></div></div>')
 
 # the wall: pictured works, masterpieces first (rank slipped by the seed), then the
 # door's names and the highlights, then the rest -- artists taking turns within a medium

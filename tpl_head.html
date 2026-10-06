@@ -696,6 +696,13 @@ footer a{border-bottom:1px solid var(--rule)}
   font-family:var(--serif-text);font-size:var(--fs-md)}
 .doors button:hover,.doors a[data-door]:hover{background:var(--raise)}
 .doors button:focus-visible,.doors a[data-door]:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+/* themes and moods: a line of links each, quieter than the names */
+.doors .d-ways{display:grid;grid-template-columns:3fr 2fr;gap:var(--sp-2) var(--sp-4);margin:var(--sp-3) 0 var(--sp-4)}
+@media(max-width:760px){.doors .d-ways{grid-template-columns:1fr}}
+.doors .d-ways p{display:flex;flex-wrap:wrap;gap:6px 16px;margin:0}
+.doors .d-ways a,.doors .d-ways a[data-door]{display:inline;width:auto;min-height:0;padding:0;background:none;color:var(--ink);
+  font-family:var(--serif-text);font-size:var(--fs-md);text-decoration:none;border-bottom:1px solid var(--rule)}
+.doors .d-ways a:hover{border-bottom-color:var(--ink);background:none}
 .doors .n{font-family:var(--mono);font-size:var(--fs-sm);color:var(--grey-4);
   font-variant-numeric:tabular-nums;flex:none}
 @media(max-width:760px){.doors{grid-template-columns:1fr;gap:var(--sp-3)}}

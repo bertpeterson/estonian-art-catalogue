@@ -1494,6 +1494,22 @@
                  "Evald Okas", "Evi Tihemets", "Jüri Arrak", "Malle Leis",
                  "Silvi Liiva", "Mare Vint", "Leonhard Lapin", "Merike Estna"];
   const CANON_SET = new Set(CANON.map(n => A.findIndex(a => a.n === n)).filter(i => i >= 0));
+  // ...and ways in that are not a name: pages the catalogue already has (a decade, a
+  // subject, Buy art under €1,000), the occupation years and the Pallas school as the
+  // filters they are, and words that open the mood wall. build_landing.py bakes the same.
+  const DOOR_WAYS = [
+    {"en": "The 1930s", "et": "1930. aastad", "href": "decades/1930.html", "het": "kumnendid/1930.html"},
+    {"en": "The occupation years, 1940–1990", "et": "Okupatsiooniaeg 1940–1990", "href": "#from=1940&to=1990", "door": "p", "v": "3"},
+    {"en": "The Pallas school", "et": "Pallase koolkond", "href": "#grp=school:Pallas", "door": "g", "v": "school:Pallas"},
+    {"en": "Winter", "et": "Talv", "href": "subjects/winter.html", "het": "ained/talv.html"},
+    {"en": "The sea", "et": "Meri", "href": "subjects/the-sea.html", "het": "ained/meri.html"},
+    {"en": "Tallinn", "et": "Tallinn", "href": "subjects/tallinn.html", "het": "ained/tallinn.html"},
+    {"en": "Italy", "et": "Itaalia", "href": "subjects/italy.html", "het": "ained/itaalia.html"},
+    {"en": "Self-portraits", "et": "Autoportreed", "href": "subjects/self-portrait.html", "het": "ained/autoportree.html"},
+    {"en": "For sale under €1,000", "et": "Müügil alla 1000 €", "href": "find.html#max=1000", "het": "leia.html#max=1000"}
+  ];
+  const DOOR_MOODS = [["serene", "rahulik"], ["melancholy", "melanhoolne"], ["dreamy", "unenäoline"], ["stormy", "tormine"],
+                      ["wintry", "talvine"], ["mysterious", "salapärane"], ["misty", "udune"], ["golden", "kuldne"]];
   // Artists a public collection has accessioned AND a gallery is selling right now.
   const FOR_SALE = W.reduce((n, w) => n + (w.kind === "gallery" ? 1 : 0), 0);
   // works a gallery is selling now, per artist (the index's and the artist view's "For sale now")
@@ -1531,7 +1547,12 @@
       // handler opens the artist in place instead), a period a button
       ([label, n, kind, v]) => (kind === "a" ? `<li><a href="${LANG === "et" ? "k" : "a"}/${esc(slug(A[v].n))}.html" data-door="a" data-v="${v}">` : `<li><button data-door="${kind}" data-v="${v}">`) +
         `<span>${esc(label)}</span>${kind === "a" ? "" : `<span class="n">${num(n)}</span>`}${kind === "a" ? "</a>" : "</button>"}</li>`).join("") + "</ul></div>";
-    el.innerHTML = col("doors_name", TOP_ART.map(([i, n]) => [A[i].n, n, "a", i]), "d-names");
+    const cap = w => w[0].toUpperCase() + w.slice(1);      // capitalised like the themes beside them
+    const ways = `<div class="d-ways"><div><h2>${esc(T("doors_theme"))}</h2><p>` + DOOR_WAYS.map(x =>
+        `<a href="${esc(LANG === "et" && x.het ? x.het : x.href)}"${x.door ? ` data-door="${x.door}" data-v="${esc(x.v)}"` : ""}>${esc(LANG === "et" ? x.et : x.en)}</a>`).join(" ")
+      + `</p></div><div><h2>${esc(T("doors_mood"))}</h2><p>` + DOOR_MOODS.map(([en, et]) =>
+        `<a href="${LANG === "et" ? "meeleolu" : "mood"}.html#w=${en}">${esc(cap(LANG === "et" ? et : en))}</a>`).join(" ") + "</p></div></div>";
+    el.innerHTML = col("doors_name", TOP_ART.map(([i, n]) => [A[i].n, n, "a", i]), "d-names") + ways;
     el.hidden = false;
   }
 
@@ -2065,6 +2086,7 @@
     if (b.tagName === "A") e.preventDefault();      // the baked door is links; once the app is here it opens in place
     const v = +b.dataset.v;
     if (b.dataset.door === "a") state.artist = v;
+    else if (b.dataset.door === "g") state.groups = new Set([b.dataset.v]);
     else { state.from = DOOR_PERIODS[v][0]; state.to = DOOR_PERIODS[v][1]; }
     renderAll(); pushHash();
   });
