@@ -1139,7 +1139,9 @@ for i, a in enumerate(artists):
         a["l"], a["ls"] = ["", ""], "ed"; WD_UNDONE += 1
 print("  wikidata: newly matched", WD_MATCHED, "/ life dates filled", WD_DATED, "/ undone as wrong person", WD_UNDONE)
 # Origins Wikidata leaves out, where we know them: set by hand, editorial
-AFF_KNOWN = {"Elīna Vītola": "Latvian"}   # Kogo Gallery's painter; Art Academy of Latvia
+AFF_KNOWN = {"Elīna Vītola": "Latvian",   # Kogo Gallery's painter; Art Academy of Latvia
+             "Agate Tūna": "Latvian",     # Kogo; photographer from Riga, Art Academy of Latvia
+             "Eetu Sihvonen": "Finnish"}  # Temnikova; Academy of Fine Arts, Helsinki
 for a in artists:
     if a["n"] in AFF_KNOWN: a["aff"] = AFF_KNOWN[a["n"]]
 
