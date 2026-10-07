@@ -351,7 +351,8 @@
                  view:null, viewKey:"", wLimit:72,   // the artwall: chosen for one view (viewKey), or null for the rule
                  decade:null, media:new Set(), museums:new Set(), cats:new Set(), srcs:new Set(),
                  artist:null, letter:null, idxOpen:false, idxQ:"", idxLimit:120, idxSort:"az", showEarly:false, origins:new Set(), groups:new Set(), sort:"featured", onWall:false, year:null, gLimit:50, from:null, to:null, undOnly:false, open:null, expand:new Set(),
-                 auLimit:20};     // sales drawn in the auction view before "more"
+                 auLimit:20,      // sales drawn in the auction view before "more"
+                 histo:false};    // the decades chart: closed on the home page, opened from the works figure
   const LIMIT_DEC = 50, LIMIT_ART = 18;
   const slug = s => (s||"").normalize("NFKD").replace(/[\u0300-\u036f]/g,"")
       .toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"");
@@ -385,6 +386,8 @@
     if (state.view) p.set("view", state.view);
     if (state.open) p.set("open", state.open);
     if (state.idxOpen) p.set("index", state.letter || "all");
+    const timed = state.decade !== null || state.year !== null || state.from !== null || state.to !== null || state.undOnly;
+    if (state.histo && !timed) p.set("decades", "1");
     // The list travels as its keys, so "Link to this view" of your own list is a link
     // anyone can open. An empty list is "mine" -- nothing to carry.
     if (state.sale) p.set("sale", state.saleUp ? "up" : "1");
@@ -427,6 +430,9 @@
     state.from = nOrNull(p.get("from"));
     state.to   = nOrNull(p.get("to"));
     state.undOnly = p.get("undated") === "1";
+    // a link into a decade, era or span of years opens the chart it was chosen on
+    state.histo = p.get("decades") === "1" || state.decade !== null || state.year !== null
+      || state.from !== null || state.to !== null || state.undOnly;
     const g = k => p.getAll(k);
     state.media   = new Set(MEDIA.filter(m => g("medium").includes(slug(m))));
     state.museums = new Set(MUSEUMS.filter(m => g("museum").includes(abbr(m).toLowerCase())));
@@ -544,6 +550,11 @@
     // Each bar is split: museum holdings below, gallery stock above. Since NOBA, the
     // 2020s bar is 98% works for sale, and an unsplit bar read as the most-collected
     // decade in Estonian history. The shape must not lie at a glance.
+    // the chart is the catalogue's shape, not a door: on the home page it waits behind the
+    // works figure, and is not drawn while closed
+    $("histo").hidden = !state.histo;
+    $("stat-wbtn").setAttribute("aria-pressed", state.histo);
+    if (!state.histo) return;
     const set = baseSet(), counts = {}, sale = {}; DECADES.forEach(d=>{counts[d]=0; sale[d]=0;}); counts.und = sale.und = 0;
     set.forEach(w => { const d = decOf(w); if (d in counts){ counts[d]++; if (w.kind === "gallery") sale[d]++; } });
     const max = Math.max(1, ...DECADES.map(d=>counts[d]));
@@ -1262,8 +1273,8 @@
     $("v-list").setAttribute("aria-pressed", !wall);
     $("v-wall").setAttribute("aria-pressed", wall);
     $("v-wall").innerHTML = esc(T("v_wall")) + `<span class="v-n">${fmt(nPics)}</span>`;
-    // On the untouched page the wall stands alone: the histogram, the door and the
-    // search are the ways into the other 68,000 works, not a mosaic of every decade.
+    // On the untouched page the wall stands alone: the works figure's decades chart, the
+    // door and the search are the ways into the other 68,000 works, not a mosaic of every decade.
     const home = wall && pristine() && !listKeys();
     // The landing page is baked into the HTML and is on the screen; the first render
     // would replace it with the same tiles in the same order. It is left as it is --
@@ -2053,6 +2064,10 @@
     setGroup("auction"); state.decOrder = "latest"; state.expand.clear(); state.auLimit = 20; state.open = null; syncOrder();
     renderAll(); pushHash();
     jumpTo(viewTop($("register")));
+  });
+  $("stat-wbtn").addEventListener("click", () => {
+    state.histo = !state.histo; renderBars(); pushHash();
+    if (state.histo) jumpTo($("histo"), true);
   });
   $("stat-art").addEventListener("click", () => {
     $("g-artist").click();     // the control bar's By artist, so the two never drift apart

@@ -727,7 +727,8 @@ footer a{border-bottom:1px solid var(--rule)}
         </div>
       </div>
       <div class="mast-stats">
-        <div><b id="stat-w">0</b><span data-i18n="works"></span></div>
+        <!-- opens the works per decade, which no longer stands open on the home page -->
+        <button class="stat-btn stat-in" id="stat-wbtn" aria-pressed="false" aria-controls="histo"><b id="stat-w">0</b><span data-i18n="works"></span></button>
         <!-- a door too: the register regrouped by artist, the same toggle as By artist -->
         <button class="stat-btn stat-in" id="stat-art"><b id="stat-a">0</b><span data-i18n="artists"></span></button>
         <!-- museums and galleries are counted in the sources note, not here: four
@@ -754,7 +755,7 @@ footer a{border-bottom:1px solid var(--rule)}
     <div class="fs-works" id="fs-works"></div>
   </section>
 
-  <section class="histo">
+  <section class="histo" id="histo" hidden>
     <div class="histo-head">
       <span><span class="eyebrow" data-i18n="worksperdecade"></span></span>
       <span class="eyebrow" id="histo-hint">Select a decade to filter</span>
