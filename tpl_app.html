@@ -1551,6 +1551,7 @@
     // the names are a way in, for the untouched page only: once anything is chosen --
     // a filter, a search, a view -- the results come first
     $("forsale").hidden = !pristine();               // Buy art: on the untouched page, like the door
+    $("findlink").hidden = pristine();               // ...and its link in the control bar once the band has gone
     if (!pristine() || state.group !== "decade"){ el.hidden = true; el.innerHTML = ""; return; }
     const num = n => n.toLocaleString(LANG === "en" ? "en-GB" : "et-EE");
     const col = (head, items, cls, tag) => `<div class="${cls || ""}"><h2>${esc(T(head))}${tag ? ` <span class="tag">${esc(tag)}</span>` : ""}</h2><ul>` + items.map(

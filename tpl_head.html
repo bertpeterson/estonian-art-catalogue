@@ -153,7 +153,6 @@ h1 a:hover{color:var(--grey-6)}
   .fs-w{scroll-snap-align:start}}
 .vh{position:absolute;left:-9999px}
 /* the controls' door to it: the one filled button in the row */
-.moodlink#findlink{background:var(--invert-bg);color:var(--invert-fg);border-color:var(--invert-bg)}
 .eyebrow{font-family:var(--mono);font-size:var(--fs-sm);letter-spacing:var(--ls-label);text-transform:uppercase;color:var(--grey-6)}
 .bars{display:flex;gap:26px;align-items:stretch}
 .cent{display:flex;flex-direction:column;gap:0;min-width:0}
@@ -809,7 +808,7 @@ footer a{border-bottom:1px solid var(--rule)}
         <button id="g-auc" aria-pressed="false" data-i18n="auctions"></button>
       </div>
       <!-- the catalogue by feeling: a page of its own (build_mood.py) -->
-      <a class="moodlink" id="moodlink" href="mood.html" data-i18n="moodlink"></a><a class="moodlink" id="findlink" href="find.html" data-i18n="findlink"></a>
+      <a class="moodlink" id="moodlink" href="mood.html" data-i18n="moodlink"></a><a class="moodlink" id="findlink" href="find.html" data-i18n="findlink" hidden></a>
     </div>
     <div class="ctl">
       <select id="sortby" class="sortsel" aria-label="Sort rows by">
