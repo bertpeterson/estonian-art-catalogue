@@ -820,8 +820,8 @@
     // "A-Z / most works" controls one above the other were one too many.
     const bySale = inArt ? state.sort === "forsale" : state.idxSort === "sale";
     const byWorks = bySale || (inArt ? state.sort === "works" : state.idxSort === "works");
-    // for sale now: only the artists a gallery is selling, most works on offer first
-    if (bySale) show = show.filter(x => SALE_N.get(x.i)).sort((a,b)=> SALE_N.get(b.i) - SALE_N.get(a.i) || cmpStr(a.s, b.s));
+    // for sale now: only the artists a gallery is selling, museum-held first, most works on offer first
+    if (bySale) show = show.filter(x => SALE_N.get(x.i)).sort((a,b)=> bySaleN(a.i, b.i) || cmpStr(a.s, b.s));
     else if (byWorks) show = show.slice().sort((a,b)=> b.c - a.c || cmpStr(a.s, b.s));
     const total = show.length;
     show = show.slice(0, state.idxLimit);
@@ -1525,6 +1525,10 @@
   const FOR_SALE = W.reduce((n, w) => n + (w.kind === "gallery" ? 1 : 0), 0);
   // works a gallery is selling now, per artist (the index's and the artist view's "For sale now")
   const SALE_N = W.reduce((m, w) => (w.kind === "gallery" && m.set(w.a, (m.get(w.a) || 0) + 1), m), new Map());
+  // ...led by the artists a public collection holds: a name known only from a gallery's stock
+  // (Katrin Piile's 101 works at one shop) does not head the list over Jüri Arrak
+  const HELD_A = new Set(W.filter(isHeld).map(w => w.a));
+  const bySaleN = (x, y) => HELD_A.has(y) - HELD_A.has(x) || (SALE_N.get(y) || 0) - (SALE_N.get(x) || 0);
   const TOP_ART = (() => {
     const c = new Map(); W.forEach(w => c.set(w.a, (c.get(w.a) || 0) + 1));
     const byName = new Map(A.map((a, i) => [a.n, i]));
@@ -1670,7 +1674,7 @@
       let r;
       if (state.sort === "born"){ const bx = born(x), by = born(y); if (!bx !== !by) return bx ? -1 : 1; r = bx - by; }
       else if (state.sort === "works") r = n.get(y) - n.get(x);
-      else if (state.sort === "forsale") r = (SALE_N.get(y) || 0) - (SALE_N.get(x) || 0);
+      else if (state.sort === "forsale") r = bySaleN(x, y);
       else r = byName(x, y);
       return (rev ? -r : r) || byName(x, y);
     });
