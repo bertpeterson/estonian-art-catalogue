@@ -129,10 +129,10 @@ ET = {
 EN = {
  "sub":"Art in Estonia's public collections and galleries · 1835–2024",
  "works":"works","artists":"artists","museums":"museums","forsale":"for sale","auctioned":"auctioned","forsale_chip":"For sale",
- "srcsummary":"Sources & method","statslink":"The catalogue in figures","moodlink":"By mood","findlink":"Buy art",
- "forsalenow":"For sale now","seeinbuy":"See them in Buy art","seeinbuy1":"See it in Buy art",
+ "srcsummary":"Sources & method","statslink":"The catalogue in figures","moodlink":"By mood","findlink":"Buy Art",
+ "forsalenow":"For sale now","seeinbuy":"See them in Buy Art","seeinbuy1":"See it in Buy Art",
  "tagline":"Look up Estonian art in the museums, and buy works from the galleries.",
- "fs_eye":"For sale now","fs_h":"Buy art","fs_lede":"{n} works at {g} galleries, with their asking prices.",
+ "fs_eye":"For sale now","fs_h":"Buy Art","fs_lede":"{n} works at {g} galleries, with their asking prices.",
  "fs_ph":"e.g. a calm sea painting under €1,000","fs_go":"Search","fs_all":"All works for sale →","fs_byartist":"By artist →",
  "worksperdecade":"Works per decade",
  "selectdecade":"Select a decade to filter",
