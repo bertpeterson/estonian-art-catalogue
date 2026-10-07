@@ -104,7 +104,7 @@ T = {"en": dict(file="find.html", other="leia.html", other_l="Eesti keeles", sit
                 note="The works are the galleries' current stock with their asking prices, read weekly from each gallery's own site; the gallery's page is the one to trust. Your messages are read by Claude, which runs the searches and picks the works it suggests; they are not stored. The auction figures under a work are its artist's record as the houses published it, hammer prices: a record, not a valuation. The moods are read from the gallery's photograph by CLIP, an image model: a guide, not a judgement of the work.",
                 sl_add="Add to my list", sl_remove="Remove from my list", fy="For you", fybtn="From My list ({n})",
                 fyhint="Bookmark three works, here, on the mood wall or in the catalogue, and this puts first what looks like them.",
-                fysee="See My list", fybit="most like My list first", fylike="Like “{t}”, {a}, in My list", fyby="By {a}, as in My list",
+                fysee="See My list", fybit="based on My list", fylike="Like “{t}”, {a}, in My list", fyby="By {a}, as in My list",
                 fynone="nothing in My list to go by yet",
                 hash=""),
      "et": dict(file="leia.html", other="find.html", other_l="In English", site="Eesti Kunstikataloog",
@@ -133,7 +133,7 @@ T = {"en": dict(file="find.html", other="leia.html", other_l="Eesti keeles", sit
                 note="Teosed on galeriide praegune müügivalik ja nende küsitud hinnad, loetud iga nädal galeriide endi lehtedelt; usaldusväärne on galerii leht. Sinu sõnumeid loeb Claude, kes teeb otsingud ja valib soovitatavad teosed; neid ei salvestata. Teose all olevad oksjoniandmed on kunstniku tulemused nii, nagu oksjonimajad need avaldasid (haamrihinnad): ülevaade, mitte hinnang. Meeleolu loeb galerii fotolt pildimudel CLIP: see on juhatus, mitte hinnang teosele.",
                 sl_add="Lisa minu nimekirja", sl_remove="Eemalda minu nimekirjast", fy="Sulle", fybtn="Minu nimekirja järgi ({n})",
                 fyhint="Märgi järjehoidjaga kolm teost, siin, meeleolu seinal või kataloogis, ja ette tulevad nendega sarnased.",
-                fysee="Vaata minu nimekirja", fybit="minu nimekirjaga sarnasemad eespool", fylike="Sarnane: „{t}“, {a}, minu nimekirjas", fyby="{a}, nagu minu nimekirjas",
+                fysee="Vaata minu nimekirja", fybit="minu nimekirja põhjal", fylike="Sarnane: „{t}“, {a}, minu nimekirjas", fyby="{a}, nagu minu nimekirjas",
                 fynone="minu nimekirjas pole veel millegi järgi minna",
                 hash="lang=et&")}
 
