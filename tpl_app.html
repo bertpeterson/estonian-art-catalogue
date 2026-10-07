@@ -553,7 +553,7 @@
     // the chart is the catalogue's shape, not a door: on the home page it waits behind the
     // works figure, and is not drawn while closed
     $("histo").hidden = !state.histo;
-    $("stat-wbtn").setAttribute("aria-pressed", state.histo);
+    $("stat-wbtn").setAttribute("aria-pressed", state.histo); $("g-per").setAttribute("aria-pressed", state.histo);
     if (!state.histo) return;
     const set = baseSet(), counts = {}, sale = {}; DECADES.forEach(d=>{counts[d]=0; sale[d]=0;}); counts.und = sale.und = 0;
     set.forEach(w => { const d = decOf(w); if (d in counts){ counts[d]++; if (w.kind === "gallery") sale[d]++; } });
@@ -1557,7 +1557,7 @@
       // an artist's name is a link to their own page (the crawler's route; the click
       // handler opens the artist in place instead), a period a button
       ([label, n, kind, v]) => (kind === "a" ? `<li><a href="${LANG === "et" ? "k" : "a"}/${esc(slug(A[v].n))}.html" data-door="a" data-v="${v}">` : `<li><button data-door="${kind}" data-v="${v}">`) +
-        `<span>${esc(label)}</span>${kind === "a" ? "" : `<span class="n">${num(n)}</span>`}${kind === "a" ? "</a>" : "</button>"}</li>`).join("") + "</ul></div>";
+        `<span>${esc(label)}</span><span class="n">${num(n)}</span>${kind === "a" ? "</a>" : "</button>"}</li>`).join("") + "</ul></div>";
     const cap = w => w[0].toUpperCase() + w.slice(1);      // capitalised like the themes beside them
     const ways = `<div class="d-ways"><div><h2>${esc(T("doors_theme"))}</h2><p>` + DOOR_WAYS.map(x =>
         `<a href="${esc(LANG === "et" && x.het ? x.het : x.href)}"${x.door ? ` data-door="${x.door}" data-v="${esc(x.v)}"` : ""}>${esc(LANG === "et" ? x.et : x.en)}</a>`).join(" ")
@@ -2065,10 +2065,12 @@
     renderAll(); pushHash();
     jumpTo(viewTop($("register")));
   });
-  $("stat-wbtn").addEventListener("click", () => {
+  const toggleHisto = () => {
     state.histo = !state.histo; renderBars(); pushHash();
     if (state.histo) jumpTo($("histo"), true);
-  });
+  };
+  $("stat-wbtn").addEventListener("click", toggleHisto);
+  $("g-per").addEventListener("click", toggleHisto);
   $("stat-art").addEventListener("click", () => {
     $("g-artist").click();     // the control bar's By artist, so the two never drift apart
     if (state.group === "artist") jumpTo(viewTop($("register")));
