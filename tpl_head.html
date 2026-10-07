@@ -813,6 +813,14 @@ footer a{border-bottom:1px solid var(--rule)}
       <!-- the catalogue by feeling: a page of its own (build_mood.py) -->
       <a class="moodlink" id="moodlink" href="mood.html" data-i18n="moodlink"></a><a class="moodlink" id="findlink" href="find.html" data-i18n="findlink" hidden></a>
     </div>
+    <!-- before the sort: the Earliest / Latest pair shows in the list and not on the wall,
+         and after it the toggle jumped along or onto another line at each switch -->
+    <div class="ctl" id="viewctl" hidden>
+      <div class="seg" role="group" aria-label="View">
+        <button id="v-list" aria-pressed="true" data-i18n="v_list"></button>
+        <button id="v-wall" aria-pressed="false"></button>
+      </div>
+    </div>
     <div class="ctl">
       <select id="sortby" class="sortsel" aria-label="Sort rows by">
         <option value="featured" data-i18n="s_featured"></option>
@@ -831,12 +839,6 @@ footer a{border-bottom:1px solid var(--rule)}
       <div class="seg" role="group" aria-label="Order" hidden>
         <button id="o-asc" aria-pressed="true">Earliest</button>
         <button id="o-desc" aria-pressed="false">Latest</button>
-      </div>
-    </div>
-    <div class="ctl" id="viewctl" hidden>
-      <div class="seg" role="group" aria-label="View">
-        <button id="v-list" aria-pressed="true" data-i18n="v_list"></button>
-        <button id="v-wall" aria-pressed="false"></button>
       </div>
     </div>
     <button class="linkbtn" id="filters-toggle" aria-expanded="false" aria-controls="filterpanel">Filters</button>
