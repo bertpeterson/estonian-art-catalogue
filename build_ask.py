@@ -79,7 +79,7 @@ def media_of(kind, tech):
     return m
 
 T = {"en": dict(file="find.html", other="leia.html", other_l="Eesti keeles", site="Estonian Art Catalogue",
-                h="Buy art", title="Buy Estonian art: {n} works for sale, with prices", lede="Art for your home from the catalogue's galleries, for sale now. Set the price, medium, size, mood and artist, or describe what you need. Each work links to the gallery that sells it.",
+                h="Buy Art", title="Buy Estonian art: {n} works for sale, with prices", lede="Art for your home from the catalogue's galleries, for sale now. Set the price, medium, size, mood and artist, or describe what you need. Each work links to the gallery that sells it.",
                 hello="Set the filters, or describe what you need: the room, size, budget, subject or mood.",
                 photo="Photo of your wall", yourroom="Your room", looking="Looking at your room…", photomsg="(a photo of my room)",
                 wallw="Wall space, width", drag="Drag the room to look around it; scroll or pinch to step closer. Drag a work to move it along the wall, or onto another outlined space. If the sizes look wrong, set the wall's width.", reset="Reset view", ar="See it on your wall (AR)", arsafari="To see a work on your real wall in AR, open this page in Safari.", arwait="Making the model…", arfail="AR could not be opened", onwall="On my wall",
@@ -98,13 +98,12 @@ T = {"en": dict(file="find.html", other="leia.html", other_l="Eesti keeles", sit
                 medium="Medium", size="Size", sizeany="Any", sizehint=dict(small="up to 40 cm", medium="40–100 cm", large="over 100 cm"),
                 mood="Mood", moremoods="More words", fewer="Fewer", clear="Clear", count="{n} works", count1="1 work",
                 artistonly="{who}: {n} for sale outside these settings.", showthem="Show them",
-                auc="At auction: {s} of {n} sold", auc0="At auction: {n} lots, none sold", inmus="{n} works in museums", mostly="mostly",
                 daily="today's selection", fromchat="From the chat", artist="Artist", artistph="Type a name", artistlist="Artists with works for sale", names="Start with a name", titlew="In the title", filters="Filters",
                 groups=dict(feeling="Feeling", light="Light", colour="Colour", weather="Season and weather", subject="Subject"),
                 note="The works are the galleries' current stock with their asking prices, read weekly from each gallery's own site; the gallery's page is the one to trust. Your messages are read by Claude, which runs the searches and picks the works it suggests; they are not stored. The auction figures under a work are its artist's record as the houses published it, hammer prices: a record, not a valuation. The moods are read from the gallery's photograph by CLIP, an image model: a guide, not a judgement of the work.",
                 sl_add="Add to my list", sl_remove="Remove from my list", fy="For you", fybtn="Based on My list ({n})",
                 fyhint="Bookmark three works, here, on the mood wall or in the catalogue, and this puts first what looks like them.",
-                fysee="See My list", fybit="based on My list", fylike="Like “{t}”, {a}, in My list", fyby="By {a}, as in My list",
+                fysee="See My list", fybit="based on My list", fylike="Like “{t}”, {a}, in My list",
                 fynone="nothing in My list to go by yet",
                 hash=""),
      "et": dict(file="leia.html", other="find.html", other_l="In English", site="Eesti Kunstikataloog",
@@ -127,13 +126,12 @@ T = {"en": dict(file="find.html", other="leia.html", other_l="Eesti keeles", sit
                 medium="Tehnika", size="Suurus", sizeany="Kõik", sizehint=dict(small="kuni 40 cm", medium="40–100 cm", large="üle 100 cm"),
                 mood="Meeleolu", moremoods="Rohkem sõnu", fewer="Vähem", clear="Tühjenda", count="{n} teost", count1="1 teos",
                 artistonly="{who}: väljaspool neid seadeid müügil {n}.", showthem="Näita",
-                auc="Oksjonil: {n}-st müüdud {s}", auc0="Oksjonil: {n} partiid, müümata", inmus="muuseumides {n} teost", mostly="enamasti",
                 daily="tänane valik", fromchat="Vestlusest", artist="Kunstnik", artistph="Kirjuta nimi", artistlist="Kunstnikud, kelle teoseid on müügil", names="Alusta nimest", titlew="Pealkirjas", filters="Filtrid",
                 groups=dict(feeling="Tunne", light="Valgus", colour="Värv", weather="Aastaaeg ja ilm", subject="Aine"),
                 note="Teosed on galeriide praegune müügivalik ja nende küsitud hinnad, loetud iga nädal galeriide endi lehtedelt; usaldusväärne on galerii leht. Sinu sõnumeid loeb Claude, kes teeb otsingud ja valib soovitatavad teosed; neid ei salvestata. Teose all olevad oksjoniandmed on kunstniku tulemused nii, nagu oksjonimajad need avaldasid (haamrihinnad): ülevaade, mitte hinnang. Meeleolu loeb galerii fotolt pildimudel CLIP: see on juhatus, mitte hinnang teosele.",
                 sl_add="Lisa minu nimekirja", sl_remove="Eemalda minu nimekirjast", fy="Sulle", fybtn="Minu nimekirja põhjal ({n})",
                 fyhint="Märgi järjehoidjaga kolm teost, siin, meeleolu seinal või kataloogis, ja ette tulevad nendega sarnased.",
-                fysee="Vaata minu nimekirja", fybit="minu nimekirja põhjal", fylike="Sarnane: „{t}“, {a}, minu nimekirjas", fyby="{a}, nagu minu nimekirjas",
+                fysee="Vaata minu nimekirja", fybit="minu nimekirja põhjal", fylike="Sarnane: „{t}“, {a}, minu nimekirjas",
                 fynone="minu nimekirjas pole veel millegi järgi minna",
                 hash="lang=et&")}
 
@@ -479,7 +477,7 @@ function buildTaste(){var keys=listNow(), need={};
     D.works.forEach(function(w,i){if(inl[w[11]])return;var b1=0,b2=0,bj=null,sc;
       vs.forEach(function(it){var c=it.r[i];if(c>b1){b2=b1;b1=c;bj=it}else if(c>b2)b2=c});
       sc=b1+.3*b2;
-      if(arts[w[1]]){sc+=.055;why[i]=T.fyby.replace('{a}',D.artists[w[1]][0])}   // as a kept work's fourth nearest
+      if(arts[w[1]])sc+=.055;   // as a kept work's fourth nearest; no reason line, the card names the artist
       else if(bj)why[i]=T.fylike.replace('{t}',bj.t).replace('{a}',bj.an);
       s[i]=sc;if(sc>max)max=sc});
     if(max)for(var i=0;i<n;i++)s[i]/=max;
@@ -537,26 +535,22 @@ function step(c,r){var i=c.input||{};
   return T.like+' '+(r.of?r.of.title+' — '+r.of.artist:'')}
 function card(w,why,fy){
   var a=D.artists[w[1]], g=D.galleries[w[9]], c=el('article','card');
-  var out=el('a','out');out.href=w[10];out.target='_blank';out.rel='noopener';
-  // every click out by gallery; and per version: conversations that led to a click out, and clicks on a pick
-  out.addEventListener('click',function(){gc('find-out',g);if(talked&&!wentOut){wentOut=true;gc('find-conv-out-'+V)}if(why)gc('find-pick-'+V);if(Q.you)gc('find-foryou-out')});
-  var img=el('img');img.src=w[3];img.alt=w[0]+', '+a[0];img.loading='lazy';img.decoding='async';img.referrerPolicy='no-referrer-when-downgrade';out.appendChild(img);
-  var cap=el('span','cap');cap.appendChild(el('i',null,w[0]));cap.appendChild(document.createTextNode(a[0]+(w[2]?', '+w[2]:'')));out.appendChild(cap);
-  var meta=[w[4],w[5]].filter(Boolean).join(' · ');if(meta)out.appendChild(el('span','meta',meta));
-  var pr=el('span','price');pr.appendChild(el('b',null,w[8]?eur(w[8]):T.noprice));pr.appendChild(document.createTextNode(' '+(T.at?T.at+' ':'')+g+' ↗'));out.appendChild(pr);
-  c.appendChild(out);
+  // the picture and title, and the price, go to the gallery; the artist's name to the work in the catalogue
+  function out(){var o=el('a','out');o.href=w[10];o.target='_blank';o.rel='noopener';
+    // every click out by gallery; and per version: conversations that led to a click out, and clicks on a pick
+    o.addEventListener('click',function(){gc('find-out',g);if(talked&&!wentOut){wentOut=true;gc('find-conv-out-'+V)}if(why)gc('find-pick-'+V);if(Q.you)gc('find-foryou-out')});return o}
+  var top=out(), img=el('img');img.src=w[3];img.alt=w[0]+', '+a[0];img.loading='lazy';img.decoding='async';img.referrerPolicy='no-referrer-when-downgrade';top.appendChild(img);
+  var cap=el('span','cap');cap.appendChild(el('i',null,w[0]));top.appendChild(cap);c.appendChild(top);
+  var by=el('span','by'), an=el('a',null,a[0]);an.href='./#'+T.hash+'artist='+a[1]+'&open='+encodeURIComponent(w[11]);an.title=T.record;
+  by.appendChild(an);if(w[2])by.appendChild(document.createTextNode(', '+w[2]));c.appendChild(by);
+  var low=out(), meta=[w[4],w[5]].filter(Boolean).join(' · ');if(meta)low.appendChild(el('span','meta',meta));
+  var pr=el('span','price');pr.appendChild(el('b',null,w[8]?eur(w[8]):T.noprice));pr.appendChild(document.createTextNode(' '+(T.at?T.at+' ':'')+g+' ↗'));low.appendChild(pr);
+  c.appendChild(low);
   if(why)c.appendChild(el('p','why',why));
   if(fy)c.appendChild(el('p','fy',fy));
-  // the artist's record beside the asking price: the museums' holdings and the auction record (not a valuation)
-  var ctx=[];
-  if(a[4])ctx.push(T.auc.replace('{s}',a[4]).replace('{n}',a[3])+(a[5]?(a[7]?', '+T.mostly+' ':' · ')+(a[6]>a[5]?eur(a[5])+'–'+eur(a[6]):eur(a[5])):''));
-  else if(a[3])ctx.push(T.auc0.replace('{n}',a[3]));
-  if(a[2])ctx.push(T.inmus.replace('{n}',String(a[2]).replace(/\B(?=(\d{3})+(?!\d))/g,' ')));
-  if(ctx.length)c.appendChild(el('span','ctx',ctx.join(' · ')));
   if(R&&w[13]){var r=R,on=el('button','btn onwall',T.onwall);on.type='button';
     on.addEventListener('click',function(){hang(r,w);r.v.scrollIntoView({block:'center',behavior:'smooth'})});c.appendChild(on)}
   if(AR&&w[13])c.appendChild(arButton(w,function(){return R&&R.sel?R.sel.frame:'black'}));
-  var rec=el('a','rec',T.record);rec.href='./#'+T.hash+'artist='+a[1]+'&open='+encodeURIComponent(w[11]);c.appendChild(rec);
   c.appendChild(slBtn(w[11],T,'list-add-find',syncYou));
   return c}
 // the search's results into box: what it was, how many answer to it, and ten at a time, leaving out works an
@@ -792,8 +786,8 @@ CSS = BM.CSS + """
 .card .fy{margin:2px 0 0;font-size:.74rem;line-height:1.3;color:var(--grey)}
 .filters .chip:disabled{opacity:.45;cursor:default}
 .f-hint{margin:8px 0 0;font-size:.8rem;line-height:1.4;color:var(--grey)}.f-hint a{color:var(--ink)}
-.card .rec{font-size:.72rem;color:var(--grey)}
-.card .ctx{font:500 .66rem/1.35 var(--mono);color:var(--grey);letter-spacing:.02em}
+.card .by{font-size:.78rem;line-height:1.3;color:var(--grey)}
+.card .by a{color:inherit;text-decoration:none}.card .by a:hover{color:var(--ink);text-decoration:underline}
 .card .why{margin:2px 0 0;font-size:.78rem;line-height:1.35;color:var(--ink)}
 .steps{margin:6px 0 0;font-size:.74rem;color:var(--grey)}.steps summary{cursor:pointer}.msg .steps p{margin:3px 0 0 1em}
 .more{justify-self:start;margin-top:12px}
@@ -913,10 +907,10 @@ def page(lang, ver, api, labels, M, n=0, tver="", names=()):
     t = T[lang]
     me, other = f"{BASE}/{t['file']}", f"{BASE}/{t['other']}"
     tj = json.dumps({k: t[k] for k in ("more", "at", "noprice", "none", "thinking", "how", "like", "choosing", "failed", "record", "sizes", "shown", "hash",
-                                       "media", "anyprice", "upto", "from_", "count", "count1", "moremoods", "fewer", "clear", "artist", "titlew", "artistonly", "showthem", "daily", "auc", "auc0", "inmus", "mostly",
+                                       "media", "anyprice", "upto", "from_", "count", "count1", "moremoods", "fewer", "clear", "artist", "titlew", "artistonly", "showthem", "daily",
                                        "yourroom", "looking", "photomsg", "wallw", "drag", "onwall", "fits", "roomnote", "nowall", "badphoto",
                                        "choose", "hangmore", "remove", "together", "frames", "reset", "ar", "arwait", "arfail", "arsafari",
-                                       "sl_add", "sl_remove", "fybtn", "fyhint", "fysee", "fybit", "fylike", "fyby", "fynone")}, ensure_ascii=False).replace("</", "<\\/")
+                                       "sl_add", "sl_remove", "fybtn", "fyhint", "fysee", "fybit", "fylike", "fynone")}, ensure_ascii=False).replace("</", "<\\/")
     lj = json.dumps(labels, ensure_ascii=False).replace("</", "<\\/")
     ask = (api.rstrip("/") + "/ask") if api else ""
     return (f'<!doctype html><html lang="{lang}"><head><meta charset="utf-8">{H.STAMP}<meta name="viewport" content="width=device-width,initial-scale=1">'
@@ -957,8 +951,8 @@ SALE = [  # key, the controls' address, English slug and heading, Estonian slug 
 ]
 SALE_DIR = {"en": "for-sale", "et": "muugil"}
 ST = {"en": dict(lede="{n} works at {g} Estonian galleries, with their asking prices. Each links to the gallery that sells it.",
-                 lede1="1 work at an Estonian gallery, with its asking price.", more="Filter these in Buy art →",
-                 browse="Browse what is for sale", first="The first {k} of {n} here; all of them in Buy art.", artist="Artist's page"),
+                 lede1="1 work at an Estonian gallery, with its asking price.", more="Filter these in Buy Art →",
+                 browse="Browse what is for sale", first="The first {k} of {n} here; all of them in Buy Art.", artist="Artist's page"),
       "et": dict(lede="{n} teost {g} Eesti galeriis koos küsitud hindadega. Iga teos viib seda müüva galerii lehele.",
                  lede1="1 teos Eesti galeriis koos küsitud hinnaga.", more="Vali neist lehel Osta kunsti →",
                  browse="Sirvi müügil olevat", first="Siin esimesed {k} teost {n}-st; kõik lehel Osta kunsti.", artist="Kunstniku leht")}
