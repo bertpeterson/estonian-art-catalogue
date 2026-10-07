@@ -2072,6 +2072,7 @@
   };
   $("stat-wbtn").addEventListener("click", toggleHisto);
   $("g-per").addEventListener("click", toggleHisto);
+  $("histo-x").addEventListener("click", toggleHisto);     // the chart's own way out, beside the hint
   $("stat-art").addEventListener("click", () => {
     $("g-artist").click();     // the control bar's By artist, so the two never drift apart
     if (state.group === "artist") jumpTo(viewTop($("register")));
@@ -2369,6 +2370,7 @@
     $("moodlink").href = LANG === "en" ? "mood.html" : "meeleolu.html";
     $("findlink").href = LANG === "en" ? "find.html" : "leia.html";
     $("fs-q").placeholder = T("fs_ph");
+    $("histo-x").setAttribute("aria-label", T("histo_close")); $("histo-x").title = T("histo_close");
     const fl = $("fs-lede");
     if (fl && fl.dataset.n) fl.textContent = T("fs_lede", {n: (+fl.dataset.n).toLocaleString(LANG === "en" ? "en-GB" : "et-EE"), g: fl.dataset.g});
     document.querySelectorAll("[data-i18n-html]").forEach(el => { el.innerHTML = I18N[LANG === "en" ? "HTML_EN" : "HTML_ET"][el.dataset.i18nHtml] || ""; });
