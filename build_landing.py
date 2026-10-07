@@ -45,7 +45,7 @@ num = lambda n: f"{n:,}"
 door = ('<div class="d-names"><h2>' + e(I18N["EN"]["doors_name"]) + '</h2><ul>'
         # a link each, to the artist's own page: what a crawler follows from the landing
         # page, and what a reader gets before the app is here; the app intercepts the click
-        + "".join(f'<li><a href="a/{slug(A[i]["n"])}.html" data-door="a" data-v="{i}"><span>{e(A[i]["n"])}</span></a></li>' for i in canon) + "</ul></div>")
+        + "".join(f'<li><a href="a/{slug(A[i]["n"])}.html" data-door="a" data-v="{i}"><span>{e(A[i]["n"])}</span><span class="n">{num(counts.get(i, 0))}</span></a></li>' for i in canon) + "</ul></div>")
 # ...and the themes and moods beside them, read from the app's own lists
 _app = open("tpl_app.html", encoding="utf-8").read()
 WAYS = json.loads(re.search(r"const DOOR_WAYS = (\[.*?\]);", _app, re.S).group(1))
