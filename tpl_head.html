@@ -115,6 +115,8 @@ h1 a:hover{color:var(--grey-6)}
 
 .histo{padding:20px 0 18px;border-bottom:1px solid var(--rule)}
 .histo-head{display:flex;justify-content:space-between;align-items:baseline;gap:20px;margin-bottom:16px}
+.histo-r{display:flex;align-items:baseline;gap:14px}
+.histo-x{background:none;border:0;padding:0 2px;font-size:1.25rem;line-height:1;color:var(--grey);cursor:pointer}.histo-x:hover{color:var(--ink)}
 
 /* Buy art: a quiet door under the masthead -- a line of text and a search on the left, six works
    for sale in a row on the right */
@@ -757,7 +759,8 @@ footer a{border-bottom:1px solid var(--rule)}
   <section class="histo" id="histo" hidden>
     <div class="histo-head">
       <span><span class="eyebrow" data-i18n="worksperdecade"></span></span>
-      <span class="eyebrow" id="histo-hint">Select a decade to filter</span>
+      <span class="histo-r"><span class="eyebrow" id="histo-hint">Select a decade to filter</span>
+        <button class="histo-x" id="histo-x" type="button" aria-controls="histo">×</button></span>
     </div>
     <div class="bars" id="bars"></div>
     <div class="eras" id="eras"></div>
