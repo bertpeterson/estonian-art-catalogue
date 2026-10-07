@@ -1510,27 +1510,16 @@
   ];
   const DOOR_MOODS = [["serene", "rahulik"], ["melancholy", "melanhoolne"], ["dreamy", "unenäoline"], ["stormy", "tormine"],
                       ["wintry", "talvine"], ["mysterious", "salapärane"], ["misty", "udune"], ["golden", "kuldne"]];
+  // Artists a public collection has accessioned AND a gallery is selling right now.
   const FOR_SALE = W.reduce((n, w) => n + (w.kind === "gallery" ? 1 : 0), 0);
   // works a gallery is selling now, per artist (the index's and the artist view's "For sale now")
   const SALE_N = W.reduce((m, w) => (w.kind === "gallery" && m.set(w.a, (m.get(w.a) || 0) + 1), m), new Map());
-  // "Start with a name": artists a public collection holds (ten works or more) AND a
-  // gallery is selling now, the most works on offer first -- sixteen of them. It was
-  // the canon (Köler, Weizenberg, Raud...), half of whom have nothing for sale. An
-  // editor's hand on top: DOOR_KEEP are in whenever they have anything for sale,
-  // DOOR_SKIP never; the rest fill up to sixteen by count.
-  // build_landing.py reads these two lists and bakes the same sixteen; keep the two rules alike.
-  const DOOR_KEEP = ["Malle Leis", "Mare Vint", "Tõnis Vint", "Eduard Wiiralt"];
-  const DOOR_SKIP = ["Reti Saks", "Maret Olvet", "Tõnis Saadoja", "Uno Roosvalt"];
   const TOP_ART = (() => {
-    const held = new Map();
-    for (const w of W) if ((w.kind || "held") === "held" || w.kind === "shown") held.set(w.a, (held.get(w.a) || 0) + 1);
-    const ids = names => new Set(names.map(n => A.findIndex(a => a.n === n)));
-    const keep = ids(DOOR_KEEP), skip = ids(DOOR_SKIP);
-    const order = (x, y) => y[1] - x[1] || (A[x[0]].n < A[y[0]].n ? -1 : A[x[0]].n > A[y[0]].n ? 1 : 0);
-    const kept = [...SALE_N.entries()].filter(([i]) => keep.has(i));
-    const rest = [...SALE_N.entries()].filter(([i]) => !keep.has(i) && !skip.has(i) && (held.get(i) || 0) >= 10)
-      .sort(order).slice(0, 16 - kept.length);
-    return [...kept, ...rest].sort(order);
+    const c = new Map(); W.forEach(w => c.set(w.a, (c.get(w.a) || 0) + 1));
+    const byName = new Map(A.map((a, i) => [a.n, i]));
+    const missing = CANON.filter(n => !byName.has(n));
+    if (missing.length) console.warn("canon names not in this build:", missing);
+    return CANON.filter(n => byName.has(n)).map(n => [byName.get(n), c.get(byName.get(n)) || 0]);
   })();
   // The app already names Estonia's periods for the decade bands. The doors reuse
   // exactly those labels rather than inventing a parallel vocabulary, plus one band
@@ -1557,7 +1546,7 @@
       // an artist's name is a link to their own page (the crawler's route; the click
       // handler opens the artist in place instead), a period a button
       ([label, n, kind, v]) => (kind === "a" ? `<li><a href="${LANG === "et" ? "k" : "a"}/${esc(slug(A[v].n))}.html" data-door="a" data-v="${v}">` : `<li><button data-door="${kind}" data-v="${v}">`) +
-        `<span>${esc(label)}</span><span class="n">${esc(kind === "a" ? T("nforsale", {n: num(n)}) : num(n))}</span>${kind === "a" ? "</a>" : "</button>"}</li>`).join("") + "</ul></div>";
+        `<span>${esc(label)}</span>${kind === "a" ? "" : `<span class="n">${num(n)}</span>`}${kind === "a" ? "</a>" : "</button>"}</li>`).join("") + "</ul></div>";
     const cap = w => w[0].toUpperCase() + w.slice(1);      // capitalised like the themes beside them
     const ways = `<div class="d-ways"><div><h2>${esc(T("doors_theme"))}</h2><p>` + DOOR_WAYS.map(x =>
         `<a href="${esc(LANG === "et" && x.het ? x.het : x.href)}"${x.door ? ` data-door="${x.door}" data-v="${esc(x.v)}"` : ""}>${esc(LANG === "et" ? x.et : x.en)}</a>`).join(" ")

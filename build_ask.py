@@ -99,7 +99,7 @@ T = {"en": dict(file="find.html", other="leia.html", other_l="Eesti keeles", sit
                 mood="Mood", moremoods="More words", fewer="Fewer", clear="Clear", count="{n} works", count1="1 work",
                 artistonly="{who}: {n} for sale outside these settings.", showthem="Show them",
                 auc="At auction: {s} of {n} sold", auc0="At auction: {n} lots, none sold", inmus="{n} works in museums", mostly="mostly",
-                daily="today's selection", fromchat="From the chat", artist="Artist", artistph="Type a name", artistlist="Artists with works for sale", titlew="In the title", filters="Filters",
+                daily="today's selection", fromchat="From the chat", artist="Artist", artistph="Type a name", artistlist="Artists with works for sale", names="Start with a name", titlew="In the title", filters="Filters",
                 groups=dict(feeling="Feeling", light="Light", colour="Colour", weather="Season and weather", subject="Subject"),
                 note="The works are the galleries' current stock with their asking prices, read weekly from each gallery's own site; the gallery's page is the one to trust. Your messages are read by Claude, which runs the searches and picks the works it suggests; they are not stored. The auction figures under a work are its artist's record as the houses published it, hammer prices: a record, not a valuation. The moods are read from the gallery's photograph by CLIP, an image model: a guide, not a judgement of the work.",
                 sl_add="Add to my list", sl_remove="Remove from my list", fy="For you", fybtn="From My list ({n})",
@@ -128,7 +128,7 @@ T = {"en": dict(file="find.html", other="leia.html", other_l="Eesti keeles", sit
                 mood="Meeleolu", moremoods="Rohkem sõnu", fewer="Vähem", clear="Tühjenda", count="{n} teost", count1="1 teos",
                 artistonly="{who}: väljaspool neid seadeid müügil {n}.", showthem="Näita",
                 auc="Oksjonil: {n}-st müüdud {s}", auc0="Oksjonil: {n} partiid, müümata", inmus="muuseumides {n} teost", mostly="enamasti",
-                daily="tänane valik", fromchat="Vestlusest", artist="Kunstnik", artistph="Kirjuta nimi", artistlist="Kunstnikud, kelle teoseid on müügil", titlew="Pealkirjas", filters="Filtrid",
+                daily="tänane valik", fromchat="Vestlusest", artist="Kunstnik", artistph="Kirjuta nimi", artistlist="Kunstnikud, kelle teoseid on müügil", names="Alusta nimest", titlew="Pealkirjas", filters="Filtrid",
                 groups=dict(feeling="Tunne", light="Valgus", colour="Värv", weather="Aastaaeg ja ilm", subject="Aine"),
                 note="Teosed on galeriide praegune müügivalik ja nende küsitud hinnad, loetud iga nädal galeriide endi lehtedelt; usaldusväärne on galerii leht. Sinu sõnumeid loeb Claude, kes teeb otsingud ja valib soovitatavad teosed; neid ei salvestata. Teose all olevad oksjoniandmed on kunstniku tulemused nii, nagu oksjonimajad need avaldasid (haamrihinnad): ülevaade, mitte hinnang. Meeleolu loeb galerii fotolt pildimudel CLIP: see on juhatus, mitte hinnang teosele.",
                 sl_add="Lisa minu nimekirja", sl_remove="Eemalda minu nimekirjast", fy="Sulle", fybtn="Minu nimekirja järgi ({n})",
@@ -599,6 +599,7 @@ function sync(){
   Array.prototype.forEach.call(F.querySelectorAll('[data-m]'),function(b){b.setAttribute('aria-pressed',String(Q.media.indexOf(b.dataset.m)>=0))});
   Array.prototype.forEach.call(F.querySelectorAll('[data-s]'),function(b){b.setAttribute('aria-pressed',String(b.dataset.s===Q.size))});
   Array.prototype.forEach.call(F.querySelectorAll('[data-w]'),function(b){b.setAttribute('aria-pressed',String(Q.words.indexOf(b.dataset.w)>=0))});
+  Array.prototype.forEach.call(F.querySelectorAll('[data-a]'),function(b){b.setAttribute('aria-pressed',String(b.dataset.a===Q.artist))});
   if(document.activeElement!==ain)ain.value=Q.artist;aclr.hidden=!Q.artist;
   var cs=chatset.querySelector('.bits');cs.textContent='';
   if(Q.terms.length){var p=el('span','bit',T.titlew+': '+Q.terms.join(', ')),b=el('button','x','×');b.type='button';b.dataset.clear='terms';b.setAttribute('aria-label',T.clear);p.appendChild(b);cs.appendChild(p)}
@@ -642,6 +643,7 @@ F.addEventListener('click',function(e){var b=e.target.closest('button');if(!b)re
   if(b.dataset.m)toggle(Q.media,b.dataset.m);
   else if(b.dataset.w)toggle(Q.words,b.dataset.w);          // in the order chosen: the first weighs most
   else if(b.dataset.s)Q.size=b.dataset.s;
+  else if(b.dataset.a)Q.artist=Q.artist===b.dataset.a?'':b.dataset.a;
   else if(b.dataset.clear==='artist')Q.artist='';
   else if(b.dataset.clear==='terms')Q.terms=[];
   else if(b.id==='foryou'){Q.you=!Q.you;fyAuto=false;fyKeep(Q.you);gc(Q.you?'find-foryou':'find-foryou-off')}
@@ -739,6 +741,9 @@ CSS = BM.CSS + """
 .f-name output{font:500 .8rem/1 var(--mono);letter-spacing:.02em;text-transform:none;color:var(--ink);font-variant-numeric:tabular-nums}
 .filters .chips{gap:6px}
 .filters .chip{font-size:.92rem;padding:6px 11px 7px}
+#akeys{margin-top:10px}
+#akeys .n{font:400 .7rem/1 var(--mono);color:var(--grey)}
+#akeys [aria-pressed=true] .n{color:inherit}
 #media .x:not([aria-pressed=true]),#moods:not(.open) .x:not([aria-pressed=true]),#moods:not(.open) .gname{display:none}
 .gname{flex-basis:100%;margin-top:8px;font:500 .62rem/1 var(--mono);letter-spacing:.13em;text-transform:uppercase;color:var(--grey)}
 .linkbtn{background:none;border:0;padding:6px 2px;font:500 .68rem/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--grey);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
@@ -851,7 +856,20 @@ PRICE_STOPS = [0, 50, 100, 150, 200, 250, 300, 400, 500, 600, 700, 800, 900, 100
 TOP_MOODS = ["serene", "contemplative", "melancholy", "nostalgic", "joyful", "playful", "romantic", "dreamy", "mysterious",
              "dramatic", "bright", "dark"]
 
-def panel(t, labels, M):
+# "Start with a name", under the artist field: sixteen artists a museum holds ten works or more of, the most works for
+# sale first, with an editor's hand on top -- DOOR_KEEP are in whenever a gallery has anything of theirs, DOOR_SKIP
+# never. The home page's names are the canon (tpl_app.html CANON), not this
+DOOR_KEEP = ["Malle Leis", "Mare Vint", "Tõnis Vint", "Eduard Wiiralt"]
+DOOR_SKIP = ["Reti Saks", "Maret Olvet", "Tõnis Saadoja", "Uno Roosvalt"]
+
+def door_names(d):
+    n = collections.Counter(w[1] for w in d["works"])
+    order = lambda x: (-x[1], x[0])
+    kept = [(a[0], n[i]) for i, a in enumerate(d["artists"]) if n[i] and a[0] in DOOR_KEEP]
+    rest = sorted(((a[0], n[i]) for i, a in enumerate(d["artists"]) if n[i] and a[2] >= 10 and a[0] not in DOOR_KEEP and a[0] not in DOOR_SKIP), key=order)
+    return sorted(kept + rest[:16 - len(kept)], key=order)
+
+def panel(t, labels, M, names=()):
     """the controls, written out; the script keeps them and the search in step. Media past the three asked
     for, and mood words past the first twelve, show when chosen (by hand or by the assistant)"""
     chip = lambda attr, v, label, x="": f'<button type="button" class="chip{x}" data-{attr}="{v}" aria-pressed="false">{e(label)}</button>'
@@ -878,7 +896,10 @@ def panel(t, labels, M):
             f'<div class="f-row"><label class="f-name" for="artist">{e(t["artist"])}</label><div class="acomp">'
             f'<input id="artist" type="search" autocomplete="off" spellcheck="false" placeholder="{e(t["artistph"])}" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="artists">'
             f'<button type="button" class="x" id="aclear" data-clear="artist" aria-label="{e(t["clear"])}" hidden>×</button>'
-            f'<ul id="artists" role="listbox" aria-label="{e(t["artistlist"])}" hidden></ul></div></div>'
+            f'<ul id="artists" role="listbox" aria-label="{e(t["artistlist"])}" hidden></ul></div>'
+            f'<div class="chips" id="akeys" role="group" aria-label="{e(t["names"])}">'
+            + "".join(f'<button type="button" class="chip" data-a="{e(a)}" aria-pressed="false">{e(a)} <span class="n">{c}</span></button>' for a, c in names)
+            + '</div></div>'
             f'<div class="f-row"><div class="f-name">{e(t["mood"])}</div><div class="chips" id="moods">{moods}</div></div>'
             f'<div class="f-row" id="chatset" hidden><div class="f-name">{e(t["fromchat"])}</div><div class="bits"></div></div>'
             f'<div class="f-foot"><button type="button" class="count" id="fcount"></button><button type="button" class="linkbtn" id="fclear">{e(t["clear"])}</button></div>'
@@ -888,7 +909,7 @@ def panel(t, labels, M):
 # lede, hello and note that told of it are in git history (commit 9c3e4a1), to be put back with it
 PHOTO = False
 
-def page(lang, ver, api, labels, M, n=0, tver=""):
+def page(lang, ver, api, labels, M, n=0, tver="", names=()):
     t = T[lang]
     me, other = f"{BASE}/{t['file']}", f"{BASE}/{t['other']}"
     tj = json.dumps({k: t[k] for k in ("more", "at", "noprice", "none", "thinking", "how", "like", "choosing", "failed", "record", "sizes", "shown", "hash",
@@ -907,7 +928,7 @@ def page(lang, ver, api, labels, M, n=0, tver=""):
             f'<nav><a href="{BASE}/{"" if lang == "en" else "#lang=et"}">{e(t["site"])}</a> › {e(t["h"])} · <a href="{other}" hreflang="{"et" if lang == "en" else "en"}">{e(t["other_l"])}</a></nav>'
             f'<header><h1>{e(t["h"])}</h1><p class="lede">{e(t["lede"])}</p></header>'
             f'<section class="chat" id="chat" data-api="{e(ask)}" data-src="data/stock.json?v={ver}" data-taste="data/taste-stock.bin?v={tver}" data-tshard="data/taste/" data-tver="{tver}">'
-            f'{panel(t, labels, M)}<div class="log" id="log" aria-live="polite"><div class="msg them"><p>{e(t["hello"])}</p></div></div>'
+            f'{panel(t, labels, M, names)}<div class="log" id="log" aria-live="polite"><div class="msg them"><p>{e(t["hello"])}</p></div></div>'
             f'<form class="ask" id="ask"><label for="q">{e(t["label"])}</label><input id="q" type="text" maxlength="400" autocomplete="off" placeholder="{e(t["ph"])}">'
             f'<button class="btn solid" type="submit">{e(t["send"])}</button>'
             + (f'<input id="photo" type="file" accept="image/*" hidden><label for="photo" class="btn photobtn" role="button" tabindex="0">{e(t["photo"])}</label>' if PHOTO else '')
@@ -1032,7 +1053,7 @@ def main():
     urls = []
     for lang in ("en", "et"):
         labels = {w["en"]: (w["et"] if lang == "et" else BM.LABEL_EN.get(w["en"], w["en"])) for w in M}
-        open(f"site/{T[lang]['file']}", "w", encoding="utf-8").write(page(lang, ver, API, labels, M, len(d["works"]), tver)); urls.append(f"{BASE}/{T[lang]['file']}")
+        open(f"site/{T[lang]['file']}", "w", encoding="utf-8").write(page(lang, ver, API, labels, M, len(d["works"]), tver, door_names(d))); urls.append(f"{BASE}/{T[lang]['file']}")
     urls += sale_pages(d)
     sm = open("site/sitemap.xml", encoding="utf-8").read()
     today = datetime.date.today().isoformat()

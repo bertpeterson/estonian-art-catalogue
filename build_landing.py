@@ -42,22 +42,10 @@ def slug(n):    # the same slug build_pages.py gives the artist's page
     n = unicodedata.normalize("NFKD", n or "").encode("ascii", "ignore").decode()
     return re.sub(r"^-+|-+$", "", re.sub(r"[^a-z0-9]+", "-", n.lower())) or "artist"
 num = lambda n: f"{n:,}"
-# the door's names: artists a public collection holds (ten works or more) and a gallery is
-# selling now, the most works on offer first, DOOR_KEEP always and DOOR_SKIP never --
-# the same rule and lists as TOP_ART in tpl_app.html
-_tpl = open("tpl_app.html", encoding="utf-8").read()
-_dlist = lambda k: {byname[n] for n in re.findall(r'"([^"]+)"', re.search(rf"const {k} = \[(.*?)\];", _tpl, re.S).group(1)) if n in byname}
-_dkeep, _dskip = _dlist("DOOR_KEEP"), _dlist("DOOR_SKIP")
-_dsale = collections.Counter(w["a"] for w in W if w.get("kind") == "gallery")
-_dheld = collections.Counter(w["a"] for w in W if (w.get("kind") or "held") in ("held", "shown"))
-_dorder = lambda x: (-x[1], A[x[0]]["n"])
-_dkept = [(i, c) for i, c in _dsale.items() if i in _dkeep]
-door_art = sorted(_dkept + sorted(((i, c) for i, c in _dsale.items() if i not in _dkeep and i not in _dskip and _dheld[i] >= 10),
-                                  key=_dorder)[:16 - len(_dkept)], key=_dorder)
 door = ('<div class="d-names"><h2>' + e(I18N["EN"]["doors_name"]) + '</h2><ul>'
         # a link each, to the artist's own page: what a crawler follows from the landing
         # page, and what a reader gets before the app is here; the app intercepts the click
-        + "".join(f'<li><a href="a/{slug(A[i]["n"])}.html" data-door="a" data-v="{i}"><span>{e(A[i]["n"])}</span><span class="n">{e(I18N["EN"]["nforsale"].replace("{n}", num(c)))}</span></a></li>' for i, c in door_art) + "</ul></div>")
+        + "".join(f'<li><a href="a/{slug(A[i]["n"])}.html" data-door="a" data-v="{i}"><span>{e(A[i]["n"])}</span></a></li>' for i in canon) + "</ul></div>")
 # ...and the themes and moods beside them, read from the app's own lists
 _app = open("tpl_app.html", encoding="utf-8").read()
 WAYS = json.loads(re.search(r"const DOOR_WAYS = (\[.*?\]);", _app, re.S).group(1))
