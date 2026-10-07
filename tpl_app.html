@@ -1515,13 +1515,22 @@
   const SALE_N = W.reduce((m, w) => (w.kind === "gallery" && m.set(w.a, (m.get(w.a) || 0) + 1), m), new Map());
   // "Start with a name": artists a public collection holds (ten works or more) AND a
   // gallery is selling now, the most works on offer first -- sixteen of them. It was
-  // the canon (Köler, Weizenberg, Raud...), half of whom have nothing for sale.
-  // build_landing.py bakes the same sixteen; keep the two rules alike.
+  // the canon (Köler, Weizenberg, Raud...), half of whom have nothing for sale. An
+  // editor's hand on top: DOOR_KEEP are in whenever they have anything for sale,
+  // DOOR_SKIP never; the rest fill up to sixteen by count.
+  // build_landing.py reads these two lists and bakes the same sixteen; keep the two rules alike.
+  const DOOR_KEEP = ["Malle Leis", "Mare Vint", "Tõnis Vint", "Eduard Wiiralt"];
+  const DOOR_SKIP = ["Reti Saks", "Maret Olvet", "Tõnis Saadoja", "Uno Roosvalt"];
   const TOP_ART = (() => {
     const held = new Map();
     for (const w of W) if ((w.kind || "held") === "held" || w.kind === "shown") held.set(w.a, (held.get(w.a) || 0) + 1);
-    return [...SALE_N.entries()].filter(([i]) => (held.get(i) || 0) >= 10)
-      .sort((x, y) => y[1] - x[1] || (A[x[0]].n < A[y[0]].n ? -1 : A[x[0]].n > A[y[0]].n ? 1 : 0)).slice(0, 16);
+    const ids = names => new Set(names.map(n => A.findIndex(a => a.n === n)));
+    const keep = ids(DOOR_KEEP), skip = ids(DOOR_SKIP);
+    const order = (x, y) => y[1] - x[1] || (A[x[0]].n < A[y[0]].n ? -1 : A[x[0]].n > A[y[0]].n ? 1 : 0);
+    const kept = [...SALE_N.entries()].filter(([i]) => keep.has(i));
+    const rest = [...SALE_N.entries()].filter(([i]) => !keep.has(i) && !skip.has(i) && (held.get(i) || 0) >= 10)
+      .sort(order).slice(0, 16 - kept.length);
+    return [...kept, ...rest].sort(order);
   })();
   // The app already names Estonia's periods for the decade bands. The doors reuse
   // exactly those labels rather than inventing a parallel vocabulary, plus one band
