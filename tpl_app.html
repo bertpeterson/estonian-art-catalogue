@@ -1696,6 +1696,13 @@
     // A highlighted title folds across years and media too: the ten drawings and
     // prints of Raud's Kalevipoja laul are one composition on the wall.
     const dupKey = w => `${w.a}|${String(w.t).toLowerCase().replace(/[\s.,;:"'«»„“”]+/g, " ").trim()}|${w.hl != null ? "" : (w.y ?? "")}`;
+    // One museum object catalogued twice is one picture too: EKM's own record of a sheet
+    // ("EKM 34818 KR 294") beside MuIS's ("EKM j 34818 KR 294"), or a whole sheet (no
+    // letter, or "/ab") beside its parts ("/a", "/b") -- Raud's Kalevipoeg kivi viskamas
+    // is in as the whole, the painting and the drawing on its back. Only where a whole is
+    // in: "/a" and "/b" alone are the two sides of a sheet, two pictures.
+    const objKey = w => w.nu ? `${w.a}|${w.mu}|${String(w.nu).replace(/\/[a-z]+\b/gi, "").replace(/\bj\s+/g, "").replace(/\s+/g, " ").trim()}` : null;
+    const wholes = new Set(pics.filter(w => w.nu && !/\/[a-z]\b/i.test(w.nu)).map(objKey));
     const seen = new Map(), dups = new Map();
     // the fold keeps the first it sees, so a masterpiece or highlight goes first
     // a sort chosen over the wall orders it exactly -- titles A-Z, the latest first --
@@ -1705,10 +1712,14 @@
     const base = sortRows(pics, state.decOrder !== "earliest").map((w, i) => [w, i]);
     const unique = (strict ? base : base
       .sort((a, b) => (a[0].mp || 1e9) - (b[0].mp || 1e9) || (a[0].hl ?? 1e9) - (b[0].hl ?? 1e9) || a[1] - b[1])).map(x => x[0]).filter(w => {
-      if (!MULTI.has(w.e) && (w.hl == null || w.e === "Painting")) return true;   // a painting is one work, however many share its title
-      const k = dupKey(w);
-      if (seen.has(k)){ dups.set(seen.get(k), (dups.get(seen.get(k)) || 1) + 1); return false; }
-      seen.set(k, w); return true;
+      const ko = wholes.has(objKey(w)) ? "o|" + objKey(w) : null;
+      // a painting is one work, however many share its title
+      const kt = MULTI.has(w.e) || (w.hl != null && w.e !== "Painting") ? dupKey(w) : null;
+      const into = (ko && seen.get(ko)) || (kt && seen.get(kt));
+      if (into){ dups.set(into, (dups.get(into) || 1) + 1); return false; }
+      if (ko) seen.set(ko, w);
+      if (kt) seen.set(kt, w);
+      return true;
     });
     // On an artist's own wall: the key works first (highlights.json, in its order), then
     // paintings before drawings before prints, then the chosen order. On a mixed wall --
