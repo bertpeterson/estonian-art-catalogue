@@ -1138,6 +1138,10 @@ for i, a in enumerate(artists):
         for k in ("qid", "wdesc", "cit", "born", "aff", "grp"): a.pop(k, None)
         a["l"], a["ls"] = ["", ""], "ed"; WD_UNDONE += 1
 print("  wikidata: newly matched", WD_MATCHED, "/ life dates filled", WD_DATED, "/ undone as wrong person", WD_UNDONE)
+# Origins Wikidata leaves out, where we know them: set by hand, editorial
+AFF_KNOWN = {"Elīna Vītola": "Latvian"}   # Kogo Gallery's painter; Art Academy of Latvia
+for a in artists:
+    if a["n"] in AFF_KNOWN: a["aff"] = AFF_KNOWN[a["n"]]
 
 # A work dated before its artist was born, or after they died, is one of three things
 # (checked last, once Wikidata has supplied the dates the museums did not):
