@@ -163,20 +163,22 @@ def data():
         if a not in aidx: aidx[a] = len(arts); arts.append([A[a]["n"], H.ARTIST_SLUG[a], held[a]] + auc(a))
         g = H.val(w, "mu") or ""
         gals.setdefault(g, len(gals))
-        tech = H.val(w, "tce") or H.val(w, "tc") or ""
+        tech = H.val(w, "tce") or H.val(w, "tc") or ""                    # as the gallery states it; the English page shows field 15
+        tech_en = H.val(w, "tc") or tech
         if re.search(r"\bmüüdud\b|\bsold\b", tech, re.I): continue          # a gallery's "sold" read as the technique
         works.append([w.get("t") or "", aidx[a], w.get("y") or "", u, tech[:60], w.get("dm") or "",
                       size_of(w.get("dm")), kind_of(w), w.get("pr") or 0, gals[g], w["url"], k,
                       [x for j, z in S.get(w["im"], [])[:8] if z >= 1.0 for x in (j, round(z * 10))],   # word, z x 10, flat
                       dims_of(w.get("dm")) or 0,
-                      media_of(kind_of(w), " ".join(filter(None, (H.val(w, "tce"), H.val(w, "tc")))))])
+                      media_of(kind_of(w), " ".join(filter(None, (H.val(w, "tce"), H.val(w, "tc"))))),
+                      tech_en[:60] if tech_en != tech else ""])
         ims.append(w["im"])
     return {"words": words, "artists": arts, "galleries": list(gals), "works": works, "_ims": ims, "_aidx": aidx}
 
 JS = r"""
 (function(){
 var T=JSON.parse(document.getElementById('t').textContent), page=document.getElementById('chat');
-var api=page.dataset.api, src=page.dataset.src, log=document.getElementById('log'), form=document.getElementById('ask'), input=document.getElementById('q'), file=document.getElementById('photo');
+var EN=document.documentElement.lang==='en', api=page.dataset.api, src=page.dataset.src, log=document.getElementById('log'), form=document.getElementById('ask'), input=document.getElementById('q'), file=document.getElementById('photo');
 // the A/B test of the assistant: each browser gets one version and keeps it -- 'a' looks with its tools first, 'o' answers
 // in one call -- and the counts carry it; ?v=a or ?v=o picks one (the side-by-side comparison)
 var V=(/[?&]v=([ao])(&|$)/.exec(location.search)||[])[1];
@@ -497,7 +499,8 @@ function syncYou(){var n=slGet().length;fyb.textContent=T.fybtn.replace('{n}',n)
 // ---- the assistant's tools: Claude asks (through the Worker), the page answers from the stock it has ----
 function wid(w){return 'w'+w.i}
 function byId(id){var w=D.works[+String(id||'').slice(1)];return w&&wid(w)===id?w:null}
-function row(w){var a=D.artists[w[1]];return {id:wid(w),title:w[0],artist:a[0],year:w[2]||'',technique:w[4]||'',size:w[13]?cm(w[13]):(w[5]||''),
+function tech(w){return EN&&w[15]||w[4]||''}     // the technique: the gallery's Estonian, its English on the English page
+function row(w){var a=D.artists[w[1]];return {id:wid(w),title:w[0],artist:a[0],year:w[2]||'',technique:tech(w),size:w[13]?cm(w[13]):(w[5]||''),
   price:w[8]||null,gallery:D.galleries[w[9]],moods:Object.keys(w.m).sort(function(x,y){return w.m[y]-w.m[x]}).slice(0,3)}}
 function fresh(list){return list.filter(function(w){return !shownKeys[w[11]]}).slice(0,10).map(row)}
 function asQ(i){var a=function(v){return Array.isArray(v)?v.map(String):[]};
@@ -543,7 +546,7 @@ function card(w,why,fy){
   var cap=el('span','cap');cap.appendChild(el('i',null,w[0]));top.appendChild(cap);c.appendChild(top);
   var by=el('span','by'), an=el('a',null,a[0]);an.href='./#'+T.hash+'artist='+a[1]+'&open='+encodeURIComponent(w[11]);an.title=T.record;
   by.appendChild(an);if(w[2])by.appendChild(document.createTextNode(', '+w[2]));c.appendChild(by);
-  var low=out(), meta=[w[4],w[5]].filter(Boolean).join(' · ');if(meta)low.appendChild(el('span','meta',meta));
+  var low=out(), meta=[tech(w),w[5]].filter(Boolean).join(' · ');if(meta)low.appendChild(el('span','meta',meta));
   var pr=el('span','price');pr.appendChild(el('b',null,w[8]?eur(w[8]):T.noprice));pr.appendChild(document.createTextNode(' '+(T.at?T.at+' ':'')+g+' ↗'));low.appendChild(pr);
   c.appendChild(low);
   if(why)c.appendChild(el('p','why',why));
@@ -986,7 +989,7 @@ def sale_pages(d):
                 f'<article class="card"><a class="out" href="{e(w[10])}" target="_blank" rel="noopener">'
                 f'<img src="{e(w[3])}" alt="{e(w[0])}, {e(arts[w[1]][0])}" loading="lazy" decoding="async" referrerpolicy="no-referrer-when-downgrade">'
                 f'<span class="cap"><i>{e(w[0])}</i>{e(arts[w[1]][0])}{", " + e(str(w[2])) if w[2] else ""}</span>'
-                + (f'<span class="meta">{e(" · ".join(x for x in (w[4], w[5]) if x))}</span>' if (w[4] or w[5]) else "")
+                + (f'<span class="meta">{e(" · ".join(x for x in ((lang == "en" and w[15]) or w[4], w[5]) if x))}</span>' if (w[4] or w[5]) else "")
                 + f'<span class="price"><b>{eur(w[8], lang) if w[8] else e(t["noprice"])}</b> {e((t["at"] + " ") if t["at"] else "")}{e(gals[w[9]])} ↗</span></a>'
                 f'<a class="rec" href="{BASE}/{"a" if lang == "en" else "k"}/{arts[w[1]][1]}.html">{e(st["artist"])}</a></article>' for w in rows)
             find = f'{BASE}/{t["file"]}#{hashq}'
