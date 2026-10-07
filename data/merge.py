@@ -493,13 +493,28 @@ def term_words(v):
         return MATWORD.get(k, MAT.get(k, TECH.get(k, w)))
     out = re.sub(r"[A-Za-zÕÄÖÜõäöüŠšŽž]+", word, out)
     return out
+# the galleries' own words the tables lack, and the sheet abbreviations of a print's line
+# ("Serigraafia. Paber. Lm 116 x 60. Km 99": sheet, image, plate, frame size)
+GALWORD = {"õlimaal": "oil painting", "õlimaalid": "oil paintings", "linool": "linocut", "muu": "other", "installatsioon": "installation",
+           "lm": "sheet", "km": "image", "plm": "plate", "pml": "plate", "vm": "frame", "ja": "and", "värviline": "colour", "kõrgtrükk": "relief print",
+           "reljeeftrükk": "relief print", "puugravüür": "wood engraving", "sügavtrükk": "intaglio", "digitrükk": "digital print", "digitrüki": "digital print",
+           "digiprint": "digital print", "fotoprint": "photo print", "fototrükk": "photo print", "pigmenttrükk": "pigment print", "pigmenditrükk": "pigment print",
+           "tänavakunst": "street art", "pastapliiats": "ballpoint pen", "pastakas": "ballpoint pen", "viltpliiats": "felt-tip pen", "värvipliiats": "coloured pencil",
+           "sulepea": "pen", "grafiit": "graphite", "tsüanotüüpia": "cyanotype", "pehmelakk": "soft-ground etching", "metsotinto": "mezzotint", "akvatinta": "aquatint",
+           "lito": "lithograph", "autolito": "autolithograph", "plastikaatlõige": "PVC cut", "skulptograafia": "sculptography", "õlipastell": "oil pastel",
+           "tušijoonistus": "ink drawing", "originaalillustratsioon": "original illustration", "digimaal": "digital painting", "digimaaling": "digital painting",
+           "linasel": "on linen", "kangal": "on fabric", "õlinahal": "on oilcloth", "puitplaat": "wood panel", "puitplaadil": "on wood panel", "raam": "frame",
+           "raamimata": "unframed", "autori": "artist's", "ainueksemplar": "unique", "kantud": "transferred", "sepistatud": "forged", "tikand": "embroidery",
+           "epoksiid": "epoxy", "vinüül": "vinyl", "sünteetika": "synthetics", "pross": "brooch", "aküül": "acrylic", "kõrgus": "height",
+           "vesivärv": "watercolour", "külmnõel": "drypoint", "kivitrükk": "lithograph", "kõrgreljeef": "high relief", "vineerilõige": "plywood cut",
+           "kartongtrükk": "cardboard print", "mv": "b/w"}
 def term_gal(v):
     if not v: return None
-    out = []
-    for p in [p.strip() for p in re.split(r'[;,\n]', v) if p.strip()][:4]:
-        words = [TECHMAT.get(w.lower().strip("."), w) for w in p.split()]
-        out.append(" ".join(words))
-    return ", ".join(out)
+    def word(m):                                                    # the gallery's capital kept: "Ofort. Plm" -> "Etching. Plate"
+        w = m.group(0); t = TECHMAT.get(w.lower(), GALWORD.get(w.lower(), w))
+        return t[:1].upper() + t[1:] if w[:1].isupper() else t
+    parts = [p.strip() for p in re.split(r'[;,\n]', v) if p.strip()][:4]
+    return ", ".join(re.sub(r"[^\W\d_]+", word, p) for p in parts)      # word by word, the punctuation kept
 
 def ess_en(e, kogu, tech, mat):
     if e:
