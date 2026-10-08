@@ -1695,7 +1695,8 @@
     const MULTI = new Set(["Print", "Sculpture", "Relief", "Illustration", "Bookplate", "Poster"]);
     // A highlighted title folds across years and media too: the ten drawings and
     // prints of Raud's Kalevipoja laul are one composition on the wall.
-    const dupKey = w => `${w.a}|${String(w.t).toLowerCase().replace(/[\s.,;:"'«»„“”]+/g, " ").trim()}|${w.hl != null ? "" : (w.y ?? "")}`;
+    const tKey = w => `${w.a}|${String(w.t).toLowerCase().replace(/[\s.,;:"'«»„“”]+/g, " ").trim()}`;
+    const dupKey = w => `${tKey(w)}|${w.hl != null ? "" : (w.y ?? "")}`;
     // One museum object catalogued twice is one picture too: EKM's own record of a sheet
     // ("EKM 34818 KR 294") beside MuIS's ("EKM j 34818 KR 294"), or a whole sheet (no
     // letter, or "/ab") beside its parts ("/a", "/b") -- Raud's Kalevipoeg kivi viskamas
@@ -1732,7 +1733,14 @@
     // Mägi, Wiiralt, Arrak, Estna and Leis sit side by side at the top of the 1920s or
     // the whole catalogue instead of twenty 1440s woodcuts.
     const mixed = state.artist === null && !opt.cols;
-    const hl = w => (mixed ? 0 : (w.hl ?? 1e9));
+    // Works sharing a title are different works -- Triik's three Laikmaa portraits, three
+    // Sõttaminek -- but side by side they read as one picture shown three times. So every
+    // title is shown once before any is shown twice, and of a highlighted title only the
+    // first (the masterpiece, then a painting) heads the wall; the rest take their turn.
+    const rep = new Map(), reps = new Map();
+    unique.map((w, i) => [w, i]).sort((a, b) => (a[0].hl ?? 1e9) - (b[0].hl ?? 1e9) || (a[0].mp || 1e9) - (b[0].mp || 1e9) || medRank(a[0]) - medRank(b[0]) || a[1] - b[1])
+      .forEach(([w]) => { const n = reps.get(tKey(w)) || 0; reps.set(tKey(w), n + 1); rep.set(w, n); });
+    const hl = w => (mixed ? 0 : rep.get(w) ? 1e9 : (w.hl ?? 1e9));
     const tier = w => (!mixed ? 0 : (w.hl != null || CANON_SET.has(w.a)) ? 0 : 1);
     const hash = k => { let h = 2166136261; for (const c of String(k)) h = Math.imul(h ^ c.charCodeAt(0), 16777619); return h >>> 0; };
     const turns = new Map();
@@ -1744,7 +1752,7 @@
     // so the wall opens on the same great works but not always the same first row
     const mp = w => (mixed && w.mp) ? w.mp + (hash(w.k + VISIT) % 12) : 1e9;
     const ordered = strict ? unique : inner.map(x => [x[0], x[1], medRank(x[0]), turn(x[0]), tier(x[0]), mixed ? hash(x[0].k) : 0])
-      .sort((a, b) => mp(a[0]) - mp(b[0]) || hl(a[0]) - hl(b[0]) || a[4] - b[4] || a[3] - b[3] || a[2] - b[2] || a[5] - b[5] || a[1] - b[1]).map(x => x[0]);
+      .sort((a, b) => mp(a[0]) - mp(b[0]) || hl(a[0]) - hl(b[0]) || a[4] - b[4] || a[3] - b[3] || rep.get(a[0]) - rep.get(b[0]) || a[2] - b[2] || a[5] - b[5] || a[1] - b[1]).map(x => x[0]);
     // on the untouched page the baked order leads, exactly, so nothing jumps
     if (mixed && !strict && BAKED_KEYS && pristine() && !listKeys()){
       const pos = new Map(BAKED_KEYS.map((k, i) => [k, i]));
