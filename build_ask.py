@@ -500,6 +500,10 @@ function syncYou(){var n=slGet().length;fyb.textContent=T.fybtn.replace('{n}',n)
   fyh.textContent=n<3?T.fyhint+' ':'';if(n){var a=el('a',null,T.fysee);a.href='./#'+T.hash+'list=mine';fyh.appendChild(a)}fyh.hidden=!fyh.firstChild}
 // ---- the assistant's tools: Claude asks (through the Worker), the page answers from the stock it has ----
 function wid(w){return 'w'+w.i}
+// My list for the assistant: the latest twelve works it can name -- a work for sale from the stock (with its id, for
+// similar), another from For you's shards where they are loaded. Sent with a message, kept nowhere
+function myList(){var o=[];listNow().slice(-12).forEach(function(k){var w=D.byKey&&D.byKey[k],x;
+  if(w)o.push({t:w[0],a:D.artists[w[1]][0],id:wid(w)});else if((x=(SHARDS[shardOf(k)]||{})[k]))o.push({t:x[2],a:x[3]})});return o}
 function byId(id){var w=D.works[+String(id||'').slice(1)];return w&&wid(w)===id?w:null}
 function tech(w){return EN&&w[15]||w[4]||''}     // the technique: the gallery's Estonian, its English on the English page
 function row(w){var a=D.artists[w[1]];return {id:wid(w),title:w[0],artist:a[0],year:w[2]||'',technique:tech(w),size:w[13]?cm(w[13]):(w[5]||''),
@@ -667,6 +671,7 @@ function send(text,photo){
   var early=null;
   if(!talked){talked=true;gc('find-conv-'+V)}
   if(photo){body.image=photo.data;body.w=photo.w;body.h=photo.h}else if(V==='a'){body.tools=1;body.trail=[]}
+  var ml=myList();if(ml.length)body.mylist=ml;
   // a round: the Worker answers, or asks for searches, which run here on the stock and go back with the next round
   function round(){return Promise.all([fetch(api,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).then(function(r){return r.json().then(function(j){if(!r.ok)throw j;return j})}),stock()])
     .then(function(res){var q=res[0];
@@ -919,6 +924,7 @@ def page(lang, ver, api, labels, M, n=0, tver="", names=()):
     return (f'<!doctype html><html lang="{lang}"><head><meta charset="utf-8">{H.STAMP}<meta name="viewport" content="width=device-width,initial-scale=1">'
             f'<title>{e(t["title"].format(n=f"{n:,}".replace(",", " " if lang == "et" else ",")))} · museaal.ee</title><meta name="description" content="{e(t["lede"][:290])}">'
             f'<link rel="canonical" href="{me}"><link rel="alternate" hreflang="{lang}" href="{me}"><link rel="alternate" hreflang="{"et" if lang == "en" else "en"}" href="{other}">'
+            f'<link rel="alternate" type="application/rss+xml" title="New for sale" href="{BASE}/feed.xml">'
             '<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>'
             '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..600&family=Archivo:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">'
             f'<style>{CSS}</style>{H.GC}</head><body><div class="wrap">'
@@ -1001,6 +1007,7 @@ def sale_pages(d):
             html_ = (f'<!doctype html><html lang="{lang}"><head><meta charset="utf-8">{H.STAMP}<meta name="viewport" content="width=device-width,initial-scale=1">'
                      f'<title>{e(h)} · museaal.ee</title><meta name="description" content="{e(lede[:290])}">'
                      f'<link rel="canonical" href="{me}"><link rel="alternate" hreflang="{lang}" href="{me}"><link rel="alternate" hreflang="{"et" if lang == "en" else "en"}" href="{other}">'
+                     f'<link rel="alternate" type="application/rss+xml" title="New for sale" href="{BASE}/feed.xml">'
                      f'<script type="application/ld+json">{ld}</script>'
                      '<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>'
                      '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..600&family=Archivo:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">'
@@ -1052,6 +1059,8 @@ servers. Data as of {M["built"]}.
 {len(d["galleries"])} galleries, {n(sum(1 for w in W_ if w[8]))} with a price. A row a work: title, artist, year, technique \
 as the gallery states it and in English, medium, dimensions, size, asking price in euros, gallery, the gallery's page for \
 the work, its picture, mood words read off the picture, the artist's page on museaal.ee
+- [New for sale, RSS]({BASE}/feed.xml): the newest hundred works; each artist has a feed of their own beside their page, \
+{BASE}/a/<artist>.xml
 - [Buy Art]({BASE}/{T["en"]["file"]}): the same works, searched by price, medium, size and mood, or by describing what you \
 are after ([in Estonian]({BASE}/{T["et"]["file"]}))
 {sale}
@@ -1075,6 +1084,50 @@ sale, record at auction; in Estonian under {BASE}/k/
 - Corrections and questions: info@museaal.ee
 """
     open("site/llms.txt", "w", encoding="utf-8").write(txt)
+
+def rss(d):
+    """The new works for sale as RSS: /feed.xml, the newest hundred at every gallery, and /a/<artist>.xml beside every
+    artist page, that artist's works for sale -- so a collector can follow a name in any feed reader, with no account and
+    nothing kept about them. A work is dated by the day the weekly run first saw it (data/gallery_seen.json; works seen
+    before days were kept carry the first of their month). Each item links to the gallery's page, as the cards do."""
+    from xml.sax.saxutils import escape as x
+    import email.utils
+    arts, gals = d["artists"], d["galleries"]
+    seen = json.load(open("data/gallery_seen.json", encoding="utf-8")) if os.path.exists("data/gallery_seen.json") else {}
+    day = {"G" + re.sub(r"[^A-Za-z0-9]", "", g): e_.get("day") or e_["first"] + "-01" for g, e_ in seen.items()}
+    when = lambda w: day.get(w[11], "2026-09-01")
+    rfc = lambda s: email.utils.format_datetime(datetime.datetime.fromisoformat(s).replace(tzinfo=datetime.timezone.utc))
+    def item(w, whose):
+        a = arts[w[1]]
+        price = f"€{w[8]:,}" if w[8] else "price on request"
+        line = " · ".join(filter(None, [w[15] or w[4], w[5], price, gals[w[9]]]))
+        desc = (f'<p><img src="{x(w[3], {chr(34): "&quot;"})}" alt=""></p><p>{x(line)}</p>'
+                f'<p><a href="{BASE}/a/{a[1]}.html">{x(a[0])} on museaal.ee</a></p>')
+        return (f"<item><title>{x((a[0] + ': ' if whose else '') + (w[0] or '—') + (f', {w[2]}' if w[2] else '') + ' — ' + price)}</title>"
+                f"<link>{x(w[10])}</link><guid isPermaLink=\"false\">museaal.ee:{x(w[11])}</guid><pubDate>{rfc(when(w))}</pubDate>"
+                f"<description>{x(desc)}</description></item>")
+    def channel(path, title, link, about, ws, whose, cap):
+        ws = sorted(ws, key=lambda w: (when(w), w[11]), reverse=True)[:cap]
+        top = rfc(when(ws[0])) if ws else rfc(H.META["built"][:10])
+        open(path, "w", encoding="utf-8").write(
+            '<?xml version="1.0" encoding="utf-8"?>\n<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel>'
+            f"<title>{x(title)}</title><link>{x(link)}</link><description>{x(about)}</description><language>en</language>"
+            f'<atom:link href="{BASE}/{path[5:]}" rel="self" type="application/rss+xml"/><lastBuildDate>{top}</lastBuildDate>'
+            + "".join(item(w, whose) for w in ws) + "</channel></rss>\n")
+    channel("site/feed.xml", "New for sale — museaal.ee", f"{BASE}/{T['en']['file']}",
+            "Works by Estonian artists newly for sale at Estonian galleries, with their asking prices. Each links to the gallery that sells it.",
+            d["works"], True, 100)
+    by = collections.defaultdict(list)
+    for w in d["works"]: by[arts[w[1]][1]].append(w)
+    name = {sl: A[i]["n"] for i, sl in H.ARTIST_SLUG.items()}
+    n = 0
+    for f in os.listdir("site/a"):
+        sl = f[:-5]
+        if not f.endswith(".html") or sl == "index" or sl not in name: continue
+        channel(f"site/a/{sl}.xml", f"{name[sl]} — for sale · museaal.ee", f"{BASE}/a/{sl}.html",
+                f"Works by {name[sl]} for sale at Estonian galleries, newest first, with their asking prices.", by.get(sl, []), False, 50)
+        n += 1
+    print(f"  feeds          feed.xml, {n:,} artist feeds ({len(by):,} with works for sale)")
 
 def taste_files(d):
     """For you's data (data/taste.py): the stock's 48 bytes a work in stock.json's order (zeros: no picture read yet),
@@ -1118,7 +1171,7 @@ def main():
         labels = {w["en"]: (w["et"] if lang == "et" else BM.LABEL_EN.get(w["en"], w["en"])) for w in M}
         open(f"site/{T[lang]['file']}", "w", encoding="utf-8").write(page(lang, ver, API, labels, M, len(d["works"]), tver, door_names(d))); urls.append(f"{BASE}/{T[lang]['file']}")
     urls += sale_pages(d)
-    feed(d); llms_txt(d)
+    feed(d); llms_txt(d); rss(d)
     sm = open("site/sitemap.xml", encoding="utf-8").read()
     today = datetime.date.today().isoformat()
     add = "".join(f'<url><loc>{u}</loc><lastmod>{today}</lastmod><changefreq>weekly</changefreq></url>' for u in urls)

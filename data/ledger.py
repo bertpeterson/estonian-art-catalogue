@@ -27,7 +27,7 @@ seen = json.load(open(LEDGER, encoding="utf-8")) if os.path.exists(LEDGER) else 
 new = returned = 0
 for gid, g in now.items():
     e = seen.get(gid)
-    if not e: seen[gid] = {"first": month, "last": month, "rec": g}; new += 1
+    if not e: seen[gid] = {"first": month, "day": datetime.date.today().isoformat(), "last": month, "rec": g}; new += 1   # day: the feeds' date
     else:
         if e["last"] != month and e.get("gone"): returned += 1
         e["last"] = month; e["rec"] = g; e.pop("gone", None)

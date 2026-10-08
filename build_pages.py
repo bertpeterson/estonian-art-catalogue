@@ -324,6 +324,13 @@ def sale_block(i, a, ws, lang):
     return (f'<h2 class="sh">{head}</h2><p class="m">{e(line)}</p><div class="wall sale">{tiles}</div>'
             f'<p><a class="cta" href="{e(find)}">{more} →</a></p>'), len(S), S[:12]
 
+def follow(sl, lang, sale):
+    """the artist's feed of works for sale (build_ask.py writes it): a new work shows in the reader's feed reader"""
+    en = lang == "en"
+    t = ("Follow new works for sale (RSS)" if sale else "Nothing for sale now. Follow new works for sale (RSS)") if en else \
+        ("Jälgi uusi müüki tulevaid teoseid (RSS)" if sale else "Praegu pole müügil. Jälgi uusi müüki tulevaid teoseid (RSS)")
+    return f'<p class="m"><a href="{BASE}/a/{sl}.xml">{t}</a></p>'
+
 def embed_box(lang, src, back, name, T):
     """the two lines to paste: the iframe, and the plain link that carries the credit"""
     code = (f'<iframe src="{src}" width="100%" height="230" loading="lazy" title="{name} – museaal.ee"></iframe>\n'
@@ -418,6 +425,7 @@ def render(i, a, ws, lang):
            f"<link rel=\"canonical\" href=\"{me}\">"
            f"<link rel=\"alternate\" hreflang=\"{lang}\" href=\"{me}\"><link rel=\"alternate\" hreflang=\"{'et' if lang == 'en' else 'en'}\" href=\"{other}\">"
            f"<link rel=\"alternate\" hreflang=\"x-default\" href=\"{BASE}/a/{sl}.html\">"
+           f"<link rel=\"alternate\" type=\"application/rss+xml\" title=\"{e(a['n'])} — for sale\" href=\"{BASE}/a/{sl}.xml\">"
            f"<meta property=\"og:type\" content=\"profile\">"
            f"<meta property=\"og:title\" content=\"{e(a['n'])}{' (' + dates + ')' if dates else ''}\">"
            f"<meta property=\"og:description\" content=\"{e(desc)}\">"
@@ -440,6 +448,7 @@ def render(i, a, ws, lang):
            + (f"<p class=\"m\">{e(au_line)}</p>" if au_line else "")
            + up_line(i, lang)
            + sale
+           + follow(sl, lang, bool(n_sale))
            + f"<p><a class=\"cta\" href=\"{app}\">{e(T['browse'].format(n=n))}</a></p>"
            + wall
            + related(i, lang)
