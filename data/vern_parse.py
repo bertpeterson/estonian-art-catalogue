@@ -9,7 +9,9 @@ A point between digits is a decimal, not a break: "45.5 x 71 cm".
 """
 import re
 
-DIM=re.compile(r'([\d.,]+\s*[×x]\s*[\d.,]+(?:\s*[×x]\s*[\d.,]+)?)\s*(cm|mm)', re.I)
+# a side may carry a stray space after its decimal comma: "Lm 85, 1 x 71 cm" is 85,1
+_SIDE=r'\d+(?:[.,]\s?\d+)*'
+DIM=re.compile(rf'({_SIDE}\s*[×x]\s*{_SIDE}(?:\s*[×x]\s*{_SIDE})?)\s*(cm|mm)', re.I)
 YEAR=re.compile(r'^(1[89]\d\d|20[0-2]\d)(?!\d)')
 # what may follow the year and still be the date: a span, a reprint, a decade, a part of one
 TAIL=re.compile(r'(?:[\s\-–/]*(?:\d{2,4}(?!\d)|(?:ndate|ndad|nda|aastad|a|ii|i|pool|keskpaik|lõpp|algus)\b))*', re.I)
@@ -52,7 +54,7 @@ def parse(name):
     ci=yi-1 if yi and yi > 1 and CIRCA.match(segs[yi-1]) else None
     if ci: yl="ca "+yl
     dm=DIM.search(segs[di]) if di is not None else None
-    dims=f"{dm.group(1).strip()} {dm.group(2).lower()}" if dm else ""
+    dims=re.sub(r'([.,])\s+(?=\d)', r'\1', dm.group(1).strip())+" "+dm.group(2).lower() if dm else ""
     # the title ends at whichever marker comes first: the year, the medium, or the size
     stops=[x for x in (ci, yi, mi, di) if x is not None and x > 0]
     end=min(stops) if stops else len(segs)
