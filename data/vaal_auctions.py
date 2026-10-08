@@ -55,6 +55,13 @@ slugs = sorted({s for s in re.findall(r'href="/oksjonid/(\d{4}-[a-z]+)"', index)
 print(f"VAAL: {len(slugs)} sales listed", flush=True)
 
 today = datetime.date.today().isoformat()
+def day_date(day, slug):
+    """A sale day as Vaal labels it ("1. päev – 15.05.2025"). The label can carry the
+    year before (spring 2025's days read "15.05.2024"); a day is never earlier than the
+    year its sale is named for, so that year is taken then."""
+    m = re.search(r"(\d{2})\.(\d{2})\.(\d{4})", day.get("auction_day_description") or "")
+    return f"{max(m.group(3), slug[:4])}-{m.group(2)}-{m.group(1)}" if m else None
+
 recs, n_open, n_unparsed = [], 0, 0
 coming = []
 for slug in slugs:
@@ -65,15 +72,14 @@ for slug in slugs:
     try: a = json.loads(data)["auction"]
     except Exception: print("  bad API answer for", slug); continue
     days = a.get("days") or []
-    dates = [f"{m.group(3)}-{m.group(2)}-{m.group(1)}" for d in days for m in [re.search(r"(\d{2})\.(\d{2})\.(\d{4})", d.get("auction_day_description") or "")] if m]
+    dates = [x for x in (day_date(d, slug) for d in days) if x]
     ended = a.get("auction_status") == "ended" or (dates and max(dates) < today and any(i.get("item_price_final") for d in days for i in d.get("item", [])))
     ahead = not ended and (not dates or max(dates) >= today)       # a sale still to come (or running)
     if not ended and not ahead: n_open += 1; continue                # past its days but no results yet: wait
     sale = clean(a.get("auction_name") or slug)
     n = 0
     for day in a.get("days") or [{"auction_day_description": "", "item": a.get("item", [])}]:
-        dm = re.search(r"(\d{2})\.(\d{2})\.(\d{4})", day.get("auction_day_description") or "")
-        when = f"{dm.group(3)}-{dm.group(2)}-{dm.group(1)}" if dm else slug[:4]
+        when = day_date(day, slug) or slug[:4]
         for it in day.get("item", []):
             artist = clean(it.get("item_author"))
             title = re.sub(r"^\d+\.\s*", "", clean(it.get("item_name")))          # "12. Lamav akt"

@@ -47,7 +47,7 @@ L = {
  "en": dict(dir="a", site="Estonian Art Catalogue", kind=KIND, works="works", artists="Artists A–Z", art_nav="Artists",
             year="Year", title="Title", tech="Technique", dims="Dimensions", held="Held by", browse="Browse {n} works in the catalogue →",
             sold="sold", gone="no longer listed", soldp="Sold €{p}", soldnp="Sold", unsold="Unsold",
-            first600="Showing the first 600 of {n} works — <a href=\"{u}\">see all in the catalogue</a>.",
+            some="Showing {k} of {n} records, from every period — <a href=\"{u}\">see all in the catalogue</a>.",
             pics="{p} works with a picture; the first {k} here, all in the catalogue. Pictures for public-domain works, live gallery listings and the works galleries and artists show on their own pages, from those servers.",
             wallh="Artwall", shownat="shown at {g}",
             sim="Similar artists — same period, media and subjects: ", school="Also trained at {g}", movement="Also working in {g}", member="Also in {g}",
@@ -63,7 +63,7 @@ L = {
  "et": dict(dir="k", site="Eesti Kunstikataloog", kind={"school": "õppinud:", "movement": "suund:", "member": "liige:"}, works="teost", artists="Kunstnikud A–Ü", art_nav="Kunstnikud",
             year="Aasta", title="Pealkiri", tech="Tehnika", dims="Mõõdud", held="Hoidja", browse="Sirvi {n} teost kataloogis →",
             sold="müüdud", gone="enam ei pakuta", soldp="Müüdud €{p}", soldnp="Müüdud", unsold="Müümata",
-            first600="Esimesed 600 teost {n}-st — <a href=\"{u}\">vaata kõiki kataloogis</a>.",
+            some="{k} kirjet {n}-st, kõigist perioodidest — <a href=\"{u}\">vaata kõiki kataloogis</a>.",
             pics="{p} pildiga teost; siin esimesed {k}, kõik kataloogis. Pilte näidatakse ainult autoriõiguse alt vabade teoste, galeriides müügil olevate teoste ning galeriide ja kunstnike endi lehtedel näidatud teoste kohta, nende serveritest.",
             wallh="Kunstisein", shownat="{g} näitusel",
             sim="Sarnased kunstnikud — sama aeg, liigid ja ained: ", school="Samuti õppinud: {g}", movement="Samuti: {g}", member="Samuti {g} liige",
@@ -327,6 +327,8 @@ def embed_box(lang, src, back, name, T):
     return (f'<details class="emb"><summary>{T["embed_h"]}</summary><p class="m">{T["embed_t"]}</p>'
             f'<textarea readonly rows="3" spellcheck="false">{e(code)}</textarea></details>')
 
+ROWS = 1000                       # the works table; the app has the rest
+
 def render(i, a, ws, lang):
     T = L[lang]; D = T["dir"]
     sl = SLUG[i]
@@ -361,11 +363,19 @@ def render(i, a, ws, lang):
         if w.get("kind") != "auction": return e(val(w, "mu") or "")
         out = T["soldp"].format(p=f"{w['ap']:,}") if w.get("ao") and w.get("ap") else T["soldnp"] if w.get("ao") else T["unsold"]
         return f"{e(val(w, 'mu'))} · {e(w.get('an') or '')} · {out}"
+    # up to ROWS rows: every auction lot and gallery listing, then the museum records
+    # spread evenly over the years -- a cut by date dropped an artist's last decades
+    by_year = lambda x: (x.get("y") is None, x.get("y") or 0, x.get("t") or "")
+    market = [w for w in ws if w.get("kind")]
+    museum = sorted((w for w in ws if not w.get("kind")), key=by_year)
+    room = max(ROWS - len(market), 0)
+    if len(museum) > room: museum = [museum[k * len(museum) // room] for k in range(room)]
+    shown = sorted(market + museum, key=by_year)
     rows = "".join(
         f"<tr><td>{e(w.get('y') or w.get('yl') or '—')}</td><td>{e(w.get('t'))}</td>"
         f"<td>{e((val(w,'tc') or val(w,'tce') or '') if lang == 'en' else (val(w,'tce') or val(w,'tc') or ''))}</td><td>{e(w.get('dm') or '')}</td>"
         f"<td>{holder(w)}</td></tr>"
-        for w in sorted(ws, key=lambda x: (x.get("y") is None, x.get("y") or 0, x.get("t") or ""))[:600])
+        for w in shown)
     # the artwall: the same pictures as the app, from the holders' and galleries' own
     # servers, in the app's order -- key works, then paintings before drawings before
     # prints -- capped at forty-eight, each tile a link into the app's record
@@ -430,7 +440,7 @@ def render(i, a, ws, lang):
            + wall
            + related(i, lang)
            + hub_line(ws, lang)
-           + (f"<p class=\"m\">{T['first600'].format(n=f'{n:,}', u=app)}</p>" if n > 600 else "")
+           + (f"<p class=\"m\">{T['some'].format(k=f'{len(shown):,}', n=f'{len(ws):,}', u=app)}</p>" if len(shown) < len(ws) else "")
            + f"<table><thead><tr><th>{T['year']}</th><th>{T['title']}</th><th>{T['tech']}</th><th>{T['dims']}</th>"
            f"<th>{T['held']}</th></tr></thead><tbody>{rows}</tbody></table>"
            + neighbours(i, lang)

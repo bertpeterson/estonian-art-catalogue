@@ -1009,19 +1009,30 @@ print("  auction results added:", auc_added, "sold", sum(1 for r in AUC if r["so
 # in 1999, sold there in 2019. Every lot stays a record -- each is a sale that
 # happened -- but lots of one work (artist, title, size) are chained, and the page
 # shows the work once, with its results in order, rather than twice as strangers.
+# The size is matched side by side, within a centimetre: one house rounds what another
+# gives to the millimetre (Lapin's Kristjan Jaak, "60,3 x 56,9" at Vernissage, "60 x 57"
+# at Vaal). Two dated lots more than a year apart are two works of one name.
 _chain = collections.defaultdict(list)
 for w in works:
     if w.get("kind") == "auction" and w.get("dm"):
-        _chain[(w["a"], "".join(fold(w["t"])).rstrip("."), re.sub(r"[^0-9x]", "", w["dm"].lower().replace("×", "x").replace(",", ".")))].append(w)
-_nc = 0
+        _chain[(w["a"], "".join(fold(w["t"])).rstrip("."))].append(w)
+_sides = lambda w: sorted(float(x.replace(",", ".")) for x in re.findall(r"\d+(?:[.,]\d+)?", w["dm"]))
+_same = lambda p, w, s: len(p[1]) == len(s) and all(abs(x - y) <= 1 for x, y in zip(p[1], s)) \
+    and not (p[0].get("y") and w.get("y") and abs(p[0]["y"] - w["y"]) > 1)
+_nc = _nl = 0
 for lots in _chain.values():
-    if len(lots) < 2: continue
-    lots.sort(key=lambda w: str(w.get("ad") or ""))
-    _nc += 1
-    for k, w in enumerate(lots):
-        w["ac"] = _nc                                    # the chain
-        if k == len(lots) - 1: w["al"] = 1               # the latest lot carries the work on the page
-print("  works offered more than once:", _nc, "chains over", sum(len(l) for l in _chain.values() if len(l) > 1), "lots")
+    works_ = []
+    for w in sorted(lots, key=lambda w: str(w.get("ad") or "")):
+        s = _sides(w)
+        g = next((g for g in works_ if _same(g[0], w, s)), None)
+        g.append((w, s)) if g else works_.append([(w, s)])
+    for g in works_:
+        if len(g) < 2: continue
+        _nc += 1; _nl += len(g)
+        for k, (w, _) in enumerate(g):
+            w["ac"] = _nc                                # the chain
+            if k == len(g) - 1: w["al"] = 1              # the latest lot carries the work on the page
+print("  works offered more than once:", _nc, "chains over", _nl, "lots")
 # Vaal galerii prints life dates beside every lot's artist -- "s 1960", "1936–2022" --
 # the only auction house that does. For an artist with no date from any museum,
 # Wikidata or their own biography, that is taken, tagged Vaal, under the same gate as
