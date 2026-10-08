@@ -68,6 +68,7 @@ jobs:
       - name: Merge, guard and build
         run: |
           git show HEAD:data/data.json > /tmp/data_before.json
+          echo '{}' > data/stock_gone.json    # every gallery read afresh: the daily check's list of works gone (stock.yml) starts again
           (cd data && python3 ledger.py && python3 merge.py && python3 gallery_shapes.py && python3 merge.py)
           python3 data/data_guard.py /tmp/data_before.json data/data.json
           (cd data && python3 img_small.py)
