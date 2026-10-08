@@ -47,7 +47,9 @@ jobs:
         working-directory: data
         run: |
           rm -rf gcache
-          for s in haus kogo temnikova tutar artrovert ruki allee eks vernissage vernissage_auctions haus_auctions allee_auctions eko_auctions vaal_auctions eks_auctions konradmagi artner artman tokkoarrak artandtonic kipskassid noba noba_artists noba_artworks noba; do
+          python3 -u fetch_galleries.py      # the galleries side by side (data/fetch_galleries.py)
+          # then the auction houses, one after another: four of them are galleries' own servers, just read
+          for s in vernissage_auctions haus_auctions allee_auctions eko_auctions vaal_auctions eks_auctions; do
             echo "=== $s ==="
             python3 -u $s.py
           done

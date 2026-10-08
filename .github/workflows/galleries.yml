@@ -44,11 +44,7 @@ jobs:
 
       - name: Fetch every gallery afresh
         working-directory: data
-        run: |
-          for s in haus kogo temnikova tutar artrovert ruki allee eks vernissage konradmagi artner artman tokkoarrak artandtonic kipskassid noba noba_artists noba_artworks noba; do
-            echo "=== $s ==="
-            python3 -u $s.py
-          done
+        run: python3 -u fetch_galleries.py    # side by side, each at its own pace: one after another took 164 min
 
       # a new Lihtsad Kipskassid photograph is shown only once looked at for people
       # (data/kipskassid_check.py); the models are installed only in a week that has one
