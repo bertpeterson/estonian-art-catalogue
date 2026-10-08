@@ -787,6 +787,7 @@ CSS = BM.CSS + """
 .card{display:grid;align-content:start;gap:4px}
 .card .out{display:grid;gap:3px;text-decoration:none}
 .card img{display:block;width:100%;aspect-ratio:1;object-fit:contain;background:var(--field)}
+.card .sl{top:2px;right:2px}
 .card .cap{padding-top:5px;font-size:.78rem;line-height:1.3;color:var(--grey)}
 .card .cap i{display:block;font:italic 400 1rem/1.2 var(--serif);color:var(--ink)}
 .card .out:hover .cap i{text-decoration:underline}
