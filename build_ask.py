@@ -106,7 +106,7 @@ T = {"en": dict(file="find.html", other="leia.html", other_l="Eesti keeles", sit
                 note="The works are the galleries' current stock with their asking prices, read weekly from each gallery's own site; the gallery's page is the one to trust. Your messages are read by Claude, which runs the searches and picks the works it suggests; they are not stored. The auction figures under a work are its artist's record as the houses published it, hammer prices: a record, not a valuation. The moods are read from the gallery's photograph by CLIP, an image model: a guide, not a judgement of the work.",
                 sl_add="Add to my list", sl_remove="Remove from my list", fy="For you", fybtn="Based on My list ({n})",
                 fyhint="Bookmark three works, here, on the mood wall or in the catalogue, and this puts first what looks like them.",
-                fysee="See My list", fybit="based on My list", fylike="Like “{t}”, {a}, in My list",
+                fysee="See My list", fybit="based on My list",
                 fynone="nothing in My list to go by yet",
                 hash=""),
      "et": dict(file="leia.html", other="find.html", other_l="In English", site="Eesti Kunstikataloog",
@@ -134,7 +134,7 @@ T = {"en": dict(file="find.html", other="leia.html", other_l="Eesti keeles", sit
                 note="Teosed on galeriide praegune müügivalik ja nende küsitud hinnad, loetud iga nädal galeriide endi lehtedelt; usaldusväärne on galerii leht. Sinu sõnumeid loeb Claude, kes teeb otsingud ja valib soovitatavad teosed; neid ei salvestata. Teose all olevad oksjoniandmed on kunstniku tulemused nii, nagu oksjonimajad need avaldasid (haamrihinnad): ülevaade, mitte hinnang. Meeleolu loeb galerii fotolt pildimudel CLIP: see on juhatus, mitte hinnang teosele.",
                 sl_add="Lisa minu nimekirja", sl_remove="Eemalda minu nimekirjast", fy="Sulle", fybtn="Minu nimekirja põhjal ({n})",
                 fyhint="Märgi järjehoidjaga kolm teost, siin, meeleolu seinal või kataloogis, ja ette tulevad nendega sarnased.",
-                fysee="Vaata minu nimekirja", fybit="minu nimekirja põhjal", fylike="Sarnane: „{t}“, {a}, minu nimekirjas",
+                fysee="Vaata minu nimekirja", fybit="minu nimekirja põhjal",
                 fynone="minu nimekirjas pole veel millegi järgi minna",
                 hash="lang=et&")}
 
@@ -472,21 +472,20 @@ function buildTaste(){var keys=listNow(), need={};
       if(w)items.push({v:SV[w.i],a:w[1],t:w[0],an:D.artists[w[1]][0]});
       else if((x=(SHARDS[shardOf(k)]||{})[k]))items.push({v:unb64(x[1]),a:x[0],t:x[2],an:x[3]})});
     items.forEach(function(it){if(it.a>=0)arts[it.a]=1});
-    var vs=items.filter(function(it){return it.v}), n=D.works.length, s=new Float32Array(n), why=[], max=0;
+    var vs=items.filter(function(it){return it.v}), n=D.works.length, s=new Float32Array(n), max=0;
     // each kept picture ranks every work for sale by nearness, and a work scores by its place, 1/(10 + place): the
     // kept works take turns at the top. By nearness itself one gallery photograph on the list outweighed two museum
     // scans (photographs are nearer photographs), and as z-scores the scans outweighed it
     vs.forEach(function(it){var c=new Float32Array(n),o=[],r=it.r=new Float32Array(n),i,d,x;
       for(i=0;i<n;i++){o.push(i);if(!SV[i]){c[i]=-9;continue}x=0;for(d=0;d<NV;d++)x+=SV[i][d]*it.v[d];c[i]=x}
       o.sort(function(a,b){return c[b]-c[a]});for(i=0;i<n;i++)r[o[i]]=SV[o[i]]?1/(10+i):0});
-    D.works.forEach(function(w,i){if(inl[w[11]])return;var b1=0,b2=0,bj=null,sc;
-      vs.forEach(function(it){var c=it.r[i];if(c>b1){b2=b1;b1=c;bj=it}else if(c>b2)b2=c});
+    D.works.forEach(function(w,i){if(inl[w[11]])return;var b1=0,b2=0,sc;
+      vs.forEach(function(it){var c=it.r[i];if(c>b1){b2=b1;b1=c}else if(c>b2)b2=c});
       sc=b1+.3*b2;
-      if(arts[w[1]])sc+=.055;   // as a kept work's fourth nearest; no reason line, the card names the artist
-      else if(bj)why[i]=T.fylike.replace('{t}',bj.t).replace('{a}',bj.an);
+      if(arts[w[1]])sc+=.055;   // as a kept work's fourth nearest
       s[i]=sc;if(sc>max)max=sc});
     if(max)for(var i=0;i<n;i++)s[i]/=max;
-    TASTE={sig:keys.join(','),s:s,why:why,in:inl,n:max?items.length:0};return TASTE})}
+    TASTE={sig:keys.join(','),s:s,in:inl,n:max?items.length:0};return TASTE})}
 // On by default from three works on the list, unless this browser turned it off (find-fy: off); the stock's bytes
 // are fetched at once, beside stock.json, so the first ten wait for little more than the ranking. Default use counts
 // apart from chosen: find-foryou-auto, find-foryou, find-foryou-off.
@@ -539,7 +538,7 @@ function step(c,r){var i=c.input||{};
   if(c.name==='search')return describe(asQ(i))+' → '+count(r.matched||0);
   if(c.name==='artist')return T.artist+': '+(r.name||String(i.name||''))+(r.for_sale?' → '+count(r.for_sale):'');
   return T.like+' '+(r.of?r.of.title+' — '+r.of.artist:'')}
-function card(w,why,fy){
+function card(w,why){
   var a=D.artists[w[1]], g=D.galleries[w[9]], c=el('article','card');
   // the picture and title, and the price, go to the gallery; the artist's name to the work in the catalogue
   function out(){var o=el('a','out');o.href=w[10];o.target='_blank';o.rel='noopener';
@@ -553,7 +552,6 @@ function card(w,why,fy){
   var pr=el('span','price');pr.appendChild(el('b',null,w[8]?eur(w[8]):T.noprice));pr.appendChild(document.createTextNode(' '+(T.at?T.at+' ':'')+g+' ↗'));low.appendChild(pr);
   c.appendChild(low);
   if(why)c.appendChild(el('p','why',why));
-  if(fy)c.appendChild(el('p','fy',fy));
   if(R&&w[13]){var r=R,on=el('button','btn onwall',T.onwall);on.type='button';
     on.addEventListener('click',function(){hang(r,w);r.v.scrollIntoView({block:'center',behavior:'smooth'})});c.appendChild(on)}
   if(AR&&w[13])c.appendChild(arButton(w,function(){return R&&R.sel?R.sel.frame:'black'}));
@@ -579,7 +577,7 @@ function show(box,q,picks){
     if(k){var p=el('p','none',T.artistonly.replace('{who}',q.artist).replace('{n}',count(k))+' '),go=el('button','linkbtn',T.showthem);go.type='button';
       go.addEventListener('click',function(){Q=solo;changed()});p.appendChild(go);box.appendChild(p)}
     return {note:k?T.artistonly.replace('{who}',q.artist).replace('{n}',count(k)):'',list:list,keys:keys}}
-  function page(){list.slice(n,n+10).forEach(function(w){grid.appendChild(card(w,why[w.i],ty&&ty.why[w.i]));shownKeys[w[11]]=1;keys.push(w[11])});n+=10;more.hidden=n>=list.length}
+  function page(){list.slice(n,n+10).forEach(function(w){grid.appendChild(card(w,why[w.i]));shownKeys[w[11]]=1;keys.push(w[11])});n+=10;more.hidden=n>=list.length}
   page();box.appendChild(grid);box.appendChild(more);more.addEventListener('click',page);
   return {list:list,keys:keys,note:T.shown+' '+Math.min(10,list.length)+' / '+all.length+': '+list.slice(0,10).map(function(w){return w[0]+' — '+D.artists[w[1]][0]+(w[8]?', '+eur(w[8]):'')+(w[13]?', '+cm(w[13]):'')+' ['+wid(w)+']'}).join('; ')}}
 
@@ -789,7 +787,6 @@ CSS = BM.CSS + """
 .card .out:hover .cap i{text-decoration:underline}
 .card .meta{font-size:.74rem;color:var(--grey);line-height:1.3}
 .card .price{font-size:.78rem;color:var(--grey)}.card .price b{font:500 .86rem/1.3 var(--mono);color:var(--ink);margin-right:4px}
-.card .fy{margin:2px 0 0;font-size:.74rem;line-height:1.3;color:var(--grey)}
 .filters .chip:disabled{opacity:.45;cursor:default}
 .f-hint{margin:8px 0 0;font-size:.8rem;line-height:1.4;color:var(--grey)}.f-hint a{color:var(--ink)}
 .card .by{font-size:.78rem;line-height:1.3;color:var(--grey)}
@@ -916,7 +913,7 @@ def page(lang, ver, api, labels, M, n=0, tver="", names=()):
                                        "media", "anyprice", "upto", "from_", "count", "count1", "moremoods", "fewer", "clear", "artist", "titlew", "artistonly", "showthem", "daily",
                                        "yourroom", "looking", "photomsg", "wallw", "drag", "onwall", "fits", "roomnote", "nowall", "badphoto",
                                        "choose", "hangmore", "remove", "together", "frames", "reset", "ar", "arwait", "arfail", "arsafari",
-                                       "sl_add", "sl_remove", "fybtn", "fyhint", "fysee", "fybit", "fylike", "fynone")}, ensure_ascii=False).replace("</", "<\\/")
+                                       "sl_add", "sl_remove", "fybtn", "fyhint", "fysee", "fybit", "fynone")}, ensure_ascii=False).replace("</", "<\\/")
     lj = json.dumps(labels, ensure_ascii=False).replace("</", "<\\/")
     ask = (api.rstrip("/") + "/ask") if api else ""
     return (f'<!doctype html><html lang="{lang}"><head><meta charset="utf-8">{H.STAMP}<meta name="viewport" content="width=device-width,initial-scale=1">'
