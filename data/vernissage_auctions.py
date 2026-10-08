@@ -70,11 +70,11 @@ while True:
         if hammer is not None and start is not None and hammer < start: n_odd += 1
         got = parse(LOTNO.sub("", PRICE_PHRASE.sub(" ", name)))
         if not got: n_unparsed += 1; continue
-        artist, title, wyear, tech, dims = got
+        artist, title, wyear, tech, dims, yl = got
         aid = "vern-" + str(p.get("id"))
         if aid in seen: continue
         seen.add(aid)
-        (coming if ahead else recs).append({"aid": aid, "artist": artist, "title": title, "year": wyear, "tech": tech, "dims": dims,
+        (coming if ahead else recs).append({"aid": aid, "artist": artist, "title": title, "year": wyear, "yl": yl, "tech": tech, "dims": dims,
                      "house": "Vernissage", "sale": sale, "when": f"{year}-{month:02d}",
                      "start": start, "hammer": hammer, "sold": sold, "after": after,
                      "url": p.get("permalink") or "https://vernissage.ee"})

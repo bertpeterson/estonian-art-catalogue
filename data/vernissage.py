@@ -52,7 +52,7 @@ while True:
         name=re.sub(r'\b(alghind|haamrihind|hind|price|starting price|hammer price)\s*:?\s*[\d\s.,]*\s*(€|eur)?', ' ', p.get("name") or "", flags=re.I)
         got=parse(name)
         if not got: continue
-        artist,title,year,tech,dims = got
+        artist,title,year,tech,dims,_ = got
         gid="vern-"+str(p.get("id"))
         if gid in seen: continue
         seen.add(gid)
