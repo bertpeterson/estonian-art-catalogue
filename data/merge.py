@@ -1253,6 +1253,14 @@ for w in works:
     elif w.get("oi") and str(w["oi"]) in _ekm:
         w["im"] = "e:" + _ekm[str(w["oi"])];            IMG["ekm"] += 1
         if str(w["oi"]) in _ekmr: w["ir"] = _ekmr[str(w["oi"])]
+# A set of different pictures the holder titled identically, told apart by hand:
+# title_fixes.json maps an inventory number to the title shown. Triik's six postcards,
+# all 'Postkaart sarjast "Vene olustik"' in MuIS, are numbered in inventory order with
+# the scene in square brackets -- the brackets mark our words, not the museum's.
+_TF = json.load(open("title_fixes.json", encoding="utf-8")) if os.path.exists("title_fixes.json") else {}
+for w in works:
+    if w.get("nu") in _TF: w["t"] = _TF[w["nu"]]
+print("  titles set by hand:", sum(1 for w in works if w.get("nu") in _TF), "of", len(_TF))
 # What people come to an artist for goes first on the wall: highlights.json names, per
 # artist, the works art history treats as the key ones, in order. A pictured work whose
 # title matches gets a rank -- the exact title before a version or a study of it.
