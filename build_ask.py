@@ -15,8 +15,11 @@ is sold.
 
 Only current stock with the gallery's picture; a work without a price is shown only
 while no budget is set. Run after build_mood.py (it adds to the sitemap) and before csp.py.
+
+The same stock goes out for machines too: schema.org offers on the for-sale pages, every
+value named in /data/for-sale.csv, and /llms.txt saying what the site is and where that lives.
 """
-import json, os, re, hashlib, datetime, urllib.parse, collections, base64, shutil
+import json, os, re, hashlib, datetime, urllib.parse, collections, base64, shutil, csv
 import build_hubs as H
 import build_mood as BM
 
@@ -993,9 +996,15 @@ def sale_pages(d):
                 + f'<span class="price"><b>{eur(w[8], lang) if w[8] else e(t["noprice"])}</b> {e((t["at"] + " ") if t["at"] else "")}{e(gals[w[9]])} ↗</span></a>'
                 f'<a class="rec" href="{BASE}/{"a" if lang == "en" else "k"}/{arts[w[1]][1]}.html">{e(st["artist"])}</a></article>' for w in rows)
             find = f'{BASE}/{t["file"]}#{hashq}'
+            ld = H.ldjson({"@context": "https://schema.org", "@type": "CollectionPage", "name": h, "url": me, "inLanguage": lang,
+                           "mainEntity": {"@type": "ItemList", "numberOfItems": len(pick), "itemListElement": [
+                               {"@type": "ListItem", "position": k + 1, "item": H.offer_item(
+                                   w[0], arts[w[1]][0], w[2], (lang == "en" and w[15]) or w[4], w[3], w[8], gals[w[9]], w[10])}
+                               for k, w in enumerate(rows)]}})
             html_ = (f'<!doctype html><html lang="{lang}"><head><meta charset="utf-8">{H.STAMP}<meta name="viewport" content="width=device-width,initial-scale=1">'
                      f'<title>{e(h)} · museaal.ee</title><meta name="description" content="{e(lede[:290])}">'
                      f'<link rel="canonical" href="{me}"><link rel="alternate" hreflang="{lang}" href="{me}"><link rel="alternate" hreflang="{"et" if lang == "en" else "en"}" href="{other}">'
+                     f'<script type="application/ld+json">{ld}</script>'
                      '<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>'
                      '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..600&family=Archivo:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">'
                      f'<style>{CSS}.browse{{margin:0;font-size:.9rem;line-height:1.9;color:var(--grey)}}.browse .eyebrow{{margin-right:8px}}.browse b{{color:var(--ink);font-weight:500}}</style>{H.GC}</head><body><div class="wrap">'
@@ -1009,6 +1018,66 @@ def sale_pages(d):
             os.makedirs(f"site/{SALE_DIR[lang]}", exist_ok=True)
             open(f"site/{SALE_DIR[lang]}/{sl}.html", "w", encoding="utf-8").write(html_); urls.append(me)
     return urls
+
+def feed(d):
+    """/data/for-sale.csv: the stock with every value named, a row a work -- for a spreadsheet, a search engine or an
+    agent, none of which can read stock.json's numbered fields. The works and asking prices Buy Art shows"""
+    arts, gals, words = d["artists"], d["galleries"], d["words"]
+    with open("site/data/for-sale.csv", "w", encoding="utf-8", newline="") as f:
+        wr = csv.writer(f)
+        wr.writerow(["title", "artist", "year", "technique", "technique_en", "medium", "dimensions", "size", "price_eur",
+                     "gallery", "url", "image", "moods", "artist_page"])
+        for w in d["works"]:
+            wr.writerow([w[0], arts[w[1]][0], w[2], w[4], w[15] or w[4], "; ".join(m for m in MEDIA if w[14] & BIT[m]),
+                         w[5], w[6], w[8] or "", gals[w[9]], w[10], w[3], "; ".join(words[j] for j in w[12][::2]),
+                         f"{BASE}/a/{arts[w[1]][1]}.html"])
+
+def llms_txt(d):
+    """/llms.txt (llmstxt.org): what the site is and where its data lives, in plain words for a language model that
+    reads it -- above all that the prices are the galleries' asking prices and a work is bought from the gallery"""
+    M, W_ = H.META, d["works"]
+    n = lambda x: f"{x:,}"
+    sale = "\n".join(f"- [{s[3]}]({BASE}/{SALE_DIR['en']}/{s[2]}.html)" for s in SALE)
+    txt = f"""# museaal.ee — Estonian Art Catalogue
+
+> A catalogue of Estonian art: {n(M["records"])} records of works by {n(M["artists"])} artists, from the museums' collections \
+(MuIS and the Art Museum of Estonia's digital collection), the auction houses' published results, and the stock of \
+{len(d["galleries"])} Estonian galleries — the works they have for sale now, with their asking prices. In English and Estonian.
+
+museaal.ee is not a shop: every work for sale links to the gallery that sells it, and is bought there. Prices are the \
+galleries' asking prices in euros, as their own pages state them, and the stock is read again every week; a work sold \
+since may still be listed, and the gallery's page is the one to trust. Pictures stay on the museums' and galleries' own \
+servers. Data as of {M["built"]}.
+
+## Works for sale
+
+- [All works for sale, CSV]({BASE}/data/for-sale.csv): {n(len(W_))} works by {n(len(d["artists"]))} artists at \
+{len(d["galleries"])} galleries, {n(sum(1 for w in W_ if w[8]))} with a price. A row a work: title, artist, year, technique \
+as the gallery states it and in English, medium, dimensions, size, asking price in euros, gallery, the gallery's page for \
+the work, its picture, mood words read off the picture, the artist's page on museaal.ee
+- [Buy Art]({BASE}/{T["en"]["file"]}): the same works, searched by price, medium, size and mood, or by describing what you \
+are after ([in Estonian]({BASE}/{T["et"]["file"]}))
+{sale}
+
+Each of these is in Estonian too, under {BASE}/{SALE_DIR["et"]}/.
+
+## Artists
+
+- [Artists A–Z]({BASE}/a/): a page for each artist — dates, biography, the museums that hold their work, works for \
+sale, record at auction; in Estonian under {BASE}/k/
+
+## Data
+
+- [Every record, CSV, gzip]({BASE}/data/export/works.csv.gz): a row a record, every value written out
+- [Artists, CSV, gzip]({BASE}/data/export/artists.csv.gz)
+- [The catalogue in figures]({BASE}/stats.html)
+
+## Optional
+
+- [Art by mood]({BASE}/mood.html): museum pictures by the mood words a visitor picks
+- Corrections and questions: info@museaal.ee
+"""
+    open("site/llms.txt", "w", encoding="utf-8").write(txt)
 
 def taste_files(d):
     """For you's data (data/taste.py): the stock's 48 bytes a work in stock.json's order (zeros: no picture read yet),
@@ -1052,13 +1121,14 @@ def main():
         labels = {w["en"]: (w["et"] if lang == "et" else BM.LABEL_EN.get(w["en"], w["en"])) for w in M}
         open(f"site/{T[lang]['file']}", "w", encoding="utf-8").write(page(lang, ver, API, labels, M, len(d["works"]), tver, door_names(d))); urls.append(f"{BASE}/{T[lang]['file']}")
     urls += sale_pages(d)
+    feed(d); llms_txt(d)
     sm = open("site/sitemap.xml", encoding="utf-8").read()
     today = datetime.date.today().isoformat()
     add = "".join(f'<url><loc>{u}</loc><lastmod>{today}</lastmod><changefreq>weekly</changefreq></url>' for u in urls)
     open("site/sitemap.xml", "w", encoding="utf-8").write(sm.replace("</urlset>", add + "</urlset>"))
     W_ = d["works"]
     print(f"  find a work    {len(W_):,} works for sale, {sum(1 for w in W_ if w[8]):,} with a price, {sum(1 for w in W_ if w[12]):,} with moods; "
-          f"stock.json {len(blob) // 1024} KB; assistant {'at the Worker' if API else 'not set up'}")
+          f"stock.json {len(blob) // 1024} KB, for-sale.csv, llms.txt; assistant {'at the Worker' if API else 'not set up'}")
 
 if __name__ == "__main__":
     main()
