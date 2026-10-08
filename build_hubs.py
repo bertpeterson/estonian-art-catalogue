@@ -12,7 +12,7 @@ appends to the sitemap) and before csp.py.
   EN /decades/1920.html  /media/painting.html  /museums/<slug>.html  /subjects/landscape.html
   ET /kumnendid/1920.html /liigid/maal.html    /muuseumid/<slug>.html /ained/maastik.html
 """
-import json, os, re, html, unicodedata, datetime, collections
+import json, os, re, html, unicodedata, datetime, collections, urllib.parse
 
 BASE = "https://museaal.ee"
 d = json.load(open("data/data.json", encoding="utf-8"))
@@ -44,6 +44,23 @@ def imsrc(im):
     u = im[2:]                                          # a gallery's own picture: https only
     return re.sub(r"^http:", "https:", u) if re.match(r"https?://", u) else ""
 key = lambda w: w.get("k") or re.sub(r"[^A-Z0-9:]", "", (w.get("nu") or "").upper())
+# a work a gallery has for sale, as schema.org: the gallery's asking price, the gallery as the seller and its page as
+# the place to buy -- what lets a search engine or an agent read the work as on sale, not only as made. A priced work
+# is also a Product, the type prices are read from; one without a price stays an artwork with an offer, so it is never
+# reported as a product missing its price. The artist pages and the for-sale pages (build_ask.py) both use it
+def offer_item(title, artist, year, medium, image, price, seller, url):
+    it = {"@type": ["VisualArtwork", "Product"] if price else "VisualArtwork", "name": title or "—",
+          "creator": {"@type": "Person", "name": artist}}
+    if year: it["dateCreated"] = str(year)
+    if medium: it["artMedium"] = medium
+    if image: it["image"] = image
+    p = urllib.parse.urlsplit(url)
+    it["offers"] = {"@type": "Offer", "url": url, "availability": "https://schema.org/InStock",
+                    "seller": {"@type": "Organization", "name": seller, "url": f"{p.scheme}://{p.netloc}"}}
+    if price: it["offers"].update(price=price, priceCurrency="EUR")
+    return it
+# JSON for inside a <script>: a "</" in a title off a gallery's page would end the script early
+ldjson = lambda o: json.dumps(o, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
 ARTIST_SLUG = {i: slug(a["n"]) for i, a in enumerate(A)}
 CHARTS = {k: v for k, v in (json.load(open("data/chart_sides.json", encoding="utf-8")) if os.path.exists("data/chart_sides.json") else {}).items() if v}
 POS = {"l": "100% 50%", "r": "0% 50%", "t": "50% 100%", "b": "50% 0%"}

@@ -125,12 +125,14 @@ CSS = ("body{margin:0;padding:28px;font:15px/1.55 -apple-system,BlinkMacSystemFo
        "table{font-size:9pt}}")
 
 
-def jsonld(a, ws, sl, dates, lang="en"):
+def jsonld(a, ws, sl, dates, lang="en", sale=()):
     """schema.org description of the artist and a sample of their works.
 
     Plain HTML tells a crawler these are words; this tells it they are an artist and
     artworks, which is what lets an art-specific query match. Only the first 50 works
-    are described — enough to characterise the page without a megabyte of JSON."""
+    are described — enough to characterise the page without a megabyte of JSON. The
+    works for sale the page shows come first, with the galleries' asking prices
+    (H.offer_item), so an artist with hundreds in museums does not push them out."""
     life = a.get("l") or ["", ""]
     D = L[lang]["dir"]
     person = {"@type": "Person", "name": a["n"], "url": f"{BASE}/{D}/{sl}.html"}
@@ -145,8 +147,11 @@ def jsonld(a, ws, sl, dates, lang="en"):
         key = {"school": "alumniOf", "member": "memberOf", "movement": "movement"}[kind]
         org = {"@type": "Organization", "name": label} if kind != "movement" else label
         person.setdefault(key, []).append(org)
-    works = []
-    for w in ws[:50]:
+    tech = (lambda w: val(w, "tc") or val(w, "tce")) if lang == "en" else (lambda w: val(w, "tce") or val(w, "tc"))
+    works = [H.offer_item(w.get("t"), a["n"], w.get("y"), tech(w), re.sub(r"^http:", "https:", w["im"][2:]),
+                          w.get("pr"), val(w, "mu"), w["url"]) for w in sale]
+    on_sale = {((w.get("t") or "").lower().strip(), val(w, "mu")) for w in sale}
+    for w in [w for w in ws if ((w.get("t") or "").lower().strip(), val(w, "mu")) not in on_sale][:50 - len(works)]:
         it = {"@type": "VisualArtwork", "name": w.get("t") or "—",
               "creator": {"@type": "Person", "name": a["n"]}}
         if w.get("y"): it["dateCreated"] = str(w["y"])
@@ -154,13 +159,12 @@ def jsonld(a, ws, sl, dates, lang="en"):
         if val(w, "e"): it["artform"] = val(w, "e")
         if val(w, "mu"): it["holdingArchive"] = {"@type": "Organization", "name": val(w, "mu")}
         works.append(it)
-    return json.dumps({"@context": "https://schema.org", "@graph": [person,
+    return H.ldjson({"@context": "https://schema.org", "@graph": [person,
         {"@type": "CollectionPage", "name": (f"Works by {a['n']}" if lang == "en" else f"{a['n']} teosed"), "inLanguage": lang,
          "url": f"{BASE}/{D}/{sl}.html", "about": person,
          "mainEntity": {"@type": "ItemList", "numberOfItems": sum(1 for w in ws if not (w.get("ac") and not w.get("al"))),
                         "itemListElement": [{"@type": "ListItem", "position": i + 1, "item": it}
-                                            for i, it in enumerate(works)]}}]},
-        ensure_ascii=False, separators=(",", ":"))
+                                            for i, it in enumerate(works)]}}]})
 
 # ---- related artists -------------------------------------------------------
 # Until now every artist page was an orphan: it linked up to the catalogue and
@@ -301,7 +305,7 @@ def sale_block(i, a, ws, lang):
         k = ((w.get("t") or "").lower().strip(), val(w, "mu"))
         if k in seen: continue
         seen.add(k); S.append(w)
-    if not S: return "", 0
+    if not S: return "", 0, []
     S.sort(key=lambda w: (not w.get("pr"), w.get("pr") or 0))
     en = lang == "en"
     price = lambda p: (f"€{p:,}" if en else f"{p:,} €".replace(",", " ")) if p else ("price on request" if en else "hind päringul")
@@ -318,7 +322,7 @@ def sale_block(i, a, ws, lang):
     find = f'{BASE}/{"find" if en else "leia"}.html#a={urllib.parse.quote(a["n"])}'
     more = (f"See {'it' if len(S) == 1 else 'them'} in Buy Art" if en else "Vaata neid lehel Osta kunsti")
     return (f'<h2 class="sh">{head}</h2><p class="m">{e(line)}</p><div class="wall sale">{tiles}</div>'
-            f'<p><a class="cta" href="{e(find)}">{more} →</a></p>'), len(S)
+            f'<p><a class="cta" href="{e(find)}">{more} →</a></p>'), len(S), S[:12]
 
 def embed_box(lang, src, back, name, T):
     """the two lines to paste: the iframe, and the plain link that carries the credit"""
@@ -353,7 +357,7 @@ def render(i, a, ws, lang):
     d_ = dict(name=a["n"], dates=f" ({dates})" if dates else "", n=n, gal=gal, span=span, media=media_phrase(ws, lang) or T["works"],
               holders=", ".join(top_holders) if top_holders else "—")
     desc = (T["desc"] if span else T["desc_nospan"]).format(**d_)[:300]
-    sale, n_sale = sale_block(i, a, ws, lang)
+    sale, n_sale, sale_ws = sale_block(i, a, ws, lang)
     if n_sale:                                   # the snippet says so too, when there is room
         extra = (f" {n_sale} for sale now." if lang == "en" else f" Müügil {n_sale} {'teos' if n_sale == 1 else 'teost'}.")
         if len(desc) + len(extra) <= 300: desc += extra
@@ -425,7 +429,7 @@ def render(i, a, ws, lang):
               f"<meta property=\"og:image:alt\" content=\"{e(tiles[0].get('t') or '')}, {e(a['n'])}\">"
               f"<meta name=\"twitter:card\" content=\"summary_large_image\">" if tiles else
               f"<meta name=\"twitter:card\" content=\"summary\">")
-           + f"<script type=\"application/ld+json\">{jsonld(a, ws, sl, dates, lang)}</script>"
+           + f"<script type=\"application/ld+json\">{jsonld(a, ws, sl, dates, lang, sale_ws)}</script>"
            f"<style>{CSS}</style>{GC}</head><body>"
            f"<nav><a href=\"{BASE}/{'' if lang == 'en' else '#lang=et'}\">{T['site']}</a> › <a href=\"{BASE}/{D}/\">{T['art_nav']}</a> › {e(a['n'])} <span class=\"m\">· <a href=\"{other}\" hreflang=\"{'et' if lang == 'en' else 'en'}\">{T['other_lang']}</a></span></nav>"
            f"<h1>{e(a['n'])}</h1>"
