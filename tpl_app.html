@@ -1701,9 +1701,11 @@
     // ("EKM 34818 KR 294") beside MuIS's ("EKM j 34818 KR 294"), or a whole sheet (no
     // letter, or "/ab") beside its parts ("/a", "/b") -- Raud's Kalevipoeg kivi viskamas
     // is in as the whole, the painting and the drawing on its back. Only where a whole is
-    // in: "/a" and "/b" alone are the two sides of a sheet, two pictures.
-    const objKey = w => w.nu ? `${w.a}|${w.mu}|${String(w.nu).replace(/\/[a-z]+\b/gi, "").replace(/\bj\s+/g, "").replace(/\s+/g, " ").trim()}` : null;
-    const wholes = new Set(pics.filter(w => w.nu && !/\/[a-z]\b/i.test(w.nu)).map(objKey));
+    // in: "/a" and "/b" alone are the two sides of a sheet, two pictures. EKM writes a
+    // sub-number "283/124" where MuIS has "283:124" (Erich von Kügelgen's thirty
+    // paintings were each on his wall twice); "/a-h" is the whole run of a set.
+    const objKey = w => w.nu ? `${w.a}|${w.mu}|${String(w.nu).replace(/\/[a-z]+\b/gi, "").replace(/(\d)\/(?=\d)/g, "$1:").replace(/\bj\s+/g, "").replace(/\s+/g, " ").trim()}` : null;
+    const wholes = new Set(pics.filter(w => w.nu && !/\/[a-z](?![\w-])/i.test(w.nu)).map(objKey));
     const seen = new Map(), dups = new Map();
     // the fold keeps the first it sees, so a masterpiece or highlight goes first
     // a sort chosen over the wall orders it exactly -- titles A-Z, the latest first --
@@ -1716,10 +1718,13 @@
       const ko = wholes.has(objKey(w)) ? "o|" + objKey(w) : null;
       // a painting is one work, however many share its title
       const kt = MULTI.has(w.e) || (w.hl != null && w.e !== "Painting") ? dupKey(w) : null;
-      const into = (ko && seen.get(ko)) || (kt && seen.get(kt));
+      // and one picture is one tile, whatever the records say (merge.py, sp)
+      const kp = w.sp ? "p|" + w.sp : null;
+      const into = (ko && seen.get(ko)) || (kt && seen.get(kt)) || (kp && seen.get(kp));
       if (into){ dups.set(into, (dups.get(into) || 1) + 1); return false; }
       if (ko) seen.set(ko, w);
       if (kt) seen.set(kt, w);
+      if (kp) seen.set(kp, w);
       return true;
     });
     // On an artist's own wall: the key works first (highlights.json, in its order), then

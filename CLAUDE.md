@@ -29,7 +29,8 @@ anything private (keys, accounts, personal plans, correspondence) out of this fi
 ## Pipelines
 
 - Art by mood: CLIP runs locally only, in `data/.venv-clip`. After new museum pictures, run
-  `lookalikes.py`, `moods.py`, then `taste.py`, and commit `lookalikes.json` + `moods.json` + `taste_vecs.json`;
+  `lookalikes.py`, `same_pictures.py`, `moods.py`, then `taste.py`, and commit `lookalikes.json` +
+  `same_pictures.json` + `moods.json` + `taste_vecs.json`;
   CI cannot run CLIP on museum pictures. Never refit `taste_proj.npz` without redoing `stock_taste.json` too.
 - Buy art (`find.html` / `leia.html`): `build_ask.py` writes the pages and `site/data/stock.json`;
   stock moods and taste vectors come from `data/stock_moods.py`. "For you" ranks stock by My list
