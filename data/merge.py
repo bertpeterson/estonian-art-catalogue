@@ -1419,7 +1419,22 @@ for a in data["artists"]:
         if a.get(f) and a[f][:1].islower(): a[f] = a[f][:1].upper() + a[f][1:]
         if a.get(f) and not re.search(r'[.!?…"”)\]]\s*$', a[f]): a[f] = a[f].rstrip() + "."   # a sentence ends with a stop
 print("  translations applied:", _na, "biographies,", _nw, "descriptions")
-json.dump(data, open("data.json", "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
+# One picture on several records of an artist -- one MuIS photograph of a sheet for
+# each drawing on it, a gallery's English and Estonian page of one work, a photograph
+# sold in two sizes, a picture CLIP finds identical under another id (same_pictures.py)
+# -- is one tile on the wall: they share an `sp`, and the wall folds on it.
+_SP = json.load(open("same_pictures.json", encoding="utf-8")) if os.path.exists("same_pictures.json") else {}
+_sp = collections.defaultdict(list)
+for w in data["works"]:
+    w.pop("sp", None)
+    if w.get("im"): _sp[(w["a"], _SP.get(w["im"], w["im"]))].append(w)
+_spn = 0
+for ws in _sp.values():
+    if len(ws) < 2: continue
+    _spn += 1
+    for w in ws: w["sp"] = _spn
+print("  one picture on several records:", _spn, "pictures,", sum(len(v) for v in _sp.values() if len(v) > 1), "records")
+json.dump(data,open("data.json", "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
 print("data.json", os.path.getsize("data.json")//1024, "KB")
 for k, v in data["meta"].items(): print(" ", k, v)
 dec = collections.Counter((w["y"]//10*10) for w in works if w["y"])
