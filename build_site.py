@@ -125,6 +125,16 @@ for k, v in detail.items():
     json.dump(v, open(f"{OUT}/data/detail/{k}.json", "w", encoding="utf-8"),
               ensure_ascii=False, separators=(",", ":"))
 shutil.copy("i18n.json", f"{OUT}/data/i18n.json")
+# Your wall, on the home page: each museum picture's look-alikes by key, in 256 shards by the key's hash (as the
+# app's nearShard), so a visitor's list fetches a few small files and never the detail shards
+near = collections.defaultdict(dict)
+for i, js in LA.items():
+    k, h = _key(W[i]), 0
+    for c in k: h = (h * 31 + ord(c)) & 0xFFFFFFFF
+    near[f"{h & 255:02x}"][k] = [_key(W[j]) for j in js]
+shutil.rmtree(f"{OUT}/data/near", ignore_errors=True); os.makedirs(f"{OUT}/data/near")
+for h, v in near.items():
+    json.dump(v, open(f"{OUT}/data/near/{h}.json", "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
 
 ix = os.path.getsize(f"{OUT}/data/index.json")
 ds = sum(os.path.getsize(f"{OUT}/data/detail/{f}") for f in os.listdir(f"{OUT}/data/detail"))

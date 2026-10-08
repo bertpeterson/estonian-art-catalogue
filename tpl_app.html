@@ -1570,6 +1570,32 @@
         `<a href="${LANG === "et" ? "meeleolu" : "mood"}.html#w=${en}">${esc(cap(LANG === "et" ? et : en))}</a>`).join(" ") + "</p></div></div>";
     el.innerHTML = col("doors_name", TOP_ART.map(([i, n]) => [A[i].n, n, "a", i]), "d-names") + ways;
     el.hidden = false;
+    yourWall(el);
+  }
+  // Your wall: on the untouched page, for a visitor with three works or more on My list, the museum pictures that look
+  // most like them -- each one's six nearest (data/lookalikes.py), fetched by key from data/near/, a small file a
+  // shard. The kept works' neighbours take turns at the top, 1/(10 + place), as For you ranks the stock on Buy art, so
+  // a picture near several of them rises; the list's own works stay out. Read in this browser only, like the list.
+  const NEAR = new Map(); let KW = null;
+  const nearShard = k => { let h = 0; for (let i = 0; i < k.length; i++) h = (h * 31 + k.charCodeAt(i)) | 0; return ("0" + (h & 255).toString(16)).slice(-2); };
+  function yourWall(el){
+    const keys = [...SL].slice(-60);
+    if (keys.length < 3) return;
+    const box = document.createElement("div"); box.className = "d-yours"; box.hidden = true; el.prepend(box);
+    const need = [...new Set(keys.map(nearShard))].filter(h => !NEAR.has(h));
+    Promise.all(need.map(h => fetch(`data/near/${h}.json?v=__V_INDEX__`).then(r => r.ok ? r.json() : {}).catch(() => ({})).then(x => NEAR.set(h, x)))
+        .concat(typeof detailOf === "function" && !PICS ? [loadPics()] : [])).then(() => {
+      if (!box.isConnected) return;
+      KW = KW || new Map(W.map(w => [w.k, w]));
+      const s = new Map(), on = new Set(keys);
+      keys.forEach(k => ((NEAR.get(nearShard(k)) || {})[k] || []).forEach((n, i) => { if (!on.has(n)) s.set(n, (s.get(n) || 0) + 1 / (10 + i)); }));
+      const ws = [...s].sort((a, b) => b[1] - a[1]).map(([k]) => KW.get(k)).filter(w => w && imgSrc(picOf(w))).slice(0, 12);
+      if (ws.length < 6) { box.remove(); return; }
+      box.innerHTML = `<h2>${esc(T("yours"))} <span class="tag">${esc(T("yours_tag").replace("{n}", keys.length))}</span></h2><div class="fs-works">` + ws.map(x =>
+        `<a class="fs-w" href="#artist=${esc(slug(A[x.a].n))}&open=${esc(x.k)}" title="${esc(x.t)} · ${esc(A[x.a].n)}"><img src="${esc(imgSrc(picOf(x)))}" alt="${esc(x.t)}, ${esc(A[x.a].n)}" loading="lazy" style="${cropPos(x).slice(1)}" referrerpolicy="no-referrer-when-downgrade">`
+        + `<span class="fs-cap"><i>${esc(x.t)}</i>${esc(A[x.a].n)}${x.y ? " · " + x.y : ""}</span></a>`).join("") + "</div>";
+      box.hidden = false;
+    });
   }
 
   // ---- shortlist ------------------------------------------------------------
@@ -2511,7 +2537,7 @@
   }   // end boot
 
   Promise.all([
-    fetch("data/index.json?v=__V_INDEX__").then(r => r.json()),
+    fetch("data/index.json?v=__V_INDEX__", {priority: "high"}).then(r => r.json()),   // ahead of the pictures: on a phone they took the line
     fetch("data/i18n.json?v=__V_I18N__").then(r => r.json())
   ]).then(([data, i18n]) => boot(data, i18n))
    .catch(err => {

@@ -184,10 +184,12 @@ def _six():
     return [ps[0], ps[1], os_[0], ps[2], os_[1], ps[3]] if len(ps) == 4 and len(os_) == 2 else (ps + os_)[:6]
 eurf = lambda n: "€" + f"{n:,}".replace(",", " ")
 fs_works = "".join(
-    f'<a class="fs-w" href="{e(w["url"])}" target="_blank" rel="noopener"><img src="{e(w["im"][2:])}" alt="{e(w.get("t") or "")}, {e(A[w["a"]]["n"])}" decoding="async" referrerpolicy="no-referrer-when-downgrade">'
+    f'<a class="fs-w" href="{e(w["url"])}" target="_blank" rel="noopener"><img src="{e(imsrc(w["im"]))}" alt="{e(w.get("t") or "")}, {e(A[w["a"]]["n"])}" decoding="async" referrerpolicy="no-referrer-when-downgrade">'
     f'<span class="fs-cap"><i>{e(w.get("t") or "")}</i>{e(A[w["a"]]["n"])}<b>{eurf(w["pr"])}</b></span>'
-    # the whole picture, uncropped, while the pointer is on the card (the same file, so no second download)
-    f'<span class="fs-pop"><img src="{e(w["im"][2:])}" alt="" decoding="async" referrerpolicy="no-referrer-when-downgrade"></span></a>'
+    # the whole picture, uncropped, while the pointer is on the card (the same file, so no second download). Both are the
+    # gallery's own 768-pixel copy where it keeps one (img_small.py): the uploads ran to 1 MB, and on a phone six of them
+    # held back the catalogue's index behind them
+    f'<span class="fs-pop"><img src="{e(imsrc(w["im"]))}" alt="" decoding="async" referrerpolicy="no-referrer-when-downgrade"></span></a>'
     for w in _six())
 fs_lede = f'<p class="fs-lede" id="fs-lede" data-n="{len(_sale)}" data-g="{len(_galleries)}">' + e(EN["fs_lede"].replace("{n}", f"{len(_sale):,}").replace("{g}", str(len(_galleries)))) + "</p>"
 json.dump({"doors": door, "register": wall, "bars": bars, "eras": eras, "seed": SEED, "fs_works": fs_works, "fs_lede": fs_lede}, open("site/landing.json", "w", encoding="utf-8"), ensure_ascii=False)
