@@ -91,36 +91,43 @@ for i, w in enumerate(W):
         detail[shard_of(w)][str(i)] = heavy
     index.append(light)
 
-# a decade's shard over SHARD_MAX is split by artist: part a % n of the decade, so an
-# artist's works in a decade still come in one file, and opening one record no longer
-# waits on the whole decade (the 1970s were 2.4 MB, the undated 4.2 MB). The page
-# finds the part from meta["split"].
-SHARD_MAX = 400_000
-split = {}
-for k in list(detail):
-    size = len(json.dumps(detail[k], ensure_ascii=False, separators=(",", ":")).encode())
-    if size <= SHARD_MAX: continue
-    n = -(-size // SHARD_MAX)
-    split[k] = n
-    for i, heavy in detail.pop(k).items():
-        detail[f"{k}-{W[int(i)]['a'] % n}"][i] = heavy
-
-# ...and an artist whose works in a dated decade are still over SHARD_MAX on their own
-# (one artist's 1920s, 839 KB) gets a file a year: <decade>-a<artist>-<year>.
-# meta["byyear"] lists them as <decade>-<artist>.
+# Detail shards are kept under SHARD_MAX, so opening one record never waits on a whole
+# decade (the 1970s were 2.4 MB, the undated 4.2 MB). First, an artist whose works in a
+# dated decade are over SHARD_MAX on their own (Wiiralt's 1920s, 839 KB) gets a file a
+# year: <decade>-a<artist>-<year>; meta["byyear"] lists them as <decade>-<artist>.
+SHARD_MAX = 300_000
+blen = lambda x: len(json.dumps(x, ensure_ascii=False, separators=(",", ":")).encode())
 per = collections.defaultdict(int)
 for k, v in detail.items():
     for i, heavy in v.items():
         w = W[int(i)]
-        if w.get("y") is not None:
-            per[(shard_of(w), w["a"])] += len(json.dumps(heavy, ensure_ascii=False, separators=(",", ":")).encode())
-byyear = {f"{dec}-{a}" for (dec, a), size in per.items() if size > SHARD_MAX}
+        if w.get("y") is not None: per[(k, w["a"])] += blen(heavy)
+byyear = {f"{k}-{a}" for (k, a), size in per.items() if size > SHARD_MAX}
 for k in list(detail):
     for i in list(detail[k]):
         w = W[int(i)]
-        if w.get("y") is not None and f"{shard_of(w)}-{w['a']}" in byyear:
-            detail[f"{shard_of(w)}-a{w['a']}-{w['y']}"][i] = detail[k].pop(i)
+        if w.get("y") is not None and f"{k}-{w['a']}" in byyear:
+            detail[f"{k}-a{w['a']}-{w['y']}"][i] = detail[k].pop(i)
     if not detail[k]: del detail[k]
+
+# Then a decade still over SHARD_MAX is split by artist into n parts, a record going to
+# part a % n, so an artist's works in a decade still come in one file. n starts at
+# size / SHARD_MAX and grows until every part fits: a % n is lumpy, and at the first n
+# one part could be 650 KB. The page finds the part from meta["split"].
+split = {}
+for k in [k for k in detail if "-" not in k]:
+    if blen(detail[k]) <= SHARD_MAX: continue
+    by_a = collections.defaultdict(int)
+    for i, heavy in detail[k].items(): by_a[W[int(i)]["a"]] += blen(heavy)
+    n = n0 = -(-sum(by_a.values()) // SHARD_MAX)
+    while n < 4 * n0:
+        parts = collections.defaultdict(int)
+        for a, size in by_a.items(): parts[a % n] += size
+        if max(parts.values()) <= SHARD_MAX: break
+        n += 1
+    split[k] = n
+    for i, heavy in detail.pop(k).items():
+        detail[f"{k}-{W[int(i)]['a'] % n}"][i] = heavy
 
 meta = dict(d["meta"])
 meta["shards"] = sorted(detail.keys())
