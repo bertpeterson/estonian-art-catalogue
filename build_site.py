@@ -91,8 +91,23 @@ for i, w in enumerate(W):
         detail[shard_of(w)][str(i)] = heavy
     index.append(light)
 
+# a decade's shard over SHARD_MAX is split by artist: part a % n of the decade, so an
+# artist's works in a decade still come in one file, and opening one record no longer
+# waits on the whole decade (the 1970s were 2.4 MB, the undated 4.2 MB). The page
+# finds the part from meta["split"].
+SHARD_MAX = 400_000
+split = {}
+for k in list(detail):
+    size = len(json.dumps(detail[k], ensure_ascii=False, separators=(",", ":")).encode())
+    if size <= SHARD_MAX: continue
+    n = -(-size // SHARD_MAX)
+    split[k] = n
+    for i, heavy in detail.pop(k).items():
+        detail[f"{k}-{W[int(i)]['a'] % n}"][i] = heavy
+
 meta = dict(d["meta"])
 meta["shards"] = sorted(detail.keys())
+meta["split"] = split
 # The biographies leave the index. They are read only on an artist's own page, in an
 # opened record and in the artist-grouped list, yet every visitor downloaded all 896
 # of them -- 0.44 MB of the 3.3 MB gzipped index -- before the catalogue would answer.
