@@ -1011,6 +1011,9 @@
   }
 
   const SHARDS = new Map();
+  // shards that failed after their retries: the open record says so rather than
+  // "No description in the record", which is only true once the shard is in hand
+  const SHARD_FAILED = new Set();
   const shardOf = w => w.y != null ? String(Math.floor(w.y/10)*10) : "und";
   async function loadShard(key, attempt = 0){
     if (SHARDS.has(key)) return SHARDS.get(key);
@@ -1033,7 +1036,7 @@
       });
     SHARDS.set(key, p);
     const v = await p;
-    if (v) SHARDS.set(key, v); else SHARDS.delete(key);
+    if (v){ SHARDS.set(key, v); SHARD_FAILED.delete(key); } else { SHARDS.delete(key); SHARD_FAILED.add(key); }
     return v;
   }
   function detailOf(w){
@@ -1085,7 +1088,7 @@
                 <span>${m[3]?`<a href="https://www.muis.ee/museaalview/${esc(m[3])}" target="_blank" rel="noopener">MuIS</a>`:""}${m[3]&&m[4]?" · ":""}${m[4]?`<a href="https://digikogu.ekm.ee/ekm/search/oid-${esc(m[4])}/" target="_blank" rel="noopener">EKM</a>`:""}</span>
               </div>`).join("")}</div></div>` : ""}
           ${(detailOf(w)||{}).d ? `<div class="d-note"><span class="d-nolabel">${w.s==="cca"?esc(T("d_desc_cca"))+" · "+esc(T("inenglish")):w.s==="ekkm"?esc(T("d_desc_ekkm"))+" · "+esc(T("inenglish")):esc(T("d_desc"))+" · "+(LANG==="en"&&detailOf(w).de?esc(T("mt_desc")):esc(T("estonianprose")))}</span>${esc(LANG==="en"&&detailOf(w).de?detailOf(w).de:detailOf(w).d)}</div>`
-                   : isHeld(w) && w.s !== "gallery" ? `<div class="d-note"><span class="d-nolabel">${esc(T("d_desc"))}</span><em style="color:var(--grey-4)">${esc(T("d_nodesc"))}</em></div>` : ""}
+                   : isHeld(w) && w.s !== "gallery" ? `<div class="d-note"><span class="d-nolabel">${esc(T("d_desc"))}</span><em style="color:var(--grey-4)">${esc(T(w.h && !detailOf(w) ? (SHARD_FAILED.has(shardOf(w)) ? "d_loadfail" : "d_loading") : "d_nodesc"))}</em></div>` : ""}
           <div class="d-v" style="margin-top:16px;display:flex;flex-wrap:wrap;gap:18px">
             ${(detailOf(w)||{}).mi?`<a class="permalink" href="https://www.muis.ee/museaalview/${esc(detailOf(w).mi)}" target="_blank" rel="noopener">${esc(T("d_recmuis"))}</a>`:""}
             ${(detailOf(w)||{}).oi?`<a class="permalink" href="https://digikogu.ekm.ee/ekm/search/oid-${esc(detailOf(w).oi)}/" target="_blank" rel="noopener">${esc(T("d_recekm"))}</a>`:""}
