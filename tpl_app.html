@@ -1015,8 +1015,11 @@
   // "No description in the record", which is only true once the shard is in hand
   const SHARD_FAILED = new Set();
   // a big decade is split by artist into n parts (build_site.py, meta.split)
+  // and an artist too big for one file in a decade into a file a year (meta.byyear)
   const SPLIT = (DATA.meta && DATA.meta.split) || {};
+  const BYYEAR = new Set((DATA.meta && DATA.meta.byyear) || []);
   const shardOf = w => { const d = w.y != null ? String(Math.floor(w.y/10)*10) : "und", n = SPLIT[d];
+                         if (w.y != null && BYYEAR.has(`${d}-${w.a}`)) return `${d}-a${w.a}-${w.y}`;
                          return n ? `${d}-${w.a % n}` : d; };
   async function loadShard(key, attempt = 0){
     if (SHARDS.has(key)) return SHARDS.get(key);

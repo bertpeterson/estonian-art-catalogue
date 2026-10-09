@@ -105,9 +105,27 @@ for k in list(detail):
     for i, heavy in detail.pop(k).items():
         detail[f"{k}-{W[int(i)]['a'] % n}"][i] = heavy
 
+# ...and an artist whose works in a dated decade are still over SHARD_MAX on their own
+# (one artist's 1920s, 839 KB) gets a file a year: <decade>-a<artist>-<year>.
+# meta["byyear"] lists them as <decade>-<artist>.
+per = collections.defaultdict(int)
+for k, v in detail.items():
+    for i, heavy in v.items():
+        w = W[int(i)]
+        if w.get("y") is not None:
+            per[(shard_of(w), w["a"])] += len(json.dumps(heavy, ensure_ascii=False, separators=(",", ":")).encode())
+byyear = {f"{dec}-{a}" for (dec, a), size in per.items() if size > SHARD_MAX}
+for k in list(detail):
+    for i in list(detail[k]):
+        w = W[int(i)]
+        if w.get("y") is not None and f"{shard_of(w)}-{w['a']}" in byyear:
+            detail[f"{shard_of(w)}-a{w['a']}-{w['y']}"][i] = detail[k].pop(i)
+    if not detail[k]: del detail[k]
+
 meta = dict(d["meta"])
 meta["shards"] = sorted(detail.keys())
 meta["split"] = split
+meta["byyear"] = sorted(byyear)
 # The biographies leave the index. They are read only on an artist's own page, in an
 # opened record and in the artist-grouped list, yet every visitor downloaded all 896
 # of them -- 0.44 MB of the 3.3 MB gzipped index -- before the catalogue would answer.
