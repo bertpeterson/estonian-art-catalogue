@@ -162,10 +162,10 @@ def parse(mid, x, subset):
         v = "".join(texts(d, "descriptiveNoteValue")).strip()
         if v and len(v) > 12 and kind in ("kirjeldus", "füüsiline kirjeldus", "sisu kirjeldus", ""):
             r["desc"] = v[:700]; break
-    # pictures: the first jpg resource, with its pixel size for the wall
+    # pictures: the first image resource (jpg, jpeg or png), with its pixel size for the wall
     for res in block(x, "resourceSet"):
         rid = re.search(r'<lido:resourceID[^>]*>([^<]*)</lido:resourceID>', res)
-        if rid and 'lido:formatResource="jpg"' in res:
+        if rid and re.search(r'lido:formatResource="(jpe?g|png)"', res):
             r["media"] = rid.group(1).strip()
             w = re.search(r"<lido:measurementType>width</lido:measurementType>\s*<lido:measurementUnit>pixel</lido:measurementUnit>\s*<lido:measurementValue>([\d.]+)", res)
             h = re.search(r"<lido:measurementType>height</lido:measurementType>\s*<lido:measurementUnit>pixel</lido:measurementUnit>\s*<lido:measurementValue>([\d.]+)", res)
@@ -176,12 +176,18 @@ def parse(mid, x, subset):
 if __name__ == "__main__" and sys.argv[1:2] == ["--reparse"]:
     # read every cached record again with the current parser (no request to MuIS)
     out = json.load(open("oai_records.json", encoding="utf-8")); n = 0
+    imgs = json.load(open("oai_images.json", encoding="utf-8")) if os.path.exists("oai_images.json") else {}
+    shapes = json.load(open("oai_shapes.json", encoding="utf-8")) if os.path.exists("oai_shapes.json") else {}
     for i, r in enumerate(out):
         p = os.path.join(CACHE, f"lido_{r['id']}.xml.gz")
         if not os.path.exists(p): continue
         with gzip.open(p, "rt", encoding="utf-8") as f: new = parse(r["id"], f.read(), r.get("oai_set"))
         if new and new != r: out[i] = new; n += 1
+        if new and new.get("media"):     # a picture the parser now reads goes to the picture list too
+            imgs["muis:" + new["id"]] = new["media"]
+            if new.get("shape"): shapes[new["media"]] = new["shape"]
     json.dump(out, open("oai_records.json", "w", encoding="utf-8"), ensure_ascii=False)
+    json.dump(imgs, open("oai_images.json", "w", encoding="utf-8")); json.dump(shapes, open("oai_shapes.json", "w", encoding="utf-8"))
     print(f"reparsed: {n:,} records changed; with a maker {sum(1 for r in out if r.get('author')):,} of {len(out):,}"); sys.exit()
 if __name__ == "__main__":
     which = sys.argv[1:] or list(SETS)
