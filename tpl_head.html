@@ -488,7 +488,7 @@ footer p{margin:0;font-size:.81rem;line-height:1.6;color:var(--grey-6);max-width
 .up-row .n{text-align:right;white-space:nowrap;line-height:1.7;font-family:var(--mono);font-size:.74rem;font-variant-numeric:tabular-nums}
 .up-row .n a{color:var(--grey-6);border-bottom:1px solid var(--rule)}
 @media(max-width:760px){.up-row{grid-template-columns:1fr}.up-row .n{text-align:left}}
-html[lang="et"] footer .nav[lang="en"],html:not([lang="et"]) footer .nav[lang="et"]{display:none}
+footer .nav{display:none}   /* the links are in the page head already; kept in the markup for crawlers, the sitemap carries the rest */
 .mono-up{margin:14px 0 4px;border-top:1px solid var(--rule);padding-top:10px}
 .up-lot{margin:8px 0 10px;font-size:.84rem;line-height:1.45}
 .up-when{font-family:var(--mono);font-size:var(--fs-xs);letter-spacing:.06em;color:var(--grey-4)}
