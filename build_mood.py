@@ -172,10 +172,13 @@ form.describe input:focus{outline:2px solid var(--ink);outline-offset:1px}
 .btn:hover{border-color:var(--grey)}.btn.solid{background:var(--on);color:var(--on-ink);border-color:var(--on)}
 .msg{flex-basis:100%;margin:0;font-size:.85rem;color:var(--grey)}
 .groups{display:grid;gap:12px}
-.group{display:grid;grid-template-columns:150px 1fr;gap:10px;align-items:start}
+.group{display:grid;grid-template-columns:150px minmax(0,1fr);gap:10px;align-items:start}
 @media (max-width:700px){.group{grid-template-columns:1fr;gap:6px}}
 .gname{font:500 .68rem/2.5 var(--mono);letter-spacing:.13em;text-transform:uppercase;color:var(--grey)}
-.chips{display:flex;flex-wrap:wrap;gap:7px}
+/* each group one row that scrolls sideways, the right edge fading to say there is more */
+.chips{display:flex;gap:7px;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:thin;padding:0 32px 6px 0;
+  -webkit-mask-image:linear-gradient(to right,#000 calc(100% - 32px),transparent);mask-image:linear-gradient(to right,#000 calc(100% - 32px),transparent)}
+.chip{flex:none;white-space:nowrap}
 .chip{font:400 1.02rem/1 var(--serif);color:var(--ink);background:var(--raise);border:1px solid var(--rule);padding:8px 13px 9px;border-radius:999px;cursor:pointer}
 .chip:hover{border-color:var(--grey)}.chip[aria-pressed=true]{background:var(--on);color:var(--on-ink);border-color:var(--on)}
 .bar{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;border-top:1px solid var(--rule);padding-top:14px}
@@ -246,7 +249,9 @@ function writeHash() {
   try { history.replaceState(null, "", location.pathname + (h ? "#" + h : "")); } catch (e) {}
 }
 function chips() {
-  const g = $("groups"); g.textContent = "";
+  const g = $("groups");
+  const at = [...g.querySelectorAll(".chips")].map(c => c.scrollLeft);   // a pick redraws the rows: keep where each was scrolled
+  g.textContent = "";
   for (const key of Object.keys(T.groups)) {
     const row = document.createElement("div"); row.className = "group";
     const n = document.createElement("div"); n.className = "gname"; n.textContent = T.groups[key];
@@ -258,6 +263,7 @@ function chips() {
       c.append(b);
     }
     row.append(n, c); g.append(row);
+    c.scrollLeft = at[g.children.length - 1] || 0;
   }
   document.querySelectorAll("[data-k]").forEach(b => b.setAttribute("aria-pressed", b.dataset.k === kind));
 }
