@@ -94,7 +94,7 @@ T = {"en": dict(file="mood", other="meeleolu", other_l="Eesti keeles", site="Est
                 surprise="Surprise me", clear="Clear", more="Show more", none="Pick a word to begin.",
                 nomatch="No mood word in that. Try one of the words below.", of="of", works="works", loading="Loading the pictures…", failed="The pictures could not be loaded. Reload the page to try again.",
                 note="The moods are read by CLIP, an image model, from the museums' own photographs of public-domain works: a guide to looking, not a judgement of the work. A typed description is read by Claude, which picks the words; the sentence is not stored. Each picture opens its record in the catalogue.",
-                sl_add="Add to my list", sl_remove="Remove from my list",
+                sl_add="Add to My List", sl_remove="Remove from My List",
                 hash=""),
      "et": dict(file="meeleolu", other="mood", other_l="In English", site="Eesti Kunstikataloog",
                 h="Kunst meeleolu järgi", lede="Vali kuni kolm sõna või kirjelda oma sõnadega, mida tahaksid näha. Seinal on muuseumiteosed, mille pilt sellele kõige paremini vastab. Pildimudel on iga pilti ise vaadanud, mitte kirjet, nii et ta leiab meeleolu nagu sinagi: vaadates.",
@@ -189,7 +189,7 @@ form.describe input:focus{outline:2px solid var(--ink);outline-offset:1px}
 .t span{display:block;padding-top:6px;font-size:.76rem;line-height:1.3;color:var(--grey)}
 .t span i{display:block;font:italic 400 .98rem/1.2 var(--serif);color:var(--ink)}
 .t:hover span i{text-decoration:underline}
-/* My list's bookmark on a picture, as in the register (tpl_app.html .sl): Buy art's cards share it */
+/* My List's bookmark on a picture, as in the register (tpl_app.html .sl): Buy art's cards share it */
 .tw,.card{position:relative}
 .sl{position:absolute;top:6px;right:6px;width:30px;height:30px;display:flex;align-items:center;justify-content:center;padding:0;border:0;border-radius:50%;
   background:color-mix(in srgb,var(--paper) 78%,transparent);color:var(--ink);cursor:pointer;opacity:.8}
@@ -202,7 +202,7 @@ footer a{color:var(--ink)}
 :focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 """
 
-# My list: the register's bookmark (tpl_app.html, museaal.shortlist) on the mood wall and Buy art's cards. One list,
+# My List: the register's bookmark (tpl_app.html, museaal.shortlist) on the mood wall and Buy art's cards. One list,
 # kept in this browser and never sent; the register shows it, exports it and shares it. T: the page's sl_add, sl_remove;
 # ev: the GoatCounter event an addition counts as.
 SL_JS = r"""
