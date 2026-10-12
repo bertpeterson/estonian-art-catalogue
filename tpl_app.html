@@ -605,6 +605,7 @@
          </div>`;
     $("histo-hint").textContent = state.decade===null ? T("selectdecade")
       : (state.decade==="und" ? T("undatedonly") : T("filteredto",{x:state.decade+"s"}));
+    if (state.decade!==null || state.from!==null || state.to!==null || state.undOnly) $("histo").classList.add("on");
     renderEras();
   }
   // The eras sit against the bars they describe: a band beneath the histogram with one
@@ -2092,7 +2093,7 @@
     jumpTo(viewTop($("register")));
   });
   // the chart is pinned open; the works figure and Periods take the visitor to it
-  const toHisto = () => jumpTo($("histo"), true);
+  const toHisto = () => { $("histo").classList.add("on"); jumpTo($("histo"), true); };
   $("stat-wbtn").addEventListener("click", toHisto);
   $("g-per").addEventListener("click", toHisto);
   $("stat-art").addEventListener("click", () => {
