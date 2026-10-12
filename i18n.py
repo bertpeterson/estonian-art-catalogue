@@ -11,7 +11,7 @@ import json
 ET = {
  "sub":"Kunst Eesti avalikes kogudes ja galeriides · 1835–2024",
  "works":"teost","artists":"kunstnikku","museums":"muuseumi","forsale":"müügil","auctioned":"oksjonil","forsale_chip":"Müügil",
- "srcsummary":"Allikad ja meetod","statslink":"Kataloog arvudes","moodlink":"Meeleolu järgi","findlink":"Osta kunsti",
+ "srcsummary":"Allikad ja meetod","statslink":"Kataloog arvudes","moodlink":"Meeleolu järgi","moodsearch":"või otsi meeleolu järgi →","findlink":"Osta kunsti",
  "forsalenow":"Müügil praegu","seeinbuy":"Vaata neid lehel Osta kunsti","seeinbuy1":"Vaata seda lehel Osta kunsti",
  "tagline":"Vaata Eesti kunsti muuseumide kogudes ja osta teoseid galeriidest.",
  "fs_eye":"Müügil praegu","fs_h":"Osta kunsti","fs_lede":"{n} teost {g} galeriis, koos küsitud hindadega.",
@@ -129,7 +129,7 @@ ET = {
 EN = {
  "sub":"Art in Estonia's public collections and galleries · 1835–2024",
  "works":"works","artists":"artists","museums":"museums","forsale":"for sale","auctioned":"auctioned","forsale_chip":"For sale",
- "srcsummary":"Sources & method","statslink":"The catalogue in figures","moodlink":"By mood","findlink":"Buy Art",
+ "srcsummary":"Sources & method","statslink":"The catalogue in figures","moodlink":"By mood","moodsearch":"or search by mood →","findlink":"Buy Art",
  "forsalenow":"For sale now","seeinbuy":"See them in Buy Art","seeinbuy1":"See it in Buy Art",
  "tagline":"Look up Estonian art in the museums, and buy works from the galleries.",
  "fs_eye":"For sale now","fs_h":"Buy Art","fs_lede":"{n} works at {g} galleries, with their asking prices.",
