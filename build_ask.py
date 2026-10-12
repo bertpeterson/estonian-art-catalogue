@@ -593,7 +593,17 @@ var PR=JSON.parse(plo.dataset.stops), N=PR.length-1, WIDE=window.matchMedia('(mi
 function lowAt(v){var i=0;while(v>0&&i<N-1&&PR[i+1]<=v)i++;return i}
 function highAt(v){var i=1;if(!v)return N;while(i<N&&PR[i]<v)i++;return i}
 function rail(){dual.style.setProperty('--a',plo.value/N);dual.style.setProperty('--b',phi.value/N);
-  plo.setAttribute('aria-valuetext',Q.min?eur(Q.min):T.anyprice);phi.setAttribute('aria-valuetext',Q.max?eur(Q.max):T.anyprice)}
+  plo.setAttribute('aria-valuetext',Q.min?eur(Q.min):T.anyprice);phi.setAttribute('aria-valuetext',Q.max?eur(Q.max):T.anyprice);tags()}
+// a figure under each handle, centred on it, kept inside the rail and pushed apart where the handles meet
+var tlo=dual.querySelector('.tlo'), thi=dual.querySelector('.thi');
+function tags(){var a=+plo.value,b=+phi.value,W=dual.clientWidth;if(!W)return;
+  tlo.textContent=eur(PR[a]);thi.textContent=b===N?eur(PR[N-1])+'+':eur(PR[b]);
+  tlo.classList.toggle('set',a>0);thi.classList.toggle('set',b<N);
+  var wl=tlo.offsetWidth,wh=thi.offsetWidth,cl=9+(W-18)*a/N,ch=9+(W-18)*b/N,
+      l=Math.max(0,Math.min(W-wl,cl-wl/2)),h=Math.max(0,Math.min(W-wh,ch-wh/2)),gap=l+wl+8-h;
+  if(gap>0){l=Math.max(0,l-gap/2);h=Math.min(W-wh,l+wl+8)}
+  tlo.style.left=l+'px';thi.style.left=h+'px'}
+window.addEventListener('resize',tags)
 function tally(){fcount.textContent=D?T.show.replace('{c}',count(rank(Q).length))+' ↓':''}
 // the controls as the search is
 function sync(){
@@ -761,7 +771,8 @@ CSS = BM.CSS + """
 .linkbtn{background:none;border:0;padding:6px 2px;font:500 .68rem/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--grey);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
 .linkbtn:hover{color:var(--ink)}
 .filters .seg .btn{flex:1;padding:9px 4px;font-size:.66rem}
-.dual{position:relative;height:28px;margin:0 2px}
+.dual{position:relative;height:46px;margin:0 2px}
+.dual .tag{position:absolute;top:30px;left:0;white-space:nowrap;font:500 .7rem/1 var(--mono);color:var(--grey);font-variant-numeric:tabular-nums;pointer-events:none}.dual .tag.set{color:var(--ink)}
 .dual .track,.dual .fill{position:absolute;top:13px;height:2px;pointer-events:none}
 .dual .track{left:0;right:0;background:var(--rule)}
 .dual .fill{left:calc(9px + (100% - 18px) * var(--a));right:calc(9px + (100% - 18px) * (1 - var(--b)));background:var(--ink)}
@@ -907,7 +918,8 @@ def panel(t, labels, M, names=()):
             f'<div class="f-row"><div class="f-name">{e(t["price"])} <output id="pout">{e(t["anyprice"])}</output></div>'
             f'<div class="dual" style="--a:0;--b:1"><span class="track"></span><span class="fill"></span>'
             f'<input type="range" id="plo" min="0" max="{n}" step="1" value="0" aria-label="{e(t["lowest"])}" data-stops="{json.dumps(PRICE_STOPS)}">'
-            f'<input type="range" id="phi" min="0" max="{n}" step="1" value="{n}" aria-label="{e(t["highest"])}"></div></div>'
+            f'<input type="range" id="phi" min="0" max="{n}" step="1" value="{n}" aria-label="{e(t["highest"])}">'
+            '<span class="tag tlo" aria-hidden="true"></span><span class="tag thi" aria-hidden="true"></span></div></div>'
             f'<details class="f-row fold"><summary class="f-name">{e(t["medium"])} <span class="picked" id="pm"></span></summary><div class="chips scroll" id="media">{media}</div></details>'
             f'<details class="f-row fold"><summary class="f-name">{e(t["size"])} <span class="picked" id="ps"></span></summary><div class="seg">{sizes}</div></details>'
             f'<details class="f-row fold"><summary class="f-name">{e(t["artist"])} <span class="picked" id="pa"></span></summary><div class="acomp">'
