@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Taste: each museum picture as 48 small numbers -> taste_vecs.json
 
-My list (the bookmark on a register row, a Buy art card, a mood tile) is the works a
+My List (the bookmark on a register row, a Buy art card, a mood tile) is the works a
 visitor kept. Buy art's For you puts first the works for sale whose pictures are nearest
 one of theirs, and that has to be worked out in the browser, where the list is. So each
 picture's CLIP embedding (lookalikes.py, cached in embcache/) is brought down to its 48

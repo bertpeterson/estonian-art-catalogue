@@ -104,10 +104,10 @@ T = {"en": dict(file="find", other="leia", other_l="Eesti keeles", site="Estonia
                 daily="today's selection", fromchat="From the chat", artist="Artist", artistph="Type a name", artistlist="Artists with works for sale", names="Start with a name", titlew="In the title", filters="Filters",
                 groups=dict(feeling="Feeling", light="Light", colour="Colour", weather="Season and weather", subject="Subject"),
                 about="Sources & privacy", note="The works are the galleries' current stock with their asking prices, read weekly from each gallery's own site; the gallery's page is the one to trust. Your messages are read by Claude, which runs the searches and picks the works it suggests; they are not stored. The auction figures under a work are its artist's record as the houses published it, hammer prices: a record, not a valuation. The moods are read from the gallery's photograph by CLIP, an image model: a guide, not a judgement of the work.",
-                sl_add="Add to my list", sl_remove="Remove from my list", fy="For you", fybtn="Similar to the works in My list ({n})",
+                sl_add="Add to My List", sl_remove="Remove from My List", fy="For you", fybtn="Similar to My List ({n})",
                 fyhint="Bookmark three works, here, on the mood wall or in the catalogue, and this puts first what looks like them.",
-                fysee="See My list", fybit="based on My list",
-                fynone="nothing in My list to go by yet",
+                fysee="See My List", fybit="based on My List",
+                fynone="nothing in My List to go by yet",
                 hash=""),
      "et": dict(file="leia", other="find", other_l="In English", site="Eesti Kunstikataloog",
                 h="Osta kunsti", title="Osta Eesti kunsti: müügil {n} teost koos hindadega", lede="Kunst sinu koju kataloogi galeriidest, praegu müügil. Sea hind, tehnika, suurus, meeleolu ja kunstnik või kirjelda, mida vajad. Iga teos viib seda müüva galerii lehele.",
@@ -449,7 +449,7 @@ function rank(q){
   return picked.concat(rest)}
 function count(n){return n===1?T.count1:T.count.replace('{n}',String(n).replace(/\B(?=(\d{3})+(?!\d))/g,' '))}
 function priceText(lo,hi){return lo&&hi?eur(lo)+' – '+eur(hi):hi?T.upto+' '+eur(hi):lo?T.from_+' '+eur(lo):T.anyprice}
-// ---- For you: the works for sale ranked by My list (data/taste.py) ----
+// ---- For you: the works for sale ranked by My List (data/taste.py) ----
 // The list is the only taste the page knows: read from this browser, never sent. A work for sale scores by its picture's
 // nearness to the nearest picture on the list (and a little to the next), 48 bytes a picture in one space for museum
 // and stock, and by its artist being on the list; its card says which. The stock's bytes are one file, fetched the
@@ -500,7 +500,7 @@ function syncYou(){var n=slGet().length;fyb.textContent=T.fybtn.replace('{n}',n)
   fyh.textContent=n<3?T.fyhint+' ':'';if(n){var a=el('a',null,T.fysee);a.href='./#'+T.hash+'list=mine';fyh.appendChild(a)}fyh.hidden=!fyh.firstChild}
 // ---- the assistant's tools: Claude asks (through the Worker), the page answers from the stock it has ----
 function wid(w){return 'w'+w.i}
-// My list for the assistant: the latest twelve works it can name -- a work for sale from the stock (with its id, for
+// My List for the assistant: the latest twelve works it can name -- a work for sale from the stock (with its id, for
 // similar), another from For you's shards where they are loaded. Sent with a message, kept nowhere
 function myList(){var o=[];listNow().slice(-12).forEach(function(k){var w=D.byKey&&D.byKey[k],x;
   if(w)o.push({t:w[0],a:D.artists[w[1]][0],id:wid(w)});else if((x=(SHARDS[shardOf(k)]||{})[k]))o.push({t:x[2],a:x[3]})});return o}

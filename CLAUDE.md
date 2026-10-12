@@ -33,7 +33,7 @@ anything private (keys, accounts, personal plans, correspondence) out of this fi
   `same_pictures.json` + `moods.json` + `taste_vecs.json`;
   CI cannot run CLIP on museum pictures. Never refit `taste_proj.npz` without redoing `stock_taste.json` too.
 - Buy art (`find.html` / `leia.html`): `build_ask.py` writes the pages and `site/data/stock.json`;
-  stock moods and taste vectors come from `data/stock_moods.py`. "For you" ranks stock by My list
+  stock moods and taste vectors come from `data/stock_moods.py`. "For you" ranks stock by My List
   (`museaal.shortlist` in the browser, same list as the register's bookmark).
 - Worker: edit `worker/template.js`; it generates `worker/mood-worker.js`, which the user pastes into
   Cloudflare. Any Worker change needs that re-paste before it is live.

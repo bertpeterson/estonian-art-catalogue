@@ -313,12 +313,12 @@ function controls(f) {
     (artist || "none") + ". This is the visitor's current search: start from it." };
 }
 
-// My list: the works the visitor saved while browsing (the page sends the latest twelve it can name: title, artist,
+// My List: the works the visitor saved while browsing (the page sends the latest twelve it can name: title, artist,
 // and the id of one for sale), a taste to go on when they point to it or ask with nothing else to go on
 function mylist(v) {
   const L = Array.isArray(v) ? v.slice(0, 12).map(x => x && typeof x === "object" ? { t: short(x.t, 80), a: short(x.a, 60), id: /^w\d{1,6}$/.test(x.id || "") ? x.id : "" } : null).filter(x => x && x.a) : [];
   if (!L.length) return "";
-  return "\n\nThe visitor's My list, the works they saved while browsing (museum works, and works for sale where an id is given): " +
+  return "\n\nThe visitor's My List, the works they saved while browsing (museum works, and works for sale where an id is given): " +
     L.map(x => `"${x.t}" by ${x.a}${x.id ? " (" + x.id + ")" : ""}`).join("; ") + ". Use it when they point to it ('like the ones I " +
     "saved', 'my taste') or ask with nothing else to go on: their artists, the media and moods those works suggest, and similar on " +
     "a saved work's id. Otherwise leave it aside, and never list it back to them.";
