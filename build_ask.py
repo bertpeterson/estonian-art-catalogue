@@ -90,7 +90,7 @@ T = {"en": dict(file="find", other="leia", other_l="Eesti keeles", site="Estonia
                 frames=dict(none="No frame", black="Black", oak="Oak", white="White", gold="Gold"),
                 fits="fits", roomnote="Room", nowall="I couldn't find a clear stretch of wall in that photo. Try one taken straight on, with the empty wall in view.",
                 badphoto="That photo could not be read. Try a JPEG or PNG.",
-                label="Your message", ph="Describe the work you're looking for", send="Send",
+                label="Your message", ph="Describe the work you're looking for.", send="Send",
                 more="Show more", at="at", noprice="Price on request", none="No work for sale matches this search. Widen the price range or clear a filter.",
                 thinking="Thinking…", how="How it searched", like="Works like", choosing="Choosing from these", failed="The assistant could not be reached. Try again in a moment.", record="In the catalogue",
                 kinds=dict(paint="paintings", paper="works on paper", sculpture="sculpture", photo="photographs"),
@@ -118,7 +118,7 @@ T = {"en": dict(file="find", other="leia", other_l="Eesti keeles", site="Estonia
                 frames=dict(none="Raamita", black="Must", oak="Tamm", white="Valge", gold="Kuld"),
                 fits="mahub", roomnote="Tuba", nowall="Ma ei leidnud sellelt fotolt vaba seinaosa. Proovi fotot, mis on tehtud otse seina poole ja kus tühi sein on näha.",
                 badphoto="Seda fotot ei õnnestunud lugeda. Proovi JPEG- või PNG-faili.",
-                label="Sinu sõnum", ph="Kirjelda teost, mida otsid", send="Saada",
+                label="Sinu sõnum", ph="Kirjelda teost, mida otsid.", send="Saada",
                 more="Näita rohkem", at="", noprice="Hind päringul", none="Müügil pole ühtki teost, mis sellele otsingule vastaks. Laienda hinnavahemikku või eemalda mõni filter.",
                 thinking="Mõtlen…", how="Kuidas otsisin", like="Sarnased teosele", choosing="Valin nende seast", failed="Abilist ei õnnestunud kätte saada. Proovi hetke pärast uuesti.", record="Kataloogis",
                 kinds=dict(paint="maalid", paper="tööd paberil", sculpture="skulptuur", photo="fotod"),
@@ -756,11 +756,11 @@ CSS = BM.CSS + """
 .filters{display:grid;gap:18px;align-content:start;border:1px solid var(--rule);background:var(--raise);padding:16px}
 .f-name{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:9px;font:500 .68rem/1 var(--mono);letter-spacing:.13em;text-transform:uppercase;color:var(--grey)}
 .f-name output{font:500 .8rem/1 var(--mono);letter-spacing:.02em;text-transform:none;color:var(--ink);font-variant-numeric:tabular-nums}
-.filters .chips{gap:6px}
+.filters .chips{flex-wrap:wrap;gap:6px;overflow-x:visible;padding:0;-webkit-mask-image:none;mask-image:none}
 .fold>summary{cursor:pointer;list-style:none;margin-bottom:0}.fold>summary::-webkit-details-marker{display:none}
 .fold>summary::after{content:"+";font-size:.9rem;letter-spacing:0}.fold[open]>summary::after{content:"−"}.fold[open]>summary{margin-bottom:9px}
 .fold .picked{flex:1;text-align:left;font:500 .8rem/1.2 var(--mono);letter-spacing:.02em;text-transform:none;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.chips.scroll{max-height:168px;overflow:auto;align-content:flex-start;padding-right:4px}
+.filters .chips.scroll{max-height:168px;overflow-y:auto;align-content:flex-start;padding-right:4px}
 .about summary{cursor:pointer;display:inline}.about p{margin:8px 0 0}
 /* the panel in two faces: mono for its headings, figures and buttons, the sans for every option and line of text */
 .filters .chip{font:400 .86rem/1 var(--sans);padding:7px 11px}
@@ -903,7 +903,7 @@ def panel(t, labels, M, names=()):
     for, and mood words past the first twelve, show when chosen (by hand or by the assistant)"""
     chip = lambda attr, v, label, x="": f'<button type="button" class="chip{x}" data-{attr}="{v}" aria-pressed="false">{e(label)}</button>'
     media = "".join(chip("m", m, t["media"][m], "" if i < 8 else " x") for i, m in enumerate(MEDIA))
-    sizes = "".join(f'<button type="button" class="btn" data-s="{k}" aria-pressed="{str(k == "any").lower()}"'
+    sizes = "".join(f'<button type="button" class="chip" data-s="{k}" aria-pressed="{str(k == "any").lower()}"'
                     + (f' title="{e(t["sizehint"][k])}"' if k != "any" else "") + f'>{e(t["sizeany"] if k == "any" else t["sizes"][k])}</button>'
                     for k in ("any", "small", "medium", "large"))
     grp = {w["en"]: ("feeling" if w["g"] == "more" else w["g"]) for w in M}
@@ -922,7 +922,7 @@ def panel(t, labels, M, names=()):
             f'<input type="range" id="phi" min="0" max="{n}" step="1" value="{n}" aria-label="{e(t["highest"])}">'
             '<span class="tag tlo" aria-hidden="true"></span><span class="tag thi" aria-hidden="true"></span></div></div>'
             f'<details class="f-row fold"><summary class="f-name">{e(t["medium"])} <span class="picked" id="pm"></span></summary><div class="chips scroll" id="media">{media}</div></details>'
-            f'<details class="f-row fold"><summary class="f-name">{e(t["size"])} <span class="picked" id="ps"></span></summary><div class="seg">{sizes}</div></details>'
+            f'<details class="f-row fold"><summary class="f-name">{e(t["size"])} <span class="picked" id="ps"></span></summary><div class="chips">{sizes}</div></details>'
             f'<details class="f-row fold"><summary class="f-name">{e(t["artist"])} <span class="picked" id="pa"></span></summary><div class="acomp">'
             f'<input id="artist" type="search" autocomplete="off" spellcheck="false" placeholder="{e(t["artistph"])}" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="artists">'
             f'<button type="button" class="x" id="aclear" data-clear="artist" aria-label="{e(t["clear"])}" hidden>×</button>'
