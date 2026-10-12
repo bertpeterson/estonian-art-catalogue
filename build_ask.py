@@ -81,7 +81,7 @@ def media_of(kind, tech):
     if kind == "paper" and not m: m |= BIT["drawing"]          # on paper, and neither printed nor painted
     return m
 
-T = {"en": dict(file="find.html", other="leia.html", other_l="Eesti keeles", site="Estonian Art Catalogue",
+T = {"en": dict(file="find", other="leia", other_l="Eesti keeles", site="Estonian Art Catalogue",
                 h="Buy Art", title="Buy Estonian art: {n} works for sale, with prices", lede="Art for your home from the catalogue's galleries, for sale now. Set the price, medium, size, mood and artist, or describe what you need. Each work links to the gallery that sells it.",
                 hello="Set the filters, or describe what you need: the room, size, budget, subject or mood.",
                 photo="Photo of your wall", yourroom="Your room", looking="Looking at your room…", photomsg="(a photo of my room)",
@@ -103,13 +103,13 @@ T = {"en": dict(file="find.html", other="leia.html", other_l="Eesti keeles", sit
                 artistonly="{who}: {n} for sale outside these settings.", showthem="Show them",
                 daily="today's selection", fromchat="From the chat", artist="Artist", artistph="Type a name", artistlist="Artists with works for sale", names="Start with a name", titlew="In the title", filters="Filters",
                 groups=dict(feeling="Feeling", light="Light", colour="Colour", weather="Season and weather", subject="Subject"),
-                note="The works are the galleries' current stock with their asking prices, read weekly from each gallery's own site; the gallery's page is the one to trust. Your messages are read by Claude, which runs the searches and picks the works it suggests; they are not stored. The auction figures under a work are its artist's record as the houses published it, hammer prices: a record, not a valuation. The moods are read from the gallery's photograph by CLIP, an image model: a guide, not a judgement of the work.",
+                about="Privacy & how this works", note="The works are the galleries' current stock with their asking prices, read weekly from each gallery's own site; the gallery's page is the one to trust. Your messages are read by Claude, which runs the searches and picks the works it suggests; they are not stored. The auction figures under a work are its artist's record as the houses published it, hammer prices: a record, not a valuation. The moods are read from the gallery's photograph by CLIP, an image model: a guide, not a judgement of the work.",
                 sl_add="Add to my list", sl_remove="Remove from my list", fy="For you", fybtn="Based on My list ({n})",
                 fyhint="Bookmark three works, here, on the mood wall or in the catalogue, and this puts first what looks like them.",
                 fysee="See My list", fybit="based on My list",
                 fynone="nothing in My list to go by yet",
                 hash=""),
-     "et": dict(file="leia.html", other="find.html", other_l="In English", site="Eesti Kunstikataloog",
+     "et": dict(file="leia", other="find", other_l="In English", site="Eesti Kunstikataloog",
                 h="Osta kunsti", title="Osta Eesti kunsti: müügil {n} teost koos hindadega", lede="Kunst sinu koju kataloogi galeriidest, praegu müügil. Sea hind, tehnika, suurus, meeleolu ja kunstnik või kirjelda, mida vajad. Iga teos viib seda müüva galerii lehele.",
                 hello="Sea filtrid või kirjelda, mida vajad: tuba, suurus, eelarve, teema või meeleolu.",
                 photo="Foto seinast", yourroom="Sinu tuba", looking="Vaatan su tuba…", photomsg="(foto minu toast)",
@@ -131,7 +131,7 @@ T = {"en": dict(file="find.html", other="leia.html", other_l="Eesti keeles", sit
                 artistonly="{who}: väljaspool neid seadeid müügil {n}.", showthem="Näita",
                 daily="tänane valik", fromchat="Vestlusest", artist="Kunstnik", artistph="Kirjuta nimi", artistlist="Kunstnikud, kelle teoseid on müügil", names="Alusta nimest", titlew="Pealkirjas", filters="Filtrid",
                 groups=dict(feeling="Tunne", light="Valgus", colour="Värv", weather="Aastaaeg ja ilm", subject="Aine"),
-                note="Teosed on galeriide praegune müügivalik ja nende küsitud hinnad, loetud iga nädal galeriide endi lehtedelt; usaldusväärne on galerii leht. Sinu sõnumeid loeb Claude, kes teeb otsingud ja valib soovitatavad teosed; neid ei salvestata. Teose all olevad oksjoniandmed on kunstniku tulemused nii, nagu oksjonimajad need avaldasid (haamrihinnad): ülevaade, mitte hinnang. Meeleolu loeb galerii fotolt pildimudel CLIP: see on juhatus, mitte hinnang teosele.",
+                about="Privaatsus ja kuidas see töötab", note="Teosed on galeriide praegune müügivalik ja nende küsitud hinnad, loetud iga nädal galeriide endi lehtedelt; usaldusväärne on galerii leht. Sinu sõnumeid loeb Claude, kes teeb otsingud ja valib soovitatavad teosed; neid ei salvestata. Teose all olevad oksjoniandmed on kunstniku tulemused nii, nagu oksjonimajad need avaldasid (haamrihinnad): ülevaade, mitte hinnang. Meeleolu loeb galerii fotolt pildimudel CLIP: see on juhatus, mitte hinnang teosele.",
                 sl_add="Lisa minu nimekirja", sl_remove="Eemalda minu nimekirjast", fy="Sulle", fybtn="Minu nimekirja põhjal ({n})",
                 fyhint="Märgi järjehoidjaga kolm teost, siin, meeleolu seinal või kataloogis, ja ette tulevad nendega sarnased.",
                 fysee="Vaata minu nimekirja", fybit="minu nimekirja põhjal",
@@ -605,7 +605,10 @@ function sync(){
   if(document.activeElement!==ain)ain.value=Q.artist;aclr.hidden=!Q.artist;
   var cs=chatset.querySelector('.bits');cs.textContent='';
   if(Q.terms.length){var p=el('span','bit',T.titlew+': '+Q.terms.join(', ')),b=el('button','x','×');b.type='button';b.dataset.clear='terms';b.setAttribute('aria-label',T.clear);p.appendChild(b);cs.appendChild(p)}
-  chatset.hidden=!cs.firstChild;syncYou();tally()}
+  chatset.hidden=!cs.firstChild;
+  document.getElementById('pm').textContent=Q.media.map(function(m){return T.media[m]}).join(', ');
+  document.getElementById('pa').textContent=Q.artist;
+  document.getElementById('pw').textContent=Q.words.map(function(w){return labels[w]}).join(', ');syncYou();tally()}
 // ---- the artist: a name typed, and chosen from those with work for sale (with how many) ----
 var ain=document.getElementById('artist'), alist=document.getElementById('artists'), aclr=document.getElementById('aclear'), act=-1;
 function names(s){var f=fold(s.trim());if(!D||f.length<2)return [];
@@ -743,6 +746,11 @@ CSS = BM.CSS + """
 .f-name{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:9px;font:500 .68rem/1 var(--mono);letter-spacing:.13em;text-transform:uppercase;color:var(--grey)}
 .f-name output{font:500 .8rem/1 var(--mono);letter-spacing:.02em;text-transform:none;color:var(--ink);font-variant-numeric:tabular-nums}
 .filters .chips{gap:6px}
+.fold>summary{cursor:pointer;list-style:none;margin-bottom:0}.fold>summary::-webkit-details-marker{display:none}
+.fold>summary::after{content:"+";font-size:.9rem;letter-spacing:0}.fold[open]>summary::after{content:"−"}.fold[open]>summary{margin-bottom:9px}
+.fold .picked{flex:1;text-align:left;font:500 .8rem/1.2 var(--mono);letter-spacing:.02em;text-transform:none;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chips.scroll{max-height:168px;overflow:auto;align-content:flex-start;padding-right:4px}
+.about summary{cursor:pointer;display:inline}.about p{margin:8px 0 0}
 .filters .chip{font-size:.92rem;padding:6px 11px 7px}
 #akeys{margin-top:10px}
 #akeys .n{font:400 .7rem/1 var(--mono);color:var(--grey)}
@@ -894,16 +902,16 @@ def panel(t, labels, M, names=()):
             f'<div class="dual" style="--a:0;--b:1"><span class="track"></span><span class="fill"></span>'
             f'<input type="range" id="plo" min="0" max="{n}" step="1" value="0" aria-label="{e(t["lowest"])}" data-stops="{json.dumps(PRICE_STOPS)}">'
             f'<input type="range" id="phi" min="0" max="{n}" step="1" value="{n}" aria-label="{e(t["highest"])}"></div></div>'
-            f'<div class="f-row"><div class="f-name">{e(t["medium"])}</div><div class="chips" id="media">{media}</div></div>'
+            f'<details class="f-row fold"><summary class="f-name">{e(t["medium"])} <span class="picked" id="pm"></span></summary><div class="chips scroll" id="media">{media}</div></details>'
             f'<div class="f-row"><div class="f-name">{e(t["size"])}</div><div class="seg">{sizes}</div></div>'
-            f'<div class="f-row"><label class="f-name" for="artist">{e(t["artist"])}</label><div class="acomp">'
+            f'<details class="f-row fold"><summary class="f-name">{e(t["artist"])} <span class="picked" id="pa"></span></summary><div class="acomp">'
             f'<input id="artist" type="search" autocomplete="off" spellcheck="false" placeholder="{e(t["artistph"])}" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="artists">'
             f'<button type="button" class="x" id="aclear" data-clear="artist" aria-label="{e(t["clear"])}" hidden>×</button>'
             f'<ul id="artists" role="listbox" aria-label="{e(t["artistlist"])}" hidden></ul></div>'
-            f'<div class="chips" id="akeys" role="group" aria-label="{e(t["names"])}">'
+            f'<div class="chips scroll" id="akeys" role="group" aria-label="{e(t["names"])}">'
             + "".join(f'<button type="button" class="chip" data-a="{e(a)}" aria-pressed="false">{e(a)} <span class="n">{c}</span></button>' for a, c in names)
-            + '</div></div>'
-            f'<div class="f-row"><div class="f-name">{e(t["mood"])}</div><div class="chips" id="moods">{moods}</div></div>'
+            + '</div></details>'
+            f'<details class="f-row fold"><summary class="f-name">{e(t["mood"])} <span class="picked" id="pw"></span></summary><div class="chips scroll" id="moods">{moods}</div></details>'
             f'<div class="f-row" id="chatset" hidden><div class="f-name">{e(t["fromchat"])}</div><div class="bits"></div></div>'
             f'<div class="f-foot"><button type="button" class="count" id="fcount"></button><button type="button" class="linkbtn" id="fclear">{e(t["clear"])}</button></div>'
             '</div>')
@@ -937,8 +945,7 @@ def page(lang, ver, api, labels, M, n=0, tver="", names=()):
             f'<button class="btn solid" type="submit">{e(t["send"])}</button>'
             + (f'<input id="photo" type="file" accept="image/*" hidden><label for="photo" class="btn photobtn" role="button" tabindex="0">{e(t["photo"])}</label>' if PHOTO else '')
             + '</form></section>'
-            + browse_links(lang)
-            + f'<footer>{e(t["note"])} {H.CONTACT[lang]}</footer></div>'
+            + f'<footer><details class="about"><summary>{e(t["about"])}</summary><p>{e(t["note"])} {H.CONTACT[lang]}</p></details></footer></div>'
             f'<script type="importmap">{{"imports":{{"three":"https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/"}}}}</script>'
             f'<script type="application/json" id="t">{tj}</script><script type="application/json" id="labels">{lj}</script><script>{BM.SL_JS}{JS}</script></body></html>')
 
@@ -971,7 +978,7 @@ def browse_links(lang, here=None):
     i = 3 if lang == "en" else 5
     return (f'<p class="browse"><span class="eyebrow">{e(ST[lang]["browse"])}</span> ' + " · ".join(
         (f'<b>{e(s[i])}</b>' if s[2 if lang == "en" else 4] == here else
-         f'<a href="{BASE}/{SALE_DIR[lang]}/{s[2] if lang == "en" else s[4]}.html">{e(s[i])}</a>') for s in SALE) + "</p>")
+         f'<a href="{BASE}/{SALE_DIR[lang]}/{s[2] if lang == "en" else s[4]}">{e(s[i])}</a>') for s in SALE) + "</p>")
 
 def sale_pages(d):
     eur = lambda n, lang: ("€" + f"{n:,}".replace(",", " ")) if lang == "en" else (f"{n:,}".replace(",", " ") + " €")
@@ -990,7 +997,7 @@ def sale_pages(d):
         g = len({w[9] for w in pick})
         for lang, sl, h in (("en", sl_en, h_en), ("et", sl_et, h_et)):
             t, st = T[lang], ST[lang]
-            me = f"{BASE}/{SALE_DIR[lang]}/{sl}.html"; other = f"{BASE}/{SALE_DIR['et' if lang == 'en' else 'en']}/{sl_et if lang == 'en' else sl_en}.html"
+            me = f"{BASE}/{SALE_DIR[lang]}/{sl}"; other = f"{BASE}/{SALE_DIR['et' if lang == 'en' else 'en']}/{sl_et if lang == 'en' else sl_en}"
             lede = st["lede1"] if len(pick) == 1 else st["lede"].format(n=f"{len(pick):,}".replace(",", " " if lang == "et" else ","), g=g)
             cards = "".join(
                 f'<article class="card"><a class="out" href="{e(w[10])}" target="_blank" rel="noopener">'
@@ -998,7 +1005,7 @@ def sale_pages(d):
                 f'<span class="cap"><i>{e(w[0])}</i>{e(arts[w[1]][0])}{", " + e(str(w[2])) if w[2] else ""}</span>'
                 + (f'<span class="meta">{e(" · ".join(x for x in ((lang == "en" and w[15]) or w[4], w[5]) if x))}</span>' if (w[4] or w[5]) else "")
                 + f'<span class="price"><b>{eur(w[8], lang) if w[8] else e(t["noprice"])}</b> {e((t["at"] + " ") if t["at"] else "")}{e(gals[w[9]])} ↗</span></a>'
-                f'<a class="rec" href="{BASE}/{"a" if lang == "en" else "k"}/{arts[w[1]][1]}.html">{e(st["artist"])}</a></article>' for w in rows)
+                f'<a class="rec" href="{BASE}/{"a" if lang == "en" else "k"}/{arts[w[1]][1]}">{e(st["artist"])}</a></article>' for w in rows)
             find = f'{BASE}/{t["file"]}#{hashq}'
             ld = H.ldjson({"@context": "https://schema.org", "@type": "CollectionPage", "name": h, "url": me, "inLanguage": lang,
                            "mainEntity": {"@type": "ItemList", "numberOfItems": len(pick), "itemListElement": [
@@ -1035,14 +1042,14 @@ def feed(d):
         for w in d["works"]:
             wr.writerow([w[0], arts[w[1]][0], w[2], w[4], w[15] or w[4], "; ".join(m for m in MEDIA if w[14] & BIT[m]),
                          w[5], w[6], w[8] or "", gals[w[9]], w[10], w[3], "; ".join(words[j] for j in w[12][::2]),
-                         f"{BASE}/a/{arts[w[1]][1]}.html"])
+                         f"{BASE}/a/{arts[w[1]][1]}"])
 
 def llms_txt(d):
     """/llms.txt (llmstxt.org): what the site is and where its data lives, in plain words for a language model that
     reads it -- above all that the prices are the galleries' asking prices and a work is bought from the gallery"""
     M, W_ = H.META, d["works"]
     n = lambda x: f"{x:,}"
-    sale = "\n".join(f"- [{s[3]}]({BASE}/{SALE_DIR['en']}/{s[2]}.html)" for s in SALE)
+    sale = "\n".join(f"- [{s[3]}]({BASE}/{SALE_DIR['en']}/{s[2]})" for s in SALE)
     txt = f"""# museaal.ee — Estonian Art Catalogue
 
 > A catalogue of Estonian art: {n(M["records"])} records of works by {n(M["artists"])} artists, from the museums' collections \
@@ -1077,11 +1084,11 @@ sale, record at auction; in Estonian under {BASE}/k/
 
 - [Every record, CSV, gzip]({BASE}/data/export/works.csv.gz): a row a record, every value written out
 - [Artists, CSV, gzip]({BASE}/data/export/artists.csv.gz)
-- [The catalogue in figures]({BASE}/stats.html)
+- [The catalogue in figures]({BASE}/stats)
 
 ## Optional
 
-- [Art by mood]({BASE}/mood.html): museum pictures by the mood words a visitor picks
+- [Art by mood]({BASE}/mood): museum pictures by the mood words a visitor picks
 - Corrections and questions: info@museaal.ee
 """
     open("site/llms.txt", "w", encoding="utf-8").write(txt)
@@ -1103,7 +1110,7 @@ def rss(d):
         price = f"€{w[8]:,}" if w[8] else "price on request"
         line = " · ".join(filter(None, [w[15] or w[4], w[5], price, gals[w[9]]]))
         desc = (f'<p><img src="{x(w[3], {chr(34): "&quot;"})}" alt=""></p><p>{x(line)}</p>'
-                f'<p><a href="{BASE}/a/{a[1]}.html">{x(a[0])} on museaal.ee</a></p>')
+                f'<p><a href="{BASE}/a/{a[1]}">{x(a[0])} on museaal.ee</a></p>')
         return (f"<item><title>{x((a[0] + ': ' if whose else '') + (w[0] or '—') + (f', {w[2]}' if w[2] else '') + ' — ' + price)}</title>"
                 f"<link>{x(w[10])}</link><guid isPermaLink=\"false\">museaal.ee:{x(w[11])}</guid><pubDate>{rfc(when(w))}</pubDate>"
                 f"<description>{x(desc)}</description></item>")
@@ -1125,7 +1132,7 @@ def rss(d):
     for f in os.listdir("site/a"):
         sl = f[:-5]
         if not f.endswith(".html") or sl == "index" or sl not in name: continue
-        channel(f"site/a/{sl}.xml", f"{name[sl]} — for sale · museaal.ee", f"{BASE}/a/{sl}.html",
+        channel(f"site/a/{sl}.xml", f"{name[sl]} — for sale · museaal.ee", f"{BASE}/a/{sl}",
                 f"Works by {name[sl]} for sale at Estonian galleries, newest first, with their asking prices.", by.get(sl, []), False, 50)
         n += 1
     print(f"  feeds          feed.xml, {n:,} artist feeds ({len(by):,} with works for sale)")
@@ -1170,7 +1177,7 @@ def main():
     urls = []
     for lang in ("en", "et"):
         labels = {w["en"]: (w["et"] if lang == "et" else BM.LABEL_EN.get(w["en"], w["en"])) for w in M}
-        open(f"site/{T[lang]['file']}", "w", encoding="utf-8").write(page(lang, ver, API, labels, M, len(d["works"]), tver, door_names(d))); urls.append(f"{BASE}/{T[lang]['file']}")
+        open(f"site/{T[lang]['file']}.html", "w", encoding="utf-8").write(page(lang, ver, API, labels, M, len(d["works"]), tver, door_names(d))); urls.append(f"{BASE}/{T[lang]['file']}")
     urls += sale_pages(d)
     feed(d); llms_txt(d); rss(d)
     sm = open("site/sitemap.xml", encoding="utf-8").read()
