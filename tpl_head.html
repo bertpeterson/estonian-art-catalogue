@@ -114,10 +114,12 @@ h1 a:hover{color:var(--grey-6)}
 .srcline a:hover{border-bottom-color:var(--ink);color:var(--ink)}
 
 .histo{padding:20px 0 18px;border-bottom:1px solid var(--rule)}
+/* a phone leaves the chart out until it is asked for: the works figure, Periods, or a decade or era chosen */
+@media(max-width:620px){.histo:not(.on){display:none}}
 .histo-head{display:flex;justify-content:space-between;align-items:baseline;gap:20px;margin-bottom:16px}
 .histo-r{display:flex;align-items:baseline;gap:14px}
 
-/* Buy art: a quiet door under the masthead -- a line of text and a search on the left, six works
+/* Buy art: a quiet door under the masthead -- a line of text and two links on the left, works
    for sale in a row on the right */
 .forsale{display:grid;grid-template-columns:minmax(250px,2fr) minmax(0,5fr);gap:28px;align-items:center;padding:18px 0 20px;border-bottom:1px solid var(--rule)}
 @media(max-width:900px){.forsale{grid-template-columns:1fr;gap:14px}}
@@ -127,26 +129,37 @@ h1 a:hover{color:var(--grey-6)}
 .fs-all{display:inline-block;margin-top:2px;font-family:var(--mono);font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;color:var(--grey-6);text-decoration:none;border-bottom:1px solid var(--rule);padding-bottom:2px}
 .fs-all:hover{color:var(--ink);border-bottom-color:var(--ink)}
 .fs-all + .fs-all{margin-left:18px}
-.fs-works{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px}
 .fs-w{display:block;text-decoration:none;color:inherit;min-width:0}
 .fs-w img{display:block;width:100%;aspect-ratio:1;object-fit:cover;background:var(--field)}
 .fs-cap{display:block;padding-top:5px;font-size:.66rem;line-height:1.3;color:var(--grey-6);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .fs-cap i{display:block;font-family:var(--serif-text);font-size:.8rem;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .fs-cap b{font-family:var(--mono);font-weight:500;color:var(--ink);font-size:.68rem;margin-left:3px}
 .fs-w:hover .fs-cap i{text-decoration:underline}
-/* on hover, the whole picture, uncropped and larger, opens under the row: from the card's left edge for
-   the first three, its right edge for the last three; the pointer passes through it to the cards */
+/* the row scrolls sideways: six cards in view, eighteen in all; on a pointer screen, arrows at its ends (shown
+   while there is more that way) and no scrollbar; on a phone, swiped, a card and a bit at a time */
+.fs-row{position:relative;min-width:0}
+.fs-works{display:grid;gap:10px;grid-auto-flow:column;grid-auto-columns:calc((100% - 50px) / 6);overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;overscroll-behavior-x:contain}
+.fs-works::-webkit-scrollbar{display:none}
+.fs-w{scroll-snap-align:start}
+.fs-arr{display:none}
+@media(hover:hover) and (min-width:621px){
+  .fs-arr{display:flex;align-items:center;justify-content:center;position:absolute;top:calc((100% - 40px) / 2);transform:translateY(-50%);z-index:5;
+    width:34px;height:34px;padding:0;border-radius:50%;border:1px solid var(--rule);background:var(--raise);color:var(--ink);
+    font:inherit;font-size:1.05rem;line-height:1;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.3);transition:opacity .15s}
+  .fs-arr:hover{border-color:var(--ink)}
+  .fs-arr[hidden]{display:flex;opacity:0;pointer-events:none}
+  .fs-prev{left:-14px} .fs-next{right:-14px}}
+/* on hover, the whole picture, uncropped and larger, opens under the row: fixed to the window, since the scrolling
+   row would clip it, and placed by the script below the band from the card's left edge, or its right edge for a
+   card in the right half; the pointer passes through it to the cards */
 .fs-pop{display:none}
 @media(hover:hover) and (min-width:621px){
-  .fs-w{position:relative}
-  .fs-pop{display:block;position:absolute;top:calc(100% + 10px);left:0;z-index:30;padding:6px;background:var(--raise);border:1px solid var(--rule);box-shadow:0 12px 32px rgba(0,0,0,.35);pointer-events:none;opacity:0;visibility:hidden;transition:opacity .15s,visibility .15s}
-  .fs-w:nth-child(n+4) .fs-pop{left:auto;right:0}
+  .fs-pop{display:block;position:fixed;top:0;left:0;z-index:30;padding:6px;background:var(--raise);border:1px solid var(--rule);box-shadow:0 12px 32px rgba(0,0,0,.35);pointer-events:none;opacity:0;visibility:hidden;transition:opacity .15s,visibility .15s}
   /* not the card's square crop; sized to its box from the picture's shape (--r, set by the script below the
      band), so a small file grows too */
   .fs-pop img{display:block;aspect-ratio:auto;object-fit:contain;height:auto;max-width:none;width:min(416px,35.2vw,calc(min(51.2vh,480px) * var(--r,1)));max-height:min(51.2vh,480px)}
   .fs-w:hover .fs-pop{opacity:1;visibility:visible}}
-@media(max-width:620px){.fs-works{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:38%;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:4px}
-  .fs-w{scroll-snap-align:start}}
+@media(max-width:620px){.fs-works{grid-auto-columns:38%;padding-bottom:4px}}
 .vh{position:absolute;left:-9999px}
 /* the controls' door to it: the one filled button in the row */
 .eyebrow{font-family:var(--mono);font-size:var(--fs-sm);letter-spacing:var(--ls-label);text-transform:uppercase;color:var(--grey-6)}
@@ -746,7 +759,11 @@ footer a{border-bottom:1px solid var(--rule)}
       <a class="fs-all" href="find" data-fs="" data-i18n="fs_all"></a>
       <a class="fs-all" id="fs-byartist" href="#group=artist&amp;sort=forsale" data-i18n="fs_byartist"></a>
     </div>
-    <div class="fs-works" id="fs-works"></div>
+    <div class="fs-row">
+      <div class="fs-works" id="fs-works"></div>
+      <button type="button" class="fs-arr fs-prev" aria-label="Previous works" hidden>&#8592;</button>
+      <button type="button" class="fs-arr fs-next" aria-label="More works" hidden>&#8594;</button>
+    </div>
   </section>
 
   <section class="histo" id="histo">
@@ -766,6 +783,18 @@ footer a{border-bottom:1px solid var(--rule)}
     document.querySelectorAll(".fs-pop img").forEach(function(i){
       var r=function(){if(i.naturalHeight)i.style.setProperty("--r",i.naturalWidth/i.naturalHeight)};
       if(i.complete)r();else i.addEventListener("load",r)});
+    // the row's arrows: a page of cards a click, each shown while there is more that way
+    var row=document.getElementById("fs-works"),prev=document.querySelector(".fs-prev"),next=document.querySelector(".fs-next");
+    var ends=function(){prev.hidden=row.scrollLeft<4;next.hidden=row.scrollLeft+row.clientWidth>=row.scrollWidth-4};
+    [prev,next].forEach(function(b,k){b.addEventListener("click",function(){row.scrollBy({left:(k?1:-1)*row.clientWidth,behavior:"smooth"})})});
+    row.addEventListener("scroll",ends,{passive:true});addEventListener("resize",ends);ends();
+    // the hover picture, placed under its card (see .fs-pop); out of sight while the row or the page moves
+    var on=null,place=function(){if(!on)return;var p=on.querySelector(".fs-pop"),c=on.getBoundingClientRect();if(!p)return;
+      p.style.top=(c.bottom+10)+"px";
+      if(c.left+c.width/2>innerWidth/2){p.style.left="auto";p.style.right=(document.documentElement.clientWidth-c.right)+"px"}else{p.style.right="auto";p.style.left=c.left+"px"}};
+    row.addEventListener("mouseover",function(e){var w=e.target.closest(".fs-w");if(w&&w!==on){on=w;place()}});
+    row.addEventListener("mouseleave",function(){on=null});
+    row.addEventListener("scroll",place,{passive:true});addEventListener("scroll",place,{passive:true});
   })();
   // a visitor whose browser asks for Estonian, and who has not chosen English here, gets the page in Estonian
   // before the index arrives (the app, when it boots, keeps to the same choice); the link's #lang and a choice made
