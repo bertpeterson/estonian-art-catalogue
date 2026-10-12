@@ -672,6 +672,11 @@ footer a{border-bottom:1px solid var(--rule)}
 @media (max-width:760px){
   .bar-n{display:none}
   .bars{gap:12px}
+  /* the folded 15th-18th centuries took 118px of a 320px chart; on a phone they shrink to a narrow
+     band named "<1800", and the hint goes under the title instead of beside it */
+  .bars .cent.early{flex:0 0 46px!important}
+  .histo-head{flex-direction:column;align-items:flex-start;gap:6px}
+  .histo-head #histo-hint{color:var(--grey-4)}
   .cent-bars{gap:2px}
   .cent-lab{font-size:.55rem;letter-spacing:.06em}
   .cl-full{display:none}

@@ -148,7 +148,7 @@ if early:
     eh = max(3, rnd(6 + (min(et, mx) / mx) * 66)) if et else 2
     bars += (f'<div class="cent early" style="flex:0 0 118px"><div class="cent-bars">'
              f'<a class="early-btn" id="early-toggle" href="decades/before" title="{e(lab)} — {e(EN["nworks"].replace("{n}", str(et)))}">'
-             f'<span class="bar-n">{et or ""}</span><span class="early-fill" style="height:{eh}px"></span><span class="early-lab">{e(lab)}</span></a>'
+             f'<span class="bar-n">{et or ""}</span><span class="early-fill" style="height:{eh}px"></span><span class="early-lab"><span class="cl-full">{e(lab)}</span><span class="cl-abbr">&lt;{early[-1][0] + 1}00</span></span></a>'
              f'</div><div class="cent-lab">&nbsp;</div></div>')
 bars += "".join(cent(c, ds) for c, ds in rest)
 bars += (f'<div class="cent nd" style="flex:1"><div class="cent-bars">{cell("und", EN["nd"], EN["undated"], "undated")}</div>'
