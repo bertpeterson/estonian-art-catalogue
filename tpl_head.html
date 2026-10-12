@@ -225,11 +225,8 @@ h1 a:hover{color:var(--grey-6)}
 .seg button[aria-pressed="true"]{background:var(--invert-bg);color:var(--invert-fg)}
 .moodlink{display:inline-flex;align-items:center;margin-left:10px;font-family:var(--mono);font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink);text-decoration:none;border:1px solid var(--rule);padding:8px 14px}
 .moodlink:hover{border-color:var(--grey-6)}
-.moodsearch{display:inline-block;margin-top:6px;font-family:var(--mono);font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:var(--grey-6);text-decoration:none;border-bottom:1px solid var(--rule)}
-.moodsearch:hover{color:var(--ink);border-bottom-color:var(--ink)}
 .moodlink{white-space:nowrap}   /* "Buy art" stood four lines tall in a phone's row */
-.searchcol{flex:0 1 300px;max-width:100%}
-.search{position:relative}   /* a fixed-ish width: the controls after it must not shift when one of them hides */
+.search{position:relative;flex:0 1 300px;max-width:100%}   /* a fixed-ish width: the controls after it must not shift when one of them hides */
 .search input{width:100%;background:var(--field);border:1px solid var(--rule);color:var(--ink);font-family:var(--sans);font-size:.92rem;padding:9px 12px 9px 34px}
 .search input::placeholder{color:var(--grey-4)}
 .search svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--grey-4)}
@@ -664,7 +661,7 @@ footer a{border-bottom:1px solid var(--rule)}
 @media (max-width:640px){
   .controls{position:static;padding:10px 0;gap:8px 12px}
   .ctl-label{display:none}
-  .searchcol{flex:1 1 100%;max-width:none}
+  .search{flex:1 1 100%;max-width:none}
   .sortsel{max-width:150px}
   .mast-stats{display:grid;grid-template-columns:1fr 1fr;gap:12px 20px}
   .mast-stats > *{border:0!important;padding:0!important}
@@ -728,6 +725,15 @@ footer a{border-bottom:1px solid var(--rule)}
   -webkit-mask-image:linear-gradient(to right,#000 calc(100% - 40px),transparent);mask-image:linear-gradient(to right,#000 calc(100% - 40px),transparent)}
 .doors .d-ways p::after{content:"";flex:none;width:24px}
 .doors .d-ways a{flex:none}
+/* ...and opened, the whole list: wrapped, in a box that scrolls down */
+.doors .d-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:0 0 var(--sp-2)}
+.doors .d-head h2{margin:0}
+.doors button.d-more{flex:none;display:inline-block;width:auto;min-height:0;padding:2px 0;background:none;border:0;border-bottom:1px solid var(--rule);
+  font-family:var(--mono);font-size:var(--fs-sm);letter-spacing:var(--ls-label);text-transform:uppercase;color:var(--grey-6)}
+.doors button.d-more:hover{background:none;color:var(--ink);border-bottom-color:var(--ink)}
+.doors .d-ways p.open{flex-wrap:wrap;white-space:normal;row-gap:10px;overflow-x:hidden;overflow-y:auto;overscroll-behavior-y:contain;
+  max-height:11.5rem;padding:0 8px 4px 0;-webkit-mask-image:none;mask-image:none}
+.doors .d-ways p.open::after{display:none}
 .doors .d-ways a,.doors .d-ways a[data-door]{display:inline;width:auto;min-height:0;padding:0;background:none;color:var(--ink);
   font-family:var(--serif-text);font-size:var(--fs-md);text-decoration:none;border-bottom:1px solid var(--rule)}
 .doors .d-ways a:hover{border-bottom-color:var(--ink);background:none}
@@ -850,16 +856,11 @@ footer a{border-bottom:1px solid var(--rule)}
   </script>
 
   <div class="controls">
-    <!-- the mood page is another way to search, by feeling rather than by name, so its link
-         sits under the search box and not among the filters (build_mood.py) -->
-    <div class="searchcol">
     <div class="search">
       <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="7" cy="7" r="4.6"/><path d="M10.4 10.4L14 14"/></svg>
       <input id="q" type="search" placeholder="Search titles, artists, techniques, inventory numbers…" aria-label="Search the register"
              autocomplete="off" role="combobox" aria-expanded="false" aria-controls="sugg" aria-autocomplete="list">
       <div id="sugg" role="listbox" hidden></div>
-    </div>
-    <a class="moodsearch" id="moodlink" href="mood" data-i18n="moodsearch"></a>
     </div>
     <div class="ctl">
       <div class="seg" role="group" aria-label="Group by">
