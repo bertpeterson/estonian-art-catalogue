@@ -99,12 +99,12 @@ T = {"en": dict(file="find", other="leia", other_l="Eesti keeles", site="Estonia
                            sculpture="Sculpture", photo="Photography", painting="Paintings, any medium"),
                 price="Price", anyprice="Any price", upto="up to", from_="from", lowest="Lowest price", highest="Highest price",
                 medium="Medium", size="Size", sizeany="Any", sizehint=dict(small="up to 40 cm", medium="40–100 cm", large="over 100 cm"),
-                mood="Mood", moremoods="More words", fewer="Fewer", clear="Clear", count="{n} works", count1="1 work",
+                mood="Mood", moremoods="More words", fewer="Fewer", clear="Clear", count="{n} works", count1="1 work", show="Show {c}",
                 artistonly="{who}: {n} for sale outside these settings.", showthem="Show them",
                 daily="today's selection", fromchat="From the chat", artist="Artist", artistph="Type a name", artistlist="Artists with works for sale", names="Start with a name", titlew="In the title", filters="Filters",
                 groups=dict(feeling="Feeling", light="Light", colour="Colour", weather="Season and weather", subject="Subject"),
-                about="Privacy & how this works", note="The works are the galleries' current stock with their asking prices, read weekly from each gallery's own site; the gallery's page is the one to trust. Your messages are read by Claude, which runs the searches and picks the works it suggests; they are not stored. The auction figures under a work are its artist's record as the houses published it, hammer prices: a record, not a valuation. The moods are read from the gallery's photograph by CLIP, an image model: a guide, not a judgement of the work.",
-                sl_add="Add to my list", sl_remove="Remove from my list", fy="For you", fybtn="Based on My list ({n})",
+                about="Sources & privacy", note="The works are the galleries' current stock with their asking prices, read weekly from each gallery's own site; the gallery's page is the one to trust. Your messages are read by Claude, which runs the searches and picks the works it suggests; they are not stored. The auction figures under a work are its artist's record as the houses published it, hammer prices: a record, not a valuation. The moods are read from the gallery's photograph by CLIP, an image model: a guide, not a judgement of the work.",
+                sl_add="Add to my list", sl_remove="Remove from my list", fy="For you", fybtn="Like the works in My list ({n})",
                 fyhint="Bookmark three works, here, on the mood wall or in the catalogue, and this puts first what looks like them.",
                 fysee="See My list", fybit="based on My list",
                 fynone="nothing in My list to go by yet",
@@ -127,12 +127,12 @@ T = {"en": dict(file="find", other="leia", other_l="Eesti keeles", site="Estonia
                            sculpture="Skulptuur", photo="Foto", painting="Maalid, iga tehnika"),
                 price="Hind", anyprice="Iga hind", upto="kuni", from_="alates", lowest="Madalaim hind", highest="Kõrgeim hind",
                 medium="Tehnika", size="Suurus", sizeany="Kõik", sizehint=dict(small="kuni 40 cm", medium="40–100 cm", large="üle 100 cm"),
-                mood="Meeleolu", moremoods="Rohkem sõnu", fewer="Vähem", clear="Tühjenda", count="{n} teost", count1="1 teos",
+                mood="Meeleolu", moremoods="Rohkem sõnu", fewer="Vähem", clear="Tühjenda", count="{n} teost", count1="1 teos", show="Näita {c}",
                 artistonly="{who}: väljaspool neid seadeid müügil {n}.", showthem="Näita",
                 daily="tänane valik", fromchat="Vestlusest", artist="Kunstnik", artistph="Kirjuta nimi", artistlist="Kunstnikud, kelle teoseid on müügil", names="Alusta nimest", titlew="Pealkirjas", filters="Filtrid",
                 groups=dict(feeling="Tunne", light="Valgus", colour="Värv", weather="Aastaaeg ja ilm", subject="Aine"),
-                about="Privaatsus ja kuidas see töötab", note="Teosed on galeriide praegune müügivalik ja nende küsitud hinnad, loetud iga nädal galeriide endi lehtedelt; usaldusväärne on galerii leht. Sinu sõnumeid loeb Claude, kes teeb otsingud ja valib soovitatavad teosed; neid ei salvestata. Teose all olevad oksjoniandmed on kunstniku tulemused nii, nagu oksjonimajad need avaldasid (haamrihinnad): ülevaade, mitte hinnang. Meeleolu loeb galerii fotolt pildimudel CLIP: see on juhatus, mitte hinnang teosele.",
-                sl_add="Lisa minu nimekirja", sl_remove="Eemalda minu nimekirjast", fy="Sulle", fybtn="Minu nimekirja põhjal ({n})",
+                about="Allikad ja privaatsus", note="Teosed on galeriide praegune müügivalik ja nende küsitud hinnad, loetud iga nädal galeriide endi lehtedelt; usaldusväärne on galerii leht. Sinu sõnumeid loeb Claude, kes teeb otsingud ja valib soovitatavad teosed; neid ei salvestata. Teose all olevad oksjoniandmed on kunstniku tulemused nii, nagu oksjonimajad need avaldasid (haamrihinnad): ülevaade, mitte hinnang. Meeleolu loeb galerii fotolt pildimudel CLIP: see on juhatus, mitte hinnang teosele.",
+                sl_add="Lisa minu nimekirja", sl_remove="Eemalda minu nimekirjast", fy="Sulle", fybtn="Sarnased minu nimekirjaga ({n})",
                 fyhint="Märgi järjehoidjaga kolm teost, siin, meeleolu seinal või kataloogis, ja ette tulevad nendega sarnased.",
                 fysee="Vaata minu nimekirja", fybit="minu nimekirja põhjal",
                 fynone="minu nimekirjas pole veel millegi järgi minna",
@@ -594,7 +594,7 @@ function lowAt(v){var i=0;while(v>0&&i<N-1&&PR[i+1]<=v)i++;return i}
 function highAt(v){var i=1;if(!v)return N;while(i<N&&PR[i]<v)i++;return i}
 function rail(){dual.style.setProperty('--a',plo.value/N);dual.style.setProperty('--b',phi.value/N);
   plo.setAttribute('aria-valuetext',Q.min?eur(Q.min):T.anyprice);phi.setAttribute('aria-valuetext',Q.max?eur(Q.max):T.anyprice)}
-function tally(){fcount.textContent=D?count(rank(Q).length)+' ↓':''}
+function tally(){fcount.textContent=D?T.show.replace('{c}',count(rank(Q).length))+' ↓':''}
 // the controls as the search is
 function sync(){
   plo.value=lowAt(Q.min);phi.value=highAt(Q.max);pout.textContent=priceText(Q.min,Q.max);rail();
@@ -606,6 +606,7 @@ function sync(){
   var cs=chatset.querySelector('.bits');cs.textContent='';
   if(Q.terms.length){var p=el('span','bit',T.titlew+': '+Q.terms.join(', ')),b=el('button','x','×');b.type='button';b.dataset.clear='terms';b.setAttribute('aria-label',T.clear);p.appendChild(b);cs.appendChild(p)}
   chatset.hidden=!cs.firstChild;
+  document.getElementById('ps').textContent=Q.size&&Q.size!=='any'?T.sizes[Q.size].replace(/^./,function(c){return c.toUpperCase()}):'';
   document.getElementById('pm').textContent=Q.media.map(function(m){return T.media[m]}).join(', ');
   document.getElementById('pa').textContent=Q.artist;
   document.getElementById('pw').textContent=Q.words.map(function(w){return labels[w]}).join(', ');syncYou();tally()}
@@ -783,7 +784,7 @@ CSS = BM.CSS + """
 #chatset .bit{display:inline-flex;align-items:center;gap:4px;font-size:.85rem;border:1px solid var(--rule);padding:3px 4px 3px 9px}
 #chatset .x{background:none;border:0;color:var(--grey);font-size:1rem;line-height:1;padding:2px 5px;cursor:pointer}#chatset .x:hover{color:var(--ink)}
 .f-foot{display:flex;justify-content:space-between;align-items:center;gap:8px;border-top:1px solid var(--rule);padding-top:12px}
-.count{background:none;border:0;padding:4px 0;font:500 .8rem/1 var(--mono);color:var(--ink);font-variant-numeric:tabular-nums;cursor:pointer}.count:empty{visibility:hidden}
+.count{background:var(--ink);border:0;padding:9px 12px;font:500 .8rem/1 var(--mono);color:var(--paper);font-variant-numeric:tabular-nums;cursor:pointer}.count:empty{visibility:hidden}
 .log{display:grid;gap:16px}
 .msg p{margin:0}
 .msg.you{justify-self:end;max-width:min(560px,90%);background:var(--raise);border:1px solid var(--rule);padding:10px 14px;font:400 1.05rem/1.4 var(--serif)}
@@ -801,7 +802,12 @@ CSS = BM.CSS + """
 .card .out:hover .cap i{text-decoration:underline}
 .card .meta{font-size:.74rem;color:var(--grey);line-height:1.3}
 .card .price{font-size:.78rem;color:var(--grey)}.card .price b{font:500 .86rem/1.3 var(--mono);color:var(--ink);margin-right:4px}
-.filters .chip:disabled{opacity:.45;cursor:default}
+.filters .chip:disabled,.switch:disabled{opacity:.45;cursor:default}
+/* For you: an on/off switch, not a chip, so it reads as a setting rather than a tag */
+.switch{position:relative;display:flex;align-items:center;gap:10px;width:100%;background:none;border:0;padding:2px 0;color:var(--ink);font:400 .9rem/1.3 var(--sans);text-align:left;cursor:pointer}
+.switch::before{content:"";flex:none;width:34px;height:20px;border-radius:10px;background:var(--rule);transition:background .15s}
+.switch::after{content:"";position:absolute;left:3px;top:50%;width:14px;height:14px;margin-top:-7px;border-radius:50%;background:var(--grey);transition:transform .15s,background .15s}
+.switch[aria-pressed=true]::before{background:var(--ink)}.switch[aria-pressed=true]::after{transform:translateX(14px);background:var(--paper)}
 .f-hint{margin:8px 0 0;font-size:.8rem;line-height:1.4;color:var(--grey)}.f-hint a{color:var(--ink)}
 .card .by{font-size:.78rem;line-height:1.3;color:var(--grey)}
 .card .by a{color:inherit;text-decoration:none}.card .by a:hover{color:var(--ink);text-decoration:underline}
@@ -896,14 +902,14 @@ def panel(t, labels, M, names=()):
     moods += f'<button type="button" class="linkbtn" id="moremoods" aria-expanded="false" aria-controls="moods">{e(t["moremoods"])}</button>'
     n = len(PRICE_STOPS) - 1
     return (f'<div class="filters" id="filters" role="group" aria-label="{e(t["filters"])}" data-bits="{e(json.dumps(BIT))}">'
-            f'<div class="f-row" id="fyou"><div class="f-name">{e(t["fy"])}</div><div class="chips"><button type="button" class="chip" id="foryou" aria-pressed="false" disabled>{e(t["fybtn"].format(n=0))}</button></div>'
+            f'<div class="f-row" id="fyou"><div class="f-name">{e(t["fy"])}</div><button type="button" class="switch" id="foryou" aria-pressed="false" disabled>{e(t["fybtn"].format(n=0))}</button>'
             f'<p class="f-hint" id="fyhint" hidden></p></div>'
             f'<div class="f-row"><div class="f-name">{e(t["price"])} <output id="pout">{e(t["anyprice"])}</output></div>'
             f'<div class="dual" style="--a:0;--b:1"><span class="track"></span><span class="fill"></span>'
             f'<input type="range" id="plo" min="0" max="{n}" step="1" value="0" aria-label="{e(t["lowest"])}" data-stops="{json.dumps(PRICE_STOPS)}">'
             f'<input type="range" id="phi" min="0" max="{n}" step="1" value="{n}" aria-label="{e(t["highest"])}"></div></div>'
             f'<details class="f-row fold"><summary class="f-name">{e(t["medium"])} <span class="picked" id="pm"></span></summary><div class="chips scroll" id="media">{media}</div></details>'
-            f'<div class="f-row"><div class="f-name">{e(t["size"])}</div><div class="seg">{sizes}</div></div>'
+            f'<details class="f-row fold"><summary class="f-name">{e(t["size"])} <span class="picked" id="ps"></span></summary><div class="seg">{sizes}</div></details>'
             f'<details class="f-row fold"><summary class="f-name">{e(t["artist"])} <span class="picked" id="pa"></span></summary><div class="acomp">'
             f'<input id="artist" type="search" autocomplete="off" spellcheck="false" placeholder="{e(t["artistph"])}" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="artists">'
             f'<button type="button" class="x" id="aclear" data-clear="artist" aria-label="{e(t["clear"])}" hidden>×</button>'
@@ -924,7 +930,7 @@ def page(lang, ver, api, labels, M, n=0, tver="", names=()):
     t = T[lang]
     me, other = f"{BASE}/{t['file']}", f"{BASE}/{t['other']}"
     tj = json.dumps({k: t[k] for k in ("more", "at", "noprice", "none", "thinking", "how", "like", "choosing", "failed", "record", "sizes", "shown", "hash",
-                                       "media", "anyprice", "upto", "from_", "count", "count1", "moremoods", "fewer", "clear", "artist", "titlew", "artistonly", "showthem", "daily",
+                                       "media", "anyprice", "upto", "from_", "count", "count1", "show", "moremoods", "fewer", "clear", "artist", "titlew", "artistonly", "showthem", "daily",
                                        "yourroom", "looking", "photomsg", "wallw", "drag", "onwall", "fits", "roomnote", "nowall", "badphoto",
                                        "choose", "hangmore", "remove", "together", "frames", "reset", "ar", "arwait", "arfail", "arsafari",
                                        "sl_add", "sl_remove", "fybtn", "fyhint", "fysee", "fybit", "fynone")}, ensure_ascii=False).replace("</", "<\\/")
