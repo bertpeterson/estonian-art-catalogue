@@ -585,7 +585,7 @@
            <button class="early-btn" id="early-toggle" title="${esc(T("earlyexpand"))} — ${earlyTotal===1?T('oneworkc'):T('nworks',{n:earlyTotal})}">
              <span class="bar-n">${earlyTotal||""}</span>
              <span class="early-fill" style="height:${earlyTotal?Math.max(3,Math.round(6+(Math.min(earlyTotal,max)/max)*66)):2}px"></span>
-             <span class="early-lab">${esc(earlyLabel)}</span>
+             <span class="early-lab"><span class="cl-full">${esc(earlyLabel)}</span><span class="cl-abbr">&lt;${early[early.length-1].c+1}00</span></span>
            </button>
          </div>
          <div class="cent-lab">&nbsp;</div>
