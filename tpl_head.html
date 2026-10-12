@@ -116,7 +116,6 @@ h1 a:hover{color:var(--grey-6)}
 .histo{padding:20px 0 18px;border-bottom:1px solid var(--rule)}
 .histo-head{display:flex;justify-content:space-between;align-items:baseline;gap:20px;margin-bottom:16px}
 .histo-r{display:flex;align-items:baseline;gap:14px}
-.histo-x{background:none;border:0;padding:0 2px;font-size:1.25rem;line-height:1;color:var(--grey);cursor:pointer}.histo-x:hover{color:var(--ink)}
 
 /* Buy art: a quiet door under the masthead -- a line of text and a search on the left, six works
    for sale in a row on the right */
@@ -125,12 +124,7 @@ h1 a:hover{color:var(--grey-6)}
 .forsale[hidden]{display:none}
 .forsale h2{margin:5px 0 4px;font-family:var(--serif-text);font-weight:500;font-size:1.45rem;line-height:1.1;letter-spacing:-.01em}
 .fs-lede{margin:0 0 10px;color:var(--grey-6);font-size:.82rem;max-width:44ch}
-.fs-ask{display:flex;max-width:420px}
-.fs-ask input{flex:1;min-width:0;font:400 .95rem/1.2 var(--serif-text);color:var(--ink);background:var(--raise);border:1px solid var(--rule);border-right:0;padding:8px 10px;border-radius:0}
-.fs-ask input:focus{outline:2px solid var(--focus);outline-offset:1px}
-.fs-go{font-family:var(--mono);font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;background:none;color:var(--ink);border:1px solid var(--rule);padding:0 12px;cursor:pointer}
-.fs-go:hover{border-color:var(--ink)}
-.fs-all{display:inline-block;margin-top:9px;font-family:var(--mono);font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;color:var(--grey-6);text-decoration:none;border-bottom:1px solid var(--rule);padding-bottom:2px}
+.fs-all{display:inline-block;margin-top:2px;font-family:var(--mono);font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;color:var(--grey-6);text-decoration:none;border-bottom:1px solid var(--rule);padding-bottom:2px}
 .fs-all:hover{color:var(--ink);border-bottom-color:var(--ink)}
 .fs-all + .fs-all{margin-left:18px}
 .fs-works{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px}
@@ -729,7 +723,7 @@ footer a{border-bottom:1px solid var(--rule)}
       </div>
       <div class="mast-stats">
         <!-- opens the works per decade, which no longer stands open on the home page -->
-        <button class="stat-btn stat-in" id="stat-wbtn" aria-pressed="false" aria-controls="histo"><b id="stat-w">0</b><span data-i18n="works"></span></button>
+        <button class="stat-btn stat-in" id="stat-wbtn" aria-controls="histo"><b id="stat-w">0</b><span data-i18n="works"></span></button>
         <!-- a door too: the register regrouped by artist, the same toggle as By artist -->
         <button class="stat-btn stat-in" id="stat-art"><b id="stat-a">0</b><span data-i18n="artists"></span></button>
         <!-- museums and galleries are counted in the sources note, not here: four
@@ -749,29 +743,24 @@ footer a{border-bottom:1px solid var(--rule)}
       <span class="eyebrow" data-i18n="fs_eye"></span>
       <h2 id="fs-h" data-i18n="fs_h"></h2>
       <p class="fs-lede" id="fs-lede"></p>
-      <form class="fs-ask" id="fs-ask" role="search"><label for="fs-q" class="vh" data-i18n="fs_h"></label><input id="fs-q" type="text" maxlength="400" autocomplete="off" placeholder="e.g. a calm sea painting under €1,000"><button class="fs-go" type="submit" data-i18n="fs_go"></button></form>
       <a class="fs-all" href="find.html" data-fs="" data-i18n="fs_all"></a>
       <a class="fs-all" id="fs-byartist" href="#group=artist&amp;sort=forsale" data-i18n="fs_byartist"></a>
     </div>
     <div class="fs-works" id="fs-works"></div>
   </section>
 
-  <section class="histo" id="histo" hidden>
+  <section class="histo" id="histo">
     <div class="histo-head">
       <span><span class="eyebrow" data-i18n="worksperdecade"></span></span>
-      <span class="histo-r"><span class="eyebrow" id="histo-hint">Select a decade to filter</span>
-        <button class="histo-x" id="histo-x" type="button" aria-controls="histo">×</button></span>
+      <span class="histo-r"><span class="eyebrow" id="histo-hint">Select a decade to filter</span></span>
     </div>
     <div class="bars" id="bars"></div>
     <div class="eras" id="eras"></div>
   </section>
   <script>
-  // works before the catalogue's index has arrived: the search box and the link go to Buy art, in
-  // the page's language
+  // works before the catalogue's index has arrived: the links go to Buy art, in the page's language
   (function(){
     var page=function(){return document.documentElement.lang==="et"?"leia.html":"find.html"};
-    document.getElementById("fs-ask").addEventListener("submit",function(e){e.preventDefault();
-      var v=document.getElementById("fs-q").value.replace(/\s+/g," ").trim();location.href=page()+(v?"#q="+encodeURIComponent(v):"")});
     document.getElementById("forsale").addEventListener("click",function(e){var a=e.target.closest("a[data-fs]");if(a)a.href=page()+a.dataset.fs});
     // each hover picture's width/height, for its size (see .fs-pop img)
     document.querySelectorAll(".fs-pop img").forEach(function(i){
@@ -789,8 +778,7 @@ footer a{border-bottom:1px solid var(--rule)}
       document.querySelectorAll("[data-i18n]").forEach(function(el){var v=E[el.dataset.i18n];if(v!=null)el.textContent=v});
       document.querySelectorAll("[data-i18n-html]").forEach(function(el){var v=H[el.dataset.i18nHtml];if(v!=null)el.innerHTML=v});
       var fl=document.getElementById("fs-lede");if(fl&&fl.dataset.n&&E.fs_lede)fl.textContent=E.fs_lede.replace("{n}",(+fl.dataset.n).toLocaleString("et-EE")).replace("{g}",fl.dataset.g);
-      var q=document.getElementById("q");if(q&&E.searchph)q.placeholder=E.searchph;
-      var f=document.getElementById("fs-q");if(f&&E.fs_ph)f.placeholder=E.fs_ph};
+      var q=document.getElementById("q");if(q&&E.searchph)q.placeholder=E.searchph};
     fetch("data/i18n.json?v=__V_I18N__").then(function(r){return r.json()}).then(function(I){
       if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",function(){go(I)});else go(I)}).catch(function(){});
   })();
@@ -806,7 +794,7 @@ footer a{border-bottom:1px solid var(--rule)}
     <div class="ctl">
       <div class="seg" role="group" aria-label="Group by">
         <!-- not a grouping: opens the works per decade and their periods, as the works figure does -->
-        <button id="g-per" aria-pressed="false" aria-controls="histo" data-i18n="periods"></button>
+        <button id="g-per" aria-controls="histo" data-i18n="periods"></button>
         <button id="g-artist" aria-pressed="false" data-i18n="artist"></button>
         <button id="g-auc" aria-pressed="false" data-i18n="auctions"></button>
       </div>
