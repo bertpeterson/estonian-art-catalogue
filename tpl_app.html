@@ -2092,15 +2092,8 @@
     renderAll(); pushHash();
     jumpTo(viewTop($("register")));
   });
-  // the chart is pinned open; the works figure and Periods take the visitor to it
-  const toHisto = () => { $("histo").classList.add("on"); jumpTo($("histo"), true); };
-  $("stat-wbtn").addEventListener("click", toHisto);
-  // with the chart already in view the scroll alone shows nothing: the period bands light up to say "pick one here"
-  $("g-per").addEventListener("click", () => {
-    toHisto();
-    const eras = $("eras"); eras.classList.remove("cue"); void eras.offsetWidth; eras.classList.add("cue");
-    setTimeout(() => eras.classList.remove("cue"), 2500);
-  });
+  // the chart is pinned open; the works figure takes the visitor to it
+  $("stat-wbtn").addEventListener("click", () => { $("histo").classList.add("on"); jumpTo($("histo"), true); });
   $("stat-art").addEventListener("click", () => {
     $("g-artist").click();     // the control bar's By artist, so the two never drift apart
     if (state.group === "artist") jumpTo(viewTop($("register")));
