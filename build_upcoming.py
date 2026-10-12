@@ -19,12 +19,12 @@ lots_of = collections.defaultdict(list)
 for w in W:
     if w.get("kind") == "auction": lots_of[w["a"]].append(w)
 
-T = {"en": dict(file="upcoming.html", other="tulemas.html", h="Coming up at auction", site="Estonian Art Catalogue", art="a",
+T = {"en": dict(file="upcoming", other="tulemas", h="Coming up at auction", site="Estonian Art Catalogue", art="a",
                 lede="Every lot in the Estonian auction houses' coming sales by an artist in the catalogue, with the starting price as the house published it and the artist's record at auction beside it. Bids are not shown; the houses' own pages have them.",
                 none="No coming sale has published its lots yet. The houses put their catalogues online two to four weeks before a sale; this page is refreshed every week.",
                 start="starting price", rec="At auction: {n} lots, {s} sold{r}", rec0="First time at auction in the catalogue", prior="Same title before", unsold="unsold",
                 lots="lots", other_l="Eesti keeles", note="A record, not a valuation. Refreshed weekly.", month=["January","February","March","April","May","June","July","August","September","October","November","December"]),
-     "et": dict(file="tulemas.html", other="upcoming.html", h="Tulemas oksjonil", site="Eesti Kunstikataloog", art="k",
+     "et": dict(file="tulemas", other="upcoming", h="Tulemas oksjonil", site="Eesti Kunstikataloog", art="k",
                 lede="Kõik Eesti oksjonimajade tulevate oksjonite partiid kataloogi kunstnikelt, alghind nii, nagu maja selle avaldas, ja kõrval kunstniku senine oksjonitulemus. Pakkumisi ei näidata; need on majade endi lehtedel.",
                 none="Ükski tulev oksjon pole veel oma partiisid avaldanud. Majad panevad kataloogi üles kaks kuni neli nädalat enne oksjonit; see leht uueneb iga nädal.",
                 start="alghind", rec="Oksjonil: {n} partiid, {s} müüdud{r}", rec0="Kataloogis esimest korda oksjonil", prior="Sama pealkiri varem", unsold="müümata",
@@ -59,7 +59,7 @@ def main():
                 sl = H.ARTIST_SLUG[u["a"]]
                 prior = (f'<br><span class="m">{t["prior"]}: ' + " · ".join(f'{e(str(p[0])[:4])} {e(house(p[1], lang))} {eur(p[2], lang) if p[2] else t["unsold"]}' for p in u["pr"]) + "</span>") if u.get("pr") else ""
                 lot = f'<a href="{e(u["u"])}" rel="noopener">{e(house(h, lang))} ↗</a>' if str(u.get("u") or "").startswith("http") else ""
-                body += (f'<tr><td><a href="{BASE}/{t["art"]}/{sl}.html">{e(A[u["a"]]["n"])}</a><br><span class="m">{e(record(u["a"], lang))}</span></td>'
+                body += (f'<tr><td><a href="{BASE}/{t["art"]}/{sl}">{e(A[u["a"]]["n"])}</a><br><span class="m">{e(record(u["a"], lang))}</span></td>'
                          f'<td><i>{e(u["t"])}</i>{", " + e(u["yl"]) if u.get("yl") else ""}<br><span class="m">{e(" · ".join(x for x in (u.get("tc"), u.get("dm")) if x))}</span>{prior}</td>'
                          f'<td class="n">{(t["start"] + " " + eur(u["p"], lang)) if u.get("p") else ""}<br>{lot}</td></tr>')
             body += "</tbody></table>"
@@ -75,7 +75,7 @@ def main():
                 f'<h1>{t["h"]}</h1><p class="lede">{e(t["lede"])}</p>'
                 + (body or f'<p class="m">{e(t["none"])}</p>')
                 + f'<p class="m">{e(t["note"])} {H.CONTACT[lang]}</p></body></html>')
-        open(f"site/{t['file']}", "w", encoding="utf-8").write(page)
+        open(f"site/{t['file']}.html", "w", encoding="utf-8").write(page)
         urls.append(me)
     sm = open("site/sitemap.xml", encoding="utf-8").read()
     today = datetime.date.today().isoformat()

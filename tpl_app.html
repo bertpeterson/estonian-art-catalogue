@@ -280,7 +280,7 @@
         <div><i>${esc(u.t)}</i>${u.yl ? ", " + esc(u.yl) : ""}${u.tc ? " · " + esc(u.tc) : ""}${u.dm ? " · " + esc(u.dm) : ""}</div>
         <div class="up-p">${u.p ? `${esc(T("up_start"))} ${esc(eur(u.p))}` : ""}${href(u.u) ? ` · <a href="${href(u.u)}" target="_blank" rel="noopener">${esc(musName(u.h))} ↗</a>` : ""}</div>
         ${u.pr ? `<div class="up-pr">${esc(T("up_prior"))}: ${u.pr.map(p => `${esc(String(p[0]).slice(0, 4))} ${esc(musName(p[1]))} ${p[2] ? esc(eur(p[2])) : esc(T("up_unsold"))}`).join(" · ")}</div>` : ""}
-      </div>`).join("")}<div class="up-note">${esc(T("up_note"))} <a href="${LANG === "et" ? "tulemas.html" : "upcoming.html"}">${esc(T("up_all"))} →</a></div></div>`;
+      </div>`).join("")}<div class="up-note">${esc(T("up_note"))} <a href="${LANG === "et" ? "tulemas" : "upcoming"}">${esc(T("up_all"))} →</a></div></div>`;
   }
   // "Eesti Kunsti Oksjonid 8–10 Oct" -- one per house, soonest first; two at most, then "+n"
   function upSales(){
@@ -786,7 +786,7 @@
     const keys = $("ai-keys");
     keys.hidden = !!(state.letter || state.idxQ) || !TOP_ART.length;
     keys.innerHTML = keys.hidden ? "" : `<span class="ctl-label">${esc(T("doors_name"))}</span>` + TOP_ART.map(([i]) =>
-      `<a class="ai-key" href="${LANG === "et" ? "k" : "a"}/${esc(slug(A[i].n))}.html" data-artist="${i}">${esc(A[i].n)}</a>`).join("");
+      `<a class="ai-key" href="${LANG === "et" ? "k" : "a"}/${esc(slug(A[i].n))}" data-artist="${i}">${esc(A[i].n)}</a>`).join("");
     $("ai-rail").innerHTML = letters.map(L =>
       `<button class="ai-l" data-letter="${esc(L)}" aria-pressed="${state.letter===L}">${esc(L)}</button>`).join("");
     const t = $("ai-toggle");
@@ -841,7 +841,7 @@
     const eur = n => LANG === "en" ? "€" + n.toLocaleString("en-GB") : n.toLocaleString("et-EE") + " €";
     const gals = [...new Set(S.map(w => w.mu).filter(Boolean))];
     const rng = ps.length > 1 && ps[0] !== ps[ps.length - 1] ? ` · ${eur(ps[0])}–${eur(ps[ps.length - 1])}` : ps.length ? ` · ${eur(ps[0])}` : "";
-    const href = (LANG === "en" ? "find.html" : "leia.html") + "#a=" + encodeURIComponent(A[i].n);
+    const href = (LANG === "en" ? "find" : "leia") + "#a=" + encodeURIComponent(A[i].n);
     return `<div class="mono-sale"><span class="mono-salehead">${esc(T("forsalenow"))}</span>`
       + `<span class="mono-salen">${esc(S.length === 1 ? T("oneworkc") : T("nworks", {n: S.length.toLocaleString(LANG === "en" ? "en-GB" : "et-EE")}))}${esc(rng)}</span>`
       + `<span class="mono-salegal">${esc(gals.slice(0, 4).join(", "))}${gals.length > 4 ? " …" : ""}</span>`
@@ -877,7 +877,7 @@
           ${ar.qid?`<a class="permalink" href="https://www.wikidata.org/wiki/${esc(ar.qid)}" target="_blank" rel="noopener">${esc(T("d_wd"))}</a>`:""}
           <!-- the static page: a stable address to cite or print, which the app's
                fragment URLs are not, and the only route from app to crawlable page -->
-          <a class="permalink" href="${LANG === "et" ? "k" : "a"}/${esc(slug(ar.n))}.html">${esc(T("artistpage"))}</a>
+          <a class="permalink" href="${LANG === "et" ? "k" : "a"}/${esc(slug(ar.n))}">${esc(T("artistpage"))}</a>
         </div>
       </div>
       <div class="mono-side">
@@ -1231,7 +1231,7 @@
         || state.media.size || state.museums.size || state.cats.size || state.srcs.size || state.origins.size || state.groups.size;
       $("countline").textContent = (lots.length === 1 ? T("up_count1") : T("up_count", {n: fmt(lots.length)})) + (state.artist !== null ? " · " + A[state.artist].n : "") + (state.q ? ` · “${state.q}”` : "")
         + (ignored ? " · " + T("up_ignored") : "");
-      $("countline").insertAdjacentHTML("beforeend", ` · <a class="hub-link" href="${LANG === "et" ? "tulemas.html" : "upcoming.html"}">${esc(T("hubpage"))}</a>`);
+      $("countline").insertAdjacentHTML("beforeend", ` · <a class="hub-link" href="${LANG === "et" ? "tulemas" : "upcoming"}">${esc(T("hubpage"))}</a>`);
       $("countline").hidden = false; $("reset").hidden = false;
       reg.innerHTML = renderUpcoming(lots); $("viewctl").hidden = true; return;
     }
@@ -1507,15 +1507,15 @@
   // subject, Buy art under €1,000), the occupation years and the Pallas school as the
   // filters they are, and words that open the mood wall. build_landing.py bakes the same.
   const DOOR_WAYS = [
-    {"en": "The 1930s", "et": "1930. aastad", "href": "decades/1930.html", "het": "kumnendid/1930.html"},
+    {"en": "The 1930s", "et": "1930. aastad", "href": "decades/1930", "het": "kumnendid/1930"},
     {"en": "The occupation years, 1940–1990", "et": "Okupatsiooniaeg 1940–1990", "href": "#from=1940&to=1990", "door": "p", "v": "3"},
     {"en": "The Pallas school", "et": "Pallase koolkond", "href": "#grp=school:Pallas", "door": "g", "v": "school:Pallas"},
-    {"en": "Winter", "et": "Talv", "href": "subjects/winter.html", "het": "ained/talv.html"},
-    {"en": "The sea", "et": "Meri", "href": "subjects/the-sea.html", "het": "ained/meri.html"},
-    {"en": "Tallinn", "et": "Tallinn", "href": "subjects/tallinn.html", "het": "ained/tallinn.html"},
-    {"en": "Italy", "et": "Itaalia", "href": "subjects/italy.html", "het": "ained/itaalia.html"},
-    {"en": "Self-portraits", "et": "Autoportreed", "href": "subjects/self-portrait.html", "het": "ained/autoportree.html"},
-    {"en": "For sale under €1,000", "et": "Müügil alla 1000 €", "href": "find.html#max=1000", "het": "leia.html#max=1000"}
+    {"en": "Winter", "et": "Talv", "href": "subjects/winter", "het": "ained/talv"},
+    {"en": "The sea", "et": "Meri", "href": "subjects/the-sea", "het": "ained/meri"},
+    {"en": "Tallinn", "et": "Tallinn", "href": "subjects/tallinn", "het": "ained/tallinn"},
+    {"en": "Italy", "et": "Itaalia", "href": "subjects/italy", "het": "ained/itaalia"},
+    {"en": "Self-portraits", "et": "Autoportreed", "href": "subjects/self-portrait", "het": "ained/autoportree"},
+    {"en": "For sale under €1,000", "et": "Müügil alla 1000 €", "href": "find#max=1000", "het": "leia#max=1000"}
   ];
   const DOOR_MOODS = [["serene", "rahulik"], ["melancholy", "melanhoolne"], ["dreamy", "unenäoline"], ["stormy", "tormine"],
                       ["wintry", "talvine"], ["mysterious", "salapärane"], ["misty", "udune"], ["golden", "kuldne"]];
@@ -1559,13 +1559,13 @@
     const col = (head, items, cls, tag) => `<div class="${cls || ""}"><h2>${esc(T(head))}${tag ? ` <span class="tag">${esc(tag)}</span>` : ""}</h2><ul>` + items.map(
       // an artist's name is a link to their own page (the crawler's route; the click
       // handler opens the artist in place instead), a period a button
-      ([label, n, kind, v]) => (kind === "a" ? `<li><a href="${LANG === "et" ? "k" : "a"}/${esc(slug(A[v].n))}.html" data-door="a" data-v="${v}">` : `<li><button data-door="${kind}" data-v="${v}">`) +
+      ([label, n, kind, v]) => (kind === "a" ? `<li><a href="${LANG === "et" ? "k" : "a"}/${esc(slug(A[v].n))}" data-door="a" data-v="${v}">` : `<li><button data-door="${kind}" data-v="${v}">`) +
         `<span>${esc(label)}</span><span class="n">${num(n)}</span>${kind === "a" ? "</a>" : "</button>"}</li>`).join("") + "</ul></div>";
     const cap = w => w[0].toUpperCase() + w.slice(1);      // capitalised like the themes beside them
     const ways = `<div class="d-ways"><div><h2>${esc(T("doors_theme"))}</h2><p>` + DOOR_WAYS.map(x =>
         `<a href="${esc(LANG === "et" && x.het ? x.het : x.href)}"${x.door ? ` data-door="${x.door}" data-v="${esc(x.v)}"` : ""}>${esc(LANG === "et" ? x.et : x.en)}</a>`).join(" ")
       + `</p></div><div><h2>${esc(T("doors_mood"))}</h2><p>` + DOOR_MOODS.map(([en, et]) =>
-        `<a href="${LANG === "et" ? "meeleolu" : "mood"}.html#w=${en}">${esc(cap(LANG === "et" ? et : en))}</a>`).join(" ") + "</p></div></div>";
+        `<a href="${LANG === "et" ? "meeleolu" : "mood"}#w=${en}">${esc(cap(LANG === "et" ? et : en))}</a>`).join(" ") + "</p></div></div>";
     el.innerHTML = col("doors_name", TOP_ART.map(([i, n]) => [A[i].n, n, "a", i]), "d-names") + ways;
     el.hidden = false;
   }
@@ -1605,9 +1605,9 @@
     const facets = [state.decade !== null && state.decade !== "und", state.media.size > 0, state.museums.size > 0, state.cats.size > 0, state.srcs.size > 0, state.origins.size > 0, state.groups.size > 0, state.from !== null || state.to !== null].filter(Boolean).length;
     if (facets !== 1) return null;
     const D = HUB_DIR[LANG] || HUB_DIR.en;
-    if (state.decade !== null && state.decade !== "und" && state.year === null) return `${D.dec}/${state.decade < 1800 ? "before" : state.decade}.html`;
-    const m = one(state.media); if (m) return `${D.med}/${slug(medName(m))}.html`;
-    const mu = one(state.museums); if (mu) return `${D.mus}/${slug(LANG === "en" ? musName(mu) : mu)}.html`;
+    if (state.decade !== null && state.decade !== "und" && state.year === null) return `${D.dec}/${state.decade < 1800 ? "before" : state.decade}`;
+    const m = one(state.media); if (m) return `${D.med}/${slug(medName(m))}`;
+    const mu = one(state.museums); if (mu) return `${D.mus}/${slug(LANG === "en" ? musName(mu) : mu)}`;
     return null;
   }
   const wallPic = w => w.p === 1 || (w.p === undefined && typeof w.im === "string" && w.im.length > 2);
@@ -2388,9 +2388,9 @@
     document.documentElement.lang = LANG;
     document.title = T("doctitle");
     document.querySelectorAll("[data-i18n]").forEach(el => { el.textContent = T(el.dataset.i18n); });
-    document.querySelectorAll('a[data-i18n="statslink"]').forEach(a => { a.href = LANG === "en" ? "stats.html" : "stats-et.html"; });   // the figures page exists in both languages
-    $("moodlink").href = LANG === "en" ? "mood.html" : "meeleolu.html";
-    $("findlink").href = LANG === "en" ? "find.html" : "leia.html";
+    document.querySelectorAll('a[data-i18n="statslink"]').forEach(a => { a.href = LANG === "en" ? "stats" : "stats-et"; });   // the figures page exists in both languages
+    $("moodlink").href = LANG === "en" ? "mood" : "meeleolu";
+    $("findlink").href = LANG === "en" ? "find" : "leia";
     const fl = $("fs-lede");
     if (fl && fl.dataset.n) fl.textContent = T("fs_lede", {n: (+fl.dataset.n).toLocaleString(LANG === "en" ? "en-GB" : "et-EE"), g: fl.dataset.g});
     document.querySelectorAll("[data-i18n-html]").forEach(el => { el.innerHTML = I18N[LANG === "en" ? "HTML_EN" : "HTML_ET"][el.dataset.i18nHtml] || ""; });

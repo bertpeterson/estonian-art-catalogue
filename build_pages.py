@@ -135,7 +135,7 @@ def jsonld(a, ws, sl, dates, lang="en", sale=()):
     (H.offer_item), so an artist with hundreds in museums does not push them out."""
     life = a.get("l") or ["", ""]
     D = L[lang]["dir"]
-    person = {"@type": "Person", "name": a["n"], "url": f"{BASE}/{D}/{sl}.html"}
+    person = {"@type": "Person", "name": a["n"], "url": f"{BASE}/{D}/{sl}"}
     if life[0]: person["birthDate"] = life[0]
     if life[1]: person["deathDate"] = life[1]
     if a.get("born"): person["birthPlace"] = {"@type": "Place", "name": a["born"]}
@@ -161,7 +161,7 @@ def jsonld(a, ws, sl, dates, lang="en", sale=()):
         works.append(it)
     return H.ldjson({"@context": "https://schema.org", "@graph": [person,
         {"@type": "CollectionPage", "name": (f"Works by {a['n']}" if lang == "en" else f"{a['n']} teosed"), "inLanguage": lang,
-         "url": f"{BASE}/{D}/{sl}.html", "about": person,
+         "url": f"{BASE}/{D}/{sl}", "about": person,
          "mainEntity": {"@type": "ItemList", "numberOfItems": sum(1 for w in ws if not (w.get("ac") and not w.get("al"))),
                         "itemListElement": [{"@type": "ListItem", "position": i + 1, "item": it}
                                             for i, it in enumerate(works)]}}]})
@@ -216,7 +216,7 @@ ALPHA = sorted(LIVE, key=lambda i: A[i]["n"])
 APOS  = {i: n for n, i in enumerate(ALPHA)}
 
 def link(i, lang="en"):
-    return f'<a href="{BASE}/{L[lang]["dir"]}/{SLUG[i]}.html">{e(A[i]["n"])}</a>'
+    return f'<a href="{BASE}/{L[lang]["dir"]}/{SLUG[i]}">{e(A[i]["n"])}</a>'
 
 def related(i, lang="en"):
     """Rendered related-artist lines for artist i, or an empty string."""
@@ -287,7 +287,7 @@ def up_line(i, lang):
     """the artist's lots in sales still to come, with a link to the page of coming sales"""
     L = UPC.get(i)
     if not L: return ""
-    lab, start, page = ("Coming up at auction", "starting price", "upcoming.html") if lang == "en" else ("Tulemas oksjonil", "alghind", "tulemas.html")
+    lab, start, page = ("Coming up at auction", "starting price", "upcoming") if lang == "en" else ("Tulemas oksjonil", "alghind", "tulemas")
     def d(x):
         if not x: return ""
         y, m, *r = x.split("-"); return f"{int(r[0])}.{int(m)}.{y}" if r else f"{int(m)}.{y}"
@@ -319,7 +319,7 @@ def sale_block(i, a, ws, lang):
         f'<a class="wt" href="{e(w["url"])}" target="_blank" rel="noopener" title="{e(w.get("t") or "")}">'
         f'<img src="{e(imsrc(w["im"]))}" alt="{e(w.get("t") or "")}, {e(a["n"])}" loading="lazy" referrerpolicy="no-referrer-when-downgrade">'
         f'<span><i>{e(w.get("t") or "")}</i><br><b>{price(w.get("pr"))}</b> · {e(val(w, "mu") or "")} ↗</span></a>' for w in S[:12])
-    find = f'{BASE}/{"find" if en else "leia"}.html#a={urllib.parse.quote(a["n"])}'
+    find = f'{BASE}/{"find" if en else "leia"}#a={urllib.parse.quote(a["n"])}'
     more = (f"See {'it' if len(S) == 1 else 'them'} in Buy Art" if en else "Vaata neid lehel Osta kunsti")
     return (f'<h2 class="sh">{head}</h2><p class="m">{e(line)}</p><div class="wall sale">{tiles}</div>'
             f'<p><a class="cta" href="{e(find)}">{more} →</a></p>'), len(S), S[:12]
@@ -343,7 +343,7 @@ ROWS = 1000                       # the works table; the app has the rest
 def render(i, a, ws, lang):
     T = L[lang]; D = T["dir"]
     sl = SLUG[i]
-    me, other = f"{BASE}/{D}/{sl}.html", f"{BASE}/{L['et' if lang == 'en' else 'en']['dir']}/{sl}.html"
+    me, other = f"{BASE}/{D}/{sl}", f"{BASE}/{L['et' if lang == 'en' else 'en']['dir']}/{sl}"
     life = a.get("l") or ["", ""]
     dates = f"{life[0]}–{life[1]}" if life[0] or life[1] else ""
     years = sorted({w["y"] for w in ws if w.get("y")})
@@ -424,7 +424,7 @@ def render(i, a, ws, lang):
            f"<meta name=\"description\" content=\"{e(desc)}\">"
            f"<link rel=\"canonical\" href=\"{me}\">"
            f"<link rel=\"alternate\" hreflang=\"{lang}\" href=\"{me}\"><link rel=\"alternate\" hreflang=\"{'et' if lang == 'en' else 'en'}\" href=\"{other}\">"
-           f"<link rel=\"alternate\" hreflang=\"x-default\" href=\"{BASE}/a/{sl}.html\">"
+           f"<link rel=\"alternate\" hreflang=\"x-default\" href=\"{BASE}/a/{sl}\">"
            f"<link rel=\"alternate\" type=\"application/rss+xml\" title=\"{e(a['n'])} — for sale\" href=\"{BASE}/a/{sl}.xml\">"
            f"<meta property=\"og:type\" content=\"profile\">"
            f"<meta property=\"og:title\" content=\"{e(a['n'])}{' (' + dates + ')' if dates else ''}\">"
@@ -457,7 +457,7 @@ def render(i, a, ws, lang):
            + f"<table><thead><tr><th>{T['year']}</th><th>{T['title']}</th><th>{T['tech']}</th><th>{T['dims']}</th>"
            f"<th>{T['held']}</th></tr></thead><tbody>{rows}</tbody></table>"
            + neighbours(i, lang)
-           + embed_box(lang, f"{BASE}/embed/{'' if lang == 'en' else 'et/'}{sl}.html", me, a["n"], T)
+           + embed_box(lang, f"{BASE}/embed/{'' if lang == 'en' else 'et/'}{sl}", me, a["n"], T)
            + f"<p class=\"m\">{T['foot']}<a href=\"{BASE}/{'' if lang == 'en' else '#lang=et'}\">{T['full']}</a> · {CONTACT[lang]}</p></body></html>")
 
 for i, a in enumerate(A):
@@ -471,21 +471,21 @@ for i, a in enumerate(A):
 
 today = datetime.date.today().isoformat()
 # both languages of every artist page, each naming the other (the sitemap's hreflang form)
-alt = lambda sl: (f'<xhtml:link rel="alternate" hreflang="en" href="{BASE}/a/{sl}.html"/>'
-                  f'<xhtml:link rel="alternate" hreflang="et" href="{BASE}/k/{sl}.html"/>')
-urls = "".join(f"<url><loc>{BASE}/{D}/{sl}.html</loc><lastmod>{today}</lastmod>{alt(sl)}</url>" for sl, _, _ in index_rows for D in ("a", "k"))
+alt = lambda sl: (f'<xhtml:link rel="alternate" hreflang="en" href="{BASE}/a/{sl}"/>'
+                  f'<xhtml:link rel="alternate" hreflang="et" href="{BASE}/k/{sl}"/>')
+urls = "".join(f"<url><loc>{BASE}/{D}/{sl}</loc><lastmod>{today}</lastmod>{alt(sl)}</url>" for sl, _, _ in index_rows for D in ("a", "k"))
 open("site/sitemap.xml", "w", encoding="utf-8").write(
     '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">'
     f'<url><loc>{BASE}/</loc><lastmod>{today}</lastmod><priority>1.0</priority></url>'
     f'<url><loc>{BASE}/a/</loc><lastmod>{today}</lastmod></url><url><loc>{BASE}/k/</loc><lastmod>{today}</lastmod></url>'
-    f'<url><loc>{BASE}/stats.html</loc><lastmod>{today}</lastmod></url><url><loc>{BASE}/stats-et.html</loc><lastmod>{today}</lastmod></url>{urls}</urlset>')
+    f'<url><loc>{BASE}/stats</loc><lastmod>{today}</lastmod></url><url><loc>{BASE}/stats-et</loc><lastmod>{today}</lastmod></url>{urls}</urlset>')
 open("site/robots.txt", "w", encoding="utf-8").write(
     f"User-agent: *\nAllow: /\n\nSitemap: {BASE}/sitemap.xml\n")
 
 # a plain index in each language, so crawlers reach every artist page from one place
 for lang in ("en", "et"):
     T = L[lang]; D = T["dir"]; O = L["et" if lang == "en" else "en"]
-    lst = "".join(f'<li><a href="{BASE}/{D}/{sl}.html">{html.escape(n)}</a> <span class="m">{c}</span></li>'
+    lst = "".join(f'<li><a href="{BASE}/{D}/{sl}">{html.escape(n)}</a> <span class="m">{c}</span></li>'
                   for sl, n, c in sorted(index_rows, key=lambda r: r[1]))
     open(f"site/{D}/index.html", "w", encoding="utf-8").write(
         f'<!doctype html><html lang="{lang}"><head><meta charset="utf-8">{STAMP}'
@@ -514,12 +514,12 @@ if os.path.exists(_retired):
             f"<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\"><script>try{{if(localStorage.getItem(\"ekr:theme\")===\"light\")document.documentElement.setAttribute(\"data-theme\",\"light\")}}catch(e){{}}</script>"
             f"<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">"
             f"<title>{e(old)} — see {e(new)} — Estonian Art Catalogue</title>"
-            f"<link rel=\"canonical\" href=\"{BASE}/{D}/{nsl}.html\">"
-            f"<meta http-equiv=\"refresh\" content=\"0; url={BASE}/{D}/{nsl}.html\">"
+            f"<link rel=\"canonical\" href=\"{BASE}/{D}/{nsl}\">"
+            f"<meta http-equiv=\"refresh\" content=\"0; url={BASE}/{D}/{nsl}\">"
             f"<meta name=\"robots\" content=\"noindex\"><style>{CSS}</style></head><body>"
             f"<nav><a href=\"{BASE}/\">Estonian Art Catalogue</a> › {e(old)}</nav>"
             f"<h1>{e(old)}</h1><p class=\"m\">This spelling has been merged. The artist is catalogued as "
-            f"<a href=\"{BASE}/{D}/{nsl}.html\">{e(new)}</a> — taking you there.</p></body></html>")
+            f"<a href=\"{BASE}/{D}/{nsl}\">{e(new)}</a> — taking you there.</p></body></html>")
         stubs += 1
 
 # ---- 404 --------------------------------------------------------------------

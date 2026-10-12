@@ -81,7 +81,7 @@ def hbars(rows, fmtv=fmt, width=420, bar=14, gap=6, label_w=150):
 def cellbar(v, mx):
     return f'<span class="cb"><i style="width:{max(1, round(100 * v / mx)) if mx else 0}%"></i></span>'
 def artist_link(i):
-    return f'<a href="a/{slug(A[i]["n"]) or "artist-" + str(i)}.html">{e(A[i]["n"])}</a>'
+    return f'<a href="a/{slug(A[i]["n"]) or "artist-" + str(i)}">{e(A[i]["n"])}</a>'
 def pct(a, b): return f"{a / b * 100:.0f}%" if b else "—"
 def table(head, rows):
     th = "".join(f"<th{' class=n' if i else ''}>{e(h)}</th>" for i, h in enumerate(head))
@@ -112,9 +112,9 @@ def render(lang):
     medl = (lambda m: MED_ET.get(m, m)) if lang == "et" else (lambda m: m)
     musl = (lambda h: h) if lang == "et" else (lambda h: MUS_EN.get(h, h))
     decl = (lambda d: f"{d}ndad") if lang == "et" else (lambda d: f"{d}s")
-    OUTNAME = "stats.html" if lang == "en" else "stats-et.html"
+    OUTNAME = "stats" if lang == "en" else "stats-et"
     HOME = "./" if lang == "en" else "./#lang=et"
-    OTHER, OTHERLAB = ("stats-et.html", "Eesti keeles") if lang == "en" else ("stats.html", "In English")
+    OTHER, OTHERLAB = ("stats-et", "Eesti keeles") if lang == "en" else ("stats", "In English")
     parts = []
     parts = [f"<!doctype html><html lang=\"{lang}\"><head><meta charset=\"utf-8\"><script>try{{if(localStorage.getItem(\"ekr:theme\")===\"light\")document.documentElement.setAttribute(\"data-theme\",\"light\")}}catch(e){{}}</script><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">"
              f"<title>The catalogue in figures — Estonian Art Catalogue</title>"
@@ -186,7 +186,7 @@ def render(lang):
     out = "".join(parts)
     if lang == "et":   # Estonian groups thousands with a space
         for _k in range(3): out = re.sub(r"(\d),(\d{3})(?!\d)", "\\1\u202f\\2", out)
-    open("site/" + OUTNAME, "w", encoding="utf-8").write(out)
+    open("site/" + OUTNAME + ".html", "w", encoding="utf-8").write(out)
     return len(parts)
 render("en"); render("et")
 print(f"  stats page      {len(lots):,} lots, {len(house)} houses, {len(year)} years")

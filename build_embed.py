@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """Embeds: a small strip of an artist, a decade or a subject for other people's pages.
 
-    <iframe src="https://museaal.ee/embed/konrad-magi.html" width="100%" height="230" loading="lazy"></iframe>
-    <p><a href="https://museaal.ee/a/konrad-magi.html">Konrad Mägi at museaal.ee</a></p>
+    <iframe src="https://museaal.ee/embed/konrad-magi" width="100%" height="230" loading="lazy"></iframe>
+    <p><a href="https://museaal.ee/a/konrad-magi">Konrad Mägi at museaal.ee</a></p>
 
 One page per artist (every artist; with pictures where the catalogue may show them,
 the count and the media otherwise), per decade and per subject, in English at
@@ -71,7 +71,7 @@ def main():
             nw = sum(1 for w in ws if not (w.get("ac") and not w.get("al")))
             sub = f"{dates + ' · ' if dates else ''}{H.fmt(nw, lang)} {t['works']}"
             open(f"site/{t['dir']}/{sl}.html", "w", encoding="utf-8").write(
-                embed(lang, sl, a["n"], sub, ws, f"{BASE}/{t['art']}/{sl}.html", f"artist={sl}", False)); n += 1
+                embed(lang, sl, a["n"], sub, ws, f"{BASE}/{t['art']}/{sl}", f"artist={sl}", False)); n += 1
         for dd in H.DECS:
             ws = H.by_dec[dd]; lab = H.dec_label(dd, lang)
             h1 = (f"Estonian art of the {dd}s" if lang == "en" else f"Eesti kunst {dd}ndatel") if dd != "before" else (f"Estonian art {lab}" if lang == "en" else f"Eesti kunst {lab}")
