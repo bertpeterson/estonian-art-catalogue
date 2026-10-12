@@ -160,10 +160,11 @@ PER = [(None, 1699, EN["p_pre"])] + [(int(a), int(b), I18N["PERIOD_EN"][k]) for 
        re.findall(r'\[(\d{4}),(\d{4}),"(\w+)","[^"]+"\]', _app[_app.index("const PERIODS"):_app.index("const PERIOD_NOTE")])]
 eras = "".join(f'<a class="era" data-era="{i}" href="#{"from=" + str(lo) + "&" if lo else ""}{"to=" + str(hi) if hi != 2099 else ""}">{e(lab)}</a>'.replace("&\"", "\"")
                for i, (lo, hi, lab) in enumerate(PER))
-# Buy art, baked: six works for sale with a picture and a price, one an artist, from the sixty
-# artists the museums hold most of (the names a visitor is likeliest to know), turned by the build's seed. Four
-# paintings and two other works, alternating (2026-10-02: the best-held names are often printmakers and the row
-# read as a print shop; then paintings alone read as too narrow)
+# Buy art, baked: eighteen works for sale with a picture and a price, one an artist, from the sixty
+# artists the museums hold most of (the names a visitor is likeliest to know), turned by the build's seed. Six show
+# at a time and the row scrolls sideways for the rest. In each six, four paintings and two other works, alternating
+# (2026-10-02: the best-held names are often printmakers and the row read as a print shop; then paintings alone
+# read as too narrow)
 import random as _random
 _rng = _random.Random(SEED)
 _held = collections.Counter(w["a"] for w in W if (w.get("kind") or "held") in ("held", "shown"))
@@ -174,23 +175,29 @@ _PRINTED = re.compile(r"giclée|giclee|serigraaf|litograaf|digitrük|\bprint", r
 _tech = lambda w: f'{name("tc", w.get("tc")) or ""} {name("tce", w.get("tce")) or ""}'
 _ok = [w for w in _sale if 150 <= (w.get("pr") or 0) <= 20000 and not re.search(r"müüdud|\bsold\b", _tech(w), re.I)]
 _painting = lambda w: name("e", w.get("e")) in _PAINT and not _PRINTED.search(_tech(w))
-def _six():
+def _row(sixes=3):
     by_p, by_o = collections.defaultdict(list), collections.defaultdict(list)
     for w in _ok: (by_p if _painting(w) else by_o)[w["a"]].append(w)
     top = lambda by: sorted(by, key=lambda a: -_held[a])[:60]
     tp, to = top(by_p), top(by_o); _rng.shuffle(tp); _rng.shuffle(to)
-    ps = [_rng.choice(by_p[a]) for a in tp[:4]]
-    os_ = [_rng.choice(by_o[a]) for a in to if a not in tp[:4]][:2]
-    return [ps[0], ps[1], os_[0], ps[2], os_[1], ps[3]] if len(ps) == 4 and len(os_) == 2 else (ps + os_)[:6]
+    ps = [_rng.choice(by_p[a]) for a in tp[:4 * sixes]]
+    os_ = [_rng.choice(by_o[a]) for a in to if a not in tp[:4 * sixes]][:2 * sixes]
+    out = []
+    for k in range(sixes):
+        p, o = ps[4 * k:4 * k + 4], os_[2 * k:2 * k + 2]
+        out += [p[0], p[1], o[0], p[2], o[1], p[3]] if len(p) == 4 and len(o) == 2 else p + o
+    return out
 eurf = lambda n: "€" + f"{n:,}".replace(",", " ")
+# past the first six, the pictures wait until the row is scrolled near them
+_lazy = lambda i: ' loading="lazy"' if i >= 6 else ""
 fs_works = "".join(
-    f'<a class="fs-w" href="{e(w["url"])}" target="_blank" rel="noopener"><img src="{e(imsrc(w["im"]))}" alt="{e(w.get("t") or "")}, {e(A[w["a"]]["n"])}" decoding="async" referrerpolicy="no-referrer-when-downgrade">'
+    f'<a class="fs-w" href="{e(w["url"])}" target="_blank" rel="noopener"><img src="{e(imsrc(w["im"]))}" alt="{e(w.get("t") or "")}, {e(A[w["a"]]["n"])}" decoding="async"{_lazy(i)} referrerpolicy="no-referrer-when-downgrade">'
     f'<span class="fs-cap"><i>{e(w.get("t") or "")}</i>{e(A[w["a"]]["n"])}<b>{eurf(w["pr"])}</b></span>'
     # the whole picture, uncropped, while the pointer is on the card (the same file, so no second download). Both are the
     # gallery's own 768-pixel copy where it keeps one (img_small.py): the uploads ran to 1 MB, and on a phone six of them
     # held back the catalogue's index behind them
-    f'<span class="fs-pop"><img src="{e(imsrc(w["im"]))}" alt="" decoding="async" referrerpolicy="no-referrer-when-downgrade"></span></a>'
-    for w in _six())
+    f'<span class="fs-pop"><img src="{e(imsrc(w["im"]))}" alt="" decoding="async"{_lazy(i)} referrerpolicy="no-referrer-when-downgrade"></span></a>'
+    for i, w in enumerate(_row()))
 fs_lede = f'<p class="fs-lede" id="fs-lede" data-n="{len(_sale)}" data-g="{len(_galleries)}">' + e(EN["fs_lede"].replace("{n}", f"{len(_sale):,}").replace("{g}", str(len(_galleries)))) + "</p>"
 json.dump({"doors": door, "register": wall, "bars": bars, "eras": eras, "seed": SEED, "fs_works": fs_works, "fs_lede": fs_lede}, open("site/landing.json", "w", encoding="utf-8"), ensure_ascii=False)
 print(f"  landing baked   {len(shown)} tiles, seed {SEED}, first: {shown[0]['t']} · {A[shown[0]['a']]['n']}")
