@@ -702,6 +702,10 @@ footer a{border-bottom:1px solid var(--rule)}
 .era:hover{color:var(--ink);border-top-color:var(--ink)}
 .era[aria-pressed="true"]{color:var(--ink);border-top-color:var(--ink)}
 .era:focus-visible{outline:2px solid var(--focus);outline-offset:1px}
+/* Periods in the control bar: the chart is pinned open, so the click lights up the period bands to pick from */
+.eras.cue .era{animation:eracue 1.4s ease-out}
+@keyframes eracue{0%,45%{color:var(--ink);border-top-color:var(--ink);border-bottom-color:var(--ink)}}
+@media(prefers-reduced-motion:reduce){.eras.cue .era{animation-duration:2.4s;animation-timing-function:steps(1,end)}}
 @media(max-width:1000px){
   .eras{height:auto;display:flex;flex-wrap:wrap;gap:4px 14px}
   .era{position:static!important;width:auto!important;left:auto!important;height:auto;
