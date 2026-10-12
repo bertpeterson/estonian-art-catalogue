@@ -86,6 +86,10 @@ for s, txt in re.findall(r'href="(?:' + BASE + r')?/k/oksjonid/([^/"]+)/"[^>]*>(
     if d: HOME_DAY[s] = (int(d.group(1)), int(d.group(2)))
 print(f"EKO: {len(slugs)} sales linked", flush=True)
 
+# the day a coming sale was given (from the home page) is gone once the sale is over; the last
+# run's upcoming lots kept it, so a finished sale whose name gives no day takes it from them
+PREV_DAY = {r["url"]: r["date"] for r in (json.load(open("upcoming_records.json", encoding="utf-8")) if os.path.exists("upcoming_records.json") else [])
+            if r.get("house") == "Eesti Kunsti Oksjonid" and r.get("url") and len(r.get("date") or "") == 10}
 today = datetime.date.today()
 recs, n_open, n_unparsed = [], 0, 0
 coming = []                                  # the lots of sales still to come (upcoming.py)
@@ -148,6 +152,8 @@ for slug in slugs:
         elif mo < int(ym[5:7]): y += 1
         when = f"{y}-{mo:02d}-{int(day[0]):02d}"
     else: when = ym or ""
+    known = collections.Counter(PREV_DAY[r["url"]] for r in got if r["url"] in PREV_DAY)
+    if not day and known: when = known.most_common(1)[0][0]
     if open_sale or (when and when[:7] > today.isoformat()[:7]):
         n_open += 1
         if slug in HOME_DAY:                                          # the day, from the home page, in the coming year
