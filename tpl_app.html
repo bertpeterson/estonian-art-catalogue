@@ -1549,6 +1549,7 @@
     && !state.undOnly && !state.media.size && !state.museums.size && !state.cats.size
     && !state.srcs.size && !state.origins.size && !state.groups.size;
 
+  const doorsOpen = new Set();     // the theme and mood lists a visitor has opened, kept across a language switch
   function renderDoors(){
     const el = $("doors");
     // the names are a way in, for the untouched page only: once anything is chosen --
@@ -1563,9 +1564,16 @@
       ([label, n, kind, v]) => (kind === "a" ? `<li><a href="${LANG === "et" ? "k" : "a"}/${esc(slug(A[v].n))}" data-door="a" data-v="${v}">` : `<li><button data-door="${kind}" data-v="${v}">`) +
         `<span>${esc(label)}</span><span class="n">${num(n)}</span>${kind === "a" ? "</a>" : "</button>"}</li>`).join("") + "</ul></div>";
     const cap = w => w[0].toUpperCase() + w.slice(1);      // capitalised like the themes beside them
-    const ways = `<div class="d-ways"><div><h2>${esc(T("doors_theme"))}</h2><p>` + DOOR_WAYS.map(x =>
+    // the whole lists (every subject page, every mood word) come baked on the section by
+    // build_landing.py; the row shows them sideways, and opened, wrapped in a box that scrolls down
+    let lists = {};
+    try { lists = JSON.parse(el.dataset.lists || "{}"); } catch(e){}
+    const ways_ = lists.ways || DOOR_WAYS, moods_ = lists.moods || DOOR_MOODS;
+    const head = (key, k, n) => `<div class="d-head"><h2>${esc(T(key))}</h2><button type="button" class="linkbtn d-more" data-k="${k}" aria-expanded="${doorsOpen.has(k)}">`
+      + esc(doorsOpen.has(k) ? T("doors_less") : T("doors_all", {n})) + `</button></div><p${doorsOpen.has(k) ? ' class="open"' : ""}>`;
+    const ways = `<div class="d-ways"><div>` + head("doors_theme", "ways", ways_.length) + ways_.map(x =>
         `<a href="${esc(LANG === "et" && x.het ? x.het : x.href)}"${x.door ? ` data-door="${x.door}" data-v="${esc(x.v)}"` : ""}>${esc(LANG === "et" ? x.et : x.en)}</a>`).join(" ")
-      + `</p></div><div><h2>${esc(T("doors_mood"))}</h2><p>` + DOOR_MOODS.map(([en, et]) =>
+      + `</p></div><div>` + head("doors_mood", "moods", moods_.length) + moods_.map(([en, et]) =>
         `<a href="${LANG === "et" ? "meeleolu" : "mood"}#w=${en}">${esc(cap(LANG === "et" ? et : en))}</a>`).join(" ") + "</p></div></div>";
     el.innerHTML = col("doors_name", TOP_ART.map(([i, n]) => [A[i].n, n, "a", i]), "d-names") + ways;
     el.hidden = false;
@@ -2121,6 +2129,16 @@
     renderAll(); pushHash();
   });
   $("doors").addEventListener("click", e => {
+    const m = e.target.closest(".d-more");
+    if (m){
+      const k = m.dataset.k, open = !doorsOpen.has(k);
+      open ? doorsOpen.add(k) : doorsOpen.delete(k);
+      const p = m.closest(".d-head").nextElementSibling;
+      p.classList.toggle("open", open); p.scrollTop = 0; p.scrollLeft = 0;
+      m.setAttribute("aria-expanded", open);
+      m.textContent = open ? T("doors_less") : T("doors_all", {n: p.children.length});
+      return;
+    }
     const b = e.target.closest("[data-door]");
     if (!b) return;
     if (b.tagName === "A") e.preventDefault();      // the baked door is links; once the app is here it opens in place
@@ -2388,7 +2406,6 @@
     document.title = T("doctitle");
     document.querySelectorAll("[data-i18n]").forEach(el => { el.textContent = T(el.dataset.i18n); });
     document.querySelectorAll('a[data-i18n="statslink"]').forEach(a => { a.href = LANG === "en" ? "stats" : "stats-et"; });   // the figures page exists in both languages
-    $("moodlink").href = LANG === "en" ? "mood" : "meeleolu";
     $("findlink").href = LANG === "en" ? "find" : "leia";
     const fl = $("fs-lede");
     if (fl && fl.dataset.n) fl.textContent = T("fs_lede", {n: (+fl.dataset.n).toLocaleString(LANG === "en" ? "en-GB" : "et-EE"), g: fl.dataset.g});

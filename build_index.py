@@ -87,10 +87,10 @@ if _top:
 # the landing page's first paint, baked (build_landing.py): the door and the opening of
 # the artwall as plain HTML, cleared at once by an inline script when the address names
 # another view, and replaced by the app when it boots
-import json as _json, os as _os
+import json as _json, os as _os, html
 if _os.path.exists('site/landing.json'):
     _L=_json.load(open('site/landing.json',encoding='utf-8'))
-    body=body.replace('<section class="doors" id="doors" hidden></section>','<section class="doors" id="doors">'+_L['doors']+'</section>',1)
+    body=body.replace('<section class="doors" id="doors" hidden></section>','<section class="doors" id="doors" data-lists="'+html.escape(_L.get('door_lists',''))+'">'+_L['doors']+'</section>',1)
     body=body.replace('<div class="bars" id="bars"></div>','<div class="bars" id="bars">'+_L.get('bars','')+'</div>',1)
     body=body.replace('<div class="eras" id="eras"></div>','<div class="eras baked" id="eras">'+_L.get('eras','')+'</div>',1)
     body=body.replace('<div class="fs-works" id="fs-works"></div>','<div class="fs-works" id="fs-works" data-more="'+_L.get('fs_more','')+'">'+_L.get('fs_works','')+'</div>',1)

@@ -50,10 +50,21 @@ door = ('<div class="d-names"><h2>' + e(I18N["EN"]["doors_name"]) + '</h2><ul>'
 _app = open("tpl_app.html", encoding="utf-8").read()
 WAYS = json.loads(re.search(r"const DOOR_WAYS = (\[.*?\]);", _app, re.S).group(1))
 MOODS = json.loads(re.search(r"const DOOR_MOODS = (\[.*?\]);", _app, re.S).group(1))
-door += ('<div class="d-ways"><div><h2>' + e(I18N["EN"]["doors_theme"]) + '</h2><p>'
+# ...each led by those, then the rest: every subject page (build_hubs.py) and every mood
+# word the mood page has a chip for, but its subjects (themes already) and the typed-only MORE
+import build_hubs as _H
+_seen = {x["href"] for x in WAYS}
+WAYS += [{"en": s[2], "et": s[3], "href": f"subjects/{s[0]}", "het": f"ained/{s[1]}"} for s in _H.SUBS if f"subjects/{s[0]}" not in _seen]
+_seen = {en for en, _et in MOODS}
+MOODS += [[w["en"], w["et"]] for w in json.load(open("data/moods.json", encoding="utf-8"))["words"]
+          if w["g"] in ("feeling", "light", "colour", "weather") and w["en"] not in _seen]
+_head = lambda key, n: ('<div class="d-head"><h2>' + e(I18N["EN"][key]) + '</h2><button type="button" class="linkbtn d-more" aria-expanded="false">'
+                        + e(I18N["EN"]["doors_all"].replace("{n}", str(n))) + '</button></div><p>')
+door += ('<div class="d-ways"><div>' + _head("doors_theme", len(WAYS))
          + " ".join(f'<a href="{e(x["href"])}"' + (f' data-door="{x["door"]}" data-v="{e(x["v"])}"' if x.get("door") else "") + f'>{e(x["en"])}</a>' for x in WAYS)
-         + '</p></div><div><h2>' + e(I18N["EN"]["doors_mood"]) + '</h2><p>'
+         + '</p></div><div>' + _head("doors_mood", len(MOODS))
          + " ".join(f'<a href="mood#w={en}">{e(en[:1].upper() + en[1:])}</a>' for en, _et in MOODS) + '</p></div></div>')
+door_lists = json.dumps({"ways": WAYS, "moods": MOODS}, ensure_ascii=False, separators=(",", ":"))
 
 # the wall: pictured works, masterpieces first (rank slipped by the seed), then the
 # door's names and the highlights, then the rest -- artists taking turns within a medium
@@ -233,5 +244,5 @@ os.makedirs("site/data", exist_ok=True)
 open("site/data/fs-more.json", "w", encoding="utf-8").write(_more)
 fs_more = "data/fs-more.json?v=" + _hashlib.sha1(_more.encode()).hexdigest()[:10]
 fs_lede = f'<p class="fs-lede" id="fs-lede" data-n="{len(_sale)}" data-g="{len(_galleries)}">' + e(EN["fs_lede"].replace("{n}", f"{len(_sale):,}").replace("{g}", str(len(_galleries)))) + "</p>"
-json.dump({"doors": door, "register": wall, "bars": bars, "eras": eras, "seed": SEED, "fs_works": fs_works, "fs_more": fs_more, "fs_lede": fs_lede}, open("site/landing.json", "w", encoding="utf-8"), ensure_ascii=False)
+json.dump({"doors": door, "door_lists": door_lists, "register": wall, "bars": bars, "eras": eras, "seed": SEED, "fs_works": fs_works, "fs_more": fs_more, "fs_lede": fs_lede}, open("site/landing.json", "w", encoding="utf-8"), ensure_ascii=False)
 print(f"  landing baked   {len(shown)} tiles, seed {SEED}, first: {shown[0]['t']} · {A[shown[0]['a']]['n']}")
