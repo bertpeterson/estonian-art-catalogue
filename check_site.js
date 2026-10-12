@@ -39,13 +39,13 @@ const check = (name, ok, detail) => { console.log(`${ok ? "ok  " : "FAIL"} ${nam
   await send("Network.emulateNetworkConditions", {offline: false, latency: 0, downloadThroughput: -1, uploadThroughput: -1});
   check("landing: sixteen names", (await ev(`document.querySelectorAll("[data-door=a]").length`)) === 16);
   check("landing: the names are links a crawler can follow", (await ev(`document.querySelectorAll('a[data-door=a][href^="a/"]').length`)) === 16
-        && (fs.readFileSync(path.join(DIR, "index.html"), "utf-8").match(/href="a\/[a-z0-9-]+\.html" data-door="a"/g) || []).length === 16);
+        && (fs.readFileSync(path.join(DIR, "index.html"), "utf-8").match(/href="a\/[a-z0-9-]+" data-door="a"/g) || []).length === 16);
   check("landing: seventy-two tiles", (await ev(`document.querySelectorAll(".wt").length`)) === 72);
   {
     // the baked histogram (build_landing.py): its decade links name pages that exist
     const html = fs.readFileSync(path.join(DIR, "index.html"), "utf-8"), bars = (html.match(/<div class="bars" id="bars">[\s\S]*?<\/div>\s*<div class="eras/) || [""])[0];
     const hrefs = [...bars.matchAll(/href="(decades\/[^"]+)"/g)].map(m => m[1]);
-    const missing = hrefs.filter(h => !fs.existsSync(path.join(DIR, h)));
+    const missing = hrefs.filter(h => !fs.existsSync(path.join(DIR, h + ".html")));
     check("landing: the baked histogram links to decade pages that exist", hrefs.length >= 20 && !missing.length, missing.join(" ") || `${hrefs.length} links`);
   }
   check("landing: masthead figures", (await ev(`+document.querySelector("#stat-w").textContent.replace(/[^0-9]/g,"")`)) > 90000);
@@ -83,9 +83,9 @@ const check = (name, ok, detail) => { console.log(`${ok ? "ok  " : "FAIL"} ${nam
   check("decade: wall", (await ev(`document.querySelectorAll(".wt").length`)) >= 12);
   check("no JavaScript errors", errors.length === 0, errors.slice(0, 3).join(" | "));
   for (const [f, needle] of [["stats.html", "The auction record"], ["stats-et.html", "Kataloog arvudes"], ["a/konrad-magi.html", 'class="wt"'], ["a/index.html", "Artists A"],
-                             ["k/konrad-magi.html", 'hreflang="en" href="https://museaal.ee/a/konrad-magi.html"'], ["k/index.html", "Kunstnikud A"], ["sitemap.xml", "k/konrad-magi.html"],
-                             ["decades/1920.html", 'class="wt"'], ["kumnendid/1920.html", "Eesti kunst 1920ndatel"], ["museums/index.html", "tartu-art-museum.html"], ["ained/maastik.html", "Maastik"], ["sitemap.xml", "subjects/landscape.html"],
-                             ["embed/konrad-magi.html", 'target="_top"'], ["embed/et/kumnendid/1920.html", "Eesti kunst 1920ndatel"], ["a/konrad-magi.html", "embed/konrad-magi.html"]]){
+                             ["k/konrad-magi.html", 'hreflang="en" href="https://museaal.ee/a/konrad-magi"'], ["k/index.html", "Kunstnikud A"], ["sitemap.xml", "k/konrad-magi<"],
+                             ["decades/1920.html", 'class="wt"'], ["kumnendid/1920.html", "Eesti kunst 1920ndatel"], ["museums/index.html", "tartu-art-museum\""], ["ained/maastik.html", "Maastik"], ["sitemap.xml", "subjects/landscape<"],
+                             ["embed/konrad-magi.html", 'target="_top"'], ["embed/et/kumnendid/1920.html", "Eesti kunst 1920ndatel"], ["a/konrad-magi.html", "embed/konrad-magi&quot;"]]){
     const p = path.join(DIR, f); check(`file: ${f}`, fs.existsSync(p) && fs.readFileSync(p, "utf-8").includes(needle));
   }
   check("artist pages: more than a thousand", fs.readdirSync(path.join(DIR, "a")).length > 1000);

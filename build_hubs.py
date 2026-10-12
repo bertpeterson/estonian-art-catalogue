@@ -175,15 +175,15 @@ def wall(ws, lang, n=24):
         f'<span><i>{e(w.get("t"))}</i><br>{e(A[w["a"]]["n"])}{" · " + str(w["y"]) if w.get("y") else ""}</span></a>' for w in tiles) + "</div>")
 def artists_list(ws, lang, n=60):
     c = collections.Counter(w["a"] for w in ws)
-    return '<ul class="cols">' + "".join(f'<li><a href="{BASE}/{L[lang]["art"]}/{ARTIST_SLUG[i]}.html">{e(A[i]["n"])}</a><span class="n">{fmt(k, lang)}</span></li>' for i, k in c.most_common(n)) + "</ul>"
+    return '<ul class="cols">' + "".join(f'<li><a href="{BASE}/{L[lang]["art"]}/{ARTIST_SLUG[i]}">{e(A[i]["n"])}</a><span class="n">{fmt(k, lang)}</span></li>' for i, k in c.most_common(n)) + "</ul>"
 # the contact line every static page ends with: where to ask for a correction or a removal
 CONTACT = {"en": 'Corrections, removals, questions: <a href="mailto:info@museaal.ee">info@museaal.ee</a>',
            "et": 'Parandused, eemaldamised, küsimused: <a href="mailto:info@museaal.ee">info@museaal.ee</a>'}
 def dec_label(dd, lang): return L[lang]["before"] if dd == "before" else (f"{dd}s" if lang == "en" else f"{dd}ndad")
-def dec_href(dd, lang): return f"{BASE}/{L[lang]['dec']}/{dd}.html"
-def med_href(m, lang): return f"{BASE}/{L[lang]['med']}/{slug(med_name(m, lang))}.html"
-def mus_href(m, lang): return f"{BASE}/{L[lang]['mus']}/{slug(mus_name(m, lang))}.html"
-def sub_href(s, lang): return f"{BASE}/{L[lang]['sub']}/{s[0] if lang == 'en' else s[1]}.html"
+def dec_href(dd, lang): return f"{BASE}/{L[lang]['dec']}/{dd}"
+def med_href(m, lang): return f"{BASE}/{L[lang]['med']}/{slug(med_name(m, lang))}"
+def mus_href(m, lang): return f"{BASE}/{L[lang]['mus']}/{slug(mus_name(m, lang))}"
+def sub_href(s, lang): return f"{BASE}/{L[lang]['sub']}/{s[0] if lang == 'en' else s[1]}"
 def facet_row(ws, lang, kind):
     if kind == "dec":
         c = collections.Counter(("before" if dec_of(w) < 1800 else dec_of(w)) for w in ws if dec_of(w) is not None)
@@ -249,7 +249,7 @@ def main():
             nb = dict(crumb=f'<a href="{BASE}/{T["dec"]}/">{T["dec_h"]}</a> › {lab}', links=links)
             open(f"site/{T['dec']}/{dd}.html", "w", encoding="utf-8").write(page(lang, me, other, title, desc, h1, lede, ws,
                 f"decade={dd}" if dd != "before" else "to=1799", [(T["by_med"], facet_row(ws, lang, "med")), (T["by_mus"], facet_row(ws, lang, "mus"))], nb, dec_href(dd, "en"),
-            f"{BASE}/embed/{'' if lang == 'en' else 'et/'}{T['dec']}/{dd}.html"))
+            f"{BASE}/embed/{'' if lang == 'en' else 'et/'}{T['dec']}/{dd}"))
             urls.append((me, dec_href(dd, "en"), dec_href(dd, "et")))
         # media
         for m in MEDS:
@@ -283,7 +283,7 @@ def main():
             nb = dict(crumb=f'<a href="{BASE}/{T["sub"]}/">{T["sub_h"]}</a> › {e(lab)}', links=f'<a href="{BASE}/{T["sub"]}/">{T["sub_h"]}</a>')
             open(f"site/{T['sub']}/{s[0] if lang == 'en' else s[1]}.html", "w", encoding="utf-8").write(page(lang, me, other, title, desc, lab, "", ws, f"q={s[3]}",
                 [(T["by_dec"], facet_row(ws, lang, "dec")), (T["by_med"], facet_row(ws, lang, "med")), (T["by_mus"], facet_row(ws, lang, "mus"))], nb, sub_href(s, "en"),
-            f"{BASE}/embed/{'' if lang == 'en' else 'et/'}{T['sub']}/{s[0] if lang == 'en' else s[1]}.html"))
+            f"{BASE}/embed/{'' if lang == 'en' else 'et/'}{T['sub']}/{s[0] if lang == 'en' else s[1]}"))
             urls.append((me, sub_href(s, "en"), sub_href(s, "et")))
         # the four indexes
         for k, h, items in (("dec", T["dec_h"], [(dec_label(dd, lang), dec_href(dd, lang), len(by_dec[dd])) for dd in DECS]),
