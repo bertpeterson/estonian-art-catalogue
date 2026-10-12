@@ -223,7 +223,8 @@ h1 a:hover{color:var(--grey-6)}
 .seg button{font-family:var(--mono);font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;background:none;border:0;color:var(--grey-6);padding:8px 14px;cursor:pointer}
 .seg button + button{border-left:1px solid var(--rule)}
 .seg button[aria-pressed="true"]{background:var(--invert-bg);color:var(--invert-fg)}
-.moodlink{display:inline-flex;align-items:center;margin-left:10px;font-family:var(--mono);font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink);text-decoration:none;border:1px solid var(--rule);padding:8px 14px}
+.mast-nav{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
+.moodlink{display:inline-flex;align-items:center;font-family:var(--mono);font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink);text-decoration:none;border:1px solid var(--rule);padding:8px 14px}
 .moodlink:hover{border-color:var(--grey-6)}
 .moodlink{white-space:nowrap}   /* "Buy art" stood four lines tall in a phone's row */
 .search{position:relative;flex:0 1 300px;max-width:100%}   /* a fixed-ish width: the controls after it must not shift when one of them hides */
@@ -749,6 +750,11 @@ footer a{border-bottom:1px solid var(--rule)}
             <button id="th-dark" aria-pressed="true" data-i18n="th_dark"></button>
           </div>
         </div>
+        <!-- the pages of their own (build_mood.py, build_ask.py) sit up here, apart from the
+             control bar, whose every other button filters or sorts the page below -->
+        <nav class="mast-nav" aria-label="Pages">
+          <a class="moodlink" id="moodlink" href="mood" data-i18n="moodlink"></a><a class="moodlink" id="findlink" href="find" data-i18n="findlink"></a>
+        </nav>
       </div>
       <div class="mast-stats">
         <!-- opens the works per decade, which no longer stands open on the home page -->
@@ -858,8 +864,6 @@ footer a{border-bottom:1px solid var(--rule)}
         <button id="g-artist" aria-pressed="false" data-i18n="artist"></button>
         <button id="g-auc" aria-pressed="false" data-i18n="auctions"></button>
       </div>
-      <!-- the catalogue by feeling: a page of its own (build_mood.py) -->
-      <a class="moodlink" id="moodlink" href="mood" data-i18n="moodlink"></a><a class="moodlink" id="findlink" href="find" data-i18n="findlink" hidden></a>
     </div>
     <!-- before the sort: the Earliest / Latest pair shows in the list and not on the wall,
          and after it the toggle jumped along or onto another line at each switch -->
