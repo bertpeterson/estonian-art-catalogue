@@ -904,7 +904,7 @@ def panel(t, labels, M, names=()):
     chip = lambda attr, v, label, x="": f'<button type="button" class="chip{x}" data-{attr}="{v}" aria-pressed="false">{e(label)}</button>'
     media = "".join(chip("m", m, t["media"][m], "" if i < 8 else " x") for i, m in enumerate(MEDIA))
     sizes = "".join(f'<button type="button" class="chip" data-s="{k}" aria-pressed="{str(k == "any").lower()}"'
-                    + (f' title="{e(t["sizehint"][k])}"' if k != "any" else "") + f'>{e(t["sizeany"] if k == "any" else t["sizes"][k])}</button>'
+                    + (f' title="{e(t["sizehint"][k])}"' if k != "any" else "") + f'>{e(t["sizeany"] if k == "any" else t["sizes"][k].capitalize())}</button>'
                     for k in ("any", "small", "medium", "large"))
     grp = {w["en"]: ("feeling" if w["g"] == "more" else w["g"]) for w in M}
     moods = "".join(chip("w", w, labels[w]) for w in TOP_MOODS)
