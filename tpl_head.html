@@ -116,6 +116,8 @@ h1 a:hover{color:var(--grey-6)}
 .histo{padding:20px 0 18px;border-bottom:1px solid var(--rule)}
 /* a phone leaves the chart out until it is asked for: the works figure, Periods, or a decade or era chosen */
 @media(max-width:620px){.histo:not(.on){display:none}}
+/* and Periods stays off a phone altogether: the works figure is the one way in there */
+@media(max-width:620px){#g-per{display:none}}
 .histo-head{display:flex;justify-content:space-between;align-items:baseline;gap:20px;margin-bottom:16px}
 .histo-r{display:flex;align-items:baseline;gap:14px}
 
@@ -135,13 +137,17 @@ h1 a:hover{color:var(--grey-6)}
 .fs-cap i{display:block;font-family:var(--serif-text);font-size:.8rem;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .fs-cap b{font-family:var(--mono);font-weight:500;color:var(--ink);font-size:.68rem;margin-left:3px}
 .fs-w:hover .fs-cap i{text-decoration:underline}
-/* the row scrolls sideways: six cards in view, eighteen in all; on a pointer screen, arrows at its ends (shown
+/* the row scrolls sideways: six cards in view, eighteen baked in and the rest added as it nears its end; on a pointer screen, arrows at its ends (shown
    while there is more that way) and no scrollbar; on a phone, swiped, a card and a bit at a time */
 .fs-row{position:relative;min-width:0}
 .fs-works{display:grid;gap:10px;grid-auto-flow:column;grid-auto-columns:calc((100% - 50px) / 6);overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;overscroll-behavior-x:contain}
 .fs-works::-webkit-scrollbar{display:none}
 .fs-w{scroll-snap-align:start}
 .fs-arr{display:none}
+/* every sixty works, a card that leads to all of them on Buy art */
+.fs-more{display:flex;align-items:center;justify-content:center;align-self:start;aspect-ratio:1;padding:12px;border:1px solid var(--rule);text-align:center;
+  font-family:var(--mono);font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;color:var(--grey-6)}
+.fs-more:hover{color:var(--ink);border-color:var(--ink)}
 @media(hover:hover) and (min-width:621px){
   .fs-arr{display:flex;align-items:center;justify-content:center;position:absolute;top:calc((100% - 40px) / 2);transform:translateY(-50%);z-index:5;
     width:34px;height:34px;padding:0;border-radius:50%;border:1px solid var(--rule);background:var(--raise);color:var(--ink);
@@ -708,7 +714,13 @@ footer a{border-bottom:1px solid var(--rule)}
 /* themes and moods: a line of links each, quieter than the names */
 .doors .d-ways{display:grid;grid-template-columns:3fr 2fr;gap:var(--sp-2) var(--sp-4);margin:var(--sp-3) 0 var(--sp-4)}
 @media(max-width:760px){.doors .d-ways{grid-template-columns:1fr}}
-.doors .d-ways p{display:flex;flex-wrap:wrap;gap:6px 16px;margin:0}
+.doors .d-ways>div{min-width:0}
+/* each a single line that scrolls sideways, fading out at the end while there is more; a thin scrollbar under it */
+.doors .d-ways p{display:flex;flex-wrap:nowrap;gap:16px;margin:0;overflow-x:auto;overscroll-behavior-x:contain;white-space:nowrap;
+  padding-bottom:8px;scrollbar-width:thin;scrollbar-color:var(--rule) transparent;
+  -webkit-mask-image:linear-gradient(to right,#000 calc(100% - 40px),transparent);mask-image:linear-gradient(to right,#000 calc(100% - 40px),transparent)}
+.doors .d-ways p::after{content:"";flex:none;width:24px}
+.doors .d-ways a{flex:none}
 .doors .d-ways a,.doors .d-ways a[data-door]{display:inline;width:auto;min-height:0;padding:0;background:none;color:var(--ink);
   font-family:var(--serif-text);font-size:var(--fs-md);text-decoration:none;border-bottom:1px solid var(--rule)}
 .doors .d-ways a:hover{border-bottom-color:var(--ink);background:none}
@@ -787,7 +799,24 @@ footer a{border-bottom:1px solid var(--rule)}
     var row=document.getElementById("fs-works"),prev=document.querySelector(".fs-prev"),next=document.querySelector(".fs-next");
     var ends=function(){prev.hidden=row.scrollLeft<4;next.hidden=row.scrollLeft+row.clientWidth>=row.scrollWidth-4};
     [prev,next].forEach(function(b,k){b.addEventListener("click",function(){row.scrollBy({left:(k?1:-1)*row.clientWidth,behavior:"smooth"})})});
-    row.addEventListener("scroll",ends,{passive:true});addEventListener("resize",ends);ends();
+    // past the baked eighteen, the row goes on: the rest of the stock, fetched once a visitor nears the end,
+    // twelve cards at a time, and every sixty a card for all works for sale
+    var list=null,at=0,since=0,asked=false;
+    var el=function(t,c,x){var e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e};
+    var pic=function(src){var i=el("img");i.src=src;i.alt="";i.decoding="async";i.loading="lazy";i.referrerPolicy="no-referrer-when-downgrade";return i};
+    var card=function(x){var a=el("a","fs-w");a.href=x[0];a.target="_blank";a.rel="noopener";
+      var i=pic(x[1]);i.alt=x[2]+", "+x[3];a.appendChild(i);
+      var c=el("span","fs-cap");c.appendChild(el("i","",x[2]));c.appendChild(document.createTextNode(x[3]));c.appendChild(el("b","","€"+String(x[4]).replace(/\B(?=(\d{3})+(?!\d))/g," ")));a.appendChild(c);
+      var p=el("span","fs-pop"),q=pic(x[1]);p.appendChild(q);a.appendChild(p);
+      q.addEventListener("load",function(){if(q.naturalHeight)q.style.setProperty("--r",q.naturalWidth/q.naturalHeight)});return a};
+    var fill=function(){
+      while(at<list.length&&row.scrollLeft+row.clientWidth>row.scrollWidth-2*row.clientWidth){
+        for(var k=0;k<12&&at<list.length;k++){row.appendChild(card(list[at++]));
+          if(++since===60){since=0;var m=el("a","fs-w fs-more",(document.querySelector(".fs-all[data-fs]")||{}).textContent||"All works for sale →");m.href="find";m.dataset.fs="";row.appendChild(m)}}}
+      ends()};
+    var near=function(){if(list)return fill();if(asked||!row.dataset.more||row.scrollLeft+row.clientWidth<row.scrollWidth-2*row.clientWidth)return;
+      asked=true;fetch(row.dataset.more).then(function(r){return r.json()}).then(function(l){list=l;fill()}).catch(function(){asked=false})};
+    row.addEventListener("scroll",function(){ends();near()},{passive:true});addEventListener("resize",ends);ends();
     // the hover picture, placed under its card (see .fs-pop); out of sight while the row or the page moves
     var on=null,place=function(){if(!on)return;var p=on.querySelector(".fs-pop"),c=on.getBoundingClientRect();if(!p)return;
       p.style.top=(c.bottom+10)+"px";

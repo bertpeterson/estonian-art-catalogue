@@ -189,6 +189,7 @@ def _row(sixes=3):
     return out
 eurf = lambda n: "€" + f"{n:,}".replace(",", " ")
 # past the first six, the pictures wait until the row is scrolled near them
+_first = _row()
 _lazy = lambda i: ' loading="lazy"' if i >= 6 else ""
 fs_works = "".join(
     f'<a class="fs-w" href="{e(w["url"])}" target="_blank" rel="noopener"><img src="{e(imsrc(w["im"]))}" alt="{e(w.get("t") or "")}, {e(A[w["a"]]["n"])}" decoding="async"{_lazy(i)} referrerpolicy="no-referrer-when-downgrade">'
@@ -197,7 +198,40 @@ fs_works = "".join(
     # gallery's own 768-pixel copy where it keeps one (img_small.py): the uploads ran to 1 MB, and on a phone six of them
     # held back the catalogue's index behind them
     f'<span class="fs-pop"><img src="{e(imsrc(w["im"]))}" alt="" decoding="async"{_lazy(i)} referrerpolicy="no-referrer-when-downgrade"></span></a>'
-    for i, w in enumerate(_row()))
+    for i, w in enumerate(_first))
+# ... and past those, the row goes on without end: every other work for sale with a picture, fetched from
+# data/fs-more.json only once a visitor scrolls near the eighteenth. In rounds, one work an artist each: the
+# best-held artists first, sixty at a time in the seed's order, and within a round the same four paintings to two
+# other works
+def _rest(first):
+    srcs, urls = {imsrc(w["im"]) for w in first}, {w["url"] for w in first}
+    by_a = collections.defaultdict(list)
+    for w in _ok:
+        if imsrc(w["im"]) not in srcs and w["url"] not in urls: by_a[w["a"]].append(w)
+    for ws in by_a.values(): _rng.shuffle(ws)
+    ranked = sorted(by_a, key=lambda a: -_held[a])
+    tiers = [ranked[i:i + 60] for i in range(0, len(ranked), 60)]
+    for t in tiers: _rng.shuffle(t)
+    artists, out = [a for t in tiers for a in t], []
+    while artists:
+        rnd = [by_a[a].pop() for a in artists]
+        p, o = [w for w in rnd if _painting(w)], [w for w in rnd if not _painting(w)]
+        while p or o:
+            for want in "ppopop":
+                q = (p if want == "p" else o) or p or o
+                if q: out.append(q.pop(0))
+        artists = [a for a in artists if by_a[a]]
+    seen = set(srcs) | set(urls); res = []
+    for w in out:
+        sv = imsrc(w["im"])
+        if sv and sv not in seen and w["url"] not in seen:
+            seen |= {sv, w["url"]}; res.append([w["url"], sv, w.get("t") or "", A[w["a"]]["n"], w["pr"]])
+    return res
+import hashlib as _hashlib
+_more = json.dumps(_rest(_first), ensure_ascii=False, separators=(",", ":"))
+os.makedirs("site/data", exist_ok=True)
+open("site/data/fs-more.json", "w", encoding="utf-8").write(_more)
+fs_more = "data/fs-more.json?v=" + _hashlib.sha1(_more.encode()).hexdigest()[:10]
 fs_lede = f'<p class="fs-lede" id="fs-lede" data-n="{len(_sale)}" data-g="{len(_galleries)}">' + e(EN["fs_lede"].replace("{n}", f"{len(_sale):,}").replace("{g}", str(len(_galleries)))) + "</p>"
-json.dump({"doors": door, "register": wall, "bars": bars, "eras": eras, "seed": SEED, "fs_works": fs_works, "fs_lede": fs_lede}, open("site/landing.json", "w", encoding="utf-8"), ensure_ascii=False)
+json.dump({"doors": door, "register": wall, "bars": bars, "eras": eras, "seed": SEED, "fs_works": fs_works, "fs_more": fs_more, "fs_lede": fs_lede}, open("site/landing.json", "w", encoding="utf-8"), ensure_ascii=False)
 print(f"  landing baked   {len(shown)} tiles, seed {SEED}, first: {shown[0]['t']} · {A[shown[0]['a']]['n']}")
