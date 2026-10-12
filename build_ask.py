@@ -762,7 +762,8 @@ CSS = BM.CSS + """
 .fold .picked{flex:1;text-align:left;font:500 .8rem/1.2 var(--mono);letter-spacing:.02em;text-transform:none;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .chips.scroll{max-height:168px;overflow:auto;align-content:flex-start;padding-right:4px}
 .about summary{cursor:pointer;display:inline}.about p{margin:8px 0 0}
-.filters .chip{font-size:.92rem;padding:6px 11px 7px}
+/* the panel in two faces: mono for its headings, figures and buttons, the sans for every option and line of text */
+.filters .chip{font:400 .86rem/1 var(--sans);padding:7px 11px}
 #akeys{margin-top:10px}
 #akeys .n{font:400 .7rem/1 var(--mono);color:var(--grey)}
 #akeys [aria-pressed=true] .n{color:inherit}
@@ -783,12 +784,12 @@ CSS = BM.CSS + """
 .dual input::-moz-range-thumb{pointer-events:auto;width:12px;height:12px;border-radius:50%;background:var(--on);border:3px solid var(--raise);box-shadow:0 0 0 1px var(--grey);cursor:pointer}
 .dual input:focus-visible{outline:none}.dual input:focus-visible::-webkit-slider-thumb{box-shadow:0 0 0 2px var(--ink)}.dual input:focus-visible::-moz-range-thumb{box-shadow:0 0 0 2px var(--ink)}
 .acomp{position:relative}
-.acomp input{width:100%;font:400 1rem/1.2 var(--serif);color:var(--ink);background:var(--paper);border:1px solid var(--rule);border-radius:0;padding:8px 30px 8px 10px;-webkit-appearance:none;appearance:none}
+.acomp input{width:100%;font:400 .9rem/1.2 var(--sans);color:var(--ink);background:var(--paper);border:1px solid var(--rule);border-radius:0;padding:8px 30px 8px 10px;-webkit-appearance:none;appearance:none}
 .acomp input::-webkit-search-cancel-button{display:none}
 .acomp input:focus{outline:2px solid var(--ink);outline-offset:1px}
 .acomp .x{position:absolute;right:2px;top:50%;transform:translateY(-50%);background:none;border:0;color:var(--grey);font-size:1.1rem;line-height:1;padding:4px 7px;cursor:pointer}.acomp .x:hover{color:var(--ink)}
 .acomp ul{position:absolute;left:0;right:0;top:100%;z-index:5;margin:3px 0 0;padding:4px 0;list-style:none;background:var(--raise);border:1px solid var(--grey);max-height:264px;overflow:auto}
-.acomp li{display:flex;justify-content:space-between;gap:10px;padding:7px 10px;cursor:pointer;font-size:.92rem}
+.acomp li{display:flex;justify-content:space-between;gap:10px;padding:7px 10px;cursor:pointer;font:400 .86rem/1.3 var(--sans)}
 .acomp li span{font:500 .72rem/1.6 var(--mono);color:var(--grey);font-variant-numeric:tabular-nums}
 .acomp li:hover,.acomp li[aria-selected=true]{background:var(--field)}
 #chatset .bits{display:flex;flex-wrap:wrap;gap:6px}
@@ -815,11 +816,11 @@ CSS = BM.CSS + """
 .card .price{font-size:.78rem;color:var(--grey)}.card .price b{font:500 .86rem/1.3 var(--mono);color:var(--ink);margin-right:4px}
 .filters .chip:disabled,.switch:disabled{opacity:.45;cursor:default}
 /* For you: an on/off switch, not a chip, so it reads as a setting rather than a tag */
-.switch{position:relative;display:flex;align-items:center;gap:10px;width:100%;background:none;border:0;padding:2px 0;color:var(--ink);font:400 .9rem/1.3 var(--sans);text-align:left;cursor:pointer}
+.switch{position:relative;display:flex;align-items:center;gap:10px;width:100%;background:none;border:0;padding:2px 0;color:var(--ink);font:400 .86rem/1.3 var(--sans);text-align:left;cursor:pointer}
 .switch::before{content:"";flex:none;width:34px;height:20px;border-radius:10px;background:var(--rule);transition:background .15s}
 .switch::after{content:"";position:absolute;left:3px;top:50%;width:14px;height:14px;margin-top:-7px;border-radius:50%;background:var(--grey);transition:transform .15s,background .15s}
 .switch[aria-pressed=true]::before{background:var(--ink)}.switch[aria-pressed=true]::after{transform:translateX(14px);background:var(--paper)}
-.f-hint{margin:8px 0 0;font-size:.8rem;line-height:1.4;color:var(--grey)}.f-hint a{color:var(--ink)}
+.f-hint{margin:8px 0 0;font:400 .8rem/1.4 var(--sans);color:var(--grey)}.f-hint a{color:var(--ink)}
 .card .by{font-size:.78rem;line-height:1.3;color:var(--grey)}
 .card .by a{color:inherit;text-decoration:none}.card .by a:hover{color:var(--ink);text-decoration:underline}
 .card .why{margin:2px 0 0;font-size:.78rem;line-height:1.35;color:var(--ink)}
