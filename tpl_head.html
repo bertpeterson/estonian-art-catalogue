@@ -36,7 +36,7 @@ document.addEventListener("DOMContentLoaded", function(){ window.__lz(); });
   --ink:#0B0C0E; --ink-soft:#33363B; --grey-6:#6C7178; --grey-4:#70757C;
   --rule:#DCDFE3; --rule-soft:#EBEDF0; --bar:#C9CDD3;
   --invert-bg:#0B0C0E; --invert-fg:#FFFFFF; --focus:#0B0C0E;
-  --shop-bg:#FBF6EE; --shop-edge:#8A6230;   /* Buy art's warm panel: the shop, set apart from the catalogue */
+  --shop-bg:#F2F3F5;   /* Buy art's panel: the shop, set apart from the catalogue by a tint and an ink edge, no hue */
   --fs-xs:.62rem;   --fs-sm:.68rem;  --fs-base:.8rem; --fs-md:.88rem;
   --fs-lg:1rem;     --fs-xl:1.5rem;  --fs-2xl:2.6rem;
   /* greys are pinned to WCAG AA: --grey-4 carries row years, dates and small labels,
@@ -54,7 +54,7 @@ document.addEventListener("DOMContentLoaded", function(){ window.__lz(); });
   --ink:#F1F2F4; --ink-soft:#C7CACE; --grey-6:#8B9098; --grey-4:#7A7F86;
   --rule:#2B2E34; --rule-soft:#212429; --bar:#3F434A;
   --invert-bg:#F1F2F4; --invert-fg:#0B0C0E; --focus:#F1F2F4;
-  --shop-bg:#18140F; --shop-edge:#C9A46A;
+  --shop-bg:#1A1C20;
 }
 *{box-sizing:border-box}
 [hidden]{display:none!important}
@@ -124,11 +124,11 @@ h1 a:hover{color:var(--grey-6)}
 
 /* Buy art: a quiet door under the masthead -- a line of text and two links on the left, works
    for sale in a row on the right */
-.forsale{display:grid;grid-template-columns:minmax(250px,2fr) minmax(0,5fr);gap:28px;align-items:center;margin-top:22px;padding:22px 26px 24px;background:var(--shop-bg);border-left:3px solid var(--shop-edge)}
+.forsale{display:grid;grid-template-columns:minmax(250px,2fr) minmax(0,5fr);gap:28px;align-items:center;margin-top:22px;padding:22px 26px 24px;background:var(--shop-bg);border-left:3px solid var(--ink)}
 @media(max-width:900px){.forsale{grid-template-columns:1fr;gap:14px;padding:18px 16px 20px}}
 /* Buy art sits in its own panel; the catalogue below opens with a heading of its own and the masthead's rule,
    so the filters and the decade chart are not read as belonging to Buy art */
-.forsale .eyebrow{color:var(--shop-edge)}
+.forsale .eyebrow{color:var(--ink-soft)}
 .cat-head{margin-top:44px;padding-bottom:16px;border-bottom:1px solid var(--ink)}
 .cat-head h2{margin:5px 0 4px;font-family:var(--serif-text);font-weight:500;font-size:1.45rem;line-height:1.1;letter-spacing:-.01em}
 .cat-head p{margin:0;color:var(--grey-6);font-size:.82rem}
