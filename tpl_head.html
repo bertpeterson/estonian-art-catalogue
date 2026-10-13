@@ -122,8 +122,14 @@ h1 a:hover{color:var(--grey-6)}
 
 /* Buy art: a quiet door under the masthead -- a line of text and two links on the left, works
    for sale in a row on the right */
-.forsale{display:grid;grid-template-columns:minmax(250px,2fr) minmax(0,5fr);gap:28px;align-items:center;padding:18px 0 20px;border-bottom:1px solid var(--rule)}
-@media(max-width:900px){.forsale{grid-template-columns:1fr;gap:14px}}
+.forsale{display:grid;grid-template-columns:minmax(250px,2fr) minmax(0,5fr);gap:28px;align-items:center;margin-top:22px;padding:22px 26px 24px;background:var(--field)}
+@media(max-width:900px){.forsale{grid-template-columns:1fr;gap:14px;padding:18px 16px 20px}}
+/* Buy art sits in its own panel; the catalogue below opens with a heading of its own and the masthead's rule,
+   so the filters and the decade chart are not read as belonging to Buy art */
+.cat-head{margin-top:44px;padding-bottom:16px;border-bottom:1px solid var(--ink)}
+.cat-head h2{margin:5px 0 4px;font-family:var(--serif-text);font-weight:500;font-size:1.45rem;line-height:1.1;letter-spacing:-.01em}
+.cat-head p{margin:0;color:var(--grey-6);font-size:.82rem}
+.forsale[hidden] + .cat-head{display:none}
 .forsale[hidden]{display:none}
 .forsale h2{margin:5px 0 4px;font-family:var(--serif-text);font-weight:500;font-size:1.45rem;line-height:1.1;letter-spacing:-.01em}
 .fs-lede{margin:0 0 10px;color:var(--grey-6);font-size:.82rem;max-width:44ch}
@@ -790,6 +796,11 @@ footer a{border-bottom:1px solid var(--rule)}
       <button type="button" class="fs-arr fs-next" aria-label="More works" hidden>&#8594;</button>
     </div>
   </section>
+  <div class="cat-head">
+    <span class="eyebrow" data-i18n="cat_eye"></span>
+    <h2 data-i18n="cat_h"></h2>
+    <p data-i18n="cat_lede"></p>
+  </div>
 
   <section class="histo" id="histo">
     <div class="histo-head">
