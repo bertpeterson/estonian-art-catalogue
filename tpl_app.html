@@ -1210,11 +1210,6 @@
     $("stat-m").textContent = fmt(STATS.museums);
     $("stat-g").textContent = fmt(STATS.galleries);
     $("stat-gwrap").hidden = true; $("stat-mwrap").hidden = true;
-    // Everything a gallery is selling right now, museum-held artist or not. It sits
-    // beside the counts because it is the one thing here a visitor can act on.
-    $("stat-s").textContent = fmt(FOR_SALE);
-    $("stat-sale").hidden = FOR_SALE === 0;
-    $("stat-sale").setAttribute("aria-pressed", state.sale);
     $("stat-au").textContent = fmt(AU_N);
     $("stat-auc").hidden = AU_N === 0;
     $("stat-auc").setAttribute("aria-pressed", state.group === "auction");
@@ -2111,14 +2106,6 @@
     const up = b.id === "su-up"; if (up === !!state.saleUp) return;
     state.saleUp = up; state.open = null; state.expand.clear();
     renderAll(); pushHash();
-  });
-  $("stat-sale").addEventListener("click", () => {
-    state.sale = !state.sale; state.saleUp = false; state.open = null; state.expand.clear();
-    if (state.sale && state.group === "auction") setGroup("decade");   // a lot under the hammer is not on sale
-    renderAll(); pushHash();
-    // land on the count line and the galleries / coming-sales switch, just clear of the
-    // sticky control bar -- not on the register's top, which the bar covers
-    if (state.sale) jumpTo(viewTop($("salesw")));
   });
   $("eras").addEventListener("click", e => {
     const b = e.target.closest(".era"); if (!b) return;
