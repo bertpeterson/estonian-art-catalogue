@@ -128,13 +128,12 @@ h1 a:hover{color:var(--grey-6)}
 @media(max-width:900px){.forsale{grid-template-columns:1fr;gap:14px;padding:18px 16px 20px}}
 /* Buy art sits in its own panel; the catalogue below opens with a heading of its own and the masthead's rule,
    so the filters and the decade chart are not read as belonging to Buy art */
-.forsale .eyebrow{color:var(--ink-soft)}
 .cat-head{margin-top:44px;padding-bottom:16px;border-bottom:1px solid var(--ink)}
-.cat-head h2{margin:5px 0 4px;font-family:var(--serif-text);font-weight:500;font-size:1.45rem;line-height:1.1;letter-spacing:-.01em}
+.cat-head h2{margin:0 0 4px;font-family:var(--serif-text);font-weight:500;font-size:1.45rem;line-height:1.1;letter-spacing:-.01em}
 .cat-head p{margin:0;color:var(--grey-6);font-size:.82rem}
 .forsale[hidden] + .cat-head{display:none}
 .forsale[hidden]{display:none}
-.forsale h2{margin:5px 0 4px;font-family:var(--serif-text);font-weight:500;font-size:1.45rem;line-height:1.1;letter-spacing:-.01em}
+.forsale h2{margin:0 0 4px;font-family:var(--serif-text);font-weight:500;font-size:1.45rem;line-height:1.1;letter-spacing:-.01em}
 .fs-lede{margin:0 0 10px;color:var(--grey-6);font-size:.82rem;max-width:44ch}
 .fs-all{display:inline-block;margin-top:2px;font-family:var(--mono);font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;color:var(--grey-6);text-decoration:none;border-bottom:1px solid var(--rule);padding-bottom:2px}
 .fs-all:hover{color:var(--ink);border-bottom-color:var(--ink)}
@@ -772,7 +771,7 @@ footer a{border-bottom:1px solid var(--rule)}
       <div class="mast-stats">
         <!-- opens the works per decade, which no longer stands open on the home page -->
         <button class="stat-btn stat-in" id="stat-wbtn" aria-controls="histo"><b id="stat-w">0</b><span data-i18n="works"></span></button>
-        <!-- a door too: the register regrouped by artist, the same toggle as By artist -->
+        <!-- a door too: the artist index, the full list of names -->
         <button class="stat-btn stat-in" id="stat-art"><b id="stat-a">0</b><span data-i18n="artists"></span></button>
         <!-- museums and galleries are counted in the sources note, not here: four
              figures read as a masthead, six as a table -->
@@ -786,11 +785,11 @@ footer a{border-bottom:1px solid var(--rule)}
 
   <section class="forsale" id="forsale" aria-labelledby="fs-h">
     <div class="fs-text">
-      <span class="eyebrow" data-i18n="fs_eye"></span>
       <h2 id="fs-h" data-i18n="fs_h"></h2>
       <p class="fs-lede" id="fs-lede"></p>
       <a class="fs-all" href="find" data-fs="" data-i18n="fs_all"></a>
       <a class="fs-all" id="fs-byartist" href="#group=artist&amp;sort=forsale" data-i18n="fs_byartist"></a>
+      <a class="fs-all" id="fs-up" href="upcoming" data-i18n="fs_up"></a>
     </div>
     <div class="fs-row">
       <div class="fs-works" id="fs-works"></div>
@@ -799,7 +798,6 @@ footer a{border-bottom:1px solid var(--rule)}
     </div>
   </section>
   <div class="cat-head">
-    <span class="eyebrow" data-i18n="cat_eye"></span>
     <h2 data-i18n="cat_h"></h2>
     <p data-i18n="cat_lede"></p>
   </div>

@@ -1213,7 +1213,7 @@
     $("stat-au").textContent = fmt(AU_N);
     $("stat-auc").hidden = AU_N === 0;
     $("stat-auc").setAttribute("aria-pressed", state.group === "auction");
-    $("stat-art").setAttribute("aria-pressed", state.group === "artist");
+    $("stat-art").setAttribute("aria-pressed", state.idxOpen);
     // inside For sale: the galleries' stock, or the lots of the coming sales
     $("salesw").hidden = !state.sale || !UP.length;
     if (state.sale && UP.length){
@@ -2097,9 +2097,11 @@
   });
   // the chart is pinned open; the works figure takes the visitor to it
   $("stat-wbtn").addEventListener("click", () => { $("histo").classList.add("on"); jumpTo($("histo"), true); });
+  // the artists figure opens the artist index, the list of names, not the register regrouped by artist
   $("stat-art").addEventListener("click", () => {
-    $("g-artist").click();     // the control bar's By artist, so the two never drift apart
-    if (state.group === "artist") jumpTo(viewTop($("register")));
+    state.idxOpen = true; state.idxLimit = 120;
+    renderAll(); pushHash();
+    jumpTo(viewTop($("aidx")));
   });
   $("salesw").addEventListener("click", e => {
     const b = e.target.closest("button"); if (!b) return;
@@ -2394,6 +2396,7 @@
     document.querySelectorAll("[data-i18n]").forEach(el => { el.textContent = T(el.dataset.i18n); });
     document.querySelectorAll('a[data-i18n="statslink"]').forEach(a => { a.href = LANG === "en" ? "stats" : "stats-et"; });   // the figures page exists in both languages
     $("findlink").href = LANG === "en" ? "find" : "leia";
+    $("fs-up").href = LANG === "en" ? "upcoming" : "tulemas";
     const fl = $("fs-lede");
     if (fl && fl.dataset.n) fl.textContent = T("fs_lede", {n: (+fl.dataset.n).toLocaleString(LANG === "en" ? "en-GB" : "et-EE"), g: fl.dataset.g});
     document.querySelectorAll("[data-i18n-html]").forEach(el => { el.innerHTML = I18N[LANG === "en" ? "HTML_EN" : "HTML_ET"][el.dataset.i18nHtml] || ""; });
