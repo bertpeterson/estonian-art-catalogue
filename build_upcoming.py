@@ -23,12 +23,39 @@ T = {"en": dict(file="upcoming", other="tulemas", h="Coming up at auction", site
                 lede="Every lot in the Estonian auction houses' coming sales by an artist in the catalogue, with the starting price as the house published it and the artist's record at auction beside it. Bids are not shown; the houses' own pages have them.",
                 none="No coming sale has published its lots yet. The houses put their catalogues online two to four weeks before a sale; this page is refreshed every week.",
                 start="starting price", rec="At auction: {n} lots, {s} sold{r}", rec0="First time at auction in the catalogue", prior="Same title before", unsold="unsold",
-                lots="lots", other_l="Eesti keeles", note="A record, not a valuation. Refreshed weekly.", month=["January","February","March","April","May","June","July","August","September","October","November","December"]),
+                lots="lots", lot1="lot", c_art="Artist", c_work="Work", c_price="Starting price", lot="Lot", other_l="Eesti keeles", note="A record, not a valuation. Refreshed weekly.", month=["January","February","March","April","May","June","July","August","September","October","November","December"]),
      "et": dict(file="tulemas", other="upcoming", h="Tulemas oksjonil", site="Eesti Kunstikataloog", art="k",
                 lede="Kõik Eesti oksjonimajade tulevate oksjonite partiid kataloogi kunstnikelt, alghind nii, nagu maja selle avaldas, ja kõrval kunstniku senine oksjonitulemus. Pakkumisi ei näidata; need on majade endi lehtedel.",
                 none="Ükski tulev oksjon pole veel oma partiisid avaldanud. Majad panevad kataloogi üles kaks kuni neli nädalat enne oksjonit; see leht uueneb iga nädal.",
                 start="alghind", rec="Oksjonil: {n} partiid, {s} müüdud{r}", rec0="Kataloogis esimest korda oksjonil", prior="Sama pealkiri varem", unsold="müümata",
-                lots="partiid", other_l="In English", note="Ülestähendus, mitte hinnang. Uueneb iga nädal.", month=["jaanuar","veebruar","märts","aprill","mai","juuni","juuli","august","september","oktoober","november","detsember"])}
+                lots="partiid", lot1="partii", c_art="Kunstnik", c_work="Teos", c_price="Alghind", lot="Partii", other_l="In English", note="Ülestähendus, mitte hinnang. Uueneb iga nädal.", month=["jaanuar","veebruar","märts","aprill","mai","juuni","juuli","august","september","oktoober","november","detsember"])}
+
+CSS = (":root{--paper:#0B0C0E;--field:#15171A;--ink:#F1F2F4;--ink-soft:#C7CACE;--grey:#8B9098;--rule:#2B2E34;--rule-soft:#212429;"
+       "--serif:'Newsreader','Iowan Old Style',Georgia,serif;--sans:'Archivo','Helvetica Neue',Arial,sans-serif;--mono:'IBM Plex Mono',ui-monospace,Menlo,monospace}"
+       ":root[data-theme=light]{--paper:#FFFFFF;--field:#F5F6F8;--ink:#0B0C0E;--ink-soft:#33363B;--grey:#6C7178;--rule:#DCDFE3;--rule-soft:#EBEDF0}"
+       "*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.5 var(--sans);-webkit-font-smoothing:antialiased}"
+       ".pg{max-width:1080px;margin:0 auto;padding:22px 32px 40px}a{color:inherit}"
+       ".top{display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding-bottom:14px;border-bottom:1px solid var(--rule)}"
+       ".wm{font-family:var(--serif);font-size:1.15rem;font-weight:500;text-decoration:none}.wm:hover{text-decoration:underline}"
+       ".eb{font-family:var(--mono);font-size:.68rem;letter-spacing:.13em;text-transform:uppercase;color:var(--grey)}a.eb{text-decoration:none;border-bottom:1px solid var(--rule)}a.eb:hover{color:var(--ink)}"
+       ".mast{padding:34px 0 22px;border-bottom:1px solid var(--ink)}"
+       "h1{font-family:var(--serif);font-weight:500;font-size:2.6rem;line-height:1.05;letter-spacing:-.015em;margin:0 0 12px}"
+       ".lede{margin:0;max-width:68ch;color:var(--ink-soft);font-size:.95rem}"
+       ".sale{margin-top:40px}.sale-h{margin-bottom:14px}"
+       "h2{font-family:var(--serif);font-weight:500;font-size:1.6rem;line-height:1.1;margin:6px 0 4px}.sub{margin:0;color:var(--grey);font-size:.85rem}"
+       "table{border-collapse:collapse;width:100%}"
+       "th{font-family:var(--mono);font-weight:400;font-size:.66rem;letter-spacing:.13em;text-transform:uppercase;color:var(--grey);text-align:left;padding:0 16px 8px 0;border-bottom:1px solid var(--rule)}"
+       "td{padding:13px 16px 13px 0;border-bottom:1px solid var(--rule-soft);vertical-align:top}"
+       "td.a{width:34%}td.a a{font-family:var(--serif);font-size:1.08rem;text-decoration:none}td.a a:hover{text-decoration:underline}"
+       "td.w i{font-family:var(--serif);font-size:1.02rem}"
+       ".m{display:block;margin-top:3px;color:var(--grey);font-size:.78rem}td.a .m{font-family:var(--mono);font-size:.7rem;letter-spacing:.02em}"
+       ".n{text-align:right;white-space:nowrap;padding-right:0}td.n b{display:block;font-family:var(--mono);font-weight:500;font-size:.95rem;font-variant-numeric:tabular-nums}"
+       "a.lot{display:inline-block;margin-top:5px;font-family:var(--mono);font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;color:var(--grey);text-decoration:none;border-bottom:1px solid var(--rule)}"
+       "a.lot:hover{color:var(--ink);border-bottom-color:var(--ink)}"
+       ".foot{margin-top:44px;padding-top:14px;border-top:1px solid var(--rule);color:var(--grey);font-size:.8rem}.foot a{color:var(--ink-soft)}"
+       "@media(max-width:700px){.pg{padding:16px 16px 32px}h1{font-size:2rem}thead{display:none}"
+       "tr{display:grid;grid-template-columns:1fr auto;gap:2px 14px;padding:12px 0;border-bottom:1px solid var(--rule-soft)}"
+       "td{display:block;padding:0;border:0}td.a{width:auto}td.w{grid-column:1}td.n{grid-column:2;grid-row:1 / span 2}}")
 
 fmt = lambda n, lang: f"{n:,}" if lang == "en" else f"{n:,}".replace(",", " ")
 eur = lambda n, lang: "€" + fmt(n, lang)
@@ -54,27 +81,33 @@ def main():
             groups.setdefault((u.get("d"), u["h"], u["s"]), []).append(u)
         body = ""
         for (dd, h, s), lots in groups.items():
-            body += f'<h2>{e(day(dd, lang))} · {e(house(h, lang))}{" · " + e(s) if s else ""} <span class="m">{fmt(len(lots), lang)} {t["lots"]}</span></h2><table><tbody>'
+            nl = f'{fmt(len(lots), lang)} {t["lots"] if len(lots) != 1 else t["lot1"]}'
+            body += (f'<section class="sale"><header class="sale-h"><span class="eb">{e(day(dd, lang))}</span>'
+                     f'<h2>{e(s or house(h, lang))}</h2><p class="sub">{e(house(h, lang)) + " · " if s else ""}{nl}</p></header>'
+                     f'<table><thead><tr><th>{t["c_art"]}</th><th>{t["c_work"]}</th><th class="n">{t["c_price"]}</th></tr></thead><tbody>')
             for u in lots:
                 sl = H.ARTIST_SLUG[u["a"]]
-                prior = (f'<br><span class="m">{t["prior"]}: ' + " · ".join(f'{e(str(p[0])[:4])} {e(house(p[1], lang))} {eur(p[2], lang) if p[2] else t["unsold"]}' for p in u["pr"]) + "</span>") if u.get("pr") else ""
-                lot = f'<a href="{e(u["u"])}" rel="noopener">{e(house(h, lang))} ↗</a>' if str(u.get("u") or "").startswith("http") else ""
-                body += (f'<tr><td><a href="{BASE}/{t["art"]}/{sl}">{e(A[u["a"]]["n"])}</a><br><span class="m">{e(record(u["a"], lang))}</span></td>'
-                         f'<td><i>{e(u["t"])}</i>{", " + e(u["yl"]) if u.get("yl") else ""}<br><span class="m">{e(" · ".join(x for x in (u.get("tc"), u.get("dm")) if x))}</span>{prior}</td>'
-                         f'<td class="n">{(t["start"] + " " + eur(u["p"], lang)) if u.get("p") else ""}<br>{lot}</td></tr>')
-            body += "</tbody></table>"
+                prior = (f'<span class="m">{t["prior"]}: ' + " · ".join(f'{e(str(p[0])[:4])} {e(house(p[1], lang))} {eur(p[2], lang) if p[2] else t["unsold"]}' for p in u["pr"]) + "</span>") if u.get("pr") else ""
+                lot = f'<a class="lot" href="{e(u["u"])}" rel="noopener">{t["lot"]} ↗</a>' if str(u.get("u") or "").startswith("http") else ""
+                det = " · ".join(x for x in (u.get("tc"), u.get("dm")) if x)
+                det = f'<span class="m">{e(det)}</span>' if det else ""
+                body += (f'<tr><td class="a"><a href="{BASE}/{t["art"]}/{sl}">{e(A[u["a"]]["n"])}</a><span class="m">{e(record(u["a"], lang))}</span></td>'
+                         f'<td class="w"><i>{e(u["t"])}</i>{", " + e(u["yl"]) if u.get("yl") else ""}{det}{prior}</td>'
+                         f'<td class="n"><b>{eur(u["p"], lang) if u.get("p") else "–"}</b>{lot}</td></tr>')
+            body += "</tbody></table></section>"
         me, other = f"{BASE}/{t['file']}", f"{BASE}/{t['other']}"
         n = len(UP)
         title = f'{t["h"]} – {fmt(n, lang)} {t["lots"]} · museaal.ee' if n else f'{t["h"]} · museaal.ee'
         page = (f'<!doctype html><html lang="{lang}"><head><meta charset="utf-8">{H.STAMP}<meta name="viewport" content="width=device-width,initial-scale=1">'
                 f'<title>{e(title)}</title><meta name="description" content="{e(t["lede"][:290])}">'
                 f'<link rel="canonical" href="{me}"><link rel="alternate" hreflang="{lang}" href="{me}"><link rel="alternate" hreflang="{"et" if lang == "en" else "en"}" href="{other}">'
-                f'<style>{H.CSS}table{{border-collapse:collapse;width:100%;font-size:.9rem;margin:6px 0 18px}}td{{padding:7px 10px 7px 0;border-bottom:1px solid #2b2e34;vertical-align:top}}'
-                f':root[data-theme=light] td{{border-color:#e3e5e9}}td.n{{text-align:right;white-space:nowrap}}h2 .m{{font-size:.8rem;margin-left:8px}}</style>{H.GC}</head><body>'
-                f'<nav><a href="{BASE}/{"" if lang == "en" else "#lang=et"}">{t["site"]}</a> › {t["h"]} <span class="m">· <a href="{other}">{t["other_l"]}</a></span></nav>'
-                f'<h1>{t["h"]}</h1><p class="lede">{e(t["lede"])}</p>'
+                '<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>'
+                '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..600&family=Archivo:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">'
+                f'<style>{CSS}</style>{H.GC}</head><body><div class="pg">'
+                f'<div class="top"><a class="wm" href="{BASE}/{"" if lang == "en" else "#lang=et"}">{t["site"]}</a><a class="eb" href="{other}">{t["other_l"]}</a></div>'
+                f'<header class="mast"><h1>{t["h"]}</h1><p class="lede">{e(t["lede"])}</p></header>'
                 + (body or f'<p class="m">{e(t["none"])}</p>')
-                + f'<p class="m">{e(t["note"])} {H.CONTACT[lang]}</p></body></html>')
+                + f'<footer class="foot">{e(t["note"])} {H.CONTACT[lang]}</footer></div></body></html>')
         open(f"site/{t['file']}.html", "w", encoding="utf-8").write(page)
         urls.append(me)
     sm = open("site/sitemap.xml", encoding="utf-8").read()
