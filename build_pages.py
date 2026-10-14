@@ -52,6 +52,7 @@ L = {
             wallh="Artwall", shownat="shown at {g}",
             sim="Similar artists — same period, media and subjects: ", school="Also trained at {g}", movement="Also working in {g}", member="Also in {g}",
             contemp="Contemporaries in {h}: ", allaz="All artists A&ndash;Z",
+            linh="Teachers, pupils, circle", teachers="Teachers", pupils="Pupils", circle="Circle", cdir="circles",
             au="{n} auction lots · {s} sold · {y}{r} — as the auction houses published them; not a valuation",
             foot="Museum records from MuIS and the EKM Digital Collection; gallery stock from the galleries' own catalogues; auction results as Haus Galerii, Vernissage, Allee galerii, Vaal galerii, E-Kunstisalong and Eesti Kunsti Oksjonid published them. ",
             full="Full catalogue", mt=" <span class=\"m\">(machine translation of the holder&#39;s Estonian text, unedited)</span>", enonly="",
@@ -68,6 +69,7 @@ L = {
             wallh="Kunstisein", shownat="{g} näitusel",
             sim="Sarnased kunstnikud — sama aeg, liigid ja ained: ", school="Samuti õppinud: {g}", movement="Samuti: {g}", member="Samuti {g} liige",
             contemp="Kaasaegsed kogus {h}: ", allaz="Kõik kunstnikud A&ndash;Ü",
+            linh="Õpetajad, õpilased, ring", teachers="Õpetajad", pupils="Õpilased", circle="Ring", cdir="ringid",
             au="{n} oksjonipartiid · {s} müüdud · {y}{r} — nii, nagu oksjonimajad avaldasid; mitte hinnang",
             foot="Muuseumikirjed MuISist ja EKM digikogust; galeriide laoseis galeriide endi kataloogidest; oksjonitulemused nii, nagu Haus Galerii, Vernissage, Allee galerii, Vaal galerii, E-Kunstisalong ja Eesti Kunsti Oksjonid need avaldasid. ",
             full="Kogu kataloog", mt="", enonly=" <span class=\"m\">(inglise keeles)</span>",
@@ -247,6 +249,27 @@ def related(i, lang="en"):
             seen.update(near)
             out.append('<p class="rel">' + e(T["contemp"].format(h=h)) + " · ".join(link_(j) for j in near) + "</p>")
     return "".join(out)
+
+# teachers, pupils and circles (data/lineage.py): Wikidata's links and what the bios say,
+# a bio's link carrying its quote as the tooltip; a circle links to its page (build_circles.py)
+_lin = json.load(open("data/lineage.json", encoding="utf-8")) if os.path.exists("data/lineage.json") else {"circles": [], "links": []}
+_byname = {A[i]["n"]: i for i in LIVE}
+TEACHERS, PUPILS, CIRCLE_OF = collections.defaultdict(list), collections.defaultdict(list), collections.defaultdict(list)
+for _t, _p, _src, _q in _lin["links"]:
+    if _t in _byname and _p in _byname:
+        TEACHERS[_byname[_p]].append((_byname[_t], _q)); PUPILS[_byname[_t]].append((_byname[_p], _q))
+for _c in _lin["circles"]:
+    for _n in _c["members"]:
+        if _n in _byname: CIRCLE_OF[_byname[_n]].append(_c)
+
+def lineage(i, lang="en"):
+    T = L[lang]
+    names = lambda js: " · ".join((f'<span title="{e(q)}">{link(j, lang)}</span>' if q else link(j, lang))
+                                  for j, q in sorted(js, key=lambda x: PERIOD.get(x[0]) or 0))
+    out = [f'<p class="rel">{T[k]}: {names(d[i])}</p>' for k, d in (("teachers", TEACHERS), ("pupils", PUPILS)) if d.get(i)]
+    if CIRCLE_OF.get(i):
+        out.append(f'<p class="rel">{T["circle"]}: ' + " · ".join(f'<a href="{BASE}/{T["cdir"]}/{c["id"]}">{e(c[lang])}</a>' for c in CIRCLE_OF[i]) + "</p>")
+    return (f'<h2 class="sh">{T["linh"]}</h2>' + "".join(out)) if out else ""
 
 def neighbours(i, lang="en"):
     """Previous and next alphabetically -- the chain that connects every page."""
@@ -450,6 +473,7 @@ def render(i, a, ws, lang):
            + sale
            + follow(sl, lang, bool(n_sale))
            + f"<p><a class=\"cta\" href=\"{app}\">{e(T['browse'].format(n=n))}</a></p>"
+           + lineage(i, lang)
            + wall
            + related(i, lang)
            + hub_line(ws, lang)

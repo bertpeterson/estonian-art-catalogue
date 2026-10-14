@@ -1,0 +1,332 @@
+{
+ "circles": [
+  {
+   "id": "pallas",
+   "en": "Pallas",
+   "et": "Pallas",
+   "d_en": "The art school of the Pallas society in Tartu, 1919–1940, where Konrad Mägi, Ado Vabbe and Anton Starkopf taught.",
+   "d_et": "Kunstiühingu Pallas kunstikool Tartus aastatel 1919–1940, kus õpetasid Konrad Mägi, Ado Vabbe ja Anton Starkopf.",
+   "members": [
+    "Aarne Miikmaa",
+    "Agu Peerna",
+    "Aino Bach",
+    "Albert Kesner",
+    "Albert Paap",
+    "Aleksander Ipsberg",
+    "Aleksander Möldroo",
+    "Alfred Kongo",
+    "Alfred Leius",
+    "Andrus Johani",
+    "Anita Laigo",
+    "Ann Audova",
+    "Anna Triik-Põllusaar",
+    "Anu Uustalu",
+    "Ardo Sivadi",
+    "Arkadio Laigo",
+    "Arno Vihalemm",
+    "Artur Mihkelsoo",
+    "August Vomm",
+    "Benita Vomm",
+    "Boris Lukats",
+    "Eduard Ahas",
+    "Eduard Kutsar",
+    "Eduard Maaser",
+    "Eduard Mässo",
+    "Eduard Rüga",
+    "Eerik Haamer",
+    "Elfriide Maran",
+    "Ella Mätik",
+    "Ellinor Aiki",
+    "Elmar Kits",
+    "Elmar Leppik",
+    "Endel Kõks",
+    "Endel Kübarsepp",
+    "Ene Falkenberg",
+    "Enn Roos",
+    "Erich Leps",
+    "Erich Pehap",
+    "Ernst Hallop",
+    "Ernst Jõesaar",
+    "Ernst Kollom",
+    "Ernst Tiido",
+    "Eugen Kask",
+    "Eva Limberg",
+    "Felix Randel",
+    "Ferdi Sannamees",
+    "Gunnar Neeme",
+    "Gustav Mägi",
+    "Gustav Raud",
+    "Hando Mugasto",
+    "Harri Pudersell",
+    "Helene Mölder",
+    "Helgi Hirv",
+    "Helmi Kalm",
+    "Henn Sarap",
+    "Herman Halliste",
+    "Hilda Kamdron",
+    "Hilda Mikkelsaar",
+    "Ida Anton-Agu",
+    "Jaan Grünberg",
+    "Jeguda Leiba",
+    "Johannes Hirv",
+    "Johannes Saal",
+    "Johannes Võerahansu",
+    "Joosep Karell",
+    "Juhan Kangilaski",
+    "Juhan Muks",
+    "Juhan Nõmmik",
+    "Juhan Püttsepp",
+    "Kaarel Liimand",
+    "Kalju Nagel",
+    "Karin Luts",
+    "Karin Siim-Juse",
+    "Karl Pärsimägi",
+    "Lembit Rull",
+    "Leontine Karu-Lind",
+    "Leopold Ennosaar",
+    "Lepo Mikko",
+    "Linda Kits-Mägi",
+    "Linda Sõber",
+    "Lydia Laas",
+    "Lydia Nirk-Soosaar",
+    "Lüüdia Vallimäe-Mark",
+    "Maire Männik",
+    "Martin Saks",
+    "Märt Roosma",
+    "Natalie Mei",
+    "Nigul Espe",
+    "Nikolai Kull",
+    "Nikolai Kummits",
+    "Ole Ehelaid",
+    "Ott Kangilaski",
+    "Priidu Aavik",
+    "Raoul Kernumees",
+    "Richard Sagrits",
+    "Richard Uutmaa",
+    "Roman Timotheus",
+    "Roman Treuman",
+    "Roman Vaher",
+    "Romulus Tiitus",
+    "Rudolf Kriisa",
+    "Rudolf Lepvalts",
+    "Rudolf Sepp",
+    "Salome Trei",
+    "Selma Loog",
+    "Sigrid Uiga",
+    "Silvia Jõgever",
+    "Silvia Leitu",
+    "Ursus Tamm",
+    "Valdemar Väli",
+    "Valerian Loik",
+    "Valve Janov",
+    "Varmo Pirk",
+    "Viktor Karrus",
+    "Viktor Turp",
+    "Voldemar Kangro-Pool",
+    "Voldemar Mölder",
+    "Voldemar Peil"
+   ]
+  },
+  {
+   "id": "laikmaa",
+   "en": "Ants Laikmaa's studio school",
+   "et": "Ants Laikmaa ateljeekool",
+   "d_en": "The studio school Ants Laikmaa opened in Tallinn in 1903, the first art school of its kind in Estonia.",
+   "d_et": "Ants Laikmaa 1903. aastal Tallinnas avatud ateljeekool, esimene omataoline kunstikool Eestis.",
+   "members": [
+    "Aarne Miikmaa",
+    "Aleksander Ipsberg",
+    "Aleksander Krims (Radava)",
+    "Arnold Akberg",
+    "Arved Erich Dörvald",
+    "August Kilgas",
+    "Erna Kreischmann",
+    "Erna von Brinckmann",
+    "Herbert Lukk",
+    "Herman Halliste",
+    "Jaan Vanakamar",
+    "Johannes Greenberg",
+    "Johannes Võerahansu",
+    "Karl Leopold Marley",
+    "Lo Tui",
+    "Ludvig Oskar",
+    "Märt Laarman",
+    "Nikolai Kull",
+    "Nikolai Triik",
+    "Oskar Kallis",
+    "Oskar Sädek",
+    "Otto Krusten",
+    "Paul Burman",
+    "Priidu Aavik"
+   ]
+  },
+  {
+   "id": "ank-64",
+   "en": "ANK '64",
+   "et": "ANK '64",
+   "d_en": "The Tallinn group formed in 1964 around Tõnis Vint.",
+   "d_et": "1964. aastal Tõnis Vindi ümber kogunenud Tallinna rühmitus.",
+   "members": [
+    "Aili Vint",
+    "Jüri Arrak",
+    "Kristiina Kaasik",
+    "Malle Leis",
+    "Marju Mutsu",
+    "Tõnis Laanemaa",
+    "Tõnis Vint"
+   ]
+  },
+  {
+   "id": "soup-69",
+   "en": "SOUP '69",
+   "et": "SOUP '69",
+   "d_en": "The Tallinn group of 1969 that brought pop art to Estonia.",
+   "d_et": "1969. aasta Tallinna rühmitus, kes tõi Eestisse popkunsti.",
+   "members": [
+    "Ando Keskküla",
+    "Andres Tolts",
+    "Leonhard Lapin"
+   ]
+  }
+ ],
+ "links": [
+  [
+   "Aleksander Vardi",
+   "Arno Vihalemm",
+   "wd",
+   ""
+  ],
+  [
+   "Anton Starkopf",
+   "Eduard Wiiralt",
+   "wd",
+   ""
+  ],
+  [
+   "Ants Laikmaa",
+   "Priidu Aavik",
+   "wd",
+   ""
+  ],
+  [
+   "Ants Laikmaa",
+   "Woldemar Tank",
+   "wd",
+   ""
+  ],
+  [
+   "Elmar Kits",
+   "Ülo Sooster",
+   "wd",
+   ""
+  ],
+  [
+   "Enn Roos",
+   "Evi Mardna",
+   "wd",
+   ""
+  ],
+  [
+   "Francesco Bartolozzi",
+   "Louis Charles Ruotte",
+   "wd",
+   ""
+  ],
+  [
+   "Illarion Prjanišnikov",
+   "Vassili Meškov",
+   "wd",
+   ""
+  ],
+  [
+   "Jakob Matthias Schmutzer",
+   "Josef Stöber",
+   "wd",
+   ""
+  ],
+  [
+   "Jean-Baptiste Isabey",
+   "Nicolas Jacques",
+   "wd",
+   ""
+  ],
+  [
+   "Johann Georg Wille",
+   "Jakob Matthias Schmutzer",
+   "wd",
+   ""
+  ],
+  [
+   "Johann Georg Wille",
+   "Joseph de Longueil",
+   "wd",
+   ""
+  ],
+  [
+   "Johann Heinrich Lips",
+   "Samuel Amsler",
+   "wd",
+   ""
+  ],
+  [
+   "Kaarel Liimand",
+   "Arno Vihalemm",
+   "wd",
+   ""
+  ],
+  [
+   "Nikolai Triik",
+   "Arno Vihalemm",
+   "wd",
+   ""
+  ],
+  [
+   "Nikolai Triik",
+   "Priidu Aavik",
+   "wd",
+   ""
+  ],
+  [
+   "Peter Paul Rubens",
+   "Frans Wouters",
+   "wd",
+   ""
+  ],
+  [
+   "Pieter Symonsz Potter",
+   "Paulus Potter",
+   "wd",
+   ""
+  ],
+  [
+   "Stefano della Bella",
+   "Livio Mehus",
+   "wd",
+   ""
+  ],
+  [
+   "Sven Herling",
+   "Carl Friedrich Clemens",
+   "wd",
+   ""
+  ],
+  [
+   "Tõnis Vint",
+   "Siim-Tanel Annus",
+   "wd",
+   ""
+  ],
+  [
+   "Valentin Serov",
+   "Ilja Maškov",
+   "wd",
+   ""
+  ],
+  [
+   "William Unger",
+   "Theodor Alphons",
+   "wd",
+   ""
+  ]
+ ]
+}
