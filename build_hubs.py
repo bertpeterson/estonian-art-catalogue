@@ -54,6 +54,9 @@ def offer_item(title, artist, year, medium, image, price, seller, url):
     if year: it["dateCreated"] = str(year)
     if medium: it["artMedium"] = medium
     if image: it["image"] = image
+    # a gallery's technique text can carry empty fields and its own dates: "(2004/2023), cashmere wool , , wall carpet"
+    m = re.sub(r"\s*,(\s*,)*\s*", ", ", re.sub(r"^\s*\([^)]*\)", "", medium or "")).strip(" ,.;")
+    it["description"] = (f"{m[0].upper()}{m[1:]} by {artist}" if m else f"By {artist}") + (f", {year}" if year else "") + f". For sale at {seller}."
     p = urllib.parse.urlsplit(url)
     it["offers"] = {"@type": "Offer", "url": url, "availability": "https://schema.org/InStock",
                     "seller": {"@type": "Organization", "name": seller, "url": f"{p.scheme}://{p.netloc}"}}
