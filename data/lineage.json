@@ -8,33 +8,47 @@
    "d_et": "Kunstiühingu Pallas kunstikool Tartus aastatel 1919–1940, kus õpetasid Konrad Mägi, Ado Vabbe ja Anton Starkopf.",
    "members": [
     "Aarne Miikmaa",
+    "Ado Vabbe",
     "Agu Peerna",
     "Aino Bach",
     "Albert Kesner",
     "Albert Paap",
     "Aleksander Ipsberg",
     "Aleksander Möldroo",
+    "Aleksander Vardi",
     "Alfred Kongo",
     "Alfred Leius",
     "Andrus Johani",
     "Anita Laigo",
+    "Anita Trink",
     "Ann Audova",
+    "Anna Kõuhkna",
+    "Anna Lukats-Laigo",
     "Anna Triik-Põllusaar",
+    "Anna-Maria Vaskovskaja",
+    "Anton Starkopf",
     "Anu Uustalu",
     "Ardo Sivadi",
     "Arkadio Laigo",
     "Arno Vihalemm",
     "Artur Mihkelsoo",
+    "Asteria",
     "August Vomm",
+    "Belliisi Seenemaa",
     "Benita Vomm",
     "Boris Lukats",
+    "Brita Maripuu",
+    "Caroliina Ladva",
+    "Danel Ülper",
     "Eduard Ahas",
     "Eduard Kutsar",
     "Eduard Maaser",
     "Eduard Mässo",
     "Eduard Rüga",
+    "Eduard Wiiralt",
     "Eerik Haamer",
     "Elfriide Maran",
+    "Elina Madal",
     "Ella Mätik",
     "Ellinor Aiki",
     "Elmar Kits",
@@ -51,22 +65,29 @@
     "Ernst Tiido",
     "Eugen Kask",
     "Eva Limberg",
+    "Evi Gailit",
     "Felix Randel",
     "Ferdi Sannamees",
+    "Georg Krug",
     "Gunnar Neeme",
     "Gustav Mägi",
     "Gustav Raud",
     "Hando Mugasto",
+    "Harald Tannberg",
     "Harri Pudersell",
+    "Hedi Kuhi",
     "Helene Mölder",
     "Helgi Hirv",
     "Helmi Kalm",
+    "Helve Viidalepp",
     "Henn Sarap",
     "Herman Halliste",
     "Hilda Kamdron",
     "Hilda Mikkelsaar",
     "Ida Anton-Agu",
     "Jaan Grünberg",
+    "Jaan Vahtra",
+    "Jaanus Eensalu",
     "Jeguda Leiba",
     "Johannes Hirv",
     "Johannes Saal",
@@ -77,30 +98,48 @@
     "Juhan Nõmmik",
     "Juhan Püttsepp",
     "Kaarel Liimand",
+    "Kadri Krüüner",
+    "Kail Timusk",
     "Kalju Nagel",
     "Karin Luts",
     "Karin Siim-Juse",
     "Karl Pärsimägi",
+    "Kristjan Teder",
+    "Kuno Veeber",
+    "Lagle Israel",
     "Lembit Rull",
     "Leontine Karu-Lind",
     "Leopold Ennosaar",
     "Lepo Mikko",
+    "Liis Tedre",
+    "Liisa Soolepp",
     "Linda Kits-Mägi",
     "Linda Sõber",
+    "Luisa Greta Vilo",
     "Lydia Laas",
     "Lydia Nirk-Soosaar",
     "Lüüdia Vallimäe-Mark",
     "Maire Männik",
+    "Margus Meinart",
+    "Maria Evestus",
+    "Maria Hommik",
+    "Maris Paal",
     "Martin Saks",
+    "Maryliis Teinfeldt-Grins",
+    "Miina Vilo",
     "Märt Roosma",
     "Natalie Mei",
+    "Nele Luik",
     "Nigul Espe",
     "Nikolai Kull",
     "Nikolai Kummits",
     "Ole Ehelaid",
+    "Olger Lehtsaar",
     "Ott Kangilaski",
+    "Ott-Kaspar Sults",
     "Priidu Aavik",
     "Raoul Kernumees",
+    "Regina-Mareta Soonsein",
     "Richard Sagrits",
     "Richard Uutmaa",
     "Roman Timotheus",
@@ -109,12 +148,18 @@
     "Romulus Tiitus",
     "Rudolf Kriisa",
     "Rudolf Lepvalts",
+    "Rudolf Paris",
     "Rudolf Sepp",
     "Salome Trei",
     "Selma Loog",
     "Sigrid Uiga",
+    "Siiri Kängsepp",
+    "Silver Laadi",
     "Silvia Jõgever",
     "Silvia Leitu",
+    "Taavi Oolberg",
+    "Talia",
+    "Urmo Teekivi",
     "Ursus Tamm",
     "Valdemar Väli",
     "Valerian Loik",
@@ -122,9 +167,13 @@
     "Varmo Pirk",
     "Viktor Karrus",
     "Viktor Turp",
+    "Villem Ormisson",
+    "Voldemar Haas",
     "Voldemar Kangro-Pool",
+    "Voldemar Mellik",
     "Voldemar Mölder",
-    "Voldemar Peil"
+    "Voldemar Peil",
+    "Õie Holm"
    ]
   },
   {
@@ -137,6 +186,9 @@
     "Aarne Miikmaa",
     "Aleksander Ipsberg",
     "Aleksander Krims (Radava)",
+    "Aleksander Mülber",
+    "Aleksander Tassa",
+    "Aleksander Uurits",
     "Arnold Akberg",
     "Arved Erich Dörvald",
     "August Kilgas",
@@ -148,6 +200,7 @@
     "Johannes Greenberg",
     "Johannes Võerahansu",
     "Karl Leopold Marley",
+    "Kuno Veeber",
     "Lo Tui",
     "Ludvig Oskar",
     "Märt Laarman",
@@ -157,7 +210,37 @@
     "Oskar Sädek",
     "Otto Krusten",
     "Paul Burman",
-    "Priidu Aavik"
+    "Priidu Aavik",
+    "Voldemar Vaga"
+   ]
+  },
+  {
+   "id": "vikerla",
+   "en": "Vikerla",
+   "et": "Vikerla",
+   "d_en": "The young artists' union in Tallinn, founded in 1917.",
+   "d_et": "Noorte kunstnike ühing Tallinnas, asutatud 1917.",
+   "members": [
+    "Aleksander Krims (Radava)",
+    "Aleksander Mülber",
+    "Roman Haavamägi"
+   ]
+  },
+  {
+   "id": "group-of-estonian-artists",
+   "en": "Group of Estonian Artists",
+   "et": "Eesti Kunstnikkude Rühm",
+   "d_en": "The group founded in Tartu in 1923 that took up cubism and constructivism.",
+   "d_et": "1923. aastal Tartus asutatud rühmitus, kes võttis omaks kubismi ja konstruktivismi.",
+   "members": [
+    "Aleksander Krims (Radava)",
+    "Anna Lukats-Laigo",
+    "Arnold Akberg",
+    "Eduard Ole",
+    "Jaan Vahtra",
+    "Juhan Raudsepp",
+    "Lydia Mei",
+    "Märt Laarman"
    ]
   },
   {
@@ -168,6 +251,7 @@
    "d_et": "1964. aastal Tõnis Vindi ümber kogunenud Tallinna rühmitus.",
    "members": [
     "Aili Vint",
+    "Enno Ootsing",
     "Jüri Arrak",
     "Kristiina Kaasik",
     "Malle Leis",
@@ -185,16 +269,203 @@
    "members": [
     "Ando Keskküla",
     "Andres Tolts",
+    "Kaarel Kurismaa",
     "Leonhard Lapin"
    ]
   }
  ],
  "links": [
   [
+   "Ado Vabbe",
+   "Benita Vomm",
+   "bio",
+   "A. Vabbe ateljee"
+  ],
+  [
+   "Ado Vabbe",
+   "Bruno Sõmeri",
+   "bio",
+   "Õpetajateka A. Vabbe, A. Vardi, E. Kits, J. Võerahansu."
+  ],
+  [
+   "Ado Vabbe",
+   "Eduard Maaser",
+   "bio",
+   "Tema peamine juhendaja oli aga Ado Vabbe"
+  ],
+  [
+   "Ado Vabbe",
+   "Endel Kõks",
+   "bio",
+   "Ado Vabbe õpilasena"
+  ],
+  [
+   "Ado Vabbe",
+   "Ernst Tiido",
+   "bio",
+   "ja Ado Vabbe"
+  ],
+  [
+   "Ado Vabbe",
+   "Georg Krug",
+   "bio",
+   "1928-1930 Tartus Pallases maali (N. Triigi ja A. Vabbe ateljeedes)."
+  ],
+  [
+   "Ado Vabbe",
+   "Henn Roode",
+   "bio",
+   "õppejõud Ado Vabbe ja Elmar Kits"
+  ],
+  [
+   "Ado Vabbe",
+   "Hilda Kamdron",
+   "bio",
+   "A. Vabbe"
+  ],
+  [
+   "Ado Vabbe",
+   "Johannes Võerahansu",
+   "bio",
+   "Ado Vabbe käe all Pallase kunstikoolis"
+  ],
+  [
+   "Ado Vabbe",
+   "Karl Pärsimägi",
+   "bio",
+   "ja hiljem Ado Vabbe käe all"
+  ],
+  [
+   "Ado Vabbe",
+   "Kristjan Teder",
+   "bio",
+   "siis Ado Vabbe käe all"
+  ],
+  [
+   "Ado Vabbe",
+   "Lydia Nirk-Soosaar",
+   "bio",
+   "siis Ado Vabbe ateljees"
+  ],
+  [
+   "Ado Vabbe",
+   "Ott Kangilaski",
+   "bio",
+   "Ado Vabbe graafikaateljees"
+  ],
+  [
+   "Ado Vabbe",
+   "Priidu Aavik",
+   "bio",
+   "kus õppis Nikolai Triigi ja Ado Vabbe käe all kuni 1938"
+  ],
+  [
+   "Ado Vabbe",
+   "Richard Sagrits",
+   "bio",
+   "graafikaõpinguid A. Vabbe juhendusel"
+  ],
+  [
+   "Ado Vabbe",
+   "Valerian Loik",
+   "bio",
+   "Pallase kunstikoolis Ado Vabbe õpilasena"
+  ],
+  [
+   "Ado Vabbe",
+   "Voldemar Haas",
+   "bio",
+   "Haas received his art education under Ado Vabbe and Konrad Mägi at the Pallas Art School"
+  ],
+  [
+   "Ado Vabbe",
+   "Voldemar Peil",
+   "bio",
+   "Pallase kunstikoolis Jaan Vahtra, Voldemar Melliku, Villem Ormissoni ja Ado Vabbe käe all"
+  ],
+  [
+   "Aleksander Bock",
+   "August Weizenberg",
+   "bio",
+   "kujur A. F. von Bocki ateljees"
+  ],
+  [
+   "Aleksander Kaasik",
+   "Lev Vassiljev",
+   "bio",
+   "õppejõududeks Enn Roos, Aleksander Kaasik ja Martin Saks"
+  ],
+  [
    "Aleksander Vardi",
    "Arno Vihalemm",
    "wd",
    ""
+  ],
+  [
+   "Aleksander Vardi",
+   "Bruno Sõmeri",
+   "bio",
+   "Õpetajateka A. Vabbe, A. Vardi, E. Kits, J. Võerahansu."
+  ],
+  [
+   "Aleksander Vardi",
+   "Gunnar Neeme",
+   "bio",
+   "jätkas 1940. aastal õpinguid Aleksander Vardi ateljees"
+  ],
+  [
+   "Aleksander Vardi",
+   "Varmo Pirk",
+   "bio",
+   "õppejõud Aleksander Vardi jt"
+  ],
+  [
+   "Aleksei Iljitš Kravtšenko",
+   "Vladimir Valerianovitš Bogatkin",
+   "bio",
+   "alustas ta kunstiõpinguid graafik Aleksei Kravtšenko stuudios"
+  ],
+  [
+   "Alexander Georg Schlater",
+   "Carl Alexander Winkler",
+   "bio",
+   "kunstiõpetaja oli Alexander Schlater"
+  ],
+  [
+   "Alexander Sauerweid",
+   "Aleksander von Kotzebue",
+   "bio",
+   "(A. Sauerweidi j)"
+  ],
+  [
+   "Alfred Kongo",
+   "Leili Muuga",
+   "bio",
+   "õppis maali Tartu Riiklikus Kunstiinstituudis Alfred Kongo käe all"
+  ],
+  [
+   "Anatoli Kaigorodov",
+   "Aleksander Pilar",
+   "bio",
+   "Kunsti õppis A. Kaigorodovi stuudios"
+  ],
+  [
+   "Anatoli Kaigorodov",
+   "Artur Mihkelsoo",
+   "bio",
+   "Alustas kunstiõpinguid A. Kaigorodovi juures."
+  ],
+  [
+   "Anton Azbe (Ažbe)",
+   "Anton Starkopf",
+   "bio",
+   "Münchenis A.Azbe kunstikoolis"
+  ],
+  [
+   "Anton Azbe (Ažbe)",
+   "Johannes Greenberg",
+   "bio",
+   "Münchenis A. Ažbe kunstikoolis"
   ],
   [
    "Anton Starkopf",
@@ -203,16 +474,142 @@
    ""
   ],
   [
+   "Anton Starkopf",
+   "Karl Pärsimägi",
+   "bio",
+   "tegi ta Anton Starkopfi juhtimisel õppereisi Saksamaale"
+  ],
+  [
+   "Anton Starkopf",
+   "Lagle Israel",
+   "bio",
+   "A. Starkopfi klassis"
+  ],
+  [
+   "Ants Laikmaa",
+   "Aleksander Krims (Radava)",
+   "bio",
+   "Õppis 1913-1917 Ants Laikmaa ateljeekoolis Tallinnas"
+  ],
+  [
+   "Ants Laikmaa",
+   "Aleksander Mülber",
+   "bio",
+   "Ants Laikmaa ateljeekoolis"
+  ],
+  [
+   "Ants Laikmaa",
+   "Aleksander Tassa",
+   "bio",
+   "1905-1906 Ants Laikmaa stuudios Tallinnas"
+  ],
+  [
+   "Ants Laikmaa",
+   "Johannes Greenberg",
+   "bio",
+   "Kunstihariduse omandas Greenberg Tallinnas Ants Laikmaa ateljeekoolis"
+  ],
+  [
+   "Ants Laikmaa",
+   "Karl Murakin",
+   "bio",
+   "oli maalimist õppinud A. Laikmaa juures"
+  ],
+  [
+   "Ants Laikmaa",
+   "Kuno Veeber",
+   "bio",
+   "Kunstiõpingud algasid Ants Laikmaa ateljees, jätkusid Nikolai Triigi ja Jaan Koorti juures."
+  ],
+  [
+   "Ants Laikmaa",
+   "Lo Tui",
+   "bio",
+   "õppis 1926-27 A.Laikmaa juures maalimist"
+  ],
+  [
+   "Ants Laikmaa",
+   "Oskar Kallis",
+   "bio",
+   "jätkas Laikmaa juures 1913-1916"
+  ],
+  [
+   "Ants Laikmaa",
+   "Otto Krusten",
+   "bio",
+   "A. Laikmaa ateljeekoolis"
+  ],
+  [
    "Ants Laikmaa",
    "Priidu Aavik",
-   "wd",
-   ""
+   "bio+wd",
+   "P. Aavik õppis kunsti Ants Laikmaa ateljeekoolis"
+  ],
+  [
+   "Ants Laikmaa",
+   "Voldemar Vaga",
+   "bio",
+   "õppis A. Laikmaa ateljees"
   ],
   [
    "Ants Laikmaa",
    "Woldemar Tank",
    "wd",
    ""
+  ],
+  [
+   "Arkadio Laigo",
+   "Erich Pehap",
+   "bio",
+   "A. Laigo ja R. Vaheri juures graafikat"
+  ],
+  [
+   "Arkadio Laigo",
+   "Ernst Tiido",
+   "bio",
+   "tema graafikaõpetajateks olid Arkadio Laigo"
+  ],
+  [
+   "August Matthias Hagen",
+   "Ernst Hermann Schlichting",
+   "bio",
+   "õppis Tartus A. M. Hageni juures"
+  ],
+  [
+   "August Matthias Hagen",
+   "Hermann Eduard Hartmann",
+   "bio",
+   "A.M.Hageni juures"
+  ],
+  [
+   "Boris Lukats",
+   "Mati Uprus",
+   "bio",
+   "õppinud graafikat Boris Lukatsi juhendamisel"
+  ],
+  [
+   "Eduard Ole",
+   "Uno Martin",
+   "bio",
+   "joonistusõpetaja Eduard Ole"
+  ],
+  [
+   "Eduard von Gebhardt",
+   "Oskar Hoffmann",
+   "bio",
+   "E. von Gebhradti"
+  ],
+  [
+   "Elmar Kits",
+   "Bruno Sõmeri",
+   "bio",
+   "Õpetajateka A. Vabbe, A. Vardi, E. Kits, J. Võerahansu."
+  ],
+  [
+   "Elmar Kits",
+   "Henn Roode",
+   "bio",
+   "õppejõud Ado Vabbe ja Elmar Kits"
   ],
   [
    "Elmar Kits",
@@ -227,16 +624,142 @@
    ""
   ],
   [
+   "Enn Roos",
+   "Lev Vassiljev",
+   "bio",
+   "õppejõududeks Enn Roos, Aleksander Kaasik ja Martin Saks"
+  ],
+  [
+   "Eugen Gustav Dücker",
+   "Oskar Hoffmann",
+   "bio",
+   "E. Dückeri"
+  ],
+  [
+   "Eugen Liphardt",
+   "Nikolai Bergholz",
+   "bio",
+   "prof. Lipharti juures Peterburis"
+  ],
+  [
+   "Evald Okas",
+   "Heldur Laretei",
+   "bio",
+   "studied under Paul Luhtein and Evald Okas"
+  ],
+  [
+   "Evald Okas",
+   "Viive Kuks",
+   "bio",
+   "Ta põhiliseks õpetajaks oli Evald Okas."
+  ],
+  [
    "Francesco Bartolozzi",
    "Louis Charles Ruotte",
    "wd",
    ""
   ],
   [
+   "Franz Marc",
+   "Wanda Gmelin",
+   "bio",
+   "prof. Max Feldbauer ja Franz Marci juures"
+  ],
+  [
+   "Friedrich Ludwig von Maydell",
+   "August Daugell",
+   "bio",
+   "õppis F. L. von Maydelli puugravüüritöökojas Tartus"
+  ],
+  [
+   "Georg Heinrich Büttner",
+   "Karl Johann Stephan Schultz",
+   "bio",
+   "Tema esimesed kunstiõpetajad olid G. W. Langewitz ja G. Büttner Riias, kelle käe all õppis litograafiat."
+  ],
+  [
+   "Georg Lischewitz",
+   "Louis Theodor Lindblohm",
+   "bio",
+   "G. v. Lischewitzi juures"
+  ],
+  [
+   "Günther Reindorff",
+   "Ants Eskola",
+   "bio",
+   "1924–25 Riigi Kunsttööstuskoolis (Günther Reindorffi graafikaklassis)"
+  ],
+  [
+   "Günther Reindorff",
+   "Esko Lepp",
+   "bio",
+   "juhendaja G. Reindorff"
+  ],
+  [
+   "Günther Reindorff",
+   "Osvald Timmas",
+   "bio",
+   "Günther Reindorffilt"
+  ],
+  [
+   "Günther Reindorff",
+   "Richard Sagrits",
+   "bio",
+   "Günther Reindorffi juures graafikat"
+  ],
+  [
+   "Heinrich Heidner",
+   "August Roosileht",
+   "bio",
+   "Heinrich Heidneri ateljeedes"
+  ],
+  [
+   "Ilja Jefimovitš Repin",
+   "Andrei Jegorov",
+   "bio",
+   "õppis vabakuulajana Peterburi Kunstide Akadeemias Ilja Repini"
+  ],
+  [
+   "Ilja Jefimovitš Repin",
+   "Valentin Serov",
+   "bio",
+   "õppis maalikunsti Ilja Repini juhendamisel"
+  ],
+  [
    "Illarion Prjanišnikov",
    "Vassili Meškov",
    "wd",
    ""
+  ],
+  [
+   "Ilmar Kruusamäe",
+   "Paavo Kangur",
+   "bio",
+   "professor Ilmar Kruusamäe juhendamisel"
+  ],
+  [
+   "Imat Suumann",
+   "Taavi Oolberg",
+   "bio",
+   "Eriti tuntavad on kummardused Peeter Allikule ja Imat Suumannile."
+  ],
+  [
+   "Jaan Koort",
+   "Herman Halliste",
+   "bio",
+   "töötas aasta jagu Jaan Koorti ateljees, õppides seal keraamikat"
+  ],
+  [
+   "Jaan Koort",
+   "Kuno Veeber",
+   "bio",
+   "Kunstiõpingud algasid Ants Laikmaa ateljees, jätkusid Nikolai Triigi ja Jaan Koorti juures."
+  ],
+  [
+   "Jacques Courtois",
+   "Anna von Wahl",
+   "bio",
+   "Pariisis Courtois ja Collin'i käe all"
   ],
   [
    "Jakob Matthias Schmutzer",
@@ -269,12 +792,246 @@
    ""
   ],
   [
+   "Johannes Greenberg",
+   "Oskar Raunam",
+   "bio",
+   "maalierialal Johannes Greenbergi juhendamisel Riigi Kõrgemas Kunstikoolis"
+  ],
+  [
+   "Johannes Võerahansu",
+   "Bruno Sõmeri",
+   "bio",
+   "Õpetajateka A. Vabbe, A. Vardi, E. Kits, J. Võerahansu."
+  ],
+  [
+   "Johannes Võerahansu",
+   "Helve Viidalepp",
+   "bio",
+   "J. Võerahansu õpilasena"
+  ],
+  [
+   "Johannes Võerahansu",
+   "Henn Roode",
+   "bio",
+   "õppejõud Johannes Võerahansu ja Lepo Mikko"
+  ],
+  [
+   "Julie Hagen-Schwarz",
+   "Emil Musso",
+   "bio",
+   "õppis kodulinnas ... Julie Wilhelmine Hagen-Schwarzi juures õli- ja akvarellmaali"
+  ],
+  [
+   "K. Karmarzki",
+   "Antonis van Dyck",
+   "bio",
+   "Rubensi ateljees töötas isegi Anthonis van Dyck, kes oli Rubensi kõige tuntum õpilane."
+  ],
+  [
    "Kaarel Liimand",
    "Arno Vihalemm",
    "wd",
    ""
   ],
   [
+   "Kalju Reitel",
+   "Ly Kaalma",
+   "bio",
+   "õppis Kalju Reiteli juhendamisel savimodelleerimist"
+  ],
+  [
+   "Karl August Senff",
+   "Aleksander Hripkov",
+   "bio",
+   "das Zeichnen bei K. A. Senff"
+  ],
+  [
+   "Karl August Senff",
+   "Andreas Löwis of Menar",
+   "bio",
+   "studied art under C. A. Senff"
+  ],
+  [
+   "Karl August Senff",
+   "August Matthias Hagen",
+   "bio",
+   "Karl August Senffi ateljees Tartus"
+  ],
+  [
+   "Karl August Senff",
+   "Friedrich Ludwig von Maydell",
+   "bio",
+   "õppis C. A. Senffi juhendamisel ülikooli joonistuskoolis"
+  ],
+  [
+   "Karl August Senff",
+   "Joseph Dominikus Oechs",
+   "bio",
+   "Õppis Tartu ülikooli joonistuskoolis Karl August Senffi juures."
+  ],
+  [
+   "Karl August Senff",
+   "Theodor Gehlhaar",
+   "bio",
+   "Arvatavasti õppis Tartu ülikooli joonistuskoolis C. A. Senffi juures"
+  ],
+  [
+   "Karl Ferdinand von Kügelgen",
+   "Woldemar Hau",
+   "bio",
+   "Carl Ferdinand von Kügelgeni juures"
+  ],
+  [
+   "Karl Gottlieb Wenig",
+   "Abram Jefimovitš Arhipov",
+   "bio",
+   "Wenigi ... juures"
+  ],
+  [
+   "Klara Zeidler",
+   "Georg Krug",
+   "bio",
+   "Õppis joonistamist Tallinnas K. Zeidleri ja E. Verberi juures."
+  ],
+  [
+   "Konrad Mägi",
+   "Elfriide Maran",
+   "bio",
+   "õppis 1920. aastate algul Tartus Konrad Mäe ateljees maali"
+  ],
+  [
+   "Konrad Mägi",
+   "Evi Gailit",
+   "bio",
+   "õppis Gailit Tartus Konrad Mägi ateljees"
+  ],
+  [
+   "Konrad Mägi",
+   "Karl Pärsimägi",
+   "bio",
+   "Ta õppis esialgu Konrad Mäe"
+  ],
+  [
+   "Konrad Mägi",
+   "Kristjan Teder",
+   "bio",
+   "Pallase kunstikoolis esmalt Konrad Mägi"
+  ],
+  [
+   "Konrad Mägi",
+   "Margus Meinart",
+   "bio",
+   "Tartus Konrad Mäe ateljees"
+  ],
+  [
+   "Konrad Mägi",
+   "Martti Ruus",
+   "bio",
+   "Konrad Mägi ateljees Tartus"
+  ],
+  [
+   "Konrad Mägi",
+   "Peeter Krosmann",
+   "bio",
+   "õppis Konrad Mägi Ateljees"
+  ],
+  [
+   "Konrad Mägi",
+   "Rudolf Paris",
+   "bio",
+   "õppis 1916–1919 Tartus Konrad Mäe ateljees maalimist"
+  ],
+  [
+   "Konrad Mägi",
+   "Voldemar Haas",
+   "bio",
+   "Haas received his art education under Ado Vabbe and Konrad Mägi at the Pallas Art School"
+  ],
+  [
+   "Kristjan Raud",
+   "Voldemar Kangro-Pool",
+   "bio",
+   "Kristjan Raua stuudios"
+  ],
+  [
+   "Laine Pukk",
+   "Mart Trummal",
+   "bio",
+   "saanud aasta jagu juhatust ... Laine Pukilt"
+  ],
+  [
+   "Lepo Mikko",
+   "Henn Roode",
+   "bio",
+   "õppejõud Johannes Võerahansu ja Lepo Mikko"
+  ],
+  [
+   "Ludmilla Siim-Kaasinen",
+   "Ando Keskküla",
+   "bio",
+   "tema õpilane olnud Ando Keskküla"
+  ],
+  [
+   "Luulik Kokamägi",
+   "Priit Piirmets",
+   "bio",
+   "Oma õpetajaks ja eeskujuks peab Luulik Kokamägi`t."
+  ],
+  [
+   "Mart Pukits",
+   "Agu Peerna",
+   "bio",
+   "joonistusõpetaja Mart Pukits"
+  ],
+  [
+   "Martin Saks",
+   "Lev Vassiljev",
+   "bio",
+   "õppejõududeks Enn Roos, Aleksander Kaasik ja Martin Saks"
+  ],
+  [
+   "Max Feldbauer",
+   "Wanda Gmelin",
+   "bio",
+   "prof. Max Feldbauer ja Franz Marci juures"
+  ],
+  [
+   "Meiu Münt",
+   "Carl-Christian Frey",
+   "bio",
+   "tema maaliõppejõududeks olid Peeter Allik, Meiu Münt ja Kalli Kalde"
+  ],
+  [
+   "Natalie Mei",
+   "Uno Uibo",
+   "bio",
+   "oli Uno Uibo prof. Voldemar Haasi Haasi ja Natalie Mei üliõpilane"
+  ],
+  [
+   "Nikolai Konstantinovitš (Nicholas) Roerich (Rerih)",
+   "Aleksander Uurits",
+   "bio",
+   "Peterburis Kunstide Edendamise Seltsi koolis Nikolai Roerichi ja Ivan Bilibini juures"
+  ],
+  [
+   "Nikolai Konstantinovitš (Nicholas) Roerich (Rerih)",
+   "Peet Aren",
+   "bio",
+   "õpetajad N. Roerich, I. Bilibin jt"
+  ],
+  [
+   "Nikolai Kummits",
+   "Osvald Timmas",
+   "bio",
+   "Nikolai Kummitsalt"
+  ],
+  [
+   "Nikolai Triik",
+   "Anna Triik-Põllusaar",
+   "bio",
+   "lõpetas 1926 maalijana Nikolai Triigi õpilasena"
+  ],
+  [
    "Nikolai Triik",
    "Arno Vihalemm",
    "wd",
@@ -282,9 +1039,105 @@
   ],
   [
    "Nikolai Triik",
+   "Eduard Ahas",
+   "bio",
+   "1931/1932.a. N. Triigi ateljees"
+  ],
+  [
+   "Nikolai Triik",
+   "Erich Pehap",
+   "bio",
+   "N. Triigi juures maalimist"
+  ],
+  [
+   "Nikolai Triik",
+   "Georg Krug",
+   "bio",
+   "1928-1930 Tartus Pallases maali (N. Triigi ja A. Vabbe ateljeedes)."
+  ],
+  [
+   "Nikolai Triik",
+   "Harald Tannberg",
+   "bio",
+   "began painting studies at the Pallas Higher Art School under Nikolai Triik"
+  ],
+  [
+   "Nikolai Triik",
+   "Karl Pärsimägi",
+   "bio",
+   "seejärel Nikolai Triigi"
+  ],
+  [
+   "Nikolai Triik",
+   "Kuno Veeber",
+   "bio",
+   "Kunstiõpingud algasid Ants Laikmaa ateljees, jätkusid Nikolai Triigi ja Jaan Koorti juures."
+  ],
+  [
+   "Nikolai Triik",
+   "Lydia Mei",
+   "bio",
+   "täiendas end Nikolai Triigi juures maali alal"
+  ],
+  [
+   "Nikolai Triik",
+   "Lydia Nirk-Soosaar",
+   "bio",
+   "õppis maali esialgu Nikolai Triigi"
+  ],
+  [
+   "Nikolai Triik",
    "Priidu Aavik",
-   "wd",
-   ""
+   "bio+wd",
+   "kus õppis Nikolai Triigi ja Ado Vabbe käe all kuni 1938"
+  ],
+  [
+   "Nikolai Triik",
+   "Richard Sagrits",
+   "bio",
+   "jätkas maaliõpinguid N. Triigi"
+  ],
+  [
+   "Nikolai Triik",
+   "Roman Haavamägi",
+   "bio",
+   "õppis ka Nikolai Triigi ateljeekoolis"
+  ],
+  [
+   "Nikolai Triik",
+   "Voldemar Mölder",
+   "bio",
+   "lõpetas selle N. Triigi õpilasena"
+  ],
+  [
+   "Paul Luhtein",
+   "Heldur Laretei",
+   "bio",
+   "studied under Paul Luhtein and Evald Okas"
+  ],
+  [
+   "Pavel Jakolevitš Pavlinov",
+   "Esko Lepp",
+   "bio",
+   "P. Pavlinovi õpilasena"
+  ],
+  [
+   "Peeter Allik",
+   "Carl-Christian Frey",
+   "bio",
+   "tema maaliõppejõududeks olid Peeter Allik, Meiu Münt ja Kalli Kalde"
+  ],
+  [
+   "Peeter Allik",
+   "Taavi Oolberg",
+   "bio",
+   "Eriti tuntavad on kummardused Peeter Allikule ja Imat Suumannile."
+  ],
+  [
+   "Peter Jakob Clodt von Jürgensburg",
+   "Alexander von Wahl",
+   "bio",
+   "Õpetajaks skulptor Peter Clodt von Jürgensburg"
   ],
   [
    "Peter Paul Rubens",
@@ -293,10 +1146,118 @@
    ""
   ],
   [
+   "Pierre-Guillaume-Alexandre Beljambe",
+   "V. Tizian",
+   "bio",
+   "Tema kuulsamad õpilased olid Giorgione, Tizian ja Lorenzo Lotto."
+  ],
+  [
    "Pieter Symonsz Potter",
    "Paulus Potter",
    "wd",
    ""
+  ],
+  [
+   "Priit Pajos",
+   "Piret Jürgenson",
+   "bio",
+   "Priit Pajose juhendamisel"
+  ],
+  [
+   "Raul Keller",
+   "Mari-Liis Rebane",
+   "bio",
+   "juhendaja Raul Keller"
+  ],
+  [
+   "Richard Collin",
+   "Anna von Wahl",
+   "bio",
+   "Pariisis Courtois ja Collin'i käe all"
+  ],
+  [
+   "Robert Suvi",
+   "Hillar EHASTE",
+   "bio",
+   "kunstistuudios SUVI Robert Suvi juhendamisel"
+  ],
+  [
+   "Robert Suvi",
+   "Piret Jürgenson",
+   "bio",
+   "Robert Suvi käe all"
+  ],
+  [
+   "Robert Suvi",
+   "Reet Heinla",
+   "bio",
+   "kunstnik Robert Suvi juhendamisel"
+  ],
+  [
+   "Roman Nyman",
+   "Richard Sagrits",
+   "bio",
+   "õppis Roman Nymani juures dekoratsioonimaali"
+  ],
+  [
+   "Roman Vaher",
+   "Erich Pehap",
+   "bio",
+   "A. Laigo ja R. Vaheri juures graafikat"
+  ],
+  [
+   "Rudolf Julius von zur Mühlen",
+   "Aleksander Tassa",
+   "bio",
+   "R. von zur Mühleni käe all on kunsti õppinud M. Pukits, K. Mägi, J. Koort, A. Tassa, eraõpilasena K. Raud"
+  ],
+  [
+   "Rudolf Julius von zur Mühlen",
+   "Jaan Koort",
+   "bio",
+   "R. von zur Mühleni käe all on kunsti õppinud M. Pukits, K. Mägi, J. Koort, A. Tassa, eraõpilasena K. Raud"
+  ],
+  [
+   "Rudolf Julius von zur Mühlen",
+   "Konrad Mägi",
+   "bio",
+   "R. von zur Mühleni käe all on kunsti õppinud M. Pukits, K. Mägi, J. Koort, A. Tassa, eraõpilasena K. Raud"
+  ],
+  [
+   "Rudolf Julius von zur Mühlen",
+   "Kristjan Raud",
+   "bio",
+   "eraõpilasena K. Raud"
+  ],
+  [
+   "Rudolf Julius von zur Mühlen",
+   "Mart Pukits",
+   "bio",
+   "R. von zur Mühleni käe all on kunsti õppinud M. Pukits, K. Mägi, J. Koort, A. Tassa, eraõpilasena K. Raud"
+  ],
+  [
+   "Rudolf Lepik",
+   "August Roosileht",
+   "bio",
+   "joonistuskursustel, mida juhatas Rudolf Lepik"
+  ],
+  [
+   "Rudolf Lepik",
+   "Eduard Ahas",
+   "bio",
+   "1918.a. R. Lepiku eraateljee"
+  ],
+  [
+   "Silvia Jõgever",
+   "Lemme Haldre",
+   "bio",
+   "under the artist Silvia Jõgever"
+  ],
+  [
+   "Silvia Jõgever",
+   "Mart Trummal",
+   "bio",
+   "saanud aasta jagu juhatust Silvia Jõgeverilt"
   ],
   [
    "Stefano della Bella",
@@ -311,10 +1272,28 @@
    ""
   ],
   [
+   "Tiit Pääsuke",
+   "Mart Trummal",
+   "bio",
+   "ja Tiit Pääsukeselt"
+  ],
+  [
+   "Tõnis Laanemaa",
+   "Tarmo Roosimölder",
+   "bio",
+   "Tõnis Laanemaa joonistusstuudios"
+  ],
+  [
+   "Tõnis Vint",
+   "Marje Taska",
+   "bio",
+   "alustas ta Tõnis Vindi juures"
+  ],
+  [
    "Tõnis Vint",
    "Siim-Tanel Annus",
-   "wd",
-   ""
+   "bio+wd",
+   "Tõnis Vindi stuudio"
   ],
   [
    "Valentin Serov",
@@ -323,10 +1302,112 @@
    ""
   ],
   [
+   "Vassili Dmitrijevitš Polenov",
+   "Abram Jefimovitš Arhipov",
+   "bio",
+   "V. Polenovi juures"
+  ],
+  [
+   "Vassili Dmitrijevitš Polenov",
+   "Sergei Arsenjevitš Vinogradov",
+   "bio",
+   "V. D. Polenovi ... juures"
+  ],
+  [
+   "Vassili Grigorjevitš Perov",
+   "Abram Jefimovitš Arhipov",
+   "bio",
+   "V. Perovi ... juures"
+  ],
+  [
+   "Vassili Ivanovitš Šuhhajev",
+   "Adamson-Eric",
+   "bio",
+   "Ta õpetajad olid Charles Guerin, Roger Bissiere, Moise Kisling, Andre Lhote, Vassili Šuhhajev."
+  ],
+  [
+   "Vassili Ivanovitš Šuhhajev",
+   "Kristjan Teder",
+   "bio",
+   "Pariisis Vassili Šuhhajevi eraakadeemias"
+  ],
+  [
+   "Vilhelms Karlis (Wilhelm Karl) Purvitis (Purwitis)",
+   "Lucie Buhmeister",
+   "bio",
+   "õppis Riia kunstikoolis ... V. Purvitise ... juures"
+  ],
+  [
+   "Villem Ormisson",
+   "Eduard Maaser",
+   "bio",
+   "sai esmaklassilise hariduse Jaan Vahtra, Voldemar Melliku ja Villem Ormissoni käe all"
+  ],
+  [
+   "Villem Ormisson",
+   "Gunnar Neeme",
+   "bio",
+   "õppis Villem Ormissoni maaliklassis"
+  ],
+  [
+   "Villem Ormisson",
+   "Voldemar Peil",
+   "bio",
+   "Pallase kunstikoolis Jaan Vahtra, Voldemar Melliku, Villem Ormissoni ja Ado Vabbe käe all"
+  ],
+  [
+   "Vladimir Jegorovitš Makovski",
+   "Abram Jefimovitš Arhipov",
+   "bio",
+   "ka V. J. Makovski"
+  ],
+  [
+   "Vladimir Jegorovitš Makovski",
+   "Sergei Arsenjevitš Vinogradov",
+   "bio",
+   "V. J. Makovski ... juures"
+  ],
+  [
+   "Voldemar Haas",
+   "Uno Uibo",
+   "bio",
+   "oli Uno Uibo prof. Voldemar Haasi Haasi ja Natalie Mei üliõpilane"
+  ],
+  [
+   "Voldemar Mellik",
+   "Eduard Maaser",
+   "bio",
+   "sai esmaklassilise hariduse Jaan Vahtra, Voldemar Melliku ja Villem Ormissoni käe all"
+  ],
+  [
+   "Voldemar Mellik",
+   "Voldemar Peil",
+   "bio",
+   "Pallase kunstikoolis Jaan Vahtra, Voldemar Melliku, Villem Ormissoni ja Ado Vabbe käe all"
+  ],
+  [
+   "Wilhelm Wider",
+   "Alexander von Wahl",
+   "bio",
+   "õppis Widemanni käe all"
+  ],
+  [
+   "William Unger",
+   "Emil Musso",
+   "bio",
+   "Jätkas kunstiõpinguid Viinis William Ungeri juures"
+  ],
+  [
    "William Unger",
    "Theodor Alphons",
    "wd",
    ""
+  ],
+  [
+   "Woldemar Friedrich Krüger",
+   "Emil Musso",
+   "bio",
+   "õppis kodulinnas Woldemar Friedrich Krügeri ... juures õli- ja akvarellmaali"
   ]
  ]
 }
