@@ -52,7 +52,7 @@ L = {
             wallh="Artwall", shownat="shown at {g}",
             sim="Similar artists — same period, media and subjects: ", school="Also trained at {g}", movement="Also working in {g}", member="Also in {g}",
             contemp="Contemporaries in {h}: ", allaz="All artists A&ndash;Z",
-            linh="Teachers, pupils, circle", teachers="Teachers", pupils="Pupils", circle="Circle", cdir="circles",
+            linh="Teachers, pupils, circle", teachers="Teachers", pupils="Pupils", circle="Circle", cdir="circles", net="network", innet="In the network of who taught whom →",
             au="{n} auction lots · {s} sold · {y}{r} — as the auction houses published them; not a valuation",
             foot="Museum records from MuIS and the EKM Digital Collection; gallery stock from the galleries' own catalogues; auction results as Haus Galerii, Vernissage, Allee galerii, Vaal galerii, E-Kunstisalong and Eesti Kunsti Oksjonid published them. ",
             full="Full catalogue", mt=" <span class=\"m\">(machine translation of the holder&#39;s Estonian text, unedited)</span>", enonly="",
@@ -69,7 +69,7 @@ L = {
             wallh="Kunstisein", shownat="{g} näitusel",
             sim="Sarnased kunstnikud — sama aeg, liigid ja ained: ", school="Samuti õppinud: {g}", movement="Samuti: {g}", member="Samuti {g} liige",
             contemp="Kaasaegsed kogus {h}: ", allaz="Kõik kunstnikud A&ndash;Ü",
-            linh="Õpetajad, õpilased, ring", teachers="Õpetajad", pupils="Õpilased", circle="Ring", cdir="ringid",
+            linh="Õpetajad, õpilased, ring", teachers="Õpetajad", pupils="Õpilased", circle="Ring", cdir="ringid", net="vorgustik", innet="Kes keda õpetas: võrgustikus →",
             au="{n} oksjonipartiid · {s} müüdud · {y}{r} — nii, nagu oksjonimajad avaldasid; mitte hinnang",
             foot="Muuseumikirjed MuISist ja EKM digikogust; galeriide laoseis galeriide endi kataloogidest; oksjonitulemused nii, nagu Haus Galerii, Vernissage, Allee galerii, Vaal galerii, E-Kunstisalong ja Eesti Kunsti Oksjonid need avaldasid. ",
             full="Kogu kataloog", mt="", enonly=" <span class=\"m\">(inglise keeles)</span>",
@@ -269,6 +269,8 @@ def lineage(i, lang="en"):
     out = [f'<p class="rel">{T[k]}: {names(d[i])}</p>' for k, d in (("teachers", TEACHERS), ("pupils", PUPILS)) if d.get(i)]
     if CIRCLE_OF.get(i):
         out.append(f'<p class="rel">{T["circle"]}: ' + " · ".join(f'<a href="{BASE}/{T["cdir"]}/{c["id"]}">{e(c[lang])}</a>' for c in CIRCLE_OF[i]) + "</p>")
+    if TEACHERS.get(i) or PUPILS.get(i):
+        out.append(f'<p class="rel"><a href="{BASE}/{T["cdir"]}/{T["net"]}#{SLUG[i]}">{T["innet"]}</a></p>')
     return (f'<h2 class="sh">{T["linh"]}</h2>' + "".join(out)) if out else ""
 
 def neighbours(i, lang="en"):
