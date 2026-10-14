@@ -16,9 +16,12 @@ python3 -u build_index.py || exit 1
 (cd data && python3 -u validate.py && python3 -u export_csv.py)
 
 # crawlable artist pages + sitemap (the app itself is a fragment-addressed SPA)
+(cd data && python3 lineage.py) || exit 1   # teachers, pupils, circles: lineage.json from its caches
 python3 -u build_pages.py
 # the hubs: by decade, medium, museum and subject, both languages (appends to the sitemap)
 python3 -u build_hubs.py || exit 1
+# the circles: Pallas, Laikmaa's studio, ANK '64 ... and who taught whom (appends to the sitemap)
+python3 -u build_circles.py || exit 1
 # the embeds: a strip per artist, decade and subject for other people's pages
 python3 -u build_embed.py || exit 1
 # the coming sales: the lots of auctions still ahead, with the artists' records beside them
