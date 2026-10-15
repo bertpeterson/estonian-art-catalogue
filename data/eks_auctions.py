@@ -16,6 +16,7 @@ The pages are ISO-8859-4. Sale pages are cached; a past sale does not change, bu
 sale not yet held is fetched again each run until it has results.
 """
 import re, json, os, gzip, time, html, datetime, urllib.request, ssl
+from auction_keep import merged
 
 BASE = "https://www.e-kunstisalong.ee"
 UA = "EstonianArtCatalogue/1.0 (museaal.ee; contact info@museaal.ee)"
@@ -122,7 +123,7 @@ emit("E-Kunstisalong", [{"house": r["house"], "sale": r["sale"], "date": r.get("
 
 recs.sort(key=lambda r: (r["date"], r["artist"], r["title"]))
 prev = json.load(open("auction_records.json", encoding="utf-8")) if os.path.exists("auction_records.json") else []
-json.dump(sorted([r for r in prev if r["house"] != "E-Kunstisalong"] + recs, key=lambda r: (r["house"], str(r.get("date") or r.get("when") or ""), str(r["aid"]))), open("auction_records.json", "w", encoding="utf-8"), ensure_ascii=False, indent=0)
+json.dump(sorted(merged(prev, "E-Kunstisalong", recs), key=lambda r: (r["house"], str(r.get("date") or r.get("when") or ""), str(r["aid"]))), open("auction_records.json", "w", encoding="utf-8"), ensure_ascii=False, indent=0)
 sold = [r for r in recs if r["sold"]]
 print(f"\nE-KUNSTISALONG AUCTION RESULTS: {len(recs)}   sold {len(sold)}   unsold {len(recs) - len(sold)}   sales {len({r['sale'] for r in recs})}")
 print(f"  sales still to come {n_open}, sales with no lot list {n_empty}, lots unparsed {n_unparsed}, with year {sum(1 for r in recs if r['year'])}, with medium {sum(1 for r in recs if r['tech'])}, with dims {sum(1 for r in recs if r['dims'])}")

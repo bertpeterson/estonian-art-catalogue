@@ -13,6 +13,7 @@ The house does not print the sale date on these pages; the season in the sale's
 name places it in the year -- spring in May, autumn in November -- for ordering.
 """
 import re, json, os, gzip, time, html, datetime, urllib.request, ssl
+from auction_keep import merged
 
 BASE = "https://alleegalerii.ee"
 UA = "EstonianArtCatalogue/1.0 (museaal.ee; contact info@museaal.ee)"
@@ -56,6 +57,21 @@ for slug, name in re.findall(r'href="' + BASE + r'/kunstioksjon-kategooria/([^/"
     if SALE.search(clean(name)): cats[slug] = clean(name)
 print(f"ALLEE: {len(cats)} sales listed", flush=True)
 
+def lot_medium(lp, sale):
+    # ...between the sale's heading and the size table: "Kuivnõel paberil. 1943." on
+    # the newer pages, "Õli paberil, 1946." on the older; the year is the lot line's
+    # -- read as text, since the older pages' markup is broken around it: the line
+    # after the sale's name, up to the size table
+    tx = html.unescape(re.sub(r"<[^>]+>", "\n", re.sub(r"<script.*?</script>|<style.*?</style>", "", lp or "", flags=re.S)))
+    lines = [l.strip() for l in tx.split("\n") if l.strip()]
+    medium = ""
+    for k, l in enumerate(lines):
+        if l.lower() == sale.lower() and k + 1 < len(lines) and lines[k + 1] != "Mõõdud":
+            medium = lines[k + 1]; break
+    medium = re.sub(r"[,.;]?\s*(?:\d{4}|\d{2,4}\s*[-–/]\s*\d{2,4}|\d{4}ndad).*$", "", medium).strip(" ,.;")
+    if not medium or re.match(r"^\d", medium) or len(medium) > 60 or re.search(r"alghind|haamrihind|€|eur", medium, re.I): medium = ""
+    return medium
+
 LOTS = json.load(open("allee_lots.json", encoding="utf-8")) if os.path.exists("allee_lots.json") else {}
 today = datetime.date.today()
 recs, n_upcoming, n_unparsed, n_nolot = [], 0, 0, 0
@@ -65,7 +81,7 @@ DAYS = {(s.lower(), int(y)): int(d) for s, y, d in re.findall(r"(Kevad|Sügis|Su
 for slug, sale in cats.items():
     m = SALE.search(sale)
     year, month = int(m.group(2)), MONTH.get((m.group(1) or "").lower(), 12)
-    if (year, month) > (today.year, today.month) and not re.search(r"Alghind", fetch(f"{BASE}/kunstioksjon-kategooria/{slug}/") or ""):
+    if (year, month) > (today.year, today.month) and '<article id="post-' not in (fetch(f"{BASE}/kunstioksjon-kategooria/{slug}/") or ""):
         n_upcoming += 1; continue                                    # announced, no lots online yet
     when = f"{year}-{month:02d}"
     h = fetch(f"{BASE}/kunstioksjon-kategooria/{slug}/"); time.sleep(0.8)
@@ -85,6 +101,14 @@ for slug, sale in cats.items():
         sm = re.search(r"Alghind:\s*([\d\s]+)€", pt); hm = re.search(r"Haamrihind:\s*([\d\s]+)€", pt)
         start = euros(sm.group(1)) if sm else None
         hammer = euros(hm.group(1)) if hm else None
+        lp = None
+        if ahead and start is None:
+            # before bidding opens the listing's price box is empty (Sügisoksjon 2026, Oct
+            # 2026); the lot's own page already gives "Alghind 84 000 €"
+            lp = fetch(url.group(1)) if url else ""; time.sleep(10)
+            sm = re.search(r"Alghind\s*:?\s*([\d\s]+)€", re.sub(r"<[^>]+>", " ", html.unescape(lp or "")))
+            start = euros(sm.group(1)) if sm else None
+            if lp and pid not in LOTS: LOTS[pid] = lot_medium(lp, sale)
         if start is None and hammer is None: n_nolot += 1; continue
         lm = LOT.match(clean(line.group(1)))
         # "Lepo Mikko triptühhon “Inimesed ja maa”": a trailing lower-case word is a form, not a name
@@ -114,18 +138,7 @@ for slug, sale in cats.items():
                          "start": start, "hammer": hammer, "sold": hammer is not None, "url": url.group(1)})
             continue
         lp = get(url.group(1), f"alleeauc_{pid}")
-        # ...between the sale's heading and the size table: "Kuivnõel paberil. 1943." on
-        # the newer pages, "Õli paberil, 1946." on the older; the year is the lot line's
-        # -- read as text, since the older pages' markup is broken around it: the line
-        # after the sale's name, up to the size table
-        tx = html.unescape(re.sub(r"<[^>]+>", "\n", re.sub(r"<script.*?</script>|<style.*?</style>", "", lp, flags=re.S)))
-        lines = [l.strip() for l in tx.split("\n") if l.strip()]
-        medium = ""
-        for k, l in enumerate(lines):
-            if l.lower() == sale.lower() and k + 1 < len(lines) and lines[k + 1] != "Mõõdud":
-                medium = lines[k + 1]; break
-        medium = re.sub(r"[,.;]?\s*(?:\d{4}|\d{2,4}\s*[-–/]\s*\d{2,4}|\d{4}ndad).*$", "", medium).strip(" ,.;")
-        if not medium or re.match(r"^\d", medium) or len(medium) > 60 or re.search(r"alghind|haamrihind|€|eur", medium, re.I): medium = ""
+        medium = lot_medium(lp, sale)
         if lp: LOTS[pid] = medium
         recs.append({"aid": "allee-" + pid, "artist": artist, "title": title,
                      "year": y4.group(1) if y4 else None, "yl": yl or None, "tech": medium, "dims": dims,
@@ -141,7 +154,7 @@ emit("Allee galerii", [{"house": r["house"], "sale": r["sale"], "date": r.get("d
                   "year": r.get("year"), "yl": r.get("yl"), "tech": r.get("tech") or "", "dims": r.get("dims") or "", "start": r.get("start"), "url": r.get("url")}
                  for r in coming])
 prev = json.load(open("auction_records.json", encoding="utf-8")) if os.path.exists("auction_records.json") else []
-json.dump(sorted([r for r in prev if r["house"] != "Allee galerii"] + recs, key=lambda r: (r["house"], str(r.get("date") or r.get("when") or ""), str(r["aid"]))), open("auction_records.json", "w", encoding="utf-8"), ensure_ascii=False, indent=0)
+json.dump(sorted(merged(prev, "Allee galerii", recs), key=lambda r: (r["house"], str(r.get("date") or r.get("when") or ""), str(r["aid"]))), open("auction_records.json", "w", encoding="utf-8"), ensure_ascii=False, indent=0)
 sold = [r for r in recs if r["sold"]]
 print(f"\nALLEE AUCTION RESULTS: {len(recs)}   sold {len(sold)}   unsold {len(recs) - len(sold)}   sales {len({r['sale'] for r in recs})}")
 print(f"  upcoming sales left out {n_upcoming}, lots unparsed {n_unparsed}, without a price block {n_nolot}, with medium {sum(1 for r in recs if r['tech'])}, with dims {sum(1 for r in recs if r['dims'])}")

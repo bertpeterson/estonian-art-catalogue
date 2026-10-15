@@ -15,6 +15,7 @@ sale predates the API and its page lists starting prices only; there is nothing
 to take from it.
 """
 import unicodedata, re, json, os, gzip, time, html, datetime, urllib.request, ssl
+from auction_keep import merged
 
 BASE = "https://www.vaal.ee"
 API = "https://oksjon.vaal.ee/api"
@@ -113,7 +114,7 @@ emit("Vaal galerii", [{"house": r["house"], "sale": r["sale"], "date": r.get("da
                  for r in coming])
 
 prev = json.load(open("auction_records.json", encoding="utf-8")) if os.path.exists("auction_records.json") else []
-json.dump(sorted([r for r in prev if r["house"] != "Vaal galerii"] + recs, key=lambda r: (r["house"], str(r.get("date") or r.get("when") or ""), str(r["aid"]))), open("auction_records.json", "w", encoding="utf-8"), ensure_ascii=False, indent=0)
+json.dump(sorted(merged(prev, "Vaal galerii", recs), key=lambda r: (r["house"], str(r.get("date") or r.get("when") or ""), str(r["aid"]))), open("auction_records.json", "w", encoding="utf-8"), ensure_ascii=False, indent=0)
 sold = [r for r in recs if r["sold"]]
 print(f"\nVAAL AUCTION RESULTS: {len(recs)}   sold {len(sold)}   unsold {len(recs) - len(sold)}   sales {len({r['sale'] for r in recs})}")
 print(f"  sales still open {n_open}, lots unparsed {n_unparsed}, with year {sum(1 for r in recs if r['year'])}, with dims {sum(1 for r in recs if r['dims'])}, with life dates {sum(1 for r in recs if r['life'])}")
