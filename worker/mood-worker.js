@@ -26,6 +26,7 @@
 // Needs one secret, ANTHROPIC_API_KEY (Settings > Variables and Secrets); /list/* needs more (worker/README.md).
 // With a second, TURNSTILE_SECRET, the two doors that call Claude answer only a visitor who has passed Cloudflare
 // Turnstile: the page's token buys a pass for half an hour (at human(), below). Without it they answer anyone.
+// The same secret puts Turnstile in front of /list/login, which sends email.
 // Calls the Messages API with fetch: the dashboard's editor takes one file, no build step.
 
 const WORDS = ["solemn", "serene", "contemplative", "melancholy", "lonely", "nostalgic", "tender", "intimate", "joyful", "playful", "festive", "romantic", "dreamy", "mysterious", "eerie", "anxious", "gloomy", "dramatic", "heroic", "bright", "dark", "sunny", "golden", "twilight", "moonlit", "misty", "vivid", "muted", "warm", "cold", "stormy", "still", "wintry", "spring", "summery", "autumnal", "hopeful", "cosy", "sacred", "majestic", "fragile", "sensual", "innocent", "energetic", "proud", "elegant", "lively", "empty", "spiritual", "idyllic", "wild", "harsh", "angry", "abstract", "expressive", "decorative", "simple", "ornate", "rustic", "modern", "sea", "lake", "river", "forest", "trees", "fields", "garden", "mountains", "sky", "village", "city", "harbour", "church", "interior", "portrait", "children", "family", "work", "music", "dance", "horses", "animals", "birds", "flowers", "stilllife", "boats"];
@@ -435,6 +436,8 @@ async function list(path, body, env, reply, ip) {
     if (email.length > 254 || !EMAIL.test(email)) return reply({ error: "bad email" }, 400);
     if (!env.RESEND_API_KEY && !env.SEND_MAIL) return reply({ error: "Mail is not set up." }, 503);
     if (tooMany(ip, logins, 5, 600000)) return reply({ error: "Too many requests; wait a few minutes." }, 429);
+    // each sign-in link is an email sent: like the doors that call Claude, only for a visitor who passed Turnstile
+    if (env.TURNSTILE_SECRET && await human(body, env, ip) === null) return reply({ error: "Please confirm you are not a robot.", human: true }, 401);
     const u = await account(env, email), sent = +(await KV.get("r:" + u)) || 0;
     if (sent >= LINKS_PER_HOUR) return reply({ error: "Too many links for this address; wait an hour." }, 429);
     const t = token();

@@ -9,7 +9,9 @@ import hashlib, json, os, shutil
 
 _cfg = json.load(open("data/mood_api.json", encoding="utf-8")) if os.path.exists("data/mood_api.json") else {}
 _api = (_cfg.get("url") or "") if _cfg.get("lists") or os.environ.get("MUSEAAL_LISTS") == "1" else ""
+_ts = _cfg.get("turnstile") or ""      # the Worker's Turnstile site key, public: sign-in links are sent only past it
 _src = open("list-sync.js", "rb").read()
-TAG = (f'<script src="/list-sync.js?v={hashlib.sha256(_src).hexdigest()[:10]}" data-list-api="{_api}"></script>') if _api else ""
+TAG = (f'<script src="/list-sync.js?v={hashlib.sha256(_src).hexdigest()[:10]}" data-list-api="{_api}"'
+       + (f' data-ts="{_ts}"' if _ts else "") + '></script>') if _api else ""
 os.makedirs("site", exist_ok=True)
 shutil.copyfile("list-sync.js", "site/list-sync.js")

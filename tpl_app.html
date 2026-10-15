@@ -1849,7 +1849,7 @@
     const inp = $(id), v = inp ? inp.value.trim() : "";
     if (!v || !inp.checkValidity()){ if (inp) inp.focus(); return; }
     inp.disabled = true;
-    museaalList.signIn(v, LANG);
+    museaalList.signIn(v, LANG, inp.closest(".listbar"));
   }
   // the same sign-in, from the masthead: a button beside the language and theme, and a panel
   // under it that says what an account is for and what is kept
