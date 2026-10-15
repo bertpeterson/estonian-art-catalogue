@@ -14,6 +14,7 @@ the day ("Sügisoksjon 25.10."); the two together place the sale. Lot pages are 
 a sale still running has no results and is left until it has.
 """
 import re, json, os, gzip, time, html, datetime, urllib.request, ssl, collections
+from auction_keep import merged
 
 BASE = "https://eestikunstioksjonid.ee"
 UA = "EstonianArtCatalogue/1.0 (museaal.ee; contact info@museaal.ee)"
@@ -169,7 +170,7 @@ for slug in slugs:
 recs.sort(key=lambda r: (r["date"], r["artist"], r["title"]))
 from upcoming import emit; emit("Eesti Kunsti Oksjonid", coming)
 prev = json.load(open("auction_records.json", encoding="utf-8")) if os.path.exists("auction_records.json") else []
-json.dump(sorted([r for r in prev if r["house"] != "Eesti Kunsti Oksjonid"] + recs, key=lambda r: (r["house"], str(r.get("date") or r.get("when") or ""), str(r["aid"]))), open("auction_records.json", "w", encoding="utf-8"), ensure_ascii=False, indent=0)
+json.dump(sorted(merged(prev, "Eesti Kunsti Oksjonid", recs), key=lambda r: (r["house"], str(r.get("date") or r.get("when") or ""), str(r["aid"]))), open("auction_records.json", "w", encoding="utf-8"), ensure_ascii=False, indent=0)
 sold = [r for r in recs if r["sold"]]
 print(f"\nEKO AUCTION RESULTS: {len(recs)}   sold {len(sold)}   unsold {len(recs) - len(sold)}   sales {len({r['sale'] for r in recs})}")
 print(f"  sales still open {n_open}, lots unparsed {n_unparsed}, with medium {sum(1 for r in recs if r['tech'])}, with dims {sum(1 for r in recs if r['dims'])}, undated sale {sum(1 for r in recs if not r['date'])}")

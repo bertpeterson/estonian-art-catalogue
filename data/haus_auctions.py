@@ -14,6 +14,7 @@ is still ahead is not a result and is left until it is. Pages are cached, since 
 past sale does not change; the list of sales is fetched fresh each run.
 """
 import re, json, os, gzip, time, html, datetime, urllib.request, ssl
+from auction_keep import merged
 
 BASE = "https://haus.ee"
 UA = "EstonianArtCatalogue/1.0 (museaal.ee; contact info@museaal.ee)"
@@ -141,7 +142,7 @@ emit("Haus Galerii", [{"house": r["house"], "sale": r["sale"], "date": r.get("da
                       "year": r.get("year"), "yl": r.get("yl"), "tech": r.get("tech") or "", "dims": r.get("dims") or "", "start": r.get("start"), "url": r.get("url")}
                      for r in coming])
 prev = json.load(open("auction_records.json", encoding="utf-8")) if os.path.exists("auction_records.json") else []
-json.dump(sorted([r for r in prev if r["house"] != "Haus Galerii"] + recs, key=lambda r: (r["house"], str(r.get("date") or r.get("when") or ""), str(r["aid"]))), open("auction_records.json", "w", encoding="utf-8"), ensure_ascii=False, indent=0)
+json.dump(sorted(merged(prev, "Haus Galerii", recs), key=lambda r: (r["house"], str(r.get("date") or r.get("when") or ""), str(r["aid"]))), open("auction_records.json", "w", encoding="utf-8"), ensure_ascii=False, indent=0)
 sold = [r for r in recs if r["sold"]]
 print(f"\nHAUS AUCTION RESULTS: {len(recs)}   sold {len(sold)}   unsold {len(recs) - len(sold)}   sales {len({r['sale'] + r['date'] for r in recs})}")
 print(f"  upcoming sales left out {n_upcoming}, lots unparsed {n_unparsed}, with year {sum(1 for r in recs if r['year'])}, with dims {sum(1 for r in recs if r['dims'])}")
