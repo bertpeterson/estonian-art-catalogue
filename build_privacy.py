@@ -14,6 +14,11 @@ from build_account import CSS, STAMP, GC
 e = lambda s: html.escape(str(s or ""), quote=True)
 BASE = "https://museaal.ee"
 MAIL = '<a href="mailto:info@museaal.ee">info@museaal.ee</a>'
+# the providers' own privacy terms, for what they keep themselves
+LINKS = ", ".join(f'<a href="{u}">{n}</a>' for n, u in [
+    ("Cloudflare", "https://www.cloudflare.com/privacypolicy/"), ("Anthropic", "https://www.anthropic.com/legal/privacy"),
+    ("Resend", "https://resend.com/legal/privacy-policy"), ("GitHub", "https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement"),
+    ("Google", "https://policies.google.com/privacy"), ("GoatCounter", "https://www.goatcounter.com/help/privacy")])
 
 T = {
     "en": dict(file="privacy", other="privaatsus", other_l="Eesti keeles", site="Estonian Art Catalogue", home="./",
@@ -22,9 +27,10 @@ T = {
                parts=[
         ("Who runs it", [f"Museaal.ee is an independent catalogue, run privately: not by a museum, a gallery or an auction house. "
                          f"Questions, corrections and requests about your data: {MAIL}."]),
-        ("Browsing", ["You can use the whole catalogue without an account. Museaal sets no cookies. My List and the light or dark "
-                      "setting are kept in your browser's own storage, on your device, until you clear it.",
-                      "Visits are counted with GoatCounter, without cookies and without personal data: which page was seen, not by whom. "
+        ("Browsing", ["You can use the whole catalogue without an account. Museaal itself sets no cookies. My List, a sign-in and the light or dark "
+                      "setting are kept in your browser's own storage, on your device, until you clear it or sign out.",
+                      "Visits are counted with GoatCounter, without cookies. Like any server it sees your IP address and browser, but it keeps "
+                      "no personal data: which page was seen, not by whom. "
                       "A sign-in link sent and a sign-in are counted the same way.",
                       "Museum pictures are shown straight from MuIS and the Art Museum of Estonia, gallery pictures from the gallery's own "
                       "server, and the fonts come from Google Fonts: those servers see your browser's request, as with any web page. "
@@ -43,9 +49,20 @@ T = {
         ("Who handles it for us", ["Cloudflare runs the part that answers (a Worker), holds the accounts (Workers KV) and checks "
                          "that you are not a robot (Turnstile) before an email is sent or the assistant answers. "
                          "Resend sends the emails, from its EU region. Anthropic answers the assistant and the mood page. "
-                         "GoatCounter counts the visits."]),
+                         "GoatCounter counts the visits.",
+                         "Each keeps its own records, such as server logs and Resend's log of emails sent, under its own terms: "
+                         f"{LINKS}. Museaal not keeping your messages to the assistant does not change how long Anthropic keeps them."]),
+        ("Why we may do this", ["Accounts, sign-in links and sending what you type to Claude: to give you the service you asked for "
+                         "(GDPR article 6(1)(b)). News emails: your consent (article 6(1)(a)), which you can withdraw any time by unsubscribing. "
+                         "Counting visits and the robot check: our legitimate interest in knowing how the site is used and keeping it "
+                         "free of abuse (article 6(1)(f))."]),
+        ("Outside the EU", ["Cloudflare, Anthropic, Resend, GitHub and Google are US companies, so what they handle can be processed in the US "
+                         "or elsewhere outside the EU. Resend sends our emails from Ireland. Such transfers rest on the EU–US Data Privacy "
+                         "Framework or the EU's standard contractual clauses, as each provider's terms set out."]),
         ("Your rights", ["You can see, correct or delete your data. Your account page shows your address; Delete account there removes "
                          f"the address, our copy of the list and the news emails at once. Or write to {MAIL}. "
+                         "You can also ask us to restrict or stop using your data, or to send you your address and list as a file, "
+                         "and withdraw your consent to the news emails at any time. Which of these apply depends on the reason above.",
                          "If you think we handle your data wrongly, you can complain to the Estonian Data Protection Inspectorate "
                          '(Andmekaitse Inspektsioon, <a href="https://www.aki.ee/en">aki.ee</a>).']),
     ]),
@@ -55,9 +72,10 @@ T = {
                parts=[
         ("Kes seda peab", [f"Museaal.ee on sõltumatu, eraviisiliselt peetav kataloog: mitte muuseumi, galerii ega oksjonimaja oma. "
                            f"Küsimused, parandused ja soovid sinu andmete kohta: {MAIL}."]),
-        ("Sirvimine", ["Kogu kataloogi saab kasutada ilma kontota. Museaal ei sea küpsiseid. Minu nimekiri ning hele või tume vaade "
-                       "on sinu brauseri enda mälus, sinu seadmes, kuni selle tühjendad.",
-                       "Külastusi loeb GoatCounter, ilma küpsiste ja isikuandmeteta: milline leht vaadati, mitte kes vaatas. "
+        ("Sirvimine", ["Kogu kataloogi saab kasutada ilma kontota. Museaal ise küpsiseid ei sea. Minu nimekiri, sisselogimine ning hele või tume vaade "
+                       "on sinu brauseri enda mälus, sinu seadmes, kuni selle tühjendad või välja logid.",
+                       "Külastusi loeb GoatCounter, ilma küpsisteta. Nagu iga server näeb see sinu IP-aadressi ja brauserit, kuid "
+                       "isikuandmeid ei hoia: milline leht vaadati, mitte kes vaatas. "
                        "Saadetud sisselogimislinke ja sisselogimisi loetakse samamoodi.",
                        "Muuseumide pildid tulevad otse MuISist ja Eesti Kunstimuuseumist, galeriide pildid galerii enda serverist ning "
                        "kirjatüübid Google Fontsist: need serverid näevad sinu brauseri päringut nagu iga veebilehe puhul. "
@@ -76,9 +94,20 @@ T = {
         ("Kes neid meie eest käsitleb", ["Cloudflare käitab vastavat osa (Worker), hoiab kontosid (Workers KV) ja kontrollib "
                          "(Turnstile), et sa pole robot, enne kui kiri saadetakse või abiline vastab. "
                          "Resend saadab e-kirjad oma ELi piirkonnast. Anthropic vastab abilisele ja meeleolu lehele. "
-                         "GoatCounter loeb külastusi."]),
+                         "GoatCounter loeb külastusi.",
+                         "Igaüks peab oma tingimuste järgi oma kirjeid, näiteks serverilogisid ja Resendi logi saadetud kirjadest: "
+                         f"{LINKS}. See, et Museaal sinu sõnumeid abilisele ei hoia, ei muuda seda, kui kaua Anthropic neid hoiab."]),
+        ("Miks me seda teha võime", ["Kontod, sisselogimislingid ja sinu kirjutatu saatmine Claude'ile: et pakkuda teenust, mida küsisid "
+                         "(isikuandmete kaitse üldmääruse artikli 6 lõike 1 punkt b). Uudiskirjad: sinu nõusolek (punkt a), mille saad igal ajal "
+                         "tagasi võtta, kui tellimusest loobud. Külastuste loendamine ja robotikontroll: meie õigustatud huvi teada, kuidas lehte "
+                         "kasutatakse, ja hoida see kuritarvitustest puhas (punkt f)."]),
+        ("Väljaspool ELi", ["Cloudflare, Anthropic, Resend, GitHub ja Google on USA ettevõtted, seega võidakse nende käsitletavat töödelda USAs "
+                         "või mujal väljaspool ELi. Resend saadab meie kirjad Iirimaalt. Sellised edastused põhinevad ELi–USA andmekaitseraamistikul "
+                         "või ELi tüüptingimustel, nagu iga teenusepakkuja tingimustes kirjas."]),
         ("Sinu õigused", ["Saad oma andmeid näha, parandada või kustutada. Konto lehel on näha sinu aadress; seal „Kustuta konto” "
                           f"eemaldab korraga aadressi, meie koopia nimekirjast ja uudiskirjad. Või kirjuta {MAIL}. "
+                          "Võid ka paluda, et piiraksime või lõpetaksime sinu andmete kasutamise või saadaksime sulle aadressi ja nimekirja failina, "
+                          "ning võtta igal ajal tagasi nõusoleku uudiskirjadele. Millised neist kehtivad, sõltub ülaltoodud põhjusest.",
                           "Kui leiad, et käsitleme sinu andmeid valesti, võid pöörduda Andmekaitse Inspektsiooni poole "
                           '(<a href="https://www.aki.ee">aki.ee</a>).']),
     ]),
