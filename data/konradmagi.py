@@ -44,7 +44,7 @@ for slug, cat in CATS.items():
             elif holder: kind = "private"; holder_out = "Erakogu"
             else: kind = "unknown"; holder_out = ""
             recs.append({"url": url, "title": field(it, r'itemprop="name">(.*?)<'), "date": field(it, r"itemprop='dateCreated'>(.*?)<"),
-                         "medium": field(it, r"itemprop='material'>(.*?)<"), "dims": field(it, r"</span><span>(.*?)</span></span>"),
+                         "medium": field(it, r"itemprop='material'>(.*?)<"), "dims": field(it, r"</span><span>([^<]*)</span></span>"),
                          "img": field(it, r'<img src="([^"]+)"'), "category": cat, "holder_kind": kind, "holder": holder_out,
                          "holder_as_listed_is_institution": kind == "held"})
         print(f"  {slug} page {page}: {len(items)} works", flush=True)

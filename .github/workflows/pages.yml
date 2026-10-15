@@ -36,6 +36,8 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install -q numpy==2.5.3
+      - name: Fixture tests (the ingestion boundary, asking prices)
+        run: python -m unittest discover -v tests
       - name: Build
         run: ./build_site.sh
       - name: Open the built site in headless Chrome
