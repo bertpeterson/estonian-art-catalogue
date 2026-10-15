@@ -35,8 +35,10 @@ python3 -u build_stats.py
 python3 -u build_mood.py || exit 1
 # find a work: the assistant, and the galleries' stock it looks through
 python3 -u build_ask.py || exit 1
+# the account page: the signed-in address, news emails, sign out, delete (list-sync.js's calls)
+python3 -u build_account.py || exit 1
 # the Content-Security-Policy, into every page, from the inline scripts as written
 python3 -u csp.py site || exit 1
 # a build that lost its pages must not ship: the artist pages went out missing once
 # when build_pages.py failed inside a pipe and the OK line hid it
-[ -f site/a/index.html ] && [ "$(ls site/a | wc -l)" -gt 1000 ] && [ -f site/stats.html ] && [ -f site/stats-et.html ] && [ -f site/mood.html ] && [ -f site/meeleolu.html ] && [ -f site/data/mood.json ] && [ -f site/find.html ] && [ -f site/leia.html ] && [ -f site/data/stock.json ] && [ -f site/data/for-sale.csv ] && [ -f site/llms.txt ] || { echo "BUILD FAILED: site/a, stats or mood missing"; exit 1; }
+[ -f site/a/index.html ] && [ "$(ls site/a | wc -l)" -gt 1000 ] && [ -f site/stats.html ] && [ -f site/stats-et.html ] && [ -f site/mood.html ] && [ -f site/meeleolu.html ] && [ -f site/data/mood.json ] && [ -f site/find.html ] && [ -f site/leia.html ] && [ -f site/data/stock.json ] && [ -f site/data/for-sale.csv ] && [ -f site/llms.txt ] && [ -f site/account.html ] && [ -f site/konto.html ] || { echo "BUILD FAILED: site/a, stats or mood missing"; exit 1; }
