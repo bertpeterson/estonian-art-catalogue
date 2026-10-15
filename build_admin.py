@@ -2,7 +2,7 @@
 """site/admin.html -- the backoffice: the site's own figures on one page, for Bert.
 
 Not linked from anywhere, not in the sitemap, noindex. What it shows:
-  accounts     the KV's keys counted by kind, and new accounts a day     } live, from the Worker's
+  accounts     KV keys by kind, every address, new accounts a day          } live, from the Worker's
   visits       GoatCounter's views, pages, referrers, sign-in events       } /admin/stats, which wants
   assistant    questions to Buy Art and readings on the mood page a day  } ADMIN_KEY (worker/README.md)
   stock        works for sale by gallery, and what left since the weekly run: written in here at build time
@@ -115,6 +115,12 @@ JS = r"""
     var s = section("Accounts", "Counted now in the KV store. An account is made when someone opens their sign-in link.");
     add(s, add(el("div", "cards"), card(K.accounts, "accounts"), card(K.news, "want news emails"), card(K.devices, "devices signed in"), card(K.links, "sign-in links waiting")));
     if (j.signup) add(s, el("h3", null, "New accounts a day — " + fmt(sum(j.signup)) + " in 30 days"), bars(D, j.signup, "New accounts a day"));
+    if (j.people && j.people.length) {
+      add(s, el("h3", null, "Who"));
+      add(s, table(["Address", "Since", "Works", "Last change", "News"], j.people.map(function (p) {
+        return [p[0] || "(from before 15 Oct, kept at next sign-in)", p[1] || "—", p[2], p[3] ? new Date(p[3]).toISOString().slice(0, 10) : "—", p[4] ? "yes" : ""];
+      }), [0, 0, 1, 0, 0]));
+    }
     main.appendChild(s);
 
     s = section("Visits", "GoatCounter, the last 30 days.");
