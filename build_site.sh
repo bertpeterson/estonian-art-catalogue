@@ -12,6 +12,9 @@ python3 build_site.py
 python3 build_landing.py || exit 1
 python3 -u build_index.py || exit 1
 
+# what came from the galleries' and auction houses' sites: plain text, http(s) links, pictures
+# from the gallery's own site, sane prices -- else no build
+(cd data && python3 -u boundary.py)
 # flat exports for reuse (CSV + JSONL), written into site/data/export/
 (cd data && python3 -u validate.py && python3 -u export_csv.py)
 

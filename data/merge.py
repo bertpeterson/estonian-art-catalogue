@@ -2,6 +2,13 @@
 import json, re, collections, unicodedata, datetime, os, html
 exec(open('build.py',encoding='utf-8').read().split('def esc_ess')[0])   # ESS/TECH/MAT/ED_LIFE/ED_BIO
 
+# ---------- plain text at the boundary ----------
+# What a gallery, an auction house or a foundation's site hands over is scraped HTML.
+# Every text field taken from one goes through plain() (boundary.py): entities decoded,
+# tags dropped, dimensions cut at their first tag. boundary.py checks the result after
+# the merge.
+from boundary import plain
+
 def invkey(s):
     if not s: return None
     s = re.sub(r'[^A-Za-z0-9:]', '', s.upper())
@@ -812,8 +819,8 @@ GAL.sort(key=lambda g: bool(g.get("only_known")))
 # Each gallery parser decoded its own shortlist of HTML entities, which let
 # "&#8220;" and "&#8221;" through into titles. Decode the lot here instead, once.
 for g in GAL:
-    for f in ("artist", "title", "tech", "dims"):
-        if g.get(f): g[f] = re.sub(r'\s+', ' ', html.unescape(g[f])).strip()
+    for f in ("artist", "title", "tech", "dims", "series", "gallery", "city"):
+        if g.get(f): g[f] = plain(g[f], cut=f == "dims")
     # A marketplace lists artists from the whole region. Its records are taken only
     # for artists the catalogue already has -- museum-held or in a gallery harvested
     # on its own -- and never add a name. The rest is a separate decision.
@@ -946,6 +953,8 @@ KM = json.load(open("konradmagi_records.json", encoding="utf-8")) if os.path.exi
 _musnames = {w["mu"] for w in works if w.get("kind") in (None, "held", "shown")}
 _km_added = 0
 for r in KM:
+    for f in ("title", "date", "medium", "dims", "holder"):
+        if r.get(f): r[f] = plain(r[f], cut=f == "dims")
     if r["holder_kind"] == "held" and r["holder"] in _musnames: continue
     ai = artist_index("Konrad Mägi")
     if ai is None: break
@@ -983,8 +992,8 @@ for r in AUC:
     if r["aid"] in DOUBT:
         r["hammer"] = None; r["after"] = False; r["doubt"] = DOUBT[r["aid"]]
         if "sold" in DOUBT[r["aid"]]: r["sold"] = DOUBT[r["aid"]]["sold"]
-    for f in ("artist", "title", "tech", "dims"):
-        if r.get(f): r[f] = re.sub(r'\s+', ' ', html.unescape(r[f])).strip()
+    for f in ("artist", "title", "tech", "dims", "sale", "house"):
+        if r.get(f): r[f] = plain(r[f], cut=f == "dims")
     if not r.get("title"): continue
     # a lot the house could not attribute, or attributed to two hands, is not one artist's
     if re.search(r"tundmatu|unknown|\s[&/]\s|\sja\s", r["artist"], re.I): auc_skipped += 1; continue
@@ -1326,8 +1335,10 @@ for i, w in enumerate(works):
     if w["kind"] == "auction": _prior[(w["a"], _tkey(w["t"]))].append(w)
 upcoming, up_unmatched = [], 0
 for r in UPC:
+    for f in ("artist", "title", "tech", "dims", "sale", "house", "yl", "year"):
+        if r.get(f): r[f] = plain(r[f], cut=f == "dims")
     if re.search(r"tundmatu|unknown|\s[&/]\s|\sja\s", r.get("artist") or "", re.I): continue
-    ai = artist_find(re.sub(r"\s+", " ", html.unescape(r.get("artist") or "")).strip())
+    ai = artist_find(r.get("artist") or "")
     if ai is None: up_unmatched += 1; continue
     before = [w for w in _prior.get((ai, _tkey(r["title"])), [])
               if not (w.get("dm") and r.get("dims") and w["dm"].replace(" ", "") != r["dims"].replace(" ", ""))]
