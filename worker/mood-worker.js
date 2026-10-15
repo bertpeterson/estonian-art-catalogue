@@ -417,11 +417,11 @@ const MAIL = {          // no bare "museaal.ee" in the text: mail apps make it a
   en: { subject: "Your sign-in link for museaal.ee", text: (link, news) => "Here is your link to sign in to Museaal:\n\n" + link +
     "\n\nIt works once, for 15 minutes. To use your list on another device, ask for a new link there.\n\n" + (news ?
     "Once you sign in, we will also email you now and then about new features. You can unsubscribe any time.\n\n" : "") +
-    "If you did not ask to sign in, you can ignore this email.\n\nEstonian Art Catalogue" },
+    "If you did not ask to sign in, you can ignore this email." },
   et: { subject: "Sinu sisselogimislink museaal.ee-sse", text: (link, news) => "Siin on sinu link, et logida sisse Museaali:\n\n" + link +
     "\n\nLink töötab üks kord ja 15 minutit. Teises seadmes nimekirja kasutamiseks küsi seal uus link.\n\n" + (news ?
     "Kui oled sisse loginud, saadame sulle aeg-ajalt kirja uute võimaluste kohta. Tellimuse saad lõpetada igal ajal.\n\n" : "") +
-    "Kui sa sisselogimist ei küsinud, võid selle kirja tähelepanuta jätta.\n\nEesti Kunstikataloog" },
+    "Kui sa sisselogimist ei küsinud, võid selle kirja tähelepanuta jätta." },
 };
 async function mail(env, to, m) {
   if (env.SEND_MAIL) return env.SEND_MAIL({ to, ...m });          // the local test server (.dev/serve.mjs) prints it instead
