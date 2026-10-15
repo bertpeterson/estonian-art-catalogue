@@ -26,13 +26,14 @@ POLICY = ("default-src 'self'; script-src 'self' https://gc.zgo.at{hashes}" + TS
           "base-uri 'none'; form-action 'none'; object-src 'none'; upgrade-insecure-requests")
 INLINE = re.compile(r"<script(?![^>]*\bsrc=)([^>]*)>(.*?)</script>", re.S)
 
-def policy_for(html):
+def policy_for(html, more=""):
     hashes = []
     for attrs, body in INLINE.findall(html):
         if "application/ld+json" in attrs: continue            # data, never executed
         h = base64.b64encode(hashlib.sha256(body.encode("utf-8")).digest()).decode()
         if h not in hashes: hashes.append(h)
-    return POLICY.format(hashes="".join(f" 'sha256-{h}'" for h in hashes))
+    p = POLICY.format(hashes="".join(f" 'sha256-{h}'" for h in hashes))
+    return p.replace("connect-src 'self'", "connect-src 'self' " + more) if more else p
 
 n = 0
 for d, _, files in os.walk(ROOT):
@@ -41,7 +42,9 @@ for d, _, files in os.walk(ROOT):
         p = os.path.join(d, f)
         html = open(p, encoding="utf-8").read()
         if 'http-equiv="Content-Security-Policy"' in html: continue
-        tag = f'<meta http-equiv="Content-Security-Policy" content="{policy_for(html)}">'
+        # the backoffice (build_admin.py) also reads each workflow's last run from GitHub
+        more = "https://api.github.com" if os.path.relpath(p, ROOT) == "admin.html" else ""
+        tag = f'<meta http-equiv="Content-Security-Policy" content="{policy_for(html, more)}">'
         html2, k = re.subn(r'(<meta charset="utf-8">)', r"\1" + tag.replace("\\", "\\\\"), html, count=1)
         if not k: print("  no charset tag, policy not written:", p); continue
         open(p, "w", encoding="utf-8").write(html2); n += 1

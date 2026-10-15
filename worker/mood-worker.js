@@ -27,6 +27,7 @@
 // With a second, TURNSTILE_SECRET, the two doors that call Claude answer only a visitor who has passed Cloudflare
 // Turnstile: the page's token buys a pass for half an hour (at human(), below). Without it they answer anyone.
 // The same secret puts Turnstile in front of /list/login, which sends email.
+// The backoffice (museaal.ee/admin, /admin/stats below) needs ADMIN_KEY, and GOATCOUNTER_TOKEN for the visits.
 // Calls the Messages API with fetch: the dashboard's editor takes one file, no build step.
 
 const WORDS = ["solemn", "serene", "contemplative", "melancholy", "lonely", "nostalgic", "tender", "intimate", "joyful", "playful", "festive", "romantic", "dreamy", "mysterious", "eerie", "anxious", "gloomy", "dramatic", "heroic", "bright", "dark", "sunny", "golden", "twilight", "moonlit", "misty", "vivid", "muted", "warm", "cold", "stormy", "still", "wintry", "spring", "summery", "autumnal", "hopeful", "cosy", "sacred", "majestic", "fragile", "sensual", "innocent", "energetic", "proud", "elegant", "lively", "empty", "spiritual", "idyllic", "wild", "harsh", "angry", "abstract", "expressive", "decorative", "simple", "ornate", "rustic", "modern", "sea", "lake", "river", "forest", "trees", "fields", "garden", "mountains", "sky", "village", "city", "harbour", "church", "interior", "portrait", "children", "family", "work", "music", "dance", "horses", "animals", "birds", "flowers", "stilllife", "boats"];
@@ -434,6 +435,17 @@ async function mail(env, to, m) {
 
 // the link that stops the news emails: the account and a seal on it, so nobody can stop someone else's
 const unsubLink = async (env, u, lang) => (env.SITE || "https://museaal.ee/") + "#lang=" + lang + "&unsub=" + u + "." + await mac(env.LIST_SECRET, "unsub|" + u);
+// the backoffice's day counters, c:<what>:<day> in KV for 400 days: questions to /ask (a turn, not its tool rounds),
+// readings on the mood page, new accounts. Each is a read and a write, so two at once can lose one: near enough.
+const DAY_TTL = 400 * 86400;
+const today = () => new Date().toISOString().slice(0, 10);
+async function bump(env, what) {
+  if (!env.LISTS) return;
+  const k = "c:" + what + ":" + today();
+  await env.LISTS.put(k, String((+(await env.LISTS.get(k)) || 0) + 1), { expirationTtl: DAY_TTL });
+}
+const later = (ctx, p) => { p = p.catch(e => console.log("count failed", String(e.message))); if (ctx && ctx.waitUntil) ctx.waitUntil(p); };
+
 const logins = new Map();        // visitor -> times of their recent sign-in requests: 5 in ten minutes
 async function list(path, body, env, reply, ip) {
   const KV = env.LISTS;
@@ -462,7 +474,7 @@ async function list(path, body, env, reply, ip) {
     if (!t) return reply({ error: "This link has expired or was used." }, 410);
     await KV.delete(k);
     const rec = await KV.get("u:" + t.u, "json");
-    if (!rec) await KV.put("u:" + t.u, JSON.stringify({ items: [], updated: Date.now() }), { expirationTtl: LIST_TTL });
+    if (!rec) { await KV.put("u:" + t.u, JSON.stringify({ items: [], updated: Date.now() }), { expirationTtl: LIST_TTL }); await bump(env, "signup").catch(() => {}); }
     const s = token();
     await KV.put("s:" + await hash(s), JSON.stringify({ u: t.u }), { expirationTtl: SESSION_TTL });
     // the box was ticked and the link opened: the address is confirmed, and kept for the news emails
@@ -503,6 +515,47 @@ function tooMany(ip, map = seen, limit = PER_MINUTE, span = 60000) {
 // token cannot be forged. A token is good once and for five minutes, so the first one buys a pass: its expiry and an
 // HMAC of the visitor's address and that expiry, sent back with every later message. A new address asks again.
 const PASS_TTL = 30 * 60;
+// /admin/stats, for museaal.ee/admin: the KV's keys counted by kind, the day counters for 30 days, and GoatCounter's
+// figures for the same days fetched with GOATCOUNTER_TOKEN (read-only), all behind ADMIN_KEY. KV list calls are
+// a thousand keys each, and the free plan has a thousand a day: fine for a page opened now and then.
+const tries = new Map();          // visitor -> wrong keys: 5 a minute
+async function countKeys(KV, prefix) {
+  let n = 0, cursor;
+  do { const r = await KV.list({ prefix, cursor }); n += r.keys.length; cursor = r.list_complete ? null : r.cursor; } while (cursor);
+  return n;
+}
+async function goat(env, start, end) {
+  if (!env.GOATCOUNTER_TOKEN) return null;
+  const q = "start=" + start + "T00:00:00Z&end=" + end + "T23:59:59Z";
+  const get = async p => {
+    const r = await fetch("https://museaal.goatcounter.com/api/v0/" + p, { headers: { Authorization: "Bearer " + env.GOATCOUNTER_TOKEN, "Content-Type": "application/json" } });
+    if (!r.ok) throw new Error("goatcounter " + r.status);
+    return r.json();
+  };
+  const [total, hits, refs] = await Promise.all([get("stats/total?" + q), get("stats/hits?" + q + "&limit=100&group=day"), get("stats/toprefs?" + q + "&limit=15")]);
+  const day = s => (s || []).map(x => [x.day, x.daily]);
+  const all = (hits.hits || []).map(h => ({ path: h.path, title: h.title, event: !!h.event, count: h.count, days: day(h.stats) }));
+  return { total: total.total, events: total.total_events, days: day(total.stats),
+    pages: all.filter(h => !h.event).slice(0, 15).map(h => [h.path, h.count]),
+    events_list: all.filter(h => h.event), refs: (refs.stats || []).map(r => [r.name || "(direct)", r.count]) };
+}
+async function admin(body, env, reply, ip) {
+  if (!env.ADMIN_KEY) return reply({ error: "The backoffice is not set up." }, 503);
+  if (tooMany(ip, tries, 5)) return reply({ error: "Too many tries; wait a minute." }, 429);
+  if (await hash(String(body.key || "")) !== await hash(env.ADMIN_KEY)) return reply({ error: "Wrong key." }, 401);
+  tries.delete(ip);
+  const KV = env.LISTS, end = today(), days = [];
+  for (let i = 29; i >= 0; i--) days.push(new Date(Date.now() - i * 86400000).toISOString().slice(0, 10));
+  const out = { days, at: new Date().toISOString() };
+  if (KV) {
+    const [accounts, news, devices, links] = await Promise.all(["u:", "n:", "s:", "t:"].map(p => countKeys(KV, p)));
+    out.keys = { accounts, news, devices, links };
+    for (const what of ["signup", "ask", "mood"]) out[what] = await Promise.all(days.map(async d => +(await KV.get("c:" + what + ":" + d)) || 0));
+  }
+  try { out.goat = await goat(env, days[0], end); } catch (e) { out.goat_error = String(e.message); }
+  return reply(out);
+}
+
 const mac = async (secret, s) => {
   const k = await crypto.subtle.importKey("raw", enc(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
   return b64u(await crypto.subtle.sign("HMAC", k, enc(s)));
@@ -531,7 +584,7 @@ function tooManyPhotos(ip) {
 }
 
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
     const origin = request.headers.get("Origin") || "";
     const ok = ORIGINS.includes(origin);
     const cors = {
@@ -554,6 +607,10 @@ export default {
       try { return await list(path.slice(6), body && typeof body === "object" ? body : {}, env, reply, ip); }
       catch (e) { console.log("list failed", String(e.message)); return reply({ error: "The list could not be reached." }, 502); }
     }
+    if (path === "/admin/stats") {
+      try { return await admin(body && typeof body === "object" ? body : {}, env, reply, ip); }
+      catch (e) { console.log("admin failed", String(e.message)); return reply({ error: "The figures could not be read." }, 502); }
+    }
     // a turn's later tool rounds count against the wider limit only
     const round = Array.isArray(body.trail) && body.trail.length > 0;
     if (tooMany(ip, rounds, CALLS_PER_MINUTE) || !round && tooMany(ip)) return reply({ error: "Too many searches; wait a minute." }, 429);
@@ -564,6 +621,7 @@ export default {
       if (pass) more["X-Museaal-Pass"] = pass;
     }
     if (path === "/ask") {
+      if (!round) later(ctx, bump(env, "ask"));
       if (body.image && tooManyPhotos(request.headers.get("CF-Connecting-IP") || "?")) return reply({ error: "Too many photos; wait a minute." }, 429);
       return ask(body, env, reply);
     }
@@ -571,6 +629,7 @@ export default {
     let q = "";
     try { q = String(body.q || "").replace(/\s+/g, " ").trim().slice(0, 200); } catch (e) {}
     if (!q) return reply({ error: "Nothing to read." }, 400);
+    later(ctx, bump(env, "mood"));
 
     let r;
     try {
