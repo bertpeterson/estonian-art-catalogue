@@ -75,9 +75,12 @@ into centimetres and the wall's perspective itself (the model places things well
 
 A visitor types their email address under My List; the Worker emails them a sign-in link, and the list is then
 kept in step on every device they open the link on (`list-sync.js`, which `list_sync.py` puts in the pages).
-In KV only hashes are stored: the list under an HMAC of the address, sessions and links under their SHA-256.
-The address itself is in KV only for the 15 minutes a link is valid. 1,000 works a list at most; a list not
-changed for two years, and a session after one, expire. "Delete account" deletes the stored list.
+In KV the keys are hashes: the list under an HMAC of the address, sessions and links under their SHA-256. The
+list's record also keeps the account's address (the sign-in text says so), and the key's metadata repeats it with
+the day the account began, for the backoffice. Accounts from before 15 Oct 2026 kept no address; they get it at
+their next sign-in. 1,000 works a list at most; a list not changed for two years, and a session after one, expire.
+"Delete account" deletes the stored list and its address. The address is used for sign-in links only, and for
+news only with the `n:` opt-in below.
 
 **News emails.** The sign-in has an unticked "Email me about new features" box. Only for those who tick it and
 then open the link (so the address is confirmed) does the Worker keep `n:<account>` in KV: `{e, lang, at, v,
@@ -113,7 +116,7 @@ minute. KV's free plan allows 1,000 writes a day: a sign-in is about four, a cha
 
 `site/admin.html` (build_admin.py) is not linked anywhere and is noindex. It asks once for a key and keeps it in
 that browser. With the key the Worker returns the KV's keys counted by kind (`u:` accounts, `n:` news opt-ins,
-`s:` signed-in devices, `t:` waiting links), its day counters for 30 days (`c:signup:`, `c:ask:`, `c:mood:`
+`s:` signed-in devices, `t:` waiting links), every account's address with the day it began, its day counters for 30 days (`c:signup:`, `c:ask:`, `c:mood:`
 followed by the date, kept 400 days), and GoatCounter's visits, pages, referrers and events. The page itself adds
 stock by gallery (from the build) and each workflow's last run (from GitHub's public API).
 

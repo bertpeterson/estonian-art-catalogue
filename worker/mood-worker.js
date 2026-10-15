@@ -393,11 +393,12 @@ async function ask(body, env, reply) {
 
 // My List across devices: a visitor signs in with their email address and the list follows them. POST /list/login
 // sends a sign-in link; /list/verify trades the link's token for a session; /list/sync, /list/logout and
-// /list/delete use the session. In KV (binding LISTS), every key a hash, so what is stored is no use to anyone who
-// reads it: t:<token's hash> the address and its account for 15 minutes; s:<session's hash> the account, for a year;
-// u:<account> the list, two years from its last change; r:<account> sign-in links sent this hour. The account is an
-// HMAC of the address (LIST_SECRET), so the address itself is kept only until the link is used -- unless the visitor
-// ticked "Email me about new features": then n:<account> keeps the address, the time they confirmed it by opening the
+// /list/delete use the session. In KV (binding LISTS), every key a hash: t:<token's hash> the address and its account
+// for 15 minutes; s:<session's hash> the account, for a year; u:<account> the list and the account's address (the
+// sign-in says so), two years from its last change, with the address, the day it began and the list's length also
+// in the key's metadata for the backoffice; r:<account> sign-in links sent this hour. The account is an HMAC of the
+// address (LIST_SECRET); accounts from before 15 Oct 2026 kept no address and get it at their next sign-in. If the
+// visitor ticked "Email me about new features", n:<account> keeps the address, the time they confirmed it by opening the
 // link, and the unsubscribe link every such email must carry, until they stop it (/list/unsubscribe with that link's
 // token, or /list/news signed in) or delete the account. worker/README.md says how to read them out. Needs the KV
 // binding LISTS and the secrets LIST_SECRET and RESEND_API_KEY (worker/README.md); MAIL_FROM optional.
@@ -413,6 +414,8 @@ async function account(env, email) {
 const EMAIL = /^[^\s@<>()[\]",;:\\]{1,64}@[a-z0-9-]+(\.[a-z0-9-]+)*\.[a-z]{2,}$/;
 const workKey = k => typeof k === "string" && k.length > 0 && k.length <= 120 && !/[\u0000-\u001f]/.test(k);
 const keys = v => Array.isArray(v) ? [...new Set(v.filter(workKey))].slice(0, LIST_MAX) : [];
+const putList = (KV, u, rec) => KV.put("u:" + u, JSON.stringify(rec),
+  { expirationTtl: LIST_TTL, metadata: { e: rec.e, since: rec.since, n: rec.items.length, at: rec.updated } });
 
 const MAIL = {          // no bare "museaal.ee" in the text: mail apps make it a second link next to the sign-in one
   en: { subject: "Your sign-in link for museaal.ee", text: (link, news) => "Here is your link to sign in to Museaal:\n\n" + link +
@@ -474,7 +477,8 @@ async function list(path, body, env, reply, ip) {
     if (!t) return reply({ error: "This link has expired or was used." }, 410);
     await KV.delete(k);
     const rec = await KV.get("u:" + t.u, "json");
-    if (!rec) { await KV.put("u:" + t.u, JSON.stringify({ items: [], updated: Date.now() }), { expirationTtl: LIST_TTL }); await bump(env, "signup").catch(() => {}); }
+    if (!rec) await bump(env, "signup").catch(() => {});
+    if (!rec || rec.e !== t.e) await putList(KV, t.u, { items: [], updated: Date.now(), ...rec, e: t.e, since: rec ? rec.since : today() });
     const s = token();
     await KV.put("s:" + await hash(s), JSON.stringify({ u: t.u }), { expirationTtl: SESSION_TTL });
     // the box was ticked and the link opened: the address is confirmed, and kept for the news emails
@@ -507,7 +511,7 @@ async function list(path, body, env, reply, ip) {
   const was = JSON.stringify(rec.items), rem = new Set(keys(body.remove));
   const items = rec.items.filter(k => !rem.has(k));
   for (const k of keys(body.add)) if (!items.includes(k) && items.length < LIST_MAX) items.push(k);
-  if (JSON.stringify(items) !== was) await KV.put("u:" + s.u, JSON.stringify({ items, updated: Date.now() }), { expirationTtl: LIST_TTL });
+  if (JSON.stringify(items) !== was) await putList(KV, s.u, { ...rec, items, updated: Date.now() });
   return reply({ items, news: !!(await KV.get("n:" + s.u)) });
 }
 
@@ -523,14 +527,14 @@ function tooMany(ip, map = seen, limit = PER_MINUTE, span = 60000) {
 // token cannot be forged. A token is good once and for five minutes, so the first one buys a pass: its expiry and an
 // HMAC of the visitor's address and that expiry, sent back with every later message. A new address asks again.
 const PASS_TTL = 30 * 60;
-// /admin/stats, for museaal.ee/admin: the KV's keys counted by kind, the day counters for 30 days, and GoatCounter's
+// /admin/stats, for museaal.ee/admin: the KV's keys counted by kind, the accounts' addresses, the day counters for 30 days, and GoatCounter's
 // figures for the same days fetched with GOATCOUNTER_TOKEN (read-only), all behind ADMIN_KEY. KV list calls are
 // a thousand keys each, and the free plan has a thousand a day: fine for a page opened now and then.
 const tries = new Map();          // visitor -> wrong keys: 5 a minute
-async function countKeys(KV, prefix) {
-  let n = 0, cursor;
-  do { const r = await KV.list({ prefix, cursor }); n += r.keys.length; cursor = r.list_complete ? null : r.cursor; } while (cursor);
-  return n;
+async function allKeys(KV, prefix) {
+  const out = []; let cursor;
+  do { const r = await KV.list({ prefix, cursor }); out.push(...r.keys); cursor = r.list_complete ? null : r.cursor; } while (cursor);
+  return out;
 }
 async function goat(env, start, end) {
   if (!env.GOATCOUNTER_TOKEN) return null;
@@ -556,8 +560,12 @@ async function admin(body, env, reply, ip) {
   for (let i = 29; i >= 0; i--) days.push(new Date(Date.now() - i * 86400000).toISOString().slice(0, 10));
   const out = { days, at: new Date().toISOString() };
   if (KV) {
-    const [accounts, news, devices, links] = await Promise.all(["u:", "n:", "s:", "t:"].map(p => countKeys(KV, p)));
-    out.keys = { accounts, news, devices, links };
+    const [accounts, news, devices, links] = await Promise.all(["u:", "n:", "s:", "t:"].map(p => allKeys(KV, p)));
+    out.keys = { accounts: accounts.length, news: news.length, devices: devices.length, links: links.length };
+    // the accounts' addresses, newest first: [address or null (from before 15 Oct 2026), began, works, last change, news]
+    const wantNews = new Set(news.map(k => k.name.slice(2)));
+    out.people = accounts.map(k => { const m = k.metadata || {}; return [m.e || null, m.since || null, m.n ?? null, m.at || null, wantNews.has(k.name.slice(2))]; })
+      .sort((a, b) => (b[1] || "").localeCompare(a[1] || "") || (b[3] || 0) - (a[3] || 0));
     for (const what of ["signup", "ask", "mood"]) out[what] = await Promise.all(days.map(async d => +(await KV.get("c:" + what + ":" + d)) || 0));
   }
   try { out.goat = await goat(env, days[0], end); } catch (e) { out.goat_error = String(e.message); }
