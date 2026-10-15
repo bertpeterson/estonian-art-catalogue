@@ -1194,7 +1194,7 @@
   function renderInner(){
     syncOrder();
     if (state.view && state.viewKey !== scopeKey()) state.view = null;   // a List / Artwall choice is for one view
-    renderDoors(); renderListBar(); renderAccTop();
+    renderDoors(); accFromLink(); renderListBar(); renderAccTop();
     // The count line and Reset describe and undo a selection; before there is one
     // they only repeat the masthead.
     $("countline").hidden = pristine(); $("reset").hidden = pristine();
@@ -1839,17 +1839,20 @@
     const ML = window.museaalList, who = ML.who(), n = ML.note();
     const msg = n && n !== "in" ? `<span class="sl-note acc-msg" role="status">${esc(T("acc_" + n))}</span>` : "";
     if (who) return `<span class="sl-note">${esc(T("acc_in", {e: who}))}</span>`
+      + (ML.news() ? `<span class="sl-note">${esc(T("acc_news_on"))}</span><button class="linkbtn" data-sl-act="nonews">${esc(T("acc_news_stop"))}</button>` : "")
       + `<button class="linkbtn" data-sl-act="signout">${esc(T("acc_signout"))}</button>`
       + `<button class="linkbtn" data-sl-act="forget">${esc(T("acc_delete"))}</button>` + msg;
     return `<span class="acc"><input type="email" id="${id}" autocomplete="email" spellcheck="false" placeholder="${esc(T("acc_email"))}" aria-label="${esc(T("acc_email"))}">`
       + `<button class="linkbtn" data-sl-act="signin">${esc(T("acc_send"))}</button></span>`
+      + `<label class="acc-news"><input type="checkbox" id="${id}-news"> ${esc(T("acc_news"))}</label>`
       + (n === "sent" || top ? "" : `<span class="sl-note">${esc(T("acc_offer"))}</span>`) + msg;
   }
   function accountSignIn(id){
     const inp = $(id), v = inp ? inp.value.trim() : "";
     if (!v || !inp.checkValidity()){ if (inp) inp.focus(); return; }
     inp.disabled = true;
-    museaalList.signIn(v, LANG, inp.closest(".listbar"));
+    const news = $(id + "-news");
+    museaalList.signIn(v, LANG, inp.closest(".listbar"), !!(news && news.checked));
   }
   // the same sign-in, from the masthead: a button beside the language and theme, and a panel
   // under it that says what an account is for and what is kept
@@ -1874,12 +1877,13 @@
     try { (JSON.parse(localStorage.getItem(SL_KEY) || "[]") || []).forEach(k => { if (typeof k === "string") SL.add(k); }); } catch(e){}
     renderAll(); if (state.list) pushHash(true);
   });
-  addEventListener("museaal:account", () => {
-    // back from the emailed link: the panel says how it went
-    const n = window.museaalList.note();
-    if ((n === "in" || n === "expired") && !state.list) $("accpanel").hidden = false;
-    renderAccTop(); renderListBar();
-  });
+  // back from an emailed link (sign-in or unsubscribe): the panel says how it went, also when the answer came
+  // before this script was listening
+  function accFromLink(){
+    const n = window.museaalList ? window.museaalList.note() : "";
+    if (["in", "expired", "unsub", "unsub_bad"].includes(n) && !state.list) $("accpanel").hidden = false;
+  }
+  addEventListener("museaal:account", () => { accFromLink(); renderAccTop(); renderListBar(); });
   async function slCSV(){
     const keys = listKeys() || SL;
     const rows = W.filter(w => keys.has(w.k));
@@ -2134,6 +2138,7 @@
     else if (act === "signin") accountSignIn("acc-email");
     else if (act === "signout") museaalList.signOut();
     else if (act === "forget"){ if (confirm(T("acc_delete_confirm"))) museaalList.remove(); }
+    else if (act === "nonews") museaalList.stopNews();
   });
   $("listbar").addEventListener("keydown", e => { if (e.key === "Enter" && e.target.id === "acc-email") accountSignIn("acc-email"); });
   $("acc-top").addEventListener("click", () => accTop($("accpanel").hidden));
@@ -2144,6 +2149,7 @@
     else if (act === "signin") accountSignIn("acc-email-top");
     else if (act === "signout") museaalList.signOut();
     else if (act === "forget"){ if (confirm(T("acc_delete_confirm"))) museaalList.remove(); }
+    else if (act === "nonews") museaalList.stopNews();
   });
   $("accpanel").addEventListener("keydown", e => {
     if (e.key === "Enter" && e.target.id === "acc-email-top") accountSignIn("acc-email-top");

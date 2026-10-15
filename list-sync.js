@@ -50,6 +50,10 @@
       });
     });
   }
+  function setNews(on, why) {
+    var a = acc(); if (a && !!a.news !== on) { a.news = on; write(ACC, a); if (!why) tell("museaal:account"); }
+    if (why) { note = why; tell("museaal:account"); }
+  }
   function out(why) { write(ACC, null); note = why; tell("museaal:account"); }
   function sync(keep) {
     var a = acc(); if (!a) return Promise.resolve();
@@ -64,6 +68,7 @@
       var now = list(), mine = j.items.filter(function (k) { return has(now, k) || !has(sent, k); });
       now.forEach(function (k) { if (!has(sent, k) && !has(mine, k)) mine.push(k); });
       var b = acc(); b.base = j.items; write(ACC, b);
+      if (typeof j.news === "boolean") setNews(j.news);
       if (JSON.stringify(mine) !== JSON.stringify(now)) { write(LIST, mine); tell("museaal:list"); }
       if (JSON.stringify(mine) !== JSON.stringify(j.items)) again = true;
     }).catch(function () {}).then(function () { busy = null; if (again) { again = false; sync(); } });
@@ -78,10 +83,19 @@
     post("verify", { token: tok }).then(function (j) {
       if (!j.session) { note = j.status === 410 ? "expired" : "failed"; tell("museaal:account"); return; }
       // the first sync sends everything kept here as added: the two lists are joined, nothing lost
-      write(ACC, { s: j.session, e: j.email, base: [] }); note = "in"; tell("museaal:account");
+      write(ACC, { s: j.session, e: j.email, base: [], news: !!j.news }); note = "in"; tell("museaal:account");
       return sync();
     }, function () { note = "failed"; tell("museaal:account"); });
   } else if (acc()) sync();
+  // the unsubscribe link from a news email: #unsub=<account>.<seal>, signed in or not
+  var unsub = h.get("unsub");
+  if (unsub) {
+    h.delete("unsub");
+    var left = h.toString().replace(/%2C/g, ",");
+    try { history.replaceState(null, "", location.pathname + location.search + (left ? "#" + left : "")); } catch (e) {}
+    post("unsubscribe", { token: unsub }).then(function (j) { setNews(false, j.ok ? "unsub" : "unsub_bad"); },
+      function () { note = "unsub_bad"; tell("museaal:account"); });
+  }
 
   document.addEventListener("visibilitychange", function () {
     if (document.visibilityState === "visible" && acc() && Date.now() - last > 30000) sync();
@@ -91,11 +105,18 @@
   window.museaalList = {
     changed: function () { if (!acc()) return; clearTimeout(timer); timer = setTimeout(function () { timer = 0; sync(); }, 2000); },
     who: function () { var a = acc(); return a ? a.e : ""; },
-    // what last happened, for the page to say: sent, busy, bad, robot, failed, in, expired, gone, out, deleted
+    // whether the signed-in account gets the news emails (n:<account> in the Worker), and stopping them
+    news: function () { var a = acc(); return !!(a && a.news); },
+    stopNews: function () {
+      var a = acc(); if (!a) return Promise.resolve();
+      return post("news", { session: a.s }).then(function (j) { if (j.ok) setNews(false, "unsub"); else { note = "failed"; tell("museaal:account"); } },
+        function () { note = "failed"; tell("museaal:account"); });
+    },
+    // what last happened, for the page to say: sent, busy, bad, robot, failed, in, expired, gone, out, deleted, unsub, unsub_bad
     note: function () { return note; },
-    signIn: function (email, lang, box) {
+    signIn: function (email, lang, box, news) {
       return human(box).then(function (t) {
-        var b = { email: email, lang: lang }; if (t) b.human = t;
+        var b = { email: email, lang: lang, news: !!news }; if (t) b.human = t;
         return post("login", b);
       }).then(function (j) {
         note = j.ok ? "sent" : j.status === 429 ? "busy" : j.status === 400 ? "bad" : j.status === 401 ? "robot" : "failed";
