@@ -1834,14 +1834,13 @@
     el.hidden = false;
   }
   // signing in, so the list follows the visitor to their other devices (list-sync.js): an email
-  // address, a link sent to it, and the list joined with what the account already holds
+  // address, a link sent to it, and the list joined with what the account already holds. Signed in, one line
+  // that goes to the account page, where the news emails, signing out and deleting are (build_account.py)
+  const accHref = () => LANG === "et" ? "konto" : "account";
   function accountHTML(id, top){
     const ML = window.museaalList, who = ML.who(), n = ML.note();
     const msg = n && n !== "in" ? `<span class="sl-note acc-msg" role="status">${esc(T("acc_" + n))}</span>` : "";
-    if (who) return `<span class="sl-note">${esc(T("acc_in", {e: who}))}</span>`
-      + (ML.news() ? `<span class="sl-note">${esc(T("acc_news_on"))}</span><button class="linkbtn" data-sl-act="nonews">${esc(T("acc_news_stop"))}</button>` : "")
-      + `<button class="linkbtn" data-sl-act="signout">${esc(T("acc_signout"))}</button>`
-      + `<button class="linkbtn" data-sl-act="forget">${esc(T("acc_delete"))}</button>` + msg;
+    if (who) return `<a class="linkbtn" href="${accHref()}">${esc(T("acc_link_in", {e: who}))}</a>` + msg;
     return `<span class="acc"><input type="email" id="${id}" autocomplete="email" spellcheck="false" placeholder="${esc(T("acc_email"))}" aria-label="${esc(T("acc_email"))}">`
       + `<button class="linkbtn" data-sl-act="signin">${esc(T("acc_send"))}</button></span>`
       + `<label class="acc-news"><input type="checkbox" id="${id}-news"> ${esc(T("acc_news"))}</label>`
@@ -1854,12 +1853,17 @@
     const news = $(id + "-news");
     museaalList.signIn(v, LANG, inp.closest(".listbar"), !!(news && news.checked));
   }
-  // the same sign-in, from the masthead: a button under the tagline, and a panel under the masthead
+  // the same sign-in, from the masthead: a button under the tagline, and a panel under the masthead.
+  // Signed in, the button gives way to a link to the account page; the panel opens then only to say how an
+  // emailed link went
   function renderAccTop(){
-    const ML = window.museaalList, b = $("acc-top"), p = $("accpanel");
+    const ML = window.museaalList, b = $("acc-top"), p = $("accpanel"), a = $("acc-link");
     if (!ML) return;
     b.parentNode.hidden = false;
-    b.textContent = T(ML.who() ? "acc_top_in" : "acc_top");
+    const who = ML.who();
+    b.hidden = !!who; a.hidden = !who;
+    b.textContent = T("acc_top");
+    a.textContent = T("acc_link"); a.href = accHref(); a.title = who;
     b.setAttribute("aria-expanded", !p.hidden);
     if (p.hidden){ p.innerHTML = ""; return; }
     p.innerHTML = accountHTML("acc-email-top", true)
@@ -2134,9 +2138,6 @@
     else if (act === "clear"){ if (!confirm(T("sl_confirm"))) return; SL.clear(); slSave(); renderAll(); pushHash(); }
     else if (act === "close"){ state.list = false; state.shared = null; renderAll(); pushHash(); }
     else if (act === "signin") accountSignIn("acc-email");
-    else if (act === "signout") museaalList.signOut();
-    else if (act === "forget"){ if (confirm(T("acc_delete_confirm"))) museaalList.remove(); }
-    else if (act === "nonews") museaalList.stopNews();
   });
   $("listbar").addEventListener("keydown", e => { if (e.key === "Enter" && e.target.id === "acc-email") accountSignIn("acc-email"); });
   $("acc-top").addEventListener("click", () => accTop($("accpanel").hidden));
@@ -2145,13 +2146,10 @@
     const act = b.dataset.slAct;
     if (act === "close") accTop(false);
     else if (act === "signin") accountSignIn("acc-email-top");
-    else if (act === "signout") museaalList.signOut();
-    else if (act === "forget"){ if (confirm(T("acc_delete_confirm"))) museaalList.remove(); }
-    else if (act === "nonews") museaalList.stopNews();
   });
   $("accpanel").addEventListener("keydown", e => {
     if (e.key === "Enter" && e.target.id === "acc-email-top") accountSignIn("acc-email-top");
-    else if (e.key === "Escape"){ accTop(false); $("acc-top").focus(); }
+    else if (e.key === "Escape"){ accTop(false); ($("acc-top").hidden ? $("acc-link") : $("acc-top")).focus(); }
   });
   // The mark sits beside each row button and inside the open record; neither is
   // within a .row-btn, so the row handler never sees these clicks.
