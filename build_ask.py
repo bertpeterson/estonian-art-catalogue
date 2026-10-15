@@ -188,6 +188,7 @@ var EN=document.documentElement.lang==='en', api=page.dataset.api, src=page.data
 var V=(/[?&]v=([ao])(&|$)/.exec(location.search)||[])[1];
 if(!V){try{V=localStorage.getItem('find-v')}catch(e){}if(V!=='a'&&V!=='o'){V=Math.random()<.5?'a':'o';try{localStorage.setItem('find-v',V)}catch(e){}}}
 var talked=false, wentOut=false;
+HUMAN.start(page.dataset.ts,document.getElementById('human'));
 function gc(p,t){if(window.goatcounter&&goatcounter.count)goatcounter.count({path:p,title:t||p,event:true})}
 var D=null, P=null, msgs=[], shownKeys={}, busy=false, labels=JSON.parse(document.getElementById('labels').textContent);
 var R=null, rooms=[];                              // the room on view (the latest photo), and every one shown
@@ -688,7 +689,7 @@ function send(text,photo){
   if(photo){body.image=photo.data;body.w=photo.w;body.h=photo.h}else if(V==='a'){body.tools=1;body.trail=[]}
   var ml=myList();if(ml.length)body.mylist=ml;
   // a round: the Worker answers, or asks for searches, which run here on the stock and go back with the next round
-  function round(){return Promise.all([fetch(api,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).then(function(r){return r.json().then(function(j){if(!r.ok)throw j;return j})}),stock()])
+  function round(){return Promise.all([HUMAN.post(api,body).then(function(r){return r.json().then(function(j){if(!r.ok)throw j;return j})}),stock()])
     .then(function(res){var q=res[0];
       if(!q.calls||!q.calls.length||!body.trail||body.trail.length>=8)return res;
       var out=q.calls.map(function(c){var r;try{r=TOOL.hasOwnProperty(c.name)?TOOL[c.name](c.input||{}):{error:'No such tool.'}}catch(e){r={error:'The search failed.'}}
@@ -830,6 +831,7 @@ CSS = BM.CSS + """
 form.ask{position:sticky;bottom:0;background:var(--paper);padding:12px 0 6px;border-top:1px solid var(--rule);display:flex;gap:8px;flex-wrap:wrap}
 form.ask label[for=q]{position:absolute;left:-9999px}
 form.ask input{flex:1 1 260px;min-width:0;font:400 1.1rem/1.2 var(--serif);color:var(--ink);background:var(--raise);border:1px solid var(--rule);padding:11px 12px}
+form.ask .human{flex-basis:100%}
 form.ask input:focus{outline:2px solid var(--ink);outline-offset:1px}
 .photobtn{display:inline-flex;align-items:center}
 .msg.you .thumb{display:block;max-width:220px;height:auto;margin-bottom:6px}
@@ -950,6 +952,7 @@ def page(lang, ver, api, labels, M, n=0, tver="", names=()):
                                        "sl_add", "sl_remove", "fybtn", "fyhint", "fysee", "fybit", "fynone")}, ensure_ascii=False).replace("</", "<\\/")
     lj = json.dumps(labels, ensure_ascii=False).replace("</", "<\\/")
     ask = (api.rstrip("/") + "/ask") if api else ""
+    ts = f' data-ts="{e(BM.TS)}"' if ask and BM.TS else ""       # the Worker's Turnstile site key
     return (f'<!doctype html><html lang="{lang}"><head><meta charset="utf-8">{H.STAMP}<meta name="viewport" content="width=device-width,initial-scale=1">'
             f'<title>{e(t["title"].format(n=f"{n:,}".replace(",", " " if lang == "et" else ",")))} · museaal.ee</title><meta name="description" content="{e(t["lede"][:290])}">'
             f'<link rel="canonical" href="{me}"><link rel="alternate" hreflang="{lang}" href="{me}"><link rel="alternate" hreflang="{"et" if lang == "en" else "en"}" href="{other}">'
@@ -959,15 +962,15 @@ def page(lang, ver, api, labels, M, n=0, tver="", names=()):
             f'<style>{CSS}</style>{H.GC}{LS.TAG}</head><body><div class="wrap">'
             f'<nav><a href="{BASE}/{"" if lang == "en" else "#lang=et"}">{e(t["site"])}</a> › {e(t["h"])} · <a href="{other}" hreflang="{"et" if lang == "en" else "en"}">{e(t["other_l"])}</a></nav>'
             f'<header><h1>{e(t["h"])}</h1><p class="lede">{e(t["lede"])}</p></header>'
-            f'<section class="chat" id="chat" data-api="{e(ask)}" data-src="data/stock.json?v={ver}" data-taste="data/taste-stock.bin?v={tver}" data-tshard="data/taste/" data-tver="{tver}">'
+            f'<section class="chat" id="chat" data-api="{e(ask)}" data-src="data/stock.json?v={ver}" data-taste="data/taste-stock.bin?v={tver}" data-tshard="data/taste/" data-tver="{tver}"{ts}>'
             f'{panel(t, labels, M, names)}<div class="log" id="log" aria-live="polite"><div class="msg them"><p>{e(t["hello"])}</p></div></div>'
             f'<form class="ask" id="ask"><label for="q">{e(t["label"])}</label><input id="q" type="text" maxlength="400" autocomplete="off" placeholder="{e(t["ph"])}">'
             f'<button class="btn solid" type="submit">{e(t["send"])}</button>'
             + (f'<input id="photo" type="file" accept="image/*" hidden><label for="photo" class="btn photobtn" role="button" tabindex="0">{e(t["photo"])}</label>' if PHOTO else '')
-            + '</form></section>'
+            + '<div class="human" id="human"></div></form></section>'
             + f'<footer><details class="about"><summary>{e(t["about"])}</summary><p>{e(t["note"])} {H.CONTACT[lang]}</p></details></footer></div>'
             f'<script type="importmap">{{"imports":{{"three":"https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/"}}}}</script>'
-            f'<script type="application/json" id="t">{tj}</script><script type="application/json" id="labels">{lj}</script><script>{BM.SL_JS}{JS}</script></body></html>')
+            f'<script type="application/json" id="t">{tj}</script><script type="application/json" id="labels">{lj}</script><script>{BM.SL_JS}{BM.HUMAN_JS}{JS}</script></body></html>')
 
 # Pages a search engine can read: the works for sale by medium and by price, in both languages. Buy art for your
 # home draws its works in the browser, so a search for "oil paintings for sale" found nothing of them; these list

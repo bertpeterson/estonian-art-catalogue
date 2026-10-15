@@ -27,6 +27,23 @@ credit. Without the Worker the page still works: typed words are matched by stem
    (`{"url": "https://museaal-mood.<your-name>.workers.dev"}`); the next build puts it in
    the page and in the Content-Security-Policy.
 
+## Turnstile (bots kept off the Anthropic key)
+
+The Origin check stops other sites' pages, not a script, which can send any Origin it likes. Cloudflare
+Turnstile closes that: the page runs Cloudflare's check as it opens (unseen unless Cloudflare wants a click)
+and sends the token with the first message; the Worker checks it with Cloudflare and answers with a pass
+for 30 minutes (an HMAC of the visitor's address and the expiry), which the page sends from then on.
+
+1. dash.cloudflare.com → Turnstile → Add widget: hostname `museaal.ee`, mode Managed. It gives a site key
+   and a secret key.
+2. The Worker's Settings → Variables and Secrets → Add → Secret `TURNSTILE_SECRET`, the secret key → Deploy.
+3. The site key into `data/mood_api.json` as `"turnstile": "0x…"`, and push: the build puts it in the
+   pages and lets `challenges.cloudflare.com` into their Content-Security-Policy.
+
+Order does not matter much: without the secret the Worker lets everyone through as before; with the secret
+but before the pages carry the key, the mood box falls back to stems and Buy Art's assistant says "Please
+confirm you are not a robot" until the push is live. `/list/*` is not behind it (it spends nothing).
+
 ## Limits built in
 
 Answers museaal.ee only (the browser's Origin header); 20 searches a minute per visitor;

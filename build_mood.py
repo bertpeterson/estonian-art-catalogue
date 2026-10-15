@@ -168,6 +168,7 @@ h1{margin:0;font:500 clamp(2.1rem,4.6vw,3.2rem)/1 var(--serif);letter-spacing:-.
 form.describe{display:flex;flex-wrap:wrap;gap:8px;align-items:center;max-width:640px}
 form.describe label{font:500 .68rem/1 var(--mono);letter-spacing:.13em;text-transform:uppercase;color:var(--grey);flex-basis:100%}
 form.describe input{flex:1 1 260px;min-width:0;font:400 1.1rem/1.2 var(--serif);color:var(--ink);background:var(--raise);border:1px solid var(--rule);padding:10px 12px}
+form.describe .human{flex-basis:100%}
 form.describe input:focus{outline:2px solid var(--ink);outline-offset:1px}
 .btn{font:500 .74rem/1 var(--mono);letter-spacing:.07em;text-transform:uppercase;color:var(--ink);background:none;border:1px solid var(--rule);padding:10px 13px;cursor:pointer}
 .btn:hover{border-color:var(--grey)}.btn.solid{background:var(--on);color:var(--on-ink);border-color:var(--on)}
@@ -225,10 +226,41 @@ function slBtn(k,T,ev,after){SL_T=T;var b=document.createElement('button');b.typ
   return b}
 """
 
+# Cloudflare Turnstile in front of the Worker (worker/template.js, human()): the widget runs as the page opens and shows
+# itself only when Cloudflare wants a click; its token goes with the first message and buys a pass the Worker sends back
+# in a header. The site key is public; it works on museaal.ee only, Cloudflare's test keys (1x00…) anywhere.
+HUMAN_JS = r"""
+var HUMAN=(function(){
+  var key='', pass='', tok='', wait=[], id=null;
+  try{pass=sessionStorage.getItem('museaal.pass')||''}catch(e){}
+  function got(t){tok=t||'';var w=wait;wait=[];w.forEach(function(f){f(tok)})}
+  function start(k,box){
+    key=k&&(/(^|\.)museaal\.ee$/.test(location.hostname)||/^[123]x0+A[AB]$/.test(k))?k:'';
+    if(!key||!box)return;
+    window.museaalHuman=function(){id=turnstile.render(box,{sitekey:key,appearance:'interaction-only',callback:got,'error-callback':function(){got('')},'expired-callback':function(){tok=''}})};
+    var s=document.createElement('script');s.src='https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&onload=museaalHuman';s.async=true;document.head.appendChild(s)}
+  function token(fresh){            // a token not yet spent; fresh: a new one, the last having been refused
+    if(!key||!window.turnstile||id===null)return Promise.resolve('');
+    if(tok&&!fresh){var t=tok;tok='';turnstile.reset(id);return Promise.resolve(t)}
+    return new Promise(function(ok){var done=false,f=function(t){if(!done){done=true;ok(t||'')}};
+      wait.push(function(t){tok='';turnstile.reset(id);f(t)});if(fresh){tok='';turnstile.reset(id)}setTimeout(f,60000)})}
+  function post(url,body,signal){   // fetch with the pass, or with a token; once more with a new token if the Worker asks
+    function go(again){return (pass&&!again?Promise.resolve(''):token(again)).then(function(t){
+      var b=Object.assign({},body);if(t)b.human=t;else if(pass)b.pass=pass;
+      return fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b),signal:signal}).then(function(r){
+        var p=r.headers.get('X-Museaal-Pass');if(p){pass=p;try{sessionStorage.setItem('museaal.pass',p)}catch(e){}}
+        if(r.status!==401||again||!key)return r;
+        return r.clone().json().then(function(j){if(!j.human)return r;pass='';return go(true)},function(){return r})})})}
+    return go(false)}
+  return {start:start,post:post};
+})();
+"""
+
 JS = r"""
 (() => {
 const L = document.documentElement.lang === "et" ? "et" : "en", T = JSON.parse(document.getElementById("t").textContent);
 const $ = id => document.getElementById(id), wallEl = $("wall"), API = wallEl.dataset.api || "";
+HUMAN.start(wallEl.dataset.ts, $("human"));
 let D = null, sel = [], kind = "paint", shown = 48, lastCols = 0;
 const LISTS = {}, WEIGHT = [1, 0.85, 0.7, 0.6, 0.5];       // the first word counts most
 const src = im => im.startsWith("m:") ? "https://www.muis.ee/digitaalhoidla/api/meedia/pisipilt?id=" + encodeURIComponent(im.slice(2))
@@ -327,8 +359,8 @@ async function describe(text) {
   if (API) {
     say(T.reading);
     try {
-      const ctl = new AbortController(), timer = setTimeout(() => ctl.abort(), 6000);
-      const r = await fetch(API, {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({q: text}), signal: ctl.signal});
+      const ctl = new AbortController(), timer = setTimeout(() => ctl.abort(), 9000);
+      const r = await HUMAN.post(API, {q: text}, ctl.signal);
       clearTimeout(timer);
       if (r.ok) { const j = await r.json(); got = (j.words || []).filter(w => word(w)); k = j.kind || "keep"; }
     } catch (e) {}
@@ -393,6 +425,7 @@ def page(lang, ver, api, d, kinds):
     me, other = f"{BASE}/{t['file']}", f"{BASE}/{t['other']}"
     tj = json.dumps({k: t[k] for k in ("groups", "kinds", "none", "nomatch", "of", "works", "loading", "hash", "readas", "reading", "failed", "sl_add", "sl_remove")}, ensure_ascii=False).replace("</", "<\\/")
     api_attr = f' data-api="{e(api)}"' if api else ""        # the Worker that reads a typed description
+    if api and TS: api_attr += f' data-ts="{e(TS)}"'            # its Turnstile site key
     kinds = "".join(f'<button type="button" class="btn" data-k="{k}" aria-pressed="{str(k == "paint").lower()}">{e(v)}</button>' for k, v in t["kinds"].items())
     return (f'<!doctype html><html lang="{lang}"><head><meta charset="utf-8">{H.STAMP}<meta name="viewport" content="width=device-width,initial-scale=1">'
             f'<title>{e(t["h"])} · museaal.ee</title><meta name="description" content="{e(t["lede"][:290])}">'
@@ -405,7 +438,7 @@ def page(lang, ver, api, d, kinds):
             f'<header><h1>{e(t["h"])}</h1><p class="lede">{e(t["lede"])}</p></header>'
             f'<form class="describe" id="describe"><label for="feel">{e(t["describe"])}</label>'
             f'<input id="feel" type="text" autocomplete="off" placeholder="{e(t["ph"])}"><button class="btn solid" type="submit">{e(t["find"])}</button>'
-            f'<p class="msg" id="msg" hidden></p></form>'
+            f'<p class="msg" id="msg" hidden></p><div class="human" id="human"></div></form>'
             f'<div class="groups" id="groups">{chips}</div>'
             f'<div class="bar"><div class="seg" role="group">{kinds}</div>'
             f'<button type="button" class="btn" id="surprise">{e(t["surprise"])}</button><button type="button" class="btn" id="clear">{e(t["clear"])}</button>'
@@ -413,9 +446,10 @@ def page(lang, ver, api, d, kinds):
             f'<div class="wall static" id="wall" data-src="data/mood.json?v={ver}"{api_attr}>{tiles}</div>'
             f'<button type="button" class="btn more" id="more" hidden>{e(t["more"])}</button>'
             f'<footer>{e(t["note"])} {H.CONTACT[lang]}</footer></div>'
-            f'<script type="application/json" id="t">{tj}</script><script>{SL_JS}{JS}</script></body></html>')
+            f'<script type="application/json" id="t">{tj}</script><script>{SL_JS}{HUMAN_JS}{JS}</script></body></html>')
 
 API = (json.load(open("data/mood_api.json", encoding="utf-8")).get("url") or "") if os.path.exists("data/mood_api.json") else ""
+TS = (json.load(open("data/mood_api.json", encoding="utf-8")).get("turnstile") or "") if API else ""   # Turnstile site key, public
 
 def worker():
     """worker/mood-worker.js: the template with this vocabulary written in; paste it into the Worker"""
