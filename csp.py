@@ -6,7 +6,7 @@ allows scripts only from this site, GoatCounter, and the inline scripts the buil
 itself wrote -- each named by the SHA-256 of its exact text, so an inline script
 that arrived any other way does not run; pictures from any https server (the
 museums' and galleries' own); styles inline (the tiles carry their shapes as
-style attributes) and from Google Fonts; connections to this site (the data files)
+style attributes) and from this site; fonts from this site; connections to this site (the data files)
 and to GoatCounter; no plugins, no <base>, no forms. The app's inline event
 handlers went in the same change: a policy with hashes does not admit them.
 
@@ -21,7 +21,7 @@ API = re.match(r"https://[^/]+", _api).group(0) if re.match(r"https://[^/]+", _a
 # Cloudflare Turnstile, which guards that Worker when it has a site key: its script, and the frame it asks in
 TS = " https://challenges.cloudflare.com" if API and json.load(open("data/mood_api.json", encoding="utf-8")).get("turnstile") else ""
 POLICY = ("default-src 'self'; script-src 'self' https://gc.zgo.at{hashes}" + TS + "; " + ("frame-src" + TS + "; " if TS else "") +
-          "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; "
+          "style-src 'self' 'unsafe-inline'; font-src 'self'; "
           "img-src https: data:; connect-src 'self' https://museaal.goatcounter.com" + (" " + API if API else "") + "; "
           "base-uri 'none'; form-action 'none'; object-src 'none'; upgrade-insecure-requests")
 INLINE = re.compile(r"<script(?![^>]*\bsrc=)([^>]*)>(.*?)</script>", re.S)
