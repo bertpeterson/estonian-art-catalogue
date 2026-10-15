@@ -20,9 +20,9 @@ T = {
                title="Privacy", back="Back to the catalogue",
                lede="What museaal.ee keeps about you, and who else sees what. Updated 15 October 2026.",
                parts=[
-        ("Who runs it", [f"museaal.ee is an independent catalogue, run privately: not by a museum, a gallery or an auction house. "
+        ("Who runs it", [f"Museaal.ee is an independent catalogue, run privately: not by a museum, a gallery or an auction house. "
                          f"Questions, corrections and requests about your data: {MAIL}."]),
-        ("Browsing", ["You can use the whole catalogue without an account. museaal sets no cookies. My List and the light or dark "
+        ("Browsing", ["You can use the whole catalogue without an account. Museaal sets no cookies. My List and the light or dark "
                       "setting are kept in your browser's own storage, on your device, until you clear it.",
                       "Visits are counted with GoatCounter, without cookies and without personal data: which page was seen, not by whom. "
                       "A sign-in link sent and a sign-in are counted the same way.",
@@ -38,7 +38,7 @@ T = {
                          "Every one carries an unsubscribe link, and you can stop them any time, there or on your account page. "
                          "Until you stop them or delete your account we keep your address, your language and when you said yes."]),
         ("The Buy Art assistant and art by mood", ["What you type to the Buy Art assistant, with the works on My List, and the words you type on "
-                         "the mood page are sent to Claude, Anthropic's AI model, to answer. museaal does not keep them; "
+                         "the mood page are sent to Claude, Anthropic's AI model, to answer. Museaal does not keep them; "
                          "it counts only how many there were each day."]),
         ("Who handles it for us", ["Cloudflare runs the part that answers (a Worker), holds the accounts (Workers KV) and checks "
                          "that you are not a robot (Turnstile) before an email is sent or the assistant answers. "
@@ -53,9 +53,9 @@ T = {
                title="Privaatsus", back="Tagasi kataloogi",
                lede="Mida museaal.ee sinu kohta hoiab ja kes mida näeb. Uuendatud 15. oktoobril 2026.",
                parts=[
-        ("Kes seda peab", [f"museaal.ee on sõltumatu, eraviisiliselt peetav kataloog: mitte muuseumi, galerii ega oksjonimaja oma. "
+        ("Kes seda peab", [f"Museaal.ee on sõltumatu, eraviisiliselt peetav kataloog: mitte muuseumi, galerii ega oksjonimaja oma. "
                            f"Küsimused, parandused ja soovid sinu andmete kohta: {MAIL}."]),
-        ("Sirvimine", ["Kogu kataloogi saab kasutada ilma kontota. museaal ei sea küpsiseid. Minu nimekiri ning hele või tume vaade "
+        ("Sirvimine", ["Kogu kataloogi saab kasutada ilma kontota. Museaal ei sea küpsiseid. Minu nimekiri ning hele või tume vaade "
                        "on sinu brauseri enda mälus, sinu seadmes, kuni selle tühjendad.",
                        "Külastusi loeb GoatCounter, ilma küpsiste ja isikuandmeteta: milline leht vaadati, mitte kes vaatas. "
                        "Saadetud sisselogimislinke ja sisselogimisi loetakse samamoodi.",
@@ -72,7 +72,7 @@ T = {
                          "Kuni lõpetad või konto kustutad, hoiame sinu aadressi, keelt ja aega, millal nõustusid."]),
         ("Kunstiostu abiline ja kunst meeleolu järgi", ["See, mida kirjutad kunstiostu abilisele, koos Minu nimekirja teostega, ja sõnad, "
                          "mida kirjutad meeleolu lehel, saadetakse vastamiseks Anthropicu tehisintellekti mudelile Claude. "
-                         "museaal neid ei hoia; loeme ainult, mitu neid päevas oli."]),
+                         "Museaal neid ei hoia; loeme ainult, mitu neid päevas oli."]),
         ("Kes neid meie eest käsitleb", ["Cloudflare käitab vastavat osa (Worker), hoiab kontosid (Workers KV) ja kontrollib "
                          "(Turnstile), et sa pole robot, enne kui kiri saadetakse või abiline vastab. "
                          "Resend saadab e-kirjad oma ELi piirkonnast. Anthropic vastab abilisele ja meeleolu lehele. "
