@@ -413,15 +413,15 @@ const EMAIL = /^[^\s@<>()[\]",;:\\]{1,64}@[a-z0-9-]+(\.[a-z0-9-]+)*\.[a-z]{2,}$/
 const workKey = k => typeof k === "string" && k.length > 0 && k.length <= 120 && !/[\u0000-\u001f]/.test(k);
 const keys = v => Array.isArray(v) ? [...new Set(v.filter(workKey))].slice(0, LIST_MAX) : [];
 
-const MAIL = {
-  en: { subject: "Your sign-in link for museaal.ee", text: (link, news) => "Open this link to sign in to My List on museaal.ee:\n\n" + link +
-    "\n\nIt works once, for 15 minutes, in any browser: open it on each device you want your list on.\n\n" + (news ?
-    "You also asked for emails about new features. They start once you open the link, and each one has a link to stop them.\n\n" : "") +
-    "If you did not ask for it, ignore this email; nothing happens without the link.\n\nmuseaal.ee — Estonian Art Catalogue" },
-  et: { subject: "Sinu sisselogimislink museaal.ee-sse", text: (link, news) => "Ava see link, et logida sisse museaal.ee nimekirja:\n\n" + link +
-    "\n\nLink kehtib üks kord ja 15 minutit, mis tahes brauseris: ava see igas seadmes, kus nimekirja tahad näha.\n\n" + (news ?
-    "Soovisid ka e-kirju uute võimaluste kohta. Need algavad, kui avad lingi, ja igas kirjas on link nende lõpetamiseks.\n\n" : "") +
-    "Kui sa linki ei küsinud, jäta see kiri tähelepanuta; ilma lingita ei juhtu midagi.\n\nmuseaal.ee — Eesti Kunstikataloog" },
+const MAIL = {          // no bare "museaal.ee" in the text: mail apps make it a second link next to the sign-in one
+  en: { subject: "Your sign-in link for museaal.ee", text: (link, news) => "Here is your link to sign in to My List:\n\n" + link +
+    "\n\nIt works once, for 15 minutes. To use your list on another device, ask for a new link there.\n\n" + (news ?
+    "Once you sign in, we will also email you now and then about new features. Every one of those emails has an unsubscribe link.\n\n" : "") +
+    "If you did not ask to sign in, you can ignore this email.\n\nEstonian Art Catalogue" },
+  et: { subject: "Sinu sisselogimislink museaal.ee-sse", text: (link, news) => "Siin on sinu link, et logida sisse Minu nimekirja:\n\n" + link +
+    "\n\nLink töötab üks kord ja 15 minutit. Teises seadmes nimekirja kasutamiseks küsi seal uus link.\n\n" + (news ?
+    "Kui oled sisse loginud, saadame sulle aeg-ajalt kirja uute võimaluste kohta. Igas sellises kirjas on link tellimuse lõpetamiseks.\n\n" : "") +
+    "Kui sa sisselogimist ei küsinud, võid selle kirja tähelepanuta jätta.\n\nEesti Kunstikataloog" },
 };
 async function mail(env, to, m) {
   if (env.SEND_MAIL) return env.SEND_MAIL({ to, ...m });          // the local test server (.dev/serve.mjs) prints it instead
