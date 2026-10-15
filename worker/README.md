@@ -108,3 +108,23 @@ Optional: `MAIL_FROM` (plain variable), default `museaal.ee <list@museaal.ee>`. 
 
 Limits: 5 sign-in requests per visitor per ten minutes, 4 links per address per hour, 30 list requests a
 minute. KV's free plan allows 1,000 writes a day: a sign-in is about four, a change to a list one.
+
+## The backoffice (`/admin/stats`, page museaal.ee/admin)
+
+`site/admin.html` (build_admin.py) is not linked anywhere and is noindex. It asks once for a key and keeps it in
+that browser. With the key the Worker returns the KV's keys counted by kind (`u:` accounts, `n:` news opt-ins,
+`s:` signed-in devices, `t:` waiting links), its day counters for 30 days (`c:signup:`, `c:ask:`, `c:mood:`
+followed by the date, kept 400 days), and GoatCounter's visits, pages, referrers and events. The page itself adds
+stock by gallery (from the build) and each workflow's last run (from GitHub's public API).
+
+Setting it up (once):
+
+1. **ADMIN_KEY.** Make a long random key (in Terminal: `openssl rand -base64 24`), keep it in your password manager,
+   and add it to the Worker under Settings → Variables and Secrets as a secret named `ADMIN_KEY`.
+2. **GOATCOUNTER_TOKEN** (for the visits). GoatCounter → Settings (your user menu) → API → New API key, with only
+   "Read statistics" ticked. Add it to the Worker as a secret named `GOATCOUNTER_TOKEN`.
+3. Paste `mood-worker.js` into the Worker again and deploy, then open museaal.ee/admin and enter the key.
+
+The day counters start when the new Worker goes live: nothing before that is known. Each question and each mood
+reading is one KV write; the free plan allows 1,000 writes a day across all keys, and a failed count never stops
+the answer. Wrong keys: five a minute per visitor.

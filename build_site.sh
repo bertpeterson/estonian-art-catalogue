@@ -37,6 +37,8 @@ python3 -u build_mood.py || exit 1
 python3 -u build_ask.py || exit 1
 # the account page: the signed-in address, news emails, sign out, delete (list-sync.js's calls)
 python3 -u build_account.py || exit 1
+# the backoffice: accounts, visits, assistant use, stock and pipelines on one page (not linked, noindex)
+python3 -u build_admin.py || exit 1
 # the Content-Security-Policy, into every page, from the inline scripts as written
 python3 -u csp.py site || exit 1
 # a build that lost its pages must not ship: the artist pages went out missing once
