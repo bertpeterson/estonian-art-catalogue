@@ -367,6 +367,10 @@ h1 a:hover{color:var(--grey-6)}
 .listbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px 18px;margin-top:var(--sp-3);padding:10px 0;
   border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);font-size:var(--fs-base)}
 .listbar b{font-weight:500} .sl-note{color:var(--grey-6);font-size:var(--fs-sm)}
+.listbar .acc{display:inline-flex;align-items:center;gap:10px}
+.listbar .acc input{font:inherit;font-size:var(--fs-sm);padding:4px 8px;width:22ch;max-width:60vw;border:1px solid var(--rule);border-radius:2px;background:var(--field);color:var(--ink)}
+.listbar .acc input:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
+.listbar .acc-msg{color:var(--ink)}
 #mylist[aria-pressed="true"]{color:var(--ink);border-bottom-color:var(--ink)}
 .row-btn{width:100%;text-align:left;background:none;border:0;cursor:pointer;color:inherit;
   display:grid;grid-template-columns:98px minmax(0,1fr) 160px 88px 104px;gap:14px;align-items:baseline;

@@ -21,6 +21,7 @@ value named in /data/for-sale.csv, and /llms.txt saying what the site is and whe
 """
 import json, os, re, hashlib, datetime, urllib.parse, collections, base64, shutil, csv
 import build_hubs as H
+import list_sync as LS   # My List across devices (list-sync.js)
 import build_mood as BM
 
 BASE, A, W, e = H.BASE, H.A, H.W, H.e
@@ -955,7 +956,7 @@ def page(lang, ver, api, labels, M, n=0, tver="", names=()):
             f'<link rel="alternate" type="application/rss+xml" title="New for sale" href="{BASE}/feed.xml">'
             '<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>'
             '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..600&family=Archivo:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">'
-            f'<style>{CSS}</style>{H.GC}</head><body><div class="wrap">'
+            f'<style>{CSS}</style>{H.GC}{LS.TAG}</head><body><div class="wrap">'
             f'<nav><a href="{BASE}/{"" if lang == "en" else "#lang=et"}">{e(t["site"])}</a> › {e(t["h"])} · <a href="{other}" hreflang="{"et" if lang == "en" else "en"}">{e(t["other_l"])}</a></nav>'
             f'<header><h1>{e(t["h"])}</h1><p class="lede">{e(t["lede"])}</p></header>'
             f'<section class="chat" id="chat" data-api="{e(ask)}" data-src="data/stock.json?v={ver}" data-taste="data/taste-stock.bin?v={tver}" data-tshard="data/taste/" data-tver="{tver}">'

@@ -52,3 +52,32 @@ drops its location data, and sends it with the message. Sonnet 5.5 marks up to t
 an object of known size (a door is 80 cm) and two level lines along the wall; the Worker turns those
 into centimetres and the wall's perspective itself (the model places things well and measures badly).
 6 photos a minute per visitor, about $0.007 a photo. The photo is not stored.
+
+## My List across devices (`/list/*`)
+
+A visitor types their email address under My List; the Worker emails them a sign-in link, and the list is then
+kept in step on every device they open the link on (`list-sync.js`, which `list_sync.py` puts in the pages).
+In KV only hashes are stored: the list under an HMAC of the address, sessions and links under their SHA-256.
+The address itself is in KV only for the 15 minutes a link is valid. 1,000 works a list at most; a list not
+changed for two years, and a session after one, expire. "Delete account" deletes the stored list.
+
+Setting it up (once), in this order:
+
+1. **Resend** (resend.com, free plan: 3,000 emails a month, 100 a day). Sign up, Domains → Add domain →
+   `museaal.ee`, region EU. It lists DNS records (a DKIM TXT on `resend._domainkey`, an MX and an SPF TXT on
+   `send`): add them at Veebimajutus exactly as shown. They sit beside ImprovMX's records and change nothing
+   for info@museaal.ee. Wait for "Verified". Then API Keys → Create, permission "Sending access", domain
+   museaal.ee.
+2. **The store.** Cloudflare → Storage & Databases → KV → Create → name `museaal-lists`. Then the Worker's
+   Settings → Bindings → Add → KV namespace, variable name `LISTS`, namespace `museaal-lists`.
+3. **Two secrets** (Settings → Variables and Secrets → Add, type Secret): `RESEND_API_KEY`, the key from step 1;
+   `LIST_SECRET`, a long random string (`openssl rand -base64 32` in Terminal). Never change `LIST_SECRET`
+   afterwards: every account is made from it, and a new one strands them all.
+4. **Re-paste** `mood-worker.js` and Deploy.
+5. **Switch it on in the site:** `"lists": true` in `data/mood_api.json`, build, push. Until then the pages carry
+   no sign-in (a local build can with `MUSEAAL_LISTS=1`).
+
+Optional: `MAIL_FROM` (plain variable), default `museaal.ee <list@museaal.ee>`. Replies go to info@museaal.ee.
+
+Limits: 5 sign-in requests per visitor per ten minutes, 4 links per address per hour, 30 list requests a
+minute. KV's free plan allows 1,000 writes a day: a sign-in is about four, a change to a list one.

@@ -1577,14 +1577,15 @@
   // A visitor's own list of works, kept in this browser. Every visit used to start
   // from nothing: a researcher assembling references, or a collector comparing what
   // is on the market, had nowhere to put a record they meant to come back to. The
-  // list lives in localStorage -- no account, no server; nothing leaves the machine
-  // unless they export it or share a link, and the link carries the keys and nothing
-  // else. Keys are inventory numbers, so a list survives rebuilds of the catalogue.
+  // list lives in localStorage -- no account needed; nothing leaves the machine
+  // unless they export it, share a link (which carries the keys and nothing else), or
+  // sign in with their email to have it on every device (list-sync.js, the listbar's
+  // account line). Keys are inventory numbers, so a list survives rebuilds of the catalogue.
   const SL_KEY = "museaal.shortlist";
   const KEYSET = new Set(W.map(w => w.k));
   const SL = new Set((() => { try { return JSON.parse(localStorage.getItem(SL_KEY) || "[]"); } catch(e){ return []; } })()
                      .filter(k => typeof k === "string"));
-  const slSave = () => { try { localStorage.setItem(SL_KEY, JSON.stringify([...SL])); } catch(e){} };
+  const slSave = () => { try { localStorage.setItem(SL_KEY, JSON.stringify([...SL])); } catch(e){} if (window.museaalList) museaalList.changed(); };
   // What the register is restricted to: your list, a list someone shared, or nothing.
   const listKeys = () => state.shared || (state.list ? SL : null);
   // Detail fields (dimensions, source ids) live in a shard in the sharded build and on
@@ -1828,9 +1829,35 @@
            + `<button class="linkbtn" data-sl-act="link">${esc(T("sl_link"))}</button>` : "")
       + (!state.shared && n ? `<button class="linkbtn" data-sl-act="clear">${esc(T("sl_clear"))}</button>` : "")
       + `<button class="linkbtn" data-sl-act="close">${esc(T("sl_close"))}</button>`
-      + `<span class="sl-note">${esc(T(n ? (state.shared ? "sl_shared_note" : "sl_kept") : "sl_empty"))}</span>`;
+      + `<span class="sl-note">${esc(T(n ? (state.shared ? "sl_shared_note" : window.museaalList ? "" : "sl_kept") : "sl_empty"))}</span>`
+      + (!state.shared && window.museaalList ? accountHTML() : "");
     el.hidden = false;
   }
+  // signing in, so the list follows the visitor to their other devices (list-sync.js): an email
+  // address, a link sent to it, and the list joined with what the account already holds
+  function accountHTML(){
+    const ML = window.museaalList, who = ML.who(), n = ML.note();
+    const msg = n && n !== "in" ? `<span class="sl-note acc-msg" role="status">${esc(T("acc_" + n))}</span>` : "";
+    if (who) return `<span class="sl-note">${esc(T("acc_in", {e: who}))}</span>`
+      + `<button class="linkbtn" data-sl-act="signout">${esc(T("acc_signout"))}</button>`
+      + `<button class="linkbtn" data-sl-act="forget">${esc(T("acc_delete"))}</button>` + msg;
+    return `<span class="acc"><input type="email" id="acc-email" autocomplete="email" spellcheck="false" placeholder="${esc(T("acc_email"))}" aria-label="${esc(T("acc_email"))}">`
+      + `<button class="linkbtn" data-sl-act="signin">${esc(T("acc_send"))}</button></span>`
+      + (n === "sent" ? "" : `<span class="sl-note">${esc(T("acc_offer"))}</span>`) + msg;
+  }
+  function accountSignIn(){
+    const inp = $("acc-email"), v = inp ? inp.value.trim() : "";
+    if (!v || !inp.checkValidity()){ if (inp) inp.focus(); return; }
+    inp.disabled = true;
+    museaalList.signIn(v, LANG);
+  }
+  // a list brought in from another device, or the sign-in changed: the page shows it
+  addEventListener("museaal:list", () => {
+    SL.clear();
+    try { (JSON.parse(localStorage.getItem(SL_KEY) || "[]") || []).forEach(k => { if (typeof k === "string") SL.add(k); }); } catch(e){}
+    renderAll(); if (state.list) pushHash(true);
+  });
+  addEventListener("museaal:account", () => renderListBar());
   async function slCSV(){
     const keys = listKeys() || SL;
     const rows = W.filter(w => keys.has(w.k));
@@ -2082,7 +2109,11 @@
     else if (act === "adopt"){ state.shared.forEach(k => SL.add(k)); slSave(); state.shared = null; state.list = true; renderAll(); pushHash(); }
     else if (act === "clear"){ if (!confirm(T("sl_confirm"))) return; SL.clear(); slSave(); renderAll(); pushHash(); }
     else if (act === "close"){ state.list = false; state.shared = null; renderAll(); pushHash(); }
+    else if (act === "signin") accountSignIn();
+    else if (act === "signout") museaalList.signOut();
+    else if (act === "forget"){ if (confirm(T("acc_delete_confirm"))) museaalList.remove(); }
   });
+  $("listbar").addEventListener("keydown", e => { if (e.key === "Enter" && e.target.id === "acc-email") accountSignIn(); });
   // The mark sits beside each row button and inside the open record; neither is
   // within a .row-btn, so the row handler never sees these clicks.
   reg.addEventListener("click", e => {

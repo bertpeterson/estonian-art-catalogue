@@ -21,7 +21,9 @@
 // up to two rounds a turn. The page runs them on the stock it has loaded (2 MB, too much to read
 // here) and posts the conversation again with the results; the last answer adds up to five picks.
 //
-// Needs one secret, ANTHROPIC_API_KEY (Settings > Variables and Secrets).
+// A third, /list/*, keeps a signed-in visitor's My List (below, at list()).
+//
+// Needs one secret, ANTHROPIC_API_KEY (Settings > Variables and Secrets); /list/* needs more (worker/README.md).
 // Calls the Messages API with fetch: the dashboard's editor takes one file, no build step.
 
 const WORDS = ["solemn", "serene", "contemplative", "melancholy", "lonely", "nostalgic", "tender", "intimate", "joyful", "playful", "festive", "romantic", "dreamy", "mysterious", "eerie", "anxious", "gloomy", "dramatic", "heroic", "bright", "dark", "sunny", "golden", "twilight", "moonlit", "misty", "vivid", "muted", "warm", "cold", "stormy", "still", "wintry", "spring", "summery", "autumnal", "hopeful", "cosy", "sacred", "majestic", "fragile", "sensual", "innocent", "energetic", "proud", "elegant", "lively", "empty", "spiritual", "idyllic", "wild", "harsh", "angry", "abstract", "expressive", "decorative", "simple", "ornate", "rustic", "modern", "sea", "lake", "river", "forest", "trees", "fields", "garden", "mountains", "sky", "village", "city", "harbour", "church", "interior", "portrait", "children", "family", "work", "music", "dance", "horses", "animals", "birds", "flowers", "stilllife", "boats"];
@@ -385,9 +387,91 @@ async function ask(body, env, reply) {
   });
 }
 
-const seen = new Map(), rounds = new Map();   // visitor -> times of their recent searches; of all their requests
-function tooMany(ip, map = seen, limit = PER_MINUTE) {
-  const now = Date.now(), t = (map.get(ip) || []).filter(x => now - x < 60000);
+// My List across devices: a visitor signs in with their email address and the list follows them. POST /list/login
+// sends a sign-in link; /list/verify trades the link's token for a session; /list/sync, /list/logout and
+// /list/delete use the session. In KV (binding LISTS), every key a hash, so what is stored is no use to anyone who
+// reads it: t:<token's hash> the address and its account for 15 minutes; s:<session's hash> the account, for a year;
+// u:<account> the list, two years from its last change; r:<account> sign-in links sent this hour. The account is an
+// HMAC of the address (LIST_SECRET), so the address itself is kept only until the link is used. Needs the KV
+// binding LISTS and the secrets LIST_SECRET and RESEND_API_KEY (worker/README.md); MAIL_FROM optional.
+const LINK_TTL = 15 * 60, SESSION_TTL = 365 * 86400, LIST_TTL = 2 * 365 * 86400, LIST_MAX = 1000, LINKS_PER_HOUR = 4;
+const enc = s => new TextEncoder().encode(s);
+const b64u = b => btoa(String.fromCharCode(...new Uint8Array(b))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+const token = () => b64u(crypto.getRandomValues(new Uint8Array(24)));
+const hash = async s => b64u(await crypto.subtle.digest("SHA-256", enc(s)));
+async function account(env, email) {
+  const k = await crypto.subtle.importKey("raw", enc(env.LIST_SECRET), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+  return b64u(await crypto.subtle.sign("HMAC", k, enc(email)));
+}
+const EMAIL = /^[^\s@<>()[\]",;:\\]{1,64}@[a-z0-9-]+(\.[a-z0-9-]+)*\.[a-z]{2,}$/;
+const workKey = k => typeof k === "string" && k.length > 0 && k.length <= 120 && !/[\u0000-\u001f]/.test(k);
+const keys = v => Array.isArray(v) ? [...new Set(v.filter(workKey))].slice(0, LIST_MAX) : [];
+
+const MAIL = {
+  en: { subject: "Your sign-in link for museaal.ee", text: link => "Open this link to sign in to My List on museaal.ee:\n\n" + link +
+    "\n\nIt works once, for 15 minutes, in any browser: open it on each device you want your list on.\n\n" +
+    "If you did not ask for it, ignore this email; nothing happens without the link.\n\nmuseaal.ee — Estonian Art Catalogue" },
+  et: { subject: "Sinu sisselogimislink museaal.ee-sse", text: link => "Ava see link, et logida sisse museaal.ee nimekirja:\n\n" + link +
+    "\n\nLink kehtib üks kord ja 15 minutit, mis tahes brauseris: ava see igas seadmes, kus nimekirja tahad näha.\n\n" +
+    "Kui sa linki ei küsinud, jäta see kiri tähelepanuta; ilma lingita ei juhtu midagi.\n\nmuseaal.ee — Eesti Kunstikataloog" },
+};
+async function mail(env, to, m) {
+  if (env.SEND_MAIL) return env.SEND_MAIL({ to, ...m });          // the local test server (.dev/serve.mjs) prints it instead
+  const r = await fetch("https://api.resend.com/emails", {
+    method: "POST", headers: { Authorization: "Bearer " + env.RESEND_API_KEY, "Content-Type": "application/json" },
+    body: JSON.stringify({ from: env.MAIL_FROM || "museaal.ee <list@museaal.ee>", to: [to], reply_to: "info@museaal.ee", ...m }),
+  });
+  if (!r.ok) throw new Error("mail " + r.status);
+}
+
+const logins = new Map();        // visitor -> times of their recent sign-in requests: 5 in ten minutes
+async function list(path, body, env, reply, ip) {
+  const KV = env.LISTS;
+  if (!KV || !env.LIST_SECRET) return reply({ error: "Lists are not set up." }, 503);
+  if (path === "login") {
+    const email = String(body.email || "").trim().toLowerCase(), lang = body.lang === "et" ? "et" : "en";
+    if (email.length > 254 || !EMAIL.test(email)) return reply({ error: "bad email" }, 400);
+    if (!env.RESEND_API_KEY && !env.SEND_MAIL) return reply({ error: "Mail is not set up." }, 503);
+    if (tooMany(ip, logins, 5, 600000)) return reply({ error: "Too many requests; wait a few minutes." }, 429);
+    const u = await account(env, email), sent = +(await KV.get("r:" + u)) || 0;
+    if (sent >= LINKS_PER_HOUR) return reply({ error: "Too many links for this address; wait an hour." }, 429);
+    const t = token();
+    await KV.put("r:" + u, String(sent + 1), { expirationTtl: 3600 });
+    await KV.put("t:" + await hash(t), JSON.stringify({ u, e: email }), { expirationTtl: LINK_TTL });
+    // the token after the #, which browsers never send: it reaches no server's logs, ours or GitHub's
+    const link = (env.SITE || "https://museaal.ee/") + "#lang=" + lang + "&list=mine&login=" + t;
+    try { await mail(env, email, { subject: MAIL[lang].subject, text: MAIL[lang].text(link) }); }
+    catch (e) { console.log("list mail failed", String(e.message)); return reply({ error: "The email could not be sent." }, 502); }
+    return reply({ ok: true });
+  }
+  if (path === "verify") {
+    const k = "t:" + await hash(String(body.token || "").slice(0, 64)), t = await KV.get(k, "json");
+    if (!t) return reply({ error: "This link has expired or was used." }, 410);
+    await KV.delete(k);
+    const rec = await KV.get("u:" + t.u, "json");
+    if (!rec) await KV.put("u:" + t.u, JSON.stringify({ items: [], updated: Date.now() }), { expirationTtl: LIST_TTL });
+    const s = token();
+    await KV.put("s:" + await hash(s), JSON.stringify({ u: t.u }), { expirationTtl: SESSION_TTL });
+    return reply({ session: s, email: t.e, items: rec ? rec.items : [] });
+  }
+  const sk = "s:" + await hash(String(body.session || "").slice(0, 64)), s = await KV.get(sk, "json");
+  if (!s) return reply({ error: "Signed out." }, 401);
+  if (path === "logout") { await KV.delete(sk); return reply({ ok: true }); }
+  if (path === "delete") { await KV.delete("u:" + s.u); await KV.delete(sk); return reply({ ok: true }); }
+  if (path !== "sync") return reply({ error: "No such thing." }, 404);
+  // the browser sends what it added and removed since the two last agreed, and takes the result back
+  const rec = await KV.get("u:" + s.u, "json");
+  if (!rec) { await KV.delete(sk); return reply({ error: "Signed out." }, 401); }     // the account was deleted from another device
+  const was = JSON.stringify(rec.items), rem = new Set(keys(body.remove));
+  const items = rec.items.filter(k => !rem.has(k));
+  for (const k of keys(body.add)) if (!items.includes(k) && items.length < LIST_MAX) items.push(k);
+  if (JSON.stringify(items) !== was) await KV.put("u:" + s.u, JSON.stringify({ items, updated: Date.now() }), { expirationTtl: LIST_TTL });
+  return reply({ items });
+}
+
+const seen = new Map(), rounds = new Map(), syncs = new Map();   // visitor -> times of their recent searches; of all their requests; of list requests
+function tooMany(ip, map = seen, limit = PER_MINUTE, span = 60000) {
+  const now = Date.now(), t = (map.get(ip) || []).filter(x => now - x < span);
   t.push(now); map.set(ip, t);
   if (map.size > 5000) map.clear();
   return t.length > limit;
@@ -417,11 +501,17 @@ export default {
     if (request.method !== "POST" || !ok) return reply({ error: "This service answers museaal.ee only." }, 403);
     let body = {};
     try { body = await request.json(); } catch (e) {}
+    const ip = request.headers.get("CF-Connecting-IP") || "?", path = new URL(request.url).pathname;
+    if (path.startsWith("/list/")) {
+      if (tooMany(ip, syncs, 30)) return reply({ error: "Too many requests; wait a minute." }, 429);
+      try { return await list(path.slice(6), body && typeof body === "object" ? body : {}, env, reply, ip); }
+      catch (e) { console.log("list failed", String(e.message)); return reply({ error: "The list could not be reached." }, 502); }
+    }
     // a turn's later tool rounds count against the wider limit only
-    const ip = request.headers.get("CF-Connecting-IP") || "?", round = Array.isArray(body.trail) && body.trail.length > 0;
+    const round = Array.isArray(body.trail) && body.trail.length > 0;
     if (tooMany(ip, rounds, CALLS_PER_MINUTE) || !round && tooMany(ip)) return reply({ error: "Too many searches; wait a minute." }, 429);
     if (!env.ANTHROPIC_API_KEY) return reply({ error: "The service is not set up." }, 503);
-    if (new URL(request.url).pathname === "/ask") {
+    if (path === "/ask") {
       if (body.image && tooManyPhotos(request.headers.get("CF-Connecting-IP") || "?")) return reply({ error: "Too many photos; wait a minute." }, 429);
       return ask(body, env, reply);
     }

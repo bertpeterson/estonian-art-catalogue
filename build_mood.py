@@ -24,6 +24,7 @@ Run after build_stats.py (it adds to the sitemap) and before csp.py.
 """
 import json, os, re, hashlib, datetime, urllib.parse
 import build_hubs as H
+import list_sync as LS   # My List across devices (list-sync.js)
 import sys; sys.path.insert(0, "data")
 from shape_of import shape_of
 
@@ -206,15 +207,18 @@ footer a{color:var(--ink)}
 """
 
 # My List: the register's bookmark (tpl_app.html, museaal.shortlist) on the mood wall and Buy art's cards. One list,
-# kept in this browser and never sent; the register shows it, exports it and shares it. T: the page's sl_add, sl_remove;
+# kept in this browser and sent nowhere unless the visitor signs in (list-sync.js); the register shows it, exports it and shares it. T: the page's sl_add, sl_remove;
 # ev: the GoatCounter event an addition counts as.
 SL_JS = r"""
 var SL_KEY='museaal.shortlist', SL_SVG='<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 2h8v12l-4-3-4 3z"/></svg>';
 function slGet(){try{var a=JSON.parse(localStorage.getItem(SL_KEY)||'[]');return Array.isArray(a)?a.filter(function(k){return typeof k==='string'}):[]}catch(e){return []}}
 function slMark(b,on,T){var lab=on?T.sl_remove:T.sl_add;b.setAttribute('aria-pressed',String(on));b.title=lab;b.setAttribute('aria-label',lab)}
-function slBtn(k,T,ev,after){var b=document.createElement('button');b.type='button';b.className='sl';b.dataset.sl=k;b.innerHTML=SL_SVG;slMark(b,slGet().indexOf(k)>=0,T);
+var SL_T=null;   // a list brought in from the visitor's other devices (list-sync.js): the bookmarks show it
+addEventListener('museaal:list',function(){var a=slGet();if(SL_T)document.querySelectorAll('.sl[data-sl]').forEach(function(b){slMark(b,a.indexOf(b.dataset.sl)>=0,SL_T)})});
+function slBtn(k,T,ev,after){SL_T=T;var b=document.createElement('button');b.type='button';b.className='sl';b.dataset.sl=k;b.innerHTML=SL_SVG;slMark(b,slGet().indexOf(k)>=0,T);
   b.addEventListener('click',function(e){e.preventDefault();var a=slGet(),i=a.indexOf(k);if(i>=0)a.splice(i,1);else a.push(k);
     try{localStorage.setItem(SL_KEY,JSON.stringify(a))}catch(x){}
+    if(window.museaalList)museaalList.changed();
     document.querySelectorAll('.sl[data-sl="'+CSS.escape(k)+'"]').forEach(function(x){slMark(x,i<0,T)});
     if(i<0&&window.goatcounter&&goatcounter.count)goatcounter.count({path:ev,title:ev,event:true});
     if(after)after(i<0)});
@@ -396,7 +400,7 @@ def page(lang, ver, api, d, kinds):
             '<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>'
             '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..600&family=Archivo:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">'
             '<link rel="preconnect" href="https://www.muis.ee"><link rel="preconnect" href="https://digikogu.ekm.ee">'
-            f'<style>{CSS}</style>{H.GC}</head><body><div class="wrap">'
+            f'<style>{CSS}</style>{H.GC}{LS.TAG}</head><body><div class="wrap">'
             f'<nav><a href="{BASE}/{"" if lang == "en" else "#lang=et"}">{e(t["site"])}</a> › {e(t["h"])} · <a href="{other}" hreflang="{"et" if lang == "en" else "en"}">{e(t["other_l"])}</a></nav>'
             f'<header><h1>{e(t["h"])}</h1><p class="lede">{e(t["lede"])}</p></header>'
             f'<form class="describe" id="describe"><label for="feel">{e(t["describe"])}</label>'
