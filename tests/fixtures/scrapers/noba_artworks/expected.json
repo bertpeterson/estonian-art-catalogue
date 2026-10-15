@@ -1,0 +1,292 @@
+{
+ "noba_artworks.json": {
+  "Ei Ole Olemas": {
+   "slug": null,
+   "works": {}
+  },
+  "Ene Jakobi": {
+   "slug": "ene-jakobi",
+   "works": {
+    "censured-ii": {
+     "id": "12753",
+     "dims": "42 x 30",
+     "year": "",
+     "title": {
+      "et": "Tsenseeritud II",
+      "en": "Censured II"
+     },
+     "img": "https://noba.ac/wp-content/uploads/artworks/artwork/000/000/044/046_thumb.jpg",
+     "sale": true
+    },
+    "censored-x": {
+     "id": "12754",
+     "dims": "42 x 30",
+     "year": "",
+     "title": {
+      "et": "Tsenseeritud X",
+      "en": "Censored X"
+     },
+     "img": "https://noba.ac/wp-content/uploads/artworks/artwork/000/000/044/047_thumb.jpg",
+     "sale": true
+    },
+    "censored-xv": {
+     "id": "12755",
+     "dims": "42 x 30",
+     "year": "",
+     "title": {
+      "et": "Tsenseeritud XV",
+      "en": "Censored XV"
+     },
+     "img": "https://noba.ac/wp-content/uploads/artworks/artwork/000/000/044/048_thumb.jpg",
+     "sale": true
+    },
+    "censored-xvii": {
+     "id": "12756",
+     "dims": "42 x 30",
+     "year": "",
+     "title": {
+      "et": "Tsenseeritud XVII",
+      "en": "Censored XVII"
+     },
+     "img": "https://noba.ac/wp-content/uploads/artworks/artwork/000/000/044/049_thumb.jpg",
+     "sale": true
+    },
+    "geopolitics": {
+     "id": "12315",
+     "dims": "42 x 33",
+     "year": "",
+     "title": {
+      "et": "Geopoliitiline",
+      "en": "Geopolitics"
+     },
+     "img": "https://noba.ac/wp-content/uploads/artworks/artwork/000/000/040/567_thumb.jpg",
+     "sale": false
+    },
+    "horses-in-the-smoke-of-notre-dame": {
+     "id": "12316",
+     "dims": "50 x 50",
+     "year": "",
+     "title": {
+      "et": "Hobused Notre-Dâme'i suitsus",
+      "en": "Horses in the smoke of Notre-Däme"
+     },
+     "img": "https://noba.ac/wp-content/uploads/artworks/artwork/000/000/040/568_thumb.jpg",
+     "sale": false
+    },
+    "weeds": {
+     "id": "12317",
+     "dims": "50 x 65",
+     "year": "",
+     "title": {
+      "et": "Umbrohi",
+      "en": "Weeds"
+     },
+     "img": "https://noba.ac/wp-content/uploads/artworks/artwork/000/000/040/569_thumb.jpg",
+     "sale": false
+    },
+    "wild-3": {
+     "id": "12318",
+     "dims": "50 x 65",
+     "year": "",
+     "title": {
+      "et": "Metsik",
+      "en": "Wild"
+     },
+     "img": "https://noba.ac/wp-content/uploads/artworks/artwork/000/000/040/570_thumb.jpg",
+     "sale": false
+    },
+    "weeds-2": {
+     "id": "12319",
+     "dims": "50 x 65",
+     "year": "",
+     "title": {
+      "et": "Umbrohi",
+      "en": "Weeds"
+     },
+     "img": "https://noba.ac/wp-content/uploads/artworks/artwork/000/000/040/571_thumb.jpg",
+     "sale": false
+    },
+    "weeds-3": {
+     "id": "12320",
+     "dims": "50 x 65",
+     "year": "",
+     "title": {
+      "et": "Umbrohi",
+      "en": "Weeds"
+     },
+     "img": "https://noba.ac/wp-content/uploads/artworks/artwork/000/000/040/572_thumb.jpg",
+     "sale": false
+    },
+    "weeds-4": {
+     "id": "12321",
+     "dims": "50 x 65",
+     "year": "",
+     "title": {
+      "et": "Umbrohi",
+      "en": "Weeds"
+     },
+     "img": "https://noba.ac/wp-content/uploads/artworks/artwork/000/000/040/573_thumb.jpg",
+     "sale": false
+    },
+    "wild-4": {
+     "id": "12322",
+     "dims": "50 x 65",
+     "year": "",
+     "title": {
+      "et": "Metsik",
+      "en": "Wild"
+     },
+     "img": "https://noba.ac/wp-content/uploads/artworks/artwork/000/000/040/574_thumb.jpg",
+     "sale": false
+    },
+    "woodlander-and-barklander": {
+     "id": "12333",
+     "dims": "46 x 63",
+     "year": "",
+     "title": {
+      "et": "Puulane ja Tohtlane"
+     },
+     "img": "https://noba.ac/wp-content/uploads/artworks/artwork/000/000/040/666_thumb.jpg",
+     "sale": true
+    },
+    "bab-ilo": {
+     "id": "9143",
+     "dims": "240 x 180",
+     "year": "",
+     "title": {
+      "et": "Bab-ilo"
+     },
+     "img": "https://noba.ac/wp-content/uploads/artworks/artwork/000/000/026/425_thumb.jpg",
+     "sale": true
+    },
+    "keepers-of-warmth-and-comfort": {
+     "id": "12606",
+     "dims": "80 x 90",
+     "year": "",
+     "title": {
+      "et": "Keepers of warmth and comfort"
+     },
+     "img": "https://noba.ac/wp-content/uploads/artworks/artwork/000/000/043/250_thumb.jpg",
+     "sale": true
+    },
+    "composition-k": {
+     "id": "10648",
+     "dims": "60 x 50",
+     "year": "",
+     "title": {
+      "en": "Composition K"
+     },
+     "img": "https://noba.ac/wp-content/uploads/artworks/artwork/000/000/031/735_thumb.jpg",
+     "sale": true
+    },
+    "cradle-of-light": {
+     "id": "12602",
+     "dims": "80 x 80",
+     "year": "",
+     "title": {
+      "en": "Cradle of Light"
+     },
+     "img": "https://noba.ac/wp-content/uploads/artworks/artwork/000/000/043/239_thumb.jpg",
+     "sale": true
+    },
+    "movement-i": {
+     "id": "8208",
+     "dims": "80.5 x 62.5",
+     "year": "",
+     "title": {
+      "en": "Movement I"
+     },
+     "img": "https://noba.ac/wp-content/uploads/artworks/artwork/000/000/022/293_thumb.jpg",
+     "sale": false
+    }
+   }
+  },
+  "Viive Noor": {
+   "slug": "viive-noor",
+   "works": {
+    "you-cannot-escape-i": {
+     "id": "12147",
+     "dims": "31 x 42",
+     "year": "",
+     "title": {
+      "et": "Sa ei pääse I",
+      "en": "You Cannot Escape I"
+     },
+     "img": "https://noba.ac/wp-content/uploads/artworks/artwork/000/000/039/835_thumb.jpg",
+     "sale": true
+    },
+    "you-cannot-escape-ii": {
+     "id": "12148",
+     "dims": "31 x 42",
+     "year": "",
+     "title": {
+      "et": "Sa ei pääse II",
+      "en": "You Cannot Escape II"
+     },
+     "img": "https://noba.ac/wp-content/uploads/artworks/artwork/000/000/039/836_thumb.jpg",
+     "sale": true
+    },
+    "dance-party": {
+     "id": "371",
+     "dims": "42 x 49",
+     "year": "",
+     "title": {
+      "et": "Laulupidu"
+     },
+     "img": "https://noba.ac/wp-content/uploads/artworks/artwork/000/000/000/600_thumb.jpg",
+     "sale": true
+    },
+    "against-the-wind": {
+     "id": "8570",
+     "dims": "55 x 70",
+     "year": "",
+     "title": {
+      "et": "Vastutuult"
+     },
+     "img": "https://noba.ac/wp-content/uploads/artworks/artwork/000/000/023/790_thumb.jpg",
+     "sale": true
+    },
+    "unnecessary-nuances": {
+     "id": "4745",
+     "dims": "60 x 80",
+     "year": "",
+     "title": {
+      "et": "Tarbetud nüansid"
+     },
+     "img": "https://noba.ac/wp-content/uploads/artworks/artwork/000/000/010/412_thumb.jpg",
+     "sale": true
+    },
+    "figurative-figures-iii": {
+     "id": "9100",
+     "dims": "74 x 86",
+     "year": "",
+     "title": {
+      "en": "Figurative figures III"
+     },
+     "img": "https://noba.ac/wp-content/uploads/artworks/artwork/000/000/026/285_thumb.jpg",
+     "sale": true
+    },
+    "i-am-a-jackal": {
+     "id": "5870",
+     "dims": "79 x 54",
+     "year": "",
+     "title": {
+      "en": "I am a Jackal"
+     },
+     "img": "https://noba.ac/wp-content/uploads/artworks/artwork/000/000/013/315_thumb.jpg",
+     "sale": true
+    },
+    "organism-ii-hand-colored": {
+     "id": "8290",
+     "dims": "38 x 38",
+     "year": "",
+     "title": {
+      "en": "Organism II, hand colored"
+     },
+     "img": "https://noba.ac/wp-content/uploads/artworks/artwork/000/000/022/538_thumb.jpg",
+     "sale": false
+    }
+   }
+  }
+ }
+}

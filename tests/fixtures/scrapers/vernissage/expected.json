@@ -1,0 +1,41 @@
+{
+ "gallery_records.json": [
+  {
+   "gid": "other-1",
+   "artist": "Kristjan Raud",
+   "title": "Kalevipoeg",
+   "year": "1935",
+   "tech": "",
+   "dims": "",
+   "gallery": "Another gallery",
+   "city": "Tallinn",
+   "url": "https://example.org/1"
+  },
+  {
+   "price": 1500,
+   "gid": "vern-27662",
+   "artist": "Margret Paide",
+   "title": "Jupiter",
+   "year": "2026",
+   "tech": "Õli. Lõuend",
+   "dims": "100 x 60 cm",
+   "gallery": "Vernissage",
+   "city": "Tallinn",
+   "url": "https://vernissage.ee/toode/margret-paide-jupiter-2026-oli-louend-100-x-60-cm/",
+   "img": "https://vernissage.ee/wp-content/uploads/2026/08/mp-scaled.jpg"
+  },
+  {
+   "price": 1100,
+   "gid": "vern-27961",
+   "artist": "Illimar Paul",
+   "title": "Iirised",
+   "year": "1990",
+   "tech": "Graafika. Serigraafia, paber",
+   "dims": "30 x 30 cm",
+   "gallery": "Vernissage",
+   "city": "Tallinn",
+   "url": "https://vernissage.ee/toode/illimar-paul-iirised-1990-graafika-serigraafia-paber-km-30-x-30-cm/",
+   "img": "https://vernissage.ee/wp-content/uploads/2026/09/ip.jpg"
+  }
+ ]
+}

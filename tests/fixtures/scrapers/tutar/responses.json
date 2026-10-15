@@ -1,0 +1,30 @@
+[
+ {
+  "key": "https://www.tutar.ee/kunstnikud",
+  "url": "https://www.tutar.ee/kunstnikud",
+  "status": 200,
+  "final_url": null,
+  "file": "01.gz"
+ },
+ {
+  "key": "https://www.tutar.ee/kunstnikud/angela-maasalu",
+  "url": "https://www.tutar.ee/kunstnikud/angela-maasalu",
+  "status": 200,
+  "final_url": null,
+  "file": "02.gz"
+ },
+ {
+  "key": "https://www.tutar.ee/kunstnikud/august-sai-et",
+  "url": "https://www.tutar.ee/kunstnikud/august-sai-et",
+  "status": 200,
+  "final_url": null,
+  "file": "03.gz"
+ },
+ {
+  "key": "https://www.tutar.ee/kunstnikud/denes-farkas-et",
+  "url": "https://www.tutar.ee/kunstnikud/denes-farkas-et",
+  "status": 200,
+  "final_url": null,
+  "file": "04.gz"
+ }
+]

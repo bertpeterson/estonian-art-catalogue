@@ -1,0 +1,132 @@
+{
+ "gallery_records.json": [
+  {
+   "gid": "other-1",
+   "artist": "Kristjan Raud",
+   "title": "Kalevipoeg",
+   "year": "1935",
+   "tech": "",
+   "dims": "",
+   "gallery": "Another gallery",
+   "city": "Tallinn",
+   "url": "https://example.org/1"
+  },
+  {
+   "gid": "tk-5553",
+   "artist": "Quistrebert Brothers",
+   "title": "Firescape",
+   "year": "2020",
+   "tech": "sprayed ink on burlap",
+   "dims": "200×300cm",
+   "gallery": "Temnikova & Kasela",
+   "city": "Tallinn",
+   "url": "https://temnikova.ee/?c=exhibition&l=en&id=400",
+   "shown": true,
+   "img": "https://temnikova.ee/axs_site/content/module.art/5553.t1.jpg"
+  },
+  {
+   "gid": "tk-5561",
+   "artist": "Sirja-Liisa Eelma",
+   "title": "Mirror. On the Desire to See. VII",
+   "year": "2025",
+   "tech": "oil, canvas, mdf",
+   "dims": "201×109cm",
+   "gallery": "Temnikova & Kasela",
+   "city": "Tallinn",
+   "url": "https://temnikova.ee/?c=exhibition&l=en&id=400",
+   "shown": true,
+   "img": "https://temnikova.ee/axs_site/content/module.art/5561.t1.jpg"
+  },
+  {
+   "gid": "tk-5563",
+   "artist": "Sirja-Liisa Eelma",
+   "title": "Mirror. On the Desire to See. IX-X ",
+   "year": "2025",
+   "tech": "oil, canvas, mdf",
+   "dims": "157×109cm",
+   "gallery": "Temnikova & Kasela",
+   "city": "Tallinn",
+   "url": "https://temnikova.ee/?c=exhibition&l=en&id=400",
+   "shown": true,
+   "img": "https://temnikova.ee/axs_site/content/module.art/5563.t1.jpg"
+  },
+  {
+   "gid": "tk-5568",
+   "artist": "Sirja-Liisa Eelma",
+   "title": "Mirror. On the Desire to See. XV ",
+   "year": "2025",
+   "tech": "oil, canvas, mdf",
+   "dims": "201×109cm",
+   "gallery": "Temnikova & Kasela",
+   "city": "Tallinn",
+   "url": "https://temnikova.ee/?c=exhibition&l=en&id=400",
+   "shown": true,
+   "img": "https://temnikova.ee/axs_site/content/module.art/5568.t1.jpg"
+  },
+  {
+   "gid": "tk-5570",
+   "artist": "Sirja-Liisa Eelma",
+   "title": "Mirror. On the Desire to See. XVII ",
+   "year": "2025",
+   "tech": "oil, canvas, mdf",
+   "dims": "157×109cm",
+   "gallery": "Temnikova & Kasela",
+   "city": "Tallinn",
+   "url": "https://temnikova.ee/?c=exhibition&l=en&id=400",
+   "shown": true,
+   "img": "https://temnikova.ee/axs_site/content/module.art/5570.t1.jpg"
+  },
+  {
+   "gid": "tk-5546",
+   "artist": "Quistrebert Brothers",
+   "title": "Valet 1",
+   "year": "2025",
+   "tech": "acrylic, canvas",
+   "dims": "130×60cm",
+   "gallery": "Temnikova & Kasela",
+   "city": "Tallinn",
+   "url": "https://temnikova.ee/?c=exhibition&l=en&id=400",
+   "shown": true,
+   "img": "https://temnikova.ee/axs_site/content/module.art/5546.t1.jpg"
+  },
+  {
+   "gid": "tk-5547",
+   "artist": "Quistrebert Brothers",
+   "title": "Valet 2",
+   "year": "2025",
+   "tech": "acrylic, canvas",
+   "dims": "130×60cm",
+   "gallery": "Temnikova & Kasela",
+   "city": "Tallinn",
+   "url": "https://temnikova.ee/?c=exhibition&l=en&id=400",
+   "shown": true,
+   "img": "https://temnikova.ee/axs_site/content/module.art/5547.t1.jpg"
+  },
+  {
+   "gid": "tk-5548",
+   "artist": "Quistrebert Brothers",
+   "title": "Valet 3",
+   "year": "2025",
+   "tech": "acrylic, canvas",
+   "dims": "130×60cm",
+   "gallery": "Temnikova & Kasela",
+   "city": "Tallinn",
+   "url": "https://temnikova.ee/?c=exhibition&l=en&id=400",
+   "shown": true,
+   "img": "https://temnikova.ee/axs_site/content/module.art/5548.t1.jpg"
+  },
+  {
+   "gid": "tk-5549",
+   "artist": "Quistrebert Brothers",
+   "title": "Valet 4",
+   "year": "2025",
+   "tech": "acrylic, canvas",
+   "dims": "130×60cm",
+   "gallery": "Temnikova & Kasela",
+   "city": "Tallinn",
+   "url": "https://temnikova.ee/?c=exhibition&l=en&id=400",
+   "shown": true,
+   "img": "https://temnikova.ee/axs_site/content/module.art/5549.t1.jpg"
+  }
+ ]
+}
