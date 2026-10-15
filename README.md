@@ -526,4 +526,10 @@ whether to keep them. One filter on `kind` separates the two. Biographies and bi
 Attribution to the holding institution is carried in every record, and every record links back
 to its source.
 
+**What this catalogue adds is not licensed for reuse.** The writing on museaal.ee and in this
+repository — page texts, circle and hub descriptions, translations — and the selection behind the
+artwall, the moods and the circles are © Bert Peterson, all rights reserved, and the catalogue as a
+whole is protected as a database under EU law. The records and exports are free to reuse on the
+terms above; mirroring or republishing the site itself is not. Ask at info@museaal.ee.
+
 Corrections and removal requests are welcome — open an issue on this repository.
