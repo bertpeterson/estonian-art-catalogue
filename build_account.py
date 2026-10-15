@@ -5,7 +5,8 @@ Signed in (list-sync.js keeps the session in this browser): the address, the new
 at the foot, set apart, deleting the account after a second click. Signed out: the sign-in form, the same one the
 masthead strip has. Everything the page does is a call list-sync.js already makes to the Worker (login, logout,
 news, delete); signed in, turning the news emails on is immediate, since the sign-in already confirmed the
-address. Strings from i18n.py. Not in the sitemap, and noindex: there is nothing here for a search engine.
+address. Strings from i18n.py; the privacy page (build_privacy.py) linked under the sign-in line and at the foot.
+Not in the sitemap, and noindex: there is nothing here for a search engine.
 Run before csp.py, which hashes the inline script.
 """
 import json, html
@@ -18,9 +19,9 @@ I18N = json.load(open("i18n.json", encoding="utf-8"))
 KEYS = ["acc_h", "acc_lede", "acc_who", "acc_signout", "acc_news_h", "acc_news_on", "acc_news_off",
         "acc_del_h", "acc_del_note", "acc_delete", "acc_del_yes", "acc_del_no", "acc_del_sure", "acc_signin_h",
         "acc_signin_lede", "acc_email", "acc_send", "acc_news", "acc_off", "acc_sent", "acc_busy", "acc_bad", "acc_robot",
-        "acc_failed", "acc_expired", "acc_gone", "acc_out", "acc_deleted", "acc_unsub", "acc_unsub_bad"]
-PAGE = {"en": dict(file="account", other="konto", other_l="Eesti keeles", site="Estonian Art Catalogue", home="./"),
-        "et": dict(file="konto", other="account", other_l="In English", site="Eesti Kunstikataloog", home="./#lang=et")}
+        "acc_failed", "acc_expired", "acc_gone", "acc_out", "acc_deleted", "acc_unsub", "acc_unsub_bad", "privacy_link"]
+PAGE = {"en": dict(file="account", other="konto", privacy="privacy", other_l="Eesti keeles", site="Estonian Art Catalogue", home="./"),
+        "et": dict(file="konto", other="account", privacy="privaatsus", other_l="In English", site="Eesti Kunstikataloog", home="./#lang=et")}
 
 CSS = (":root{--paper:#0B0C0E;--field:#15171A;--ink:#F1F2F4;--ink-soft:#C7CACE;--grey:#8B9098;--rule:#2B2E34;--rule-soft:#212429;--warn:#E5484D;"
        "--serif:'Newsreader','Iowan Old Style',Georgia,serif;--sans:'Archivo','Helvetica Neue',Arial,sans-serif;--mono:'IBM Plex Mono',ui-monospace,Menlo,monospace}"
@@ -68,7 +69,7 @@ function draw(){
   if(!ML){h1.textContent=T.acc_h;lede.textContent=T.acc_off;return}
   var who=ML.who(),m=say();
   if(!who){
-    h1.textContent=T.acc_signin_h;lede.textContent=T.acc_signin_lede;document.title=T.acc_signin_h+" · museaal.ee";
+    h1.textContent=T.acc_signin_h;lede.textContent=T.acc_signin_lede+" ";lede.appendChild(h("a",{href:document.getElementById("acc-pv").getAttribute("href"),text:T.privacy_link}));document.title=T.acc_signin_h+" · museaal.ee";
     var inp=h("input",{type:"email",id:"acc-email",autocomplete:"email",spellcheck:"false",placeholder:T.acc_email,"aria-label":T.acc_email});
     var box=h("input",{type:"checkbox",id:"acc-news"}),send=h("button",{type:"button","class":"btn",text:T.acc_send});
     var form=h("div",{"class":"form"},[inp,send,h("label",{},[box,document.createTextNode(" "+T.acc_news)])]);
@@ -115,7 +116,7 @@ def main():
                 f'<style>{CSS}</style>{LS.TAG}{GC}</head><body><div class="pg">'
                 f'<div class="top"><a class="wm" href="{p["home"]}">{e(p["site"])}</a><a class="eb" href="{p["other"]}">{p["other_l"]}</a></div>'
                 f'<header class="mast"><h1>{e(t["acc_h"])}</h1><p class="lede"></p></header><main id="acc"></main>'
-                f'<footer class="foot"><a href="{p["home"]}">{e(S["acc_back"])}</a></footer></div>'
+                f'<footer class="foot"><a href="{p["home"]}">{e(S["acc_back"])}</a> · <a id="acc-pv" href="{p["privacy"]}">{e(S["privacy_link"])}</a></footer></div>'
                 f'<script type="application/json" id="acc-t">{tj}</script>'
                 f'<script>{JS}</script></body></html>')
         open(f"site/{p['file']}.html", "w", encoding="utf-8").write(page)

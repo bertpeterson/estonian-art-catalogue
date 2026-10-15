@@ -14,7 +14,7 @@ carries over.
 """
 import json, os, re, html, unicodedata, datetime, collections, urllib.parse
 # the page's last line: where to ask for a correction or a removal
-CONTACT = {"en": 'Corrections, removals, questions: <a href="mailto:info@museaal.ee">info@museaal.ee</a>', "et": 'Parandused, eemaldamised, küsimused: <a href="mailto:info@museaal.ee">info@museaal.ee</a>'}
+CONTACT = {"en": 'Corrections, removals, questions: <a href="mailto:info@museaal.ee">info@museaal.ee</a> · <a href="https://museaal.ee/privacy">Privacy</a>', "et": 'Parandused, eemaldamised, küsimused: <a href="mailto:info@museaal.ee">info@museaal.ee</a> · <a href="https://museaal.ee/privaatsus">Privaatsus</a>'}
 GC = '<script data-goatcounter="https://museaal.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>'   # GoatCounter: a page-view count, no cookies
 
 BASE = "https://museaal.ee"
