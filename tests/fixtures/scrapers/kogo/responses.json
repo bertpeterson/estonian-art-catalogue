@@ -1,0 +1,16 @@
+[
+ {
+  "key": "https://www.kogogallery.ee/en/art-store/",
+  "url": "https://www.kogogallery.ee/en/art-store/",
+  "status": 200,
+  "final_url": "https://www.kogogallery.ee/en/works/",
+  "file": "01.gz"
+ },
+ {
+  "key": "https://www.kogogallery.ee/en/works/",
+  "url": "https://www.kogogallery.ee/en/works/",
+  "status": 200,
+  "final_url": null,
+  "file": "02.gz"
+ }
+]

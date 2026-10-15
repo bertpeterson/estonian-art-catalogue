@@ -1,0 +1,67 @@
+{
+ "gallery_records.json": [
+  {
+   "gid": "other-1",
+   "artist": "Kristjan Raud",
+   "title": "Kalevipoeg",
+   "year": "1935",
+   "tech": "",
+   "dims": "",
+   "gallery": "Another gallery",
+   "city": "Tallinn",
+   "url": "https://example.org/1"
+  },
+  {
+   "price": 1900,
+   "gid": "tokko-ashiyana-kuu-maja-goas",
+   "artist": "QBA",
+   "title": "Ashiyana Kuu maja Goas",
+   "year": "2025",
+   "tech": "Akrüül, lõuend",
+   "dims": "74 x 55 cm",
+   "gallery": "Tokko & Arrak",
+   "city": "Tallinn",
+   "url": "https://tokkoarrak.ee/kunsti-muuk/p/ashiyana-kuu-maja-goas",
+   "img": "https://static1.squarespace.com/static/65ad0f5e7b7f34489b5085aa/65ad0f6e7b7f34489b508686/6a95e2c04827863ca84e3228/1791582074070/Ashiyana+Kuu+maja+Goas-2048px_raam.jpg.1.jpeg?format=1500w"
+  },
+  {
+   "price": 2100,
+   "gid": "tokko-jamaika-pubi",
+   "artist": "QBA",
+   "title": "Jamaika pubi",
+   "year": "2026",
+   "tech": "Akrüül, lõuend",
+   "dims": "70 x 100 cm",
+   "gallery": "Tokko & Arrak",
+   "city": "Tallinn",
+   "url": "https://tokkoarrak.ee/kunsti-muuk/p/jamaika-pubi",
+   "img": "https://static1.squarespace.com/static/65ad0f5e7b7f34489b5085aa/65ad0f6e7b7f34489b508686/6a943b2858c191198c0763f9/1791581893928/Jamaika+pubi-2048px_raam.jpg.1.jpeg?format=1500w"
+  },
+  {
+   "price": 20800,
+   "gid": "tokko-meile-antud-mark",
+   "artist": "Jüri Arrak",
+   "title": "Meile antud märk",
+   "year": "1999",
+   "tech": "Õli, lõuend",
+   "dims": "116 x 89 cm",
+   "gallery": "Tokko & Arrak",
+   "city": "Tallinn",
+   "url": "https://tokkoarrak.ee/kunsti-muuk/p/meile-antud-mark",
+   "img": "https://static1.squarespace.com/static/65ad0f5e7b7f34489b5085aa/65ad0f6e7b7f34489b508686/6a0704f9509ff40518ab93f9/1788212102385/J_Arrak_Meile+antud+ma%CC%88rk_raam.1.jpeg?format=1500w"
+  },
+  {
+   "price": 2100,
+   "gid": "tokko-puerto-escondido-surfikool",
+   "artist": "QBA",
+   "title": "Puerto Escondido surfikool",
+   "year": "2026",
+   "tech": "Õli, lõuend",
+   "dims": "67 x 100 cm",
+   "gallery": "Tokko & Arrak",
+   "city": "Tallinn",
+   "url": "https://tokkoarrak.ee/kunsti-muuk/p/puerto-escondido-surfikool",
+   "img": "https://static1.squarespace.com/static/65ad0f5e7b7f34489b5085aa/65ad0f6e7b7f34489b508686/6a943848b581f969a6e4d284/1791581892844/Puerto+Escondido+surfikool-2048px_raam.jpg.1.jpeg?format=1500w"
+  }
+ ]
+}

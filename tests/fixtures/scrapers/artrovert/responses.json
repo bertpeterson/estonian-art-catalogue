@@ -1,0 +1,37 @@
+[
+ {
+  "key": "https://www.artrovert.ee/en/teosed/",
+  "url": "https://www.artrovert.ee/en/teosed/",
+  "status": 200,
+  "final_url": null,
+  "file": "01.gz"
+ },
+ {
+  "key": "https://www.artrovert.ee/en/toode/anna-liisa-villmann-klein-klein-blau-2/",
+  "url": "https://www.artrovert.ee/en/toode/anna-liisa-villmann-klein-klein-blau-2/",
+  "status": 200,
+  "final_url": null,
+  "file": "02.gz"
+ },
+ {
+  "key": "https://www.artrovert.ee/en/toode/britta-benno-about-lines-stains-and-seashells/",
+  "url": "https://www.artrovert.ee/en/toode/britta-benno-about-lines-stains-and-seashells/",
+  "status": 200,
+  "final_url": null,
+  "file": "03.gz"
+ },
+ {
+  "key": "https://www.artrovert.ee/en/toode/britta-benno-being-together/",
+  "url": "https://www.artrovert.ee/en/toode/britta-benno-being-together/",
+  "status": 200,
+  "final_url": null,
+  "file": "04.gz"
+ },
+ {
+  "key": "https://www.artrovert.ee/en/toode/britta-benno-combination-with-orange/",
+  "url": "https://www.artrovert.ee/en/toode/britta-benno-combination-with-orange/",
+  "status": 200,
+  "final_url": null,
+  "file": "05.gz"
+ }
+]

@@ -1,0 +1,41 @@
+{
+ "gallery_records.json": [
+  {
+   "gid": "other-1",
+   "artist": "Kristjan Raud",
+   "title": "Kalevipoeg",
+   "year": "1935",
+   "tech": "",
+   "dims": "",
+   "gallery": "Another gallery",
+   "city": "Tallinn",
+   "url": "https://example.org/1"
+  },
+  {
+   "price": 2000,
+   "gid": "artro-anna-liisa-villmann-klein-klein-blau-2",
+   "artist": "Anna-Liisa Villmann",
+   "title": "Kein Klein Blau",
+   "year": "2026",
+   "tech": "height 72 cm, diameter 36-42 cm",
+   "dims": "72 × 42 cm",
+   "gallery": "Artrovert",
+   "city": "Tallinn",
+   "url": "https://www.artrovert.ee/en/toode/anna-liisa-villmann-klein-klein-blau-2/",
+   "img": "https://artrovert.ee/wp-content/uploads/2026/06/Anna-Liisa-Villmann-Klein-Klein-Blau.png"
+  },
+  {
+   "price": 2500,
+   "gid": "artro-britta-benno-about-lines-stains-and-seashells",
+   "artist": "Britta Benno",
+   "title": "Of strokes, stains and shells",
+   "year": "2026",
+   "tech": "ink, charcoal, oilpastel on canvas",
+   "dims": "90 × 150 cm",
+   "gallery": "Artrovert",
+   "city": "Tallinn",
+   "url": "https://www.artrovert.ee/en/toode/britta-benno-about-lines-stains-and-seashells/",
+   "img": "https://artrovert.ee/wp-content/uploads/2026/10/Britta-Benno-Joontest-plekkidest-ja-teokarpidest.png"
+  }
+ ]
+}

@@ -1,0 +1,36 @@
+[
+ {
+  "gid": "other-1",
+  "artist": "Kristjan Raud",
+  "title": "Kalevipoeg",
+  "year": "1935",
+  "tech": "",
+  "dims": "",
+  "gallery": "Another gallery",
+  "city": "Tallinn",
+  "url": "https://example.org/1"
+ },
+ {
+  "year": null,
+  "tech": "",
+  "dims": "",
+  "gallery": "Artner",
+  "city": "",
+  "url": "https://artner.ee/",
+  "gid": "artner-1",
+  "artist": "Valdur Ohakas",
+  "title": "Portree"
+ },
+ {
+  "year": null,
+  "tech": "",
+  "dims": "",
+  "gallery": "Artner",
+  "city": "",
+  "url": "https://artner.ee/",
+  "gid": "artner-2",
+  "artist": "Evald Okas",
+  "title": "Naised VI",
+  "sold": true
+ }
+]

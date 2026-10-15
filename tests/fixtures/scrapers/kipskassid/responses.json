@@ -1,0 +1,37 @@
+[
+ {
+  "key": "https://www.lihtsadkipskassid.ee/vota-kass",
+  "url": "https://www.lihtsadkipskassid.ee/vota-kass",
+  "status": 200,
+  "final_url": null,
+  "file": "01.gz"
+ },
+ {
+  "key": "https://www.lihtsadkipskassid.ee/kassikesed",
+  "url": "https://www.lihtsadkipskassid.ee/kassikesed",
+  "status": 200,
+  "final_url": null,
+  "file": "02.gz"
+ },
+ {
+  "key": "https://www.lihtsadkipskassid.ee/collab-kassid",
+  "url": "https://www.lihtsadkipskassid.ee/collab-kassid",
+  "status": 200,
+  "final_url": null,
+  "file": "03.gz"
+ },
+ {
+  "key": "https://www.lihtsadkipskassid.ee/api/supercollab/archive",
+  "url": "https://www.lihtsadkipskassid.ee/api/supercollab/archive",
+  "status": 200,
+  "final_url": null,
+  "file": "04.gz"
+ },
+ {
+  "key": "https://www.lihtsadkipskassid.ee/api/media/gallery",
+  "url": "https://www.lihtsadkipskassid.ee/api/media/gallery",
+  "status": 200,
+  "final_url": null,
+  "file": "05.gz"
+ }
+]
