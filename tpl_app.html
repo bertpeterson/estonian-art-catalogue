@@ -1194,7 +1194,7 @@
   function renderInner(){
     syncOrder();
     if (state.view && state.viewKey !== scopeKey()) state.view = null;   // a List / Artwall choice is for one view
-    renderDoors(); renderListBar();
+    renderDoors(); renderListBar(); renderAccTop();
     // The count line and Reset describe and undo a selection; before there is one
     // they only repeat the masthead.
     $("countline").hidden = pristine(); $("reset").hidden = pristine();
@@ -1830,26 +1830,43 @@
       + (!state.shared && n ? `<button class="linkbtn" data-sl-act="clear">${esc(T("sl_clear"))}</button>` : "")
       + `<button class="linkbtn" data-sl-act="close">${esc(T("sl_close"))}</button>`
       + `<span class="sl-note">${esc(T(n ? (state.shared ? "sl_shared_note" : window.museaalList ? "" : "sl_kept") : "sl_empty"))}</span>`
-      + (!state.shared && window.museaalList ? accountHTML() : "");
+      + (!state.shared && window.museaalList && $("accpanel").hidden ? accountHTML("acc-email") : "");
     el.hidden = false;
   }
   // signing in, so the list follows the visitor to their other devices (list-sync.js): an email
   // address, a link sent to it, and the list joined with what the account already holds
-  function accountHTML(){
+  function accountHTML(id, top){
     const ML = window.museaalList, who = ML.who(), n = ML.note();
     const msg = n && n !== "in" ? `<span class="sl-note acc-msg" role="status">${esc(T("acc_" + n))}</span>` : "";
     if (who) return `<span class="sl-note">${esc(T("acc_in", {e: who}))}</span>`
       + `<button class="linkbtn" data-sl-act="signout">${esc(T("acc_signout"))}</button>`
       + `<button class="linkbtn" data-sl-act="forget">${esc(T("acc_delete"))}</button>` + msg;
-    return `<span class="acc"><input type="email" id="acc-email" autocomplete="email" spellcheck="false" placeholder="${esc(T("acc_email"))}" aria-label="${esc(T("acc_email"))}">`
+    return `<span class="acc"><input type="email" id="${id}" autocomplete="email" spellcheck="false" placeholder="${esc(T("acc_email"))}" aria-label="${esc(T("acc_email"))}">`
       + `<button class="linkbtn" data-sl-act="signin">${esc(T("acc_send"))}</button></span>`
-      + (n === "sent" ? "" : `<span class="sl-note">${esc(T("acc_offer"))}</span>`) + msg;
+      + (n === "sent" || top ? "" : `<span class="sl-note">${esc(T("acc_offer"))}</span>`) + msg;
   }
-  function accountSignIn(){
-    const inp = $("acc-email"), v = inp ? inp.value.trim() : "";
+  function accountSignIn(id){
+    const inp = $(id), v = inp ? inp.value.trim() : "";
     if (!v || !inp.checkValidity()){ if (inp) inp.focus(); return; }
     inp.disabled = true;
     museaalList.signIn(v, LANG);
+  }
+  // the same sign-in, from the masthead: a button beside the language and theme, and a panel
+  // under it that says what an account is for and what is kept
+  function renderAccTop(){
+    const ML = window.museaalList, b = $("acc-top"), p = $("accpanel");
+    if (!ML) return;
+    b.parentNode.hidden = false;
+    b.textContent = T(ML.who() ? "acc_top_in" : "acc_top");
+    b.setAttribute("aria-expanded", !p.hidden);
+    if (p.hidden){ p.innerHTML = ""; return; }
+    p.innerHTML = `<p class="acc-why">${esc(T(ML.who() ? "acc_why_in" : "acc_why"))}</p>`
+      + accountHTML("acc-email-top", true)
+      + `<button class="linkbtn" data-sl-act="close">${esc(T("acc_close"))}</button>`;
+  }
+  function accTop(open){
+    $("accpanel").hidden = !open; renderAccTop(); renderListBar();
+    if (open){ const i = $("acc-email-top"); if (i) i.focus(); }
   }
   // a list brought in from another device, or the sign-in changed: the page shows it
   addEventListener("museaal:list", () => {
@@ -1857,7 +1874,12 @@
     try { (JSON.parse(localStorage.getItem(SL_KEY) || "[]") || []).forEach(k => { if (typeof k === "string") SL.add(k); }); } catch(e){}
     renderAll(); if (state.list) pushHash(true);
   });
-  addEventListener("museaal:account", () => renderListBar());
+  addEventListener("museaal:account", () => {
+    // back from the emailed link: the panel says how it went
+    const n = window.museaalList.note();
+    if ((n === "in" || n === "expired") && !state.list) $("accpanel").hidden = false;
+    renderAccTop(); renderListBar();
+  });
   async function slCSV(){
     const keys = listKeys() || SL;
     const rows = W.filter(w => keys.has(w.k));
@@ -2109,11 +2131,24 @@
     else if (act === "adopt"){ state.shared.forEach(k => SL.add(k)); slSave(); state.shared = null; state.list = true; renderAll(); pushHash(); }
     else if (act === "clear"){ if (!confirm(T("sl_confirm"))) return; SL.clear(); slSave(); renderAll(); pushHash(); }
     else if (act === "close"){ state.list = false; state.shared = null; renderAll(); pushHash(); }
-    else if (act === "signin") accountSignIn();
+    else if (act === "signin") accountSignIn("acc-email");
     else if (act === "signout") museaalList.signOut();
     else if (act === "forget"){ if (confirm(T("acc_delete_confirm"))) museaalList.remove(); }
   });
-  $("listbar").addEventListener("keydown", e => { if (e.key === "Enter" && e.target.id === "acc-email") accountSignIn(); });
+  $("listbar").addEventListener("keydown", e => { if (e.key === "Enter" && e.target.id === "acc-email") accountSignIn("acc-email"); });
+  $("acc-top").addEventListener("click", () => accTop($("accpanel").hidden));
+  $("accpanel").addEventListener("click", e => {
+    const b = e.target.closest("[data-sl-act]"); if (!b) return;
+    const act = b.dataset.slAct;
+    if (act === "close") accTop(false);
+    else if (act === "signin") accountSignIn("acc-email-top");
+    else if (act === "signout") museaalList.signOut();
+    else if (act === "forget"){ if (confirm(T("acc_delete_confirm"))) museaalList.remove(); }
+  });
+  $("accpanel").addEventListener("keydown", e => {
+    if (e.key === "Enter" && e.target.id === "acc-email-top") accountSignIn("acc-email-top");
+    else if (e.key === "Escape"){ accTop(false); $("acc-top").focus(); }
+  });
   // The mark sits beside each row button and inside the open record; neither is
   // within a .row-btn, so the row handler never sees these clicks.
   reg.addEventListener("click", e => {
