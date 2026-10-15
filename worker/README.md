@@ -42,7 +42,8 @@ for 30 minutes (an HMAC of the visitor's address and the expiry), which the page
 
 Order does not matter much: without the secret the Worker lets everyone through as before; with the secret
 but before the pages carry the key, the mood box falls back to stems and Buy Art's assistant says "Please
-confirm you are not a robot" until the push is live. `/list/*` is not behind it (it spends nothing).
+confirm you are not a robot" until the push is live. Of `/list/*` only `/list/login` is behind it, since each
+sign-in link is an email sent; the rest spends nothing.
 
 ## Limits built in
 
@@ -77,6 +78,15 @@ kept in step on every device they open the link on (`list-sync.js`, which `list_
 In KV only hashes are stored: the list under an HMAC of the address, sessions and links under their SHA-256.
 The address itself is in KV only for the 15 minutes a link is valid. 1,000 works a list at most; a list not
 changed for two years, and a session after one, expire. "Delete account" deletes the stored list.
+
+**News emails.** The sign-in has an unticked "Email me about new features" box. Only for those who tick it and
+then open the link (so the address is confirmed) does the Worker keep `n:<account>` in KV: `{e, lang, at, v,
+unsub}`, the address, their language, when they confirmed, the wording version, and their own unsubscribe link.
+It stays until they use that link, press "Stop them" signed in, or delete the account. To read the list:
+Cloudflare → Storage & Databases → KV → `museaal-lists` → search keys for `n:`, or in Terminal
+`npx wrangler kv key list --namespace-id <id> --prefix n:` and `npx wrangler kv key get --namespace-id <id> "n:…"`.
+Every news email must carry that person's `unsub` link (in the text, and as the `List-Unsubscribe` header).
+The page promised this when they ticked the box, so nothing else may be sent to these addresses.
 
 Setting it up (once), in this order:
 

@@ -395,7 +395,10 @@ async function ask(body, env, reply) {
 // /list/delete use the session. In KV (binding LISTS), every key a hash, so what is stored is no use to anyone who
 // reads it: t:<token's hash> the address and its account for 15 minutes; s:<session's hash> the account, for a year;
 // u:<account> the list, two years from its last change; r:<account> sign-in links sent this hour. The account is an
-// HMAC of the address (LIST_SECRET), so the address itself is kept only until the link is used. Needs the KV
+// HMAC of the address (LIST_SECRET), so the address itself is kept only until the link is used -- unless the visitor
+// ticked "Email me about new features": then n:<account> keeps the address, the time they confirmed it by opening the
+// link, and the unsubscribe link every such email must carry, until they stop it (/list/unsubscribe with that link's
+// token, or /list/news signed in) or delete the account. worker/README.md says how to read them out. Needs the KV
 // binding LISTS and the secrets LIST_SECRET and RESEND_API_KEY (worker/README.md); MAIL_FROM optional.
 const LINK_TTL = 15 * 60, SESSION_TTL = 365 * 86400, LIST_TTL = 2 * 365 * 86400, LIST_MAX = 1000, LINKS_PER_HOUR = 4;
 const enc = s => new TextEncoder().encode(s);
@@ -411,11 +414,13 @@ const workKey = k => typeof k === "string" && k.length > 0 && k.length <= 120 &&
 const keys = v => Array.isArray(v) ? [...new Set(v.filter(workKey))].slice(0, LIST_MAX) : [];
 
 const MAIL = {
-  en: { subject: "Your sign-in link for museaal.ee", text: link => "Open this link to sign in to My List on museaal.ee:\n\n" + link +
-    "\n\nIt works once, for 15 minutes, in any browser: open it on each device you want your list on.\n\n" +
+  en: { subject: "Your sign-in link for museaal.ee", text: (link, news) => "Open this link to sign in to My List on museaal.ee:\n\n" + link +
+    "\n\nIt works once, for 15 minutes, in any browser: open it on each device you want your list on.\n\n" + (news ?
+    "You also asked for emails about new features. They start once you open the link, and each one has a link to stop them.\n\n" : "") +
     "If you did not ask for it, ignore this email; nothing happens without the link.\n\nmuseaal.ee — Estonian Art Catalogue" },
-  et: { subject: "Sinu sisselogimislink museaal.ee-sse", text: link => "Ava see link, et logida sisse museaal.ee nimekirja:\n\n" + link +
-    "\n\nLink kehtib üks kord ja 15 minutit, mis tahes brauseris: ava see igas seadmes, kus nimekirja tahad näha.\n\n" +
+  et: { subject: "Sinu sisselogimislink museaal.ee-sse", text: (link, news) => "Ava see link, et logida sisse museaal.ee nimekirja:\n\n" + link +
+    "\n\nLink kehtib üks kord ja 15 minutit, mis tahes brauseris: ava see igas seadmes, kus nimekirja tahad näha.\n\n" + (news ?
+    "Soovisid ka e-kirju uute võimaluste kohta. Need algavad, kui avad lingi, ja igas kirjas on link nende lõpetamiseks.\n\n" : "") +
     "Kui sa linki ei küsinud, jäta see kiri tähelepanuta; ilma lingita ei juhtu midagi.\n\nmuseaal.ee — Eesti Kunstikataloog" },
 };
 async function mail(env, to, m) {
@@ -427,6 +432,8 @@ async function mail(env, to, m) {
   if (!r.ok) throw new Error("mail " + r.status);
 }
 
+// the link that stops the news emails: the account and a seal on it, so nobody can stop someone else's
+const unsubLink = async (env, u, lang) => (env.SITE || "https://museaal.ee/") + "#lang=" + lang + "&unsub=" + u + "." + await mac(env.LIST_SECRET, "unsub|" + u);
 const logins = new Map();        // visitor -> times of their recent sign-in requests: 5 in ten minutes
 async function list(path, body, env, reply, ip) {
   const KV = env.LISTS;
@@ -442,10 +449,11 @@ async function list(path, body, env, reply, ip) {
     if (sent >= LINKS_PER_HOUR) return reply({ error: "Too many links for this address; wait an hour." }, 429);
     const t = token();
     await KV.put("r:" + u, String(sent + 1), { expirationTtl: 3600 });
-    await KV.put("t:" + await hash(t), JSON.stringify({ u, e: email }), { expirationTtl: LINK_TTL });
+    const news = body.news === true;
+    await KV.put("t:" + await hash(t), JSON.stringify({ u, e: email, lang, news }), { expirationTtl: LINK_TTL });
     // the token after the #, which browsers never send: it reaches no server's logs, ours or GitHub's
     const link = (env.SITE || "https://museaal.ee/") + "#lang=" + lang + "&list=mine&login=" + t;
-    try { await mail(env, email, { subject: MAIL[lang].subject, text: MAIL[lang].text(link) }); }
+    try { await mail(env, email, { subject: MAIL[lang].subject, text: MAIL[lang].text(link, news) }); }
     catch (e) { console.log("list mail failed", String(e.message)); return reply({ error: "The email could not be sent." }, 502); }
     return reply({ ok: true });
   }
@@ -457,12 +465,21 @@ async function list(path, body, env, reply, ip) {
     if (!rec) await KV.put("u:" + t.u, JSON.stringify({ items: [], updated: Date.now() }), { expirationTtl: LIST_TTL });
     const s = token();
     await KV.put("s:" + await hash(s), JSON.stringify({ u: t.u }), { expirationTtl: SESSION_TTL });
-    return reply({ session: s, email: t.e, items: rec ? rec.items : [] });
+    // the box was ticked and the link opened: the address is confirmed, and kept for the news emails
+    if (t.news) await KV.put("n:" + t.u, JSON.stringify({ e: t.e, lang: t.lang || "en", at: new Date().toISOString(), v: 1, unsub: await unsubLink(env, t.u, t.lang || "en") }));
+    return reply({ session: s, email: t.e, items: rec ? rec.items : [], news: !!(t.news || await KV.get("n:" + t.u)) });
+  }
+  if (path === "unsubscribe") {
+    const [u, seal] = String(body.token || "").slice(0, 200).split(".");
+    if (!u || !seal || seal !== await mac(env.LIST_SECRET, "unsub|" + u)) return reply({ error: "This link is not valid." }, 400);
+    await KV.delete("n:" + u);
+    return reply({ ok: true });
   }
   const sk = "s:" + await hash(String(body.session || "").slice(0, 64)), s = await KV.get(sk, "json");
   if (!s) return reply({ error: "Signed out." }, 401);
   if (path === "logout") { await KV.delete(sk); return reply({ ok: true }); }
-  if (path === "delete") { await KV.delete("u:" + s.u); await KV.delete(sk); return reply({ ok: true }); }
+  if (path === "delete") { await KV.delete("u:" + s.u); await KV.delete("n:" + s.u); await KV.delete(sk); return reply({ ok: true }); }
+  if (path === "news") { await KV.delete("n:" + s.u); return reply({ ok: true }); }     // signed in: stop the news emails
   if (path !== "sync") return reply({ error: "No such thing." }, 404);
   // the browser sends what it added and removed since the two last agreed, and takes the result back
   const rec = await KV.get("u:" + s.u, "json");
@@ -471,7 +488,7 @@ async function list(path, body, env, reply, ip) {
   const items = rec.items.filter(k => !rem.has(k));
   for (const k of keys(body.add)) if (!items.includes(k) && items.length < LIST_MAX) items.push(k);
   if (JSON.stringify(items) !== was) await KV.put("u:" + s.u, JSON.stringify({ items, updated: Date.now() }), { expirationTtl: LIST_TTL });
-  return reply({ items });
+  return reply({ items, news: !!(await KV.get("n:" + s.u)) });
 }
 
 const seen = new Map(), rounds = new Map(), syncs = new Map();   // visitor -> times of their recent searches; of all their requests; of list requests
