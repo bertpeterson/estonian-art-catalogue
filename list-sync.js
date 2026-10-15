@@ -20,6 +20,36 @@
       body: JSON.stringify(body), keepalive: !!keep })
       .then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { j.status = r.status; return j; }); });
   }
+  // Turnstile before a sign-in link is sent (the Worker's /list/login wants it when it has a secret): the widget is
+  // put in the page's box only for that, shows itself only if Cloudflare wants a click, and goes once it answers.
+  // The site key (data-ts) works on museaal.ee only, Cloudflare's test keys (1x00...) anywhere; elsewhere no token.
+  var KEY = (me && me.getAttribute("data-ts")) || "";
+  if (!(/(^|\.)museaal\.ee$/.test(location.hostname) || /^[123]x0+A[AB]$/.test(KEY))) KEY = "";
+  function turnstile() {
+    return new Promise(function (ok) {
+      if (window.turnstile) return ok(window.turnstile);
+      if (!document.querySelector('script[src*="challenges.cloudflare.com/turnstile"]')) {
+        var s = document.createElement("script");
+        s.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit"; s.async = true; document.head.appendChild(s);
+      }
+      var n = 0, t = setInterval(function () { if (window.turnstile || ++n > 150) { clearInterval(t); ok(window.turnstile || null); } }, 100);
+    });
+  }
+  function human(box) {
+    if (!KEY) return Promise.resolve("");
+    return turnstile().then(function (ts) {
+      if (!ts) return "";
+      return new Promise(function (ok) {
+        var el = document.createElement("div"), done = false, id = null;
+        el.style.flexBasis = "100%";
+        (box || document.body).appendChild(el);
+        function end(t) { if (done) return; done = true; try { if (id !== null) ts.remove(id); } catch (e) {} el.remove(); ok(t || ""); }
+        try { id = ts.render(el, { sitekey: KEY, appearance: "interaction-only", callback: end, "error-callback": function () { end(""); } }); }
+        catch (e) { end(""); }
+        setTimeout(function () { end(""); }, 60000);
+      });
+    });
+  }
   function out(why) { write(ACC, null); note = why; tell("museaal:account"); }
   function sync(keep) {
     var a = acc(); if (!a) return Promise.resolve();
@@ -61,11 +91,14 @@
   window.museaalList = {
     changed: function () { if (!acc()) return; clearTimeout(timer); timer = setTimeout(function () { timer = 0; sync(); }, 2000); },
     who: function () { var a = acc(); return a ? a.e : ""; },
-    // what last happened, for the page to say: sent, busy, bad, failed, in, expired, gone, out, deleted
+    // what last happened, for the page to say: sent, busy, bad, robot, failed, in, expired, gone, out, deleted
     note: function () { return note; },
-    signIn: function (email, lang) {
-      return post("login", { email: email, lang: lang }).then(function (j) {
-        note = j.ok ? "sent" : j.status === 429 ? "busy" : j.status === 400 ? "bad" : "failed";
+    signIn: function (email, lang, box) {
+      return human(box).then(function (t) {
+        var b = { email: email, lang: lang }; if (t) b.human = t;
+        return post("login", b);
+      }).then(function (j) {
+        note = j.ok ? "sent" : j.status === 429 ? "busy" : j.status === 400 ? "bad" : j.status === 401 ? "robot" : "failed";
       }, function () { note = "failed"; }).then(function () { tell("museaal:account"); });
     },
     signOut: function () { var a = acc(); if (a) post("logout", { session: a.s }).catch(function () {}); out("out"); },

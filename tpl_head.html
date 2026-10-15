@@ -76,9 +76,9 @@ h1 a{color:inherit;text-decoration:none;border-bottom:0}
 h1 a:hover{color:var(--grey-6)}
 .switches{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px;margin:-18px 0 14px}
 .switches .langsw button{padding:3px 8px;font-size:.62rem}
-/* the sign-in is the one of the three meant to be found */
-.switches .acc-sw{border-color:var(--ink)}
-.switches .acc-sw button{color:var(--ink)}
+/* the sign-in sits under the tagline, the one control there meant to be found */
+.acc-sw{margin-top:12px;border-color:var(--ink)}
+.acc-sw button{color:var(--ink)}
 .langsw{display:inline-flex;border:1px solid var(--rule)}
 .langsw button{font-family:var(--mono);font-size:var(--fs-xs);letter-spacing:var(--ls-label);
   background:none;border:0;color:var(--grey-6);padding:5px 11px;cursor:pointer}
@@ -762,7 +762,7 @@ footer a{border-bottom:1px solid var(--rule)}
 
 <div class="wrap">
   <header class="masthead">
-    <!-- the small things, top right: language, theme, and the sign-in -->
+    <!-- the small things, top right: language and theme -->
     <div class="switches">
       <div class="langsw" role="group" aria-label="Language">
         <button id="lang-en" aria-pressed="true">ENG</button>
@@ -772,13 +772,13 @@ footer a{border-bottom:1px solid var(--rule)}
         <button id="th-light" aria-pressed="false" data-i18n="th_light"></button>
         <button id="th-dark" aria-pressed="true" data-i18n="th_dark"></button>
       </div>
-      <!-- signing in, up front: the account carries My List to every device (list-sync.js) -->
-      <div class="langsw acc-sw" hidden><button id="acc-top" aria-expanded="false" aria-controls="accpanel"></button></div>
     </div>
     <div class="mast-grid">
       <div>
         <h1><a href="./" data-i18n-html="wordmark"></a></h1>
         <p class="mast-tag" data-i18n="tagline"></p>
+        <!-- signing in, up front: the account carries My List to every device (list-sync.js) -->
+        <div class="langsw acc-sw" hidden><button id="acc-top" aria-expanded="false" aria-controls="accpanel"></button></div>
       </div>
       <div class="mast-stats">
         <!-- opens the works per decade, which no longer stands open on the home page -->
