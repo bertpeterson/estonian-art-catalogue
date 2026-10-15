@@ -17,7 +17,7 @@ def invkey(s):
 # ---------- artist name hygiene ----------
 # clean_name, fold, bare_of and the token matching below live in names.py, where the
 # tests reach them (merge.py runs on import).
-from names import (clean_name, fold, QUALIFIER, _strip_brackets, bare_of, PARTICLE, NEVER,
+from names import (LIST, clean_name, fold, QUALIFIER, _strip_brackets, bare_of, PARTICLE, NEVER,
                    _ftok, _toks, _close, _qual, toks, _vn, _vtoks, resolve_variant as _resolve_variant)
 
 # ---------- medium inference for digikogu-only records ----------
@@ -761,6 +761,10 @@ for g in GAL:
         gal_new_est += 1
     if not g.get("title"): continue           # before the artist is added: a titleless listing must not create a name
     if _anon(g["artist"]): continue           # an unknown hand, a firm, two artists at once: the museums' rule, for galleries too
+    # a list of names -- a shop's book by three authors, or a title read into the name field
+    # ("Malle Leis, Kollased liiliad") -- is no one artist; brackets first, so a museum-style
+    # "Josse (Joost, Joos) den II Momper" would not count
+    if LIST.search(re.sub(r"\([^)]*\)", "", g["artist"])): continue
     ai = artist_index(g["artist"])
     if ai is None: continue
     # a biography from the artist's NOBA page, for artists who have none elsewhere

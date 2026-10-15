@@ -215,9 +215,21 @@ def combine(A):
         for a in byname.values():
             if set(a.get("grp", [])) & set(c["grp"]): members[c["id"]][a["n"]] = "wd"
     cache = json.load(open(BIOS, encoding="utf-8")) if os.path.exists(BIOS) else {}
-    current = {key for key, _, _ in items_for(A)}
+    items = items_for(A)
+    current = {key for key, _, _ in items}
+    bio_now = {it["artist"]: it["bio"] for key, it, _ in items}
+    read_now = {cache[key]["artist"] for key in current if key in cache}
     for key, r in cache.items():
-        if key not in current or r["artist"] not in byname: continue   # a bio since edited or an artist since merged
+        if r["artist"] not in byname: continue                          # an artist since merged
+        if key not in current:
+            # A reading goes stale when the bio is edited, and also when its candidate list
+            # moves because some other artist came or went (5 list-named "artists" dropped
+            # on 15 Oct took 4 links with them). An artist with no current reading keeps,
+            # from an older one, what the bio as it reads now still says word for word.
+            text = bio_now.get(r["artist"])
+            if not text or r["artist"] in read_now: continue
+            said = lambda xs: [x for x in xs if x[1] and x[1] in text]
+            r = dict(r, teachers=said(r["teachers"]), pupils=said(r["pupils"]), circles=said(r["circles"]))
         for t, q in r["teachers"]: add(t, r["artist"], "bio", q)
         for p, q in r["pupils"]: add(r["artist"], p, "bio", q)
         for c, q in r["circles"]: members[c].setdefault(r["artist"], "bio")

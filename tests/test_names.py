@@ -140,10 +140,8 @@ class ResolveVariant(unittest.TestCase):
         find = resolver("Kristjan Raud", "Kristian Raud")                       # two close candidates: neither
         self.assertIsNone(find("Kristjan Raud"))
 
-    @unittest.expectedFailure
-    def test_known_false_match_comma_list(self):
-        # A list of names is three people, but a comma does not stop the match the way
-        # "ja", "&" and "/" do: merge.py's log has this one resolving to Moss.
+    def test_comma_list_is_several_people(self):
+        # merge.py's log once had this list resolving to Moss
         self.assertIsNone(self.find("Ants Juske, Harry Liivrand, Rauno Thomas Moss"))
 
 

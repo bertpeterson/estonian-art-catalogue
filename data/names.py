@@ -98,10 +98,15 @@ def toks(n):
 # than guessing on the surname alone.
 _vn = lambda t: re.sub(r"^c", "k", t.replace("x", "ks").replace("w", "v"))
 def _vtoks(n): return [_vn(t) for t in re.findall(r"[^\s.,\-]+", " ".join(_toks(n)))]
+# A comma between two full names is a list of people ("Ants Juske, Harry Liivrand, Rauno
+# Thomas Moss" resolved to Moss); a comma after a surname alone is the catalogues' own
+# order ("Köler, Johann") and stays a name.
+LIST = re.compile(r"[^\s,]+\s+[^\s,]+\s*,\s*[^\s,]+\s+[^\s,]+")
 def resolve_variant(name, artists, vsur):
     """The index in artists of the one artist name is a spelling of, or None.
     vsur maps a folded surname to the indexes of the artists that carry it."""
     if NEVER.search(name) or re.search(r"\s[&/]\s|\sja\s|\sand\s", name): return None   # two hands are not a variant of one
+    if LIST.search(name): return None
     t = _vtoks(name)
     if len(t) < 2: return None
     hits = []
