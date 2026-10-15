@@ -24,6 +24,8 @@
 // A third, /list/*, keeps a signed-in visitor's My List (below, at list()).
 //
 // Needs one secret, ANTHROPIC_API_KEY (Settings > Variables and Secrets); /list/* needs more (worker/README.md).
+// With a second, TURNSTILE_SECRET, the two doors that call Claude answer only a visitor who has passed Cloudflare
+// Turnstile: the page's token buys a pass for half an hour (at human(), below). Without it they answer anyone.
 // Calls the Messages API with fetch: the dashboard's editor takes one file, no build step.
 
 const WORDS = __WORDS__;
@@ -477,6 +479,29 @@ function tooMany(ip, map = seen, limit = PER_MINUTE, span = 60000) {
   return t.length > limit;
 }
 
+// Cloudflare Turnstile. The Origin header keeps other sites' pages out, but a script sets it as it likes; the widget's
+// token cannot be forged. A token is good once and for five minutes, so the first one buys a pass: its expiry and an
+// HMAC of the visitor's address and that expiry, sent back with every later message. A new address asks again.
+const PASS_TTL = 30 * 60;
+const mac = async (secret, s) => {
+  const k = await crypto.subtle.importKey("raw", enc(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+  return b64u(await crypto.subtle.sign("HMAC", k, enc(s)));
+};
+async function human(body, env, ip) {      // -> "" when the visitor may go on, a new pass, or null
+  const now = Math.floor(Date.now() / 1000);
+  const [exp, sig] = String(body.pass || "").split(".");
+  if (+exp > now && +exp <= now + PASS_TTL && sig === await mac(env.TURNSTILE_SECRET, ip + "|" + exp)) return "";
+  if (typeof body.human !== "string" || !body.human || body.human.length > 2048) return null;
+  const f = new FormData();
+  f.append("secret", env.TURNSTILE_SECRET); f.append("response", body.human); f.append("remoteip", ip);
+  try {
+    const v = await (await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", { method: "POST", body: f })).json();
+    if (!v.success) return null;
+  } catch (e) { return null; }
+  const until = now + PASS_TTL;
+  return until + "." + await mac(env.TURNSTILE_SECRET, ip + "|" + until);
+}
+
 const photos = new Map();        // visitor -> times of their recent photos: 6 a minute
 function tooManyPhotos(ip) {
   const now = Date.now(), t = (photos.get(ip) || []).filter(x => now - x < 60000);
@@ -494,9 +519,11 @@ export default {
       "Access-Control-Allow-Methods": "POST, OPTIONS",
       "Access-Control-Allow-Headers": "Content-Type",
       "Access-Control-Max-Age": "86400",
+      "Access-Control-Expose-Headers": "X-Museaal-Pass",
       "Vary": "Origin",
     };
-    const reply = (body, status = 200) => new Response(JSON.stringify(body), { status, headers: { ...cors, "Content-Type": "application/json" } });
+    const more = {};     // a new Turnstile pass rides on the answer's headers
+    const reply = (body, status = 200) => new Response(JSON.stringify(body), { status, headers: { ...cors, ...more, "Content-Type": "application/json" } });
     if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: cors });
     if (request.method !== "POST" || !ok) return reply({ error: "This service answers museaal.ee only." }, 403);
     let body = {};
@@ -511,6 +538,11 @@ export default {
     const round = Array.isArray(body.trail) && body.trail.length > 0;
     if (tooMany(ip, rounds, CALLS_PER_MINUTE) || !round && tooMany(ip)) return reply({ error: "Too many searches; wait a minute." }, 429);
     if (!env.ANTHROPIC_API_KEY) return reply({ error: "The service is not set up." }, 503);
+    if (env.TURNSTILE_SECRET) {
+      const pass = await human(body, env, ip);
+      if (pass === null) return reply({ error: "Please confirm you are not a robot.", human: true }, 401);
+      if (pass) more["X-Museaal-Pass"] = pass;
+    }
     if (path === "/ask") {
       if (body.image && tooManyPhotos(request.headers.get("CF-Connecting-IP") || "?")) return reply({ error: "Too many photos; wait a minute." }, 429);
       return ask(body, env, reply);

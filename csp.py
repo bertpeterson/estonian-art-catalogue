@@ -18,7 +18,9 @@ ROOT = sys.argv[1] if len(sys.argv) > 1 else "site"
 # the mood page's reader of typed descriptions (build_mood.py), when one is set up
 _api = (json.load(open("data/mood_api.json", encoding="utf-8")).get("url") or "") if os.path.exists("data/mood_api.json") else ""
 API = re.match(r"https://[^/]+", _api).group(0) if re.match(r"https://[^/]+", _api) else ""
-POLICY = ("default-src 'self'; script-src 'self' https://gc.zgo.at{hashes}; "
+# Cloudflare Turnstile, which guards that Worker when it has a site key: its script, and the frame it asks in
+TS = " https://challenges.cloudflare.com" if API and json.load(open("data/mood_api.json", encoding="utf-8")).get("turnstile") else ""
+POLICY = ("default-src 'self'; script-src 'self' https://gc.zgo.at{hashes}" + TS + "; " + ("frame-src" + TS + "; " if TS else "") +
           "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; "
           "img-src https: data:; connect-src 'self' https://museaal.goatcounter.com" + (" " + API if API else "") + "; "
           "base-uri 'none'; form-action 'none'; object-src 'none'; upgrade-insecure-requests")
