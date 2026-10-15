@@ -18,7 +18,7 @@ MAIL = '<a href="mailto:info@museaal.ee">info@museaal.ee</a>'
 LINKS = ", ".join(f'<a href="{u}">{n}</a>' for n, u in [
     ("Cloudflare", "https://www.cloudflare.com/privacypolicy/"), ("Anthropic", "https://www.anthropic.com/legal/privacy"),
     ("Resend", "https://resend.com/legal/privacy-policy"), ("GitHub", "https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement"),
-    ("Google", "https://policies.google.com/privacy"), ("GoatCounter", "https://www.goatcounter.com/help/privacy")])
+    ("GoatCounter", "https://www.goatcounter.com/help/privacy")])
 
 T = {
     "en": dict(file="privacy", other="privaatsus", other_l="Eesti keeles", site="Estonian Art Catalogue", home="./",
@@ -33,8 +33,8 @@ T = {
                       "no personal data: which page was seen, not by whom. "
                       "A sign-in link sent and a sign-in are counted the same way.",
                       "Museum pictures are shown straight from MuIS and the Art Museum of Estonia, gallery pictures from the gallery's own "
-                      "server, and the fonts come from Google Fonts: those servers see your browser's request, as with any web page. "
-                      "The site itself is served by GitHub Pages."]),
+                      "server: those servers see your browser's request, as with any web page. "
+                      "The site itself, fonts included, is served by GitHub Pages."]),
         ("Accounts", ["An account is only for having My List on all your devices. We keep your email address and your list in Cloudflare's "
                       "storage (Workers KV) until you delete the account, or until the list has gone unchanged for two years. "
                       "The address is used only to send you sign-in links, and the news emails below if you ask for them.",
@@ -56,7 +56,7 @@ T = {
                          "(GDPR article 6(1)(b)). News emails: your consent (article 6(1)(a)), which you can withdraw any time by unsubscribing. "
                          "Counting visits and the robot check: our legitimate interest in knowing how the site is used and keeping it "
                          "free of abuse (article 6(1)(f))."]),
-        ("Outside the EU", ["Cloudflare, Anthropic, Resend, GitHub and Google are US companies, so what they handle can be processed in the US "
+        ("Outside the EU", ["Cloudflare, Anthropic, Resend and GitHub are US companies, so what they handle can be processed in the US "
                          "or elsewhere outside the EU. Resend sends our emails from Ireland. Such transfers rest on the EU–US Data Privacy "
                          "Framework or the EU's standard contractual clauses, as each provider's terms set out."]),
         ("Your rights", ["You can see, correct or delete your data. Your account page shows your address; Delete account there removes "
@@ -77,9 +77,9 @@ T = {
                        "Külastusi loeb GoatCounter, ilma küpsisteta. Nagu iga server näeb see sinu IP-aadressi ja brauserit, kuid "
                        "isikuandmeid ei hoia: milline leht vaadati, mitte kes vaatas. "
                        "Saadetud sisselogimislinke ja sisselogimisi loetakse samamoodi.",
-                       "Muuseumide pildid tulevad otse MuISist ja Eesti Kunstimuuseumist, galeriide pildid galerii enda serverist ning "
-                       "kirjatüübid Google Fontsist: need serverid näevad sinu brauseri päringut nagu iga veebilehe puhul. "
-                       "Lehte ennast serveerib GitHub Pages."]),
+                       "Muuseumide pildid tulevad otse MuISist ja Eesti Kunstimuuseumist, galeriide pildid galerii enda serverist: "
+                       "need serverid näevad sinu brauseri päringut nagu iga veebilehe puhul. "
+                       "Lehte ennast koos kirjatüüpidega serveerib GitHub Pages."]),
         ("Kontod", ["Konto on ainult selleks, et Minu nimekiri oleks kõigis sinu seadmetes. Sinu e-posti aadressi ja nimekirja hoiame "
                     "Cloudflare'i andmehoidlas (Workers KV), kuni kustutad konto või kuni nimekiri on kaks aastat muutmata. "
                     "Aadressi kasutame ainult sisselogimislinkide saatmiseks ja allpool kirjeldatud uudiskirjadeks, kui neid soovid.",
@@ -101,7 +101,7 @@ T = {
                          "(isikuandmete kaitse üldmääruse artikli 6 lõike 1 punkt b). Uudiskirjad: sinu nõusolek (punkt a), mille saad igal ajal "
                          "tagasi võtta, kui tellimusest loobud. Külastuste loendamine ja robotikontroll: meie õigustatud huvi teada, kuidas lehte "
                          "kasutatakse, ja hoida see kuritarvitustest puhas (punkt f)."]),
-        ("Väljaspool ELi", ["Cloudflare, Anthropic, Resend, GitHub ja Google on USA ettevõtted, seega võidakse nende käsitletavat töödelda USAs "
+        ("Väljaspool ELi", ["Cloudflare, Anthropic, Resend ja GitHub on USA ettevõtted, seega võidakse nende käsitletavat töödelda USAs "
                          "või mujal väljaspool ELi. Resend saadab meie kirjad Iirimaalt. Sellised edastused põhinevad ELi–USA andmekaitseraamistikul "
                          "või ELi tüüptingimustel, nagu iga teenusepakkuja tingimustes kirjas."]),
         ("Sinu õigused", ["Saad oma andmeid näha, parandada või kustutada. Konto lehel on näha sinu aadress; seal „Kustuta konto” "
@@ -124,8 +124,7 @@ def page(lang):
             f'<title>{e(p["title"])} · museaal.ee</title><meta name="description" content="{e(p["lede"])}">'
             f'<link rel="canonical" href="{BASE}/{p["file"]}">'
             f'<link rel="alternate" hreflang="{lang}" href="{BASE}/{p["file"]}"><link rel="alternate" hreflang="{"et" if lang == "en" else "en"}" href="{BASE}/{p["other"]}">'
-            '<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>'
-            '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..600&family=Archivo:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">'
+            '<link rel="stylesheet" href="/fonts/fonts.css">'
             f'<style>{CSS}{MORE}</style>{GC}</head><body><div class="pg">'
             f'<div class="top"><a class="wm" href="{p["home"]}">{e(p["site"])}</a><a class="eb" href="{p["other"]}" hreflang="{"et" if lang == "en" else "en"}">{p["other_l"]}</a></div>'
             f'<header class="mast"><h1>{e(p["title"])}</h1><p class="lede">{e(p["lede"])}</p></header><main>{body}</main>'

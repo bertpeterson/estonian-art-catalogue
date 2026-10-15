@@ -9,6 +9,8 @@ python3 -u i18n.py
 (cd data && python3 stock_check.py apply) || exit 1
 (cd data && python3 similar.py) || exit 1     # a["sim"]: six nearest artists, into data.json
 python3 build_site.py
+# the fonts (Newsreader, Archivo, IBM Plex Mono; OFL) come from this site, not Google: fonts/ -> site/fonts/
+cp -R fonts site/fonts
 python3 build_landing.py || exit 1
 python3 -u build_index.py || exit 1
 
@@ -45,4 +47,4 @@ python3 -u build_admin.py || exit 1
 python3 -u csp.py site || exit 1
 # a build that lost its pages must not ship: the artist pages went out missing once
 # when build_pages.py failed inside a pipe and the OK line hid it
-[ -f site/a/index.html ] && [ "$(ls site/a | wc -l)" -gt 1000 ] && [ -f site/stats.html ] && [ -f site/stats-et.html ] && [ -f site/mood.html ] && [ -f site/meeleolu.html ] && [ -f site/data/mood.json ] && [ -f site/find.html ] && [ -f site/leia.html ] && [ -f site/data/stock.json ] && [ -f site/data/for-sale.csv ] && [ -f site/llms.txt ] && [ -f site/account.html ] && [ -f site/konto.html ] && [ -f site/privacy.html ] && [ -f site/privaatsus.html ] || { echo "BUILD FAILED: site/a, stats or mood missing"; exit 1; }
+[ -f site/a/index.html ] && [ "$(ls site/a | wc -l)" -gt 1000 ] && [ -f site/stats.html ] && [ -f site/stats-et.html ] && [ -f site/mood.html ] && [ -f site/meeleolu.html ] && [ -f site/data/mood.json ] && [ -f site/find.html ] && [ -f site/leia.html ] && [ -f site/data/stock.json ] && [ -f site/data/for-sale.csv ] && [ -f site/llms.txt ] && [ -f site/account.html ] && [ -f site/konto.html ] && [ -f site/privacy.html ] && [ -f site/privaatsus.html ] && [ -f site/fonts/fonts.css ] || { echo "BUILD FAILED: site/a, stats or mood missing"; exit 1; }
