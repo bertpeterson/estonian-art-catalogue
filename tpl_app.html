@@ -1844,7 +1844,7 @@
     return `<span class="acc"><input type="email" id="${id}" autocomplete="email" spellcheck="false" placeholder="${esc(T("acc_email"))}" aria-label="${esc(T("acc_email"))}">`
       + `<button class="linkbtn" data-sl-act="signin">${esc(T("acc_send"))}</button></span>`
       + `<label class="acc-news"><input type="checkbox" id="${id}-news"> ${esc(T("acc_news"))}</label>`
-      + (n === "sent" || top ? "" : `<span class="sl-note">${esc(T("acc_offer"))}</span>`) + msg;
+      + (n === "sent" || top ? "" : `<span class="sl-note">${esc(T("acc_offer"))} <a href="${LANG === "et" ? "privaatsus" : "privacy"}">${esc(T("privacy_link"))}</a></span>`) + msg;
   }
   function accountSignIn(id){
     const inp = $(id), v = inp ? inp.value.trim() : "";

@@ -180,8 +180,8 @@ def artists_list(ws, lang, n=60):
     c = collections.Counter(w["a"] for w in ws)
     return '<ul class="cols">' + "".join(f'<li><a href="{BASE}/{L[lang]["art"]}/{ARTIST_SLUG[i]}">{e(A[i]["n"])}</a><span class="n">{fmt(k, lang)}</span></li>' for i, k in c.most_common(n)) + "</ul>"
 # the contact line every static page ends with: where to ask for a correction or a removal
-CONTACT = {"en": 'Corrections, removals, questions: <a href="mailto:info@museaal.ee">info@museaal.ee</a>',
-           "et": 'Parandused, eemaldamised, küsimused: <a href="mailto:info@museaal.ee">info@museaal.ee</a>'}
+CONTACT = {"en": 'Corrections, removals, questions: <a href="mailto:info@museaal.ee">info@museaal.ee</a> · <a href="https://museaal.ee/privacy">Privacy</a>',
+           "et": 'Parandused, eemaldamised, küsimused: <a href="mailto:info@museaal.ee">info@museaal.ee</a> · <a href="https://museaal.ee/privaatsus">Privaatsus</a>'}
 def dec_label(dd, lang): return L[lang]["before"] if dd == "before" else (f"{dd}s" if lang == "en" else f"{dd}ndad")
 def dec_href(dd, lang): return f"{BASE}/{L[lang]['dec']}/{dd}"
 def med_href(m, lang): return f"{BASE}/{L[lang]['med']}/{slug(med_name(m, lang))}"
