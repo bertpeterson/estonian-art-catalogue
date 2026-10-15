@@ -15,6 +15,11 @@
   function acc() { var a = read(ACC); return a && typeof a.s === "string" ? a : null; }
   function tell(name) { try { window.dispatchEvent(new Event(name)); } catch (e) {} }
   function has(a, k) { return a.indexOf(k) >= 0; }
+  // a GoatCounter event (sign-ins, not accounts: the KV's u: keys are the accounts); count.js loads async, so wait for load
+  function count(p) {
+    function go() { if (window.goatcounter && goatcounter.count) goatcounter.count({ path: p, title: p, event: true }); }
+    if (document.readyState === "complete") go(); else window.addEventListener("load", go);
+  }
   function post(path, body, keep) {
     return fetch(API.replace(/\/?$/, "/") + "list/" + path, { method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body), keepalive: !!keep })
@@ -83,7 +88,7 @@
     post("verify", { token: tok }).then(function (j) {
       if (!j.session) { note = j.status === 410 ? "expired" : "failed"; tell("museaal:account"); return; }
       // the first sync sends everything kept here as added: the two lists are joined, nothing lost
-      write(ACC, { s: j.session, e: j.email, base: [], news: !!j.news }); note = "in"; tell("museaal:account");
+      write(ACC, { s: j.session, e: j.email, base: [], news: !!j.news }); note = "in"; tell("museaal:account"); count("signed-in");
       return sync();
     }, function () { note = "failed"; tell("museaal:account"); });
   } else if (acc()) sync();
@@ -119,6 +124,7 @@
         var b = { email: email, lang: lang, news: !!news }; if (t) b.human = t;
         return post("login", b);
       }).then(function (j) {
+        if (j.ok) count("sign-in-link-sent");
         note = j.ok ? "sent" : j.status === 429 ? "busy" : j.status === 400 ? "bad" : j.status === 401 ? "robot" : "failed";
       }, function () { note = "failed"; }).then(function () { tell("museaal:account"); });
     },
