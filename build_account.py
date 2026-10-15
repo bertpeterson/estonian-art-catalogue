@@ -4,8 +4,8 @@
 Signed in (list-sync.js keeps the session in this browser): the address, the news emails on or off, sign out, and
 at the foot, set apart, deleting the account after a second click. Signed out: the sign-in form, the same one the
 masthead strip has. Everything the page does is a call list-sync.js already makes to the Worker (login, logout,
-news, delete); turning the news emails on is a sign-in link with the box ticked, which is how the Worker keeps an
-address for them. Strings from i18n.py. Not in the sitemap, and noindex: there is nothing here for a search engine.
+news, delete); signed in, turning the news emails on is immediate, since the sign-in already confirmed the
+address. Strings from i18n.py. Not in the sitemap, and noindex: there is nothing here for a search engine.
 Run before csp.py, which hashes the inline script.
 """
 import json, html
@@ -15,7 +15,7 @@ e = lambda s: html.escape(str(s or ""), quote=True)
 STAMP = "<script>try{if(localStorage.getItem(\"ekr:theme\")===\"light\")document.documentElement.setAttribute(\"data-theme\",\"light\")}catch(e){}</script>"
 GC = '<script data-goatcounter="https://museaal.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>'
 I18N = json.load(open("i18n.json", encoding="utf-8"))
-KEYS = ["acc_h", "acc_lede", "acc_who", "acc_signout", "acc_news_h", "acc_news_on", "acc_news_off", "acc_news_confirm",
+KEYS = ["acc_h", "acc_lede", "acc_who", "acc_signout", "acc_news_h", "acc_news_on", "acc_news_off",
         "acc_del_h", "acc_del_note", "acc_delete", "acc_del_yes", "acc_del_no", "acc_del_sure", "acc_signin_h",
         "acc_signin_lede", "acc_email", "acc_send", "acc_news", "acc_off", "acc_sent", "acc_busy", "acc_bad", "acc_robot",
         "acc_failed", "acc_expired", "acc_gone", "acc_out", "acc_deleted", "acc_unsub", "acc_unsub_bad"]
@@ -58,11 +58,11 @@ CSS = (":root{--paper:#0B0C0E;--field:#15171A;--ink:#F1F2F4;--ink-soft:#C7CACE;-
 JS = r"""(function(){
 var T=JSON.parse(document.getElementById("acc-t").textContent),LANG=document.documentElement.lang,ML=window.museaalList;
 var app=document.getElementById("acc"),h1=document.querySelector("h1"),lede=document.querySelector(".lede");
-var asked=false,sure=false,busy=false;
+var sure=false,busy=false;
 function h(tag,attrs,kids){var el=document.createElement(tag);for(var k in attrs||{})if(k==="text")el.textContent=attrs[k];else el.setAttribute(k,attrs[k]);
   (kids||[]).forEach(function(c){if(c)el.appendChild(c)});return el}
 function say(){var n=ML.note();if(!n||n==="in")return null;
-  var t=n==="sent"&&asked&&ML.who()?T.acc_news_confirm.replace("{e}",ML.who()):T["acc_"+n];return t?h("p",{"class":"msg",role:"status",text:t}):null}
+  var t=T["acc_"+n];return t?h("p",{"class":"msg",role:"status",text:t}):null}
 function draw(){
   app.textContent="";
   if(!ML){h1.textContent=T.acc_h;lede.textContent=T.acc_off;return}
@@ -85,7 +85,7 @@ function draw(){
   var on=ML.news(),sw=h("button",{type:"button",role:"switch","class":"sw","aria-checked":String(on),"aria-labelledby":"acc-news-l"});
   if(busy)sw.disabled=true;
   sw.addEventListener("click",function(){busy=true;sw.disabled=true;
-    var p=on?ML.stopNews():(asked=true,ML.signIn(who,LANG,app,true));
+    var p=on?ML.stopNews():ML.startNews(LANG);
     p.then(function(){busy=false;draw()})});
   app.appendChild(h("div",{"class":"row"},[h("div",{},[h("span",{"class":"eb",text:T.acc_news_h}),
     h("span",{"class":"s",id:"acc-news-l",text:on?T.acc_news_on:T.acc_news_off})]),sw]));

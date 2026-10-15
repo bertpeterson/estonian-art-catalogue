@@ -117,6 +117,12 @@
       return post("news", { session: a.s }).then(function (j) { if (j.ok) setNews(false, "unsub"); else { note = "failed"; tell("museaal:account"); } },
         function () { note = "failed"; tell("museaal:account"); });
     },
+    // signed in, the address is already confirmed: the emails go on at once, no link
+    startNews: function (lang) {
+      var a = acc(); if (!a) return Promise.resolve();
+      return post("news", { session: a.s, on: true, email: a.e, lang: lang }).then(function (j) { if (j.ok) setNews(true); else { note = "failed"; tell("museaal:account"); } },
+        function () { note = "failed"; tell("museaal:account"); });
+    },
     // what last happened, for the page to say: sent, busy, bad, robot, failed, in, expired, gone, out, deleted, unsub, unsub_bad
     note: function () { return note; },
     signIn: function (email, lang, box, news) {

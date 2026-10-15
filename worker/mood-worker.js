@@ -491,7 +491,15 @@ async function list(path, body, env, reply, ip) {
   if (!s) return reply({ error: "Signed out." }, 401);
   if (path === "logout") { await KV.delete(sk); return reply({ ok: true }); }
   if (path === "delete") { await KV.delete("u:" + s.u); await KV.delete("n:" + s.u); await KV.delete(sk); return reply({ ok: true }); }
-  if (path === "news") { await KV.delete("n:" + s.u); return reply({ ok: true }); }     // signed in: stop the news emails
+  // signed in: the news emails on or off. The session came from a link opened in this address's inbox, so turning
+  // them on needs no second link; the address is checked against the account, so a session can't add another one
+  if (path === "news") {
+    if (body.on !== true) { await KV.delete("n:" + s.u); return reply({ ok: true }); }
+    const email = String(body.email || "").trim().toLowerCase().slice(0, 254), lang = body.lang === "et" ? "et" : "en";
+    if (await account(env, email) !== s.u) return reply({ error: "Not this account's address." }, 403);
+    await KV.put("n:" + s.u, JSON.stringify({ e: email, lang, at: new Date().toISOString(), v: 1, unsub: await unsubLink(env, s.u, lang) }));
+    return reply({ ok: true });
+  }
   if (path !== "sync") return reply({ error: "No such thing." }, 404);
   // the browser sends what it added and removed since the two last agreed, and takes the result back
   const rec = await KV.get("u:" + s.u, "json");
