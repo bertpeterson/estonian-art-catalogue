@@ -1854,8 +1854,7 @@
     const news = $(id + "-news");
     museaalList.signIn(v, LANG, inp.closest(".listbar"), !!(news && news.checked));
   }
-  // the same sign-in, from the masthead: a button beside the language and theme, and a panel
-  // under it that says what an account is for and what is kept
+  // the same sign-in, from the masthead: a button under the tagline, and a panel under the masthead
   function renderAccTop(){
     const ML = window.museaalList, b = $("acc-top"), p = $("accpanel");
     if (!ML) return;
@@ -1863,8 +1862,7 @@
     b.textContent = T(ML.who() ? "acc_top_in" : "acc_top");
     b.setAttribute("aria-expanded", !p.hidden);
     if (p.hidden){ p.innerHTML = ""; return; }
-    p.innerHTML = `<p class="acc-why">${esc(T(ML.who() ? "acc_why_in" : "acc_why"))}</p>`
-      + accountHTML("acc-email-top", true)
+    p.innerHTML = accountHTML("acc-email-top", true)
       + `<button class="linkbtn" data-sl-act="close">${esc(T("acc_close"))}</button>`;
   }
   function accTop(open){
