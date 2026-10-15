@@ -74,12 +74,18 @@ h1 em{font-style:italic;font-weight:400}
 /* the wordmark is the way home: a plain link back to the untouched page, no hash */
 h1 a{color:inherit;text-decoration:none;border-bottom:0}
 h1 a:hover{color:var(--grey-6)}
-.switches{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+.switches{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px;margin:-18px 0 14px}
+.switches .langsw button{padding:3px 8px;font-size:.62rem}
+/* the sign-in is the one of the three meant to be found */
+.switches .acc-sw{border-color:var(--ink)}
+.switches .acc-sw button{color:var(--ink)}
 .langsw{display:inline-flex;border:1px solid var(--rule)}
 .langsw button{font-family:var(--mono);font-size:var(--fs-xs);letter-spacing:var(--ls-label);
   background:none;border:0;color:var(--grey-6);padding:5px 11px;cursor:pointer}
 .langsw button + button{border-left:1px solid var(--rule)}
 .langsw button[aria-pressed="true"]{background:var(--invert-bg);color:var(--invert-fg)}
+.acc-sw button[aria-expanded="true"]{color:var(--ink)}
+.accpanel .acc-why{flex-basis:100%;margin:0;color:var(--grey-6);font-size:var(--fs-sm);max-width:62ch}
 /* only the frozen single-file snapshot carries this; the hosted site never shows it */
 .snapshot{font-family:var(--mono);font-size:.66rem;letter-spacing:.06em;color:var(--grey-6);
   border:1px solid var(--rule);padding:8px 11px;margin:14px 0 0;max-width:78ch}
@@ -756,20 +762,23 @@ footer a{border-bottom:1px solid var(--rule)}
 
 <div class="wrap">
   <header class="masthead">
+    <!-- the small things, top right: language, theme, and the sign-in -->
+    <div class="switches">
+      <div class="langsw" role="group" aria-label="Language">
+        <button id="lang-en" aria-pressed="true">ENG</button>
+        <button id="lang-et" aria-pressed="false">EST</button>
+      </div>
+      <div class="langsw themesw" role="group" aria-label="Theme">
+        <button id="th-light" aria-pressed="false" data-i18n="th_light"></button>
+        <button id="th-dark" aria-pressed="true" data-i18n="th_dark"></button>
+      </div>
+      <!-- signing in, up front: the account carries My List to every device (list-sync.js) -->
+      <div class="langsw acc-sw" hidden><button id="acc-top" aria-expanded="false" aria-controls="accpanel"></button></div>
+    </div>
     <div class="mast-grid">
       <div>
         <h1><a href="./" data-i18n-html="wordmark"></a></h1>
         <p class="mast-tag" data-i18n="tagline"></p>
-        <div class="switches">
-          <div class="langsw" role="group" aria-label="Language">
-            <button id="lang-en" aria-pressed="true">ENG</button>
-            <button id="lang-et" aria-pressed="false">EST</button>
-          </div>
-          <div class="langsw themesw" role="group" aria-label="Theme">
-            <button id="th-light" aria-pressed="false" data-i18n="th_light"></button>
-            <button id="th-dark" aria-pressed="true" data-i18n="th_dark"></button>
-          </div>
-        </div>
       </div>
       <div class="mast-stats">
         <!-- opens the works per decade, which no longer stands open on the home page -->
@@ -784,6 +793,7 @@ footer a{border-bottom:1px solid var(--rule)}
         <button class="stat-btn" id="stat-auc" hidden><b id="stat-au">0</b><span data-i18n="auctioned"></span></button>
       </div>
     </div>
+    <div class="listbar accpanel" id="accpanel" hidden></div>
   </header>
 
   <section class="forsale" id="forsale" aria-labelledby="fs-h">
