@@ -25,6 +25,7 @@ DESC = ('<meta name="description" content="A catalogue of %s works of art by %s 
         'collections and galleries, %d\u2013%d. Museum records from MuIS and the EKM Digital Collection, gallery '
         'stock from the galleries\' own catalogues; every record links back to its source.">'
         % (f"{_meta['works']:,}", f"{_meta['artists']:,}", min(_ys), max(_ys)))
+import list_sync as LS   # My List across devices: its script, first in the head
 h=open('tpl_head.html',encoding='utf-8').read()
 a=open('tpl_app.html',encoding='utf-8').read()
 miss=[]
@@ -34,6 +35,7 @@ head='''<!doctype html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 ''' + DESC + '''
+''' + LS.TAG + '''
 '''
 # The masthead figures are in the HTML from the first paint. They were "0" placeholders
 # the app filled once the 11 MB index had loaded, so a reload showed 0 · 0 · 0 for a
