@@ -1859,7 +1859,6 @@
   function renderAccTop(){
     const ML = window.museaalList, b = $("acc-top"), p = $("accpanel"), a = $("acc-link");
     if (!ML) return;
-    b.parentNode.hidden = false;
     const who = ML.who();
     b.hidden = !!who; a.hidden = !who;
     b.textContent = T("acc_top");
