@@ -75,7 +75,9 @@ h1 a:hover{color:var(--grey-6)}
 .switches{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px;margin:-18px 0 14px}
 .switches .langsw button{padding:3px 8px;font-size:.62rem}
 /* the sign-in sits under the tagline, the one control there meant to be found */
-.acc-sw{margin-top:12px;border-color:var(--ink)}
+.mast-acts{display:inline-flex;flex-direction:column;gap:8px;margin-top:12px}
+.acc-sw{border-color:var(--ink)}
+.acc-sw > *{flex:1;text-align:center}
 .acc-sw button{color:var(--ink)}
 /* signed in, the same place is a link to the account page (build_account.py) */
 .acc-sw a{font-family:var(--mono);font-size:var(--fs-xs);letter-spacing:var(--ls-label);color:var(--ink);padding:5px 11px;text-decoration:none}
@@ -378,7 +380,6 @@ a.linkbtn{text-decoration:none}
 .listbar .acc-msg{color:var(--ink)}
 .listbar .acc-news{display:inline-flex;align-items:center;gap:6px;color:var(--grey-6);font-size:var(--fs-sm);cursor:pointer}
 .listbar .acc-news input{margin:0;accent-color:var(--ink)}
-#mylist[aria-pressed="true"]{color:var(--ink);border-bottom-color:var(--ink)}
 .row-btn{width:100%;text-align:left;background:none;border:0;cursor:pointer;color:inherit;
   display:grid;grid-template-columns:98px minmax(0,1fr) 160px 88px 104px;gap:14px;align-items:baseline;
   padding:6px 118px 6px 12px;margin-left:-12px;border-left:2px solid transparent;transition:background .12s ease}
@@ -779,7 +780,11 @@ footer a{border-bottom:1px solid var(--rule)}
         <h1><a href="./" data-i18n-html="wordmark"></a></h1>
         <p class="mast-tag" data-i18n="tagline"></p>
         <!-- signing in, up front: the account carries My List to every device (list-sync.js); signed in, the account page -->
-        <div class="langsw acc-sw" hidden><button id="acc-top" aria-expanded="false" aria-controls="accpanel"></button><a id="acc-link" href="account" hidden></a></div>
+        <!-- and My List under it, the visitor's own things together; the list's tools open with the catalogue (#listbar) -->
+        <div class="mast-acts">
+          <div class="langsw acc-sw" hidden><button id="acc-top" aria-expanded="false" aria-controls="accpanel"></button><a id="acc-link" href="account" hidden></a></div>
+          <div class="langsw acc-sw"><button id="mylist" aria-pressed="false" data-i18n="mylist"></button></div>
+        </div>
       </div>
       <div class="mast-stats">
         <!-- opens the works per decade, which no longer stands open on the home page -->
@@ -923,7 +928,6 @@ footer a{border-bottom:1px solid var(--rule)}
       </div>
     </div>
     <button class="linkbtn" id="filters-toggle" aria-expanded="false" aria-controls="filterpanel">Filters</button>
-    <button class="linkbtn" id="mylist" aria-pressed="false" data-i18n="mylist"></button>
     <button class="linkbtn" id="reset" data-i18n="reset" hidden></button>
   </div>
 
