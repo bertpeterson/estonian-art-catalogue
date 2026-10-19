@@ -11,20 +11,14 @@ the frame's. The asking price of current stock is read (asking_price.py); a sold
 """
 import re, json, os, time, html, urllib.request, ssl
 from asking_price import asking
+import store_api
 
 API = "https://alleegalerii.ee/wp-json/wc/store/v1/products"
 UA = "EstonianArtCatalogue/1.0 (museaal.ee; contact info@museaal.ee)"
 ctx = ssl.create_default_context(); ctx.check_hostname = False; ctx.verify_mode = ssl.CERT_NONE
 
 def api(page, per=100):
-    for attempt in range(3):
-        try:
-            r = urllib.request.Request(f"{API}?per_page={per}&page={page}", headers={"User-Agent": UA, "Accept": "application/json"})
-            with urllib.request.urlopen(r, timeout=45, context=ctx) as f:
-                return json.loads(f.read().decode("utf-8", "replace"))
-        except Exception as e:
-            if attempt == 2: print("ERR page", page, repr(e)[:60], flush=True); return []
-            time.sleep(3 * (attempt + 1))
+    return store_api.page(f"{API}?per_page={per}&page={page}", UA, ctx, 45)    # a page not read stops the script (store_api.py)
 
 clean = lambda s: re.sub(r"\s+", " ", html.unescape(re.sub(r"<[^>]+>", " ", s or ""))).strip()
 LOT = re.compile(r"^(?P<a>[^“”\"„]+?)\s*,?\s*[“”\"„]\s*(?P<t>.+?)\s*[”\"“]\s*,?\s*(?P<rest>.*)$", re.S)

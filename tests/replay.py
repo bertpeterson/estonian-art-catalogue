@@ -93,6 +93,9 @@ def child(mode, fix, script):
         return Response(body, e.get("final_url") or url)
 
     def missing(url):
+        # a Store API page beyond the saved ones: an empty page, as the real API answers past
+        # its last -- a page that fails now stops the script (data/store_api.py)
+        if "/wp-json/wc/store/v1/products?" in url: return Response(b"[]", url)
         raise urllib.error.HTTPError(url, 404, "not in the fixtures", Message(), io.BytesIO(b""))
 
     def urlopen(req, data=None, timeout=None, **kw):
