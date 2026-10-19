@@ -17,19 +17,13 @@ Finnish and Swedish artists on NOBA stay out.
 """
 import json, re, ssl, time, urllib.request, os, unicodedata, html, datetime
 from asking_price import asking
+import store_api
 UA = "EstonianArtCatalogue/1.0 (museaal.ee; contact info@museaal.ee)"
 API = "https://noba.ac/wp-json/wc/store/v1/products"
 ctx = ssl.create_default_context(); ctx.check_hostname = False; ctx.verify_mode = ssl.CERT_NONE
 
 def api(page):
-    for attempt in range(3):
-        try:
-            r = urllib.request.Request(f"{API}?per_page=100&page={page}", headers={"User-Agent": UA, "Accept": "application/json"})
-            with urllib.request.urlopen(r, timeout=60, context=ctx) as f:
-                return json.loads(f.read().decode("utf-8", "replace"))
-        except Exception as e:
-            if attempt == 2: print("ERR page", page, repr(e)[:60], flush=True); return []
-            time.sleep(3 * (attempt + 1))
+    return store_api.page(f"{API}?per_page=100&page={page}", UA, ctx, 60)    # a page not read stops the script (store_api.py)
 
 # "Punased jooned 1, Kaia Rähn, 2025, Maal 120x90cm"
 NAME = re.compile(r"^(?P<t>.+?),\s*(?P<a>[^,]+?),\s*(?P<y>\d{4}[^,]*)?,?\s*(?P<m>[^,]*?)\s*"

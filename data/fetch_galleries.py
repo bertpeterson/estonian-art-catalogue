@@ -18,14 +18,19 @@ Artner's fresh records (a work at both is left to Artner), so it follows Artner;
 are one group, in their order; its artist steps read the other galleries' records as
 they were before this run, so a name new elsewhere this week counts for NOBA next week.
 
-A script that fails fails the run, as it did when they ran one after another, once
-every group has finished and its log has been printed.
+A script that fails -- a page its gallery would not serve, store_api.py -- leaves that
+group's galleries with last week's records, and the run goes on with the others: Allee's
+pages refused on GitHub's runners stopped the whole weekly run three Thursdays running
+(1-15 Oct 2026). The group is noted in gallery_kept.json with the day it was first not
+read; one not read for two weeks fails the run, once every group has finished and its
+log has been printed, so a parser that broke for good is still looked at.
 """
-import json, os, sys, shutil, subprocess, tempfile, time
+import json, os, sys, shutil, subprocess, tempfile, time, datetime
 from concurrent.futures import ThreadPoolExecutor
 
 here = os.path.dirname(os.path.abspath(__file__))
 REC = "gallery_records.json"
+KEPT = os.path.join(here, "gallery_kept.json")    # group -> the day it was first not read
 GROUPS = [["haus"], ["kogo"], ["temnikova"], ["tutar"], ["artrovert"], ["ruki"], ["allee"], ["eks"], ["vernissage"],
           ["konradmagi"], ["artner", "artman"], ["tokkoarrak"], ["artandtonic"], ["kipskassid"],
           ["noba", "noba_artists", "noba_artworks", "noba"]]
@@ -68,4 +73,11 @@ if __name__ == "__main__":
         for name in [n for n, o in owner.items() if o == group[0]]: keep += new[name]
     json.dump(keep, open(os.path.join(here, REC), "w", encoding="utf-8"), ensure_ascii=False)
     print(f"gallery_records.json: {len(keep)} records; changed: {', '.join(sorted(new)) or 'none'}")
-    if failed: sys.exit(f"failed: {', '.join(failed)}")
+    kept, today = (json.load(open(KEPT)) if os.path.exists(KEPT) else {}), datetime.date.today()
+    for group in groups:
+        if group[0] in failed: kept.setdefault(group[0], today.isoformat())
+        else: kept.pop(group[0], None)
+    json.dump(dict(sorted(kept.items())), open(KEPT, "w"), indent=0)
+    if failed: print(f"not read, last week's records kept: {', '.join(failed)}")
+    stale = [g for g, d in kept.items() if (today - datetime.date.fromisoformat(d)).days >= 14]
+    if stale: sys.exit(f"not read for two weeks or more: {', '.join(f'{g} (since {kept[g]})' for g in stale)}")
