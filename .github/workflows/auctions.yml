@@ -67,5 +67,6 @@ jobs:
           if git diff --cached --quiet; then echo "nothing changed"; exit 0; fi
           n=$(python3 -c "import json; print(len(json.load(open('data/data.json')).get('upcoming', [])))")
           git commit -m "Weekly auction lots, $(date -u +%F): $n coming lots" -m "Automated: read the six auction houses' sales, merged, guarded, built and smoke-tested."
+          git pull --rebase -q origin main    # main moves while the run reads (19 Oct 2026: three pushes in its 72 min, and this push was refused)
           git push
           gh workflow run pages.yml --ref main
