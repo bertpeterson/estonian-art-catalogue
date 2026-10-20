@@ -65,6 +65,8 @@ CSS = (":root{--paper:#0B0C0E;--field:#15171A;--ink:#F1F2F4;--ink-soft:#C7CACE;-
        "table{border-collapse:collapse;width:100%}"
        "th{font-family:var(--mono);font-weight:400;font-size:.66rem;letter-spacing:.13em;text-transform:uppercase;color:var(--grey);text-align:left;padding:0 16px 8px 0;border-bottom:1px solid var(--rule)}"
        "tr.mine td.a{box-shadow:inset 2px 0 0 var(--ink);padding-left:12px}.sub .mine{color:var(--ink)}"
+       ".sub .mine a{text-decoration:underline;text-decoration-color:var(--grey);text-underline-offset:3px}.sub .mine a:hover{text-decoration-color:var(--ink)}"
+       "@keyframes flash{from{background:var(--field)}to{background:transparent}}tr.flash td{animation:flash 1.6s ease-out}"
        "td{padding:13px 16px 13px 0;border-bottom:1px solid var(--rule-soft);vertical-align:top}"
        "td.a{width:34%}td.a a{font-family:var(--serif);font-size:1.08rem;text-decoration:none}td.a a:hover{text-decoration:underline}"
        "td.w i{font-family:var(--serif);font-size:1.02rem}"
@@ -88,14 +90,20 @@ JS = ("document.querySelectorAll('.sort').forEach(function(b){b.addEventListener
       "if(!pa!==!pc)return pa?-1:1;return dir*(pa-pc)||a.dataset.i-c.dataset.i;});"
       "rs.forEach(function(r){tb.appendChild(r);});b.querySelectorAll('button').forEach(function(y){y.classList.toggle('on',y===x);if(y!==x&&y.dataset.l){y.textContent=y.dataset.l+' ↓';delete y.dataset.d;}});});});")
 # The artists on the visitor's My List (museaal.artists in the browser, saved on an artist's page or in the
-# register): their lots are marked, and each sale says how many works it has by each of them, the most first
+# register): their lots are marked, and each sale says how many works it has by each of them, the most first.
+# Each name there goes to that artist's first lot in the sale as it is sorted now, opening the sale if it is closed
 MINE_JS = ("(function(){var T=%s,S;try{S=JSON.parse(localStorage.getItem('museaal.artists')||'[]')}catch(e){S=[]}"
            "if(!Array.isArray(S)||!S.length)return;document.querySelectorAll('details.sale').forEach(function(d){var who=[],nw={};"
            "d.querySelectorAll('tr[data-a]').forEach(function(r){if(S.indexOf(r.dataset.a)<0)return;r.classList.add('mine');"
            "var n=r.querySelector('td.a a').textContent;if(!nw[n]){nw[n]=0;who.push(n)}nw[n]++;});"
            "if(!who.length)return;var y=document.createElement('button');y.type='button';y.dataset.s='y';y.textContent=T.first;d.querySelector('.sort').appendChild(y);"
-           "var m=d.querySelector('.mine');who.sort(function(a,b){return nw[b]-nw[a]});"
-           "m.textContent=' · '+who.map(function(n){return T.mine.replace('{w}',nw[n]===1?T.w1:T.wn.replace('{n}',nw[n])).replace('{a}',n)}).join(', ');m.hidden=false;});})();")
+           "var m=d.querySelector('.mine');who.sort(function(a,b){return nw[b]-nw[a]});m.textContent=' · ';"
+           "who.forEach(function(n,i){var p=T.mine.replace('{w}',nw[n]===1?T.w1:T.wn.replace('{n}',nw[n])).split('{a}'),a=document.createElement('a');"
+           "a.href='#';a.textContent=n;a.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();d.open=true;"
+           "var r=[].filter.call(d.querySelectorAll('tr.mine'),function(x){return x.querySelector('td.a a').textContent===n})[0];if(!r)return;"
+           "r.scrollIntoView({block:'center',behavior:matchMedia('(prefers-reduced-motion:reduce)').matches?'auto':'smooth'});"
+           "r.classList.remove('flash');void r.offsetWidth;r.classList.add('flash');});"
+           "m.append((i?', ':'')+p[0],a,p[1]||'');});m.hidden=false;});})();")
 fmt = lambda n, lang: f"{n:,}" if lang == "en" else f"{n:,}".replace(",", " ")
 eur = lambda n, lang: "€" + fmt(n, lang)
 surname = lambda n: (n.split()[-1].lower(), n.lower())      # Karl Alexander von Winkler under W

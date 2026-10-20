@@ -311,14 +311,24 @@
     const ps = L.filter(w => w.ao && w.ap).map(w => w.ap).sort((a, b) => a - b);
     return T("up_rec", {n: fmt(L.length), s: fmt(L.filter(w => w.ao).length)}) + (ps.length > 1 ? ` · ${eur(ps[0])}–${eur(ps[ps.length - 1])}` : ps.length ? ` · ${eur(ps[0])}` : "");
   };
-  // the artists of My List in a sale: how many works by each
+  // the artists of My List in a sale: how many works by each, each name going to that artist's first lot in it
   const SL_ICON_ON = '<svg class="up-mark" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 2h8v12l-4-3-4 3z"/></svg>';
   const mineIn = items => {
     const nw = new Map();
     for (const u of items) if (isSaved(u.a)) nw.set(u.a, (nw.get(u.a) || 0) + 1);
     const who = [...nw.keys()].sort((x, y) => nw.get(y) - nw.get(x));      // the most first
-    return who.length ? `<div class="g-split up-mine-n">${esc(who.map(i => T("up_mine", {w: nw.get(i) === 1 ? T("up_w1") : T("up_wn", {n: fmt(nw.get(i))}), a: A[i].n})).join(", "))}</div>` : "";
+    return who.length ? `<div class="g-split up-mine-n">${who.map(i => {
+      const [pre, post = ""] = T("up_mine", {w: nw.get(i) === 1 ? T("up_w1") : T("up_wn", {n: fmt(nw.get(i))})}).split("{a}");
+      return `${esc(pre)}<a href="#" data-up-goto="${i}">${esc(A[i].n)}</a>${esc(post)}`;
+    }).join(", ")}</div>` : "";
   };
+  document.addEventListener("click", e => {
+    const b = e.target.closest("[data-up-goto]"); if (!b) return;
+    e.preventDefault();
+    const r = b.closest(".group").querySelector(`.up-row[data-ua="${b.dataset.upGoto}"]`); if (!r) return;
+    r.scrollIntoView({block: "center", behavior: matchMedia("(prefers-reduced-motion:reduce)").matches ? "auto" : "smooth"});
+    r.classList.remove("flash"); void r.offsetWidth; r.classList.add("flash");
+  });
   // by sale day and house, as the ledger groups past sales
   function renderUpcoming(lots){
     if (!lots.length) return `<p class="empty">${esc(T("noresults"))}</p>`;
@@ -332,7 +342,7 @@
         <div class="g-dates">${esc(musName(u0.h))}</div>${u0.s ? `<div class="g-split">${esc(u0.s)}</div>` : ""}
         <div class="g-count">${fmt(items.length)} ${esc(T("entries"))}</div>${mineIn(items)}</div><div class="rows">${items.map(u => {
           if (!rec.has(u.a)) rec.set(u.a, upRec(u.a));
-          return `<div class="up-row${isSaved(u.a) ? " up-mine" : ""}"><div>${isSaved(u.a) ? SL_ICON_ON : ""}<a class="r-alink" href="#artist=${esc(slug(A[u.a].n))}" data-artist="${u.a}">${esc(A[u.a].n)}</a><span class="m">${esc(rec.get(u.a))}</span></div>
+          return `<div class="up-row${isSaved(u.a) ? " up-mine" : ""}" data-ua="${u.a}"><div>${isSaved(u.a) ? SL_ICON_ON : ""}<a class="r-alink" href="#artist=${esc(slug(A[u.a].n))}" data-artist="${u.a}">${esc(A[u.a].n)}</a><span class="m">${esc(rec.get(u.a))}</span></div>
             <div><i>${esc(u.t)}</i>${u.yl ? ", " + esc(u.yl) : ""}<span class="m">${esc([u.tc, u.dm].filter(Boolean).join(" · "))}</span>
             ${u.pr ? `<span class="m">${esc(T("up_prior"))}: ${u.pr.map(p => `${esc(String(p[0]).slice(0, 4))} ${esc(musName(p[1]))} ${p[2] ? esc(eur(p[2])) : esc(T("up_unsold"))}`).join(" · ")}</span>` : ""}</div>
             <div class="n">${u.p ? `${esc(T("up_start"))} ${esc(eur(u.p))}` : ""}${href(u.u) ? `<br><a href="${href(u.u)}" target="_blank" rel="noopener" title="${esc(musName(u.h))}">${esc(T("up_lot"))}</a>` : ""}</div></div>`;
