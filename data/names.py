@@ -84,6 +84,11 @@ def _qual(n):
     return None
 
 # ---------- the galleries' and auction houses' spellings ----------
+# One person under two spellings that the rules do not join, set by hand: the spelling
+# with the life dates or most of the works stands
+SAME_PERSON = {"Herald Eelmaa": "Herald Eelma", "Maks Roosmaa": "Maks Roosma",
+               "Felix Leetve": "Felix Leetvee", "Heli Šestakov": "Heli Šestakova"}
+
 def toks(n):
     n = unicodedata.normalize('NFKD', (n or "").lower())
     n = ''.join(c for c in n if not unicodedata.combining(c))

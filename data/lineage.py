@@ -228,7 +228,9 @@ def combine(A):
             # from an older one, what the bio as it reads now still says word for word.
             text = bio_now.get(r["artist"])
             if not text or r["artist"] in read_now: continue
-            said = lambda xs: [x for x in xs if x[1] and x[1] in text]
+            # word for word, but an apostrophe is one whether curly or straight: SOUP ’69 is SOUP '69
+            ap = lambda x: re.sub(r"[’‘`´]", "'", x)
+            said = lambda xs: [x for x in xs if x[1] and ap(x[1]) in ap(text)]
             r = dict(r, teachers=said(r["teachers"]), pupils=said(r["pupils"]), circles=said(r["circles"]))
         for t, q in r["teachers"]: add(t, r["artist"], "bio", q)
         for p, q in r["pupils"]: add(r["artist"], p, "bio", q)
