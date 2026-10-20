@@ -44,7 +44,7 @@ jobs:
       - name: The auction houses
         working-directory: data
         run: |
-          for s in vernissage_auctions haus_auctions allee_auctions eko_auctions vaal_auctions eks_auctions; do
+          for s in vernissage_auctions haus_auctions eko_auctions vaal_auctions eks_auctions; do
             echo "=== $s ==="; python3 -u $s.py
           done
 

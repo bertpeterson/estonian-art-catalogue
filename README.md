@@ -191,7 +191,9 @@ the start, is converted and marked. One published figure is set aside by hand ra
 prints €26,000 as the hammer price of Mägi's *Oberstdorfi maastik* in 1999, with no bid recorded — the sum the
 same painting made at Haus in 2019 — so the 1999 lot stands as offered at €6,391 and unsold, with the reason
 on the record (`data/auction_doubt.json`). Allee galerii keeps a page per sale
-with the lot line, starting and hammer price, and the medium on the lot's own page. Eesti Kunsti Oksjonid keeps each
+with the lot line, starting and hammer price, and the medium on the lot's own page; those pages were read
+until October 2026 and no longer are, so Allee's results stand as then recorded, and its coming sales are
+entered by hand (`data/sales_by_hand.json`) with a link to its catalogue. Eesti Kunsti Oksjonid keeps each
 online sale's page up with the final bid on every lot — *Lõpppakkumine – (0)* for a lot nobody bid on — but prints no
 date, so the sale is placed by the day its name gives and the month its lots were listed. Vaal galerii's site draws each
 sale from a small JSON API — lots by day with the date, technique, starting and hammer price, year and size — and that is

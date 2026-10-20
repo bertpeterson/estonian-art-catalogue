@@ -2,7 +2,7 @@
 """Allee galerii shop stock -> gallery_records.json (gallery: Allee galerii)
 
 The same WooCommerce Store API that carries Allee's auction lots (type "auction",
-read by allee_auctions.py) carries the gallery's own stock as plain products,
+read by the former allee_auctions.py) carries the gallery's own stock as plain products,
 category "E-pood": what is purchasable and in stock now. The name is the lot line
 the house uses everywhere -- "Endel Kõks “Théme-timide”, 1968" -- and the short
 description opens with the medium and the size: "Söövitus paberil. Raamitud.
