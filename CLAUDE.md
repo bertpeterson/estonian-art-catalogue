@@ -35,6 +35,9 @@ anything private (keys, accounts, personal plans, correspondence) out of this fi
 - Buy art (`find.html` / `leia.html`): `build_ask.py` writes the pages and `site/data/stock.json`;
   stock moods and taste vectors come from `data/stock_moods.py`. "For you" ranks stock by My List
   (`museaal.shortlist` in the browser, same list as the register's bookmark).
+- My List has two halves: works (`museaal.shortlist`) and artists (`museaal.artists`, page slugs). Signed in,
+  both sync as one Worker list, artists as `@slug`. Saved artists and works lead the landing wall; saved
+  artists are marked in the coming sales (register and /upcoming).
 - Worker: edit `worker/template.js`; it generates `worker/mood-worker.js`, which the user pastes into
   Cloudflare. Any Worker change needs that re-paste before it is live.
 - Translations: `data/translate.py`, cached in `data/translations.json`, applied in `merge.py`.

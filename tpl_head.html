@@ -373,6 +373,19 @@ a.linkbtn{text-decoration:none}
 .listbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px 18px;margin-top:var(--sp-3);padding:10px 0;
   border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);font-size:var(--fs-base)}
 .listbar b{font-weight:500} .sl-note{color:var(--grey-6);font-size:var(--fs-sm)}
+/* My List's two halves, and the artists half: one row per saved artist */
+.sl-tabs{display:inline-flex;gap:16px}
+.sl-tabs button{background:none;border:0;padding:2px 0;cursor:pointer;font:inherit;font-weight:500;color:var(--grey-6);border-bottom:1px solid transparent}
+.sl-tabs button:hover{color:var(--ink)} .sl-tabs button[aria-pressed="true"]{color:var(--ink);border-bottom-color:var(--ink)}
+.sa-row{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 16px;padding:12px 0;border-bottom:1px solid var(--rule-soft)}
+.sa-row .r-alink{font-family:var(--serif-text);font-size:var(--fs-lg);cursor:pointer;border-bottom:1px solid var(--rule)}
+.sa-row .r-alink:hover{border-bottom-color:var(--ink)}
+.sa-row .m{flex:1;font-size:.8rem;color:var(--grey-6)}
+.mono-save{margin-top:10px}
+/* a coming lot by an artist on My List */
+.up-row.up-mine{box-shadow:inset 2px 0 0 var(--ink);padding-left:12px}
+.up-mark{width:11px;height:11px;fill:currentColor;margin-right:6px;vertical-align:-1px}
+.up-mine-n{color:var(--ink)}
 .listbar .acc{display:inline-flex;align-items:center;gap:10px}
 .listbar .acc input{font:inherit;font-size:var(--fs-sm);padding:4px 8px;width:22ch;max-width:60vw;border:1px solid var(--rule);border-radius:2px;background:var(--field);color:var(--ink)}
 .listbar .acc input:focus-visible{outline:2px solid var(--ink);outline-offset:1px}

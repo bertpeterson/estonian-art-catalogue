@@ -16,6 +16,7 @@ lots were read after all is not shown twice, and its lots' heading takes the las
 """
 import json, os, re, html, datetime, collections
 import build_hubs as H
+import list_sync as LS
 
 BASE, A, W, e = H.BASE, H.A, H.W, H.e
 d = json.load(open("data/data.json", encoding="utf-8"))
@@ -35,12 +36,12 @@ T = {"en": dict(file="upcoming", other="tulemas", h="Coming up at auction", site
                 lede="Every lot in the Estonian auction houses' coming sales by an artist in the catalogue, with the starting price as the house published it and the artist's record at auction beside it. Bids are not shown; the houses' own pages have them.",
                 none="No coming sale has published its lots yet. The houses put their catalogues online two to four weeks before a sale; this page is refreshed every week.",
                 start="starting price", rec="At auction: {n} lots, {s} sold{r}", rec0="First time at auction in the catalogue", prior="Same title before", unsold="unsold",
-                lots="lots", lot1="lot", c_art="Artist", c_work="Work", c_price="Starting price", lot="Lot", hand="The catalogue is on the house's own site; its lots are not listed here.", cat="Catalogue", sort="Sort", az="A–Z", price="Price", lotno="Lot no.", show="Show the lots ↓", hide="Hide the lots ↑", other_l="Eesti keeles", note="A record, not a valuation. Refreshed weekly.", month=["January","February","March","April","May","June","July","August","September","October","November","December"]),
+                lots="lots", lot1="lot", mine="{n} of your artists in this sale", mine1="1 of your artists in this sale", c_art="Artist", c_work="Work", c_price="Starting price", lot="Lot", hand="The catalogue is on the house's own site; its lots are not listed here.", cat="Catalogue", sort="Sort", az="A–Z", price="Price", lotno="Lot no.", show="Show the lots ↓", hide="Hide the lots ↑", other_l="Eesti keeles", note="A record, not a valuation. Refreshed weekly.", month=["January","February","March","April","May","June","July","August","September","October","November","December"]),
      "et": dict(file="tulemas", other="upcoming", h="Tulemas oksjonil", site="Eesti Kunstikataloog", art="k",
                 lede="Kõik Eesti oksjonimajade tulevate oksjonite partiid kataloogi kunstnikelt, alghind nii, nagu maja selle avaldas, ja kõrval kunstniku senine oksjonitulemus. Pakkumisi ei näidata; need on majade endi lehtedel.",
                 none="Ükski tulev oksjon pole veel oma partiisid avaldanud. Majad panevad kataloogi üles kaks kuni neli nädalat enne oksjonit; see leht uueneb iga nädal.",
                 start="alghind", rec="Oksjonil: {n} partiid, {s} müüdud{r}", rec0="Kataloogis esimest korda oksjonil", prior="Sama pealkiri varem", unsold="müümata",
-                lots="partiid", lot1="partii", c_art="Kunstnik", c_work="Teos", c_price="Alghind", lot="Partii", hand="Kataloog on oksjonimaja enda lehel; selle partiisid siin ei loetleta.", cat="Kataloog", sort="Järjesta", az="A–Ü", price="Hind", lotno="Partii nr", show="Näita partiisid ↓", hide="Peida partiid ↑", other_l="In English", note="Ülestähendus, mitte hinnang. Uueneb iga nädal.", month=["jaanuar","veebruar","märts","aprill","mai","juuni","juuli","august","september","oktoober","november","detsember"])}
+                lots="partiid", lot1="partii", mine="{n} sinu kunstnikku selles oksjonis", mine1="1 sinu kunstnik selles oksjonis", c_art="Kunstnik", c_work="Teos", c_price="Alghind", lot="Partii", hand="Kataloog on oksjonimaja enda lehel; selle partiisid siin ei loetleta.", cat="Kataloog", sort="Järjesta", az="A–Ü", price="Hind", lotno="Partii nr", show="Näita partiisid ↓", hide="Peida partiid ↑", other_l="In English", note="Ülestähendus, mitte hinnang. Uueneb iga nädal.", month=["jaanuar","veebruar","märts","aprill","mai","juuni","juuli","august","september","oktoober","november","detsember"])}
 
 CSS = (":root{--paper:#0B0C0E;--field:#15171A;--ink:#F1F2F4;--ink-soft:#C7CACE;--grey:#8B9098;--rule:#2B2E34;--rule-soft:#212429;"
        "--serif:'Newsreader','Iowan Old Style',Georgia,serif;--sans:'Archivo','Helvetica Neue',Arial,sans-serif;--mono:'IBM Plex Mono',ui-monospace,Menlo,monospace}"
@@ -63,6 +64,7 @@ CSS = (":root{--paper:#0B0C0E;--field:#15171A;--ink:#F1F2F4;--ink-soft:#C7CACE;-
        "h2{font-family:var(--serif);font-weight:500;font-size:1.6rem;line-height:1.1;margin:6px 0 4px}.sub{margin:0;color:var(--grey);font-size:.85rem}"
        "table{border-collapse:collapse;width:100%}"
        "th{font-family:var(--mono);font-weight:400;font-size:.66rem;letter-spacing:.13em;text-transform:uppercase;color:var(--grey);text-align:left;padding:0 16px 8px 0;border-bottom:1px solid var(--rule)}"
+       "tr.mine td.a{box-shadow:inset 2px 0 0 var(--ink);padding-left:12px}.sub .mine{color:var(--ink)}"
        "td{padding:13px 16px 13px 0;border-bottom:1px solid var(--rule-soft);vertical-align:top}"
        "td.a{width:34%}td.a a{font-family:var(--serif);font-size:1.08rem;text-decoration:none}td.a a:hover{text-decoration:underline}"
        "td.w i{font-family:var(--serif);font-size:1.02rem}"
@@ -84,6 +86,13 @@ JS = ("document.querySelectorAll('.sort').forEach(function(b){b.addEventListener
       "rs.sort(function(a,c){if(m==='az')return a.dataset.i-c.dataset.i;var k=m==='n'?'n':'p';if(m==='n')dir=1;var pa=+a.dataset[k]||0,pc=+c.dataset[k]||0;"
       "if(!pa!==!pc)return pa?-1:1;return dir*(pa-pc)||a.dataset.i-c.dataset.i;});"
       "rs.forEach(function(r){tb.appendChild(r);});b.querySelectorAll('button').forEach(function(y){y.classList.toggle('on',y===x);if(y!==x&&y.dataset.l){y.textContent=y.dataset.l+' ↓';delete y.dataset.d;}});});});")
+# The artists on the visitor's My List (museaal.artists in the browser, saved on an artist's page or in the
+# register): their lots are marked, and each sale says how many of them it has, and who
+MINE_JS = ("(function(){var T=%s,S;try{S=JSON.parse(localStorage.getItem('museaal.artists')||'[]')}catch(e){S=[]}"
+           "if(!Array.isArray(S)||!S.length)return;document.querySelectorAll('details.sale').forEach(function(d){var who=[];"
+           "d.querySelectorAll('tr[data-a]').forEach(function(r){if(S.indexOf(r.dataset.a)<0)return;r.classList.add('mine');"
+           "var n=r.querySelector('td.a a').textContent;if(who.indexOf(n)<0)who.push(n);});"
+           "if(!who.length)return;var m=d.querySelector('.mine');m.textContent=' · '+(who.length===1?T.one:T.n.replace('{n}',who.length))+': '+who.join(', ');m.hidden=false;});})();")
 fmt = lambda n, lang: f"{n:,}" if lang == "en" else f"{n:,}".replace(",", " ")
 eur = lambda n, lang: "€" + fmt(n, lang)
 surname = lambda n: (n.split()[-1].lower(), n.lower())      # Karl Alexander von Winkler under W
@@ -125,7 +134,7 @@ def main():
             nl = f'{fmt(len(lots), lang)} {t["lots"] if len(lots) != 1 else t["lot1"]}'
             body += (f'<details class="sale"{" open" if len(groups) == 1 else ""}><summary class="sale-h"><span class="eb">{e(days(dd, END.get((h, dd)), lang))}</span>'
                      f'<h2>{e(s or house(h, lang))}</h2><p class="sub">{e(house(h, lang)) + " · " if s else ""}{nl}'
-                     f'<span class="tog"><span class="sh">{t["show"]}</span><span class="hd">{t["hide"]}</span></span></p></summary>'
+                     f'<span class="mine" hidden></span><span class="tog"><span class="sh">{t["show"]}</span><span class="hd">{t["hide"]}</span></span></p></summary>'
                      f'<div class="sort"><span class="eb">{t["sort"]}</span><button type="button" data-s="az" class="on">{t["az"]}</button>'
                      f'<button type="button" data-s="p" data-l="{t["price"]}">{t["price"]} ↓</button>'
                      + (f'<button type="button" data-s="n">{t["lotno"]}</button>' if any(u.get("n") for u in lots) else "") + '</div>'
@@ -136,7 +145,7 @@ def main():
                 lot = f'<a class="lot" href="{e(u["u"])}" rel="noopener">{t["lot"]}{" " + str(u["n"]) if u.get("n") else ""} ↗</a>' if str(u.get("u") or "").startswith("http") else ""
                 det = " · ".join(x for x in (u.get("tc"), u.get("dm")) if x)
                 det = f'<span class="m">{e(det)}</span>' if det else ""
-                body += (f'<tr data-i="{i}" data-p="{u.get("p") or ""}" data-n="{u.get("n") or ""}"><td class="a"><a href="{BASE}/#lang={lang}&amp;artist={sl}">{e(A[u["a"]]["n"])}</a><span class="m">{e(record(u["a"], lang))}</span></td>'
+                body += (f'<tr data-i="{i}" data-p="{u.get("p") or ""}" data-n="{u.get("n") or ""}" data-a="{sl}"><td class="a"><a href="{BASE}/#lang={lang}&amp;artist={sl}">{e(A[u["a"]]["n"])}</a><span class="m">{e(record(u["a"], lang))}</span></td>'
                          f'<td class="w"><i>{e(u["t"])}</i>{", " + e(u["yl"]) if u.get("yl") else ""}{det}{prior}</td>'
                          f'<td class="n"><b>{eur(u["p"], lang) if u.get("p") else "–"}</b>{lot}</td></tr>')
             body += "</tbody></table></details>"
@@ -149,11 +158,11 @@ def main():
                 f'<title>{e(title)}</title><meta name="description" content="{e(t["lede"][:290])}">'
                 f'<link rel="canonical" href="{me}"><link rel="alternate" hreflang="{lang}" href="{me}"><link rel="alternate" hreflang="{"et" if lang == "en" else "en"}" href="{other}">'
                 '<link rel="stylesheet" href="/fonts/fonts.css">'
-                f'<style>{CSS}</style>{H.GC}</head><body><div class="pg">'
+                f'<style>{CSS}</style>{LS.TAG}{H.GC}</head><body><div class="pg">'
                 f'<div class="top"><a class="wm" href="{BASE}/{"" if lang == "en" else "#lang=et"}">{t["site"]}</a><a class="eb" href="{other}">{t["other_l"]}</a></div>'
                 f'<header class="mast"><h1>{t["h"]}</h1><p class="lede">{e(t["lede"])}</p></header>'
                 + (body or f'<p class="m">{e(t["none"])}</p>')
-                + f'<footer class="foot">{e(t["note"])} {H.CONTACT[lang]}</footer></div><script>{JS}</script></body></html>')
+                + f'<footer class="foot">{e(t["note"])} {H.CONTACT[lang]}</footer></div><script>{JS}</script><script>{MINE_JS % json.dumps({"one": t["mine1"], "n": t["mine"]}, ensure_ascii=False)}</script></body></html>')
         open(f"site/{t['file']}.html", "w", encoding="utf-8").write(page)
         urls.append(me)
     sm = open("site/sitemap.xml", encoding="utf-8").read()

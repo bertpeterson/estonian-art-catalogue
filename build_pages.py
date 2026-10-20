@@ -44,7 +44,8 @@ KIND = {"school": "trained at", "movement": "movement", "member": "member of"}
 I18N = json.load(open("i18n.json", encoding="utf-8"))
 MED_ET = I18N["MEDIUM_ET"]
 L = {
- "en": dict(dir="a", site="Estonian Art Catalogue", kind=KIND, works="works", artists="Artists A–Z", art_nav="Artists",
+ "en": dict(save_a="Save artist", saved_a="Artist saved", save_t="On My List, their best works open the front page's artwall and their lots are marked in the coming sales",
+            dir="a", site="Estonian Art Catalogue", kind=KIND, works="works", artists="Artists A–Z", art_nav="Artists",
             year="Year", title="Title", tech="Technique", dims="Dimensions", held="Held by", browse="Browse {n} works in the catalogue →",
             sold="sold", gone="no longer listed", soldp="Sold €{p}", soldnp="Sold", unsold="Unsold",
             some="Showing {k} of {n} records, from every period — <a href=\"{u}\">see all in the catalogue</a>.",
@@ -61,7 +62,8 @@ L = {
             idx_h="Artists A–Z", idx_n="{n} artists", buy="Buy Estonian art: the works for sale now, with prices →", buy_u="find", other_lang="Eesti keeles", hash="",
             artist="artist", work1="work", t_sale=", {k} for sale", d_n="{name}{dates}: {n} {w} in Estonian public collections{gal}{span}.",
             d_sale="{k} for sale now{r}.", d_key="Works include {t}.", d_med="{media} at {holders}.", d_and=" and ", gal=" and galleries"),
- "et": dict(dir="k", site="Eesti Kunstikataloog", kind={"school": "õppinud:", "movement": "suund:", "member": "liige:"}, works="teost", artists="Kunstnikud A–Ü", art_nav="Kunstnikud",
+ "et": dict(save_a="Salvesta kunstnik", saved_a="Kunstnik salvestatud", save_t="Sinu nimekirjas avavad tema parimad teosed avalehe kunstiseina ja tema partiid on tulevatel oksjonitel märgitud",
+            dir="k", site="Eesti Kunstikataloog", kind={"school": "õppinud:", "movement": "suund:", "member": "liige:"}, works="teost", artists="Kunstnikud A–Ü", art_nav="Kunstnikud",
             year="Aasta", title="Pealkiri", tech="Tehnika", dims="Mõõdud", held="Hoidja", browse="Sirvi {n} teost kataloogis →",
             sold="müüdud", gone="enam ei pakuta", soldp="Müüdud €{p}", soldnp="Müüdud", unsold="Müümata",
             some="{k} kirjet {n}-st, kõigist perioodidest — <a href=\"{u}\">vaata kõiki kataloogis</a>.",
@@ -102,6 +104,9 @@ CSS = ("body{margin:0;padding:28px;font:15px/1.55 -apple-system,BlinkMacSystemFo
        ":root:not([data-theme=light]) body{background:#0b0c0e;color:#f1f2f4}:root:not([data-theme=light]) a{color:#9ec5ff}:root:not([data-theme=light]) "
        "th,:root:not([data-theme=light]) td{border-color:#2b2e34!important}:root:not([data-theme=light]) .m{color:#8b9098!important}"
        "h1{font-size:1.7rem;margin:0 0 4px;font-weight:600}"
+       ".save{display:inline-flex;align-items:center;gap:7px;margin:2px 0 6px;padding:3px 0;background:none;border:0;border-bottom:1px solid currentColor;"
+       "color:inherit;font:inherit;font-size:.85rem;cursor:pointer;opacity:.75}.save:hover{opacity:1}"
+       ".save svg{width:12px;height:12px;fill:none;stroke:currentColor;stroke-width:1.4;stroke-linejoin:round}.save[aria-pressed=true]{opacity:1}.save[aria-pressed=true] svg{fill:currentColor}.save[hidden]{display:none}"
        ".m{color:#666;font-size:.85rem;margin:0 0 14px}"
        "table{border-collapse:collapse;width:100%;font-size:.88rem;margin-top:14px}"
        "th,td{text-align:left;padding:5px 9px 5px 0;border-bottom:1px solid #e3e5e9;vertical-align:top}"
@@ -286,6 +291,15 @@ os.makedirs("site/k", exist_ok=True)
 # the hubs this artist belongs to -- their decades, media and museums -- as a line of links:
 # the reader's way sideways, and the crawler's; the sets and addresses are build_hubs.py's own
 import build_hubs as H
+import list_sync as LS
+# Save artist: the artist onto My List (museaal.artists in the browser, slugs, as the register keeps them), where
+# they lead the front page's artwall and are marked in the coming sales. The button shows only where the script runs.
+SAVE_JS = ("(function(){var b=document.getElementById('save-a');if(!b)return;var k=b.dataset.sa,K='museaal.artists';"
+           "function get(){try{var a=JSON.parse(localStorage.getItem(K)||'[]');return Array.isArray(a)?a:[]}catch(e){return []}}"
+           "function show(){var on=get().indexOf(k)>=0;b.setAttribute('aria-pressed',on);b.lastChild.textContent=on?b.dataset.on:b.dataset.off;}"
+           "b.addEventListener('click',function(){var a=get(),i=a.indexOf(k);if(i>=0)a.splice(i,1);else a.push(k);"
+           "try{localStorage.setItem(K,JSON.stringify(a))}catch(e){}if(window.museaalList)museaalList.changed();show();});"
+           "addEventListener('museaal:list',show);show();b.hidden=false;})();")
 def hub_line(ws, lang):
     T = H.L[lang]
     decs = collections.Counter(("before" if H.dec_of(w) < 1800 else H.dec_of(w)) for w in ws if H.dec_of(w) is not None)
@@ -482,9 +496,11 @@ def render(i, a, ws, lang):
               f"<meta name=\"twitter:card\" content=\"summary_large_image\">" if tiles else
               f"<meta name=\"twitter:card\" content=\"summary\">")
            + f"<script type=\"application/ld+json\">{jsonld(a, ws, sl, dates, lang, sale_ws)}</script>"
-           f"<style>{CSS}</style>{GC}</head><body>"
+           f"<style>{CSS}</style>{LS.TAG}{GC}</head><body>"
            f"<nav><a href=\"{BASE}/{'' if lang == 'en' else '#lang=et'}\">{T['site']}</a> › <a href=\"{BASE}/{D}/\">{T['art_nav']}</a> › {e(a['n'])} <span class=\"m\">· <a href=\"{other}\" hreflang=\"{'et' if lang == 'en' else 'en'}\">{T['other_lang']}</a></span></nav>"
            f"<h1>{e(a['n'])}</h1>"
+           f"<button class=\"save\" id=\"save-a\" data-sa=\"{sl}\" data-on=\"{T['saved_a']}\" data-off=\"{T['save_a']}\" aria-pressed=\"false\" title=\"{T['save_t']}\" hidden>"
+           f"<svg viewBox=\"0 0 16 16\" aria-hidden=\"true\"><path d=\"M4 2h8v12l-4-3-4 3z\"/></svg>{T['save_a']}</button>"
            f"<p class=\"m\">{e(dates)}{' · ' if dates and a.get('wdesc') else ''}{e(a.get('wdesc') or '')}"
            f"{'<br>' if holders else ''}{e('; '.join(holders[:6]))}</p>"
            + (f"<p class=\"m\">{e(grp)}</p>" if grp else "")
@@ -504,7 +520,7 @@ def render(i, a, ws, lang):
            + neighbours(i, lang)
            + embed_box(lang, f"{BASE}/embed/{'' if lang == 'en' else 'et/'}{sl}", me, a["n"], T)
            + f"<p class=\"m\">{T['foot']}<a href=\"{BASE}/{'' if lang == 'en' else '#lang=et'}\">{T['full']}</a> · {CONTACT[lang]}</p>"
-           + (H.out_js("artist") if n_sale else "") + "</body></html>")
+           + (H.out_js("artist") if n_sale else "") + f"<script>{SAVE_JS}</script></body></html>")
 
 for i, a in enumerate(A):
     ws = by_artist.get(i, [])
