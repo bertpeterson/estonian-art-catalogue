@@ -17,7 +17,7 @@ def invkey(s):
 # ---------- artist name hygiene ----------
 # clean_name, fold, bare_of and the token matching below live in names.py, where the
 # tests reach them (merge.py runs on import).
-from names import (LIST, clean_name, fold, QUALIFIER, _strip_brackets, bare_of, PARTICLE, NEVER,
+from names import (SAME_PERSON, LIST, clean_name, fold, QUALIFIER, _strip_brackets, bare_of, PARTICLE, NEVER,
                    _ftok, _toks, _close, _qual, toks, _vn, _vtoks, resolve_variant as _resolve_variant)
 
 # ---------- medium inference for digikogu-only records ----------
@@ -385,6 +385,11 @@ for names in _bysur.values():
                 for r in by_artist.pop(small): r["artist"] = big; by_artist[big].append(r)
                 if not _life_of(big) and _life_of(small): LIFE_FROM_VARIANT[big] = _life_of(small, src=True)
                 SPELLINGS.append((small, big))
+for small, big in SAME_PERSON.items():                      # names.py, set by hand
+    if small in by_artist:
+        for r in by_artist.pop(small): r["artist"] = big; by_artist[big].append(r)
+        if not _life_of(big) and _life_of(small): LIFE_FROM_VARIANT[big] = _life_of(small, src=True)
+        SPELLINGS.append((small, big))
 print("  merged as one person under two spellings:", len(SPELLINGS))
 # The retired spellings had artist pages of their own, indexed and bookmarked.
 # build_pages.py turns each into a redirect to the surviving page.
@@ -565,6 +570,7 @@ def resolve_variant(name): return _resolve_variant(name, artists, _vsur)   # nam
 
 def artist_index(name, bio_en=None):
     """Find an artist, or add one. Returns index or None for unusable names."""
+    name = SAME_PERSON.get((name or "").strip(), name)
     t = toks(name)
     if not t: return None
     if t in by_tok: return by_tok[t]
@@ -1254,6 +1260,7 @@ print("  images: public-domain museum works", IMG["pd"], "-> MuIS", IMG["muis"],
 # (artist, title, and size when both give one) has been sold before, to those results.
 UPC = json.load(open("upcoming_records.json", encoding="utf-8")) if os.path.exists("upcoming_records.json") else []
 def artist_find(name):
+    name = SAME_PERSON.get((name or "").strip(), name)
     t = toks(name)
     if not t: return None
     j = by_tok.get(t)
