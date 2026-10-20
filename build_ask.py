@@ -84,6 +84,8 @@ def media_of(kind, tech):
 
 T = {"en": dict(file="find", other="leia", other_l="Eesti keeles", site="Estonian Art Catalogue",
                 h="Buy Art", title="Buy Estonian art: {n} works for sale, with prices", lede="Art for your home from the catalogue's galleries, for sale now. Set the price, medium, size, mood and artist, or describe what you need. Each work links to the gallery that sells it.",
+                desc="Paintings, prints and sculpture by Estonian artists for sale: {n} works from Estonian galleries, each with the gallery's asking price. Filter by price, medium, size, mood and artist; every work links to the gallery that sells it.",
+                sh="Estonian art for sale", sp="Buy paintings, prints, watercolours and sculpture by Estonian artists from the galleries that sell them: {n} works, each with its asking price and a link to the gallery. museaal.ee is a catalogue, not a shop; the sale is the gallery's.",
                 hello="Set the filters, or describe what you need: the room, size, budget, subject or mood.",
                 photo="Photo of your wall", yourroom="Your room", looking="Looking at your room…", photomsg="(a photo of my room)",
                 wallw="Wall space, width", drag="Drag the room to look around it; scroll or pinch to step closer. Drag a work to move it along the wall, or onto another outlined space. If the sizes look wrong, set the wall's width.", reset="Reset view", ar="See it on your wall (AR)", arsafari="To see a work on your real wall in AR, open this page in Safari.", arwait="Making the model…", arfail="AR could not be opened", onwall="On my wall",
@@ -112,6 +114,8 @@ T = {"en": dict(file="find", other="leia", other_l="Eesti keeles", site="Estonia
                 hash=""),
      "et": dict(file="leia", other="find", other_l="In English", site="Eesti Kunstikataloog",
                 h="Osta kunsti", title="Osta Eesti kunsti: müügil {n} teost koos hindadega", lede="Kunst sinu koju kataloogi galeriidest, praegu müügil. Sea hind, tehnika, suurus, meeleolu ja kunstnik või kirjelda, mida vajad. Iga teos viib seda müüva galerii lehele.",
+                desc="Eesti kunstnike maalid, graafika ja skulptuurid müügil: {n} teost Eesti galeriidest, igaüks galerii küsitud hinnaga. Vali hinna, tehnika, suuruse, meeleolu ja kunstniku järgi; iga teos viib seda müüva galerii lehele.",
+                sh="Eesti kunsti müük", sp="Osta Eesti kunstnike maale, graafikat, akvarelle ja skulptuure otse neid müüvatelt galeriidelt: {n} teost, igaüks küsitud hinnaga ja lingiga galeriile. museaal.ee on kataloog, mitte pood; teose müüb galerii.",
                 hello="Sea filtrid või kirjelda, mida vajad: tuba, suurus, eelarve, teema või meeleolu.",
                 photo="Foto seinast", yourroom="Sinu tuba", looking="Vaatan su tuba…", photomsg="(foto minu toast)",
                 wallw="Vaba seinaosa laius", drag="Lohista tuba, et ringi vaadata; keri või näpista, et lähemale astuda. Lohista teost, et seda seinal liigutada või teisele märgitud kohale viia. Kui suurused tunduvad valed, sea seina laius õigeks.", reset="Algvaade", ar="Vaata oma seinal (AR)", arsafari="Et näha teost AR-is oma päris seinal, ava see leht Safaris.", arwait="Teen mudelit…", arfail="AR-i ei õnnestunud avada", onwall="Minu seinale",
@@ -752,6 +756,8 @@ if(!arrived)stock().then(function(){if(!live)refresh(true)},function(){});
 """
 
 CSS = BM.CSS + """
+.seo{margin:34px 0 0}.seo h2{font-weight:500;font-size:1.15rem;margin:0 0 6px}.seo p{max-width:66ch;color:var(--grey);margin:0 0 10px}
+.browse{margin:0;font-size:.9rem;line-height:1.9;color:var(--grey)}.browse .eyebrow{margin-right:8px}.browse b{color:var(--ink);font-weight:500}
 .chat{display:grid;gap:18px 32px}
 @media (min-width:980px){.chat{grid-template-columns:270px minmax(0,1fr);align-items:start}
   .filters{grid-row:1 / span 2;position:sticky;top:16px;max-height:calc(100vh - 32px);overflow:auto}.log,form.ask{grid-column:2}}
@@ -953,8 +959,9 @@ def page(lang, ver, api, labels, M, n=0, tver="", names=()):
     lj = json.dumps(labels, ensure_ascii=False).replace("</", "<\\/")
     ask = (api.rstrip("/") + "/ask") if api else ""
     ts = f' data-ts="{e(BM.TS)}"' if ask and BM.TS else ""       # the Worker's Turnstile site key
+    N = f"{n:,}".replace(",", " " if lang == "et" else ",")
     return (f'<!doctype html><html lang="{lang}"><head><meta charset="utf-8">{H.STAMP}<meta name="viewport" content="width=device-width,initial-scale=1">'
-            f'<title>{e(t["title"].format(n=f"{n:,}".replace(",", " " if lang == "et" else ",")))} · museaal.ee</title><meta name="description" content="{e(t["lede"][:290])}">'
+            f'<title>{e(t["title"].format(n=f"{n:,}".replace(",", " " if lang == "et" else ",")))} · museaal.ee</title><meta name="description" content="{e(t["desc"].format(n=N))}">'
             f'<link rel="canonical" href="{me}"><link rel="alternate" hreflang="{lang}" href="{me}"><link rel="alternate" hreflang="{"et" if lang == "en" else "en"}" href="{other}">'
             f'<link rel="alternate" type="application/rss+xml" title="New for sale" href="{BASE}/feed.xml">'
             '<link rel="stylesheet" href="/fonts/fonts.css">'
@@ -967,6 +974,8 @@ def page(lang, ver, api, labels, M, n=0, tver="", names=()):
             f'<button class="btn solid" type="submit">{e(t["send"])}</button>'
             + (f'<input id="photo" type="file" accept="image/*" hidden><label for="photo" class="btn photobtn" role="button" tabindex="0">{e(t["photo"])}</label>' if PHOTO else '')
             + '<div class="human" id="human"></div></form></section>'
+            # in words a search engine reads ("osta kunsti", "maalide müük"): the panel above is drawn in the browser
+            + f'<section class="seo"><h2>{e(t["sh"])}</h2><p>{e(t["sp"].format(n=N))}</p>{browse_links(lang)}</section>'
             + f'<footer><details class="about"><summary>{e(t["about"])}</summary><p>{e(t["note"])} {H.CONTACT[lang]}</p></details></footer></div>'
             f'<script type="importmap">{{"imports":{{"three":"https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/"}}}}</script>'
             f'<script type="application/json" id="t">{tj}</script><script type="application/json" id="labels">{lj}</script><script>{BM.SL_JS}{BM.HUMAN_JS}{JS}</script></body></html>')
@@ -1022,7 +1031,7 @@ def sale_pages(d):
             me = f"{BASE}/{SALE_DIR[lang]}/{sl}"; other = f"{BASE}/{SALE_DIR['et' if lang == 'en' else 'en']}/{sl_et if lang == 'en' else sl_en}"
             lede = st["lede1"] if len(pick) == 1 else st["lede"].format(n=f"{len(pick):,}".replace(",", " " if lang == "et" else ","), g=g)
             cards = "".join(
-                f'<article class="card"><a class="out" href="{e(w[10])}" target="_blank" rel="noopener">'
+                f'<article class="card"><a class="out" href="{e(w[10])}" target="_blank" rel="noopener" data-out="{e(gals[w[9]])}">'
                 f'<img src="{e(w[3])}" alt="{e(w[0])}, {e(arts[w[1]][0])}" loading="lazy" decoding="async" referrerpolicy="no-referrer-when-downgrade">'
                 f'<span class="cap"><i>{e(w[0])}</i>{e(arts[w[1]][0])}{", " + e(str(w[2])) if w[2] else ""}</span>'
                 + (f'<span class="meta">{e(" · ".join(x for x in ((lang == "en" and w[15]) or w[4], w[5]) if x))}</span>' if (w[4] or w[5]) else "")
@@ -1040,14 +1049,14 @@ def sale_pages(d):
                      f'<link rel="alternate" type="application/rss+xml" title="New for sale" href="{BASE}/feed.xml">'
                      f'<script type="application/ld+json">{ld}</script>'
                      '<link rel="stylesheet" href="/fonts/fonts.css">'
-                     f'<style>{CSS}.browse{{margin:0;font-size:.9rem;line-height:1.9;color:var(--grey)}}.browse .eyebrow{{margin-right:8px}}.browse b{{color:var(--ink);font-weight:500}}</style>{H.GC}</head><body><div class="wrap">'
+                     f'<style>{CSS}</style>{H.GC}</head><body><div class="wrap">'
                      f'<nav><a href="{BASE}/{"" if lang == "en" else "#lang=et"}">{e(t["site"])}</a> › <a href="{BASE}/{t["file"]}">{e(t["h"])}</a> › {e(h)} · '
                      f'<a href="{other}" hreflang="{"et" if lang == "en" else "en"}">{e(t["other_l"])}</a></nav>'
                      f'<header><h1>{e(h)}</h1><p class="lede">{e(lede)}</p><p><a class="btn solid" href="{e(find)}">{e(st["more"])}</a></p></header>'
                      f'<div class="grid">{cards}</div>'
                      + (f'<p class="m">{e(st["first"].format(k=len(rows), n=len(pick)))}</p>' if len(pick) > len(rows) else "")
                      + browse_links(lang, sl)
-                     + f'<footer>{e(t["note"].split(". ")[0])}. {H.CONTACT[lang]}</footer></div></body></html>')
+                     + f'<footer>{e(t["note"].split(". ")[0])}. {H.CONTACT[lang]}</footer></div>{H.out_js("forsale")}</body></html>')
             os.makedirs(f"site/{SALE_DIR[lang]}", exist_ok=True)
             open(f"site/{SALE_DIR[lang]}/{sl}.html", "w", encoding="utf-8").write(html_); urls.append(me)
     return urls

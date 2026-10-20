@@ -58,9 +58,9 @@ L = {
             full="Full catalogue", mt=" <span class=\"m\">(machine translation of the holder&#39;s Estonian text, unedited)</span>", enonly="",
             embed_h="Embed on your page", embed_t="A strip of pictures, the count and a link back, for a blog, a course page or a museum's site. Paste both lines: the second is the link that tells search engines where the pictures live.",
             idx_title="Artists A–Z — Estonian Art Catalogue", idx_desc="Every artist in the Estonian Art Catalogue: {n} artists represented in Estonian public collections and galleries.",
-            idx_h="Artists A–Z", idx_n="{n} artists", other_lang="Eesti keeles", hash="", in_mus="in Estonian museums and galleries", in_mus_nog="in Estonian museums",
-            desc="{name}{dates}: {n} works in Estonian public collections{gal}, {span} — {media}, at {holders}. Every record links to its source.",
-            desc_nospan="{name}{dates}: {n} works in Estonian public collections{gal} — {media}, at {holders}. Every record links to its source.", gal=" and galleries"),
+            idx_h="Artists A–Z", idx_n="{n} artists", buy="Buy Estonian art: the works for sale now, with prices →", buy_u="find", other_lang="Eesti keeles", hash="",
+            artist="artist", work1="work", t_sale=", {k} for sale", d_n="{name}{dates}: {n} {w} in Estonian public collections{gal}{span}.",
+            d_sale="{k} for sale now{r}.", d_key="Works include {t}.", d_med="{media} at {holders}.", d_and=" and ", gal=" and galleries"),
  "et": dict(dir="k", site="Eesti Kunstikataloog", kind={"school": "õppinud:", "movement": "suund:", "member": "liige:"}, works="teost", artists="Kunstnikud A–Ü", art_nav="Kunstnikud",
             year="Aasta", title="Pealkiri", tech="Tehnika", dims="Mõõdud", held="Hoidja", browse="Sirvi {n} teost kataloogis →",
             sold="müüdud", gone="enam ei pakuta", soldp="Müüdud €{p}", soldnp="Müüdud", unsold="Müümata",
@@ -75,9 +75,9 @@ L = {
             full="Kogu kataloog", mt="", enonly=" <span class=\"m\">(inglise keeles)</span>",
             embed_h="Manusta oma lehele", embed_t="Pildiriba, teoste arv ja link tagasi — blogile, kursuse lehele või muuseumi kodulehele. Kleebi mõlemad read: teine on link, mis ütleb otsimootorile, kust pildid pärit on.",
             idx_title="Kunstnikud A–Ü — Eesti Kunstikataloog", idx_desc="Kõik Eesti Kunstikataloogi kunstnikud: {n} kunstnikku, kelle teoseid on Eesti avalikes kogudes ja galeriides.",
-            idx_h="Kunstnikud A–Ü", idx_n="{n} kunstnikku", other_lang="In English", hash="lang=et&", in_mus="Eesti muuseumides ja galeriides", in_mus_nog="Eesti muuseumides",
-            desc="{name}{dates}: {n} teost Eesti avalikes kogudes{gal}, {span} — {media}; {holders}. Iga kirje viitab allikale.",
-            desc_nospan="{name}{dates}: {n} teost Eesti avalikes kogudes{gal} — {media}; {holders}. Iga kirje viitab allikale.", gal=" ja galeriides"),
+            idx_h="Kunstnikud A–Ü", idx_n="{n} kunstnikku", buy="Osta Eesti kunsti: praegu müügil olevad teosed koos hindadega →", buy_u="leia", other_lang="In English", hash="lang=et&",
+            artist="kunstnik", work1="teos", t_sale=", {k} müügil", d_n="{name}{dates}: {n} {w} Eesti avalikes kogudes{gal}{span}.",
+            d_sale="Müügil {k} {w}{r}.", d_key="Teoste seas {t}.", d_med="{media}; {holders}.", d_and=" ja ", gal=" ja galeriides"),
 }
 MED_NAME = {"en": lambda m: m, "et": lambda m: MED_ET.get(m, m)}
 # the media a description names: "paintings, drawings and prints" / "maalid, joonistused ja graafika"
@@ -85,12 +85,12 @@ MED_PL = {"en": {"Painting": "paintings", "Watercolour": "watercolours", "Drawin
                  "Illustration": "illustrations", "Photograph": "photographs", "Mixed media": "mixed media", "Installation": "installations", "Poster": "posters", "Bookplate": "bookplates"},
           "et": {"Painting": "maalid", "Watercolour": "akvarellid", "Drawing": "joonistused", "Print": "graafika", "Sculpture": "skulptuur",
                  "Illustration": "illustratsioonid", "Photograph": "fotod", "Mixed media": "segatehnika", "Installation": "installatsioonid", "Poster": "plakatid", "Bookplate": "eksliibrised"}}
-def media_phrase(ws, lang):
+def media_phrase(ws, lang, k=3):
     c = {}
     for w in ws:
         m = val(w, "e")
         if m: c[m] = c.get(m, 0) + 1
-    names = [MED_PL[lang].get(m, MED_NAME[lang](m).lower()) for m, _ in sorted(c.items(), key=lambda kv: -kv[1])[:3]]
+    names = [MED_PL[lang].get(m, MED_NAME[lang](m).lower()) for m, _ in sorted(c.items(), key=lambda kv: -kv[1])[:k]]
     if not names: return ""
     if len(names) == 1: return names[0]
     return ", ".join(names[:-1]) + (" and " if lang == "en" else " ja ") + names[-1]
@@ -319,6 +319,19 @@ def up_line(i, lang):
     items = " · ".join(f'{d(u.get("d"))} {e(H.mus_name(u["h"], lang))}: <i>{e(u["t"])}</i>' + (f', {start} €{u["p"]:,}' if u.get("p") else "") for u in L[:6])
     return f'<p class="m">{lab}: {items} — <a href="{BASE}/{page}">{"all coming sales" if lang == "en" else "kõik tulevad oksjonid"}</a></p>'
 
+GENERIC = re.compile(r"(nimetu|nimeta|pealkirjata|ilma pealkirjata|untitled|kompositsioon|composition|visand|sketch|etüüd|study)\b", re.I)
+def key_titles(ws, k=3):
+    """the works a searcher may name: the key works first (hl), then the museums' (the ones known by name;
+    the stock is named, with prices, in the sentence before), paintings first, pictured first"""
+    out, seen = [], set()
+    for w in sorted(ws, key=lambda w: (w.get("hl", 10**9), bool(w.get("kind")), MRANK.get(val(w, "e"), 8), not w.get("im"))):
+        t = re.sub(r"[.,]?\s*\(?\d{4}(\s*[-–]\s*\d{2,4})?\)?$", "", (w.get("t") or "").strip(" .")).strip(" .,")   # "Title. 2024 - 2025"
+        if not t or len(t) > 40 or GENERIC.match(t) or t.lower() in seen: continue
+        seen.add(t.lower()); out.append(t)
+        if len(out) == k: break
+    return out
+join_and = lambda xs, a: xs[0] if len(xs) == 1 else ", ".join(xs[:-1]) + a + xs[-1]
+
 def sale_block(i, a, ws, lang):
     """the artist's works for sale now, with the galleries' asking prices, each linking to the gallery that sells
     it, and the way into Buy art kept to this artist: what a searcher typing the name and "buy" is
@@ -330,7 +343,7 @@ def sale_block(i, a, ws, lang):
         k = ((w.get("t") or "").lower().strip(), val(w, "mu"))
         if k in seen: continue
         seen.add(k); S.append(w)
-    if not S: return "", 0, []
+    if not S: return "", 0, [], ""
     S.sort(key=lambda w: (not w.get("pr"), w.get("pr") or 0))
     en = lang == "en"
     price = lambda p: (f"€{p:,}" if en else f"{p:,} €".replace(",", " ")) if p else ("price on request" if en else "hind päringul")
@@ -341,13 +354,13 @@ def sale_block(i, a, ws, lang):
     line = (f"{len(S)} {'work' if len(S) == 1 else 'works'} at {', '.join(gals)}{rng}. Prices as the galleries state them."
             if en else f"{len(S)} {'teos' if len(S) == 1 else 'teost'}: {', '.join(gals)}{rng}. Hinnad nii, nagu galeriid need avaldavad.")
     tiles = "".join(
-        f'<a class="wt" href="{e(w["url"])}" target="_blank" rel="noopener" title="{e(w.get("t") or "")}">'
+        f'<a class="wt" href="{e(w["url"])}" target="_blank" rel="noopener" title="{e(w.get("t") or "")}" data-out="{e(val(w, "mu") or "")}">'
         f'<img src="{e(imsrc(w["im"]))}" alt="{e(w.get("t") or "")}, {e(a["n"])}" loading="lazy" referrerpolicy="no-referrer-when-downgrade">'
         f'<span><i>{e(w.get("t") or "")}</i><br><b>{price(w.get("pr"))}</b> · {e(val(w, "mu") or "")} ↗</span></a>' for w in S[:12])
     find = f'{BASE}/{"find" if en else "leia"}#a={urllib.parse.quote(a["n"])}'
     more = (f"See {'it' if len(S) == 1 else 'them'} in Buy Art" if en else "Vaata neid lehel Osta kunsti")
     return (f'<h2 class="sh">{head}</h2><p class="m">{e(line)}</p><div class="wall sale">{tiles}</div>'
-            f'<p><a class="cta" href="{e(find)}">{more} →</a></p>'), len(S), S[:12]
+            f'<p><a class="cta" href="{e(find)}">{more} →</a></p>'), len(S), S[:12], rng
 
 def follow(sl, lang, sale):
     """the artist's feed of works for sale (build_ask.py writes it): a new work shows in the reader's feed reader"""
@@ -372,7 +385,7 @@ def render(i, a, ws, lang):
     life = a.get("l") or ["", ""]
     dates = f"{life[0]}–{life[1]}" if life[0] or life[1] else ""
     years = sorted({w["y"] for w in ws if w.get("y")})
-    span = f"{years[0]}–{years[-1]}" if years else ""
+    span = (f"{years[0]}–{years[-1]}" if years[0] != years[-1] else str(years[0])) if years else ""
     holders = sorted({val(w, "mu") for w in ws if val(w, "mu")})
     # the snippet names museums, in the page's language; a private collection or a
     # gallery is not where a searcher would go to see the work
@@ -382,17 +395,23 @@ def render(i, a, ws, lang):
         if h and (w.get("kind") or "held") == "held" and h not in ("Erakogu", "Asukoht teadmata"): hc[h] = hc.get(h, 0) + 1
     top_holders = [(I18N["MUSEUM_EN"].get(h, h) if lang == "en" else h) for h, _ in sorted(hc.items(), key=lambda kv: -kv[1])[:3]]
     gal = T["gal"] if any(w.get("kind") in ("gallery", "shown", "sold") for w in ws) else ""
-    # the title and the snippet in the words a searcher uses: the name, how many works,
-    # where they are, what kinds, when -- and the site's own name last
+    # the title and the snippet in the words a searcher uses. Search Console (Oct 2026): the name, often with
+    # "kunstnik" or "maalid", sometimes a work's title; so the title says artist, what kind of work, how many,
+    # how many for sale -- and the site's own name last; the snippet adds the prices and the works to name
     n = sum(1 for w in ws if not (w.get("ac") and not w.get("al")))   # distinct works; earlier lots are in their sale history
-    title = f"{a['n']} – {n} {T['works']} {T['in_mus'] if gal else T['in_mus_nog']} · museaal.ee"
-    d_ = dict(name=a["n"], dates=f" ({dates})" if dates else "", n=n, gal=gal, span=span, media=media_phrase(ws, lang) or T["works"],
-              holders=", ".join(top_holders) if top_holders else "—")
-    desc = (T["desc"] if span else T["desc_nospan"]).format(**d_)[:300]
-    sale, n_sale, sale_ws = sale_block(i, a, ws, lang)
-    if n_sale:                                   # the snippet says so too, when there is room
-        extra = (f" {n_sale} for sale now." if lang == "en" else f" Müügil {n_sale} {'teos' if n_sale == 1 else 'teost'}.")
-        if len(desc) + len(extra) <= 300: desc += extra
+    sale, n_sale, sale_ws, rng = sale_block(i, a, ws, lang)
+    wd = lambda k: T["work1"] if k == 1 else T["works"]
+    med = media_phrase(ws, lang, 1)
+    title = (f"{a['n']}, {T['artist']}" + (f" – {med}" if med else "") + f" · {n} {wd(n)}"
+             + (T["t_sale"].format(k=n_sale) if n_sale else "") + " · museaal.ee")
+    media = media_phrase(ws, lang)
+    parts = [T["d_n"].format(name=a["n"], dates=f" ({dates})" if dates else "", n=n, w=wd(n), gal=gal, span=f", {span}" if span else ""),
+             T["d_sale"].format(k=n_sale, w=wd(n_sale), r=rng) if n_sale else "",
+             T["d_key"].format(t=join_and(key_titles(ws), T["d_and"])) if key_titles(ws) else "",
+             T["d_med"].format(media=media[:1].upper() + media[1:], holders=", ".join(top_holders)) if media and top_holders else ""]
+    desc = parts[0][:300]
+    for p_ in parts[1:]:                        # each sentence whole, while there is room
+        if p_ and len(desc) + 1 + len(p_) <= 300: desc += " " + p_
 
     def holder(w):
         if w.get("kind") == "sold": return f"{e(val(w, 'mu'))} · {T['sold'] if w.get('gs') else T['gone']}"
@@ -484,7 +503,8 @@ def render(i, a, ws, lang):
            f"<th>{T['held']}</th></tr></thead><tbody>{rows}</tbody></table>"
            + neighbours(i, lang)
            + embed_box(lang, f"{BASE}/embed/{'' if lang == 'en' else 'et/'}{sl}", me, a["n"], T)
-           + f"<p class=\"m\">{T['foot']}<a href=\"{BASE}/{'' if lang == 'en' else '#lang=et'}\">{T['full']}</a> · {CONTACT[lang]}</p></body></html>")
+           + f"<p class=\"m\">{T['foot']}<a href=\"{BASE}/{'' if lang == 'en' else '#lang=et'}\">{T['full']}</a> · {CONTACT[lang]}</p>"
+           + (H.out_js("artist") if n_sale else "") + "</body></html>")
 
 for i, a in enumerate(A):
     ws = by_artist.get(i, [])
@@ -522,7 +542,7 @@ for lang in ("en", "et"):
         f'<style>{CSS}ul{{columns:260px;list-style:none;padding:0}}'
         f'li{{break-inside:avoid;padding:2px 0}}</style>{GC}</head><body>'
         f'<nav><a href="{BASE}/{"" if lang == "en" else "#lang=et"}">{T["site"]}</a> › {T["art_nav"]} <span class="m">· <a href="{BASE}/{O["dir"]}/">{T["other_lang"]}</a></span></nav>'
-        f'<h1>{T["idx_h"]}</h1><p class="m">{T["idx_n"].format(n=f"{len(index_rows):,}")}</p><ul>{lst}</ul></body></html>')
+        f'<h1>{T["idx_h"]}</h1><p class="m">{T["idx_n"].format(n=f"{len(index_rows):,}")} · <a href="{BASE}/{T["buy_u"]}">{T["buy"]}</a></p><ul>{lst}</ul></body></html>')
 
 # ---- retired names: redirect stubs --------------------------------------------
 # A spelling merged away in merge.py had an artist page of its own, indexed and

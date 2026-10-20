@@ -128,10 +128,15 @@ JS = r"""
     if (!g) add(s, el("p", "m", j.goat_error ? "GoatCounter did not answer: " + j.goat_error : "Add GOATCOUNTER_TOKEN to the Worker to see visits here (worker/README.md)."));
     else {
       var ev = {}; (g.events_list || []).forEach(function (x) { ev[x.path] = x.count; });
-      add(s, add(el("div", "cards"), card(g.total - (g.events || 0), "page views"), card(ev["sign-in-link-sent"] || 0, "sign-in links sent"), card(ev["signed-in"] || 0, "sign-ins")));
+      // a click through to a gallery: "find-out" from Buy art, "out-artist" and "out-forsale" from the pages that list stock
+      var outs = (g.events_list || []).reduce(function (t, x) { return t + (/^(find-out|out-)/.test(x.path) ? x.count : 0); }, 0);
+      add(s, add(el("div", "cards"), card(g.total - (g.events || 0), "page views"), card(outs, "clicks to a gallery"), card(ev["sign-in-link-sent"] || 0, "sign-in links sent"), card(ev["signed-in"] || 0, "sign-ins")));
+      // /find and /find.html are one page (links from before the clean addresses still carry .html): counted together
+      var pg = {}; (g.pages || []).forEach(function (r) { var k = r[0].replace(/\.html$/, "").replace(/\/index$/, "/"); pg[k] = (pg[k] || 0) + r[1]; });
+      var pages = Object.keys(pg).map(function (k) { return [k, pg[k]]; }).sort(function (a, b) { return b[1] - a[1]; });
       add(s, el("h3", null, "Views a day"), bars(D, D.map(function (d) { var x = (g.days || []).filter(function (y) { return y[0] === d; })[0]; return x ? x[1] : 0; }), "Views a day"));
       var two = el("div", "two");
-      add(two, add(el("div"), el("h3", null, "Top pages"), table(["Page", "Views"], g.pages || [], [0, 1])),
+      add(two, add(el("div"), el("h3", null, "Top pages"), table(["Page", "Views"], pages, [0, 1])),
                add(el("div"), el("h3", null, "Referrers"), table(["From", "Visits"], g.refs || [], [0, 1])));
       add(s, two);
       if ((g.events_list || []).length) add(s, el("h3", null, "Events"), table(["Event", "Count"], g.events_list.map(function (x) { return [x.path, x.count]; }), [0, 1]));
