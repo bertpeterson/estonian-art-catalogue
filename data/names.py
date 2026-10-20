@@ -117,4 +117,9 @@ def resolve_variant(name, artists, vsur):
         # a short given name gets no slack: Are is not Mare, Ott is not Otto
         near = lambda a, b: a == b if min(len(a), len(b)) < 4 else _close(a, b)
         if all(any(near(a, b) for b in hi) for a in lo): hits.append(j)
+    if not hits and len(t[-1]) >= 5 and t[-1].endswith("i"):
+        # a lot line in the genitive ("Malle Leisi" portrait, "Eduard Wiiralti" drawing):
+        # the same given names and the surname without its -i is that artist
+        hits = [j for j in vsur.get(t[-1][:-1], []) if _vtoks(artists[j]["n"])[:-1] == t[:-1]
+                and _qual(artists[j]["n"]) == _qual(name)]
     return hits[0] if len(hits) == 1 else None

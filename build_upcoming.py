@@ -136,7 +136,7 @@ def main():
                 lot = f'<a class="lot" href="{e(u["u"])}" rel="noopener">{t["lot"]}{" " + str(u["n"]) if u.get("n") else ""} ↗</a>' if str(u.get("u") or "").startswith("http") else ""
                 det = " · ".join(x for x in (u.get("tc"), u.get("dm")) if x)
                 det = f'<span class="m">{e(det)}</span>' if det else ""
-                body += (f'<tr data-i="{i}" data-p="{u.get("p") or ""}" data-n="{u.get("n") or ""}"><td class="a"><a href="{BASE}/{t["art"]}/{sl}">{e(A[u["a"]]["n"])}</a><span class="m">{e(record(u["a"], lang))}</span></td>'
+                body += (f'<tr data-i="{i}" data-p="{u.get("p") or ""}" data-n="{u.get("n") or ""}"><td class="a"><a href="{BASE}/#lang={lang}&amp;artist={sl}">{e(A[u["a"]]["n"])}</a><span class="m">{e(record(u["a"], lang))}</span></td>'
                          f'<td class="w"><i>{e(u["t"])}</i>{", " + e(u["yl"]) if u.get("yl") else ""}{det}{prior}</td>'
                          f'<td class="n"><b>{eur(u["p"], lang) if u.get("p") else "–"}</b>{lot}</td></tr>')
             body += "</tbody></table></details>"
