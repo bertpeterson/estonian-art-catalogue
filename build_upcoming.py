@@ -36,12 +36,12 @@ T = {"en": dict(file="upcoming", other="tulemas", h="Coming up at auction", site
                 lede="Every lot in the Estonian auction houses' coming sales by an artist in the catalogue, with the starting price as the house published it and the artist's record at auction beside it. Bids are not shown; the houses' own pages have them.",
                 none="No coming sale has published its lots yet. The houses put their catalogues online two to four weeks before a sale; this page is refreshed every week.",
                 start="starting price", rec="At auction: {n} lots, {s} sold{r}", rec0="First time at auction in the catalogue", prior="Same title before", unsold="unsold",
-                lots="lots", lot1="lot", mine="{n} of your artists in this sale", mine1="1 of your artists in this sale", c_art="Artist", c_work="Work", c_price="Starting price", lot="Lot", hand="The catalogue is on the house's own site; its lots are not listed here.", cat="Catalogue", sort="Sort", az="A–Z", price="Price", lotno="Lot no.", show="Show the lots ↓", hide="Hide the lots ↑", other_l="Eesti keeles", note="A record, not a valuation. Refreshed weekly.", month=["January","February","March","April","May","June","July","August","September","October","November","December"]),
+                lots="lots", lot1="lot", mine="{w} from {a}", w1="1 work", wn="{n} works", a1="1 saved artist", an="{n} saved artists", first="Your artists first", c_art="Artist", c_work="Work", c_price="Starting price", lot="Lot", hand="The catalogue is on the house's own site; its lots are not listed here.", cat="Catalogue", sort="Sort", az="A–Z", price="Price", lotno="Lot no.", show="Show the lots ↓", hide="Hide the lots ↑", other_l="Eesti keeles", note="A record, not a valuation. Refreshed weekly.", month=["January","February","March","April","May","June","July","August","September","October","November","December"]),
      "et": dict(file="tulemas", other="upcoming", h="Tulemas oksjonil", site="Eesti Kunstikataloog", art="k",
                 lede="Kõik Eesti oksjonimajade tulevate oksjonite partiid kataloogi kunstnikelt, alghind nii, nagu maja selle avaldas, ja kõrval kunstniku senine oksjonitulemus. Pakkumisi ei näidata; need on majade endi lehtedel.",
                 none="Ükski tulev oksjon pole veel oma partiisid avaldanud. Majad panevad kataloogi üles kaks kuni neli nädalat enne oksjonit; see leht uueneb iga nädal.",
                 start="alghind", rec="Oksjonil: {n} partiid, {s} müüdud{r}", rec0="Kataloogis esimest korda oksjonil", prior="Sama pealkiri varem", unsold="müümata",
-                lots="partiid", lot1="partii", mine="{n} sinu kunstnikku selles oksjonis", mine1="1 sinu kunstnik selles oksjonis", c_art="Kunstnik", c_work="Teos", c_price="Alghind", lot="Partii", hand="Kataloog on oksjonimaja enda lehel; selle partiisid siin ei loetleta.", cat="Kataloog", sort="Järjesta", az="A–Ü", price="Hind", lotno="Partii nr", show="Näita partiisid ↓", hide="Peida partiid ↑", other_l="In English", note="Ülestähendus, mitte hinnang. Uueneb iga nädal.", month=["jaanuar","veebruar","märts","aprill","mai","juuni","juuli","august","september","oktoober","november","detsember"])}
+                lots="partiid", lot1="partii", mine="{w} {a}", w1="1 teos", wn="{n} teost", a1="1 salvestatud kunstnikult", an="{n} salvestatud kunstnikult", first="Sinu kunstnikud enne", c_art="Kunstnik", c_work="Teos", c_price="Alghind", lot="Partii", hand="Kataloog on oksjonimaja enda lehel; selle partiisid siin ei loetleta.", cat="Kataloog", sort="Järjesta", az="A–Ü", price="Hind", lotno="Partii nr", show="Näita partiisid ↓", hide="Peida partiid ↑", other_l="In English", note="Ülestähendus, mitte hinnang. Uueneb iga nädal.", month=["jaanuar","veebruar","märts","aprill","mai","juuni","juuli","august","september","oktoober","november","detsember"])}
 
 CSS = (":root{--paper:#0B0C0E;--field:#15171A;--ink:#F1F2F4;--ink-soft:#C7CACE;--grey:#8B9098;--rule:#2B2E34;--rule-soft:#212429;"
        "--serif:'Newsreader','Iowan Old Style',Georgia,serif;--sans:'Archivo','Helvetica Neue',Arial,sans-serif;--mono:'IBM Plex Mono',ui-monospace,Menlo,monospace}"
@@ -79,20 +79,23 @@ CSS = (":root{--paper:#0B0C0E;--field:#15171A;--ink:#F1F2F4;--ink-soft:#C7CACE;-
 
 # A–Z puts the rows back in the order written (by surname); Price sorts by the starting
 # price, highest first, and the other way on a second click; Lot no. by the house's own numbers,
-# where it gives them (EKO); a lot with no price or number goes last
+# where it gives them (EKO); a lot with no price or number goes last. Your artists first (added by MINE_JS where a sale
+# has artists from My List) puts their lots on top, each group in the A–Z order
 JS = ("document.querySelectorAll('.sort').forEach(function(b){b.addEventListener('click',function(ev){"
       "var x=ev.target.closest('button');if(!x)return;var tb=b.nextElementSibling.tBodies[0],rs=[].slice.call(tb.rows),m=x.dataset.s,dir=-1;"
       "if(m==='p'){dir=x.classList.contains('on')&&x.dataset.d==='-1'?1:-1;x.dataset.d=dir;x.textContent=x.dataset.l+(dir<0?' ↓':' ↑');}"
-      "rs.sort(function(a,c){if(m==='az')return a.dataset.i-c.dataset.i;var k=m==='n'?'n':'p';if(m==='n')dir=1;var pa=+a.dataset[k]||0,pc=+c.dataset[k]||0;"
+      "rs.sort(function(a,c){if(m==='az')return a.dataset.i-c.dataset.i;if(m==='y')return c.classList.contains('mine')-a.classList.contains('mine')||a.dataset.i-c.dataset.i;var k=m==='n'?'n':'p';if(m==='n')dir=1;var pa=+a.dataset[k]||0,pc=+c.dataset[k]||0;"
       "if(!pa!==!pc)return pa?-1:1;return dir*(pa-pc)||a.dataset.i-c.dataset.i;});"
       "rs.forEach(function(r){tb.appendChild(r);});b.querySelectorAll('button').forEach(function(y){y.classList.toggle('on',y===x);if(y!==x&&y.dataset.l){y.textContent=y.dataset.l+' ↓';delete y.dataset.d;}});});});")
 # The artists on the visitor's My List (museaal.artists in the browser, saved on an artist's page or in the
 # register): their lots are marked, and each sale says how many of them it has, and who
 MINE_JS = ("(function(){var T=%s,S;try{S=JSON.parse(localStorage.getItem('museaal.artists')||'[]')}catch(e){S=[]}"
            "if(!Array.isArray(S)||!S.length)return;document.querySelectorAll('details.sale').forEach(function(d){var who=[];"
-           "d.querySelectorAll('tr[data-a]').forEach(function(r){if(S.indexOf(r.dataset.a)<0)return;r.classList.add('mine');"
+           "var nw=0;d.querySelectorAll('tr[data-a]').forEach(function(r){if(S.indexOf(r.dataset.a)<0)return;r.classList.add('mine');nw++;"
            "var n=r.querySelector('td.a a').textContent;if(who.indexOf(n)<0)who.push(n);});"
-           "if(!who.length)return;var m=d.querySelector('.mine');m.textContent=' · '+(who.length===1?T.one:T.n.replace('{n}',who.length))+': '+who.join(', ');m.hidden=false;});})();")
+           "if(!who.length)return;var y=document.createElement('button');y.type='button';y.dataset.s='y';y.textContent=T.first;d.querySelector('.sort').appendChild(y);"
+           "var m=d.querySelector('.mine');function c(x,one,n){return x===1?one:n.replace('{n}',x)}"
+           "m.textContent=' · '+T.mine.replace('{w}',c(nw,T.w1,T.wn)).replace('{a}',c(who.length,T.a1,T.an))+': '+who.join(', ');m.hidden=false;});})();")
 fmt = lambda n, lang: f"{n:,}" if lang == "en" else f"{n:,}".replace(",", " ")
 eur = lambda n, lang: "€" + fmt(n, lang)
 surname = lambda n: (n.split()[-1].lower(), n.lower())      # Karl Alexander von Winkler under W
@@ -162,7 +165,7 @@ def main():
                 f'<div class="top"><a class="wm" href="{BASE}/{"" if lang == "en" else "#lang=et"}">{t["site"]}</a><a class="eb" href="{other}">{t["other_l"]}</a></div>'
                 f'<header class="mast"><h1>{t["h"]}</h1><p class="lede">{e(t["lede"])}</p></header>'
                 + (body or f'<p class="m">{e(t["none"])}</p>')
-                + f'<footer class="foot">{e(t["note"])} {H.CONTACT[lang]}</footer></div><script>{JS}</script><script>{MINE_JS % json.dumps({"one": t["mine1"], "n": t["mine"]}, ensure_ascii=False)}</script></body></html>')
+                + f'<footer class="foot">{e(t["note"])} {H.CONTACT[lang]}</footer></div><script>{JS}</script><script>{MINE_JS % json.dumps({k: t[k] for k in ("mine", "w1", "wn", "a1", "an", "first")}, ensure_ascii=False)}</script></body></html>')
         open(f"site/{t['file']}.html", "w", encoding="utf-8").write(page)
         urls.append(me)
     sm = open("site/sitemap.xml", encoding="utf-8").read()
