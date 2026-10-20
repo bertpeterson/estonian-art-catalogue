@@ -8,10 +8,18 @@
 (function () {
   var me = document.currentScript, API = me && me.getAttribute("data-list-api");
   if (!API) return;
-  var LIST = "museaal.shortlist", ACC = "museaal.account", timer = 0, busy = null, again = false, last = 0, note = "";
+  var LIST = "museaal.shortlist", ARTS = "museaal.artists", ACC = "museaal.account", timer = 0, busy = null, again = false, last = 0, note = "";
   function read(k) { try { return JSON.parse(localStorage.getItem(k) || "null"); } catch (e) { return null; } }
   function write(k, v) { try { if (v == null) localStorage.removeItem(k); else localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
-  function list() { var a = read(LIST); return Array.isArray(a) ? a.filter(function (k) { return typeof k === "string"; }) : []; }
+  function strs(k) { var a = read(k); return Array.isArray(a) ? a.filter(function (x) { return typeof x === "string"; }) : []; }
+  // My List is two lists in the browser -- works (inventory keys) and artists (their page slugs) -- and one on the
+  // Worker, which keeps any short strings: an artist goes there as "@slug", which no inventory number starts with
+  function list() { return strs(LIST).filter(function (k) { return k.charAt(0) !== "@"; })
+    .concat(strs(ARTS).map(function (s) { return "@" + s; })); }
+  function save(a) {
+    write(LIST, a.filter(function (k) { return k.charAt(0) !== "@"; }));
+    write(ARTS, a.filter(function (k) { return k.charAt(0) === "@"; }).map(function (k) { return k.slice(1); }));
+  }
   function acc() { var a = read(ACC); return a && typeof a.s === "string" ? a : null; }
   function tell(name) { try { window.dispatchEvent(new Event(name)); } catch (e) {} }
   function has(a, k) { return a.indexOf(k) >= 0; }
@@ -74,7 +82,7 @@
       now.forEach(function (k) { if (!has(sent, k) && !has(mine, k)) mine.push(k); });
       var b = acc(); b.base = j.items; write(ACC, b);
       if (typeof j.news === "boolean") setNews(j.news);
-      if (JSON.stringify(mine) !== JSON.stringify(now)) { write(LIST, mine); tell("museaal:list"); }
+      if (JSON.stringify(mine) !== JSON.stringify(now)) { save(mine); tell("museaal:list"); }
       if (JSON.stringify(mine) !== JSON.stringify(j.items)) again = true;
     }).catch(function () {}).then(function () { busy = null; if (again) { again = false; sync(); } });
     return busy;
