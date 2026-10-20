@@ -35,12 +35,12 @@ T = {"en": dict(file="upcoming", other="tulemas", h="Coming up at auction", site
                 lede="Every lot in the Estonian auction houses' coming sales by an artist in the catalogue, with the starting price as the house published it and the artist's record at auction beside it. Bids are not shown; the houses' own pages have them.",
                 none="No coming sale has published its lots yet. The houses put their catalogues online two to four weeks before a sale; this page is refreshed every week.",
                 start="starting price", rec="At auction: {n} lots, {s} sold{r}", rec0="First time at auction in the catalogue", prior="Same title before", unsold="unsold",
-                lots="lots", lot1="lot", c_art="Artist", c_work="Work", c_price="Starting price", lot="Lot", hand="The catalogue is on the house's own site; its lots are not listed here.", cat="Catalogue", show="Show the lots ↓", hide="Hide the lots ↑", other_l="Eesti keeles", note="A record, not a valuation. Refreshed weekly.", month=["January","February","March","April","May","June","July","August","September","October","November","December"]),
+                lots="lots", lot1="lot", c_art="Artist", c_work="Work", c_price="Starting price", lot="Lot", hand="The catalogue is on the house's own site; its lots are not listed here.", cat="Catalogue", sort="Sort", az="A–Z", price="Price", show="Show the lots ↓", hide="Hide the lots ↑", other_l="Eesti keeles", note="A record, not a valuation. Refreshed weekly.", month=["January","February","March","April","May","June","July","August","September","October","November","December"]),
      "et": dict(file="tulemas", other="upcoming", h="Tulemas oksjonil", site="Eesti Kunstikataloog", art="k",
                 lede="Kõik Eesti oksjonimajade tulevate oksjonite partiid kataloogi kunstnikelt, alghind nii, nagu maja selle avaldas, ja kõrval kunstniku senine oksjonitulemus. Pakkumisi ei näidata; need on majade endi lehtedel.",
                 none="Ükski tulev oksjon pole veel oma partiisid avaldanud. Majad panevad kataloogi üles kaks kuni neli nädalat enne oksjonit; see leht uueneb iga nädal.",
                 start="alghind", rec="Oksjonil: {n} partiid, {s} müüdud{r}", rec0="Kataloogis esimest korda oksjonil", prior="Sama pealkiri varem", unsold="müümata",
-                lots="partiid", lot1="partii", c_art="Kunstnik", c_work="Teos", c_price="Alghind", lot="Partii", hand="Kataloog on oksjonimaja enda lehel; selle partiisid siin ei loetleta.", cat="Kataloog", show="Näita partiisid ↓", hide="Peida partiid ↑", other_l="In English", note="Ülestähendus, mitte hinnang. Uueneb iga nädal.", month=["jaanuar","veebruar","märts","aprill","mai","juuni","juuli","august","september","oktoober","november","detsember"])}
+                lots="partiid", lot1="partii", c_art="Kunstnik", c_work="Teos", c_price="Alghind", lot="Partii", hand="Kataloog on oksjonimaja enda lehel; selle partiisid siin ei loetleta.", cat="Kataloog", sort="Järjesta", az="A–Ü", price="Hind", show="Näita partiisid ↓", hide="Peida partiid ↑", other_l="In English", note="Ülestähendus, mitte hinnang. Uueneb iga nädal.", month=["jaanuar","veebruar","märts","aprill","mai","juuni","juuli","august","september","oktoober","november","detsember"])}
 
 CSS = (":root{--paper:#0B0C0E;--field:#15171A;--ink:#F1F2F4;--ink-soft:#C7CACE;--grey:#8B9098;--rule:#2B2E34;--rule-soft:#212429;"
        "--serif:'Newsreader','Iowan Old Style',Georgia,serif;--sans:'Archivo','Helvetica Neue',Arial,sans-serif;--mono:'IBM Plex Mono',ui-monospace,Menlo,monospace}"
@@ -56,6 +56,9 @@ CSS = (":root{--paper:#0B0C0E;--field:#15171A;--ink:#F1F2F4;--ink-soft:#C7CACE;-
        ".sale{margin-top:28px;border-bottom:1px solid var(--rule)}.sale-h{display:block;padding-bottom:14px}"
        "summary.sale-h{list-style:none;cursor:pointer}summary.sale-h::-webkit-details-marker{display:none}summary.sale-h:hover h2{text-decoration:underline}"
        ".tog{margin-left:12px;font-family:var(--mono);font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);border-bottom:1px solid var(--rule)}"
+       ".sort{display:flex;align-items:baseline;gap:14px;margin:0 0 10px}.sort button{background:none;border:0;padding:0;cursor:pointer;"
+       "font-family:var(--mono);font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;color:var(--grey);border-bottom:1px solid transparent}"
+       ".sort button:hover{color:var(--ink)}.sort button.on{color:var(--ink);border-bottom-color:var(--ink)}"
        ".hd,details[open] .sh{display:none}details[open] .hd{display:inline}details[open]{padding-bottom:20px}"
        "h2{font-family:var(--serif);font-weight:500;font-size:1.6rem;line-height:1.1;margin:6px 0 4px}.sub{margin:0;color:var(--grey);font-size:.85rem}"
        "table{border-collapse:collapse;width:100%}"
@@ -72,8 +75,17 @@ CSS = (":root{--paper:#0B0C0E;--field:#15171A;--ink:#F1F2F4;--ink-soft:#C7CACE;-
        "tr{display:grid;grid-template-columns:1fr auto;gap:2px 14px;padding:12px 0;border-bottom:1px solid var(--rule-soft)}"
        "td{display:block;padding:0;border:0}td.a{width:auto}td.w{grid-column:1}td.n{grid-column:2;grid-row:1 / span 2}}")
 
+# A–Z puts the rows back in the order written (by surname); Price sorts by the starting
+# price, highest first, and the other way on a second click; a lot with no price goes last
+JS = ("document.querySelectorAll('.sort').forEach(function(b){b.addEventListener('click',function(ev){"
+      "var x=ev.target.closest('button');if(!x)return;var tb=b.nextElementSibling.tBodies[0],rs=[].slice.call(tb.rows),m=x.dataset.s,dir=-1;"
+      "if(m==='p'){dir=x.classList.contains('on')&&x.dataset.d==='-1'?1:-1;x.dataset.d=dir;x.textContent=x.dataset.l+(dir<0?' ↓':' ↑');}"
+      "rs.sort(function(a,c){if(m==='az')return a.dataset.i-c.dataset.i;var pa=+a.dataset.p||0,pc=+c.dataset.p||0;"
+      "if(!pa!==!pc)return pa?-1:1;return dir*(pa-pc)||a.dataset.i-c.dataset.i;});"
+      "rs.forEach(function(r){tb.appendChild(r);});b.querySelectorAll('button').forEach(function(y){y.classList.toggle('on',y===x);if(y!==x&&y.dataset.l){y.textContent=y.dataset.l+' ↓';delete y.dataset.d;}});});});")
 fmt = lambda n, lang: f"{n:,}" if lang == "en" else f"{n:,}".replace(",", " ")
 eur = lambda n, lang: "€" + fmt(n, lang)
+surname = lambda n: (n.split()[-1].lower(), n.lower())      # Karl Alexander von Winkler under W
 house = lambda h, lang: MUS_EN.get(h, h) if lang == "en" else h
 def day(dd, lang):
     if not dd: return ""
@@ -97,7 +109,7 @@ def main():
     for lang in ("en", "et"):
         t = T[lang]
         groups = collections.OrderedDict()
-        for u in sorted(UP, key=lambda u: (u.get("d") or "9", u["h"], u["s"] or "", A[u["a"]]["n"], u["t"])):
+        for u in sorted(UP, key=lambda u: (u.get("d") or "9", u["h"], u["s"] or "", surname(A[u["a"]]["n"]), u["t"])):
             groups.setdefault((u.get("d"), u["h"], u["s"]), []).append(u)
         secs = []
         for x in HAND:
@@ -113,14 +125,16 @@ def main():
             body += (f'<details class="sale"{" open" if len(groups) == 1 else ""}><summary class="sale-h"><span class="eb">{e(days(dd, END.get((h, dd)), lang))}</span>'
                      f'<h2>{e(s or house(h, lang))}</h2><p class="sub">{e(house(h, lang)) + " · " if s else ""}{nl}'
                      f'<span class="tog"><span class="sh">{t["show"]}</span><span class="hd">{t["hide"]}</span></span></p></summary>'
+                     f'<div class="sort"><span class="eb">{t["sort"]}</span><button type="button" data-s="az" class="on">{t["az"]}</button>'
+                     f'<button type="button" data-s="p" data-l="{t["price"]}">{t["price"]} ↓</button></div>'
                      f'<table><thead><tr><th>{t["c_art"]}</th><th>{t["c_work"]}</th><th class="n">{t["c_price"]}</th></tr></thead><tbody>')
-            for u in lots:
+            for i, u in enumerate(lots):
                 sl = H.ARTIST_SLUG[u["a"]]
                 prior = (f'<span class="m">{t["prior"]}: ' + " · ".join(f'{e(str(p[0])[:4])} {e(house(p[1], lang))} {eur(p[2], lang) if p[2] else t["unsold"]}' for p in u["pr"]) + "</span>") if u.get("pr") else ""
                 lot = f'<a class="lot" href="{e(u["u"])}" rel="noopener">{t["lot"]} ↗</a>' if str(u.get("u") or "").startswith("http") else ""
                 det = " · ".join(x for x in (u.get("tc"), u.get("dm")) if x)
                 det = f'<span class="m">{e(det)}</span>' if det else ""
-                body += (f'<tr><td class="a"><a href="{BASE}/{t["art"]}/{sl}">{e(A[u["a"]]["n"])}</a><span class="m">{e(record(u["a"], lang))}</span></td>'
+                body += (f'<tr data-i="{i}" data-p="{u.get("p") or ""}"><td class="a"><a href="{BASE}/{t["art"]}/{sl}">{e(A[u["a"]]["n"])}</a><span class="m">{e(record(u["a"], lang))}</span></td>'
                          f'<td class="w"><i>{e(u["t"])}</i>{", " + e(u["yl"]) if u.get("yl") else ""}{det}{prior}</td>'
                          f'<td class="n"><b>{eur(u["p"], lang) if u.get("p") else "–"}</b>{lot}</td></tr>')
             body += "</tbody></table></details>"
@@ -137,7 +151,7 @@ def main():
                 f'<div class="top"><a class="wm" href="{BASE}/{"" if lang == "en" else "#lang=et"}">{t["site"]}</a><a class="eb" href="{other}">{t["other_l"]}</a></div>'
                 f'<header class="mast"><h1>{t["h"]}</h1><p class="lede">{e(t["lede"])}</p></header>'
                 + (body or f'<p class="m">{e(t["none"])}</p>')
-                + f'<footer class="foot">{e(t["note"])} {H.CONTACT[lang]}</footer></div></body></html>')
+                + f'<footer class="foot">{e(t["note"])} {H.CONTACT[lang]}</footer></div><script>{JS}</script></body></html>')
         open(f"site/{t['file']}.html", "w", encoding="utf-8").write(page)
         urls.append(me)
     sm = open("site/sitemap.xml", encoding="utf-8").read()
