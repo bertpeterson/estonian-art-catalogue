@@ -1273,7 +1273,7 @@ for r in UPC:
     before = [w for w in _prior.get((ai, _tkey(r["title"])), [])
               if not (w.get("dm") and r.get("dims") and w["dm"].replace(" ", "") != r["dims"].replace(" ", ""))]
     upcoming.append({"a": ai, "t": r["title"], "yl": r.get("yl") or r.get("year"), "tc": r.get("tech") or None, "dm": r.get("dims") or None,
-                     "h": r["house"], "s": r["sale"], "d": r.get("date"), "p": r.get("start"), "u": r.get("url"),
+                     "h": r["house"], "s": r["sale"], "d": r.get("date"), "p": r.get("start"), "u": r.get("url"), "n": r.get("lot"),
                      "pr": [[w["ad"], w["mu"], w.get("ap") if w.get("ao") else None] for w in sorted(before, key=lambda w: str(w["ad"]))] or None})
 print("  upcoming auction lots:", len(upcoming), "joined to catalogue artists;", up_unmatched, "by artists not in it;",
       sum(1 for u in upcoming if u["pr"]), "offered before")
