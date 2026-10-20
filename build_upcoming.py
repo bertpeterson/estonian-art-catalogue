@@ -7,6 +7,12 @@ a link to the lot, and beside it the artist's record at auction from the catalog
 how many lots, how many sold, the range of the hammer prices -- and, where the same
 title was offered before, those results. No bids, no pictures. A record, not a valuation.
 Run after build_pages.py (it adds to the sitemap) and before csp.py.
+
+A house whose lots are not read (Allee galerii) can be given its coming sales by hand in
+data/sales_by_hand.json: a list of {"house", "sale", "date": first day, "end": last day
+(optional), "lots": how many (optional), "url": the house's catalogue}. Each shows as a
+sale with no lots, a link to the catalogue, until its last day has passed; a sale whose
+lots were read after all is not shown twice.
 """
 import json, os, re, html, datetime, collections
 import build_hubs as H
@@ -14,6 +20,10 @@ import build_hubs as H
 BASE, A, W, e = H.BASE, H.A, H.W, H.e
 d = json.load(open("data/data.json", encoding="utf-8"))
 UP = d.get("upcoming", [])
+_today = datetime.date.today().isoformat()
+HAND = [x for x in (json.load(open("data/sales_by_hand.json", encoding="utf-8")) if os.path.exists("data/sales_by_hand.json") else [])
+        if (x.get("end") or x["date"]) >= _today
+        and not any(u["h"] == x["house"] and x["date"] <= (u.get("d") or "") <= (x.get("end") or x["date"]) for u in UP)]
 MUS_EN = H.MUSEUM_EN
 lots_of = collections.defaultdict(list)
 for w in W:
@@ -23,12 +33,12 @@ T = {"en": dict(file="upcoming", other="tulemas", h="Coming up at auction", site
                 lede="Every lot in the Estonian auction houses' coming sales by an artist in the catalogue, with the starting price as the house published it and the artist's record at auction beside it. Bids are not shown; the houses' own pages have them.",
                 none="No coming sale has published its lots yet. The houses put their catalogues online two to four weeks before a sale; this page is refreshed every week.",
                 start="starting price", rec="At auction: {n} lots, {s} sold{r}", rec0="First time at auction in the catalogue", prior="Same title before", unsold="unsold",
-                lots="lots", lot1="lot", c_art="Artist", c_work="Work", c_price="Starting price", lot="Lot", other_l="Eesti keeles", note="A record, not a valuation. Refreshed weekly.", month=["January","February","March","April","May","June","July","August","September","October","November","December"]),
+                lots="lots", lot1="lot", c_art="Artist", c_work="Work", c_price="Starting price", lot="Lot", hand="The catalogue is on the house's own site; its lots are not listed here.", cat="Catalogue", other_l="Eesti keeles", note="A record, not a valuation. Refreshed weekly.", month=["January","February","March","April","May","June","July","August","September","October","November","December"]),
      "et": dict(file="tulemas", other="upcoming", h="Tulemas oksjonil", site="Eesti Kunstikataloog", art="k",
                 lede="Kõik Eesti oksjonimajade tulevate oksjonite partiid kataloogi kunstnikelt, alghind nii, nagu maja selle avaldas, ja kõrval kunstniku senine oksjonitulemus. Pakkumisi ei näidata; need on majade endi lehtedel.",
                 none="Ükski tulev oksjon pole veel oma partiisid avaldanud. Majad panevad kataloogi üles kaks kuni neli nädalat enne oksjonit; see leht uueneb iga nädal.",
                 start="alghind", rec="Oksjonil: {n} partiid, {s} müüdud{r}", rec0="Kataloogis esimest korda oksjonil", prior="Sama pealkiri varem", unsold="müümata",
-                lots="partiid", lot1="partii", c_art="Kunstnik", c_work="Teos", c_price="Alghind", lot="Partii", other_l="In English", note="Ülestähendus, mitte hinnang. Uueneb iga nädal.", month=["jaanuar","veebruar","märts","aprill","mai","juuni","juuli","august","september","oktoober","november","detsember"])}
+                lots="partiid", lot1="partii", c_art="Kunstnik", c_work="Teos", c_price="Alghind", lot="Partii", hand="Kataloog on oksjonimaja enda lehel; selle partiisid siin ei loetleta.", cat="Kataloog", other_l="In English", note="Ülestähendus, mitte hinnang. Uueneb iga nädal.", month=["jaanuar","veebruar","märts","aprill","mai","juuni","juuli","august","september","oktoober","november","detsember"])}
 
 CSS = (":root{--paper:#0B0C0E;--field:#15171A;--ink:#F1F2F4;--ink-soft:#C7CACE;--grey:#8B9098;--rule:#2B2E34;--rule-soft:#212429;"
        "--serif:'Newsreader','Iowan Old Style',Georgia,serif;--sans:'Archivo','Helvetica Neue',Arial,sans-serif;--mono:'IBM Plex Mono',ui-monospace,Menlo,monospace}"
@@ -79,8 +89,16 @@ def main():
         groups = collections.OrderedDict()
         for u in sorted(UP, key=lambda u: (u.get("d") or "9", u["h"], u["s"] or "", A[u["a"]]["n"], u["t"])):
             groups.setdefault((u.get("d"), u["h"], u["s"]), []).append(u)
-        body = ""
+        secs = []
+        for x in HAND:
+            span = day(x["date"], lang) + (" – " + day(x["end"], lang) if x.get("end") and x["end"] != x["date"] else "")
+            nl = f' · {fmt(x["lots"], lang)} {t["lots"] if x["lots"] != 1 else t["lot1"]}' if x.get("lots") else ""
+            cat = f' <a class="lot" href="{e(x["url"])}" rel="noopener">{t["cat"]} ↗</a>' if str(x.get("url") or "").startswith("http") else ""
+            secs.append((x["date"], f'<section class="sale"><header class="sale-h"><span class="eb">{e(span)}</span>'
+                         f'<h2>{e(x["sale"])}</h2><p class="sub">{e(house(x["house"], lang))}{nl}</p></header>'
+                         f'<p class="sub">{e(t["hand"])}{cat}</p></section>'))
         for (dd, h, s), lots in groups.items():
+            body = ""
             nl = f'{fmt(len(lots), lang)} {t["lots"] if len(lots) != 1 else t["lot1"]}'
             body += (f'<section class="sale"><header class="sale-h"><span class="eb">{e(day(dd, lang))}</span>'
                      f'<h2>{e(s or house(h, lang))}</h2><p class="sub">{e(house(h, lang)) + " · " if s else ""}{nl}</p></header>'
@@ -95,6 +113,8 @@ def main():
                          f'<td class="w"><i>{e(u["t"])}</i>{", " + e(u["yl"]) if u.get("yl") else ""}{det}{prior}</td>'
                          f'<td class="n"><b>{eur(u["p"], lang) if u.get("p") else "–"}</b>{lot}</td></tr>')
             body += "</tbody></table></section>"
+            secs.append((dd or "9", body))
+        body = "".join(b for _, b in sorted(secs, key=lambda x: x[0]))
         me, other = f"{BASE}/{t['file']}", f"{BASE}/{t['other']}"
         n = len(UP)
         title = f'{t["h"]} – {fmt(n, lang)} {t["lots"]} · museaal.ee' if n else f'{t["h"]} · museaal.ee'
@@ -113,7 +133,7 @@ def main():
     today = datetime.date.today().isoformat()
     add = "".join(f'<url><loc>{u}</loc><lastmod>{today}</lastmod><changefreq>weekly</changefreq></url>' for u in urls)
     open("site/sitemap.xml", "w", encoding="utf-8").write(sm.replace("</urlset>", add + "</urlset>"))
-    print(f"  coming sales   {len(UP):,} lots in {len({(u.get('d'), u['h'], u['s']) for u in UP})} sale day(s); upcoming.html, tulemas.html")
+    print(f"  coming sales   {len(UP):,} lots in {len({(u.get('d'), u['h'], u['s']) for u in UP})} sale day(s), {len(HAND)} sale(s) by hand; upcoming.html, tulemas.html")
 
 if __name__ == "__main__":
     main()
