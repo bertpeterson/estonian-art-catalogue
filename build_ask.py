@@ -503,7 +503,14 @@ function buildTaste(){var keys=listNow(), need={};
     Object.keys(by).forEach(function(a){by[a].sort(function(x,y){return s[y]-s[x]}).slice(0,3).forEach(function(i){s[i]+=.13})});
     for(var j=0;j<n;j++)if(s[j]>max)max=s[j];
     if(max)for(var i=0;i<n;i++)s[i]/=max;
-    TASTE={sig:tasteSig(),s:s,in:inl,n:max?items.length+nSaved:0};return TASTE})}
+    TASTE={sig:tasteSig(),s:s,in:inl,n:max?items.length+nSaved:0};tasteSave(TASTE);return TASTE})}
+// the home page's Buy Art row leads with two of these (tpl_head.html): For you's twelve best, an artist each, with a
+// picture, kept in this browser (museaal.foryou) and read there for three days; an empty list takes them away
+function tasteSave(t){try{if(!t.n)return localStorage.removeItem('museaal.foryou');
+  var ix=[],o=[],seen={},i,w;for(i=0;i<t.s.length;i++)if(t.s[i]>0&&!t.in[D.works[i][11]]&&D.works[i][3])ix.push(i);
+  ix.sort(function(a,b){return t.s[b]-t.s[a]});
+  for(i=0;i<ix.length&&o.length<12;i++){w=D.works[ix[i]];if(seen[w[1]])continue;seen[w[1]]=1;o.push([w[10],w[3],w[0],D.artists[w[1]][0],w[8]||0])}
+  localStorage.setItem('museaal.foryou',JSON.stringify({at:Date.now(),w:o}))}catch(e){}}
 // On by default from three works on the list, unless this browser turned it off (find-fy: off); the stock's bytes
 // are fetched at once, beside stock.json, so the first ten wait for little more than the ranking. Default use counts
 // apart from chosen: find-foryou-auto, find-foryou, find-foryou-off.
