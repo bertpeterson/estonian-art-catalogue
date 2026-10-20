@@ -311,12 +311,13 @@
     const ps = L.filter(w => w.ao && w.ap).map(w => w.ap).sort((a, b) => a - b);
     return T("up_rec", {n: fmt(L.length), s: fmt(L.filter(w => w.ao).length)}) + (ps.length > 1 ? ` · ${eur(ps[0])}–${eur(ps[ps.length - 1])}` : ps.length ? ` · ${eur(ps[0])}` : "");
   };
-  // the artists of My List in a sale: how many, and who
+  // the artists of My List in a sale: how many works by each
   const SL_ICON_ON = '<svg class="up-mark" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 2h8v12l-4-3-4 3z"/></svg>';
   const mineIn = items => {
-    const mine = items.filter(u => isSaved(u.a)), who = [...new Set(mine.map(u => u.a))];
-    const c = (x, one, n) => x === 1 ? T(one) : T(n, {n: fmt(x)});
-    return who.length ? `<div class="g-split up-mine-n">${esc(T("up_mine", {w: c(mine.length, "up_w1", "up_wn"), a: c(who.length, "up_a1", "up_an")}))}: ${esc(who.map(i => A[i].n).join(", "))}</div>` : "";
+    const nw = new Map();
+    for (const u of items) if (isSaved(u.a)) nw.set(u.a, (nw.get(u.a) || 0) + 1);
+    const who = [...nw.keys()].sort((x, y) => nw.get(y) - nw.get(x));      // the most first
+    return who.length ? `<div class="g-split up-mine-n">${esc(who.map(i => T("up_mine", {w: nw.get(i) === 1 ? T("up_w1") : T("up_wn", {n: fmt(nw.get(i))}), a: A[i].n})).join(", "))}</div>` : "";
   };
   // by sale day and house, as the ledger groups past sales
   function renderUpcoming(lots){
