@@ -94,6 +94,7 @@ PREV_DAY = {r["url"]: r["date"] for r in (json.load(open("upcoming_records.json"
 today = datetime.date.today()
 recs, n_open, n_unparsed = [], 0, 0
 coming = []                                  # the lots of sales still to come (upcoming.py)
+LOTNR = {}                                   # a coming lot's number in its sale, "<span class="_lotnr ...">2</span>"
 for slug in slugs:
     lots, page, sale, day = [], 1, None, None
     while True:
@@ -122,6 +123,8 @@ for slug in slugs:
         pid = re.search(r"\bpost-(\d+)\b", c)
         st = re.search(r'data-startprice="([\d.]+)"', c)
         oc = OUTCOME.search(c)
+        ln = re.search(r'class="_lotnr[^"]*">\s*(\d+)\s*<', c)
+        if url and ln: LOTNR[url.group(1)] = int(ln.group(1))
         if not (url and title and pid and (oc or open_sale)): n_unparsed += 1; continue
         lm = split_lot(clean(title.group(1)))
         if not lm or not re.match(r"^[^\d]{3,60}$", lm[0]): n_unparsed += 1; continue
@@ -161,7 +164,7 @@ for slug in slugs:
             dd, mo = HOME_DAY[slug]; y = today.year + (1 if mo < today.month else 0)
             when = f"{y}-{mo:02d}-{dd:02d}"
         coming += [{"house": "Eesti Kunsti Oksjonid", "sale": r["sale"], "date": when or None, "artist": r["artist"], "title": r["title"],
-                    "year": r["year"], "yl": r["yl"], "tech": r["tech"], "dims": r["dims"], "start": r["start"], "url": r["url"]} for r in got]
+                    "year": r["year"], "yl": r["yl"], "tech": r["tech"], "dims": r["dims"], "start": r["start"], "url": r["url"], "lot": LOTNR.get(r["url"])} for r in got]
         continue
     for r in got: r["when"] = when[:7]; r["date"] = when
     recs += got
