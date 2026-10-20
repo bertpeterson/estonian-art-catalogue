@@ -12,7 +12,7 @@ A house whose lots are not read (Allee galerii) can be given its coming sales by
 data/sales_by_hand.json: a list of {"house", "sale", "date": first day, "end": last day
 (optional), "lots": how many (optional), "url": the house's catalogue}. Each shows as a
 sale with no lots, a link to the catalogue, until its last day has passed; a sale whose
-lots were read after all is not shown twice.
+lots were read after all is not shown twice, and its lots' heading takes the last day from here.
 """
 import json, os, re, html, datetime, collections
 import build_hubs as H
@@ -21,7 +21,9 @@ BASE, A, W, e = H.BASE, H.A, H.W, H.e
 d = json.load(open("data/data.json", encoding="utf-8"))
 UP = d.get("upcoming", [])
 _today = datetime.date.today().isoformat()
-HAND = [x for x in (json.load(open("data/sales_by_hand.json", encoding="utf-8")) if os.path.exists("data/sales_by_hand.json") else [])
+_hand = json.load(open("data/sales_by_hand.json", encoding="utf-8")) if os.path.exists("data/sales_by_hand.json") else []
+END = {(x["house"], x["date"]): x["end"] for x in _hand if x.get("end")}      # a sale over several days, its lots dated by the first
+HAND = [x for x in _hand
         if (x.get("end") or x["date"]) >= _today
         and not any(u["h"] == x["house"] and x["date"] <= (u.get("d") or "") <= (x.get("end") or x["date"]) for u in UP)]
 MUS_EN = H.MUSEUM_EN
@@ -78,6 +80,11 @@ def day(dd, lang):
     y, m, *rest = str(dd).split("-")
     mo = T[lang]["month"][int(m) - 1]
     return (f"{int(rest[0])} {mo} {y}" if lang == "en" else f"{int(rest[0])}. {mo} {y}") if rest else f"{mo} {y}"
+def days(a, b, lang):
+    """13–15 November 2026 (13.–15. november 2026) within a month; both days in full otherwise"""
+    if not b or b == a: return day(a, lang)
+    if str(a)[:7] == str(b)[:7]: return (f"{int(str(a)[8:10])}–" if lang == "en" else f"{int(str(a)[8:10])}.–") + day(b, lang)
+    return day(a, lang) + " – " + day(b, lang)
 def record(ai, lang):
     L = lots_of.get(ai, [])
     if not L: return T[lang]["rec0"]
@@ -94,7 +101,7 @@ def main():
             groups.setdefault((u.get("d"), u["h"], u["s"]), []).append(u)
         secs = []
         for x in HAND:
-            span = day(x["date"], lang) + (" – " + day(x["end"], lang) if x.get("end") and x["end"] != x["date"] else "")
+            span = days(x["date"], x.get("end"), lang)
             nl = f' · {fmt(x["lots"], lang)} {t["lots"] if x["lots"] != 1 else t["lot1"]}' if x.get("lots") else ""
             cat = f' <a class="lot" href="{e(x["url"])}" rel="noopener">{t["cat"]} ↗</a>' if str(x.get("url") or "").startswith("http") else ""
             secs.append((x["date"], f'<section class="sale"><header class="sale-h"><span class="eb">{e(span)}</span>'
@@ -103,7 +110,7 @@ def main():
         for (dd, h, s), lots in groups.items():
             body = ""
             nl = f'{fmt(len(lots), lang)} {t["lots"] if len(lots) != 1 else t["lot1"]}'
-            body += (f'<details class="sale"{" open" if len(groups) == 1 else ""}><summary class="sale-h"><span class="eb">{e(day(dd, lang))}</span>'
+            body += (f'<details class="sale"{" open" if len(groups) == 1 else ""}><summary class="sale-h"><span class="eb">{e(days(dd, END.get((h, dd)), lang))}</span>'
                      f'<h2>{e(s or house(h, lang))}</h2><p class="sub">{e(house(h, lang)) + " · " if s else ""}{nl}'
                      f'<span class="tog"><span class="sh">{t["show"]}</span><span class="hd">{t["hide"]}</span></span></p></summary>'
                      f'<table><thead><tr><th>{t["c_art"]}</th><th>{t["c_work"]}</th><th class="n">{t["c_price"]}</th></tr></thead><tbody>')
