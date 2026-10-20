@@ -386,6 +386,8 @@ a.linkbtn{text-decoration:none}
 .up-row.up-mine{box-shadow:inset 2px 0 0 var(--ink);padding-left:12px}
 .up-mark{width:11px;height:11px;fill:currentColor;margin-right:6px;vertical-align:-1px}
 .up-mine-n{color:var(--ink)}
+.up-mine-n a{text-decoration:underline;text-decoration-color:var(--grey-6);text-underline-offset:3px}.up-mine-n a:hover{text-decoration-color:var(--ink)}
+@keyframes up-flash{from{background:var(--field)}to{background:transparent}}.up-row.flash{animation:up-flash 1.6s ease-out}
 .listbar .acc{display:inline-flex;align-items:center;gap:10px}
 .listbar .acc input{font:inherit;font-size:var(--fs-sm);padding:4px 8px;width:22ch;max-width:60vw;border:1px solid var(--rule);border-radius:2px;background:var(--field);color:var(--ink)}
 .listbar .acc input:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
