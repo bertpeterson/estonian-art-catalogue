@@ -108,7 +108,7 @@ T = {"en": dict(file="find", other="leia", other_l="Eesti keeles", site="Estonia
                 groups=dict(feeling="Feeling", light="Light", colour="Colour", weather="Season and weather", subject="Subject"),
                 about="Sources & privacy", note="The works are the galleries' current stock with their asking prices, read weekly from each gallery's own site; the gallery's page is the one to trust. Your messages are read by Claude, which runs the searches and picks the works it suggests; they are not stored. The auction figures under a work are its artist's record as the houses published it, hammer prices: a record, not a valuation. The moods are read from the gallery's photograph by CLIP, an image model: a guide, not a judgement of the work.",
                 sl_add="Add to My List", sl_remove="Remove from My List", fy="For you", fybtn="Similar to My List ({n})",
-                fyhint="Bookmark three works, here, on the mood wall or in the catalogue, and this puts first what looks like them.",
+                fyhint="Bookmark three works, here, on the mood wall or in the catalogue, or save an artist, and this puts first what looks like them and the artists you saved.",
                 fysee="See My List", fybit="based on My List",
                 fynone="nothing in My List to go by yet",
                 hash=""),
@@ -138,7 +138,7 @@ T = {"en": dict(file="find", other="leia", other_l="Eesti keeles", site="Estonia
                 groups=dict(feeling="Tunne", light="Valgus", colour="Värv", weather="Aastaaeg ja ilm", subject="Aine"),
                 about="Allikad ja privaatsus", note="Teosed on galeriide praegune müügivalik ja nende küsitud hinnad, loetud iga nädal galeriide endi lehtedelt; usaldusväärne on galerii leht. Sinu sõnumeid loeb Claude, kes teeb otsingud ja valib soovitatavad teosed; neid ei salvestata. Teose all olevad oksjoniandmed on kunstniku tulemused nii, nagu oksjonimajad need avaldasid (haamrihinnad): ülevaade, mitte hinnang. Meeleolu loeb galerii fotolt pildimudel CLIP: see on juhatus, mitte hinnang teosele.",
                 sl_add="Lisa minu nimekirja", sl_remove="Eemalda minu nimekirjast", fy="Sulle", fybtn="Sarnased minu nimekirjaga ({n})",
-                fyhint="Märgi järjehoidjaga kolm teost, siin, meeleolu seinal või kataloogis, ja ette tulevad nendega sarnased.",
+                fyhint="Märgi järjehoidjaga kolm teost, siin, meeleolu seinal või kataloogis, või salvesta kunstnik, ja ette tulevad nendega sarnased ja sinu salvestatud kunstnikud.",
                 fysee="Vaata minu nimekirja", fybit="minu nimekirja põhjal",
                 fynone="minu nimekirjas pole veel millegi järgi minna",
                 hash="lang=et&")}
@@ -463,7 +463,11 @@ function priceText(lo,hi){return lo&&hi?eur(lo)+' – '+eur(hi):hi?T.upto+' '+eu
 var TS=page.dataset.taste, TSH=page.dataset.tshard, TSV=page.dataset.tver, NV=48, SV=null, TASTE=null, tasteP=null, SHARDS={};
 var fyb=document.getElementById('foryou'), fyh=document.getElementById('fyhint');
 function listNow(){return slGet().slice(-60)}       // the latest sixty
-function tasteFresh(){return !!TASTE&&TASTE.sig===listNow().join(',')}
+// the artists on My List (museaal.artists: their pages' slugs, which the stock's artists carry): their works lead For you
+function artsNow(){try{var a=JSON.parse(localStorage.getItem('museaal.artists')||'[]');return Array.isArray(a)?a.filter(function(k){return typeof k==='string'}):[]}catch(e){return []}}
+function mineN(){return slGet().length+artsNow().length}
+function tasteSig(){return listNow().join(',')+'|'+artsNow().join(',')}
+function tasteFresh(){return !!TASTE&&TASTE.sig===tasteSig()}
 function shardOf(k){var h=0;for(var i=0;i<k.length;i++)h=(h*31+k.charCodeAt(i))|0;return ('0'+(h&255).toString(16)).slice(-2)}
 function unit(b){var v=new Float32Array(b.length),n=0,i;for(i=0;i<b.length;i++){v[i]=b[i];n+=b[i]*b[i]}if(!n)return null;n=Math.sqrt(n);for(i=0;i<v.length;i++)v[i]/=n;return v}
 function unb64(s){if(!s)return null;var t=atob(s),b=new Int8Array(t.length);for(var i=0;i<t.length;i++)b[i]=t.charCodeAt(i)<<24>>24;return unit(b)}
@@ -478,6 +482,8 @@ function buildTaste(){var keys=listNow(), need={};
       if(w)items.push({v:SV[w.i],a:w[1],t:w[0],an:D.artists[w[1]][0]});
       else if((x=(SHARDS[shardOf(k)]||{})[k]))items.push({v:unb64(x[1]),a:x[0],t:x[2],an:x[3]})});
     items.forEach(function(it){if(it.a>=0)arts[it.a]=1});
+    var saved={}, nSaved=0, sl=artsNow();
+    D.artists.forEach(function(a,i){if(sl.indexOf(a[1])>=0){saved[i]=1;nSaved++}});
     var vs=items.filter(function(it){return it.v}), n=D.works.length, s=new Float32Array(n), max=0;
     // each kept picture ranks every work for sale by nearness, and a work scores by its place, 1/(10 + place): the
     // kept works take turns at the top. By nearness itself one gallery photograph on the list outweighed two museum
@@ -487,11 +493,17 @@ function buildTaste(){var keys=listNow(), need={};
       o.sort(function(a,b){return c[b]-c[a]});for(i=0;i<n;i++)r[o[i]]=SV[o[i]]?1/(10+i):0});
     D.works.forEach(function(w,i){if(inl[w[11]])return;var b1=0,b2=0,sc;
       vs.forEach(function(it){var c=it.r[i];if(c>b1){b2=b1;b1=c}else if(c>b2)b2=c});
-      sc=b1+.3*b2;
-      if(arts[w[1]])sc+=.055;   // as a kept work's fourth nearest
-      s[i]=sc;if(sc>max)max=sc});
+      // with no pictures on the list, the rest come in the day's order
+      sc=vs.length?b1+.3*b2:.01*hash(w[11]+DAY)+.01*D.fame[w[1]];
+      if(arts[w[1]]||saved[w[1]])sc+=.055;   // as a kept work's fourth nearest
+      s[i]=sc});
+    // a saved artist's three nearest works for sale go to the top, as a kept work's nearest would; the rest of
+    // theirs keep the lift above, so one artist with forty works does not fill every page
+    var by={};D.works.forEach(function(w,i){if(saved[w[1]]&&!inl[w[11]])(by[w[1]]=by[w[1]]||[]).push(i)});
+    Object.keys(by).forEach(function(a){by[a].sort(function(x,y){return s[y]-s[x]}).slice(0,3).forEach(function(i){s[i]+=.13})});
+    for(var j=0;j<n;j++)if(s[j]>max)max=s[j];
     if(max)for(var i=0;i<n;i++)s[i]/=max;
-    TASTE={sig:keys.join(','),s:s,in:inl,n:max?items.length:0};return TASTE})}
+    TASTE={sig:tasteSig(),s:s,in:inl,n:max?items.length+nSaved:0};return TASTE})}
 // On by default from three works on the list, unless this browser turned it off (find-fy: off); the stock's bytes
 // are fetched at once, beside stock.json, so the first ten wait for little more than the ranking. Default use counts
 // apart from chosen: find-foryou-auto, find-foryou, find-foryou-off.
@@ -499,11 +511,12 @@ var TSB=null, fyAuto=false;
 function tasteBin(){return TSB=TSB||fetch(TS).then(function(r){if(!r.ok)throw 0;return r.arrayBuffer()}).catch(function(e){TSB=null;throw e})}
 function fyOff(){try{return localStorage.getItem('find-fy')==='off'}catch(e){return false}}
 function fyKeep(on){try{if(on)localStorage.removeItem('find-fy');else localStorage.setItem('find-fy','off')}catch(e){}}
-function fyDefault(){return slGet().length>=3&&!fyOff()}
+function fyReady(){return slGet().length>=3||artsNow().length>0}     // three works, or one artist
+function fyDefault(){return fyReady()&&!fyOff()}
 if(fyDefault()){Q.you=fyAuto=true;tasteBin().catch(function(){})}
 // the control: how many are on the list, on from three; under three, how to begin; and the way to the list itself
-function syncYou(){var n=slGet().length;fyb.textContent=T.fybtn.replace('{n}',n);fyb.disabled=n<3&&!Q.you;fyb.setAttribute('aria-pressed',String(!!Q.you));
-  fyh.textContent=n<3?T.fyhint+' ':'';if(n){var a=el('a',null,T.fysee);a.href='./#'+T.hash+'list=mine';fyh.appendChild(a)}fyh.hidden=!fyh.firstChild}
+function syncYou(){var n=mineN();fyb.textContent=T.fybtn.replace('{n}',n);fyb.disabled=!fyReady()&&!Q.you;fyb.setAttribute('aria-pressed',String(!!Q.you));
+  fyh.textContent=!fyReady()?T.fyhint+' ':'';if(n){var a=el('a',null,T.fysee);a.href='./#'+T.hash+'list=mine';fyh.appendChild(a)}fyh.hidden=!fyh.firstChild}
 // ---- the assistant's tools: Claude asks (through the Worker), the page answers from the stock it has ----
 function wid(w){return 'w'+w.i}
 // My List for the assistant: the latest twelve works it can name -- a work for sale from the stock (with its id, for
