@@ -367,6 +367,7 @@
 
   const state = {group:"decade", decOrder:"earliest", q:"", list:false, listTab:"w", shared:null, sale:false,
                  view:null, viewKey:"", wLimit:72,   // the artwall: chosen for one view (viewKey), or null for the rule
+                 aLimit:new Map(),   // artist by artist on the wall: pictures shown per artist beyond the first ten
                  decade:null, media:new Set(), museums:new Set(), cats:new Set(), srcs:new Set(),
                  artist:null, letter:null, idxOpen:false, idxQ:"", idxLimit:120, idxSort:"az", showEarly:false, origins:new Set(), groups:new Set(), sort:"featured", onWall:false, year:null, gLimit:50, from:null, to:null, undOnly:false, open:null, expand:new Set(),
                  auLimit:20};     // sales drawn in the auction view before "more"
@@ -1315,7 +1316,7 @@
         const gutter = `<span class="g-name">${esc(ar.n)}</span>${life ? `<div class="g-dates">${esc(life)}</div>` : ""}
           <div class="g-split">${esc(T("nworks", {n: fmt(nAll.get(i))}))} · ${esc(T("npics", {n: fmt(by.get(i).length)}))}${state.sort === "forsale" && SALE_N.get(i) ? ` · ${esc(T("nforsale", {n: fmt(SALE_N.get(i))}))}` : ""}</div>
           <button class="showartist" data-artist="${i}">${esc(T("openartist"))}</button>`;
-        return `<section class="group" id="grp-a${i}"><div class="gutter">${gutter}</div><div>${wallHTML(by.get(i), -1, false, {limit: 10, cols: artCols(), lazy: k > 1})}</div></section>`;
+        return `<section class="group" id="grp-a${i}"><div class="gutter">${gutter}</div><div>${wallHTML(by.get(i), -1, false, {limit: state.aLimit.get(i) || 10, more: i, cols: artCols(), lazy: k > 1})}</div></section>`;
       }).join("")
         + (order.length > shownA.length ? `<button class="more" id="more-artists" style="margin-top:18px">${esc(T("moreartists", {n: fmt(order.length - shownA.length)}))}</button>` : "")
         + (all.length > order.length ? `<p class="tl-note">${esc(T("art_nopics", {n: fmt(all.length - order.length)}))}</p>` : "");
@@ -1854,7 +1855,8 @@
     });
     return (openW ? `<div class="wall-open rows">${rowHTML(openW, true)}</div>` : "")
       + `<div class="wall" data-${opt.cols ? "acols" : "cols"}="${nCols}">${cols.map(c => `<div class="wcol">${c.t.map(tile).join("")}</div>`).join("")}</div>`
-      + (!opt.limit && ordered.length > shown.length ? `<button class="more" data-wmore="1" style="margin-bottom:22px">${esc(T("wall_more", {n: fmt(Math.min(72, ordered.length - shown.length))}))}</button>` : "");
+      + (!opt.limit && ordered.length > shown.length ? `<button class="more" data-wmore="1" style="margin-bottom:22px">${esc(T("wall_more", {n: fmt(Math.min(72, ordered.length - shown.length))}))}</button>` : "")
+      + (opt.more != null && ordered.length > shown.length ? `<button class="more" data-amore="${opt.more}" style="margin-bottom:22px">${esc(T("wall_more", {n: fmt(Math.min(30, ordered.length - shown.length))}))}</button>` : "");
   }
   let MINE = null;         // what of My List leads the landing wall, for the line above it
   const SL_ICON = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 2h8v12l-4-3-4 3z"/></svg>';
@@ -2052,7 +2054,7 @@
     state.cats = new Set([a.dataset.setcat]); state.open = null; state.artist = null; state.decade = null; state.year = null; state.expand.clear();
     renderAll(); pushHash(); jumpTo(viewTop($("register")));
   });
-  const setView = v => { state.view = v; state.viewKey = scopeKey(); state.open = null; state.wLimit = 72; render(); pushHash(); };
+  const setView = v => { state.view = v; state.viewKey = scopeKey(); state.open = null; state.wLimit = 72; state.aLimit.clear(); render(); pushHash(); };
   $("v-list").addEventListener("click", () => setView("list"));
   $("v-wall").addEventListener("click", () => setView("wall"));
   $("ai-toggle").addEventListener("click", () => {
@@ -2115,6 +2117,8 @@
     if (e.target.closest("#more-artists")){ state.gLimit += 100; render(); return; }
     if (e.target.closest("#more-sales")){ state.auLimit += 20; render(); return; }
     if (e.target.closest("[data-wmore]")){ state.wLimit += 72; render(); return; }
+    const am = e.target.closest("[data-amore]");
+    if (am){ const i = +am.dataset.amore; state.aLimit.set(i, (state.aLimit.get(i) || 10) + 30); render(); return; }
     const mb = e.target.closest(".more");
     if (mb){ state.expand.add(String(mb.dataset.exp)); render(); return; }
     if (e.target.closest("[data-artist]")) return;
@@ -2510,7 +2514,7 @@
     state.q=""; state.decade=null; state.media.clear(); state.museums.clear(); state.cats.clear(); state.srcs.clear(); state.origins.clear(); state.groups.clear();
     state.artist=null; state.letter=null; state.idxOpen=false; state.sort="featured"; state.year=null; state.from=null; state.to=null; state.undOnly=false; $("sortby").value="year";
     state.open=null; state.expand.clear(); state.decOrder="earliest";
-    state.list=false; state.shared=null; state.sale=false; state.saleUp=false; state.view=null; state.wLimit=72;
+    state.list=false; state.shared=null; state.sale=false; state.saleUp=false; state.view=null; state.wLimit=72; state.aLimit.clear();
     $("q").value=""; setGroup("decade"); renderAll(); pushHash(); window.scrollTo({top:0,behavior:"auto"});
   });
 
