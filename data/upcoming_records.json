@@ -941,6 +941,19 @@
 "house": "Allee galerii",
 "sale": "Allee sügisoksjon 2026",
 "date": "2026-11-13",
+"artist": "Aarne Vasar",
+"title": "Ma mängin ja mängin II",
+"year": "1994",
+"yl": "1994",
+"tech": "Tempera, akvarell paberil",
+"dims": "72 x 66 cm",
+"start": 3800,
+"url": "https://alleegalerii.ee/kunstioksjon/aarne-vasar-ma-mangin-ja-mangin-ii/"
+},
+{
+"house": "Allee galerii",
+"sale": "Allee sügisoksjon 2026",
+"date": "2026-11-13",
 "artist": "Aleksander Pilar",
 "title": "Ateljeevaade nartsissidega",
 "year": "1989",
@@ -948,8 +961,33 @@
 "tech": "Akvarell paberil",
 "dims": "50.7 x 57.7 cm",
 "start": 1500,
-"url": "https://alleegalerii.ee/kunstioksjon/aleksander-pilar-ateljeevaade-nartsissidega/",
-"lot": 121
+"url": "https://alleegalerii.ee/kunstioksjon/aleksander-pilar-ateljeevaade-nartsissidega/"
+},
+{
+"house": "Allee galerii",
+"sale": "Allee sügisoksjon 2026",
+"date": "2026-11-13",
+"artist": "Aleksander Pilar",
+"title": "Kihnu neiu",
+"year": "1951",
+"yl": "1951",
+"tech": "Akvarell, pliiats paberil",
+"dims": "30.5 x 23 cm",
+"start": 1200,
+"url": "https://alleegalerii.ee/kunstioksjon/aleksander-pilar-kihnu-neiu/"
+},
+{
+"house": "Allee galerii",
+"sale": "Allee sügisoksjon 2026",
+"date": "2026-11-13",
+"artist": "Aleksander Pilar",
+"title": "Paat liivasel rannal",
+"year": "1947",
+"yl": "1947",
+"tech": "Akvarell paberil",
+"dims": "30 x 39 cm",
+"start": 1000,
+"url": "https://alleegalerii.ee/kunstioksjon/aleksander-pilar-paat-liivasel-rannal/"
 },
 {
 "house": "Allee galerii",
@@ -962,8 +1000,7 @@
 "tech": "Õli lõuendil",
 "dims": "150 x 250 cm",
 "start": 19500,
-"url": "https://alleegalerii.ee/kunstioksjon/alice-kask-nimeta/",
-"lot": 81
+"url": "https://alleegalerii.ee/kunstioksjon/alice-kask-nimeta/"
 },
 {
 "house": "Allee galerii",
@@ -976,8 +1013,46 @@
 "tech": "Õli paberil",
 "dims": "69 x 69 cm",
 "start": 1900,
-"url": "https://alleegalerii.ee/kunstioksjon/alo-hoidre-montmartre/",
-"lot": 103
+"url": "https://alleegalerii.ee/kunstioksjon/alo-hoidre-montmartre/"
+},
+{
+"house": "Allee galerii",
+"sale": "Allee sügisoksjon 2026",
+"date": "2026-11-13",
+"artist": "Alo Hoidre",
+"title": "Saaremaa viikingid",
+"year": "1960",
+"yl": "1960ndad/70ndad",
+"tech": "Õli lõuendil",
+"dims": "45 x 44 cm",
+"start": 1300,
+"url": "https://alleegalerii.ee/kunstioksjon/alo-hoidre-saaremaa-viikingid/"
+},
+{
+"house": "Allee galerii",
+"sale": "Allee sügisoksjon 2026",
+"date": "2026-11-13",
+"artist": "Alo Valge",
+"title": "Beer leads to more beer",
+"year": "2022",
+"yl": "2022",
+"tech": "Õli lõuendil",
+"dims": "100 x 140 cm",
+"start": 2200,
+"url": "https://alleegalerii.ee/kunstioksjon/alo-valge-beer-leads-to-more-beer/"
+},
+{
+"house": "Allee galerii",
+"sale": "Allee sügisoksjon 2026",
+"date": "2026-11-13",
+"artist": "Alo Valge",
+"title": "Warhol",
+"year": "2025",
+"yl": "2025",
+"tech": "Õli lõuendil",
+"dims": "100 x 140 cm",
+"start": 3500,
+"url": "https://alleegalerii.ee/kunstioksjon/alo-valge-warhol/"
 },
 {
 "house": "Allee galerii",
@@ -990,8 +1065,7 @@
 "tech": "Õli lõuend kleebitud papile",
 "dims": "50 x 70 cm",
 "start": 4800,
-"url": "https://alleegalerii.ee/kunstioksjon/andrei-jegorov-kalamees/",
-"lot": 94
+"url": "https://alleegalerii.ee/kunstioksjon/andrei-jegorov-kalamees/"
 },
 {
 "house": "Allee galerii",
@@ -1004,8 +1078,7 @@
 "tech": "Guašš, tempera papil",
 "dims": "26.5 x 35.5 cm",
 "start": 1500,
-"url": "https://alleegalerii.ee/kunstioksjon/andrei-jegorov-poide-kirik/",
-"lot": 95
+"url": "https://alleegalerii.ee/kunstioksjon/andrei-jegorov-poide-kirik/"
 },
 {
 "house": "Allee galerii",
@@ -1018,8 +1091,7 @@
 "tech": "Õli vineeril",
 "dims": "26 x 33 cm",
 "start": 4000,
-"url": "https://alleegalerii.ee/kunstioksjon/andrei-jegorov-tallinna-sadamas/",
-"lot": 18
+"url": "https://alleegalerii.ee/kunstioksjon/andrei-jegorov-tallinna-sadamas/"
 },
 {
 "house": "Allee galerii",
@@ -1032,8 +1104,7 @@
 "tech": "Guašš, tempera papil",
 "dims": "35 x 50 cm",
 "start": 13000,
-"url": "https://alleegalerii.ee/kunstioksjon/andrei-jegorov-vaade-harjumaelt/",
-"lot": 20
+"url": "https://alleegalerii.ee/kunstioksjon/andrei-jegorov-vaade-harjumaelt/"
 },
 {
 "house": "Allee galerii",
@@ -1046,8 +1117,20 @@
 "tech": "Õli lõuendil",
 "dims": "60 x 85 cm",
 "start": 3800,
-"url": "https://alleegalerii.ee/kunstioksjon/andres-tolts-vore/",
-"lot": 78
+"url": "https://alleegalerii.ee/kunstioksjon/andres-tolts-vore/"
+},
+{
+"house": "Allee galerii",
+"sale": "Allee sügisoksjon 2026",
+"date": "2026-11-13",
+"artist": "Andro Kööp",
+"title": "Kuu",
+"year": "2026",
+"yl": "2026",
+"tech": "Akrüül, õli lõuendil",
+"dims": "75 x 52 cm",
+"start": 1200,
+"url": "https://alleegalerii.ee/kunstioksjon/andro-koop-kuu/"
 },
 {
 "house": "Allee galerii",
@@ -1060,8 +1143,7 @@
 "tech": "Õli papil",
 "dims": "33.5 x 48 cm",
 "start": 3000,
-"url": "https://alleegalerii.ee/kunstioksjon/ann-audova-kevad/",
-"lot": 113
+"url": "https://alleegalerii.ee/kunstioksjon/ann-audova-kevad/"
 },
 {
 "house": "Allee galerii",
@@ -1074,8 +1156,7 @@
 "tech": "Õli lõuendil",
 "dims": "150 x 100 cm",
 "start": 1900,
-"url": "https://alleegalerii.ee/kunstioksjon/anna-kouhknagrowth-ii/",
-"lot": 100
+"url": "https://alleegalerii.ee/kunstioksjon/anna-kouhknagrowth-ii/"
 },
 {
 "house": "Allee galerii",
@@ -1088,8 +1169,20 @@
 "tech": "Pastell paberil",
 "dims": "48 x 51.5 cm",
 "start": 10000,
-"url": "https://alleegalerii.ee/kunstioksjon/ants-laikmaa-soome-maastik/",
-"lot": 17
+"url": "https://alleegalerii.ee/kunstioksjon/ants-laikmaa-soome-maastik/"
+},
+{
+"house": "Allee galerii",
+"sale": "Allee sügisoksjon 2026",
+"date": "2026-11-13",
+"artist": "Arnold Peeter Vihvelin",
+"title": "Kütt/Loodus",
+"year": "1918",
+"yl": "1918",
+"tech": "Õli papil",
+"dims": "83 x 100 cm",
+"start": 9500,
+"url": "https://alleegalerii.ee/kunstioksjon/arnold-peeter-vihvelin-kutt-loodus/"
 },
 {
 "house": "Allee galerii",
@@ -1102,8 +1195,7 @@
 "tech": "Õli lõuendil",
 "dims": "56 x 82 cm",
 "start": 3000,
-"url": "https://alleegalerii.ee/kunstioksjon/arnold-vihvelin-rakvere-vaikelu/",
-"lot": 19
+"url": "https://alleegalerii.ee/kunstioksjon/arnold-vihvelin-rakvere-vaikelu/"
 },
 {
 "house": "Allee galerii",
@@ -1116,8 +1208,7 @@
 "tech": "Õli vineeril",
 "dims": "61 x 85 cm",
 "start": 3800,
-"url": "https://alleegalerii.ee/kunstioksjon/artur-lokk-tartu-vaade-2/",
-"lot": 46
+"url": "https://alleegalerii.ee/kunstioksjon/artur-lokk-tartu-vaade-2/"
 },
 {
 "house": "Allee galerii",
@@ -1130,8 +1221,7 @@
 "tech": "Õli lõuendil",
 "dims": "46 x 61 cm",
 "start": 1000,
-"url": "https://alleegalerii.ee/kunstioksjon/arville-pustrom-uus-meri/",
-"lot": 111
+"url": "https://alleegalerii.ee/kunstioksjon/arville-pustrom-uus-meri/"
 },
 {
 "house": "Allee galerii",
@@ -1144,8 +1234,7 @@
 "tech": "Õli lõuend kleebitud papile",
 "dims": "30.5 x 38 cm",
 "start": 1300,
-"url": "https://alleegalerii.ee/kunstioksjon/arville-pustrom-uus-tartu-kuuvalgel/",
-"lot": 122
+"url": "https://alleegalerii.ee/kunstioksjon/arville-pustrom-uus-tartu-kuuvalgel/"
 },
 {
 "house": "Allee galerii",
@@ -1158,8 +1247,7 @@
 "tech": "Õli lõuendil",
 "dims": "62 x 77 cm",
 "start": 20000,
-"url": "https://alleegalerii.ee/kunstioksjon/august-albo-kuldne-aeg/",
-"lot": 22
+"url": "https://alleegalerii.ee/kunstioksjon/august-albo-kuldne-aeg/"
 },
 {
 "house": "Allee galerii",
@@ -1172,8 +1260,7 @@
 "tech": "Õli lõuendil",
 "dims": "46 x 61 cm",
 "start": 2600,
-"url": "https://alleegalerii.ee/kunstioksjon/august-albo-natuurmort-sidruniga/",
-"lot": 86
+"url": "https://alleegalerii.ee/kunstioksjon/august-albo-natuurmort-sidruniga/"
 },
 {
 "house": "Allee galerii",
@@ -1186,8 +1273,7 @@
 "tech": null,
 "dims": "18.1 x 13.4 cm",
 "start": 7000,
-"url": "https://alleegalerii.ee/kunstioksjon/carl-timoleon-von-neff-maria/",
-"lot": 149
+"url": "https://alleegalerii.ee/kunstioksjon/carl-timoleon-von-neff-maria/"
 },
 {
 "house": "Allee galerii",
@@ -1200,8 +1286,7 @@
 "tech": "Segatehnika papil",
 "dims": "30 x 30.8 cm",
 "start": 1400,
-"url": "https://alleegalerii.ee/kunstioksjon/edgar-valter-embuses/",
-"lot": 73
+"url": "https://alleegalerii.ee/kunstioksjon/edgar-valter-embuses/"
 },
 {
 "house": "Allee galerii",
@@ -1214,8 +1299,7 @@
 "tech": "Segatehnika papil",
 "dims": "30 x 30 cm",
 "start": 2000,
-"url": "https://alleegalerii.ee/kunstioksjon/edgar-valter-puhkav-europe/",
-"lot": 72
+"url": "https://alleegalerii.ee/kunstioksjon/edgar-valter-puhkav-europe/"
 },
 {
 "house": "Allee galerii",
@@ -1228,8 +1312,7 @@
 "tech": "Õli kartongil",
 "dims": "20.5 x 25.5 cm",
 "start": 1300,
-"url": "https://alleegalerii.ee/kunstioksjon/edgar-valter-unistus-suurest-maailmast/",
-"lot": 71
+"url": "https://alleegalerii.ee/kunstioksjon/edgar-valter-unistus-suurest-maailmast/"
 },
 {
 "house": "Allee galerii",
@@ -1242,8 +1325,7 @@
 "tech": "Õli papil",
 "dims": "48.5 x 72.5 cm",
 "start": 1400,
-"url": "https://alleegalerii.ee/kunstioksjon/eduard-poland-sirelid/",
-"lot": 30
+"url": "https://alleegalerii.ee/kunstioksjon/eduard-poland-sirelid/"
 },
 {
 "house": "Allee galerii",
@@ -1256,8 +1338,7 @@
 "tech": "Värviline puugravüür paberil",
 "dims": "19 x 24 cm",
 "start": 1100,
-"url": "https://alleegalerii.ee/kunstioksjon/eduard-ruga-loomade-jootmine/",
-"lot": 120
+"url": "https://alleegalerii.ee/kunstioksjon/eduard-ruga-loomade-jootmine/"
 },
 {
 "house": "Allee galerii",
@@ -1270,8 +1351,7 @@
 "tech": "Puulõige paberil",
 "dims": "25 x 16.1 cm",
 "start": 2000,
-"url": "https://alleegalerii.ee/kunstioksjon/eduard-wiiralt-apass/",
-"lot": 14
+"url": "https://alleegalerii.ee/kunstioksjon/eduard-wiiralt-apass/"
 },
 {
 "house": "Allee galerii",
@@ -1284,8 +1364,7 @@
 "tech": "Kuivnõel paberil",
 "dims": "24.5 x 47.8 cm",
 "start": 3900,
-"url": "https://alleegalerii.ee/kunstioksjon/eduard-wiiralt-arkeia/",
-"lot": 91
+"url": "https://alleegalerii.ee/kunstioksjon/eduard-wiiralt-arkeia/"
 },
 {
 "house": "Allee galerii",
@@ -1298,8 +1377,7 @@
 "tech": "Pehmelakk, kuivnõel paberil",
 "dims": "33 x 24.2 cm",
 "start": 2900,
-"url": "https://alleegalerii.ee/kunstioksjon/eduard-wiiralt-eesti-neiu-2/",
-"lot": 117
+"url": "https://alleegalerii.ee/kunstioksjon/eduard-wiiralt-eesti-neiu-2/"
 },
 {
 "house": "Allee galerii",
@@ -1312,8 +1390,7 @@
 "tech": "Metsotinto paberil",
 "dims": "49.4 x 31.8 cm",
 "start": 4000,
-"url": "https://alleegalerii.ee/kunstioksjon/eduard-wiiralt-istuv-daam-2/",
-"lot": 115
+"url": "https://alleegalerii.ee/kunstioksjon/eduard-wiiralt-istuv-daam-2/"
 },
 {
 "house": "Allee galerii",
@@ -1326,8 +1403,7 @@
 "tech": "Ofort, vasegravüür paberil",
 "dims": "38.5 x 46 cm",
 "start": 39000,
-"url": "https://alleegalerii.ee/kunstioksjon/eduard-wiiralt-kabaree-2/",
-"lot": 11
+"url": "https://alleegalerii.ee/kunstioksjon/eduard-wiiralt-kabaree-2/"
 },
 {
 "house": "Allee galerii",
@@ -1340,8 +1416,7 @@
 "tech": "Pehmelakk, kuivnõel paberil",
 "dims": "29.6 x 39.5 cm",
 "start": 14000,
-"url": "https://alleegalerii.ee/kunstioksjon/eduard-wiiralt-lamav-tiiger/",
-"lot": 89
+"url": "https://alleegalerii.ee/kunstioksjon/eduard-wiiralt-lamav-tiiger/"
 },
 {
 "house": "Allee galerii",
@@ -1354,8 +1429,7 @@
 "tech": "Kuivnõel paberil",
 "dims": "24.8 x 43.5 cm",
 "start": 9500,
-"url": "https://alleegalerii.ee/kunstioksjon/eduard-wiiralt-lovide-perekond/",
-"lot": 80
+"url": "https://alleegalerii.ee/kunstioksjon/eduard-wiiralt-lovide-perekond/"
 },
 {
 "house": "Allee galerii",
@@ -1368,8 +1442,20 @@
 "tech": "Ofort, kuivnõel paberil",
 "dims": "29.9 x 39.7 cm",
 "start": 3600,
-"url": "https://alleegalerii.ee/kunstioksjon/eduard-wiiralt-marrakesi-linnamuur/",
-"lot": 90
+"url": "https://alleegalerii.ee/kunstioksjon/eduard-wiiralt-marrakesi-linnamuur/"
+},
+{
+"house": "Allee galerii",
+"sale": "Allee sügisoksjon 2026",
+"date": "2026-11-13",
+"artist": "Eduard Wiiralt",
+"title": "Naine lillega/Naine meres kalju naal",
+"year": "1930",
+"yl": "1930",
+"tech": "Akvatinta, pehmelakk paberil",
+"dims": "23.2 x 18.3 cm",
+"start": 3000,
+"url": "https://alleegalerii.ee/kunstioksjon/eduard-wiiralt-naine-lillega-naine-meres-kalju-naal/"
 },
 {
 "house": "Allee galerii",
@@ -1382,8 +1468,7 @@
 "tech": "Akvatinta paberil",
 "dims": "31 x 22.6 cm",
 "start": 1200,
-"url": "https://alleegalerii.ee/kunstioksjon/eduard-wiiralt-naine-tiigripojaga/",
-"lot": 116
+"url": "https://alleegalerii.ee/kunstioksjon/eduard-wiiralt-naine-tiigripojaga/"
 },
 {
 "house": "Allee galerii",
@@ -1396,8 +1481,7 @@
 "tech": "Monotüüpia paberil",
 "dims": "40 x 42.7 cm",
 "start": 18000,
-"url": "https://alleegalerii.ee/kunstioksjon/eduard-wiiralt-pariisi-lobusad-naised/",
-"lot": 34
+"url": "https://alleegalerii.ee/kunstioksjon/eduard-wiiralt-pariisi-lobusad-naised/"
 },
 {
 "house": "Allee galerii",
@@ -1410,8 +1494,7 @@
 "tech": "Ofort paberil",
 "dims": "9 x 11.9 cm",
 "start": 2300,
-"url": "https://alleegalerii.ee/kunstioksjon/eduard-wiiralt-sooming-orgia-2/",
-"lot": 36
+"url": "https://alleegalerii.ee/kunstioksjon/eduard-wiiralt-sooming-orgia-2/"
 },
 {
 "house": "Allee galerii",
@@ -1424,8 +1507,20 @@
 "tech": "Monotüüpia paberil",
 "dims": "49.5 x 38.1 cm",
 "start": 18000,
-"url": "https://alleegalerii.ee/kunstioksjon/eduard-wiiralt-tanav-sceauxs/",
-"lot": 153
+"url": "https://alleegalerii.ee/kunstioksjon/eduard-wiiralt-tanav-sceauxs/"
+},
+{
+"house": "Allee galerii",
+"sale": "Allee sügisoksjon 2026",
+"date": "2026-11-13",
+"artist": "Eduard Wiiralt",
+"title": "Tütarlaps kirju salliga",
+"year": "1941",
+"yl": "1941",
+"tech": "Kuivnõel paberil",
+"dims": "38.4 x 24.6 cm",
+"start": 4200,
+"url": "https://alleegalerii.ee/kunstioksjon/eduard-wiiralt-tutarlaps-kirju-salliga-2/"
 },
 {
 "house": "Allee galerii",
@@ -1438,8 +1533,7 @@
 "tech": "Kuivnõel paberil",
 "dims": "33.5 x 31.9 cm",
 "start": 4200,
-"url": "https://alleegalerii.ee/kunstioksjon/eduard-wiiralt-virve-3/",
-"lot": 15
+"url": "https://alleegalerii.ee/kunstioksjon/eduard-wiiralt-virve-3/"
 },
 {
 "house": "Allee galerii",
@@ -1452,8 +1546,7 @@
 "tech": "Õli lõuendil",
 "dims": "67 x 47 cm",
 "start": 2500,
-"url": "https://alleegalerii.ee/kunstioksjon/eerik-haamer-hokimangijad/",
-"lot": 125
+"url": "https://alleegalerii.ee/kunstioksjon/eerik-haamer-hokimangijad/"
 },
 {
 "house": "Allee galerii",
@@ -1466,8 +1559,7 @@
 "tech": "Õli lõuendil",
 "dims": "77 x 61 cm",
 "start": 5000,
-"url": "https://alleegalerii.ee/kunstioksjon/endel-koks-freddie/",
-"lot": 79
+"url": "https://alleegalerii.ee/kunstioksjon/endel-koks-freddie/"
 },
 {
 "house": "Allee galerii",
@@ -1480,8 +1572,20 @@
 "tech": "Kips, nahk, raud",
 "dims": "74 x 38 x 16 cm",
 "start": 4500,
-"url": "https://alleegalerii.ee/kunstioksjon/endel-taniloo-akt-vibuga/",
-"lot": 85
+"url": "https://alleegalerii.ee/kunstioksjon/endel-taniloo-akt-vibuga/"
+},
+{
+"house": "Allee galerii",
+"sale": "Allee sügisoksjon 2026",
+"date": "2026-11-13",
+"artist": "Endel Taniloo",
+"title": "Ujujad",
+"year": "1978",
+"yl": "1978",
+"tech": "Pronks, graniit",
+"dims": "15 x 47 x 14.5 cm",
+"start": 2000,
+"url": "https://alleegalerii.ee/kunstioksjon/endel-taniloo-ujujad/"
 },
 {
 "house": "Allee galerii",
@@ -1494,8 +1598,7 @@
 "tech": "Õli lõuendil",
 "dims": "95 x 115 cm",
 "start": 12000,
-"url": "https://alleegalerii.ee/kunstioksjon/enn-poldroos-maskid-mina-ja-freddy/",
-"lot": 137
+"url": "https://alleegalerii.ee/kunstioksjon/enn-poldroos-maskid-mina-ja-freddy/"
 },
 {
 "house": "Allee galerii",
@@ -1508,8 +1611,7 @@
 "tech": "Õli lõuendil",
 "dims": "48 x 65 cm",
 "start": 4500,
-"url": "https://alleegalerii.ee/kunstioksjon/enn-poldroos-vaade-patkuli-trepilt/",
-"lot": 110
+"url": "https://alleegalerii.ee/kunstioksjon/enn-poldroos-vaade-patkuli-trepilt/"
 },
 {
 "house": "Allee galerii",
@@ -1522,8 +1624,33 @@
 "tech": "Õli, akrüül lõuend kartongil",
 "dims": "50 x 50 cm",
 "start": 1000,
-"url": "https://alleegalerii.ee/kunstioksjon/epp-maria-kokamagi-ma-hoian-sind/",
-"lot": 146
+"url": "https://alleegalerii.ee/kunstioksjon/epp-maria-kokamagi-ma-hoian-sind/"
+},
+{
+"house": "Allee galerii",
+"sale": "Allee sügisoksjon 2026",
+"date": "2026-11-13",
+"artist": "Erich Pehap",
+"title": "Kunstitund",
+"year": "1949",
+"yl": "1949",
+"tech": "Tušš paberil",
+"dims": "39 x 31.5 cm",
+"start": 1400,
+"url": "https://alleegalerii.ee/kunstioksjon/erich-pehap-kunstitund/"
+},
+{
+"house": "Allee galerii",
+"sale": "Allee sügisoksjon 2026",
+"date": "2026-11-13",
+"artist": "Erik Schmidt",
+"title": "Lasso kerimine",
+"year": "1987",
+"yl": "1987",
+"tech": "Õli lõuendil",
+"dims": "90 x 115 cm",
+"start": 1500,
+"url": "https://alleegalerii.ee/kunstioksjon/erik-schmidt-lasso-kerimine/"
 },
 {
 "house": "Allee galerii",
@@ -1536,8 +1663,7 @@
 "tech": "Segatehnika paberil",
 "dims": "32 x 34 cm",
 "start": 2600,
-"url": "https://alleegalerii.ee/kunstioksjon/ernst-kollom-suvepaev-harju-tanaval/",
-"lot": 124
+"url": "https://alleegalerii.ee/kunstioksjon/ernst-kollom-suvepaev-harju-tanaval/"
 },
 {
 "house": "Allee galerii",
@@ -1550,8 +1676,7 @@
 "tech": "Kuivnõel paberil",
 "dims": "30.5 x 23 cm",
 "start": 1000,
-"url": "https://alleegalerii.ee/kunstioksjon/ernst-tiido-pargis/",
-"lot": 59
+"url": "https://alleegalerii.ee/kunstioksjon/ernst-tiido-pargis/"
 },
 {
 "house": "Allee galerii",
@@ -1564,8 +1689,7 @@
 "tech": "Õli lõuendil",
 "dims": "121 x 170.7 cm",
 "start": 6500,
-"url": "https://alleegalerii.ee/kunstioksjon/eugen-ducker-rannamaastik-kaluripaatidega/",
-"lot": 16
+"url": "https://alleegalerii.ee/kunstioksjon/eugen-ducker-rannamaastik-kaluripaatidega/"
 },
 {
 "house": "Allee galerii",
@@ -1578,8 +1702,7 @@
 "tech": "Kuivnõel, akvatinta paberil",
 "dims": "31.5 x 35.5 cm",
 "start": 2000,
-"url": "https://alleegalerii.ee/kunstioksjon/evald-okas-erinevad-noorused-2/",
-"lot": 35
+"url": "https://alleegalerii.ee/kunstioksjon/evald-okas-erinevad-noorused-2/"
 },
 {
 "house": "Allee galerii",
@@ -1592,8 +1715,7 @@
 "tech": "Tušš, guašš",
 "dims": "100 x 73 cm",
 "start": 5000,
-"url": "https://alleegalerii.ee/kunstioksjon/evald-okas-kaks-naist/",
-"lot": 83
+"url": "https://alleegalerii.ee/kunstioksjon/evald-okas-kaks-naist/"
 },
 {
 "house": "Allee galerii",
@@ -1606,8 +1728,7 @@
 "tech": "Kuivnõel, akvatinta paberil",
 "dims": "48.5 x 31.5 cm",
 "start": 3000,
-"url": "https://alleegalerii.ee/kunstioksjon/evald-okas-midinett/",
-"lot": 98
+"url": "https://alleegalerii.ee/kunstioksjon/evald-okas-midinett/"
 },
 {
 "house": "Allee galerii",
@@ -1620,8 +1741,7 @@
 "tech": "Kuivnõel, akvatinta paberil",
 "dims": "49.5 x 63 cm",
 "start": 1000,
-"url": "https://alleegalerii.ee/kunstioksjon/evald-okas-purjekad-tallinna-lahel/",
-"lot": 127
+"url": "https://alleegalerii.ee/kunstioksjon/evald-okas-purjekad-tallinna-lahel/"
 },
 {
 "house": "Allee galerii",
@@ -1634,8 +1754,7 @@
 "tech": "Ofort, akvatinta paberil",
 "dims": "49 x 28.3 cm",
 "start": 2000,
-"url": "https://alleegalerii.ee/kunstioksjon/evald-okas-valge-ja-must/",
-"lot": 37
+"url": "https://alleegalerii.ee/kunstioksjon/evald-okas-valge-ja-must/"
 },
 {
 "house": "Allee galerii",
@@ -1648,8 +1767,7 @@
 "tech": "Akrüül lõuendil",
 "dims": "110 x 70 cm",
 "start": 1500,
-"url": "https://alleegalerii.ee/kunstioksjon/gerth-kuusk-obelisk/",
-"lot": 39
+"url": "https://alleegalerii.ee/kunstioksjon/gerth-kuusk-obelisk/"
 },
 {
 "house": "Allee galerii",
@@ -1662,8 +1780,7 @@
 "tech": "Linoolgravüür paberil",
 "dims": "24.2 x 30.5 cm",
 "start": 1900,
-"url": "https://alleegalerii.ee/kunstioksjon/gunther-reindorff-metsaoja/",
-"lot": 58
+"url": "https://alleegalerii.ee/kunstioksjon/gunther-reindorff-metsaoja/"
 },
 {
 "house": "Allee galerii",
@@ -1676,8 +1793,7 @@
 "tech": "Õli lõuendil",
 "dims": "35 x 49 cm",
 "start": 2800,
-"url": "https://alleegalerii.ee/kunstioksjon/heitti-polli-hei-tiit/",
-"lot": 139
+"url": "https://alleegalerii.ee/kunstioksjon/heitti-polli-hei-tiit/"
 },
 {
 "house": "Allee galerii",
@@ -1690,8 +1806,7 @@
 "tech": "Õli lõuendil",
 "dims": "144 x 237 cm",
 "start": 25000,
-"url": "https://alleegalerii.ee/kunstioksjon/heitti-polli-kaleidoskoop/",
-"lot": 87
+"url": "https://alleegalerii.ee/kunstioksjon/heitti-polli-kaleidoskoop/"
 },
 {
 "house": "Allee galerii",
@@ -1704,8 +1819,7 @@
 "tech": "Õli lõuendil",
 "dims": "102 x 115 cm",
 "start": 8000,
-"url": "https://alleegalerii.ee/kunstioksjon/heitti-polli-linnud/",
-"lot": 7
+"url": "https://alleegalerii.ee/kunstioksjon/heitti-polli-linnud/"
 },
 {
 "house": "Allee galerii",
@@ -1718,8 +1832,7 @@
 "tech": "Akrüül lõuendil",
 "dims": "90 x 90 cm",
 "start": 2000,
-"url": "https://alleegalerii.ee/kunstioksjon/henrik-esse-ajatu-tallinn/",
-"lot": 44
+"url": "https://alleegalerii.ee/kunstioksjon/henrik-esse-ajatu-tallinn/"
 },
 {
 "house": "Allee galerii",
@@ -1732,8 +1845,7 @@
 "tech": "Akrüül lõuendil",
 "dims": "90 x 90 cm",
 "start": 2000,
-"url": "https://alleegalerii.ee/kunstioksjon/henrik-esse-mangumaa/",
-"lot": 40
+"url": "https://alleegalerii.ee/kunstioksjon/henrik-esse-mangumaa/"
 },
 {
 "house": "Allee galerii",
@@ -1746,8 +1858,7 @@
 "tech": "Õli lõuendil",
 "dims": "100 x 110 cm",
 "start": 2900,
-"url": "https://alleegalerii.ee/kunstioksjon/hugo-lepik-egiptuse-peolauas/",
-"lot": 128
+"url": "https://alleegalerii.ee/kunstioksjon/hugo-lepik-egiptuse-peolauas/"
 },
 {
 "house": "Allee galerii",
@@ -1760,8 +1871,7 @@
 "tech": "Söövitus paberil",
 "dims": "42.3 x 58 cm",
 "start": 1000,
-"url": "https://alleegalerii.ee/kunstioksjon/hugo-mitt-sport-i-jalgratturid/",
-"lot": 132
+"url": "https://alleegalerii.ee/kunstioksjon/hugo-mitt-sport-i-jalgratturid/"
 },
 {
 "house": "Allee galerii",
@@ -1774,8 +1884,7 @@
 "tech": "Söövitus paberil",
 "dims": "42.3 x 58 cm",
 "start": 1000,
-"url": "https://alleegalerii.ee/kunstioksjon/hugo-mitt-sport-ii-tallinna-regatt/",
-"lot": 133
+"url": "https://alleegalerii.ee/kunstioksjon/hugo-mitt-sport-ii-tallinna-regatt/"
 },
 {
 "house": "Allee galerii",
@@ -1788,8 +1897,7 @@
 "tech": "Söövitus paberil",
 "dims": "42.3 x 58 cm",
 "start": 1000,
-"url": "https://alleegalerii.ee/kunstioksjon/hugo-mitt-sport-iii-vehklejad/",
-"lot": 131
+"url": "https://alleegalerii.ee/kunstioksjon/hugo-mitt-sport-iii-vehklejad/"
 },
 {
 "house": "Allee galerii",
@@ -1802,8 +1910,7 @@
 "tech": "Õli lõuendil",
 "dims": "50 x 65 cm",
 "start": 3000,
-"url": "https://alleegalerii.ee/kunstioksjon/ilmar-kimm-suvi-vaikelinnas/",
-"lot": 33
+"url": "https://alleegalerii.ee/kunstioksjon/ilmar-kimm-suvi-vaikelinnas/"
 },
 {
 "house": "Allee galerii",
@@ -1816,8 +1923,7 @@
 "tech": "Pastell paberil",
 "dims": "50.5 x 35 cm",
 "start": 1300,
-"url": "https://alleegalerii.ee/kunstioksjon/ilmar-torn-akt-sinisel/",
-"lot": 97
+"url": "https://alleegalerii.ee/kunstioksjon/ilmar-torn-akt-sinisel/"
 },
 {
 "house": "Allee galerii",
@@ -1830,8 +1936,7 @@
 "tech": "Õli lõuendil",
 "dims": "101 x 60 cm",
 "start": 2000,
-"url": "https://alleegalerii.ee/kunstioksjon/ivar-kaasik-tundelend/",
-"lot": 41
+"url": "https://alleegalerii.ee/kunstioksjon/ivar-kaasik-tundelend/"
 },
 {
 "house": "Allee galerii",
@@ -1844,8 +1949,7 @@
 "tech": "Klaas. Külmtöötlustehnika",
 "dims": "125 x 25 x 12.5 cm",
 "start": 18000,
-"url": "https://alleegalerii.ee/kunstioksjon/ivo-lill-transparents/",
-"lot": 143
+"url": "https://alleegalerii.ee/kunstioksjon/ivo-lill-transparents/"
 },
 {
 "house": "Allee galerii",
@@ -1858,8 +1962,7 @@
 "tech": "Õli lõuendil",
 "dims": "46 x 60 cm",
 "start": 3000,
-"url": "https://alleegalerii.ee/kunstioksjon/jaak-adamson-vitaalsus/",
-"lot": 130
+"url": "https://alleegalerii.ee/kunstioksjon/jaak-adamson-vitaalsus/"
 },
 {
 "house": "Allee galerii",
@@ -1872,8 +1975,7 @@
 "tech": "Õli papil",
 "dims": "50 x 72 cm",
 "start": 1400,
-"url": "https://alleegalerii.ee/kunstioksjon/jaan-paris-suvi-emajoe-aares/",
-"lot": 96
+"url": "https://alleegalerii.ee/kunstioksjon/jaan-paris-suvi-emajoe-aares/"
 },
 {
 "house": "Allee galerii",
@@ -1886,8 +1988,7 @@
 "tech": "Õli lõuendil",
 "dims": "120 x 100 cm",
 "start": 2500,
-"url": "https://alleegalerii.ee/kunstioksjon/jan-tammik-hortensiad/",
-"lot": 140
+"url": "https://alleegalerii.ee/kunstioksjon/jan-tammik-hortensiad/"
 },
 {
 "house": "Allee galerii",
@@ -1900,8 +2001,46 @@
 "tech": "Õli masoniidil",
 "dims": "51 x 76.5 cm",
 "start": 1800,
-"url": "https://alleegalerii.ee/kunstioksjon/joann-saarniit-puhajarv/",
-"lot": 50
+"url": "https://alleegalerii.ee/kunstioksjon/joann-saarniit-puhajarv/"
+},
+{
+"house": "Allee galerii",
+"sale": "Allee sügisoksjon 2026",
+"date": "2026-11-13",
+"artist": "Joann Saarniit",
+"title": "Sailing to freedom (",
+"year": null,
+"yl": "Erma”)”, 1970-1971",
+"tech": "Õli masoniidil",
+"dims": "50.5 x 76 cm",
+"start": 2000,
+"url": "https://alleegalerii.ee/kunstioksjon/joann-saarniit-sailing-to-freedom-erma/"
+},
+{
+"house": "Allee galerii",
+"sale": "Allee sügisoksjon 2026",
+"date": "2026-11-13",
+"artist": "Joann Saarniit",
+"title": "Sõrve",
+"year": "1969",
+"yl": "1969",
+"tech": "Õli masoniidil",
+"dims": "46 x 101 cm",
+"start": 1700,
+"url": "https://alleegalerii.ee/kunstioksjon/joann-saarniit-sorve-tipp-saaremaal/"
+},
+{
+"house": "Allee galerii",
+"sale": "Allee sügisoksjon 2026",
+"date": "2026-11-13",
+"artist": "Johannes Võerahansu",
+"title": "Saaremaa rannik",
+"year": "1959",
+"yl": "1959",
+"tech": "Õli lõuendil",
+"dims": "80 x 115 cm",
+"start": 23500,
+"url": "https://alleegalerii.ee/kunstioksjon/johannes-voerahansu-saaremaa-rannik/"
 },
 {
 "house": "Allee galerii",
@@ -1914,8 +2053,7 @@
 "tech": "Õli vineeril",
 "dims": "23 x 29 cm",
 "start": 1500,
-"url": "https://alleegalerii.ee/kunstioksjon/johannes-voerahansu-varav-saaremaa-motiiv/",
-"lot": 67
+"url": "https://alleegalerii.ee/kunstioksjon/johannes-voerahansu-varav-saaremaa-motiiv/"
 },
 {
 "house": "Allee galerii",
@@ -1928,8 +2066,7 @@
 "tech": "Õli lõuendil",
 "dims": "82 x 100 cm",
 "start": 4000,
-"url": "https://alleegalerii.ee/kunstioksjon/julius-gentalen-maastik-joesillaga/",
-"lot": 24
+"url": "https://alleegalerii.ee/kunstioksjon/julius-gentalen-maastik-joesillaga/"
 },
 {
 "house": "Allee galerii",
@@ -1942,8 +2079,7 @@
 "tech": "Õli lõuendil",
 "dims": "35 x 60 cm",
 "start": 6000,
-"url": "https://alleegalerii.ee/kunstioksjon/juri-arrak-dialoog/",
-"lot": 38
+"url": "https://alleegalerii.ee/kunstioksjon/juri-arrak-dialoog/"
 },
 {
 "house": "Allee galerii",
@@ -1956,8 +2092,7 @@
 "tech": "Õli lõuendil",
 "dims": "100 x 70 cm",
 "start": 10000,
-"url": "https://alleegalerii.ee/kunstioksjon/juri-arrak-kaks-lindu/",
-"lot": 88
+"url": "https://alleegalerii.ee/kunstioksjon/juri-arrak-kaks-lindu/"
 },
 {
 "house": "Allee galerii",
@@ -1970,8 +2105,20 @@
 "tech": "Õli, email lõuendil",
 "dims": "81 x 72 cm",
 "start": 3800,
-"url": "https://alleegalerii.ee/kunstioksjon/juri-kask-vikerkaar-uugu-pangal/",
-"lot": 102
+"url": "https://alleegalerii.ee/kunstioksjon/juri-kask-vikerkaar-uugu-pangal/"
+},
+{
+"house": "Allee galerii",
+"sale": "Allee sügisoksjon 2026",
+"date": "2026-11-13",
+"artist": "Kaljo Polli",
+"title": "Kevad",
+"year": "1962",
+"yl": "1962",
+"tech": "Õli kartongil",
+"dims": "70 x 50 cm",
+"start": 1000,
+"url": "https://alleegalerii.ee/kunstioksjon/kaljo-polli-kevad/"
 },
 {
 "house": "Allee galerii",
@@ -1984,8 +2131,7 @@
 "tech": "Õli lõuendil",
 "dims": "120 x 120 cm",
 "start": 8000,
-"url": "https://alleegalerii.ee/kunstioksjon/kaljo-polli-tuisulised/",
-"lot": 21
+"url": "https://alleegalerii.ee/kunstioksjon/kaljo-polli-tuisulised/"
 },
 {
 "house": "Allee galerii",
@@ -1998,8 +2144,7 @@
 "tech": "Metsotinto paberil",
 "dims": "33.5 x 44.5 cm",
 "start": 2000,
-"url": "https://alleegalerii.ee/kunstioksjon/kaljo-pollu-eesti-maastik-5/",
-"lot": 64
+"url": "https://alleegalerii.ee/kunstioksjon/kaljo-pollu-eesti-maastik-5/"
 },
 {
 "house": "Allee galerii",
@@ -2012,8 +2157,7 @@
 "tech": "Metsotinto paberil",
 "dims": "42.2 x 42.2 cm",
 "start": 2200,
-"url": "https://alleegalerii.ee/kunstioksjon/kaljo-pollu-heinakuu/",
-"lot": 68
+"url": "https://alleegalerii.ee/kunstioksjon/kaljo-pollu-heinakuu/"
 },
 {
 "house": "Allee galerii",
@@ -2026,8 +2170,7 @@
 "tech": "Metsotinto paberil",
 "dims": "45.6 x 54.5 cm",
 "start": 9200,
-"url": "https://alleegalerii.ee/kunstioksjon/kaljo-pollu-janu/",
-"lot": 27
+"url": "https://alleegalerii.ee/kunstioksjon/kaljo-pollu-janu/"
 },
 {
 "house": "Allee galerii",
@@ -2040,8 +2183,7 @@
 "tech": "Värviline metsotinto paberil",
 "dims": "42.7 x 61.5 cm",
 "start": 2800,
-"url": "https://alleegalerii.ee/kunstioksjon/kaljo-pollu-koiksuse-kuulatajad/",
-"lot": 28
+"url": "https://alleegalerii.ee/kunstioksjon/kaljo-pollu-koiksuse-kuulatajad/"
 },
 {
 "house": "Allee galerii",
@@ -2054,8 +2196,7 @@
 "tech": "Metsotinto paberil",
 "dims": "36.7 x 36 cm",
 "start": 2200,
-"url": "https://alleegalerii.ee/kunstioksjon/kaljo-pollu-leib/",
-"lot": 47
+"url": "https://alleegalerii.ee/kunstioksjon/kaljo-pollu-leib/"
 },
 {
 "house": "Allee galerii",
@@ -2068,8 +2209,7 @@
 "tech": "Metsotinto paberil",
 "dims": "36 x 48 cm",
 "start": 2800,
-"url": "https://alleegalerii.ee/kunstioksjon/kaljo-pollu-motisklus/",
-"lot": 66
+"url": "https://alleegalerii.ee/kunstioksjon/kaljo-pollu-motisklus/"
 },
 {
 "house": "Allee galerii",
@@ -2082,8 +2222,7 @@
 "tech": "Värviline metsotinto paberil",
 "dims": "50.5 x 36.5 cm",
 "start": 2800,
-"url": "https://alleegalerii.ee/kunstioksjon/kaljo-pollu-paduvihm-labi-kolme-taeva/",
-"lot": 26
+"url": "https://alleegalerii.ee/kunstioksjon/kaljo-pollu-paduvihm-labi-kolme-taeva/"
 },
 {
 "house": "Allee galerii",
@@ -2096,8 +2235,7 @@
 "tech": "Metsotinto paberil",
 "dims": "30.5 x 43.5 cm",
 "start": 3800,
-"url": "https://alleegalerii.ee/kunstioksjon/kaljo-pollu-uni-2/",
-"lot": 48
+"url": "https://alleegalerii.ee/kunstioksjon/kaljo-pollu-uni-2/"
 },
 {
 "house": "Allee galerii",
@@ -2110,8 +2248,7 @@
 "tech": "Õli kartongil",
 "dims": "50 x 70 cm",
 "start": 2000,
-"url": "https://alleegalerii.ee/kunstioksjon/kalju-nagel-maastik-paikeseloojangus/",
-"lot": 54
+"url": "https://alleegalerii.ee/kunstioksjon/kalju-nagel-maastik-paikeseloojangus/"
 },
 {
 "house": "Allee galerii",
@@ -2124,8 +2261,7 @@
 "tech": "Õli lõuend papil",
 "dims": "42 x 33 cm",
 "start": 1300,
-"url": "https://alleegalerii.ee/kunstioksjon/karl-alexander-von-winkler-allee/",
-"lot": 63
+"url": "https://alleegalerii.ee/kunstioksjon/karl-alexander-von-winkler-allee/"
 },
 {
 "house": "Allee galerii",
@@ -2138,8 +2274,7 @@
 "tech": "Akvarell paberil",
 "dims": "23.3 x 34 cm",
 "start": 1500,
-"url": "https://alleegalerii.ee/kunstioksjon/karl-alexander-von-winkler-capri-bagno-di-tiberio/",
-"lot": 114
+"url": "https://alleegalerii.ee/kunstioksjon/karl-alexander-von-winkler-capri-bagno-di-tiberio/"
 },
 {
 "house": "Allee galerii",
@@ -2152,8 +2287,7 @@
 "tech": "Akvarell paberil",
 "dims": "33 x 16 cm",
 "start": 1800,
-"url": "https://alleegalerii.ee/kunstioksjon/karl-alexander-von-winkler-riia/",
-"lot": 52
+"url": "https://alleegalerii.ee/kunstioksjon/karl-alexander-von-winkler-riia/"
 },
 {
 "house": "Allee galerii",
@@ -2166,8 +2300,7 @@
 "tech": "Akvarell paberil",
 "dims": "37.5 x 26 cm",
 "start": 1500,
-"url": "https://alleegalerii.ee/kunstioksjon/karl-alexander-von-winkler-rooma/",
-"lot": 61
+"url": "https://alleegalerii.ee/kunstioksjon/karl-alexander-von-winkler-rooma/"
 },
 {
 "house": "Allee galerii",
@@ -2180,8 +2313,20 @@
 "tech": "Akvarell paberil",
 "dims": "36 x 26.5 cm",
 "start": 1500,
-"url": "https://alleegalerii.ee/kunstioksjon/karl-alexander-von-winkler-santa-agata/",
-"lot": 62
+"url": "https://alleegalerii.ee/kunstioksjon/karl-alexander-von-winkler-santa-agata/"
+},
+{
+"house": "Allee galerii",
+"sale": "Allee sügisoksjon 2026",
+"date": "2026-11-13",
+"artist": "Karl Burman",
+"title": "Tallinna sadam",
+"year": "1920",
+"yl": "1920ndad",
+"tech": "Akvarell paberil",
+"dims": "31 x 46 cm",
+"start": 1200,
+"url": "https://alleegalerii.ee/kunstioksjon/karl-burman-tallinna-sadam/"
 },
 {
 "house": "Allee galerii",
@@ -2194,8 +2339,7 @@
 "tech": "Õli vineeril",
 "dims": "18.5 x 36 cm",
 "start": 2300,
-"url": "https://alleegalerii.ee/kunstioksjon/konstantin-karlsonn-paikeseloojang-kadriorus/",
-"lot": 60
+"url": "https://alleegalerii.ee/kunstioksjon/konstantin-karlsonn-paikeseloojang-kadriorus/"
 },
 {
 "house": "Allee galerii",
@@ -2208,8 +2352,7 @@
 "tech": "Õli lõuendil",
 "dims": "52 x 86 cm",
 "start": 8500,
-"url": "https://alleegalerii.ee/kunstioksjon/konstantin-karlsonn-tallinn/",
-"lot": 53
+"url": "https://alleegalerii.ee/kunstioksjon/konstantin-karlsonn-tallinn/"
 },
 {
 "house": "Allee galerii",
@@ -2222,8 +2365,7 @@
 "tech": "Õli lõuendil",
 "dims": "68.5 x 75 cm",
 "start": 28000,
-"url": "https://alleegalerii.ee/kunstioksjon/konstantin-suvalo-maastik-karksist/",
-"lot": 51
+"url": "https://alleegalerii.ee/kunstioksjon/konstantin-suvalo-maastik-karksist/"
 },
 {
 "house": "Allee galerii",
@@ -2236,8 +2378,7 @@
 "tech": "Akrüül lõuendil",
 "dims": "170 x 85 cm",
 "start": 9500,
-"url": "https://alleegalerii.ee/kunstioksjon/laurentsius-n8/",
-"lot": 9
+"url": "https://alleegalerii.ee/kunstioksjon/laurentsius-n8/"
 },
 {
 "house": "Allee galerii",
@@ -2250,8 +2391,7 @@
 "tech": "Akrüül lõuendil",
 "dims": "40 x 40 cm",
 "start": 1900,
-"url": "https://alleegalerii.ee/kunstioksjon/laurentsius-snowman-xx/",
-"lot": 82
+"url": "https://alleegalerii.ee/kunstioksjon/laurentsius-snowman-xx/"
 },
 {
 "house": "Allee galerii",
@@ -2264,8 +2404,7 @@
 "tech": "Õli lõuendil, kleebitud alusele",
 "dims": "38.5 x 46 cm",
 "start": 1300,
-"url": "https://alleegalerii.ee/kunstioksjon/lembit-sarapuu-puu-maja/",
-"lot": 142
+"url": "https://alleegalerii.ee/kunstioksjon/lembit-sarapuu-puu-maja/"
 },
 {
 "house": "Allee galerii",
@@ -2278,8 +2417,7 @@
 "tech": "Õli, tempera lõuendil",
 "dims": "100 x 125 cm",
 "start": 20000,
-"url": "https://alleegalerii.ee/kunstioksjon/lemming-nagel-head-ood/",
-"lot": 2
+"url": "https://alleegalerii.ee/kunstioksjon/lemming-nagel-head-ood/"
 },
 {
 "house": "Allee galerii",
@@ -2292,8 +2430,7 @@
 "tech": "Kõrgtrükk paberil",
 "dims": "42 x 40 cm",
 "start": 1300,
-"url": "https://alleegalerii.ee/kunstioksjon/leonhard-lapin-arhitektuurisajandi-male/",
-"lot": 42
+"url": "https://alleegalerii.ee/kunstioksjon/leonhard-lapin-arhitektuurisajandi-male/"
 },
 {
 "house": "Allee galerii",
@@ -2306,8 +2443,33 @@
 "tech": "Litograafia paberil",
 "dims": "45.5 x 44.5 cm",
 "start": 1000,
-"url": "https://alleegalerii.ee/kunstioksjon/leonhard-lapin-millest-jutustab-must-ruut/",
-"lot": 43
+"url": "https://alleegalerii.ee/kunstioksjon/leonhard-lapin-millest-jutustab-must-ruut/"
+},
+{
+"house": "Allee galerii",
+"sale": "Allee sügisoksjon 2026",
+"date": "2026-11-13",
+"artist": "Leonhard Lapin",
+"title": "Miss Estonia",
+"year": "1989",
+"yl": "1989",
+"tech": "Litograafia paberil",
+"dims": "42 x 41 cm",
+"start": 2900,
+"url": "https://alleegalerii.ee/kunstioksjon/leonhard-lapin-miss-estonia/"
+},
+{
+"house": "Allee galerii",
+"sale": "Allee sügisoksjon 2026",
+"date": "2026-11-13",
+"artist": "Leonhard Lapin",
+"title": "Soomlane Tallinnas",
+"year": "1985",
+"yl": "1985",
+"tech": "Litograafia paberil",
+"dims": "60 x 60 cm",
+"start": 1000,
+"url": "https://alleegalerii.ee/kunstioksjon/leonhard-lapin-soomlane-tallinnas/"
 },
 {
 "house": "Allee galerii",
@@ -2320,8 +2482,7 @@
 "tech": "Õli lõuendil",
 "dims": "80 x 100 cm",
 "start": 3000,
-"url": "https://alleegalerii.ee/kunstioksjon/liisi-ord-rabajarv-udu/",
-"lot": 104
+"url": "https://alleegalerii.ee/kunstioksjon/liisi-ord-rabajarv-udu/"
 },
 {
 "house": "Allee galerii",
@@ -2334,8 +2495,7 @@
 "tech": "Õli lõuendil",
 "dims": "80 x 100 cm",
 "start": 3000,
-"url": "https://alleegalerii.ee/kunstioksjon/liisi-ord-ohtuvalgus-pold/",
-"lot": 109
+"url": "https://alleegalerii.ee/kunstioksjon/liisi-ord-ohtuvalgus-pold/"
 },
 {
 "house": "Allee galerii",
@@ -2348,8 +2508,20 @@
 "tech": "Õli lõuendil",
 "dims": "48 x 68 cm",
 "start": 2500,
-"url": "https://alleegalerii.ee/kunstioksjon/linda-kits-magi-saaremaa/",
-"lot": 119
+"url": "https://alleegalerii.ee/kunstioksjon/linda-kits-magi-saaremaa/"
+},
+{
+"house": "Allee galerii",
+"sale": "Allee sügisoksjon 2026",
+"date": "2026-11-13",
+"artist": "Ludmilla Siim",
+"title": "Merikarpide püüdjad",
+"year": null,
+"yl": "/ “Suur sinine”, 2004",
+"tech": "Õli lõuendil",
+"dims": "150 x 130 cm",
+"start": 5000,
+"url": "https://alleegalerii.ee/kunstioksjon/ludmilla-siim-merikarpide-puudjad-suur-sinine/"
 },
 {
 "house": "Allee galerii",
@@ -2362,8 +2534,7 @@
 "tech": "Akvarell paberil, kleebitud kartongile",
 "dims": "43 x 35 cm",
 "start": 1200,
-"url": "https://alleegalerii.ee/kunstioksjon/lydia-mei-kompositsioon-valgete-oitega/",
-"lot": 151
+"url": "https://alleegalerii.ee/kunstioksjon/lydia-mei-kompositsioon-valgete-oitega/"
 },
 {
 "house": "Allee galerii",
@@ -2376,8 +2547,7 @@
 "tech": "Akvarell paberil",
 "dims": "53 x 43 cm",
 "start": 1200,
-"url": "https://alleegalerii.ee/kunstioksjon/lydia-mei-vaade-koduaiast-paaskula/",
-"lot": 150
+"url": "https://alleegalerii.ee/kunstioksjon/lydia-mei-vaade-koduaiast-paaskula/"
 },
 {
 "house": "Allee galerii",
@@ -2390,8 +2560,7 @@
 "tech": "Õli lõuendil",
 "dims": "114 x 146 cm",
 "start": 84000,
-"url": "https://alleegalerii.ee/kunstioksjon/malle-leis-aastaajad-poeg-henriku-portree/",
-"lot": 1
+"url": "https://alleegalerii.ee/kunstioksjon/malle-leis-aastaajad-poeg-henriku-portree/"
 },
 {
 "house": "Allee galerii",
@@ -2404,8 +2573,7 @@
 "tech": "Serigraafia paberil",
 "dims": "75 x 50 cm",
 "start": 1700,
-"url": "https://alleegalerii.ee/kunstioksjon/malle-leis-maasikad/",
-"lot": 84
+"url": "https://alleegalerii.ee/kunstioksjon/malle-leis-maasikad/"
 },
 {
 "house": "Allee galerii",
@@ -2418,8 +2586,7 @@
 "tech": "Litograafia paberil",
 "dims": "39.7 x 39 cm",
 "start": 1000,
-"url": "https://alleegalerii.ee/kunstioksjon/mare-vint-ohk-ja-metall-i/",
-"lot": 147
+"url": "https://alleegalerii.ee/kunstioksjon/mare-vint-ohk-ja-metall-i/"
 },
 {
 "house": "Allee galerii",
@@ -2432,8 +2599,7 @@
 "tech": "Litograafia paberil",
 "dims": "40 x 39 cm",
 "start": 1000,
-"url": "https://alleegalerii.ee/kunstioksjon/mare-vint-ohk-ja-metall-ii/",
-"lot": 148
+"url": "https://alleegalerii.ee/kunstioksjon/mare-vint-ohk-ja-metall-ii/"
 },
 {
 "house": "Allee galerii",
@@ -2446,8 +2612,7 @@
 "tech": "Ofort paberil",
 "dims": "18.9 x 27.6 cm",
 "start": 1000,
-"url": "https://alleegalerii.ee/kunstioksjon/marju-mutsu-noor-tudruk-3/",
-"lot": 107
+"url": "https://alleegalerii.ee/kunstioksjon/marju-mutsu-noor-tudruk-3/"
 },
 {
 "house": "Allee galerii",
@@ -2460,8 +2625,7 @@
 "tech": "Ofort paberil",
 "dims": "28.4 x 29.7 cm",
 "start": 1500,
-"url": "https://alleegalerii.ee/kunstioksjon/marju-mutsu-raekoja-ees/",
-"lot": 105
+"url": "https://alleegalerii.ee/kunstioksjon/marju-mutsu-raekoja-ees/"
 },
 {
 "house": "Allee galerii",
@@ -2474,8 +2638,7 @@
 "tech": "Ofort paberil",
 "dims": "19 x 27.2 cm",
 "start": 1000,
-"url": "https://alleegalerii.ee/kunstioksjon/marju-mutsu-tallinnas-on-kevad/",
-"lot": 106
+"url": "https://alleegalerii.ee/kunstioksjon/marju-mutsu-tallinnas-on-kevad/"
 },
 {
 "house": "Allee galerii",
@@ -2488,8 +2651,7 @@
 "tech": "Pastell paberil",
 "dims": "135 x 94 cm",
 "start": 3000,
-"url": "https://alleegalerii.ee/kunstioksjon/marko-maetamm-joud-mees-ja-masin/",
-"lot": 134
+"url": "https://alleegalerii.ee/kunstioksjon/marko-maetamm-joud-mees-ja-masin/"
 },
 {
 "house": "Allee galerii",
@@ -2502,8 +2664,7 @@
 "tech": "Pastell paberil",
 "dims": "135 x 120 cm",
 "start": 3000,
-"url": "https://alleegalerii.ee/kunstioksjon/marko-maetamm-paper-sun-rising/",
-"lot": 135
+"url": "https://alleegalerii.ee/kunstioksjon/marko-maetamm-paper-sun-rising/"
 },
 {
 "house": "Allee galerii",
@@ -2516,8 +2677,7 @@
 "tech": "Õli lõuendil",
 "dims": "130 x 120 cm",
 "start": 5000,
-"url": "https://alleegalerii.ee/kunstioksjon/mauri-gross-peegeldus/",
-"lot": 10
+"url": "https://alleegalerii.ee/kunstioksjon/mauri-gross-peegeldus/"
 },
 {
 "house": "Allee galerii",
@@ -2530,8 +2690,7 @@
 "tech": "Õli lõuendil",
 "dims": "46 x 46 cm",
 "start": 2000,
-"url": "https://alleegalerii.ee/kunstioksjon/merike-estna-tana-hommikul-kui-ma-arkasin-ma-markasin-et-ma-olen-lihtsalt-veel-uks-rumal-lits/",
-"lot": 136
+"url": "https://alleegalerii.ee/kunstioksjon/merike-estna-tana-hommikul-kui-ma-arkasin-ma-markasin-et-ma-olen-lihtsalt-veel-uks-rumal-lits/"
 },
 {
 "house": "Allee galerii",
@@ -2544,8 +2703,7 @@
 "tech": "Õli vineeril",
 "dims": "48 x 55 cm",
 "start": 2800,
-"url": "https://alleegalerii.ee/kunstioksjon/mart-bormeister-kodu-mandide-all/",
-"lot": 32
+"url": "https://alleegalerii.ee/kunstioksjon/mart-bormeister-kodu-mandide-all/"
 },
 {
 "house": "Allee galerii",
@@ -2558,8 +2716,20 @@
 "tech": "Monotüüpia paberil",
 "dims": "27.8 x 34.7 cm",
 "start": 1000,
-"url": "https://alleegalerii.ee/kunstioksjon/mart-bormeister-tallinn-ohtune-tanav-vanalinnast/",
-"lot": 123
+"url": "https://alleegalerii.ee/kunstioksjon/mart-bormeister-tallinn-ohtune-tanav-vanalinnast/"
+},
+{
+"house": "Allee galerii",
+"sale": "Allee sügisoksjon 2026",
+"date": "2026-11-13",
+"artist": "Nikolai Kormašov",
+"title": "India",
+"year": "1968",
+"yl": "1968",
+"tech": "Õli lõuendil",
+"dims": "45 x 50 cm",
+"start": 2800,
+"url": "https://alleegalerii.ee/kunstioksjon/nikolai-kormasov-india/"
 },
 {
 "house": "Allee galerii",
@@ -2572,8 +2742,7 @@
 "tech": "Õli lõuendil",
 "dims": "72 x 84 cm",
 "start": 28000,
-"url": "https://alleegalerii.ee/kunstioksjon/nikolai-kull-talv-toompuiesteel/",
-"lot": 152
+"url": "https://alleegalerii.ee/kunstioksjon/nikolai-kull-talv-toompuiesteel/"
 },
 {
 "house": "Allee galerii",
@@ -2586,8 +2755,7 @@
 "tech": "Õli lõuendil",
 "dims": "41 x 52 cm",
 "start": 2600,
-"url": "https://alleegalerii.ee/kunstioksjon/olav-maran-anateel/",
-"lot": 129
+"url": "https://alleegalerii.ee/kunstioksjon/olav-maran-anateel/"
 },
 {
 "house": "Allee galerii",
@@ -2600,8 +2768,7 @@
 "tech": "Guašš, tempera papil",
 "dims": "59 x 48 cm",
 "start": 1900,
-"url": "https://alleegalerii.ee/kunstioksjon/olav-maran-levkoid/",
-"lot": 141
+"url": "https://alleegalerii.ee/kunstioksjon/olav-maran-levkoid/"
 },
 {
 "house": "Allee galerii",
@@ -2614,8 +2781,7 @@
 "tech": "Akrüül, õli masoniidil",
 "dims": "120 x 90 cm",
 "start": 58000,
-"url": "https://alleegalerii.ee/kunstioksjon/olev-subbi-galatea-lahkumine/",
-"lot": 3
+"url": "https://alleegalerii.ee/kunstioksjon/olev-subbi-galatea-lahkumine/"
 },
 {
 "house": "Allee galerii",
@@ -2628,8 +2794,7 @@
 "tech": "Akrüül, õli masoniidil",
 "dims": "90 x 120 cm",
 "start": 29000,
-"url": "https://alleegalerii.ee/kunstioksjon/olev-subbi-saabumine-mere-aarde/",
-"lot": 101
+"url": "https://alleegalerii.ee/kunstioksjon/olev-subbi-saabumine-mere-aarde/"
 },
 {
 "house": "Allee galerii",
@@ -2642,8 +2807,7 @@
 "tech": "Akrüül, õli masoniidil",
 "dims": "90 x 120 cm",
 "start": 29000,
-"url": "https://alleegalerii.ee/kunstioksjon/olev-subbi-tasandiku-lopp/",
-"lot": 108
+"url": "https://alleegalerii.ee/kunstioksjon/olev-subbi-tasandiku-lopp/"
 },
 {
 "house": "Allee galerii",
@@ -2656,8 +2820,7 @@
 "tech": "Õli lõuendil",
 "dims": "70 x 50.5 cm",
 "start": 26000,
-"url": "https://alleegalerii.ee/kunstioksjon/olev-subbi-weizenbergi-trammipeatus/",
-"lot": 8
+"url": "https://alleegalerii.ee/kunstioksjon/olev-subbi-weizenbergi-trammipeatus/"
 },
 {
 "house": "Allee galerii",
@@ -2670,8 +2833,33 @@
 "tech": "Õli lõuendil",
 "dims": "68 x 78 cm",
 "start": 1900,
-"url": "https://alleegalerii.ee/kunstioksjon/olga-terri-saaremaastik/",
-"lot": 92
+"url": "https://alleegalerii.ee/kunstioksjon/olga-terri-saaremaastik/"
+},
+{
+"house": "Allee galerii",
+"sale": "Allee sügisoksjon 2026",
+"date": "2026-11-13",
+"artist": "Osvald Eslon",
+"title": "Järve ääres",
+"year": null,
+"yl": null,
+"tech": "Õli masoniidil",
+"dims": "46 x 61 cm",
+"start": 1200,
+"url": "https://alleegalerii.ee/kunstioksjon/osvald-eslon-jarve-aares/"
+},
+{
+"house": "Allee galerii",
+"sale": "Allee sügisoksjon 2026",
+"date": "2026-11-13",
+"artist": "Peeter Allik",
+"title": "Pargis",
+"year": "1991",
+"yl": "1991",
+"tech": "Õli masoniidil",
+"dims": "45 x 70 cm",
+"start": 1800,
+"url": "https://alleegalerii.ee/kunstioksjon/peeter-allik-pargis/"
 },
 {
 "house": "Allee galerii",
@@ -2684,8 +2872,33 @@
 "tech": "Õli masoniidil",
 "dims": "72 x 120 cm",
 "start": 19000,
-"url": "https://alleegalerii.ee/kunstioksjon/peeter-mudist-rehitseja/",
-"lot": 93
+"url": "https://alleegalerii.ee/kunstioksjon/peeter-mudist-rehitseja/"
+},
+{
+"house": "Allee galerii",
+"sale": "Allee sügisoksjon 2026",
+"date": "2026-11-13",
+"artist": "Peeter Mudist",
+"title": "Saaremaa maastik",
+"year": null,
+"yl": null,
+"tech": "Õli kartongil",
+"dims": "50 x 70 cm",
+"start": 4500,
+"url": "https://alleegalerii.ee/kunstioksjon/peeter-mudist-saaremaa-maastik/"
+},
+{
+"house": "Allee galerii",
+"sale": "Allee sügisoksjon 2026",
+"date": "2026-11-13",
+"artist": "Priit Pärn",
+"title": "Kaks õuna, üks pirn",
+"year": "1988",
+"yl": "1988",
+"tech": "Segatehnika paberil",
+"dims": "83.5 x 59.3 cm",
+"start": 1400,
+"url": "https://alleegalerii.ee/kunstioksjon/priit-parn-kaks-ouna-uks-pirn/"
 },
 {
 "house": "Allee galerii",
@@ -2698,8 +2911,20 @@
 "tech": "Hõbe, klaas, email, vask",
 "dims": "",
 "start": 2000,
-"url": "https://alleegalerii.ee/kunstioksjon/rein-mets-ornament-iii/",
-"lot": 99
+"url": "https://alleegalerii.ee/kunstioksjon/rein-mets-ornament-iii/"
+},
+{
+"house": "Allee galerii",
+"sale": "Allee sügisoksjon 2026",
+"date": "2026-11-13",
+"artist": "Richard Kaljo",
+"title": "Kvartett",
+"year": "1965",
+"yl": "1965",
+"tech": "Linoollõige paberil",
+"dims": "48.5 x 32.5 cm",
+"start": 1500,
+"url": "https://alleegalerii.ee/kunstioksjon/richard-kaljo-kvartett/"
 },
 {
 "house": "Allee galerii",
@@ -2712,8 +2937,7 @@
 "tech": "Puugravüür paberil",
 "dims": "11.8 x 17.5 cm",
 "start": 1000,
-"url": "https://alleegalerii.ee/kunstioksjon/richard-kaljo-tallinna-motiiv/",
-"lot": 49
+"url": "https://alleegalerii.ee/kunstioksjon/richard-kaljo-tallinna-motiiv/"
 },
 {
 "house": "Allee galerii",
@@ -2726,8 +2950,7 @@
 "tech": "Õli kartongil",
 "dims": "24.5 x 34.5 cm",
 "start": 1400,
-"url": "https://alleegalerii.ee/kunstioksjon/richard-sagrits-paikeseloojang-karepal/",
-"lot": 69
+"url": "https://alleegalerii.ee/kunstioksjon/richard-sagrits-paikeseloojang-karepal/"
 },
 {
 "house": "Allee galerii",
@@ -2740,8 +2963,7 @@
 "tech": "Guašš paberil",
 "dims": "51 x 74 cm",
 "start": 3900,
-"url": "https://alleegalerii.ee/kunstioksjon/richard-uutmaa-altja/",
-"lot": 70
+"url": "https://alleegalerii.ee/kunstioksjon/richard-uutmaa-altja/"
 },
 {
 "house": "Allee galerii",
@@ -2754,8 +2976,7 @@
 "tech": "Akvarell paberil",
 "dims": "56 x 74 cm",
 "start": 3800,
-"url": "https://alleegalerii.ee/kunstioksjon/richard-uutmaa-altja-rand-2/",
-"lot": 55
+"url": "https://alleegalerii.ee/kunstioksjon/richard-uutmaa-altja-rand-2/"
 },
 {
 "house": "Allee galerii",
@@ -2768,8 +2989,7 @@
 "tech": "Õli kartongil",
 "dims": "50 x 70 cm",
 "start": 8800,
-"url": "https://alleegalerii.ee/kunstioksjon/richard-uutmaa-maastik/",
-"lot": 57
+"url": "https://alleegalerii.ee/kunstioksjon/richard-uutmaa-maastik/"
 },
 {
 "house": "Allee galerii",
@@ -2782,8 +3002,7 @@
 "tech": "Õli lõuend kleebitud kartongile",
 "dims": "50 x 70 cm",
 "start": 7800,
-"url": "https://alleegalerii.ee/kunstioksjon/richard-uutmaa-meri/",
-"lot": 112
+"url": "https://alleegalerii.ee/kunstioksjon/richard-uutmaa-meri/"
 },
 {
 "house": "Allee galerii",
@@ -2796,8 +3015,7 @@
 "tech": "Õli lõuendil",
 "dims": "60 x 81 cm",
 "start": 18000,
-"url": "https://alleegalerii.ee/kunstioksjon/richard-uutmaa-saaremaa-2/",
-"lot": 65
+"url": "https://alleegalerii.ee/kunstioksjon/richard-uutmaa-saaremaa-2/"
 },
 {
 "house": "Allee galerii",
@@ -2810,8 +3028,20 @@
 "tech": "Õli kartongil",
 "dims": "62 x 59 cm",
 "start": 15800,
-"url": "https://alleegalerii.ee/kunstioksjon/richard-uutmaa-suviste-oite-lummuses-poordel-maal-ukskord-suvel/",
-"lot": 154
+"url": "https://alleegalerii.ee/kunstioksjon/richard-uutmaa-suviste-oite-lummuses-poordel-maal-ukskord-suvel/"
+},
+{
+"house": "Allee galerii",
+"sale": "Allee sügisoksjon 2026",
+"date": "2026-11-13",
+"artist": "Richard Uutmaa",
+"title": "Sügismaastik Eismalt",
+"year": "1974",
+"yl": "1974",
+"tech": "Akvarell paberil",
+"dims": "34.5 x 43 cm",
+"start": 2900,
+"url": "https://alleegalerii.ee/kunstioksjon/richard-uutmaa-sugismaastik-eismalt/"
 },
 {
 "house": "Allee galerii",
@@ -2824,8 +3054,20 @@
 "tech": "Õli lõuendil",
 "dims": "60 x 81 cm",
 "start": 15000,
-"url": "https://alleegalerii.ee/kunstioksjon/richard-uutmaa-talu-karalast-saaremaa/",
-"lot": 118
+"url": "https://alleegalerii.ee/kunstioksjon/richard-uutmaa-talu-karalast-saaremaa/"
+},
+{
+"house": "Allee galerii",
+"sale": "Allee sügisoksjon 2026",
+"date": "2026-11-13",
+"artist": "Richard Uutmaa",
+"title": "Tormine meri",
+"year": "1968",
+"yl": "1968",
+"tech": "Akvarell paberil",
+"dims": "36 x 44.5 cm",
+"start": 2300,
+"url": "https://alleegalerii.ee/kunstioksjon/richard-uutmaa-tormine-meri-2/"
 },
 {
 "house": "Allee galerii",
@@ -2838,8 +3080,7 @@
 "tech": "Õli vineeril",
 "dims": "72 x 100 cm",
 "start": 28000,
-"url": "https://alleegalerii.ee/kunstioksjon/roman-nyman-kulatee/",
-"lot": 29
+"url": "https://alleegalerii.ee/kunstioksjon/roman-nyman-kulatee/"
 },
 {
 "house": "Allee galerii",
@@ -2852,8 +3093,7 @@
 "tech": "Õli vineeril",
 "dims": "46 x 53.5 cm",
 "start": 3000,
-"url": "https://alleegalerii.ee/kunstioksjon/roman-treuman-saaremaastik-tuulikuga/",
-"lot": 25
+"url": "https://alleegalerii.ee/kunstioksjon/roman-treuman-saaremaastik-tuulikuga/"
 },
 {
 "house": "Allee galerii",
@@ -2866,8 +3106,7 @@
 "tech": "Vaselõige paberil",
 "dims": "44 x 33 cm",
 "start": 1000,
-"url": "https://alleegalerii.ee/kunstioksjon/salome-trei-tulijad/",
-"lot": 56
+"url": "https://alleegalerii.ee/kunstioksjon/salome-trei-tulijad/"
 },
 {
 "house": "Allee galerii",
@@ -2880,8 +3119,7 @@
 "tech": "Õli lõuendil",
 "dims": "100 x 150 cm",
 "start": 3500,
-"url": "https://alleegalerii.ee/kunstioksjon/sirje-petersen-end-protsin-kahekesi/",
-"lot": 144
+"url": "https://alleegalerii.ee/kunstioksjon/sirje-petersen-end-protsin-kahekesi/"
 },
 {
 "house": "Allee galerii",
@@ -2894,8 +3132,33 @@
 "tech": "Õli, akrüül lõuendil",
 "dims": "100 x 200 cm",
 "start": 38000,
-"url": "https://alleegalerii.ee/kunstioksjon/tiit-paasuke-poiss-ja-torn-2000/",
-"lot": 4
+"url": "https://alleegalerii.ee/kunstioksjon/tiit-paasuke-poiss-ja-torn-2000/"
+},
+{
+"house": "Allee galerii",
+"sale": "Allee sügisoksjon 2026",
+"date": "2026-11-13",
+"artist": "Tiiu Pallo-Vaik",
+"title": "Lill",
+"year": "1969",
+"yl": "1969",
+"tech": "Õli lõuendil",
+"dims": "69 x 61 cm",
+"start": 2200,
+"url": "https://alleegalerii.ee/kunstioksjon/tiiu-pallo-vaik-lill/"
+},
+{
+"house": "Allee galerii",
+"sale": "Allee sügisoksjon 2026",
+"date": "2026-11-13",
+"artist": "Toomas Kuusing",
+"title": "Ja sõna vägi muutis vee veiniks",
+"year": "2019",
+"yl": "2019",
+"tech": "Linoollõige paberil",
+"dims": "45 x 55.5 cm",
+"start": 1000,
+"url": "https://alleegalerii.ee/kunstioksjon/toomas-kuusing-ja-sona-vagi-muutis-vee-veiniks/"
 },
 {
 "house": "Allee galerii",
@@ -2908,8 +3171,7 @@
 "tech": "Õli lõuendil",
 "dims": "100 x 120 cm",
 "start": 2800,
-"url": "https://alleegalerii.ee/kunstioksjon/toomas-kuusing-sunnipaev/",
-"lot": 138
+"url": "https://alleegalerii.ee/kunstioksjon/toomas-kuusing-sunnipaev/"
 },
 {
 "house": "Allee galerii",
@@ -2922,8 +3184,7 @@
 "tech": "Õli lõuendil",
 "dims": "60 x 90 cm",
 "start": 10000,
-"url": "https://alleegalerii.ee/kunstioksjon/toomas-vint-maastik-uksikute-puudega/",
-"lot": 5
+"url": "https://alleegalerii.ee/kunstioksjon/toomas-vint-maastik-uksikute-puudega/"
 },
 {
 "house": "Allee galerii",
@@ -2936,8 +3197,7 @@
 "tech": "Värviline kõrgtrükk paberil",
 "dims": "22 x 22 cm",
 "start": 1500,
-"url": "https://alleegalerii.ee/kunstioksjon/tonis-vint-z1/",
-"lot": 75
+"url": "https://alleegalerii.ee/kunstioksjon/tonis-vint-z1/"
 },
 {
 "house": "Allee galerii",
@@ -2950,8 +3210,7 @@
 "tech": "Värviline kõrgtrükk paberil",
 "dims": "22 x 22 cm",
 "start": 1500,
-"url": "https://alleegalerii.ee/kunstioksjon/tonis-vint-z11/",
-"lot": 74
+"url": "https://alleegalerii.ee/kunstioksjon/tonis-vint-z11/"
 },
 {
 "house": "Allee galerii",
@@ -2964,8 +3223,7 @@
 "tech": "Värviline kõrgtrükk paberil",
 "dims": "22 x 22 cm",
 "start": 1500,
-"url": "https://alleegalerii.ee/kunstioksjon/tonis-vint-z22/",
-"lot": 76
+"url": "https://alleegalerii.ee/kunstioksjon/tonis-vint-z22/"
 },
 {
 "house": "Allee galerii",
@@ -2978,8 +3236,7 @@
 "tech": "Värviline kõrgtrükk paberil",
 "dims": "22 x 22 cm",
 "start": 1500,
-"url": "https://alleegalerii.ee/kunstioksjon/tonis-vint-z28/",
-"lot": 77
+"url": "https://alleegalerii.ee/kunstioksjon/tonis-vint-z28/"
 },
 {
 "house": "Allee galerii",
@@ -2992,8 +3249,20 @@
 "tech": "Foto, õli lõuendil",
 "dims": "120 x 80 cm",
 "start": 2000,
-"url": "https://alleegalerii.ee/kunstioksjon/urmas-pedanik-maastik-iv/",
-"lot": 145
+"url": "https://alleegalerii.ee/kunstioksjon/urmas-pedanik-maastik-iv/"
+},
+{
+"house": "Allee galerii",
+"sale": "Allee sügisoksjon 2026",
+"date": "2026-11-13",
+"artist": "Urmas Viik",
+"title": "D.V. / Minialbum XV",
+"year": "1998",
+"yl": "1998",
+"tech": "Segatehnika",
+"dims": "41 x 37 cm",
+"start": 1500,
+"url": "https://alleegalerii.ee/kunstioksjon/urmas-viik-d-v-minialbum-xv/"
 },
 {
 "house": "Allee galerii",
@@ -3006,8 +3275,7 @@
 "tech": "Õli kartong kleebitud masoniidile",
 "dims": "103 x 71 cm",
 "start": 3400,
-"url": "https://alleegalerii.ee/kunstioksjon/valdemar-vali-helmi-puur/",
-"lot": 13
+"url": "https://alleegalerii.ee/kunstioksjon/valdemar-vali-helmi-puur/"
 },
 {
 "house": "Allee galerii",
@@ -3020,8 +3288,7 @@
 "tech": "Õli kartongil",
 "dims": "38.5 x 30.5 cm",
 "start": 1000,
-"url": "https://alleegalerii.ee/kunstioksjon/valdur-ohakas-loozis/",
-"lot": 45
+"url": "https://alleegalerii.ee/kunstioksjon/valdur-ohakas-loozis/"
 },
 {
 "house": "Allee galerii",
@@ -3034,8 +3301,7 @@
 "tech": "Õli lõuendil",
 "dims": "78 x 95 cm",
 "start": 7500,
-"url": "https://alleegalerii.ee/kunstioksjon/valdur-ohakas-suvine-tallinn/",
-"lot": 6
+"url": "https://alleegalerii.ee/kunstioksjon/valdur-ohakas-suvine-tallinn/"
 },
 {
 "house": "Allee galerii",
@@ -3048,8 +3314,7 @@
 "tech": "Õli lõuendil",
 "dims": "70 x 80 cm",
 "start": 6000,
-"url": "https://alleegalerii.ee/kunstioksjon/valdur-ohakas-tallinna-motiiv-taani-kuninga-aed/",
-"lot": 12
+"url": "https://alleegalerii.ee/kunstioksjon/valdur-ohakas-tallinna-motiiv-taani-kuninga-aed/"
 },
 {
 "house": "Allee galerii",
@@ -3062,8 +3327,7 @@
 "tech": "Õli lõuendil",
 "dims": "45 x 36 cm",
 "start": 1400,
-"url": "https://alleegalerii.ee/kunstioksjon/valerian-loik-suvi-vanalinnas/",
-"lot": 126
+"url": "https://alleegalerii.ee/kunstioksjon/valerian-loik-suvi-vanalinnas/"
 },
 {
 "house": "Allee galerii",
@@ -3076,8 +3340,20 @@
 "tech": "Õli vineeril",
 "dims": "62 x 67.5 cm",
 "start": 7000,
-"url": "https://alleegalerii.ee/kunstioksjon/valerian-loik-vormsi-kirik/",
-"lot": 31
+"url": "https://alleegalerii.ee/kunstioksjon/valerian-loik-vormsi-kirik/"
+},
+{
+"house": "Allee galerii",
+"sale": "Allee sügisoksjon 2026",
+"date": "2026-11-13",
+"artist": "Viktor Karrus",
+"title": "Maastik",
+"year": "1973",
+"yl": "1973",
+"tech": "Õli lõuend kleebitud papile",
+"dims": "50 x 65 cm",
+"start": 1000,
+"url": "https://alleegalerii.ee/kunstioksjon/viktor-karrus-maastik/"
 },
 {
 "house": "Allee galerii",
@@ -3090,7 +3366,45 @@
 "tech": "Õli lõuned kleebitud kartongile",
 "dims": "65.5 x 50 cm",
 "start": 2000,
-"url": "https://alleegalerii.ee/kunstioksjon/viktor-karrus-vaikelu-malelauaga/",
-"lot": 23
+"url": "https://alleegalerii.ee/kunstioksjon/viktor-karrus-vaikelu-malelauaga/"
+},
+{
+"house": "Allee galerii",
+"sale": "Allee sügisoksjon 2026",
+"date": "2026-11-13",
+"artist": "Vladimir Taiger",
+"title": "Akt",
+"year": "1979",
+"yl": "1979",
+"tech": "Akvatinta, ofort paberil",
+"dims": "24.6 x 31 cm",
+"start": 2000,
+"url": "https://alleegalerii.ee/kunstioksjon/vladimir-taiger-akt/"
+},
+{
+"house": "Allee galerii",
+"sale": "Allee sügisoksjon 2026",
+"date": "2026-11-13",
+"artist": "Vladimir Taiger",
+"title": "Figuuriga tuba II",
+"year": "1988",
+"yl": "1988",
+"tech": "Akvatinta, pehmelakk paberil",
+"dims": "48.5 x 46 cm",
+"start": 2000,
+"url": "https://alleegalerii.ee/kunstioksjon/vladimir-taiger-figuuriga-tuba-ii/"
+},
+{
+"house": "Allee galerii",
+"sale": "Allee sügisoksjon 2026",
+"date": "2026-11-13",
+"artist": "Vladimir Taiger",
+"title": "Kell 15.52 punases linnas",
+"year": "1976",
+"yl": "1976",
+"tech": "Siiditrükk paberil",
+"dims": "58.5 x 54.5 cm",
+"start": 1000,
+"url": "https://alleegalerii.ee/kunstioksjon/vladimir-taiger-kell-15-52-punases-linnas/"
 }
 ]
