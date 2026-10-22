@@ -279,7 +279,7 @@
         <div class="up-when">${esc(dmy(u.d))} · ${esc(musName(u.h))}${u.s ? " · " + esc(u.s) : ""}</div>
         <div><i>${esc(u.t)}</i>${u.yl ? ", " + esc(u.yl) : ""}${u.tc ? " · " + esc(u.tc) : ""}${u.dm ? " · " + esc(u.dm) : ""}</div>
         <div class="up-p">${u.p ? `${esc(T("up_start"))} ${esc(eur(u.p))}` : ""}${href(u.u) ? ` · <a href="${href(u.u)}" target="_blank" rel="noopener">${esc(musName(u.h))} ↗</a>` : ""}</div>
-        ${u.pr ? `<div class="up-pr">${esc(T("up_prior"))}: ${u.pr.map(p => `${esc(String(p[0]).slice(0, 4))} ${esc(musName(p[1]))} ${p[2] ? esc(eur(p[2])) : esc(T("up_unsold"))}`).join(" · ")}</div>` : ""}
+        ${u.pr ? `<div class="up-pr">${esc(T("up_prior"))}: ${u.pr.map(p => `${esc(String(p[0]).slice(0, 4))} ${esc(musName(p[1]))} ${p[2] ? esc(eur(p[2])) : esc(T(p[3] ? "up_nores" : "up_unsold"))}`).join(" · ")}</div>` : ""}
       </div>`).join("")}<div class="up-note">${esc(T("up_note"))} <a href="${LANG === "et" ? "tulemas" : "upcoming"}">${esc(T("up_all"))} →</a></div></div>`;
   }
   // "Eesti Kunsti Oksjonid 8–10 Oct" -- one per house, soonest first; two at most, then "+n"
@@ -304,12 +304,20 @@
     return UP.filter(u => (state.artist === null || u.a === state.artist)
       && (!q || skey(A[u.a].n + " " + (u.t || "")).includes(q)));
   }
+  // "{n} lots · {s} sold" over the lots with a published result; the lots of a house that
+  // publishes none (Osta Noort Kunsti: anr) are counted apart, never as unsold
+  function auCount(L, key, vars = {}){
+    const R = L.filter(w => !w.anr), k = L.length - R.length;
+    if (!R.length) return T("au_nrline", {n: fmt(k)});
+    return T(key === "au_saleline" && R.length === 1 ? "au_saleline1" : key, {...vars, n: fmt(R.length), s: fmt(R.filter(w => w.ao).length)})
+      + (k ? ` · ${T("au_nr", {k: fmt(k)})}` : "");
+  }
   // the artist's record at auction from the catalogue, beside each lot
   const upRec = ai => {
     const L = W.filter(w => w.a === ai && w.kind === "auction");
     if (!L.length) return T("up_rec0");
     const ps = L.filter(w => w.ao && w.ap).map(w => w.ap).sort((a, b) => a - b);
-    return T("up_rec", {n: fmt(L.length), s: fmt(L.filter(w => w.ao).length)}) + (ps.length > 1 ? ` · ${eur(ps[0])}–${eur(ps[ps.length - 1])}` : ps.length ? ` · ${eur(ps[0])}` : "");
+    return auCount(L, "up_rec") + (ps.length > 1 ? ` · ${eur(ps[0])}–${eur(ps[ps.length - 1])}` : ps.length ? ` · ${eur(ps[0])}` : "");
   };
   // the artists of My List in a sale: how many works by each, each name going to that artist's first lot in it
   const SL_ICON_ON = '<svg class="up-mark" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 2h8v12l-4-3-4 3z"/></svg>';
@@ -344,12 +352,12 @@
           if (!rec.has(u.a)) rec.set(u.a, upRec(u.a));
           return `<div class="up-row${isSaved(u.a) ? " up-mine" : ""}" data-ua="${u.a}"><div>${isSaved(u.a) ? SL_ICON_ON : ""}<a class="r-alink" href="#artist=${esc(slug(A[u.a].n))}" data-artist="${u.a}">${esc(A[u.a].n)}</a><span class="m">${esc(rec.get(u.a))}</span></div>
             <div><i>${esc(u.t)}</i>${u.yl ? ", " + esc(u.yl) : ""}<span class="m">${esc([u.tc, u.dm].filter(Boolean).join(" · "))}</span>
-            ${u.pr ? `<span class="m">${esc(T("up_prior"))}: ${u.pr.map(p => `${esc(String(p[0]).slice(0, 4))} ${esc(musName(p[1]))} ${p[2] ? esc(eur(p[2])) : esc(T("up_unsold"))}`).join(" · ")}</span>` : ""}</div>
+            ${u.pr ? `<span class="m">${esc(T("up_prior"))}: ${u.pr.map(p => `${esc(String(p[0]).slice(0, 4))} ${esc(musName(p[1]))} ${p[2] ? esc(eur(p[2])) : esc(T(p[3] ? "up_nores" : "up_unsold"))}`).join(" · ")}</span>` : ""}</div>
             <div class="n">${u.p ? `${esc(T("up_start"))} ${esc(eur(u.p))}` : ""}${href(u.u) ? `<br><a href="${href(u.u)}" target="_blank" rel="noopener" title="${esc(musName(u.h))}">${esc(T("up_lot"))}</a>` : ""}</div></div>`;
         }).join("")}</div></section>`;
     }).join("") + `<p class="tl-note">${esc(T("up_note"))}</p>`;
   }
-  const auText = w => w.ao ? (w.ap ? T("au_sold", {p: eur(w.ap)}) : T("au_soldnp")) : T("au_unsold");
+  const auText = w => w.ao ? (w.ap ? T("au_sold", {p: eur(w.ap)}) : T("au_soldnp")) : T(w.anr ? "au_nores" : "au_unsold");
   // One line per artist: lots, sales, span, and the range of hammer prices.
   function auLine(i){
     const lots = W.filter(w => w.a === i && w.kind === "auction");
@@ -358,7 +366,7 @@
     const ys = lots.map(w => +w.ad.slice(0, 4)).sort((a, b) => a - b);
     const span = ys[0] === ys[ys.length-1] ? String(ys[0]) : `${ys[0]}–${ys[ys.length-1]}`;
     const range = ps.length ? (ps[0] === ps[ps.length-1] ? eur(ps[0]) : `${eur(ps[0])} – ${eur(ps[ps.length-1])}`) : "";
-    return T("au_line", {n: lots.length, s: lots.filter(w => w.ao).length, y: span}) + (range ? ` · ${range}` : "");
+    return auCount(lots, "au_line", {y: span}) + (lots.every(w => w.anr) ? ` · ${span}` : "") + (range ? ` · ${range}` : "");
   }
   const SRCFULL = {muis:"catalogued in MuIS only", ekm:"catalogued in the EKM Digital Collection only", ekmmuis:"in both catalogues, merged on inventory number", cca:"Estonian Centre for Contemporary Art", ekkm:"Contemporary Art Museum of Estonia"};
   const stag = s => s==="ed" ? '<span class="tag">ed</span>' : s==="ekm" ? '<span class="tag">EKM</span>'
@@ -1127,7 +1135,7 @@
           <div class="d-k">${esc(isHeld(w)?T("d_collection"):T("venue"))}</div><div class="d-v">${w.co?esc(collName(w.co))+"<br>":""}<em>${siteOf(w.mu) ? `<a class="permalink" href="${esc(siteOf(w.mu))}" target="_blank" rel="noopener">${esc(musName(w.mu))}</a>` : esc(musName(w.mu))}</em></div>
           <div class="d-k">${esc(T("kind"))}</div><div class="d-v">${esc(T(w.kind==="shown"?(w.s==="gallery"?"kind_shown_gal":"shown"):w.kind==="gallery"?"gallery":w.kind==="auction"?"kind_auction":w.kind==="sold"?"kind_sold":w.kind==="known"?"kind_known":"held"))}${w.kind==="known"?`<br><span class="d-sub">${esc(T("d_knownnote"))}</span>`:""}</div>
           ${w.kind==="sold" ? `<div class="d-k">${esc(T("d_status"))}</div><div class="d-v">${esc(pastText(w))}${w.gl ? `<br><span class="d-sub">${esc(T("d_lastseen", {d: w.gl}))}</span>` : ""}<br><span class="d-sub">${esc(T("d_pastnote"))}</span></div>` : ""}
-          ${w.kind==="auction" ? `<div class="d-k">${esc(T("d_result"))}</div><div class="d-v">${esc(w.an)} · <b>${esc(auText(w))}</b>${w.as ? `<br><span class="d-sub">${esc(T("d_start", {p: eur(w.as)}))}</span>` : ""}${w.apr ? `<br><span class="d-sub">${esc(T("d_press"))}: ${esc(w.apr)}</span>` : ""}${w.adb ? `<br><span class="d-sub">${esc(w.adb[LANG] || w.adb.en)}</span>` : ""}${chainOf(w) ? `<div class="au-hist">${chainOf(w).map(x => `<div class="au-row${x === w ? " now" : ""}"><span>${esc(String(x.ad).slice(0, 4))}</span><span>${esc(x.an.toLowerCase().includes(musName(x.mu).toLowerCase().split(" ")[0]) ? x.an : musName(x.mu) + " · " + x.an)}</span><span class="n">${x.ao ? (x.ap ? esc(eur(x.ap)) : esc(T("au_soldnp"))) : esc(T("au_unsold"))}${x.as ? ` <em>(${esc(eur(x.as))})</em>` : ""}</span>${x.url ? `<a href="${href(x.url)}" target="_blank" rel="noopener">↗</a>` : "<span></span>"}</div>${x.adb ? `<div class="au-doubt">${esc(x.adb[LANG] || x.adb.en)}</div>` : ""}`).join("")}</div>` : ""}${w.aa ? `<br><span class="d-sub">${esc(T("au_afternote"))}</span>` : ""}<br><span class="d-sub">${esc(T("au_note"))}</span></div>` : ""}
+          ${w.kind==="auction" ? `<div class="d-k">${esc(T("d_result"))}</div><div class="d-v">${esc(w.an)} · <b>${esc(auText(w))}</b>${w.as ? `<br><span class="d-sub">${esc(T("d_start", {p: eur(w.as)}))}</span>` : ""}${w.apr ? `<br><span class="d-sub">${esc(T("d_press"))}: ${esc(w.apr)}</span>` : ""}${w.adb ? `<br><span class="d-sub">${esc(w.adb[LANG] || w.adb.en)}</span>` : ""}${chainOf(w) ? `<div class="au-hist">${chainOf(w).map(x => `<div class="au-row${x === w ? " now" : ""}"><span>${esc(String(x.ad).slice(0, 4))}</span><span>${esc(x.an.toLowerCase().includes(musName(x.mu).toLowerCase().split(" ")[0]) ? x.an : musName(x.mu) + " · " + x.an)}</span><span class="n">${x.ao ? (x.ap ? esc(eur(x.ap)) : esc(T("au_soldnp"))) : esc(T(x.anr ? "au_nores" : "au_unsold"))}${x.as ? ` <em>(${esc(eur(x.as))})</em>` : ""}</span>${x.url ? `<a href="${href(x.url)}" target="_blank" rel="noopener">↗</a>` : "<span></span>"}</div>${x.adb ? `<div class="au-doubt">${esc(x.adb[LANG] || x.adb.en)}</div>` : ""}`).join("")}</div>` : ""}${w.aa ? `<br><span class="d-sub">${esc(T("au_afternote"))}</span>` : ""}<br><span class="d-sub">${esc(T("au_note"))}</span></div>` : ""}
           ${w.nu ? `<div class="d-k">${esc(T("d_number"))}</div><div class="d-v" style="font-family:var(--mono);font-size:.78rem">${esc(w.nu)}</div>` : ""}
           ${ar.wdesc?`<div class="d-k">${esc(T("d_origin"))}</div><div class="d-v">${esc(ar.wdesc)}${ar.qid?` <a class="permalink" href="https://www.wikidata.org/wiki/${esc(ar.qid)}" target="_blank" rel="noopener">${esc(T("d_wd"))}</a>`:""}</div>`:""}
           ${ar.cit?`<div class="d-k">${esc(T("d_cit"))}</div><div class="d-v"><em>${esc(ar.cit.map(citName).join(" · "))}</em>${ar.born?`<br><em>${esc(T("d_born"))}: ${esc(ar.born)}</em>`:""}</div>`:""}
@@ -1150,7 +1158,7 @@
       // an auction result carries its outcome on the row: the sale is the point of the record
       : w.kind === "auction" && w.url
       // the price alone on the row -- it is the outcome; "sold" is in the title and the detail
-      ? `<a class="rl rl-au${w.ao ? "" : " unsold"}" href="${href(w.url)}" target="_blank" rel="noopener" title="${esc(w.an)} · ${esc(auText(w))}">${esc(w.ao ? (w.ap ? eur(w.ap) : T("au_soldnp")) : T("au_unsold"))} ↗</a>`
+      ? `<a class="rl rl-au${w.ao ? "" : " unsold"}" href="${href(w.url)}" target="_blank" rel="noopener" title="${esc(w.an)} · ${esc(auText(w))}">${esc(w.ao ? (w.ap ? eur(w.ap) : T("au_soldnp")) : T(w.anr ? "au_nores" : "au_unsold"))} ↗</a>`
       // a known work links to its entry in the catalogue raisonné
       : w.kind === "known" && w.url
       ? `<a class="rl rl-past" href="${href(w.url)}" target="_blank" rel="noopener" title="${esc(T("d_knownlink"))}">${esc(T("rl_known"))} ↗</a>` : "";
@@ -1468,7 +1476,7 @@
       const items = sortRows(lots, state.decOrder === "earliest"), sold = lots.filter(w => w.ao && w.ap);
       const ps = sold.map(w => w.ap).sort((a, b) => a - b);
       const gutter = `<span class="g-name">${esc(T("au_byprice"))}</span>
-        <div class="g-split">${esc(T("au_saleline", {n: fmt(lots.length), s: fmt(lots.filter(w => w.ao).length)}))}${ps.length ? ` · ${eur(ps[0])} – ${eur(ps[ps.length-1])}` : ""}</div>`;
+        <div class="g-split">${esc(auCount(lots, "au_saleline"))}${ps.length ? ` · ${eur(ps[0])} – ${eur(ps[ps.length-1])}` : ""}</div>`;
       return groupHTML("price", gutter, items, true) + `<p class="tl-note">${esc(T("au_note"))}</p>`;
     }
     const asc = state.decOrder === "earliest";
@@ -1485,7 +1493,7 @@
         const l = A[ai].l || [];
         const gutter = `<span class="g-name"><span class="r-alink" data-artist="${ai}">${esc(A[ai].n)}</span></span>
           ${l[0] || l[1] ? `<div class="g-dates">${esc(l[0] || "")}–${esc(l[1] || "")}</div>` : ""}
-          <div class="g-split">${esc(T(items.length === 1 ? "au_saleline1" : "au_saleline", {n: fmt(items.length), s: fmt(sold.length)}))}${ps.length ? ` · ${eur(ps[0])}${ps.length > 1 ? " – " + eur(ps[ps.length - 1]) : ""}` : ""}</div>`;
+          <div class="g-split">${esc(auCount(items, "au_saleline"))}${ps.length ? ` · ${eur(ps[0])}${ps.length > 1 ? " – " + eur(ps[ps.length - 1]) : ""}` : ""}</div>`;
         return groupHTML("a" + ai, gutter, items, false);
       }).join("") + (arts.length > shownA.length
         ? `<button class="more" id="more-sales" style="margin-top:18px">${esc(T("au_moreartists", {n: fmt(arts.length - shownA.length)}))}</button>` : "")
@@ -1500,7 +1508,7 @@
       const when = g.ad.length > 7 ? g.ad.split("-").reverse().join(".") : (g.ad.slice(5, 7) ? `${g.ad.slice(5, 7)}.${g.ad.slice(0, 4)}` : g.ad);
       const gutter = `<span class="g-name">${esc(g.an)}</span>
         <div class="g-dates">${esc(musName(g.mu))} · ${esc(when)}</div>
-        <div class="g-split">${esc(T(items.length === 1 ? "au_saleline1" : "au_saleline", {n: fmt(items.length), s: fmt(sold.length)}))}${total ? ` · ${esc(T("au_total", {p: eur(total)}))}` : ""}</div>
+        <div class="g-split">${esc(auCount(items, "au_saleline"))}${total ? ` · ${esc(T("au_total", {p: eur(total)}))}` : ""}</div>
         ${top ? `<p class="g-blurb">${esc(T("au_top"))}: ${esc(A[top.a].n)}, <em>${esc(top.t)}</em> — ${esc(eur(top.ap))}</p>` : ""}`;
       return groupHTML("s" + k, gutter, items, true);
     }).join("") + (order.length > shown.length

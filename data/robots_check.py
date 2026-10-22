@@ -11,7 +11,7 @@ import re, sys, urllib.request
 
 HOSTS = ["haus.ee", "www.kogogallery.ee", "temnikova.ee", "www.tutar.ee", "www.artrovert.ee", "rukigalerii.ee",
          "alleegalerii.ee", "vernissage.ee", "eestikunstioksjonid.ee", "www.vaal.ee", "oksjon.vaal.ee",
-         "www.e-kunstisalong.ee", "noba.ac", "konradmagi.ee", "artner.ee", "artandtonic.art", "tokkoarrak.ee", "www.artman.ee"]
+         "www.e-kunstisalong.ee", "ostanoortkunsti.ee", "noba.ac", "konradmagi.ee", "artner.ee", "artandtonic.art", "tokkoarrak.ee", "www.artman.ee"]
 # Lihtsad Kipskassid (www.lihtsadkipskassid.ee and its R2 bucket) left on 22 Oct 2026: its robots.txt
 # began to say Disallow: / to ClaudeBot. kipskassid.py is kept for the day the artist says yes.
 UA = "EstonianArtCatalogue/1.0 (museaal.ee; contact info@museaal.ee)"

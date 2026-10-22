@@ -36,7 +36,7 @@ for m, c in med_rows:
 med_rows = main + ([("Other", other)] if other else [])
 
 # ---- auctions ----
-lots = [w for w in W if kind(w) == "auction"]
+lots = [w for w in W if kind(w) == "auction" and not w.get("anr")]      # a lot with no published result says nothing of sales
 sold = [w for w in lots if w.get("ao")]
 priced = [w for w in sold if w.get("ap")]
 total = sum(w["ap"] for w in priced)

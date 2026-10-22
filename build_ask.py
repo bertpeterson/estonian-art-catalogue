@@ -149,7 +149,7 @@ def data():
     # and their record at auction, as the houses published it: lots, sold, the lowest and highest hammer price
     lots = collections.defaultdict(list)
     for w in W:
-        if w.get("kind") == "auction": lots[w["a"]].append(w)
+        if w.get("kind") == "auction" and not w.get("anr"): lots[w["a"]].append(w)      # no published result: not a record
     def auc(a):
         # from four sales up, the middle half of the hammer prices: a charity lot at €1 or one record sale said
         # little about what the artist's works fetch (seen: "€1–€100 000")

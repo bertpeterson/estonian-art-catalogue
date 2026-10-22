@@ -913,6 +913,9 @@ print("  known works from the Konrad Mägi Foundation's catalogue:", _km_added, 
 # sale it was in, its starting price, its hammer price if it sold. A separate kind
 # from a museum holding and from a gallery listing: nothing here is for sale, and
 # the price is the record of a sale, not a valuation. An unsold lot is a result too.
+# A house that publishes no results (Osta Noort Kunsti, onk_auctions.py) gives lots
+# that were offered with no outcome: "anr", shown as result not published, never as
+# unsold, and left out of every count of lots sold.
 AUC = json.load(open("auction_records.json", encoding="utf-8")) if os.path.exists("auction_records.json") else []
 # ...and the few results the houses' sites no longer carry but the press recorded at
 # the time -- Köler's 172,561 € at Vaal in 2008, the 112,000 € at E-Kunstisalong in
@@ -945,8 +948,8 @@ for r in AUC:
         "nu": None, "d": None, "c": None, "s": "auction", "mi": None, "oi": None,
         "k": "A" + re.sub(r'[^A-Za-z0-9]', '', r["aid"]), "n": 1,
         "mem": None, "kind": "auction", "url": r.get("url"),
-        "an": r["sale"], "ad": r.get("date") or r["when"], "as": r.get("start"), "ap": r.get("hammer"), "ao": 1 if r["sold"] else 0,
-        "aa": 1 if r.get("after") else None, "apr": r.get("press"), "adb": r.get("doubt")})
+        "an": r["sale"], "ad": r.get("date") or r["when"], "as": r.get("start"), "ap": r.get("hammer"), "ao": None if r.get("nores") else 1 if r["sold"] else 0,
+        "anr": 1 if r.get("nores") else None, "aa": 1 if r.get("after") else None, "apr": r.get("press"), "adb": r.get("doubt")})
     auc_added += 1
 print("  auction results added:", auc_added, "sold", sum(1 for r in AUC if r["sold"]),
       "from", len({r["house"] for r in AUC}), "houses; unattributed or joint lots skipped:", auc_skipped)
@@ -1281,7 +1284,7 @@ for r in UPC:
               if not (w.get("dm") and r.get("dims") and w["dm"].replace(" ", "") != r["dims"].replace(" ", ""))]
     upcoming.append({"a": ai, "t": r["title"], "yl": r.get("yl") or r.get("year"), "tc": r.get("tech") or None, "dm": r.get("dims") or None,
                      "h": r["house"], "s": r["sale"], "d": r.get("date"), "p": r.get("start"), "u": r.get("url"), "n": r.get("lot"),
-                     "pr": [[w["ad"], w["mu"], w.get("ap") if w.get("ao") else None] for w in sorted(before, key=lambda w: str(w["ad"]))] or None})
+                     "pr": [[w["ad"], w["mu"], w.get("ap") if w.get("ao") else None] + ([1] if w.get("anr") else []) for w in sorted(before, key=lambda w: str(w["ad"]))] or None})
 print("  upcoming auction lots:", len(upcoming), "joined to catalogue artists;", up_unmatched, "by artists not in it;",
       sum(1 for u in upcoming if u["pr"]), "offered before")
 
