@@ -1243,7 +1243,6 @@
     $("stat-au").textContent = fmt(AU_N);
     $("stat-auc").hidden = AU_N === 0;
     $("stat-auc").setAttribute("aria-pressed", state.group === "auction");
-    $("stat-art").setAttribute("aria-pressed", state.idxOpen);
     // inside For sale: the galleries' stock, or the lots of the coming sales
     $("salesw").hidden = !state.sale || !UP.length;
     if (state.sale && UP.length){
