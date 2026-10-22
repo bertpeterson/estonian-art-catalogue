@@ -10,7 +10,7 @@ into the build reverted all of them at once. Edit here, never there.
 import json
 ET = {
  "sub":"Kunst Eesti avalikes kogudes ja galeriides · 1835–2024",
- "works":"teost","artists":"kunstnikku","museums":"muuseumi","forsale":"müügil","auctioned":"oksjonil","forsale_chip":"Müügil",
+ "works":"teost","artists":"kunstnikku","museums":"muuseumi","forsale":"müügil","auctioned":"müüdud oksjonitel","forsale_chip":"Müügil",
  "srcsummary":"Allikad ja meetod","statslink":"Kataloog arvudes","moodlink":"Meeleolu järgi","findlink":"Osta kunsti",
  "forsalenow":"Müügil praegu","seeinbuy":"Vaata müügil olevaid teoseid","seeinbuy1":"Vaata müügil olevat teost",
  "tagline":"Vaata Eesti kunsti muuseumide kogudes ja osta teoseid galeriidest.",
