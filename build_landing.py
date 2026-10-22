@@ -171,9 +171,10 @@ PER = [(None, 1699, EN["p_pre"])] + [(int(a), int(b), I18N["PERIOD_EN"][k]) for 
        re.findall(r'\[(\d{4}),(\d{4}),"(\w+)","[^"]+"\]', _app[_app.index("const PERIODS"):_app.index("const PERIOD_NOTE")])]
 eras = "".join(f'<a class="era" data-era="{i}" href="#{"from=" + str(lo) + "&" if lo else ""}{"to=" + str(hi) if hi != 2099 else ""}">{e(lab)}</a>'.replace("&\"", "\"")
                for i, (lo, hi, lab) in enumerate(PER))
-# Buy art, baked: eighteen works for sale with a picture and a price, one an artist, from the sixty
+# Buy art, baked: thirty-six works for sale with a picture and a price, one an artist, from the sixty
 # artists the museums hold most of (the names a visitor is likeliest to know), turned by the build's seed. Six show
-# at a time and the row scrolls sideways for the rest. In each six, four paintings and two other works, alternating
+# at a time and the row scrolls sideways for the rest; each page view leads with another of the six sixes (tpl_head.html,
+# 2026-10-22: with eighteen and one build a day, a visitor saw the same six all day). In each six, four paintings and two other works, alternating
 # (2026-10-02: the best-held names are often printmakers and the row read as a print shop; then paintings alone
 # read as too narrow)
 import random as _random
@@ -186,7 +187,7 @@ _PRINTED = re.compile(r"giclée|giclee|serigraaf|litograaf|digitrük|\bprint", r
 _tech = lambda w: f'{name("tc", w.get("tc")) or ""} {name("tce", w.get("tce")) or ""}'
 _ok = [w for w in _sale if 150 <= (w.get("pr") or 0) <= 20000 and not re.search(r"müüdud|\bsold\b", _tech(w), re.I)]
 _painting = lambda w: name("e", w.get("e")) in _PAINT and not _PRINTED.search(_tech(w))
-def _row(sixes=3):
+def _row(sixes=6):
     by_p, by_o = collections.defaultdict(list), collections.defaultdict(list)
     for w in _ok: (by_p if _painting(w) else by_o)[w["a"]].append(w)
     top = lambda by: sorted(by, key=lambda a: -_held[a])[:60]
@@ -199,7 +200,7 @@ def _row(sixes=3):
         out += [p[0], p[1], o[0], p[2], o[1], p[3]] if len(p) == 4 and len(o) == 2 else p + o
     return out
 eurf = lambda n: "€" + f"{n:,}".replace(",", " ")
-# past the first six, the pictures wait until the row is scrolled near them
+# past the first six, the pictures wait until the row is scrolled near them (the page makes the six it leads with eager)
 _first = _row()
 _lazy = lambda i: ' loading="lazy"' if i >= 6 else ""
 fs_works = "".join(
@@ -211,7 +212,7 @@ fs_works = "".join(
     f'<span class="fs-pop"><img src="{e(imsrc(w["im"]))}" alt="" decoding="async"{_lazy(i)} referrerpolicy="no-referrer-when-downgrade"></span></a>'
     for i, w in enumerate(_first))
 # ... and past those, the row goes on without end: every other work for sale with a picture, fetched from
-# data/fs-more.json only once a visitor scrolls near the eighteenth. In rounds, one work an artist each: the
+# data/fs-more.json only once a visitor scrolls near the thirty-sixth. In rounds, one work an artist each: the
 # best-held artists first, sixty at a time in the seed's order, and within a round the same four paintings to two
 # other works
 def _rest(first):
