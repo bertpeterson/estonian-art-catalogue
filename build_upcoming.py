@@ -35,12 +35,12 @@ for w in W:
 T = {"en": dict(file="upcoming", other="tulemas", h="Coming up at auction", site="Estonian Art Catalogue", art="a",
                 lede="Every lot in the Estonian auction houses' coming sales by an artist in the catalogue, with the starting price as the house published it and the artist's record at auction beside it. Bids are not shown; the houses' own pages have them.",
                 none="No coming sale has published its lots yet. The houses put their catalogues online two to four weeks before a sale; this page is refreshed every week.",
-                start="starting price", rec="At auction: {n} lots, {s} sold{r}", rec0="First time at auction in the catalogue", prior="Same title before", unsold="unsold",
+                start="starting price", rec="At auction: {n} lots, {s} sold{r}", rec0="First time at auction in the catalogue", prior="Same title before", unsold="unsold", nores="result not published", nr=" · {k} offered, result not published", nrline="At auction: {k} lots offered, results not published",
                 lots="lots", lot1="lot", mine="{w} from {a}", w1="1 work", wn="{n} works", first="Your artists first", c_art="Artist", c_work="Work", c_price="Starting price", lot="Lot", hand="The catalogue is on the house's own site; its lots are not listed here.", cat="Catalogue", sort="Sort", az="A–Z", price="Price", lotno="Lot no.", show="Show the lots ↓", hide="Hide the lots ↑", other_l="Eesti keeles", note="A record, not a valuation. Refreshed weekly.", month=["January","February","March","April","May","June","July","August","September","October","November","December"]),
      "et": dict(file="tulemas", other="upcoming", h="Tulemas oksjonil", site="Eesti Kunstikataloog", art="k",
                 lede="Kõik Eesti oksjonimajade tulevate oksjonite partiid kataloogi kunstnikelt, alghind nii, nagu maja selle avaldas, ja kõrval kunstniku senine oksjonitulemus. Pakkumisi ei näidata; need on majade endi lehtedel.",
                 none="Ükski tulev oksjon pole veel oma partiisid avaldanud. Majad panevad kataloogi üles kaks kuni neli nädalat enne oksjonit; see leht uueneb iga nädal.",
-                start="alghind", rec="Oksjonil: {n} partiid, {s} müüdud{r}", rec0="Kataloogis esimest korda oksjonil", prior="Sama pealkiri varem", unsold="müümata",
+                start="alghind", rec="Oksjonil: {n} partiid, {s} müüdud{r}", rec0="Kataloogis esimest korda oksjonil", prior="Sama pealkiri varem", unsold="müümata", nores="tulemus avaldamata", nr=" · {k} pakutud, tulemus avaldamata", nrline="Oksjonil: {k} partiid pakutud, tulemused avaldamata",
                 lots="partiid", lot1="partii", mine="{a}: {w}", w1="1 teos", wn="{n} teost", first="Sinu kunstnikud enne", c_art="Kunstnik", c_work="Teos", c_price="Alghind", lot="Partii", hand="Kataloog on oksjonimaja enda lehel; selle partiisid siin ei loetleta.", cat="Kataloog", sort="Järjesta", az="A–Ü", price="Hind", lotno="Partii nr", show="Näita partiisid ↓", hide="Peida partiid ↑", other_l="In English", note="Ülestähendus, mitte hinnang. Uueneb iga nädal.", month=["jaanuar","veebruar","märts","aprill","mai","juuni","juuli","august","september","oktoober","november","detsember"])}
 
 CSS = (":root{--paper:#0B0C0E;--field:#15171A;--ink:#F1F2F4;--ink-soft:#C7CACE;--grey:#8B9098;--rule:#2B2E34;--rule-soft:#212429;"
@@ -123,7 +123,9 @@ def record(ai, lang):
     if not L: return T[lang]["rec0"]
     ps = sorted(w["ap"] for w in L if w.get("ao") and w.get("ap"))
     r = f" · {eur(ps[0], lang)}–{eur(ps[-1], lang)}" if len(ps) > 1 else (f" · {eur(ps[0], lang)}" if ps else "")
-    return T[lang]["rec"].format(n=fmt(len(L), lang), s=fmt(sum(1 for w in L if w.get("ao")), lang), r=r)
+    nr = sum(1 for w in L if w.get("anr"))                  # offered, no result published: never counted as unsold
+    if nr == len(L): return T[lang]["nrline"].format(k=fmt(nr, lang))
+    return T[lang]["rec"].format(n=fmt(len(L) - nr, lang), s=fmt(sum(1 for w in L if w.get("ao")), lang), r=r) + (T[lang]["nr"].format(k=fmt(nr, lang)) if nr else "")
 
 def main():
     urls = []
@@ -152,7 +154,7 @@ def main():
                      f'<table><thead><tr><th>{t["c_art"]}</th><th>{t["c_work"]}</th><th class="n">{t["c_price"]}</th></tr></thead><tbody>')
             for i, u in enumerate(lots):
                 sl = H.ARTIST_SLUG[u["a"]]
-                prior = (f'<span class="m">{t["prior"]}: ' + " · ".join(f'{e(str(p[0])[:4])} {e(house(p[1], lang))} {eur(p[2], lang) if p[2] else t["unsold"]}' for p in u["pr"]) + "</span>") if u.get("pr") else ""
+                prior = (f'<span class="m">{t["prior"]}: ' + " · ".join(f'{e(str(p[0])[:4])} {e(house(p[1], lang))} {eur(p[2], lang) if p[2] else t["nores"] if len(p) > 3 else t["unsold"]}' for p in u["pr"]) + "</span>") if u.get("pr") else ""
                 lot = f'<a class="lot" href="{e(u["u"])}" rel="noopener">{t["lot"]}{" " + str(u["n"]) if u.get("n") else ""} ↗</a>' if str(u.get("u") or "").startswith("http") else ""
                 det = " · ".join(x for x in (u.get("tc"), u.get("dm")) if x)
                 det = f'<span class="m">{e(det)}</span>' if det else ""

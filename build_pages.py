@@ -47,7 +47,7 @@ L = {
  "en": dict(save_a="Save artist", saved_a="Artist saved", save_t="On My List, their best works open the front page's artwall and their lots are marked in the coming sales",
             dir="a", site="Estonian Art Catalogue", kind=KIND, works="works", artists="Artists A–Z", art_nav="Artists",
             year="Year", title="Title", tech="Technique", dims="Dimensions", held="Held by", browse="Browse {n} works in the catalogue →",
-            sold="sold", gone="no longer listed", soldp="Sold €{p}", soldnp="Sold", unsold="Unsold",
+            sold="sold", gone="no longer listed", soldp="Sold €{p}", soldnp="Sold", unsold="Unsold", nores="Result not published", nr=" · {k} offered, result not published",
             some="Showing {k} of {n} records, from every period — <a href=\"{u}\">see all in the catalogue</a>.",
             pics="{p} works with a picture; the first {k} here, all in the catalogue. Pictures for public-domain works, live gallery listings and the works galleries and artists show on their own pages, from those servers.",
             wallh="Artwall", shownat="shown at {g}",
@@ -55,7 +55,7 @@ L = {
             contemp="Contemporaries in {h}: ", allaz="All artists A&ndash;Z",
             linh="Teachers, pupils, circle", teachers="Teachers", pupils="Pupils", circle="Circle", cdir="circles", net="network", innet="In the network of who taught whom →",
             au="{n} auction lots · {s} sold · {y}{r} — as the auction houses published them; not a valuation",
-            foot="Museum records from MuIS and the EKM Digital Collection; gallery stock from the galleries' own catalogues; auction results as Haus Galerii, Vernissage, Allee galerii, Vaal galerii, E-Kunstisalong and Eesti Kunsti Oksjonid published them. ",
+            foot="Museum records from MuIS and the EKM Digital Collection; gallery stock from the galleries' own catalogues; auction results as Haus Galerii, Vernissage, Allee galerii, Vaal galerii, E-Kunstisalong and Eesti Kunsti Oksjonid published them, and the lots Osta Noort Kunsti offered (it publishes no results). ",
             full="Full catalogue", mt=" <span class=\"m\">(machine translation of the holder&#39;s Estonian text, unedited)</span>", enonly="",
             embed_h="Embed on your page", embed_t="A strip of pictures, the count and a link back, for a blog, a course page or a museum's site. Paste both lines: the second is the link that tells search engines where the pictures live.",
             idx_title="Artists A–Z — Estonian Art Catalogue", idx_desc="Every artist in the Estonian Art Catalogue: {n} artists represented in Estonian public collections and galleries.",
@@ -65,7 +65,7 @@ L = {
  "et": dict(save_a="Salvesta kunstnik", saved_a="Kunstnik salvestatud", save_t="Sinu nimekirjas avavad tema parimad teosed avalehe kunstiseina ja tema partiid on tulevatel oksjonitel märgitud",
             dir="k", site="Eesti Kunstikataloog", kind={"school": "õppinud:", "movement": "suund:", "member": "liige:"}, works="teost", artists="Kunstnikud A–Ü", art_nav="Kunstnikud",
             year="Aasta", title="Pealkiri", tech="Tehnika", dims="Mõõdud", held="Hoidja", browse="Sirvi {n} teost kataloogis →",
-            sold="müüdud", gone="enam ei pakuta", soldp="Müüdud €{p}", soldnp="Müüdud", unsold="Müümata",
+            sold="müüdud", gone="enam ei pakuta", soldp="Müüdud €{p}", soldnp="Müüdud", unsold="Müümata", nores="Tulemus avaldamata", nr=" · {k} pakutud, tulemus avaldamata",
             some="{k} kirjet {n}-st, kõigist perioodidest — <a href=\"{u}\">vaata kõiki kataloogis</a>.",
             pics="{p} pildiga teost; siin esimesed {k}, kõik kataloogis. Pilte näidatakse ainult autoriõiguse alt vabade teoste, galeriides müügil olevate teoste ning galeriide ja kunstnike endi lehtedel näidatud teoste kohta, nende serveritest.",
             wallh="Kunstisein", shownat="{g} näitusel",
@@ -73,7 +73,7 @@ L = {
             contemp="Kaasaegsed kogus {h}: ", allaz="Kõik kunstnikud A&ndash;Ü",
             linh="Õpetajad, õpilased, ring", teachers="Õpetajad", pupils="Õpilased", circle="Ring", cdir="ringid", net="vorgustik", innet="Kes keda õpetas: võrgustikus →",
             au="{n} oksjonipartiid · {s} müüdud · {y}{r} — nii, nagu oksjonimajad avaldasid; mitte hinnang",
-            foot="Muuseumikirjed MuISist ja EKM digikogust; galeriide laoseis galeriide endi kataloogidest; oksjonitulemused nii, nagu Haus Galerii, Vernissage, Allee galerii, Vaal galerii, E-Kunstisalong ja Eesti Kunsti Oksjonid need avaldasid. ",
+            foot="Muuseumikirjed MuISist ja EKM digikogust; galeriide laoseis galeriide endi kataloogidest; oksjonitulemused nii, nagu Haus Galerii, Vernissage, Allee galerii, Vaal galerii, E-Kunstisalong ja Eesti Kunsti Oksjonid need avaldasid, ning Osta Noort Kunsti pakutud partiid (tulemusi see ei avalda). ",
             full="Kogu kataloog", mt="", enonly=" <span class=\"m\">(inglise keeles)</span>",
             embed_h="Manusta oma lehele", embed_t="Pildiriba, teoste arv ja link tagasi — blogile, kursuse lehele või muuseumi kodulehele. Kleebi mõlemad read: teine on link, mis ütleb otsimootorile, kust pildid pärit on.",
             idx_title="Kunstnikud A–Ü — Eesti Kunstikataloog", idx_desc="Kõik Eesti Kunstikataloogi kunstnikud: {n} kunstnikku, kelle teoseid on Eesti avalikes kogudes ja galeriides.",
@@ -430,7 +430,7 @@ def render(i, a, ws, lang):
     def holder(w):
         if w.get("kind") == "sold": return f"{e(val(w, 'mu'))} · {T['sold'] if w.get('gs') else T['gone']}"
         if w.get("kind") != "auction": return e(val(w, "mu") or "")
-        out = T["soldp"].format(p=f"{w['ap']:,}") if w.get("ao") and w.get("ap") else T["soldnp"] if w.get("ao") else T["unsold"]
+        out = T["soldp"].format(p=f"{w['ap']:,}") if w.get("ao") and w.get("ap") else T["soldnp"] if w.get("ao") else T["nores"] if w.get("anr") else T["unsold"]
         return f"{e(val(w, 'mu'))} · {e(w.get('an') or '')} · {out}"
     # up to ROWS rows: every auction lot and gallery listing, then the museum records
     # spread evenly over the years -- a cut by date dropped an artist's last decades
@@ -469,8 +469,10 @@ def render(i, a, ws, lang):
     if lots:
         ps = sorted(w["ap"] for w in lots if w.get("ao") and w.get("ap"))
         ys = sorted(int(w["ad"][:4]) for w in lots)
-        au_line = T["au"].format(n=len(lots), s=sum(1 for w in lots if w.get('ao')), y=(ys[0] if ys[0]==ys[-1] else f'{ys[0]}–{ys[-1]}'),
-                                 r=(f" · €{ps[0]:,} – €{ps[-1]:,}" if len(ps) > 1 and ps[0] != ps[-1] else f" · €{ps[0]:,}" if ps else ""))
+        # a lot with no published result (anr) is counted apart, never as unsold
+        nr = sum(1 for w in lots if w.get("anr"))
+        au_line = T["au"].format(n=len(lots) - nr, s=sum(1 for w in lots if w.get('ao')), y=(ys[0] if ys[0]==ys[-1] else f'{ys[0]}–{ys[-1]}'),
+                                 r=(f" · €{ps[0]:,} – €{ps[-1]:,}" if len(ps) > 1 and ps[0] != ps[-1] else f" · €{ps[0]:,}" if ps else "") + (T["nr"].format(k=nr) if nr else ""))
     else: au_line = ""
     bio = (a.get("b") or a.get("ben")) if lang == "et" else (a.get("ben") or a.get("b"))
     bio_note = (T["mt"] if (lang == "en" and a.get("bmt") and a.get("ben")) else T["enonly"] if (lang == "et" and not a.get("b") and a.get("ben")) else "")
