@@ -11,11 +11,11 @@ validate.py does.
          spreadsheet opening the CSV exports would run as a formula
   links  http(s) with a host
   images a gallery's own pictures, from the gallery's own site (or its named image
-         host), and only for works on show or for sale now -- never a sold listing
-         or an auction lot
+         host), and only for works on show or for sale now, or a past listing of a
+         public-domain work -- never one by a later artist, never an auction lot
   prices whole euros in a plausible range
 """
-import json, re, sys, collections, html
+import json, re, sys, collections, html, datetime
 from urllib.parse import urlparse
 
 # real tag names, as a browser reads them, so a lot titled "<NO-23A>" and "a < b" are text and "<p>Oil" is markup
@@ -46,7 +46,8 @@ CONTROL = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]")
 # where a gallery keeps its pictures, when it is not its own site
 IMAGE_HOSTS = {"tokkoarrak.ee": {"squarespace.com"}}
 WITH_IMAGES = {"gallery", "shown", "known"}            # for sale, on show, the Mägi catalogue
-NO_IMAGES = {"sold", "auction"}                         # past listings and lots: never a picture
+NO_IMAGES = {"auction"}                                 # lots: never a picture
+PD_ONLY = {"sold"}                                      # past listings: only of a public-domain work
 PRICE = {"pr": (20, 500_000), "lp": (20, 500_000), "as": (0, 2_000_000), "ap": (1, 2_000_000), "p": (1, 2_000_000)}
 URL_FIELDS = {"url", "u", "im"}
 
@@ -55,6 +56,13 @@ def site(host):
     """registrable part of a host, enough for .ee/.com/.art/.ac: cms.tutar.ee -> tutar.ee"""
     parts = (host or "").lower().removeprefix("www.").split(".")
     return ".".join(parts[-2:])
+
+
+def public_domain(a, year=None):
+    """the artist dead by the end of year-71, or born by year-156 with no death recorded, as merge.py has it"""
+    y = year or datetime.date.today().year
+    b, d = (int(m.group()) if (m := re.search(r"\d{4}", str(x or ""))) else None for x in (a.get("l") or ["", ""])[:2])
+    return bool((d and d <= y - 71) or (b and not d and b <= y - 156))
 
 
 def web(u):
@@ -93,7 +101,7 @@ def check(d):
         if not web(w.get("url")): bad["link not http(s)"].append(f"{where}: {w.get('url')!r}")
         im = w.get("im")
         if not im: continue
-        if kind in NO_IMAGES or kind not in WITH_IMAGES:
+        if kind in NO_IMAGES or kind not in WITH_IMAGES | PD_ONLY or (kind in PD_ONLY and not public_domain(A[w["a"]])):
             bad["picture on a work that may not show one"].append(f"{where}: {im}"); continue
         src, _, u = im.partition(":")
         if src != "g" or not web(u):

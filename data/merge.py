@@ -802,8 +802,10 @@ for g in GAL:
         "gs": (1 if g.get("sold") else 0) if (g.get("sold") or g.get("past")) else None,   # 1 the gallery said sold, 0 no longer listed
         # the gallery's own photograph, for stock only: shown from the gallery's server, with
         # the gallery named, while the listing is live -- what the gallery wants of a work it
-        # is selling. A past listing keeps no image: the sale is over and the picture is theirs.
+        # is selling. A past listing keeps no image: the sale is over and the picture is theirs --
+        # unless the work is in the public domain (below, where the artists' lives are known)
         "im": ("g:" + g["img"]) if g.get("img") and not (g.get("sold") or g.get("past")) else None,
+        **({"_pim": g["img"]} if g.get("img") and (g.get("sold") or g.get("past")) else {}),
         "gl": g.get("last"),                                                              # last month seen for sale
         # the asking price of a work for sale, as its gallery's page states it; a past
         # listing keeps none -- what a work sold for stays between the gallery and the buyer
@@ -1204,6 +1206,13 @@ for w in works:
     elif w.get("oi") and str(w["oi"]) in _ekm:
         w["im"] = "e:" + _ekm[str(w["oi"])];            IMG["ekm"] += 1
         if str(w["oi"]) in _ekmr: w["ir"] = _ekmr[str(w["oi"])]
+# A gallery's past listing of a public-domain work keeps the gallery's photograph,
+# still shown from the gallery's server: no copyright in the work is left to end with
+# the sale, and the photograph of it is not protected either (art. 14, as above). A
+# listing by a later artist stays without, and an auction lot never has one.
+for w in works:
+    pim = w.pop("_pim", None)
+    if pim and _web(pim) and _pd(artists[w["a"]]): w["im"] = "g:" + pim; IMG["past"] = IMG.get("past", 0) + 1
 # A set of different pictures the holder titled identically, told apart by hand:
 # title_fixes.json maps an inventory number to the title shown. Triik's six postcards,
 # all 'Postkaart sarjast "Vene olustik"' in MuIS, are numbered in inventory order with
@@ -1256,7 +1265,7 @@ for w in works:
     im = w.get("im") or ""
     if im.startswith("g:") and im[2:] in _galr: w["ir"] = _galr[im[2:]]
     if im.startswith("m:") and im[2:] in _muisr: w["ir"] = _muisr[im[2:]]
-print("  images: public-domain museum works", IMG["pd"], "-> MuIS", IMG["muis"], "EKM", IMG["ekm"])
+print("  images: public-domain museum works", IMG["pd"], "-> MuIS", IMG["muis"], "EKM", IMG["ekm"], "· past gallery listings", IMG.get("past", 0))
 
 # ---------- upcoming auction lots ----------
 # The lots of sales still to come (upcoming.py): shown on the artist's page and on one

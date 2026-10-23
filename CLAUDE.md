@@ -18,8 +18,9 @@ anything private (keys, accounts, personal plans, correspondence) out of this fi
 ## Rules
 
 - Images: museum works only by public-domain artists, embedded live from MuIS / EKM; gallery pictures
-  only for live stock, embedded from the gallery's own server. Never past listings, auction lots or
-  in-copyright museum works. Embed, never copy. Settled; don't reopen.
+  only for live stock, embedded from the gallery's own server, plus past listings of public-domain
+  artists (2026-10-23). Never past listings by later artists, auction lots or in-copyright museum
+  works. Embed, never copy. Settled; don't reopen.
 - Prices: asking prices of current stock (`data/asking_price.py`). A sold gallery work keeps a price
   only when its own page still shows it (Allee: "12 000 € Müüdud."), read fresh from that page and
   shown as "sold · listed at X €" (`lp`), never as what it sold for and never from an older snapshot.
