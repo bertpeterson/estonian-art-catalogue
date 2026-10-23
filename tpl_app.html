@@ -1100,6 +1100,7 @@
       const imHref = im.startsWith("g:") ? (w.url || imSrc)
                    : im.startsWith("m:") ? `https://opendata.muis.ee/dhmedia/${encodeURIComponent(im.slice(2))}` : imSrc;
       const imCap = w.kind === "known" ? esc(T("d_image", {h: musName("Konrad Mägi Sihtasutus")})) + " · " + esc(T("d_pd", {a: ar.n, l: life || "—"}))
+                  : im.startsWith("g:") && w.kind === "sold" ? esc(T("d_image", {h: musName(w.mu)})) + " · " + esc(T("d_imgpast")) + " · " + esc(T("d_pd", {a: ar.n, l: life || "—"}))
                   : im.startsWith("g:") ? esc(T("d_image", {h: musName(w.mu)})) + " · " + esc(T(w.kind === "shown" ? "d_imgshown" : "d_imgstock"))
                   : esc(T("d_image", {h: musName(w.mu)})) + (im.startsWith("m:") ? " · MuIS" : " · EKM") + " · " + esc(T("d_pd", {a: ar.n, l: life || "—"}));
       // the record's picture, less its colour chart where there is one: the box takes the

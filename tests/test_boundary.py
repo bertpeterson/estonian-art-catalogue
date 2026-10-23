@@ -82,7 +82,11 @@ class Check(unittest.TestCase):
         self.assertIn("picture from another site than the work's page",
                       self.fails(data(im="g:https://images.example.com/x.jpg")))
         self.assertIn("picture not an http(s) gallery image", self.fails(data(im="g:javascript:alert(1)")))
-        self.assertIn("picture on a work that may not show one", self.fails(data(kind="sold")))   # a past listing
+        self.assertIn("picture on a work that may not show one", self.fails(data(kind="sold")))   # a past listing, living artist
+        d = data(kind="sold"); d["artists"][0]["l"] = ["1882", "1925"]                             # ...and a public-domain one
+        self.assertEqual(self.fails(d), set())
+        d["artists"][0]["l"] = ["1882", ""]                                                       # born too late to assume dead long enough
+        self.assertIn("picture on a work that may not show one", self.fails(d))
         self.assertIn("picture on a work that may not show one", self.fails(data(kind="auction")))
         # a gallery's own image host
         self.assertEqual(self.fails(data(url="https://www.tutar.ee/teosed/x", im="g:https://cms.tutar.ee/x.jpg")), set())
