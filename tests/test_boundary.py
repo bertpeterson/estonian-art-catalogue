@@ -9,7 +9,7 @@ import copy, os, sys, unittest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "data"))
 from boundary import plain, check          # noqa: E402
-from asking_price import asking, euros     # noqa: E402
+from asking_price import asking, euros, listed     # noqa: E402
 
 
 class Plain(unittest.TestCase):
@@ -117,6 +117,13 @@ class Prices(unittest.TestCase):
         self.assertEqual(asking({"prices": {**p["prices"], "currency_code": "USD"}}), {})
         self.assertEqual(asking({"prices": {**p["prices"], "price_range": {"min": 1}}}), {})
         self.assertEqual(asking({"prices": {"price": "abc", "currency_code": "EUR"}}), {})
+
+    def test_listed(self):
+        p = {"prices": {"price": "1200000", "currency_code": "EUR", "currency_minor_unit": 2}}
+        self.assertEqual(listed({**p, "is_in_stock": False}), {"listed": 12000})
+        self.assertEqual(listed({**p, "is_in_stock": True, "categories": [{"name": "Müüdud"}]}), {"listed": 12000})
+        self.assertEqual(listed({**p, "is_in_stock": True}), {})            # stock has an asking price, not a listed one
+        self.assertEqual(listed({"is_in_stock": False, "prices": {"price": "0", "currency_code": "EUR"}}), {})
 
 
 if __name__ == "__main__":

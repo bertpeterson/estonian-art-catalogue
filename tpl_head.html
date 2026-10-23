@@ -629,6 +629,8 @@ footer a{border-bottom:1px solid var(--rule)}
 /* the columns must line up with every other row; the price alone fits the same gutter */
 .rl-au.unsold{color:var(--grey-4)}
 .rl-past{color:var(--grey-4)}
+/* a sold work with the price its page still shows: a longer link, so the row leaves it more room */
+.row.has-lp .row-btn{padding-right:250px} .rl .lp-s{display:none}
 .d-sub{font-size:.78rem;color:var(--grey-6)}
 /* a work's results in order, the latest (the one this row is) in ink */
 .au-hist{margin-top:8px;font-family:var(--mono);font-size:.7rem;border-top:1px solid var(--rule)}
@@ -669,6 +671,7 @@ footer a{border-bottom:1px solid var(--rule)}
   .row-btn{grid-template-columns:86px minmax(0,1fr);gap:10px;padding-top:7px;padding-bottom:7px}
   .r-artist{grid-column:2;font-size:.72rem}
   .r-med,.r-coll{display:none}
+  .row.has-lp .row-btn{padding-right:118px} .rl .lp-l{display:none} .rl .lp-s{display:inline}
   .detail{grid-template-columns:1fr;gap:18px}
   .facetbar{grid-template-columns:1fr;gap:8px}
   footer{grid-template-columns:1fr}

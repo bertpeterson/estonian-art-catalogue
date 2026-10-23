@@ -47,7 +47,7 @@ L = {
  "en": dict(save_a="Save artist", saved_a="Artist saved", save_t="On My List, their best works open the front page's artwall and their lots are marked in the coming sales",
             dir="a", site="Estonian Art Catalogue", kind=KIND, works="works", artists="Artists A–Z", art_nav="Artists",
             year="Year", title="Title", tech="Technique", dims="Dimensions", held="Held by", browse="Browse {n} works in the catalogue →",
-            sold="sold", gone="no longer listed", soldp="Sold €{p}", soldnp="Sold", unsold="Unsold", nores="Result not published", nr=" · {k} offered, result not published",
+            sold="sold", soldlp="sold · listed at €{p}", gone="no longer listed", soldp="Sold €{p}", soldnp="Sold", unsold="Unsold", nores="Result not published", nr=" · {k} offered, result not published",
             some="Showing {k} of {n} records, from every period — <a href=\"{u}\">see all in the catalogue</a>.",
             pics="{p} works with a picture; the first {k} here, all in the catalogue. Pictures for public-domain works, live gallery listings and the works galleries and artists show on their own pages, from those servers.",
             wallh="Artwall", shownat="shown at {g}",
@@ -65,7 +65,7 @@ L = {
  "et": dict(save_a="Salvesta kunstnik", saved_a="Kunstnik salvestatud", save_t="Sinu nimekirjas avavad tema parimad teosed avalehe kunstiseina ja tema partiid on tulevatel oksjonitel märgitud",
             dir="k", site="Eesti Kunstikataloog", kind={"school": "õppinud:", "movement": "suund:", "member": "liige:"}, works="teost", artists="Kunstnikud A–Ü", art_nav="Kunstnikud",
             year="Aasta", title="Pealkiri", tech="Tehnika", dims="Mõõdud", held="Hoidja", browse="Sirvi {n} teost kataloogis →",
-            sold="müüdud", gone="enam ei pakuta", soldp="Müüdud €{p}", soldnp="Müüdud", unsold="Müümata", nores="Tulemus avaldamata", nr=" · {k} pakutud, tulemus avaldamata",
+            sold="müüdud", soldlp="müüdud · hinnaga €{p}", gone="enam ei pakuta", soldp="Müüdud €{p}", soldnp="Müüdud", unsold="Müümata", nores="Tulemus avaldamata", nr=" · {k} pakutud, tulemus avaldamata",
             some="{k} kirjet {n}-st, kõigist perioodidest — <a href=\"{u}\">vaata kõiki kataloogis</a>.",
             pics="{p} pildiga teost; siin esimesed {k}, kõik kataloogis. Pilte näidatakse ainult autoriõiguse alt vabade teoste, galeriides müügil olevate teoste ning galeriide ja kunstnike endi lehtedel näidatud teoste kohta, nende serveritest.",
             wallh="Kunstisein", shownat="{g} näitusel",
@@ -428,7 +428,7 @@ def render(i, a, ws, lang):
         if p_ and len(desc) + 1 + len(p_) <= 300: desc += " " + p_
 
     def holder(w):
-        if w.get("kind") == "sold": return f"{e(val(w, 'mu'))} · {T['sold'] if w.get('gs') else T['gone']}"
+        if w.get("kind") == "sold": return f"{e(val(w, 'mu'))} · {(T['soldlp'].format(p=format(w['lp'], ',')) if w.get('lp') else T['sold']) if w.get('gs') else T['gone']}"
         if w.get("kind") != "auction": return e(val(w, "mu") or "")
         out = T["soldp"].format(p=f"{w['ap']:,}") if w.get("ao") and w.get("ap") else T["soldnp"] if w.get("ao") else T["nores"] if w.get("anr") else T["unsold"]
         return f"{e(val(w, 'mu'))} · {e(w.get('an') or '')} · {out}"

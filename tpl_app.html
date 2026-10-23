@@ -263,7 +263,9 @@
   // a museum holding or a work shown; not stock, not a past listing, not a lot
   const isHeld = w => !w.kind || w.kind === "held" || w.kind === "shown";
   // a past listing: sold, or no longer listed -- and the month it was last seen for sale
-  const pastText = w => w.gs ? T("rl_sold") : T("rl_gone");
+  const pastText = w => w.gs ? (w.lp ? T("rl_soldlp", {p: eur(w.lp)}) : T("rl_sold")) : T("rl_gone");
+  // on the row, a phone has room for the listed price alone; the wording is in the detail
+  const pastRow = w => w.gs && w.lp ? `<span class="lp-l">${esc(pastText(w))}</span><span class="lp-s">${esc(eur(w.lp))}</span>` : esc(pastText(w));
   // An auction result: the sale, and what the house published about the outcome.
   const eur = n => "€" + fmt(n);
   // a lot sold after the sale reads "Sold" like any other; the detail panel says how
@@ -1134,7 +1136,7 @@
           ${w.c?`<div class="d-k">${esc(T("d_category"))}</div><div class="d-v">${catsOf(w).map(c => `<a class="d-cat" href="#cat=${esc(slug(c))}" data-setcat="${esc(c)}" title="${esc(T("d_catall", {c: catName(c)}))}">${esc(catName(c))}</a>`).join(" · ")}</div>`:""}
           <div class="d-k">${esc(isHeld(w)?T("d_collection"):T("venue"))}</div><div class="d-v">${w.co?esc(collName(w.co))+"<br>":""}<em>${siteOf(w.mu) ? `<a class="permalink" href="${esc(siteOf(w.mu))}" target="_blank" rel="noopener">${esc(musName(w.mu))}</a>` : esc(musName(w.mu))}</em></div>
           <div class="d-k">${esc(T("kind"))}</div><div class="d-v">${esc(T(w.kind==="shown"?(w.s==="gallery"?"kind_shown_gal":"shown"):w.kind==="gallery"?"gallery":w.kind==="auction"?"kind_auction":w.kind==="sold"?"kind_sold":w.kind==="known"?"kind_known":"held"))}${w.kind==="known"?`<br><span class="d-sub">${esc(T("d_knownnote"))}</span>`:""}</div>
-          ${w.kind==="sold" ? `<div class="d-k">${esc(T("d_status"))}</div><div class="d-v">${esc(pastText(w))}${w.gl ? `<br><span class="d-sub">${esc(T("d_lastseen", {d: w.gl}))}</span>` : ""}<br><span class="d-sub">${esc(T("d_pastnote"))}</span></div>` : ""}
+          ${w.kind==="sold" ? `<div class="d-k">${esc(T("d_status"))}</div><div class="d-v">${esc(pastText(w))}${w.gl ? `<br><span class="d-sub">${esc(T("d_lastseen", {d: w.gl}))}</span>` : ""}<br><span class="d-sub">${esc(T(w.lp ? "d_pastnotelp" : "d_pastnote"))}</span></div>` : ""}
           ${w.kind==="auction" ? `<div class="d-k">${esc(T("d_result"))}</div><div class="d-v">${esc(w.an)} · <b>${esc(auText(w))}</b>${w.as ? `<br><span class="d-sub">${esc(T("d_start", {p: eur(w.as)}))}</span>` : ""}${w.apr ? `<br><span class="d-sub">${esc(T("d_press"))}: ${esc(w.apr)}</span>` : ""}${w.adb ? `<br><span class="d-sub">${esc(w.adb[LANG] || w.adb.en)}</span>` : ""}${chainOf(w) ? `<div class="au-hist">${chainOf(w).map(x => `<div class="au-row${x === w ? " now" : ""}"><span>${esc(String(x.ad).slice(0, 4))}</span><span>${esc(x.an.toLowerCase().includes(musName(x.mu).toLowerCase().split(" ")[0]) ? x.an : musName(x.mu) + " · " + x.an)}</span><span class="n">${x.ao ? (x.ap ? esc(eur(x.ap)) : esc(T("au_soldnp"))) : esc(T(x.anr ? "au_nores" : "au_unsold"))}${x.as ? ` <em>(${esc(eur(x.as))})</em>` : ""}</span>${x.url ? `<a href="${href(x.url)}" target="_blank" rel="noopener">↗</a>` : "<span></span>"}</div>${x.adb ? `<div class="au-doubt">${esc(x.adb[LANG] || x.adb.en)}</div>` : ""}`).join("")}</div>` : ""}${w.aa ? `<br><span class="d-sub">${esc(T("au_afternote"))}</span>` : ""}<br><span class="d-sub">${esc(T("au_note"))}</span></div>` : ""}
           ${w.nu ? `<div class="d-k">${esc(T("d_number"))}</div><div class="d-v" style="font-family:var(--mono);font-size:.78rem">${esc(w.nu)}</div>` : ""}
           ${ar.wdesc?`<div class="d-k">${esc(T("d_origin"))}</div><div class="d-v">${esc(ar.wdesc)}${ar.qid?` <a class="permalink" href="https://www.wikidata.org/wiki/${esc(ar.qid)}" target="_blank" rel="noopener">${esc(T("d_wd"))}</a>`:""}</div>`:""}
@@ -1153,8 +1155,8 @@
       // a past listing links to the gallery's page for as long as it stays up
       : w.kind === "sold"
       ? (w.url
-        ? `<a class="rl rl-past" href="${href(w.url)}" target="_blank" rel="noopener" title="${esc(T("d_pastlink", {g: musName(w.mu)}))}${w.gl ? ` · ${esc(T("d_lastseen", {d: w.gl}))}` : ""}">${esc(pastText(w))} ↗</a>`
-        : `<span class="rl rl-past">${esc(pastText(w))}</span>`)
+        ? `<a class="rl rl-past" href="${href(w.url)}" target="_blank" rel="noopener" title="${esc(T("d_pastlink", {g: musName(w.mu)}))}${w.gl ? ` · ${esc(T("d_lastseen", {d: w.gl}))}` : ""}">${pastRow(w)} ↗</a>`
+        : `<span class="rl rl-past">${pastRow(w)}</span>`)
       // an auction result carries its outcome on the row: the sale is the point of the record
       : w.kind === "auction" && w.url
       // the price alone on the row -- it is the outcome; "sold" is in the title and the detail
@@ -1162,7 +1164,7 @@
       // a known work links to its entry in the catalogue raisonné
       : w.kind === "known" && w.url
       ? `<a class="rl rl-past" href="${href(w.url)}" target="_blank" rel="noopener" title="${esc(T("d_knownlink"))}">${esc(T("rl_known"))} ↗</a>` : "";
-    return `<div class="row${rl ? " has-link" : ""}${w.kind === "auction" ? " au" : ""}" data-open="${open}">
+    return `<div class="row${rl ? " has-link" : ""}${w.kind === "sold" && w.gs && w.lp ? " has-lp" : ""}${w.kind === "auction" ? " au" : ""}" data-open="${open}">
       <button class="row-btn" data-id="${esc(id)}" aria-expanded="${open}">
         ${yr}
         <span class="r-title" title="${esc(w.t)}">${esc(w.t)}${w.n>1?`<span class="src-tag" title="${w.n} catalogued objects share this title and date — sheets, impressions or parts">×${w.n}</span>`:""}${chainOf(w)?`<span class="src-tag" title="${esc(T("au_chain_t", {n: chainOf(w).length}))}">×${chainOf(w).length}</span>`:""}</span>

@@ -20,7 +20,10 @@ anything private (keys, accounts, personal plans, correspondence) out of this fi
 - Images: museum works only by public-domain artists, embedded live from MuIS / EKM; gallery pictures
   only for live stock, embedded from the gallery's own server. Never past listings, auction lots or
   in-copyright museum works. Embed, never copy. Settled; don't reopen.
-- Prices: asking prices of current stock only (`data/asking_price.py`), never what a work sold for.
+- Prices: asking prices of current stock (`data/asking_price.py`). A sold gallery work keeps a price
+  only when its own page still shows it (Allee: "12 000 € Müüdud."), read fresh from that page and
+  shown as "sold · listed at X €" (`lp`), never as what it sold for and never from an older snapshot.
+  No picture for a sold work.
 - "The artwall" means the curated first page of the landing wall, `data/masterpieces.json`. Removing
   a work from it never removes it from the catalogue.
 - Never print or echo an API key in tool output.
