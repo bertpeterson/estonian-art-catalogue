@@ -47,7 +47,7 @@ CONTROL = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]")
 IMAGE_HOSTS = {"tokkoarrak.ee": {"squarespace.com"}}
 WITH_IMAGES = {"gallery", "shown", "known"}            # for sale, on show, the Mägi catalogue
 NO_IMAGES = {"sold", "auction"}                         # past listings and lots: never a picture
-PRICE = {"pr": (20, 500_000), "as": (0, 2_000_000), "ap": (1, 2_000_000), "p": (1, 2_000_000)}
+PRICE = {"pr": (20, 500_000), "lp": (20, 500_000), "as": (0, 2_000_000), "ap": (1, 2_000_000), "p": (1, 2_000_000)}
 URL_FIELDS = {"url", "u", "im"}
 
 

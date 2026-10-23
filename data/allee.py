@@ -7,10 +7,11 @@ category "E-pood": what is purchasable and in stock now. The name is the lot lin
 the house uses everywhere -- "Endel Kõks “Théme-timide”, 1968" -- and the short
 description opens with the medium and the size: "Söövitus paberil. Raamitud.
 Mõõdud: plm 17,4 x 15 cm, raamiga 41 x 38 cm." The work's own size is taken, not
-the frame's. The asking price of current stock is read (asking_price.py); a sold work's never.
+the frame's. The asking price of current stock is read (asking_price.py); a sold work keeps
+the price its page still shows, as the price it was listed at (listed()), never as what it sold for.
 """
 import re, json, os, time, html, urllib.request, ssl
-from asking_price import asking
+from asking_price import asking, listed
 import store_api
 
 API = "https://alleegalerii.ee/wp-json/wc/store/v1/products"
@@ -52,6 +53,7 @@ while True:
         yl = (m.group("rest") or "").strip(" ,.")
         y4 = re.search(r"(1[5-9]\d\d|20[0-2]\d)", yl)
         desc = clean(p.get("short_description") or "") or clean(p.get("description") or "")
+        desc = re.sub(r"^\s*müüdud\s*[.!]?\s*", "", desc, flags=re.I)        # a sold work's description opens "Müüdud." before the medium
         first = re.split(r"\.\s", desc, 1)[0]
         medium = first.strip(" .") if first and len(first) < 60 and not re.search(r"\d", first) else ""
         if re.fullmatch(r"(raamitud|raamimata|signeeritud)", medium, re.I): medium = ""   # a framing note, not a medium
@@ -63,7 +65,7 @@ while True:
         seen.add(gid)
         recs.append({**asking(p, is_sold), "gid": gid, "artist": artist, "title": title, "year": y4.group(1) if y4 else None,
                      "tech": medium, "dims": dims, "gallery": "Allee galerii", "city": "Tallinn",
-                     "url": p.get("permalink") or "https://alleegalerii.ee", **({"sold": True} if is_sold else {}),
+                     "url": p.get("permalink") or "https://alleegalerii.ee", **({"sold": True, **listed(p)} if is_sold else {}),
                      **({"img": p["images"][0].get("src")} if p.get("images") and p["images"][0].get("src") else {})})
     if page % 5 == 0: print(f"  page {page}  kept {len(recs)}", flush=True)
     page += 1; time.sleep(10)     # the crawl delay alleegalerii.ee asks for

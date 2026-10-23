@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
 """The asking price of a work a gallery has for sale, from a WooCommerce Store API product.
 
-Current stock only: a work that is sold, out of stock or reserved gets no price, and
-merge.py drops any price from a past listing. What a work sold for stays between the
-gallery and the buyer; what the gallery asks for it is on its own shop page.
+Current stock only: a work that is sold, out of stock or reserved gets no asking price,
+and merge.py drops any asking price from a past listing. What a buyer paid stays between
+the gallery and the buyer; what the gallery asks for it is on its own shop page.
+A gallery that keeps a sold work's page up with its price on it (Allee: "12 000 € Müüdud.")
+has published that price itself: listed() reads it as the price the work was listed at,
+never as what it sold for, and only from the sold page as it stands, not an older snapshot.
 Whole euros; nothing for a price in another currency, a price range or a zero.
 """
 
@@ -13,6 +16,12 @@ def asking(p, sold=False):
     try: n = int(pr.get("price") or 0) / 10 ** int(pr.get("currency_minor_unit") or 0)
     except (TypeError, ValueError): return {}
     return {"price": round(n)} if n >= 1 else {}
+
+def listed(p):
+    """The price a sold work's own page still shows -> {'listed': 12000}; {} for one in stock"""
+    if p.get("is_in_stock", True) and not any((c.get("name") or "") == "Müüdud" for c in p.get("categories") or []): return {}
+    n = asking({**p, "is_in_stock": True}).get("price")
+    return {"listed": n} if n else {}
 
 
 import re

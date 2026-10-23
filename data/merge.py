@@ -807,7 +807,10 @@ for g in GAL:
         "gl": g.get("last"),                                                              # last month seen for sale
         # the asking price of a work for sale, as its gallery's page states it; a past
         # listing keeps none -- what a work sold for stays between the gallery and the buyer
-        **({"pr": int(g["price"])} if g.get("price") and not (g.get("sold") or g.get("past") or g.get("shown")) else {})})
+        **({"pr": int(g["price"])} if g.get("price") and not (g.get("sold") or g.get("past") or g.get("shown")) else {}),
+        # a sold work whose page still shows its price: the price it was listed at, as the
+        # gallery itself published it -- not what the buyer paid, and never for stock
+        **({"lp": int(g["listed"])} if g.get("listed") and g.get("sold") and not g.get("past") else {})})
     gal_added += 1
 # NOBA publishes no birth years, but the biographies its artists write usually state
 # one -- "sündinud 1987", "born 1974", "(s. 1962)". Read from the biography only for
