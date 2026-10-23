@@ -1385,6 +1385,22 @@ for ws in _sp.values():
     _spn += 1
     for w in ws: w["sp"] = _spn
 print("  one picture on several records:", _spn, "pictures,", sum(len(v) for v in _sp.values() if len(v) > 1), "records")
+# What this data.json was made from: each input's entries and a short hash of its content,
+# so two builds can be told apart by their inputs, and a source that suddenly shrinks shows
+# up in the meta beside the counts it fed
+import hashlib
+data["meta"]["sources"] = {}
+for f in ("records.json", "oai_records.json", "dk_records.json", "dk_authors.json", "cca_ekkm.json",
+          "wd_artists.json", "wd_desc.json", "wd_occ.json", "wd_occ_labels.json", "wd_groups.json",
+          "wd_dates.json", "wd_matches2.json", "wd_matches3.json", "gallery_records.json", "gallery_past.json",
+          "noba_artists.json", "konradmagi_records.json", "auction_records.json", "press_results.json",
+          "auction_doubt.json", "upcoming_records.json", "venues.json", "raw/image_urls.json.gz",
+          "oai_images.json", "ekm_images.json", "ekm_shapes.json", "gallery_shapes.json", "muis_shapes.json",
+          "oai_shapes.json", "title_fixes.json", "highlights.json", "masterpieces.json", "same_pictures.json",
+          "translations.json"):
+    if not os.path.exists(f): continue
+    raw = (gzip.open if f.endswith(".gz") else open)(f, "rb").read()   # a .gz by its content, not its packing
+    data["meta"]["sources"][f] = {"n": len(json.loads(raw)), "sha": hashlib.sha256(raw).hexdigest()[:12]}
 json.dump(data,open("data.json", "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
 print("data.json", os.path.getsize("data.json")//1024, "KB")
 for k, v in data["meta"].items(): print(" ", k, v)
