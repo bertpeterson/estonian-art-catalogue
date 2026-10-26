@@ -185,7 +185,11 @@ _galleries = {name("mu", w.get("mu")) for w in _sale}
 from moods import PAINT as _PAINT
 _PRINTED = re.compile(r"giclée|giclee|serigraaf|litograaf|digitrük|\bprint", re.I)
 _tech = lambda w: f'{name("tc", w.get("tc")) or ""} {name("tce", w.get("tce")) or ""}'
-_ok = [w for w in _sale if 150 <= (w.get("pr") or 0) <= 20000 and not re.search(r"müüdud|\bsold\b", _tech(w), re.I)]
+# works kept off this row by hand (2026-10-26); they stay on Buy art and the artist pages
+_NOT_HOME = {"https://www.e-kunstisalong.ee/Maastik_13793", "https://www.e-kunstisalong.ee/Allee_Ilse_Leetaru_4463",
+             "https://vernissage.ee/toode/tonis-laanemaa-valge-puri-1969-akvarell-guass-paber-lm-431-x-50-cm/"}
+_ok = [w for w in _sale if 150 <= (w.get("pr") or 0) <= 20000 and not re.search(r"müüdud|\bsold\b", _tech(w), re.I)
+       and w["url"] not in _NOT_HOME]
 _painting = lambda w: name("e", w.get("e")) in _PAINT and not _PRINTED.search(_tech(w))
 def _row(sixes=6):
     by_p, by_o = collections.defaultdict(list), collections.defaultdict(list)
