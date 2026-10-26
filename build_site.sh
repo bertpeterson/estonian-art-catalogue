@@ -31,6 +31,8 @@ python3 -u build_circles.py || exit 1
 python3 -u build_embed.py || exit 1
 # the coming sales: the lots of auctions still ahead, with the artists' records beside them
 python3 -u build_upcoming.py || exit 1
+# the finished sales: each sale's lots with the hammer prices, newest sale first
+python3 -u build_past_sales.py || exit 1
 # the catalogue in figures
 python3 -u build_stats.py
 # art by mood: the words a visitor picks, and the museum pictures that answer to them
@@ -47,4 +49,4 @@ python3 -u build_admin.py || exit 1
 python3 -u csp.py site || exit 1
 # a build that lost its pages must not ship: the artist pages went out missing once
 # when build_pages.py failed inside a pipe and the OK line hid it
-[ -f site/a/index.html ] && [ "$(ls site/a | wc -l)" -gt 1000 ] && [ -f site/stats.html ] && [ -f site/stats-et.html ] && [ -f site/mood.html ] && [ -f site/meeleolu.html ] && [ -f site/data/mood.json ] && [ -f site/find.html ] && [ -f site/leia.html ] && [ -f site/data/stock.json ] && [ -f site/data/for-sale.csv ] && [ -f site/llms.txt ] && [ -f site/account.html ] && [ -f site/konto.html ] && [ -f site/privacy.html ] && [ -f site/privaatsus.html ] && [ -f site/fonts/fonts.css ] || { echo "BUILD FAILED: site/a, stats or mood missing"; exit 1; }
+[ -f site/a/index.html ] && [ "$(ls site/a | wc -l)" -gt 1000 ] && [ -f site/stats.html ] && [ -f site/past-sales.html ] && [ -f site/moodunud-oksjonid.html ] && [ -f site/stats-et.html ] && [ -f site/mood.html ] && [ -f site/meeleolu.html ] && [ -f site/data/mood.json ] && [ -f site/find.html ] && [ -f site/leia.html ] && [ -f site/data/stock.json ] && [ -f site/data/for-sale.csv ] && [ -f site/llms.txt ] && [ -f site/account.html ] && [ -f site/konto.html ] && [ -f site/privacy.html ] && [ -f site/privaatsus.html ] && [ -f site/fonts/fonts.css ] || { echo "BUILD FAILED: site/a, stats or mood missing"; exit 1; }
