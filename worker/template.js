@@ -35,6 +35,7 @@ const MODEL = "claude-haiku-4-5";
 const ORIGINS = ["https://museaal.ee", "https://www.museaal.ee"];
 const PER_MINUTE = 20;          // searches and turns per visitor per minute, per Worker instance (both doors)
 const CALLS_PER_MINUTE = 60;    // all requests, a turn's tool rounds included
+const ASK_PER_DAY = 2000;       // Buy Art questions a day, all visitors together (the c:ask counter): past it /ask rests till midnight UTC
 
 const SYSTEM = "You match a visitor's words to a museum's picture search. The museum has scored every picture in " +
   "its collection of Estonian art against a fixed list of words: moods, light, colour, season and weather, and " +
@@ -279,19 +280,39 @@ async function claude(env, system, messages, schema, max_tokens, model = MODEL) 
 // the turn's tool rounds so far, as the page sends them back: Claude's turns (unchanged, thinking blocks
 // included: Sonnet needs them back as they were) and the page's results, alternating. Also the ids of
 // every work the results named: the only works Claude may pick
-function trailOf(t) {
-  if (!Array.isArray(t) || t.length > 2 * ROUNDS || t.length % 2 || JSON.stringify(t).length > 80000) return null;
-  const ids = new Set();
+async function trailOf(t, env, ip) {
+  if (!Array.isArray(t) || t.length > 2 * ROUNDS || t.length % 2 || JSON.stringify(t).length > 200000) return null;
+  const ids = new Set(), out = [];
   for (let i = 0; i < t.length; i++) {
-    const m = t[i], c = m && m.content;
-    if (!m || m.role !== (i % 2 ? "user" : "assistant") || !Array.isArray(c) || !c.length) return null;
-    if (i % 2 === 0 && !c.every(b => b && ["text", "thinking", "redacted_thinking", "tool_use"].includes(b.type))) return null;
+    const m = t[i];
+    if (!m || m.role !== (i % 2 ? "user" : "assistant")) return null;
+    const c = i % 2 ? m.content : await unseal(env, ip, m.content);
+    if (!Array.isArray(c) || !c.length) return null;
     if (i % 2 === 1) {
       if (!c.every(b => b && b.type === "tool_result" && typeof b.content === "string" && b.content.length <= 10000)) return null;
       for (const b of c) for (const x of b.content.matchAll(/"id":"(w\d+)"/g)) ids.add(x[1]);
     }
+    out.push({ role: m.role, content: c });
   }
-  return { t: t.map(m => ({ role: m.role, content: m.content })), ids };
+  return { t: out, ids };
+}
+// Claude's turns go to the page sealed (AES-GCM, the key made from ANTHROPIC_API_KEY) and come back the same way: the
+// page can neither read them nor write its own, so the door runs this page's searches and is no open line to Claude.
+// A seal is good for the visitor's address and ten minutes
+const SEAL_TTL = 600;
+const unb64u = s => Uint8Array.from(atob(s.replace(/-/g, "+").replace(/_/g, "/")), c => c.charCodeAt(0));
+const sealKey = async env => crypto.subtle.importKey("raw", await crypto.subtle.digest("SHA-256", enc("trail|" + env.ANTHROPIC_API_KEY)), "AES-GCM", false, ["encrypt", "decrypt"]);
+async function seal(env, ip, content) {
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const c = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, await sealKey(env), enc(JSON.stringify({ ip, exp: Date.now() + SEAL_TTL * 1000, content })));
+  return b64u(iv) + "." + b64u(c);
+}
+async function unseal(env, ip, s) {
+  try {
+    const [iv, c] = String(s).split(".");
+    const x = JSON.parse(new TextDecoder().decode(await crypto.subtle.decrypt({ name: "AES-GCM", iv: unb64u(iv) }, await sealKey(env), unb64u(c))));
+    return x.ip === ip && x.exp > Date.now() && Array.isArray(x.content) ? x.content : null;
+  } catch (e) { return null; }
 }
 
 // the language of a message: its common words counted; letters like ä alone (an Estonian name in English) do not decide it
@@ -330,7 +351,7 @@ function mylist(v) {
     "a saved work's id. Otherwise leave it aside, and never list it back to them.";
 }
 
-async function ask(body, env, reply) {
+async function ask(body, env, reply, ip) {
   const messages = conversation(body);
   if (!messages.length) return reply({ error: "Nothing to read." }, 400);
   let out;
@@ -346,7 +367,7 @@ async function ask(body, env, reply) {
   }
   const was = controls(body.filters);
   // a page that runs the tools, on a turn without a photo: Claude looks before it answers
-  const trail = body.tools && !photo ? trailOf(body.trail || []) : null;
+  const trail = body.tools && !photo ? await trailOf(body.trail || [], env, ip) : null;
   if (body.tools && !photo && !trail) return reply({ error: "Unreadable search steps." }, 400);
   const system = (trail ? SYSTEM_TOOLS : SYSTEM_ASK) + "\n\n" + was.text + mylist(body.mylist) + "\n\n" + (et
     ? "Reply in Estonian: plain, neutral, matter-of-fact Estonian, addressing the visitor as 'sina'; no exclamations or compliments."
@@ -360,7 +381,7 @@ async function ask(body, env, reply) {
         { tools: TOOLS, tool_choice: { type: trail.t.length / 2 >= ROUNDS ? "none" : "auto" }, cache_control: { type: "ephemeral" } });
       if (!m) return reply(none);
       const calls = m.content.filter(b => b.type === "tool_use");
-      if (m.stop === "tool_use" && calls.length) return reply({ calls: calls.map(b => ({ id: b.id, name: b.name, input: b.input })), content: m.content });
+      if (m.stop === "tool_use" && calls.length) return reply({ calls: calls.map(b => ({ id: b.id, name: b.name, input: b.input })), content: await seal(env, ip, m.content) });
       out = answer(m.content);
       // an answer with no reply (seen once, Sonnet, no search made): the one-call answer instead
       if (!String(out.reply || "").trim()) out = await claude(env, system.replace(SYSTEM_TOOLS, SYSTEM_ASK), messages, SCHEMA_ASK, et ? 800 : 400, et ? SONNET : MODEL);
@@ -404,7 +425,7 @@ async function ask(body, env, reply) {
 // binding LISTS and the secrets LIST_SECRET and RESEND_API_KEY (worker/README.md); MAIL_FROM optional.
 const LINK_TTL = 15 * 60, SESSION_TTL = 365 * 86400, LIST_TTL = 2 * 365 * 86400, LIST_MAX = 1000, LINKS_PER_HOUR = 4;
 const enc = s => new TextEncoder().encode(s);
-const b64u = b => btoa(String.fromCharCode(...new Uint8Array(b))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+const b64u = b => { let s = ""; for (const x of new Uint8Array(b)) s += String.fromCharCode(x); return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, ""); };
 const token = () => b64u(crypto.getRandomValues(new Uint8Array(24)));
 const hash = async s => b64u(await crypto.subtle.digest("SHA-256", enc(s)));
 async function account(env, email) {
@@ -478,9 +499,10 @@ async function list(path, body, env, reply, ip) {
     await KV.delete(k);
     const rec = await KV.get("u:" + t.u, "json");
     if (!rec) await bump(env, "signup").catch(() => {});
-    if (!rec || rec.e !== t.e) await putList(KV, t.u, { items: [], updated: Date.now(), ...rec, e: t.e, since: rec ? rec.since : today() });
+    // born: when the account began, so a session from before it was deleted and made again is no longer good (below)
+    if (!rec || rec.e !== t.e) await putList(KV, t.u, { items: [], updated: Date.now(), ...(rec ? {} : { born: Date.now() }), ...rec, e: t.e, since: rec ? rec.since : today() });
     const s = token();
-    await KV.put("s:" + await hash(s), JSON.stringify({ u: t.u }), { expirationTtl: SESSION_TTL });
+    await KV.put("s:" + await hash(s), JSON.stringify({ u: t.u, at: Date.now() }), { expirationTtl: SESSION_TTL });
     // the box was ticked and the link opened: the address is confirmed, and kept for the news emails
     if (t.news) await KV.put("n:" + t.u, JSON.stringify({ e: t.e, lang: t.lang || "en", at: new Date().toISOString(), v: 1, unsub: await unsubLink(env, t.u, t.lang || "en") }));
     return reply({ session: s, email: t.e, items: rec ? rec.items : [], news: !!(t.news || await KV.get("n:" + t.u)) });
@@ -494,6 +516,9 @@ async function list(path, body, env, reply, ip) {
   const sk = "s:" + await hash(String(body.session || "").slice(0, 64)), s = await KV.get(sk, "json");
   if (!s) return reply({ error: "Signed out." }, 401);
   if (path === "logout") { await KV.delete(sk); return reply({ ok: true }); }
+  // the account as it is now: gone (deleted from another device), or begun again after this session was made, signs it out
+  const rec = await KV.get("u:" + s.u, "json");
+  if (!rec || rec.born && !(s.at >= rec.born)) { await KV.delete(sk); return path === "delete" ? reply({ ok: true }) : reply({ error: "Signed out." }, 401); }
   if (path === "delete") { await KV.delete("u:" + s.u); await KV.delete("n:" + s.u); await KV.delete(sk); return reply({ ok: true }); }
   // signed in: the news emails on or off. The session came from a link opened in this address's inbox, so turning
   // them on needs no second link; the address is checked against the account, so a session can't add another one
@@ -506,8 +531,6 @@ async function list(path, body, env, reply, ip) {
   }
   if (path !== "sync") return reply({ error: "No such thing." }, 404);
   // the browser sends what it added and removed since the two last agreed, and takes the result back
-  const rec = await KV.get("u:" + s.u, "json");
-  if (!rec) { await KV.delete(sk); return reply({ error: "Signed out." }, 401); }     // the account was deleted from another device
   const was = JSON.stringify(rec.items), rem = new Set(keys(body.remove));
   const items = rec.items.filter(k => !rem.has(k));
   for (const k of keys(body.add)) if (!items.includes(k) && items.length < LIST_MAX) items.push(k);
@@ -637,9 +660,11 @@ export default {
       if (pass) more["X-Museaal-Pass"] = pass;
     }
     if (path === "/ask") {
+      // the per-visitor limits live in each Worker instance's memory; this one holds across them all
+      if (!round && env.LISTS && +(await env.LISTS.get("c:ask:" + today())) >= ASK_PER_DAY) return reply({ error: "The assistant has answered all it can for today; try again tomorrow." }, 429);
       if (!round) later(ctx, bump(env, "ask"));
-      if (body.image && tooManyPhotos(request.headers.get("CF-Connecting-IP") || "?")) return reply({ error: "Too many photos; wait a minute." }, 429);
-      return ask(body, env, reply);
+      if (body.image && tooManyPhotos(ip)) return reply({ error: "Too many photos; wait a minute." }, 429);
+      return ask(body, env, reply, ip);
     }
 
     let q = "";
