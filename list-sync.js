@@ -88,13 +88,26 @@
     return busy;
   }
 
+  // a sign-in link carries nothing of the browser that asked for it, so anyone can send theirs to someone else: this
+  // browser keeps a secret with each link it asks for (museaal.pending), and a link that comes without it -- opened on
+  // another device, or in a mail app's own browser, or sent by someone else -- signs in only once the visitor says yes
+  var PEND = "museaal.pending";
+  function ask(email) {
+    var q = {}; try { q = JSON.parse((me && me.getAttribute("data-ask")) || "{}"); } catch (e) {}
+    var t = q[h.get("lang") === "et" || (document.documentElement || {}).lang === "et" ? "et" : "en"] || "Sign in as {e}?";
+    try { return window.confirm(t.replace("{e}", email)); } catch (e) { return false; }
+  }
   var h = new URLSearchParams(location.hash.replace(/^#/, "")), tok = h.get("login");
   if (tok) {
     h.delete("login");
     var rest = h.toString().replace(/%2C/g, ",");
     try { history.replaceState(null, "", location.pathname + location.search + (rest ? "#" + rest : "")); } catch (e) {}
-    post("verify", { token: tok }).then(function (j) {
+    var pend = read(PEND); write(PEND, null);
+    post("verify", { token: tok, nonce: pend && typeof pend.n === "string" ? pend.n : "" }).then(function (j) {
       if (!j.session) { note = j.status === 410 ? "expired" : "failed"; tell("museaal:account"); return; }
+      if (!j.bound && !ask(j.email)) { post("logout", { session: j.session }).catch(function () {}); note = "declined"; tell("museaal:account"); return; }
+      // another address than the one signed in here: that session ends, rather than lingering on the Worker
+      var old = acc(); if (old && old.e !== j.email) post("logout", { session: old.s }).catch(function () {});
       // the first sync sends everything kept here as added: the two lists are joined, nothing lost
       write(ACC, { s: j.session, e: j.email, base: [], news: !!j.news }); note = "in"; tell("museaal:account"); count("signed-in");
       return sync();
@@ -131,11 +144,13 @@
       return post("news", { session: a.s, on: true, email: a.e, lang: lang }).then(function (j) { if (j.ok) setNews(true); else { note = "failed"; tell("museaal:account"); } },
         function () { note = "failed"; tell("museaal:account"); });
     },
-    // what last happened, for the page to say: sent, busy, bad, robot, failed, in, expired, gone, out, deleted, unsub, unsub_bad
+    // what last happened, for the page to say: sent, busy, bad, robot, failed, in, expired, declined, gone, out, deleted, unsub, unsub_bad
     note: function () { return note; },
     signIn: function (email, lang, box, news) {
       return human(box).then(function (t) {
-        var b = { email: email, lang: lang, news: !!news }; if (t) b.human = t;
+        var n = ""; try { n = Array.from(crypto.getRandomValues(new Uint8Array(18)), function (x) { return ("0" + x.toString(16)).slice(-2); }).join(""); } catch (e) {}
+        if (n) write(PEND, { n: n });
+        var b = { email: email, lang: lang, news: !!news, nonce: n }; if (t) b.human = t;
         return post("login", b);
       }).then(function (j) {
         if (j.ok) count("sign-in-link-sent");

@@ -9,7 +9,7 @@ validate.py does.
 
   text   plain: no HTML tag, no script URL, no control character, nothing a
          spreadsheet opening the CSV exports would run as a formula
-  links  http(s) with a host
+  links  http(s) with a host; a gallery's listing on that gallery's own site (GALLERY_SITES)
   images a gallery's own pictures, from the gallery's own site (or its named image
          host), and only for works on show or for sale now, or a past listing of a
          public-domain work -- never one by a later artist, never an auction lot
@@ -45,6 +45,18 @@ FORMULA = re.compile(r"^\s*(?:[=@]|[+-].*[|(!])")
 CONTROL = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]")
 # where a gallery keeps its pictures, when it is not its own site
 IMAGE_HOSTS = {"tokkoarrak.ee": {"squarespace.com"}}
+# each gallery's own site, kept here by hand: a listing for sale, on show or sold links there and nowhere else, so a
+# page answered by someone else (a forged reply, a hijacked site) cannot send the site's visitors to another address.
+# A new gallery needs its line here before its works ship; the Mägi catalogue's works ("known") all link to it.
+GALLERY_SITES = {
+    "Allee galerii": "alleegalerii.ee", "Art & Tonic": "artandtonic.art", "Artman": "artman.ee", "Artner": "artner.ee",
+    "Artrovert": "artrovert.ee", "E-Kunstisalong": "e-kunstisalong.ee", "Haus Galerii": "haus.ee",
+    "Kogo galerii": "kogogallery.ee", "NOBA": "noba.ac", "Ruki galerii": "rukigalerii.ee", "Tokko & Arrak": "tokkoarrak.ee",
+    "Tütar galerii": "tutar.ee", "Vernissage": "vernissage.ee", "Temnikova & Kasela": "temnikova.ee",
+    "Veneetsia biennaal, Eesti paviljon": "cca.ee",
+}
+KIND_SITES = {"known": "konradmagi.ee"}
+PINNED = {"gallery", "shown", "sold", "known"}
 WITH_IMAGES = {"gallery", "shown", "known"}            # for sale, on show, the Mägi catalogue
 NO_IMAGES = {"auction"}                                 # lots: never a picture
 PD_ONLY = {"sold"}                                      # past listings: only of a public-domain work
@@ -99,6 +111,11 @@ def check(d):
             else:
                 text(where, f, v); price(where, f, v)
         if not web(w.get("url")): bad["link not http(s)"].append(f"{where}: {w.get('url')!r}")
+        elif kind in PINNED:
+            mu = V["mu"][w["mu"]] if isinstance(w.get("mu"), int) and 0 <= w["mu"] < len(V.get("mu", [])) else w.get("mu")
+            want = KIND_SITES.get(kind) or GALLERY_SITES.get(mu)
+            if not want: bad["gallery with no registered site (GALLERY_SITES)"].append(f"{where}: {mu!r}")
+            elif site(urlparse(w["url"]).hostname) != want: bad["link off the gallery's own site"].append(f"{where}: {mu!r}")
         im = w.get("im")
         if not im: continue
         if kind in NO_IMAGES or kind not in WITH_IMAGES | PD_ONLY or (kind in PD_ONLY and not public_domain(A[w["a"]])):

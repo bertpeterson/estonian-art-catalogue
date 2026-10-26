@@ -2,7 +2,7 @@
 """Kogo Galerii (Tartu) -> appends to gallery_records.json. Metadata only, no prices."""
 import time, re, json, os, gzip, urllib.request, ssl
 UA = "EstonianArtCatalogue/1.0 (museaal.ee; contact info@museaal.ee)"
-ctx = ssl.create_default_context(); ctx.check_hostname=False; ctx.verify_mode=ssl.CERT_NONE
+ctx = ssl.create_default_context()   # certificate and host checked: a forged answer must not become a listing
 os.makedirs("gcache", exist_ok=True)
 
 def get(url, key):

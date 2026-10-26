@@ -20,7 +20,7 @@ from asking_price import asking
 import store_api
 UA = "EstonianArtCatalogue/1.0 (museaal.ee; contact info@museaal.ee)"
 API = "https://noba.ac/wp-json/wc/store/v1/products"
-ctx = ssl.create_default_context(); ctx.check_hostname = False; ctx.verify_mode = ssl.CERT_NONE
+ctx = ssl.create_default_context()   # certificate and host checked: a forged answer must not become a listing
 
 def api(page):
     return store_api.page(f"{API}?per_page=100&page={page}", UA, ctx, 60)    # a page not read stops the script (store_api.py)

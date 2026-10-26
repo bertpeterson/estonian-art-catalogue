@@ -366,7 +366,9 @@ async function ask(body, env, reply, ip) {
     last.content = [{ type: "image", source: { type: "base64", media_type: "image/jpeg", data: img } }, { type: "text", text: last.content }];
   }
   const was = controls(body.filters);
-  // a page that runs the tools, on a turn without a photo: Claude looks before it answers
+  // a page that runs the tools, on a turn without a photo: Claude looks before it answers. Steps sent on any
+  // other turn are refused: the doors above counted that turn as a free later round only if it was a search turn
+  if (!(body.tools && !photo) && Array.isArray(body.trail) && body.trail.length) return reply({ error: "Unreadable search steps." }, 400);
   const trail = body.tools && !photo ? await trailOf(body.trail || [], env, ip) : null;
   if (body.tools && !photo && !trail) return reply({ error: "Unreadable search steps." }, 400);
   const system = (trail ? SYSTEM_TOOLS : SYSTEM_ASK) + "\n\n" + was.text + mylist(body.mylist) + "\n\n" + (et
@@ -486,7 +488,9 @@ async function list(path, body, env, reply, ip) {
     const t = token();
     await KV.put("r:" + u, String(sent + 1), { expirationTtl: 3600 });
     const news = body.news === true;
-    await KV.put("t:" + await hash(t), JSON.stringify({ u, e: email, lang, news }), { expirationTtl: LINK_TTL });
+    // n: the secret the asking browser kept (list-sync.js), so verify can tell that browser from any other
+    const nonce = typeof body.nonce === "string" ? body.nonce.slice(0, 64) : "";
+    await KV.put("t:" + await hash(t), JSON.stringify({ u, e: email, lang, news, ...(nonce ? { n: await hash(nonce) } : {}) }), { expirationTtl: LINK_TTL });
     // the token after the #, which browsers never send: it reaches no server's logs, ours or GitHub's
     const link = (env.SITE || "https://museaal.ee/") + "#lang=" + lang + "&list=mine&login=" + t;
     try { await mail(env, email, { subject: MAIL[lang].subject, text: MAIL[lang].text(link, news) }); }
@@ -505,7 +509,10 @@ async function list(path, body, env, reply, ip) {
     await KV.put("s:" + await hash(s), JSON.stringify({ u: t.u, at: Date.now() }), { expirationTtl: SESSION_TTL });
     // the box was ticked and the link opened: the address is confirmed, and kept for the news emails
     if (t.news) await KV.put("n:" + t.u, JSON.stringify({ e: t.e, lang: t.lang || "en", at: new Date().toISOString(), v: 1, unsub: await unsubLink(env, t.u, t.lang || "en") }));
-    return reply({ session: s, email: t.e, items: rec ? rec.items : [], news: !!(t.news || await KV.get("n:" + t.u)) });
+    // bound: opened in the browser that asked for the link. Anywhere else the page asks the visitor first, as a link
+    // sent on by someone else would otherwise sign them in to that person's account and hand it their list
+    const bound = !!t.n && typeof body.nonce === "string" && t.n === await hash(body.nonce.slice(0, 64));
+    return reply({ session: s, email: t.e, items: rec ? rec.items : [], news: !!(t.news || await KV.get("n:" + t.u)), bound });
   }
   if (path === "unsubscribe") {
     const [u, seal] = String(body.token || "").slice(0, 200).split(".");
@@ -650,8 +657,9 @@ export default {
       try { return await admin(body && typeof body === "object" ? body : {}, env, reply, ip); }
       catch (e) { console.log("admin failed", String(e.message)); return reply({ error: "The figures could not be read." }, 502); }
     }
-    // a turn's later tool rounds count against the wider limit only
-    const round = Array.isArray(body.trail) && body.trail.length > 0;
+    // a turn's later tool rounds count against the wider limit only. A round is a search turn's (tools, no photo)
+    // with steps to show; ask() turns it away unless those steps unseal, so a made-up trail buys nothing
+    const round = path === "/ask" && !!body.tools && !body.image && Array.isArray(body.trail) && body.trail.length > 0;
     if (tooMany(ip, rounds, CALLS_PER_MINUTE) || !round && tooMany(ip)) return reply({ error: "Too many searches; wait a minute." }, 429);
     if (!env.ANTHROPIC_API_KEY) return reply({ error: "The service is not set up." }, 503);
     if (env.TURNSTILE_SECRET) {
@@ -663,6 +671,9 @@ export default {
       // the per-visitor limits live in each Worker instance's memory; this one holds across them all
       if (!round && env.LISTS && +(await env.LISTS.get("c:ask:" + today())) >= ASK_PER_DAY) return reply({ error: "The assistant has answered all it can for today; try again tomorrow." }, 429);
       if (!round) later(ctx, bump(env, "ask"));
+      // a sealed round can be sent again for its 10 minutes: rounds have their own day's limit, ROUNDS to a question
+      if (round && env.LISTS && +(await env.LISTS.get("c:round:" + today())) >= ASK_PER_DAY * ROUNDS) return reply({ error: "The assistant has answered all it can for today; try again tomorrow." }, 429);
+      if (round) later(ctx, bump(env, "round"));
       if (body.image && tooManyPhotos(ip)) return reply({ error: "Too many photos; wait a minute." }, 429);
       return ask(body, env, reply, ip);
     }

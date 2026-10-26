@@ -21,7 +21,7 @@ from auction_keep import merged
 from vern_parse import parse
 UA = "EstonianArtCatalogue/1.0 (museaal.ee; contact info@museaal.ee)"
 API = "https://vernissage.ee/wp-json/wc/store/v1/products"
-ctx = ssl.create_default_context(); ctx.check_hostname = False; ctx.verify_mode = ssl.CERT_NONE
+ctx = ssl.create_default_context()   # certificate and host checked: a forged answer must not become a listing
 
 def api(page, per=100):
     for attempt in range(3):

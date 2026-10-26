@@ -5,7 +5,7 @@ import re, json, os, gzip, time, urllib.request, ssl
 from asking_price import euros
 UA="EstonianArtCatalogue/1.0 (museaal.ee; contact info@museaal.ee)"
 BASE="https://www.artrovert.ee"
-ctx=ssl.create_default_context(); ctx.check_hostname=False; ctx.verify_mode=ssl.CERT_NONE
+ctx=ssl.create_default_context()   # certificate and host checked: a forged answer must not become a listing
 os.makedirs("gcache",exist_ok=True)
 def get(u,key):
     p=f"gcache/{key}.html.gz"
