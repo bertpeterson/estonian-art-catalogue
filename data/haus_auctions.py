@@ -20,7 +20,7 @@ BASE = "https://haus.ee"
 UA = "EstonianArtCatalogue/1.0 (museaal.ee; contact info@museaal.ee)"
 CACHE = "gcache"
 os.makedirs(CACHE, exist_ok=True)
-ctx = ssl.create_default_context(); ctx.check_hostname = False; ctx.verify_mode = ssl.CERT_NONE
+ctx = ssl.create_default_context()   # certificate and host checked: a forged answer must not become a listing
 
 def fetch(url):
     for attempt in range(3):

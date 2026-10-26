@@ -1,7 +1,7 @@
 import json, re, urllib.request, ssl
 from concurrent.futures import ThreadPoolExecutor
 UA = "EstonianArtCatalogue/1.0 (museaal.ee; contact info@museaal.ee)"
-ctx = ssl.create_default_context(); ctx.check_hostname=False; ctx.verify_mode=ssl.CERT_NONE
+ctx = ssl.create_default_context()   # certificate and host checked: a forged answer must not become a listing
 def check(v):
     req = urllib.request.Request(v["url"], headers={"User-Agent": UA, "Accept-Language":"et,en"})
     try:

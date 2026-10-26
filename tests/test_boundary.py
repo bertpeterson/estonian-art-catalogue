@@ -78,6 +78,15 @@ class Check(unittest.TestCase):
         d = data(); d["upcoming"][0]["u"] = "data:text/html,<b>"
         self.assertIn("link not http(s)", self.fails(d))
 
+    def test_gallery_site_pinned(self):
+        # a forged reply: the link and its picture both on another host, which the picture rule alone lets through
+        self.assertIn("link off the gallery's own site",
+                      self.fails(data(url="https://evil.example/checkout/", im="g:https://evil.example/x.jpg")))
+        self.assertEqual(self.fails(data(url="https://kogogallery.ee/en/works/x/")), set())        # with or without www
+        d = data(); d["vocab"]["mu"][0] = "Uus galerii"
+        self.assertIn("gallery with no registered site (GALLERY_SITES)", self.fails(d))
+        self.assertEqual(self.fails(data(kind="auction", im=None, url="https://www.postimees.ee/lot")), set())  # lots: not pinned
+
     def test_pictures(self):
         self.assertIn("picture from another site than the work's page",
                       self.fails(data(im="g:https://images.example.com/x.jpg")))
@@ -89,8 +98,10 @@ class Check(unittest.TestCase):
         self.assertIn("picture on a work that may not show one", self.fails(d))
         self.assertIn("picture on a work that may not show one", self.fails(data(kind="auction")))
         # a gallery's own image host
-        self.assertEqual(self.fails(data(url="https://www.tutar.ee/teosed/x", im="g:https://cms.tutar.ee/x.jpg")), set())
-        self.assertEqual(self.fails(data(url="https://tokkoarrak.ee/x", im="g:https://static1.squarespace.com/x.jpg")), set())
+        for mu, url, im in (("Tütar galerii", "https://www.tutar.ee/teosed/x", "g:https://cms.tutar.ee/x.jpg"),
+                            ("Tokko & Arrak", "https://tokkoarrak.ee/x", "g:https://static1.squarespace.com/x.jpg")):
+            d = data(url=url, im=im); d["vocab"]["mu"][0] = mu
+            self.assertEqual(self.fails(d), set())
 
     def test_prices(self):
         self.assertIn("price out of range", self.fails(data(pr=0)))
