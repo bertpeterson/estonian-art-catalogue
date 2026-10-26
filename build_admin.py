@@ -120,6 +120,20 @@ JS = r"""
       add(s, table(["Address", "Since", "Works", "Last change", "News"], j.people.map(function (p) {
         return [p[0] || "(from before 15 Oct, kept at next sign-in)", p[1] || "—", p[2], p[3] ? new Date(p[3]).toISOString().slice(0, 10) : "—", p[4] ? "yes" : ""];
       }), [0, 0, 1, 0, 0]));
+      // the same rows as a file, made here in the browser: nothing more leaves the Worker
+      var dl = el("button", null, "Download CSV");
+      dl.style.marginLeft = "0";
+      dl.onclick = function () {
+        // a cell that starts like a formula gets a ' first, so a spreadsheet shows an address as text and never runs it
+        var q = function (v) { v = v == null ? "" : String(v); if (/^[=+\-@\t\r]/.test(v)) v = "'" + v; return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; };
+        var lines = [["address", "since", "works", "last_change", "news"]].concat(j.people.map(function (p) {
+          return [p[0], p[1], p[2], p[3] ? new Date(p[3]).toISOString().slice(0, 10) : "", p[4] ? "yes" : "no"];
+        }));
+        var a = el("a"), url = URL.createObjectURL(new Blob([lines.map(function (r) { return r.map(q).join(","); }).join("\n") + "\n"], { type: "text/csv" }));
+        a.href = url; a.download = "museaal-accounts-" + new Date().toISOString().slice(0, 10) + ".csv";
+        document.body.appendChild(a); a.click(); a.remove(); setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+      };
+      add(s, add(el("p"), dl));
     }
     main.appendChild(s);
 
