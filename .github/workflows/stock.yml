@@ -38,6 +38,6 @@ jobs:
           if git diff --cached --quiet; then echo "nothing changed"; exit 0; fi
           n=$(python3 -c "import json; print(len(json.load(open('data/stock_gone.json'))))")
           git commit -m "Daily stock check, $(date -u +%F): $n works no longer for sale since the weekly run" -m "Automated: the quick galleries read again; data/stock_check.py."
-          git pull --rebase -q origin main
+          git pull --rebase --autostash -q origin main
           git push
           gh workflow run pages.yml --ref main
