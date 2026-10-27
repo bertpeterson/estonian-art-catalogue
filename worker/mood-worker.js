@@ -447,7 +447,7 @@ const MAIL = {          // no bare "museaal.ee" in the text: mail apps make it a
     "If you did not ask to sign in, you can ignore this email." },
   et: { subject: "Sinu sisselogimislink museaal.ee-sse", text: (link, news) => "Siin on sinu link, et logida sisse Museaali:\n\n" + link +
     "\n\nLink töötab üks kord ja 15 minutit. Teises seadmes nimekirja kasutamiseks küsi seal uus link.\n\n" + (news ?
-    "Kui oled sisse loginud, saadame sulle aeg-ajalt kirja uute võimaluste kohta. Tellimuse saad lõpetada igal ajal.\n\n" : "") +
+    "Kui oled sisse loginud, saadame sulle aeg-ajalt kirja museaal.ee uuendustest. Tellimuse saad lõpetada igal ajal.\n\n" : "") +
     "Kui sa sisselogimist ei küsinud, võid selle kirja tähelepanuta jätta." },
 };
 async function mail(env, to, m) {

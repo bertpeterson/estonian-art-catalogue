@@ -1333,12 +1333,7 @@
       return;
     }
     const listSet = home ? [] : wall ? set.filter(w => !wallPic(w)) : set;
-    MINE = null;
     let html = wall ? wallHTML(set.filter(wallPic), home ? -1 : listSet.length, state.artist === null) : "";
-    if (home && MINE){
-      const what = [MINE.a ? T(MINE.a === 1 ? "sa_n1" : "sa_n", {n: fmt(MINE.a)}) : "", MINE.w ? T(MINE.w === 1 ? "sl_n1" : "sl_n", {n: fmt(MINE.w)}) : ""].filter(Boolean);
-      html = `<div class="wall-bar">${esc(T("wall_mine", {what: what.join(T("and"))}))}</div>` + html;
-    }
     // A decade opened on its wall is named above the pictures -- the decade, its period
     // and its note, which otherwise waited in the gutter of the list under the wall --
     // so a jump to the top of the view says where it is and still shows the pictures first
@@ -1825,7 +1820,6 @@
       const srcs = [saved, ...[...art.values()].filter(l => l.length).map(l => l.sort(best).slice(0, 4))];
       for (let r = 0; MINE_AT.size < 12 && srcs.some(l => l.length > r); r++)
         for (const l of srcs) if (l[r] && MINE_AT.size < 12) MINE_AT.set(l[r], MINE_AT.size);
-      if (MINE_AT.size) MINE = {a: srcs.slice(1).filter(l => l.some(w => MINE_AT.has(w))).length, w: saved.filter(w => MINE_AT.has(w)).length};
     }
     const ordered = strict ? unique : inner.map(x => [x[0], x[1], medRank(x[0]), turn(x[0]), tier(x[0]), mixed ? hash(x[0].k) : 0])
       .sort((a, b) => mp(a[0]) - mp(b[0]) || hl(a[0]) - hl(b[0]) || a[4] - b[4] || a[3] - b[3] || rep.get(a[0]) - rep.get(b[0]) || a[2] - b[2] || a[5] - b[5] || a[1] - b[1]).map(x => x[0]);
@@ -1868,7 +1862,6 @@
       + (!opt.limit && ordered.length > shown.length ? `<button class="more" data-wmore="1" style="margin-bottom:22px">${esc(T("wall_more", {n: fmt(Math.min(72, ordered.length - shown.length))}))}</button>` : "")
       + (opt.more != null && ordered.length > shown.length ? `<button class="more" data-amore="${opt.more}" style="margin-bottom:22px">${esc(T("wall_more", {n: fmt(Math.min(30, ordered.length - shown.length))}))}</button>` : "");
   }
-  let MINE = null;         // what of My List leads the landing wall, for the line above it
   const SL_ICON = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 2h8v12l-4-3-4 3z"/></svg>';
   const slBtn = (k, cls) => {
     const on = SL.has(k), lab = T(on ? "sl_remove" : "sl_add");

@@ -16,7 +16,7 @@ e = lambda s: html.escape(str(s or ""), quote=True)
 STAMP = "<script>try{if(localStorage.getItem(\"ekr:theme\")===\"light\")document.documentElement.setAttribute(\"data-theme\",\"light\")}catch(e){}</script>"
 GC = '<script data-goatcounter="https://museaal.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>'
 I18N = json.load(open("i18n.json", encoding="utf-8"))
-KEYS = ["acc_h", "acc_lede", "acc_who", "acc_signout", "acc_news_h", "acc_news_on", "acc_news_off",
+KEYS = ["acc_h", "acc_who", "acc_signout", "acc_news_h", "acc_news_on", "acc_news_off",
         "acc_del_h", "acc_del_note", "acc_delete", "acc_del_yes", "acc_del_no", "acc_del_sure", "acc_signin_h",
         "acc_signin_lede", "acc_email", "acc_send", "acc_news", "acc_off", "acc_sent", "acc_busy", "acc_bad", "acc_robot",
         "acc_failed", "acc_expired", "acc_gone", "acc_out", "acc_deleted", "acc_unsub", "acc_unsub_bad", "privacy_link"]
@@ -65,7 +65,7 @@ function h(tag,attrs,kids){var el=document.createElement(tag);for(var k in attrs
 function say(){var n=ML.note();if(!n||n==="in")return null;
   var t=T["acc_"+n];return t?h("p",{"class":"msg",role:"status",text:t}):null}
 function draw(){
-  app.textContent="";
+  app.textContent="";lede.hidden=false;
   if(!ML){h1.textContent=T.acc_h;lede.textContent=T.acc_off;return}
   var who=ML.who(),m=say();
   if(!who){
@@ -79,7 +79,7 @@ function draw(){
     app.appendChild(form);if(m)app.appendChild(m);
     if(ML.note()!=="sent")inp.focus();
     return}
-  h1.textContent=T.acc_h;lede.textContent=T.acc_lede;document.title=T.acc_h+" · museaal.ee";
+  h1.textContent=T.acc_h;lede.hidden=true;document.title=T.acc_h+" · museaal.ee";
   var out=h("button",{type:"button","class":"btn",text:T.acc_signout});
   out.addEventListener("click",function(){ML.signOut()});
   app.appendChild(h("div",{"class":"row"},[h("div",{},[h("span",{"class":"eb",text:T.acc_who}),h("span",{"class":"v",text:who})]),out]));
