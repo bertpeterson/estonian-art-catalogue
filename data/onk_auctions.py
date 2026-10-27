@@ -81,6 +81,7 @@ for url, slug in cats:
             if not artist or not tm: continue
             title = U(tm.group(2)).strip("“”\"„ ")
             lot = re.search(r'class="_lotnr[^"]*">\s*(\d+)\.', a)
+            im = re.search(r'<img[^>]*\s(?:data-)?src="(https://ostanoortkunsti\.ee/wp-content/[^"]+)"', a)
             sm = re.search(r"Alghind:\s*</b>\s*([\d\s ]+)", html.unescape(a))
             start = int(re.sub(r"\D", "", sm.group(1))) if sm and re.sub(r"\D", "", sm.group(1)) else None
             meta = a.split('class="_meta"', 1)[1] if 'class="_meta"' in a else ""
@@ -92,13 +93,13 @@ for url, slug in cats:
             r = {"aid": f"onk-{pid}", "artist": artist, "title": title or "Pealkirjata",
                  "year": ym.group(1) if ym else None, "yl": ym.group(1) if ym else None, "tech": tech[:80], "dims": dims,
                  "house": HOUSE, "sale": sale, "when": date[:7], "date": date, "start": start, "url": tm.group(1),
-                 "lot": int(lot.group(1)) if lot else None}
+                 "lot": int(lot.group(1)) if lot else None, "img": html.unescape(im.group(1)) if im else None}
             if ahead: coming.append(r)
             else: recs.append({**r, "hammer": None, "sold": None, "nores": True})
             n += 1
     print(f"  {date} {sale:32} lots {n}{' (ahead)' if ahead else ''}", flush=True)
 
-emit(HOUSE, [{k: r[k] for k in ("house", "sale", "date", "artist", "title", "year", "yl", "tech", "dims", "start", "url", "lot")} for r in coming])
+emit(HOUSE, [{k: r[k] for k in ("house", "sale", "date", "artist", "title", "year", "yl", "tech", "dims", "start", "url", "lot", "img")} for r in coming])
 prev = json.load(open("auction_records.json", encoding="utf-8")) if os.path.exists("auction_records.json") else []
 json.dump(sorted(merged(prev, HOUSE, recs), key=lambda r: (r["house"], str(r.get("date") or r.get("when") or ""), str(r["aid"]))),
           open("auction_records.json", "w", encoding="utf-8"), ensure_ascii=False, indent=0)

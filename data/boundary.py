@@ -58,8 +58,8 @@ GALLERY_SITES = {
 KIND_SITES = {"known": "konradmagi.ee"}
 PINNED = {"gallery", "shown", "sold", "known"}
 WITH_IMAGES = {"gallery", "shown", "known"}            # for sale, on show, the Mägi catalogue
-NO_IMAGES = {"auction"}                                 # lots: never a picture
-PD_ONLY = {"sold"}                                      # past listings: only of a public-domain work
+NO_IMAGES = set()
+PD_ONLY = {"sold", "auction"}                           # past listings and lots: only of a public-domain work
 PRICE = {"pr": (20, 500_000), "lp": (20, 500_000), "as": (0, 2_000_000), "ap": (1, 2_000_000), "p": (1, 2_000_000)}
 URL_FIELDS = {"url", "u", "im"}
 
@@ -134,7 +134,13 @@ def check(d):
         for f, v in u.items():
             if f == "pr": continue          # the lot's earlier sales, already checked as auction works
             text(where, f, v); price(where, f, v)
-        if not web(u.get("u")): bad["link not http(s)"].append(f"{where}: {u.get('u')!r}")
+        if not web(u.get("u")): bad["link not http(s)"].append(f"{where}: {u.get('u')!r}"); continue
+        im = u.get("im")
+        if not im: continue
+        src, _, iu = im.partition(":")
+        if src != "g" or not web(iu): bad["picture not an http(s) gallery image"].append(f"{where}: {im}")
+        elif site(urlparse(iu).hostname) != site(urlparse(u["u"]).hostname):
+            bad["picture from another site than the work's page"].append(f"{where}: {iu}")
 
     for a in A:
         text(f"artist {a.get('n')!r}", "n", a.get("n"))

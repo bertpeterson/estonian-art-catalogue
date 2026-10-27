@@ -955,7 +955,8 @@ for r in AUC:
         "k": "A" + re.sub(r'[^A-Za-z0-9]', '', r["aid"]), "n": 1,
         "mem": None, "kind": "auction", "url": r.get("url"),
         "an": r["sale"], "ad": r.get("date") or r["when"], "as": r.get("start"), "ap": r.get("hammer"), "ao": None if r.get("nores") else 1 if r["sold"] else 0,
-        "anr": 1 if r.get("nores") else None, "aa": 1 if r.get("after") else None, "apr": r.get("press"), "adb": r.get("doubt")})
+        "anr": 1 if r.get("nores") else None, "aa": 1 if r.get("after") else None, "apr": r.get("press"), "adb": r.get("doubt"),
+        "_pim": r.get("img")})
     auc_added += 1
 print("  auction results added:", auc_added, "sold", sum(1 for r in AUC if r["sold"]),
       "from", len({r["house"] for r in AUC}), "houses; unattributed or joint lots skipped:", auc_skipped)
@@ -1207,10 +1208,10 @@ for w in works:
     elif w.get("oi") and str(w["oi"]) in _ekm:
         w["im"] = "e:" + _ekm[str(w["oi"])];            IMG["ekm"] += 1
         if str(w["oi"]) in _ekmr: w["ir"] = _ekmr[str(w["oi"])]
-# A gallery's past listing of a public-domain work keeps the gallery's photograph,
-# still shown from the gallery's server: no copyright in the work is left to end with
-# the sale, and the photograph of it is not protected either (art. 14, as above). A
-# listing by a later artist stays without, and an auction lot never has one.
+# A gallery's past listing or a past auction lot of a public-domain work keeps the
+# photograph, still shown from the gallery's or the house's server: no copyright in the
+# work is left to end with the sale, and the photograph of it is not protected either
+# (art. 14, as above). A listing or lot by a later artist stays without.
 for w in works:
     pim = w.pop("_pim", None)
     if pim and _web(pim) and _pd(artists[w["a"]]): w["im"] = "g:" + pim; IMG["past"] = IMG.get("past", 0) + 1
@@ -1270,7 +1271,8 @@ print("  images: public-domain museum works", IMG["pd"], "-> MuIS", IMG["muis"],
 
 # ---------- upcoming auction lots ----------
 # The lots of sales still to come (upcoming.py): shown on the artist's page and on one
-# page of coming sales, beside the artist's record at auction. Never works of their own
+# page of coming sales, beside the artist's record at auction, with the house's picture
+# shown from the house's server while the sale is ahead, as a gallery's stock is. Never works of their own
 # and never counted: a lot is here only while its sale is ahead. Joined to an artist
 # already in the catalogue -- an upcoming lot adds no artist -- and, where the same work
 # (artist, title, and size when both give one) has been sold before, to those results.
@@ -1297,6 +1299,7 @@ for r in UPC:
               if not (w.get("dm") and r.get("dims") and w["dm"].replace(" ", "") != r["dims"].replace(" ", ""))]
     upcoming.append({"a": ai, "t": r["title"], "yl": r.get("yl") or r.get("year"), "tc": r.get("tech") or None, "dm": r.get("dims") or None,
                      "h": r["house"], "s": r["sale"], "d": r.get("date"), "p": r.get("start"), "u": r.get("url"), "n": r.get("lot"),
+                     "im": "g:" + r["img"] if _web(r.get("img") or "") else None,
                      "pr": [[w["ad"], w["mu"], w.get("ap") if w.get("ao") else None] + ([1] if w.get("anr") else []) for w in sorted(before, key=lambda w: str(w["ad"]))] or None})
 print("  upcoming auction lots:", len(upcoming), "joined to catalogue artists;", up_unmatched, "by artists not in it;",
       sum(1 for u in upcoming if u["pr"]), "offered before")

@@ -408,9 +408,12 @@ read as the object's image.
 
 A work a gallery is selling now shows the gallery's own photograph, embedded from the gallery's server
 and captioned with the gallery, for as long as the listing is live — the one case where the party who
-owns the picture wants it seen. A past listing keeps no image, and auction lots have none: once the
-sale is over nobody but this catalogue has an interest in illustrating it, and the artist and the
-buyer may have one against. Any holder or rights holder can have an image removed by asking.
+owns the picture wants it seen. A lot in a coming auction is treated the same way: the house's
+photograph, embedded from the house's server, while the sale is ahead. Once a listing or a sale is
+over, only a work by a public-domain artist keeps its picture — no copyright is left in the work, and
+a plain photograph of it gets none either (art. 14 of the EU copyright directive); for a later artist,
+nobody but this catalogue has an interest in illustrating a past sale, and the artist and the buyer may
+have one against. Any holder or rights holder can have an image removed by asking.
 
 **First paint.** The landing page's door and the opening of the artwall are baked into `index.html` at build
 (`build_landing.py`), so a visitor sees the catalogue in the first quarter-second; the app, once its index
@@ -425,11 +428,11 @@ among the last one's results; the decades below the fold are laid out only when 
 
 **Coming up at auction.** The six auction harvesters read the houses' coming sales as well as their past
 ones, and keep a coming sale's lots apart (`data/upcoming.py` → `upcoming_records.json`): artist, work, the
-starting price as the house published it, the sale and its date, a link to the lot. `merge.py` joins them to
+starting price as the house published it, the sale and its date, a link to the lot, the house's picture of it. `merge.py` joins them to
 artists already in the catalogue (a coming lot adds no artist) and to any earlier sale of the same title.
 They show on the artist's page and on `/upcoming.html` · `/tulemas.html`, beside the artist's record at
-auction; never counted as works, never with bids (they change by the hour) or pictures (the rule for auction
-lots), and gone once the sale's day has passed. A house puts its catalogue online two to four weeks ahead,
+auction; never counted as works, never with bids (they change by the hour), each with the house's picture embedded
+from the house's server, and gone once the sale's day has passed. A house puts its catalogue online two to four weeks ahead,
 so the houses are read weekly (`.github/workflows/auctions.yml`, Mondays), past sales from a cache. A sale in
 the current month with no hammer price on any lot counts as coming, so it is never recorded as a sale
 where nothing sold.

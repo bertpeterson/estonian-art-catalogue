@@ -147,7 +147,8 @@ for slug in slugs:
         got.append({"aid": "eko-" + pid.group(1), "artist": artist, "title": ltitle,
                     "year": y4.group(1) if y4 else None, "yl": yl or None, "tech": clean(med.group(1)) if med else "", "dims": dims,
                     "house": "Eesti Kunsti Oksjonid", "sale": sale,
-                    "start": int(float(st.group(1))) if st else None, "hammer": hammer, "sold": sold, "after": after, "url": url.group(1)})
+                    "start": int(float(st.group(1))) if st else None, "hammer": hammer, "sold": sold, "after": after, "url": url.group(1),
+                    "img": html.unescape(og.group(1)) if (og := re.search(r'<meta property="og:image" content="([^"]+)"', lp or "")) else None})
     # the sale's month: when its lots were listed, moved to the day the name gives
     ym = months.most_common(1)[0][0] if months else None
     if ym and day:
@@ -164,7 +165,7 @@ for slug in slugs:
             dd, mo = HOME_DAY[slug]; y = today.year + (1 if mo < today.month else 0)
             when = f"{y}-{mo:02d}-{dd:02d}"
         coming += [{"house": "Eesti Kunsti Oksjonid", "sale": r["sale"], "date": when or None, "artist": r["artist"], "title": r["title"],
-                    "year": r["year"], "yl": r["yl"], "tech": r["tech"], "dims": r["dims"], "start": r["start"], "url": r["url"], "lot": LOTNR.get(r["url"])} for r in got]
+                    "year": r["year"], "yl": r["yl"], "tech": r["tech"], "dims": r["dims"], "start": r["start"], "url": r["url"], "lot": LOTNR.get(r["url"]), "img": r["img"]} for r in got]
         continue
     for r in got: r["when"] = when[:7]; r["date"] = when
     recs += got

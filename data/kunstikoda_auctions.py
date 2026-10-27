@@ -74,6 +74,7 @@ for path in cats:
         y4 = re.match(r"(\d{4})", yl or "")
         start = money((re.search(r"Alghind\s*([\d\s ]+)\s*€", html.unescape(a)) or [None, ""])[1] + ",")
         pid = re.search(r"/product/([^/]+)/", url).group(1)
+        im = re.search(r'<img[^>]*\ssrc="(https://kunstikoda\.ee/wp-content/[^"]+)"', a)
         page, cached = lot_page(url)
         if page is None: failed.append(pid); continue
         txt = U(re.sub(r"<script.*?</script>|<style.*?</style>", "", page, flags=re.S))
@@ -82,7 +83,7 @@ for path in cats:
         if not end: failed.append(pid); continue
         r = {"aid": f"kk-{pid}", "artist": re.sub(r"\s*\([^)]*\)", "", artist).strip(), "title": title or "Pealkirjata",
              "year": y4.group(1) if y4 else None, "yl": yl, "tech": tech[:80], "dims": dims,
-             "house": HOUSE, "sale": sale, "when": end[:7], "date": end[:10], "start": start, "url": url, "lot": int(nr.group(1))}
+             "house": HOUSE, "sale": sale, "when": end[:7], "date": end[:10], "start": start, "url": url, "lot": int(nr.group(1)), "img": html.unescape(im.group(1)) if im else None}
         if end > now: coming.append(r); n += 1; continue
         hist = txt.split("Pakkumiste ajalugu")[-1].split("Arvustused")[0]
         bids = [money(b) for b in re.findall(r"\d\d\.\d\d\.\d{4} \d\d:\d\d\s+([\d\s ]+,\d\d)\s*€", hist)]
@@ -96,7 +97,7 @@ for path in cats:
         n += 1
     print(f"  {path:28} {sale or '?':34} lots {n}", flush=True)
 
-emit(HOUSE, [{k: r[k] for k in ("house", "sale", "date", "artist", "title", "year", "yl", "tech", "dims", "start", "url", "lot")} for r in coming])
+emit(HOUSE, [{k: r[k] for k in ("house", "sale", "date", "artist", "title", "year", "yl", "tech", "dims", "start", "url", "lot", "img")} for r in coming])
 prev = json.load(open("auction_records.json", encoding="utf-8")) if os.path.exists("auction_records.json") else []
 json.dump(sorted(merged(prev, HOUSE, recs), key=lambda r: (r["house"], str(r.get("date") or r.get("when") or ""), str(r["aid"]))),
           open("auction_records.json", "w", encoding="utf-8"), ensure_ascii=False, indent=0)

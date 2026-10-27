@@ -128,10 +128,11 @@ for aid, (sale, when) in sorted(sales.items(), key=lambda x: x[1][1]):
         if hammer and start and when < "2011-01-01" and hammer % 100 == 0 and (hammer / 15.6466 >= start * 0.9 or hammer >= 8 * start):
             hammer = round(hammer / 15.6466); kroon = True
         y4 = re.match(r"(\d{4})", year)
+        im = re.search(r'<img[^>]*\ssrc="(/axs_site/[^"]+)"', fig)
         (coming if ahead else recs).append({"aid": "haus-" + item.group(1), "artist": artist, "title": title,
                      "year": y4.group(1) if y4 else None, "yl": year or None, "tech": medium, "dims": dims,
                      "house": "Haus Galerii", "sale": sale, "when": when[:7], "date": when,
-                     "start": start, "hammer": hammer, "sold": hammer is not None, "after": after, **({"kroon": True} if kroon else {}),
+                     "start": start, "hammer": hammer, "sold": hammer is not None, "after": after, **({"kroon": True} if kroon else {}), "img": BASE + html.unescape(im.group(1)) if im else None,
                      "url": f"{BASE}/?c=oksjon&l=et&item={item.group(1)}" if aid == "current" else f"{BASE}/?c=toimunud-oksjonid&l=et&id={aid}&item={item.group(1)}"})
     print(f"  {when} {sale[:40]:40} lots so far {len(recs)}", flush=True)
 
@@ -139,7 +140,7 @@ recs.sort(key=lambda r: (r["date"], r["artist"], r["title"]))
 # the sales still to come: their lots, with the starting price, for upcoming.py
 from upcoming import emit
 emit("Haus Galerii", [{"house": r["house"], "sale": r["sale"], "date": r.get("date") if r.get("date", "9")[:1] != "9" else None, "artist": r["artist"], "title": r["title"],
-                      "year": r.get("year"), "yl": r.get("yl"), "tech": r.get("tech") or "", "dims": r.get("dims") or "", "start": r.get("start"), "url": r.get("url")}
+                      "year": r.get("year"), "yl": r.get("yl"), "tech": r.get("tech") or "", "dims": r.get("dims") or "", "start": r.get("start"), "url": r.get("url"), "img": r.get("img")}
                      for r in coming])
 prev = json.load(open("auction_records.json", encoding="utf-8")) if os.path.exists("auction_records.json") else []
 json.dump(sorted(merged(prev, "Haus Galerii", recs), key=lambda r: (r["house"], str(r.get("date") or r.get("when") or ""), str(r["aid"]))), open("auction_records.json", "w", encoding="utf-8"), ensure_ascii=False, indent=0)

@@ -5,7 +5,8 @@ Every lot in a sale still to come (data/upcoming.py, joined to the artists by me
 by date and house: the artist, the work, the starting price as the house published it,
 a link to the lot, and beside it the artist's record at auction from the catalogue --
 how many lots, how many sold, the range of the hammer prices -- and, where the same
-title was offered before, those results. No bids, no pictures. A record, not a valuation.
+title was offered before, those results, and the house's picture of the lot, embedded from its
+server. No bids. A record, not a valuation.
 Run after build_pages.py (it adds to the sitemap) and before csp.py.
 
 A house whose lots are not read (Allee galerii) can be given its coming sales by hand in
@@ -70,6 +71,7 @@ CSS = (":root{--paper:#0B0C0E;--field:#15171A;--ink:#F1F2F4;--ink-soft:#C7CACE;-
        "td{padding:13px 16px 13px 0;border-bottom:1px solid var(--rule-soft);vertical-align:top}"
        "td.a{width:34%}td.a a{font-family:var(--serif);font-size:1.08rem;text-decoration:none}td.a a:hover{text-decoration:underline}"
        "td.w i{font-family:var(--serif);font-size:1.02rem}"
+       ".th{float:left;margin:2px 14px 4px 0}.th img{display:block;width:72px;height:72px;object-fit:contain;background:var(--field)}"
        ".m{display:block;margin-top:3px;color:var(--grey);font-size:.78rem}td.a .m{font-family:var(--mono);font-size:.7rem;letter-spacing:.02em}"
        ".n{text-align:right;white-space:nowrap;padding-right:0}td.n b{display:block;font-family:var(--mono);font-weight:500;font-size:.95rem;font-variant-numeric:tabular-nums}"
        "a.lot{display:inline-block;margin-top:5px;font-family:var(--mono);font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;color:var(--grey);text-decoration:none;border-bottom:1px solid var(--rule)}"
@@ -158,8 +160,10 @@ def main():
                 lot = f'<a class="lot" href="{e(u["u"])}" rel="noopener">{t["lot"]}{" " + e(str(u["n"])) if u.get("n") else ""} ↗</a>' if str(u.get("u") or "").startswith("http") else ""
                 det = " · ".join(x for x in (u.get("tc"), u.get("dm")) if x)
                 det = f'<span class="m">{e(det)}</span>' if det else ""
+                th = (f'<a class="th" href="{e(u["u"])}" rel="noopener"><img src="{e(H.imsrc(u["im"]))}" alt="" loading="lazy"></a>'
+                      if u.get("im") and H.imsrc(u["im"]) and lot else "")
                 body += (f'<tr data-i="{i}" data-p="{e(str(u.get("p") or ""))}" data-n="{e(str(u.get("n") or ""))}" data-a="{sl}"><td class="a"><a href="{BASE}/#lang={lang}&amp;artist={sl}">{e(A[u["a"]]["n"])}</a><span class="m">{e(record(u["a"], lang))}</span></td>'
-                         f'<td class="w"><i>{e(u["t"])}</i>{", " + e(u["yl"]) if u.get("yl") else ""}{det}{prior}</td>'
+                         f'<td class="w">{th}<i>{e(u["t"])}</i>{", " + e(u["yl"]) if u.get("yl") else ""}{det}{prior}</td>'
                          f'<td class="n"><b>{eur(u["p"], lang) if u.get("p") else "–"}</b>{lot}</td></tr>')
             body += "</tbody></table></details>"
             secs.append((dd or "9", body))

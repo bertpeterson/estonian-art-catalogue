@@ -71,12 +71,13 @@ coming = []
 for url, sale, date in sales:
     ahead = date > today
     key = "eksauc_" + re.sub(r"\W+", "_", url.rsplit("/", 1)[-1])
-    if not ahead and key in KEPT and date < recent and KEPT[key]:
+    if not ahead and key in KEPT and date < recent and KEPT[key] and "img" in KEPT[key][0]:
         recs.extend(KEPT[key]); continue
     if ahead: n_open += 1
     h = fetch(url) if ahead else get(url, key)                       # a coming sale's page is not cached: its lots change
     if ahead and not h: continue
-    cards = CARD.findall(h)
+    cards = [(*m.groups(), (re.findall(r"(?:data-)?src='(/s2/[^']+)'", h[max(0, m.start() - 3000):m.start()]) or [None])[-1])
+             for m in CARD.finditer(h)]
     if not cards:
         n_empty += 1
         p = os.path.join(CACHE, key + ".html.gz")
@@ -84,7 +85,7 @@ for url, sale, date in sales:
         continue
     n = 0
     if not ahead: KEPT[key] = []
-    for artist, lot, line, price in cards:
+    for artist, lot, line, price, im in cards:
         artist, lot, line, price = clean(artist), clean(lot), clean(line), clean(price)
         # the older sales list the title without a lot number
         lm = re.match(r"^(?:(\d+)\.\s*)?(.+)$", lot)
@@ -109,7 +110,7 @@ for url, sale, date in sales:
         (coming if ahead else recs).append({"aid": f"eks-{key[7:]}-{lotno}", "artist": artist, "title": title,
                      "year": y4.group(1) if y4 else None, "yl": yl.strip("U ") or None, "tech": tech.strip(" ,."), "dims": dims,
                      "house": "E-Kunstisalong", "sale": sale, "when": date[:7], "date": date,
-                     "start": start, "hammer": hammer, "sold": sold, "url": url})
+                     "start": start, "hammer": hammer, "sold": sold, "url": url, "img": BASE + im if im else None})
         if not ahead: KEPT[key].append(recs[-1])
         n += 1
     print(f"  {date} {sale[:36]:36} lots {n}", flush=True)
@@ -118,7 +119,7 @@ json.dump(KEPT, open("eks_sales.json", "w", encoding="utf-8"), ensure_ascii=Fals
 # the sales still to come: their lots, with the starting price, for upcoming.py
 from upcoming import emit
 emit("E-Kunstisalong", [{"house": r["house"], "sale": r["sale"], "date": r.get("date") or r.get("when"), "artist": r["artist"], "title": r["title"],
-                  "year": r.get("year"), "yl": r.get("yl"), "tech": r.get("tech") or "", "dims": r.get("dims") or "", "start": r.get("start"), "url": r.get("url")}
+                  "year": r.get("year"), "yl": r.get("yl"), "tech": r.get("tech") or "", "dims": r.get("dims") or "", "start": r.get("start"), "url": r.get("url"), "img": r.get("img")}
                  for r in coming])
 
 recs.sort(key=lambda r: (r["date"], r["artist"], r["title"]))
