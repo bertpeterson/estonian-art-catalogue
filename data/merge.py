@@ -259,8 +259,9 @@ _FIRM = re.compile(r"\b(trükikoda|trükk|kirjastus|verlag|druckerei|tehas|töö
 # a porcelain or faience works (Vene Keiserlik Portselanimanufaktuur, a Delft workshop),
 # a photographer's studio, a museum or an office as the author, "tundmatu" after a
 # name, a follower or a circle ("Schongaueri jäljendaja", "Canova mõjukonnast"), and two
-# artists at once ("Arno Arrak / Jüri Arrak") -- none of them one hand.
-_WORKS = re.compile(r"portselan|fajans|manufaktuur|fotoateljee|villeroy|muuseum|talitus|\bSA\b", re.I)
+# artists at once ("Arno Arrak / Jüri Arrak") -- none of them one hand. A youth movement
+# (Hiiumaa Noorteliikumine "Kodusaar") is not one either.
+_WORKS = re.compile(r"portselan|fajans|manufaktuur|fotoateljee|villeroy|muuseum|talitus|\bSA\b|liikumine\b", re.I)
 _anon = lambda n: (n.strip().lower() in ANON or re.match(r"^\W*(tundmatu|teadmata|anonüüm)\b", n.strip(), re.I) is not None or not re.match(r"^\w", n.strip())
                    or (_FIRM.search(n) is not None and not re.search(r"töökoda|ateljee", n, re.I))
                    or _WORKS.search(n) is not None or re.search(r"\btundmatu\b|jäljendaja|mõjukonnast|mõjuruumist|järgija\b", n, re.I) is not None or " / " in n)
