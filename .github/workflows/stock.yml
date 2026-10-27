@@ -19,6 +19,8 @@ jobs:
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false   # no write token on disk while the scrapers, pip and the image decoders run; the push step sets it
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: "3.12"
@@ -38,6 +40,7 @@ jobs:
           if git diff --cached --quiet; then echo "nothing changed"; exit 0; fi
           n=$(python3 -c "import json; print(len(json.load(open('data/stock_gone.json'))))")
           git commit -m "Daily stock check, $(date -u +%F): $n works no longer for sale since the weekly run" -m "Automated: the quick galleries read again; data/stock_check.py."
+          git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
           git pull --rebase --autostash -q origin main
           git push
           gh workflow run pages.yml --ref main

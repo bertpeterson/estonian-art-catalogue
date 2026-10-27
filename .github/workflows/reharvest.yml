@@ -28,6 +28,8 @@ jobs:
     timeout-minutes: 350          # the galleries alone took 164 min on 1 Oct 2026 (this run was stopped at 90), the auction houses over 60; GitHub stops any job at 360
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false   # no write token on disk while the scrapers, pip and the image decoders run; the push step sets it
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: "3.12"
@@ -117,6 +119,7 @@ jobs:
           print("README figures. Museum data untouched.")
           PY
           git commit -F /tmp/msg
+          git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
           git pull --rebase --autostash -q origin main    # main moves while the run reads (19 Oct 2026: three pushes in its 72 min, and this push was refused)
           git push
           # a push made with this workflow's token starts no other workflow, so the deploy

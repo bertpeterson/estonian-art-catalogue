@@ -24,6 +24,8 @@ jobs:
     timeout-minutes: 150          # the 28 Sep 2026 run was stopped at 60 in "The auction houses"
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false   # no write token on disk while the scrapers, pip and the image decoders run; the push step sets it
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: "3.12"
@@ -67,6 +69,7 @@ jobs:
           if git diff --cached --quiet; then echo "nothing changed"; exit 0; fi
           n=$(python3 -c "import json; print(len(json.load(open('data/data.json')).get('upcoming', [])))")
           git commit -m "Weekly auction lots, $(date -u +%F): $n coming lots" -m "Automated: read the eight auction houses' sales, merged, guarded, built and smoke-tested."
+          git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
           git pull --rebase --autostash -q origin main    # main moves while the run reads (19 Oct 2026: three pushes in its 72 min, and this push was refused)
           git push
           gh workflow run pages.yml --ref main
