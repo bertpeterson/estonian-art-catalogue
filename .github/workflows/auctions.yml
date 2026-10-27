@@ -1,4 +1,4 @@
-# The seven auction houses, weekly: the lots of sales still to come (upcoming_records.json)
+# The eight auction houses, weekly: the lots of sales still to come (upcoming_records.json)
 # and any new results. A house puts a sale's catalogue online two to four weeks before
 # it, so the monthly run would miss many; this reads only the houses, with their past
 # sales kept in a cache between runs (a past sale's page does not change), merges,
@@ -44,7 +44,7 @@ jobs:
       - name: The auction houses
         working-directory: data
         run: |
-          for s in vernissage_auctions haus_auctions eko_auctions vaal_auctions eks_auctions onk_auctions; do
+          for s in vernissage_auctions haus_auctions eko_auctions vaal_auctions eks_auctions onk_auctions kunstikoda_auctions; do
             echo "=== $s ==="; python3 -u $s.py
           done
 
@@ -66,7 +66,7 @@ jobs:
           git add -u data
           if git diff --cached --quiet; then echo "nothing changed"; exit 0; fi
           n=$(python3 -c "import json; print(len(json.load(open('data/data.json')).get('upcoming', [])))")
-          git commit -m "Weekly auction lots, $(date -u +%F): $n coming lots" -m "Automated: read the seven auction houses' sales, merged, guarded, built and smoke-tested."
+          git commit -m "Weekly auction lots, $(date -u +%F): $n coming lots" -m "Automated: read the eight auction houses' sales, merged, guarded, built and smoke-tested."
           git pull --rebase --autostash -q origin main    # main moves while the run reads (19 Oct 2026: three pushes in its 72 min, and this push was refused)
           git push
           gh workflow run pages.yml --ref main
