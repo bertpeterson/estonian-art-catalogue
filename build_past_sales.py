@@ -37,7 +37,7 @@ T = {"en": dict(file="past-sales", art="a", other="moodunud-oksjonid", h="Past s
                 sale_d="{s}, {h}, {d}: {n} partiid Eesti kunstnikelt, haamrihinnad nii, nagu maja need avaldas.")}
 for lang in T: T[lang]["month"] = U.T[lang]["month"]
 
-CSS = U.CSS + (".yr{margin-top:34px;font-family:var(--mono);font-size:.72rem;letter-spacing:.13em;color:var(--grey);border-bottom:1px solid var(--rule);padding-bottom:6px}"
+CSS = U.CSS + (".yr{margin:56px 0 0;font-family:var(--serif);font-weight:500;font-size:2.2rem;line-height:1;letter-spacing:-.01em;color:var(--ink);border-bottom:2px solid var(--ink-soft);padding-bottom:10px}"
                "ul.sales{list-style:none;margin:0;padding:0}ul.sales li{display:grid;grid-template-columns:9.5em 1fr auto;gap:4px 18px;padding:12px 0;border-bottom:1px solid var(--rule-soft);align-items:baseline}"
                "ul.sales a{font-family:var(--serif);font-size:1.12rem;text-decoration:none}ul.sales a:hover{text-decoration:underline}"
                "ul.sales .n{font-family:var(--mono);font-size:.78rem;color:var(--ink-soft)}td.n .m{font-family:var(--mono);font-size:.68rem}"
