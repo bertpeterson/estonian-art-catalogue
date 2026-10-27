@@ -77,13 +77,14 @@ body=re.sub(r'<meta name="description"[^>]*>\n?','',body,count=1)   # the templa
 # picture -- the holder's own file, by reference, as on the wall
 body=re.sub(r'<meta property="og:description" content="[^"]*">', DESC.replace('name="description"','property="og:description"'), body, count=1)
 _top=min((w for w in _m['works'] if w.get('mp') is not None and w.get('im')), key=lambda w: w['mp'], default=None)
+import html as _html
 if _top:
     _im=_top['im']
     _src=(f"https://www.muis.ee/digitaalhoidla/api/meedia/pisipilt?id={_im[2:]}" if _im.startswith("m:")
           else "https://digikogu.ekm.ee/static/preview/image/"+re.sub(r"/([^/]+)$", r"/t2_\1", _im[2:]) if _im.startswith("e:") else _im[2:])
     _alt=(_top.get('t') or '')+', '+_m['artists'][_top['a']]['n']
     body=body.replace('<meta name="twitter:card" content="summary">',
-        f'<meta property="og:image" content="{_src}">\n<meta property="og:image:alt" content="{_alt.replace(chr(34), "&quot;")}">\n<meta name="twitter:card" content="summary_large_image">',1)
+        f'<meta property="og:image" content="{_html.escape(_src)}">\n<meta property="og:image:alt" content="{_html.escape(_alt)}">\n<meta name="twitter:card" content="summary_large_image">',1)
     print("og:image:", _alt)
 # the landing page's first paint, baked (build_landing.py): the door and the opening of
 # the artwall as plain HTML, cleared at once by an inline script when the address names

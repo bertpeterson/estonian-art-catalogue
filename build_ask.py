@@ -1081,6 +1081,9 @@ def sale_pages(d):
             open(f"site/{SALE_DIR[lang]}/{sl}.html", "w", encoding="utf-8").write(html_); urls.append(me)
     return urls
 
+# a cell a spreadsheet would take for a formula gets an apostrophe in front (OWASP's CSV injection rule)
+csv_cell = lambda v: "'" + v if isinstance(v, str) and re.match(r"\s*(?:[=@\t\r]|[+-].*[|(!])", v) else v
+
 def feed(d):
     """/data/for-sale.csv: the stock with every value named, a row a work -- for a spreadsheet, a search engine or an
     agent, none of which can read stock.json's numbered fields. The works and asking prices Buy Art shows"""
@@ -1090,9 +1093,9 @@ def feed(d):
         wr.writerow(["title", "artist", "year", "technique", "technique_en", "medium", "dimensions", "size", "price_eur",
                      "gallery", "url", "image", "moods", "artist_page"])
         for w in d["works"]:
-            wr.writerow([w[0], arts[w[1]][0], w[2], w[4], w[15] or w[4], "; ".join(m for m in MEDIA if w[14] & BIT[m]),
+            wr.writerow([csv_cell(v) for v in [w[0], arts[w[1]][0], w[2], w[4], w[15] or w[4], "; ".join(m for m in MEDIA if w[14] & BIT[m]),
                          w[5], w[6], w[8] or "", gals[w[9]], w[10], w[3], "; ".join(words[j] for j in w[12][::2]),
-                         f"{BASE}/a/{arts[w[1]][1]}"])
+                         f"{BASE}/a/{arts[w[1]][1]}"]])
 
 def llms_txt(d):
     """/llms.txt (llmstxt.org): what the site is and where its data lives, in plain words for a language model that

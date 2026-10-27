@@ -155,10 +155,10 @@ def main():
             for i, u in enumerate(lots):
                 sl = H.ARTIST_SLUG[u["a"]]
                 prior = (f'<span class="m">{t["prior"]}: ' + " · ".join(f'{e(str(p[0])[:4])} {e(house(p[1], lang))} {eur(p[2], lang) if p[2] else t["nores"] if len(p) > 3 else t["unsold"]}' for p in u["pr"]) + "</span>") if u.get("pr") else ""
-                lot = f'<a class="lot" href="{e(u["u"])}" rel="noopener">{t["lot"]}{" " + str(u["n"]) if u.get("n") else ""} ↗</a>' if str(u.get("u") or "").startswith("http") else ""
+                lot = f'<a class="lot" href="{e(u["u"])}" rel="noopener">{t["lot"]}{" " + e(str(u["n"])) if u.get("n") else ""} ↗</a>' if str(u.get("u") or "").startswith("http") else ""
                 det = " · ".join(x for x in (u.get("tc"), u.get("dm")) if x)
                 det = f'<span class="m">{e(det)}</span>' if det else ""
-                body += (f'<tr data-i="{i}" data-p="{u.get("p") or ""}" data-n="{u.get("n") or ""}" data-a="{sl}"><td class="a"><a href="{BASE}/#lang={lang}&amp;artist={sl}">{e(A[u["a"]]["n"])}</a><span class="m">{e(record(u["a"], lang))}</span></td>'
+                body += (f'<tr data-i="{i}" data-p="{e(str(u.get("p") or ""))}" data-n="{e(str(u.get("n") or ""))}" data-a="{sl}"><td class="a"><a href="{BASE}/#lang={lang}&amp;artist={sl}">{e(A[u["a"]]["n"])}</a><span class="m">{e(record(u["a"], lang))}</span></td>'
                          f'<td class="w"><i>{e(u["t"])}</i>{", " + e(u["yl"]) if u.get("yl") else ""}{det}{prior}</td>'
                          f'<td class="n"><b>{eur(u["p"], lang) if u.get("p") else "–"}</b>{lot}</td></tr>')
             body += "</tbody></table></details>"
