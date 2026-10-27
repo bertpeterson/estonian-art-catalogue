@@ -379,7 +379,7 @@
                  view:null, viewKey:"", wLimit:72,   // the artwall: chosen for one view (viewKey), or null for the rule
                  aLimit:new Map(),   // artist by artist on the wall: pictures shown per artist beyond the first ten
                  decade:null, media:new Set(), museums:new Set(), cats:new Set(), srcs:new Set(),
-                 artist:null, letter:null, idxOpen:false, idxQ:"", idxLimit:120, idxSort:"az", showEarly:false, origins:new Set(), groups:new Set(), sort:"featured", onWall:false, year:null, gLimit:50, from:null, to:null, undOnly:false, open:null, expand:new Set(),
+                 artist:null, sub:null, letter:null, idxOpen:false, idxQ:"", idxLimit:120, idxSort:"az", showEarly:false, origins:new Set(), groups:new Set(), sort:"featured", onWall:false, year:null, gLimit:50, from:null, to:null, undOnly:false, open:null, expand:new Set(),
                  auLimit:20};     // sales drawn in the auction view before "more"
   const LIMIT_DEC = 50, LIMIT_ART = 18;
   const slug = s => (s||"").normalize("NFKD").replace(/[\u0300-\u036f]/g,"")
@@ -401,6 +401,7 @@
     if (state.q) p.set("q", state.q);
     if (state.artist !== null) p.set("artist", slug(A[state.artist].n));
     if (state.decade !== null) p.set("decade", state.decade);
+    if (state.sub) p.set("sub", state.sub);
     if (state.year !== null) p.set("year", state.year);
     if (state.from !== null) p.set("from", state.from);
     if (state.to !== null) p.set("to", state.to);
@@ -457,6 +458,7 @@
     state.from = nOrNull(p.get("from"));
     state.to   = nOrNull(p.get("to"));
     state.undOnly = p.get("undated") === "1";
+    state.sub = I18N.SUBJECTS.some(s => s[0] === p.get("sub")) ? p.get("sub") : null;
     const g = k => p.getAll(k);
     state.media   = new Set(MEDIA.filter(m => g("medium").includes(slug(m))));
     state.museums = new Set(MUSEUMS.filter(m => g("museum").includes(abbr(m).toLowerCase())));
@@ -538,7 +540,17 @@
     _tq = q; _tset = qTerms().length ? from.filter(matchText) : W;
     return _tset;
   };
-  const inList = w => { const k = listKeys(); return (!k || k.has(w.k)) && (!state.sale || w.kind === "gallery"); };
+  // a subject (Winter, Tallinn): a word in the title, as on the subject pages; the set is made once per subject
+  let _subKey = null, _subSet = null;
+  const subOk = w => {
+    if (_subKey !== state.sub){
+      _subKey = state.sub; const s = I18N.SUBJECTS.find(s => s[0] === state.sub), rx = s && new RegExp(s[4]);
+      _subSet = rx ? new Set(W.filter(x => x.t && rx.test(defold(x.t.toLowerCase())))) : null;
+    }
+    return !_subSet || _subSet.has(w);
+  };
+  const subName = sl => { const s = I18N.SUBJECTS.find(s => s[0] === sl); return s ? (LANG === "et" ? s[3] : s[2]) : sl; };
+  const inList = w => { const k = listKeys(); return (!k || k.has(w.k)) && (!state.sale || w.kind === "gallery") && subOk(w); };
   // a work offered at auction more than once is one row: the latest lot, with the
   // earlier results in its detail (the stats page still counts every lot)
   // an auction lot's sales of the same work, chained when a record first asks (not at start)
@@ -707,6 +719,7 @@
     if (state.decade !== null) add(state.decade === "und" ? T("undated") : decS(state.decade),
                                    () => { state.decade = null; state.year = null; });
     if (state.year !== null) add(String(state.year), () => state.year = null);
+    if (state.sub) add(subName(state.sub), () => state.sub = null);
     if (state.undOnly) add(T("undated"), () => state.undOnly = false);
     else if (state.from !== null || state.to !== null)
       add(`${state.from ?? YEARS.min}–${state.to ?? YEARS.max}`, () => { state.from = null; state.to = null; });
@@ -1543,11 +1556,11 @@
     {"en": "The 1930s", "et": "1930. aastad", "href": "#decade=1930", "door": "d", "v": "1930"},
     {"en": "The occupation years, 1940–1990", "et": "Okupatsiooniaeg 1940–1990", "href": "#from=1940&to=1990", "door": "p", "v": "3"},
     {"en": "The Pallas school", "et": "Pallase koolkond", "href": "#grp=school:Pallas", "door": "g", "v": "school:Pallas"},
-    {"en": "Winter", "et": "Talv", "href": "subjects/winter", "het": "ained/talv"},
-    {"en": "The sea", "et": "Meri", "href": "subjects/the-sea", "het": "ained/meri"},
-    {"en": "Tallinn", "et": "Tallinn", "href": "subjects/tallinn", "het": "ained/tallinn"},
-    {"en": "Italy", "et": "Itaalia", "href": "subjects/italy", "het": "ained/itaalia"},
-    {"en": "Self-portraits", "et": "Autoportreed", "href": "subjects/self-portrait", "het": "ained/autoportree"},
+    {"en": "Winter", "et": "Talv", "href": "#sub=winter", "door": "s", "v": "winter"},
+    {"en": "The sea", "et": "Meri", "href": "#sub=the-sea", "door": "s", "v": "the-sea"},
+    {"en": "Tallinn", "et": "Tallinn", "href": "#sub=tallinn", "door": "s", "v": "tallinn"},
+    {"en": "Italy", "et": "Itaalia", "href": "#sub=italy", "door": "s", "v": "italy"},
+    {"en": "Self-portraits", "et": "Autoportreed", "href": "#sub=self-portrait", "door": "s", "v": "self-portrait"},
     {"en": "For sale under €1,000", "et": "Müügil alla 1000 €", "href": "find#max=1000", "het": "leia#max=1000"}
   ];
   const DOOR_MOODS = [["serene", "rahulik"], ["melancholy", "melanhoolne"], ["dreamy", "unenäoline"], ["stormy", "tormine"],
@@ -1576,7 +1589,7 @@
   const PCOUNT = DOOR_PERIODS.map(([lo, hi]) => W.reduce((n, w) =>
     n + (w.y != null && (lo === null || w.y >= lo) && w.y <= hi ? 1 : 0), 0));
 
-  const pristine = () => !state.q && !listKeys() && !state.sale && state.decade === null && state.artist === null
+  const pristine = () => !state.q && !listKeys() && !state.sale && state.decade === null && state.artist === null && !state.sub
     && state.letter === null && state.from === null && state.to === null && state.year === null
     && !state.undOnly && !state.media.size && !state.museums.size && !state.cats.size
     && !state.srcs.size && !state.origins.size && !state.groups.size;
@@ -1694,7 +1707,7 @@
   // with the List / Wall buttons, the choice holds and travels in the link.
   // A List / Artwall choice belongs to the view it was made on: change the artist,
   // the decade, the search or a filter and the rule decides again.
-  const scopeKey = () => JSON.stringify([state.group, state.artist, state.decade, state.year, state.q, state.from, state.to, state.undOnly,
+  const scopeKey = () => JSON.stringify([state.group, state.artist, state.decade, state.year, state.q, state.sub, state.from, state.to, state.undOnly,
     state.sale, state.saleUp, state.list, [...state.media], [...state.museums], [...state.cats], [...state.srcs], [...state.origins], [...state.groups]]);
   function wallMode(set, nPics){
     if (state.group === "auction" || !nPics) return false;
@@ -2317,6 +2330,7 @@
     if (b.dataset.door === "a") state.artist = v;
     else if (b.dataset.door === "g") state.groups = new Set([b.dataset.v]);
     else if (b.dataset.door === "d") state.decade = v;
+    else if (b.dataset.door === "s") state.sub = b.dataset.v;
     else { state.from = DOOR_PERIODS[v][0]; state.to = DOOR_PERIODS[v][1]; }
     renderAll(); pushHash();
   });
@@ -2515,7 +2529,7 @@
     state.expand.clear(); renderAll(); pushHash();
   });
   $("reset").addEventListener("click", () => {
-    state.q=""; state.decade=null; state.media.clear(); state.museums.clear(); state.cats.clear(); state.srcs.clear(); state.origins.clear(); state.groups.clear();
+    state.q=""; state.decade=null; state.sub=null; state.media.clear(); state.museums.clear(); state.cats.clear(); state.srcs.clear(); state.origins.clear(); state.groups.clear();
     state.artist=null; state.letter=null; state.idxOpen=false; state.sort="featured"; state.year=null; state.from=null; state.to=null; state.undOnly=false; $("sortby").value="year";
     state.open=null; state.expand.clear(); state.decOrder="earliest";
     state.list=false; state.shared=null; state.sale=false; state.saleUp=false; state.view=null; state.wLimit=72; state.aLimit.clear();

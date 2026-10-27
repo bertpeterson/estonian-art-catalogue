@@ -54,7 +54,7 @@ MOODS = json.loads(re.search(r"const DOOR_MOODS = (\[.*?\]);", _app, re.S).group
 # word the mood page has a chip for, but its subjects (themes already) and the typed-only MORE
 import build_hubs as _H
 _seen = {x["href"] for x in WAYS}
-WAYS += [{"en": s[2], "et": s[3], "href": f"subjects/{s[0]}", "het": f"ained/{s[1]}"} for s in _H.SUBS if f"subjects/{s[0]}" not in _seen]
+WAYS += [{"en": s[2], "et": s[3], "href": f"#sub={s[0]}", "door": "s", "v": s[0]} for s in _H.SUBS if f"#sub={s[0]}" not in _seen]
 _seen = {en for en, _et in MOODS}
 MOODS += [[w["en"], w["et"]] for w in json.load(open("data/moods.json", encoding="utf-8"))["words"]
           if w["g"] in ("feeling", "light", "colour", "weather") and w["en"] not in _seen]

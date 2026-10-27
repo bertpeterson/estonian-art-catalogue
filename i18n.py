@@ -387,8 +387,27 @@ MEDIUM_ET = {"Design":"Kavand","Vessel":"Nõu","Caricature":"Karikatuur","Miniat
 DATEWORD_EN = {"Enne":"before","enne":"before","pärast":"after","Pärast":"after","Kuni":"until","kuni":"until",
  "aastad":"s","aastate":"s","lõpp":"end of","algus":"beginning of","II pool":"second half","I pool":"first half",
  "keskpaik":"mid","paiku":"around","sajand":"century","ndate":"s","ndad":"s","umbes":"around","u.":"c.","ca":"c."}
+# the subjects: a word in the title, Estonian stems with their inflections. build_hubs.py makes a
+# page of each; the app filters by them (#sub=winter), on titles folded the same way
+SUBJECTS = [  # (slug en, slug et, EN label, ET label, regex on the folded title)
+ ("landscape", "maastik", "Landscape", "Maastik", r"\bmaastik"), ("portrait", "portree", "Portrait", "Portree", r"\bportree"),
+ ("self-portrait", "autoportree", "Self-portrait", "Autoportree", r"\bautoportree"), ("still-life", "natuurmort", "Still life", "Natüürmort", r"\bnat[uü]{1,2}rmort"),
+ ("nude", "akt", "Nude", "Akt", r"\b(nais|mees)?akt(id|i|e)?\b"), ("the-sea", "meri", "The sea", "Meri", r"\bmer(i|e|d|el|elt|es)\b|\bmerevaade|\bmeremaastik"),
+ ("the-shore", "rand", "The shore", "Rand", r"\brand\b|\branna"), ("harbour", "sadam", "Harbour", "Sadam", r"\bsadam"), ("ships", "laev", "Ships", "Laev", r"\blaev"),
+ ("winter", "talv", "Winter", "Talv", r"\btalv"), ("spring", "kevad", "Spring", "Kevad", r"\bkevad"), ("summer", "suvi", "Summer", "Suvi", r"\bsuvi\b|\bsuve"),
+ ("autumn", "sugis", "Autumn", "Sügis", r"\bs[uü]gis"), ("flowers", "lilled", "Flowers", "Lilled", r"\blill"), ("forest", "mets", "Forest", "Mets", r"\bmets\b|\bmetsa"),
+ ("river", "jogi", "River", "Jõgi", r"\bj[oõ]gi\b|\bj[oõ]e\b"), ("lake", "jarv", "Lake", "Järv", r"\bj[aä]rv"), ("village", "kula", "Village", "Küla", r"\bk[uü]la\b"),
+ ("farm", "talu", "Farm", "Talu", r"\btalu\b|\btaluõu|\btalumaja"), ("street", "tanav", "Street", "Tänav", r"\bt[aä]nav"), ("church", "kirik", "Church", "Kirik", r"\bkirik"),
+ ("night", "oo", "Night", "Öö", r"\b[oö]{2}\b|\b[oö]ine|\b[oö]{2}ne"), ("mother", "ema", "Mother", "Ema", r"\bema\b|\bema "), ("child", "laps", "Child", "Laps", r"\blaps|\blapse"),
+ ("horse", "hobune", "Horse", "Hobune", r"\bhobu"), ("kalevipoeg", "kalevipoeg", "Kalevipoeg", "Kalevipoeg", r"\bkalevipo"), ("interior", "interjoor", "Interior", "Interjöör", r"\binterj"),
+ ("factory", "tehas", "Factory", "Tehas", r"\btehas\b|\btehase"), ("kolkhoz", "kolhoos", "Kolkhoz", "Kolhoos", r"\bkolhoos"),
+ ("tallinn", "tallinn", "Tallinn", "Tallinn", r"\btallinn"), ("tartu", "tartu", "Tartu", "Tartu", r"\btartu\b"), ("toompea", "toompea", "Toompea", "Toompea", r"\btoompea"),
+ ("pirita", "pirita", "Pirita", "Pirita", r"\bpirita"), ("saaremaa", "saaremaa", "Saaremaa", "Saaremaa", r"\bsaaremaa"), ("parnu", "parnu", "Pärnu", "Pärnu", r"\bp[aä]rnu"),
+ ("narva", "narva", "Narva", "Narva", r"\bnarva"), ("haapsalu", "haapsalu", "Haapsalu", "Haapsalu", r"\bhaapsalu"), ("viljandi", "viljandi", "Viljandi", "Viljandi", r"\bviljandi"),
+ ("paris", "pariis", "Paris", "Pariis", r"\bpariis"), ("italy", "itaalia", "Italy", "Itaalia", r"\bitaalia|\bcapri\b|\brooma\b|\bveneetsia"), ("norway", "norra", "Norway", "Norra", r"\bnorra"),
+]
 out={"ET":ET,"EN":EN,"HTML_ET":HTML_ET,"HTML_EN":HTML_EN,"BLURB_ET":BLURB_ET,
      "PERIOD_ET":PERIOD_ET,"PERIOD_EN":PERIOD_EN,"MUSEUM_EN":MUSEUM_EN,"CAT_EN":CAT_EN,
-     "MEDIUM_ET":MEDIUM_ET,"MEDIUM_EN":MEDIUM_EN,"DATEWORD_EN":DATEWORD_EN}
+     "MEDIUM_ET":MEDIUM_ET,"MEDIUM_EN":MEDIUM_EN,"DATEWORD_EN":DATEWORD_EN,"SUBJECTS":SUBJECTS}
 open("i18n.json","w",encoding="utf-8").write(json.dumps(out,ensure_ascii=False,separators=(",",":")))
 print("i18n.json written:",sum(len(v) for v in out.values()),"entries")
