@@ -63,7 +63,7 @@ ET = {
  "acc_signin_h":"Logi sisse","acc_signin_lede":"Logi e-postiga sisse, et Minu nimekiri oleks kõigis sinu seadmetes. Saadame lingi; sinu aadressi hoiame kontoga koos, kuni selle kustutad.",
  "acc_off":"Kontod pole praegu saadaval. Minu nimekiri on selles brauseris.","acc_back":"Tagasi kataloogi","privacy_link":"Privaatsus",
 "d_gallerylink":"Vaata galeriis {g} ↗","rl_view":"Müügil ↗","doors_name":"Alusta nimest","doors_theme":"Alusta teemast","doors_mood":"Alusta meeleolust","doors_all":"Kõik {n}","doors_less":"Vähem","doors_period":"Alusta ajajärgust",
- "p_pre":"Enne 1700","era_short_Vabariik":"Vabariik","era_short_Taasiseseisvus":"Taastatud", "reset":"Lähtesta","copy":"Kopeeri","copied":"Kopeeritud",
+ "p_pre":"Enne 1700","era_short_Vabariik":"Vabariik","era_short_Taasiseseisvus":"Taasiseseisvus","era_short_Okupatsioon":"Okupatsioon", "reset":"Lähtesta","copy":"Kopeeri","copied":"Kopeeritud",
  "filters":"Filtrid","years":"Aastad","medium":"Liik","museum":"Muuseum või galerii","ekmcat":"Stiil ja periood","source":"Allikas",
  "ekmcatnote":"Eesti Kunstimuuseumi enda jaotus tema Digitaalkogus; teosed, mida see ei kataloogi, jaotust ei kanna.",
  "morefilters":"Rohkem filtreid — stiil ja periood, päritolu, koolkond, allikas","fewerfilters":"Vähem filtreid","s_forsale":"Praegu müügil",
@@ -330,7 +330,7 @@ BLURB_ET = {
 2010:"Post-internet ja arhiiv. E-Eestist saab kunsti aines.",
 2020:"Keraamika, ökoloogia ja müüt; Karlsoni hundid täidavad Veneetsias pühitsusest vabastatud kiriku.",
 }
-PERIOD_ET = {"Tsaariaeg":"Tsaariaeg","Vabariik":"Esimene vabariik","Okupatsioon":"Okupatsioon","Taasiseseisvus":"Taastatud vabariik"}
+PERIOD_ET = {"Tsaariaeg":"Tsaariaeg","Vabariik":"Esimene vabariik","Okupatsioon":"Okupatsiooniaeg","Taasiseseisvus":"Taasiseseisvusaeg"}
 PERIOD_EN = {"Tsaariaeg":"Imperial Russia","Vabariik":"First Republic","Okupatsioon":"Occupation","Taasiseseisvus":"Restored Republic"}
 MUSEUM_EN = {
  "Underi ja Tuglase Kirjanduskeskus":"Under and Tuglas Literature Centre","Võrumaa Muuseum":"Võrumaa Museum","Järvamaa Muuseum":"Järvamaa Museum",
