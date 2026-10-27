@@ -277,7 +277,7 @@
   function upHTML(ai){
     const lots = UP.filter(u => u.a === ai);
     if (!lots.length) return "";
-    return `<div class="mono-up"><div class="d-k">${esc(T("up_head"))}</div>${lots.map(u => `<div class="up-lot">
+    return `<div class="mono-up"><div class="d-k">${esc(T("up_head"))}</div>${lots.map(u => `<div class="up-lot">${imgSrc(u.im || "") && href(u.u) ? `<a class="up-im" href="${href(u.u)}" target="_blank" rel="noopener"><img src="${esc(imgSrc(u.im))}" alt="${esc(u.t)}" loading="lazy"></a>` : ""}
         <div class="up-when">${esc(dmy(u.d))} · ${esc(musName(u.h))}${u.s ? " · " + esc(u.s) : ""}</div>
         <div><i>${esc(u.t)}</i>${u.yl ? ", " + esc(u.yl) : ""}${u.tc ? " · " + esc(u.tc) : ""}${u.dm ? " · " + esc(u.dm) : ""}</div>
         <div class="up-p">${u.p ? `${esc(T("up_start"))} ${esc(eur(u.p))}` : ""}${href(u.u) ? ` · <a href="${href(u.u)}" target="_blank" rel="noopener">${esc(musName(u.h))} ↗</a>` : ""}</div>
@@ -1113,7 +1113,7 @@
       const imHref = im.startsWith("g:") ? (w.url || imSrc)
                    : im.startsWith("m:") ? `https://opendata.muis.ee/dhmedia/${encodeURIComponent(im.slice(2))}` : imSrc;
       const imCap = w.kind === "known" ? esc(T("d_image", {h: musName("Konrad Mägi Sihtasutus")})) + " · " + esc(T("d_pd", {a: ar.n, l: life || "—"}))
-                  : im.startsWith("g:") && w.kind === "sold" ? esc(T("d_image", {h: musName(w.mu)})) + " · " + esc(T("d_imgpast")) + " · " + esc(T("d_pd", {a: ar.n, l: life || "—"}))
+                  : im.startsWith("g:") && (w.kind === "sold" || w.kind === "auction") ? esc(T("d_image", {h: musName(w.mu)})) + " · " + esc(T(w.kind === "auction" ? "d_imglot" : "d_imgpast")) + " · " + esc(T("d_pd", {a: ar.n, l: life || "—"}))
                   : im.startsWith("g:") ? esc(T("d_image", {h: musName(w.mu)})) + " · " + esc(T(w.kind === "shown" ? "d_imgshown" : "d_imgstock"))
                   : esc(T("d_image", {h: musName(w.mu)})) + (im.startsWith("m:") ? " · MuIS" : " · EKM") + " · " + esc(T("d_pd", {a: ar.n, l: life || "—"}));
       // the record's picture, less its colour chart where there is one: the box takes the

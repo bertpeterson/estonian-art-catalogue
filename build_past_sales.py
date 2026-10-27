@@ -115,8 +115,10 @@ def main():
                 lot = f'<a class="lot" href="{e(w["url"])}" rel="noopener">{t["lot"]} ↗</a>' if str(w.get("url") or "").startswith("http") else ""
                 st = f'<span class="m">{t["start"].format(p=eur(w["as"], lang))}</span>' if w.get("as") else ""
                 p = w["ap"] if w.get("ao") and w.get("ap") else ""
+                th = (f'<a class="th" href="{e(w["url"])}" rel="noopener"><img src="{e(H.imsrc(w["im"]))}" alt="" loading="lazy"></a>'
+                      if w.get("im") and H.imsrc(w["im"]) and lot else "")
                 rows += (f'<tr data-i="{i}" data-p="{p}"><td class="a"><a href="{BASE}/{t["art"]}/{H.ARTIST_SLUG[w["a"]]}">{e(A[w["a"]]["n"])}</a></td>'
-                         f'<td class="w"><i>{e(w["t"])}</i>{", " + e(w["yl"]) if w.get("yl") else ""}{f"<span class=m>{e(det)}</span>" if det else ""}</td>'
+                         f'<td class="w">{th}<i>{e(w["t"])}</i>{", " + e(w["yl"]) if w.get("yl") else ""}{f"<span class=m>{e(det)}</span>" if det else ""}</td>'
                          f'<td class="n">{result(w, t, lang)}{st}{lot}</td></tr>')
             sub = summary(ws, t, lang)
             page = (head(lang, t, me, other, f'{nm} – {t["c_res"].lower()} · museaal.ee',

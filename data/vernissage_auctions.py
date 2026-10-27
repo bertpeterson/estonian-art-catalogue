@@ -78,7 +78,8 @@ while True:
         (coming if ahead else recs).append({"aid": aid, "artist": artist, "title": title, "year": wyear, "yl": yl, "tech": tech, "dims": dims,
                      "house": "Vernissage", "sale": sale, "when": f"{year}-{month:02d}",
                      "start": start, "hammer": hammer, "sold": sold, "after": after,
-                     "url": p.get("permalink") or "https://vernissage.ee"})
+                     "url": p.get("permalink") or "https://vernissage.ee",
+                     "img": next((i.get("thumbnail") or i.get("src") for i in p.get("images") or [] if i.get("src")), None)})
     if page % 5 == 0: print(f"  page {page}  lots {len(recs)}", flush=True)
     page += 1; time.sleep(1.0)
     if page > 80: break
@@ -93,7 +94,7 @@ recs.sort(key=lambda r: (r["when"], r["artist"], r["title"]))
 # the sales still to come: their lots, with the starting price, for upcoming.py
 from upcoming import emit
 emit("Vernissage", [{"house": r["house"], "sale": r["sale"], "date": r.get("date") or r.get("when"), "artist": r["artist"], "title": r["title"],
-                  "year": r.get("year"), "yl": r.get("yl"), "tech": r.get("tech") or "", "dims": r.get("dims") or "", "start": r.get("start"), "url": r.get("url")}
+                  "year": r.get("year"), "yl": r.get("yl"), "tech": r.get("tech") or "", "dims": r.get("dims") or "", "start": r.get("start"), "url": r.get("url"), "img": r.get("img")}
                  for r in coming])
 # one file for every house; this script owns its own house's records in it
 prev = json.load(open("auction_records.json", encoding="utf-8")) if os.path.exists("auction_records.json") else []

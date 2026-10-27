@@ -69,6 +69,10 @@ for art in re.findall(rf'<article[^>]*project-cat-{cat}[^>]*>(.*?)</article>', h
     dm = DIMS.search(rest)
     dims = (re.sub(r"\s*[x×]\s*", " x ", dm.group(1)).replace(",", ".") + " cm") if dm and dm.group(1) else ""
     y4 = re.match(r"(\d{4})", yl)
+    im = re.search(r'<img[^>]*\ssrc="(https://alleegalerii\.ee/wp-content/[^"]+)"[^>]*?(?:srcset="([^"]*)")?', art)
+    img = None
+    if im:
+        img = next((u for u, w in re.findall(r"(\S+)\s+(\d+)w", im.group(2) or "") if w == "600"), im.group(1))
     if url in prev: start, tech = prev[url]["start"], prev[url].get("tech")
     else:
         new += 1
@@ -77,6 +81,6 @@ for art in re.findall(rf'<article[^>]*project-cat-{cat}[^>]*>(.*?)</article>', h
         start = int(re.sub(r"\D", "", sm.group(1))) if sm else None
         tech = lot_medium(lp, heading) or None
     lots.append({"house": "Allee galerii", "sale": S["sale"], "date": S["date"], "artist": artist, "title": title,
-                 "year": y4.group(1) if y4 else None, "yl": yl or None, "tech": tech, "dims": dims, "start": start, "url": url})
+                 "year": y4.group(1) if y4 else None, "yl": yl or None, "tech": tech, "dims": dims, "start": start, "url": url, "img": html.unescape(img) if img else None})
 print(f"  ALLEE {S['sale']}: {len(lots)} lots ({new} new, {len(set(prev) - seen)} gone), {sum(1 for x in lots if x['start'])} with a starting price; unparsed: {bad}")
 emit("Allee galerii", lots)
