@@ -26,6 +26,8 @@ jobs:
     timeout-minutes: 240          # Artrovert and Tokko & Arrak serve ~500 product pages each at ~3 s a page; the 1 Oct 2026 run timed out at 90; the next took 164 min to fetch
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false   # no write token on disk while the scrapers, pip and the image decoders run; the push step sets it
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: "3.12"
@@ -74,6 +76,7 @@ jobs:
           n=$(python3 -c "import json; print(sum(1 for w in json.load(open('data/data.json'))['works'] if w.get('kind') == 'gallery'))")
           k=$(python3 -c "import json; print(', '.join(json.load(open('data/gallery_kept.json'))))")    # galleries not read this week (data/fetch_galleries.py)
           git commit -m "Weekly gallery stock, $(date -u +%F): $n for sale${k:+; not read, last week's kept: $k}" -m "Automated: read the galleries and NOBA afresh, ledger, merged, guarded, built and smoke-tested."
+          git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
           git pull --rebase --autostash -q origin main    # main moves while the run reads (19 Oct 2026: three pushes in its 72 min, and this push was refused)
           git push
           gh workflow run pages.yml --ref main
