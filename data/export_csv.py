@@ -5,7 +5,12 @@ data.json is dictionary-encoded and nested, which is right for the site and wron
 for anyone with a spreadsheet. These write one row per work with every value
 resolved, plus a separate artist table.
 """
-import json, csv, gzip, os
+import json, csv, gzip, os, re
+
+# a cell a spreadsheet would take for a formula is written with an apostrophe in front (OWASP's CSV injection rule):
+# the museums' fields and Wikidata's descriptions reach here without data/boundary.py's check
+_FORMULA = re.compile(r"^\s*(?:[=@\t\r]|[+-].*[|(!])")
+cell = lambda v: "'" + v if isinstance(v, str) and _FORMULA.search(v) else v
 
 d = json.load(open("data.json", encoding="utf-8"))
 A, W, V = d["artists"], d["works"], d.get("vocab", {})
@@ -36,7 +41,7 @@ COLS = [("artist",   lambda w: A[w["a"]]["n"]),
 
 with gzip.open("../site/data/export/works.csv.gz", "wt", encoding="utf-8", newline="") as f:
     wr = csv.writer(f); wr.writerow([c for c, _ in COLS])
-    for w in W: wr.writerow([g(w) for _, g in COLS])
+    for w in W: wr.writerow([cell(g(w)) for _, g in COLS])
 
 ACOLS = [("name", "n"), ("born", None), ("died", None), ("works", "c"),
          ("birthplace", "born"), ("affiliation", "aff"), ("wikidata", "qid"),
@@ -45,8 +50,8 @@ with gzip.open("../site/data/export/artists.csv.gz", "wt", encoding="utf-8", new
     wr = csv.writer(f); wr.writerow([c for c, _ in ACOLS])
     for a in A:
         life = a.get("l") or ["", ""]
-        wr.writerow([a.get("n"), life[0], life[1], a.get("c", 0),
-                     a.get("born"), a.get("aff"), a.get("qid"), a.get("wdesc")])
+        wr.writerow([cell(v) for v in (a.get("n"), life[0], life[1], a.get("c", 0),
+                                      a.get("born"), a.get("aff"), a.get("qid"), a.get("wdesc"))])
 
 # one JSON object per line, for stream processing
 with gzip.open("../site/data/export/works.jsonl.gz", "wt", encoding="utf-8") as f:

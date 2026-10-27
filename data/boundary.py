@@ -79,7 +79,9 @@ def public_domain(a, year=None):
 
 def web(u):
     p = urlparse(u or "")
-    return p.scheme in ("http", "https") and bool(p.hostname) and not CONTROL.search(u) and " " not in u.strip()
+    # no quote or angle bracket either: a link goes into attributes, and one that needs them is not a gallery's
+    return p.scheme in ("http", "https") and bool(p.hostname) and not CONTROL.search(u) and " " not in u.strip() \
+        and not re.search(r"[\"'<>`]", u)
 
 
 def check(d):
