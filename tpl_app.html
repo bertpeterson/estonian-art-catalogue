@@ -1540,7 +1540,7 @@
   // subject, Buy art under €1,000), the occupation years and the Pallas school as the
   // filters they are, and words that open the mood wall. build_landing.py bakes the same.
   const DOOR_WAYS = [
-    {"en": "The 1930s", "et": "1930. aastad", "href": "decades/1930", "het": "kumnendid/1930"},
+    {"en": "The 1930s", "et": "1930. aastad", "href": "#decade=1930", "door": "d", "v": "1930"},
     {"en": "The occupation years, 1940–1990", "et": "Okupatsiooniaeg 1940–1990", "href": "#from=1940&to=1990", "door": "p", "v": "3"},
     {"en": "The Pallas school", "et": "Pallase koolkond", "href": "#grp=school:Pallas", "door": "g", "v": "school:Pallas"},
     {"en": "Winter", "et": "Talv", "href": "subjects/winter", "het": "ained/talv"},
@@ -2316,6 +2316,7 @@
     const v = +b.dataset.v;
     if (b.dataset.door === "a") state.artist = v;
     else if (b.dataset.door === "g") state.groups = new Set([b.dataset.v]);
+    else if (b.dataset.door === "d") state.decade = v;
     else { state.from = DOOR_PERIODS[v][0]; state.to = DOOR_PERIODS[v][1]; }
     renderAll(); pushHash();
   });
