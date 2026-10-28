@@ -20,8 +20,8 @@ anything private (keys, accounts, personal plans, correspondence) out of this fi
 - Images: museum works only by public-domain artists, embedded live from MuIS / EKM; gallery pictures
   only for live stock, embedded from the gallery's own server, plus past listings of public-domain
   artists (2026-10-23). Auction lots (2026-10-27): every lot of a coming sale, embedded from the
-  house's own server while the sale is ahead; past lots only by public-domain artists (Vaal has
-  none: its API gives no picture address). Never past listings or past lots by later artists, or
+  house's own server while the sale is ahead; past lots only by public-domain artists (Vaal's
+  from oksjon.vaal.ee by image id, 2026-10-28). Never past listings or past lots by later artists, or
   in-copyright museum works. Embed, never copy. Settled; don't reopen.
 - Prices: asking prices of current stock (`data/asking_price.py`). A sold gallery work keeps a price
   only when its own page still shows it (Allee: "12 000 € Müüdud."), read fresh from that page and
