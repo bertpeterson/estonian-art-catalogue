@@ -6,7 +6,9 @@ sale from a small JSON API (oksjon.vaal.ee/api/auction, /api/item): the lots by
 day with the day's date, artist and life dates, technique, starting price and
 hammer price where it sold, and per lot the year and size. The API is what the
 public page itself loads; it is read the same way, one call per sale and one per
-lot, the lot calls cached since a past sale does not change.
+lot, the lot calls cached since a past sale does not change. Besides the seasonal sales
+there are one-off ones ("Tõde ja õigus 100", 30 Oct 2026) whose days carry no date; the
+sale's page gives it. Each lot's photograph is on the auction site by its image id.
 
 A lot with no hammer price did not sell and is kept as that. A sale is a result
 once every day of it is past and it has hammer prices; the API's own status lags
@@ -52,7 +54,9 @@ euros = lambda s: int(re.sub(r"[^\d]", "", clean(s))) if re.search(r"\d", clean(
 
 # the sales: the page for each carries the API tag it loads
 index = fetch(f"{BASE}/oksjonid")
-slugs = sorted({s for s in re.findall(r'href="/oksjonid/(\d{4}-[a-z]+)"', index)})
+# the seasonal sales ("2026-kevadoksjon") and the one-off ones ("tode-ja-oigus-100"); a page
+# with no API tag (the rules, the records) is passed over below
+slugs = sorted({s for s in re.findall(r'href="/oksjonid/([a-z0-9-]+)"', index)} - {"eeskirjad", "kasutustingimused", "oksjoni-rekordid", "teos"})
 print(f"VAAL: {len(slugs)} sales listed", flush=True)
 
 today = datetime.date.today().isoformat()
@@ -63,6 +67,15 @@ def day_date(day, slug):
     m = re.search(r"(\d{2})\.(\d{2})\.(\d{4})", day.get("auction_day_description") or "")
     return f"{max(m.group(3), slug[:4])}-{m.group(2)}-{m.group(1)}" if m else None
 
+MONTHS = "jaanuar veebruar märts aprill mai juuni juuli august septemb oktoob novemb detsemb".split()   # stems: "oktoobril"
+def page_date(page, slug):
+    """A one-off sale's days carry no date ("Teosed", "Raamatud"); its page says it in words,
+    "30. oktoobril algusega kell 18". The year is the slug's, else the coming one."""
+    m = re.search(r"(\d{1,2})\.\s*(" + "|".join(MONTHS) + r")", clean(page).lower())
+    if not m: return None
+    md = f"{MONTHS.index(m.group(2)) + 1:02d}-{int(m.group(1)):02d}"
+    return f"{slug[:4] if slug[:4].isdigit() else today[:4]}-{md}"
+
 recs, n_open, n_unparsed = [], 0, 0
 coming = []
 for slug in slugs:
@@ -72,18 +85,22 @@ for slug in slugs:
     data = fetch(f"{API}/auction?auction={tag.group(1)}"); time.sleep(0.5)
     try: a = json.loads(data)["auction"]
     except Exception: print("  bad API answer for", slug); continue
-    days = a.get("days") or []
-    dates = [x for x in (day_date(d, slug) for d in days) if x]
+    # the books of a one-off sale ("Raamatud": one-of-a-kind copies with an artist's cover) are not art
+    days = [d for d in a.get("days") or [] if not re.match(r"raamat", d.get("auction_day_description") or "", re.I)]
+    on_page = page_date(page, slug)
+    dates = [x for x in (day_date(d, slug) or on_page for d in days) if x]
     ended = a.get("auction_status") == "ended" or (dates and max(dates) < today and any(i.get("item_price_final") for d in days for i in d.get("item", [])))
     ahead = not ended and (not dates or max(dates) >= today)       # a sale still to come (or running)
     if not ended and not ahead: n_open += 1; continue                # past its days but no results yet: wait
     sale = clean(a.get("auction_name") or slug)
     n = 0
-    for day in a.get("days") or [{"auction_day_description": "", "item": a.get("item", [])}]:
-        when = day_date(day, slug) or slug[:4]
+    for day in days or [{"auction_day_description": "", "item": a.get("item", [])}]:
+        when = day_date(day, slug) or on_page or slug[:4]
         for it in day.get("item", []):
             artist = clean(it.get("item_author"))
+            lot = re.match(r"^(\d+)\.", clean(it.get("item_name")))
             title = re.sub(r"^\d+\.\s*", "", clean(it.get("item_name")))          # "12. Lamav akt"
+            if title in ("-", "–"): title = "Nimetu"                                 # the house's dash for no title
             if not title or not re.match(r"^[^\d]{3,60}$", artist): n_unparsed += 1; continue
             start, hammer = euros(it.get("item_price_start")), euros(it.get("item_price_final"))
             det = get(f"{API}/item?item={it['item_id']}", f"vaalauc_{it['item_id']}")
@@ -102,7 +119,11 @@ for slug in slugs:
                          "start": start, "hammer": hammer, "sold": hammer is not None,
                          # the lot page reads its id from between "?" and the first "-", so
                          # the address needs a slug after the id or it shows nothing
-                         "url": f"{BASE}/oksjonid/teos?{it['item_id']}-{slugify(title)}"})
+                         "url": f"{BASE}/oksjonid/teos?{it['item_id']}-{slugify(title)}",
+                         # the lot's photograph on the auction site; a past lot shows it only for a
+                         # public-domain artist (merge.py)
+                         "img": f"https://oksjon.vaal.ee/teos/image/{it['image_id']}/s=600" if it.get("image_id") else None,
+                         "lot": int(lot.group(1)) if lot else None})
             n += 1
     print(f"  {slug} {sale[:36]:36} lots {n}", flush=True)
 
@@ -110,7 +131,8 @@ recs.sort(key=lambda r: (r["date"], r["artist"], r["title"]))
 # the sales still to come: their lots, with the starting price, for upcoming.py
 from upcoming import emit
 emit("Vaal galerii", [{"house": r["house"], "sale": r["sale"], "date": r.get("date") or r.get("when"), "artist": r["artist"], "title": r["title"],
-                  "year": r.get("year"), "yl": r.get("yl"), "tech": r.get("tech") or "", "dims": r.get("dims") or "", "start": r.get("start"), "url": r.get("url")}
+                  "year": r.get("year"), "yl": r.get("yl"), "tech": r.get("tech") or "", "dims": r.get("dims") or "", "start": r.get("start"), "url": r.get("url"),
+                  "lot": r.get("lot"), "img": r.get("img")}
                  for r in coming])
 
 prev = json.load(open("auction_records.json", encoding="utf-8")) if os.path.exists("auction_records.json") else []
