@@ -378,7 +378,9 @@ pages. Prices are never collected, and every record links back to the gallery's 
 `robots.txt` is read before it is collected from, and the monthly run re-reads every one
 (`data/robots_check.py`) and stops if any source says no, so a site that changes its mind is heard the
 next month. Taavi Eelmaa's Lihtsad Kipskassid was taken out on 22 Oct 2026, when its file began
-to refuse ClaudeBot. Each is fetched at the pace its file asks — `alleegalerii.ee`'s ten-second delay, for one —
+to refuse ClaudeBot, and Allee galerii's stock is no longer read since 29 Oct 2026, for the same reason (its records
+stand as last read); Allee's coming auction lots
+are still read from the Mac. Each is fetched at the pace its file asks — `alleegalerii.ee`'s ten-second delay, for one —
 and a page already read is not read again.
 
 **Gallery stock is re-harvested monthly** by `.github/workflows/reharvest.yml`, at 04:00 UTC on the

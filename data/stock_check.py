@@ -27,7 +27,7 @@ import json, os, re, sys, shutil, subprocess, datetime
 here = os.path.dirname(os.path.abspath(__file__))
 GONE = os.path.join(here, "stock_gone.json")
 # the script, and the gallery whose records it replaces in gallery_records.json
-QUICK = [("artner", "Artner"), ("allee", "Allee galerii"), ("vernissage", "Vernissage"), ("artman", "Artman"),
+QUICK = [("artner", "Artner"), ("vernissage", "Vernissage"), ("artman", "Artman"),
          ("artandtonic", "Art & Tonic"), ("eks", "E-Kunstisalong"), ("kogo", "Kogo galerii"), ("ruki", "Ruki galerii"),
          ("tutar", "Tütar galerii"), ("haus", "Haus Galerii"), ("noba", "NOBA")]
 # what the scripts write besides gallery_records.json; put back afterwards, so a run leaves only stock_gone.json changed
