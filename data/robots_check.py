@@ -10,10 +10,13 @@ Exit 1 stops the workflow before anything is fetched, the same way harvest_guard
 import re, sys, urllib.request
 
 HOSTS = ["haus.ee", "www.kogogallery.ee", "temnikova.ee", "www.tutar.ee", "www.artrovert.ee", "rukigalerii.ee",
-         "alleegalerii.ee", "vernissage.ee", "eestikunstioksjonid.ee", "www.vaal.ee", "oksjon.vaal.ee",
+         "vernissage.ee", "eestikunstioksjonid.ee", "www.vaal.ee", "oksjon.vaal.ee",
          "www.e-kunstisalong.ee", "ostanoortkunsti.ee", "kunstikoda.ee", "noba.ac", "konradmagi.ee", "artner.ee", "artandtonic.art", "tokkoarrak.ee", "www.artman.ee"]
 # Lihtsad Kipskassid (www.lihtsadkipskassid.ee and its R2 bucket) left on 22 Oct 2026: its robots.txt
 # began to say Disallow: / to ClaudeBot. kipskassid.py is kept for the day the artist says yes.
+# Allee galerii's stock is no longer read since 29 Oct 2026, for the same reason; its records stand as
+# last read (allee.py is kept). Its coming auction
+# lots are still read on the Mac by allee_coming.py, under the file's User-agent: * group.
 UA = "EstonianArtCatalogue/1.0 (museaal.ee; contact info@museaal.ee)"
 OURS = {"*", "estonianartcatalogue", "claudebot", "claude-user", "claude-searchbot", "anthropic-ai"}
 

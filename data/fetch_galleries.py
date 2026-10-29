@@ -21,7 +21,8 @@ they were before this run, so a name new elsewhere this week counts for NOBA nex
 A script that fails -- a page its gallery would not serve, store_api.py -- leaves that
 group's galleries with last week's records, and the run goes on with the others: Allee's
 pages refused on GitHub's runners stopped the whole weekly run three Thursdays running
-(1-15 Oct 2026). The group is noted in gallery_kept.json with the day it was first not
+(1-15 Oct 2026); Allee's stock is no longer read since 29 Oct 2026, its records
+standing as last read. The group is noted in gallery_kept.json with the day it was first not
 read; one not read for two weeks fails the run, once every group has finished and its
 log has been printed, so a parser that broke for good is still looked at.
 """
@@ -31,7 +32,7 @@ from concurrent.futures import ThreadPoolExecutor
 here = os.path.dirname(os.path.abspath(__file__))
 REC = "gallery_records.json"
 KEPT = os.path.join(here, "gallery_kept.json")    # group -> the day it was first not read
-GROUPS = [["haus"], ["kogo"], ["temnikova"], ["tutar"], ["artrovert"], ["ruki"], ["allee"], ["eks"], ["vernissage"],
+GROUPS = [["haus"], ["kogo"], ["temnikova"], ["tutar"], ["artrovert"], ["ruki"], ["eks"], ["vernissage"],
           ["konradmagi"], ["artner", "artman"], ["tokkoarrak"], ["artandtonic"],
           ["noba", "noba_artists", "noba_artworks", "noba"]]
 
