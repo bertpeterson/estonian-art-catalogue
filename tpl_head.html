@@ -27,6 +27,13 @@ document.addEventListener("DOMContentLoaded", function(){ window.__lz(); });
      while the page is still arriving -->
 <link rel="preconnect" href="https://www.muis.ee">
 <link rel="preconnect" href="https://digikogu.ekm.ee">
+<!-- the fonts are asked for with the page, not after fonts.css names them: they land before or
+     close to the first paint, and the stand-ins in fonts.css hold their places until then -->
+<link rel="preload" href="/fonts/newsreader-normal-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/newsreader-italic-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/archivo-normal-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/ibm-plex-mono-400-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/ibm-plex-mono-500-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/fonts/fonts.css">
 <style>
 :root{
@@ -41,9 +48,9 @@ document.addEventListener("DOMContentLoaded", function(){ window.__lz(); });
      and at the old #A0A5AC it hit 2.48:1 on white. These clear 4.6:1 in both themes. */
   --ls-label:.13em; --ls-data:.05em;
   --sp-1:6px; --sp-2:11px; --sp-3:18px; --sp-4:30px;
-  --serif-text:"Newsreader","Iowan Old Style","Palatino",Georgia,serif;  /* every serif on the page */
-  --sans:"Archivo","Helvetica Neue",Helvetica,Arial,sans-serif;
-  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --serif-text:"Newsreader","Newsreader fb","Newsreader fb2",Georgia,serif;  /* every serif on the page */
+  --sans:"Archivo","Archivo fb",Arial,sans-serif;
+  --mono:"IBM Plex Mono","IBM Plex Mono fb","IBM Plex Mono fb2",ui-monospace,monospace;
 }
 /* dark is the page's own colour; light is a choice, kept for the reader who makes it
    (localStorage ekr:theme, stamped on <html> before the first paint) */
@@ -804,7 +811,9 @@ footer a{border-bottom:1px solid var(--rule)}
         <p class="mast-tag" data-i18n="tagline"></p>
         <!-- signing in, up front: the account carries My List to every device (list-sync.js); signed in, the account page -->
         <!-- and My List beside it, the visitor's own things in one box; the list's tools open with the catalogue (#listbar) -->
-        <div class="langsw acc-sw"><button id="acc-top" aria-expanded="false" aria-controls="accpanel" hidden></button><a id="acc-link" href="account" hidden></a><button id="mylist" aria-pressed="false" data-i18n="mylist"></button></div>
+        <div class="langsw acc-sw"><button id="acc-top" aria-expanded="false" aria-controls="accpanel" data-i18n="acc_top"></button><a id="acc-link" href="account" data-i18n="acc_link" hidden></a><button id="mylist" aria-pressed="false" data-i18n="mylist"></button></div>
+        <!-- shown at once, not when the page's script gets to it: the strip kept moving under the reader's eye -->
+        <script>try{if((JSON.parse(localStorage.getItem("museaal.account"))||{}).s){document.getElementById("acc-top").hidden=true;document.getElementById("acc-link").hidden=false}}catch(e){}</script>
       </div>
       <div class="mast-stats">
         <!-- opens the works per decade, which no longer stands open on the home page -->

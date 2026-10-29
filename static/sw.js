@@ -15,6 +15,10 @@ self.addEventListener("install", () => self.skipWaiting());
 self.addEventListener("activate", e => e.waitUntil(self.clients.claim()));
 
 const versioned = u => u.origin === self.location.origin && u.pathname.startsWith("/data/") && /^v=[0-9a-f]+$/.test(u.search.slice(1));
+// The fonts are kept too: GitHub Pages lets a browser keep them ten minutes, and after that every
+// refresh asked again and drew the page in the stand-in fonts until the answer came. They do not
+// change; one that does must take a new file name.
+const font = u => u.origin === self.location.origin && u.pathname.startsWith("/fonts/") && u.pathname.endsWith(".woff2");
 
 async function prune(cache, u){
   for (const k of await cache.keys()){
@@ -33,7 +37,7 @@ async function store(cache, url){
 self.addEventListener("fetch", e => {
   if (e.request.method !== "GET") return;
   const u = new URL(e.request.url);
-  if (versioned(u) && e.request.cache !== "reload"){
+  if ((versioned(u) || font(u)) && e.request.cache !== "reload"){
     e.respondWith(caches.open(CACHE).then(c => store(c, e.request.url)));
   } else if (e.request.mode === "navigate"){
     // The page itself is asked for afresh every time -- GitHub Pages lets a browser

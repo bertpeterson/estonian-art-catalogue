@@ -45,7 +45,7 @@ T = {"en": dict(file="upcoming", other="tulemas", h="Coming up at auction", site
                 lots="partiid", lot1="partii", mine="{a}: {w}", w1="1 teos", wn="{n} teost", first="Sinu kunstnikud enne", c_art="Kunstnik", c_work="Teos", c_price="Alghind", lot="Partii", hand="Kataloog on oksjonimaja enda lehel; selle partiisid siin ei loetleta.", cat="Kataloog", sort="Järjesta", az="A–Ü", price="Hind", lotno="Partii nr", show="Näita partiisid ↓", hide="Peida partiid ↑", past="Möödunud oksjonid", pf="moodunud-oksjonid", other_l="In English", note="Ülestähendus, mitte hinnang. Uueneb iga nädal.", month=["jaanuar","veebruar","märts","aprill","mai","juuni","juuli","august","september","oktoober","november","detsember"])}
 
 CSS = (":root{--paper:#0B0C0E;--field:#15171A;--ink:#F1F2F4;--ink-soft:#C7CACE;--grey:#8B9098;--rule:#2B2E34;--rule-soft:#212429;"
-       "--serif:'Newsreader','Iowan Old Style',Georgia,serif;--sans:'Archivo','Helvetica Neue',Arial,sans-serif;--mono:'IBM Plex Mono',ui-monospace,Menlo,monospace}"
+       "--serif:'Newsreader','Newsreader fb','Newsreader fb2',Georgia,serif;--sans:'Archivo','Archivo fb',Arial,sans-serif;--mono:'IBM Plex Mono','IBM Plex Mono fb','IBM Plex Mono fb2',ui-monospace,monospace}"
        ":root[data-theme=light]{--paper:#FFFFFF;--field:#F5F6F8;--ink:#0B0C0E;--ink-soft:#33363B;--grey:#6C7178;--rule:#DCDFE3;--rule-soft:#EBEDF0}"
        "*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.5 var(--sans);-webkit-font-smoothing:antialiased}"
        ".pg{max-width:1080px;margin:0 auto;padding:22px 32px 40px}a{color:inherit}"
