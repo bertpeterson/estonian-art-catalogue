@@ -110,7 +110,7 @@ for url, sale, date in sales:
         (coming if ahead else recs).append({"aid": f"eks-{key[7:]}-{lotno}", "artist": artist, "title": title,
                      "year": y4.group(1) if y4 else None, "yl": yl.strip("U ") or None, "tech": tech.strip(" ,."), "dims": dims,
                      "house": "E-Kunstisalong", "sale": sale, "when": date[:7], "date": date,
-                     "start": start, "hammer": hammer, "sold": sold, "url": url, "img": BASE + im if im else None})
+                     "start": start, "hammer": hammer, "sold": sold, "url": url, "img": BASE + im.replace("_s_e_", "_s_s_") if im else None})
         if not ahead: KEPT[key].append(recs[-1])
         n += 1
     print(f"  {date} {sale[:36]:36} lots {n}", flush=True)

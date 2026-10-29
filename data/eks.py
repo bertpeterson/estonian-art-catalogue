@@ -36,7 +36,7 @@ for k, c in enumerate(cards):
     dims = (" x ".join(x.replace(",", ".") for x in dm.groups() if x) + " cm") if dm else ""
     # the card's picture is the nearest data-src before this card's text
     before = [p for p in pics if p.start() < c.start()]
-    img = BASE + before[-1].group(1) if before else None
+    img = BASE + before[-1].group(1).replace("_s_e_", "_s_s_") if before else None   # 635 px, not the 200 px thumbnail
     hm = re.search(r"Hind:\s*(.*?)</span>", h[c.end():c.end() + 300], re.S)
     price = euros(clean(re.sub(r"<[^>]+>", " ", hm.group(1)))) if hm else {}
     recs.append({**price, "gid": "eks-" + pid, "artist": artist, "title": title, "year": year[:4] if year else None,
