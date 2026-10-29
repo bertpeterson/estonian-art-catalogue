@@ -162,6 +162,8 @@ h1 a:hover{color:var(--grey-6)}
 .fs-row{position:relative;min-width:0}
 .fs-works{display:grid;gap:10px;grid-auto-flow:column;grid-auto-columns:calc((100% - 50px) / 6);overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;overscroll-behavior-x:contain}
 .fs-works::-webkit-scrollbar{display:none}
+/* out of sight for the moment between the baked row and its order for this view (the script after it) */
+.fs-wait .fs-works{visibility:hidden}
 .fs-w{scroll-snap-align:start}
 /* the two of For you that lead the row for a visitor with a list: marked on the picture */
 .fs-w{position:relative}
@@ -840,24 +842,14 @@ footer a{border-bottom:1px solid var(--rule)}
       <a class="fs-all" id="fs-up" href="upcoming" data-i18n="fs_up"></a>
     </div>
     <div class="fs-row">
+      <script>document.documentElement.classList.add("fs-wait")</script>
       <div class="fs-works" id="fs-works"></div>
       <button type="button" class="fs-arr fs-prev" aria-label="Previous works" hidden>&#8592;</button>
       <button type="button" class="fs-arr fs-next" aria-label="More works" hidden>&#8594;</button>
     </div>
   </section>
-  <div class="cat-head">
-    <h2 data-i18n="cat_h"></h2>
-    <p data-i18n="cat_lede"></p>
-  </div>
-
-  <section class="histo" id="histo">
-    <div class="histo-head">
-      <span><span class="eyebrow" data-i18n="worksperdecade"></span></span>
-      <span class="histo-r"><span class="eyebrow" id="histo-hint">Select a decade to filter</span></span>
-    </div>
-    <div class="bars" id="bars"></div>
-    <div class="eras" id="eras"></div>
-  </section>
+  <!-- right after the row, so it is in this view's order before the page is first drawn: further down, the
+       baked first six showed and then gave way to another six (2026-10-29) -->
   <script>
   // works before the catalogue's index has arrived: the links go to Buy art, in the page's language
   (function(){
@@ -915,6 +907,22 @@ footer a{border-bottom:1px solid var(--rule)}
     row.addEventListener("mouseleave",function(){on=null});
     row.addEventListener("scroll",place,{passive:true});addEventListener("scroll",place,{passive:true});
   })();
+  </script>
+  <script>document.documentElement.classList.remove("fs-wait")</script>
+  <div class="cat-head">
+    <h2 data-i18n="cat_h"></h2>
+    <p data-i18n="cat_lede"></p>
+  </div>
+
+  <section class="histo" id="histo">
+    <div class="histo-head">
+      <span><span class="eyebrow" data-i18n="worksperdecade"></span></span>
+      <span class="histo-r"><span class="eyebrow" id="histo-hint">Select a decade to filter</span></span>
+    </div>
+    <div class="bars" id="bars"></div>
+    <div class="eras" id="eras"></div>
+  </section>
+  <script>
   // a visitor whose browser asks for Estonian, and who has not chosen English here, gets the page in Estonian
   // before the index arrives (the app, when it boots, keeps to the same choice); the link's #lang and a choice made
   // on the page come first
@@ -948,10 +956,12 @@ footer a{border-bottom:1px solid var(--rule)}
     </div>
     <!-- before the sort: the Earliest / Latest pair shows in the list and not on the wall,
          and after it the toggle jumped along or onto another line at each switch -->
-    <div class="ctl" id="viewctl" hidden>
+    <!-- shown from the start, as the landing has it (its count's place held until the app counts): when the app
+         put it in, the sort and Filters jumped sideways -->
+    <div class="ctl" id="viewctl">
       <div class="seg" role="group" aria-label="View">
-        <button id="v-list" aria-pressed="true" data-i18n="v_list"></button>
-        <button id="v-wall" aria-pressed="false"></button>
+        <button id="v-list" aria-pressed="false" data-i18n="v_list"></button>
+        <button id="v-wall" aria-pressed="true"></button>
       </div>
     </div>
     <div class="ctl">

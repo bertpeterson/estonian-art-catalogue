@@ -63,6 +63,8 @@ def _fillh(m):
     tag, attrs, key = m.group(1), m.group(2), m.group(3)
     return f'<{tag}{attrs}data-i18n-html="{key}"{m.group(4)}>{_I["HTML_EN"].get(key, "")}</{tag}>'
 h = _re.sub(r'<(\w+)([^>]*?)data-i18n-html="([a-z_0-9]+)"([^>]*)></\1>', _fillh, h)
+# the Artwall button, its count's place held until the app counts (#viewctl in tpl_head.html)
+h = h.replace('<button id="v-wall" aria-pressed="true"></button>', '<button id="v-wall" aria-pressed="true">' + _I['EN']['v_wall'] + '<span class="v-n" style="visibility:hidden">00,000</span></button>', 1)
 a=a.replace('__V_BIOS__',V_BIOS).replace('__V_INDEX__',V_INDEX).replace('__V_I18N__',V_I18N)
 h=h.replace('__V_I18N__',V_I18N)      # the head's early Estonian reads the same strings file
 # the index's download starts as the head is parsed, not when the script at the foot
