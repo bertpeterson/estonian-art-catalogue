@@ -91,7 +91,12 @@ JS = ("document.querySelectorAll('.sort').forEach(function(b){b.addEventListener
       "if(m==='p'){dir=x.classList.contains('on')&&x.dataset.d==='-1'?1:-1;x.dataset.d=dir;x.textContent=x.dataset.l+(dir<0?' ↓':' ↑');}"
       "rs.sort(function(a,c){if(m==='az')return a.dataset.i-c.dataset.i;if(m==='y')return c.classList.contains('mine')-a.classList.contains('mine')||a.dataset.i-c.dataset.i;var k=m==='n'?'n':'p';if(m==='n')dir=1;var pa=+a.dataset[k]||0,pc=+c.dataset[k]||0;"
       "if(!pa!==!pc)return pa?-1:1;return dir*(pa-pc)||a.dataset.i-c.dataset.i;});"
-      "rs.forEach(function(r){tb.appendChild(r);});b.querySelectorAll('button').forEach(function(y){y.classList.toggle('on',y===x);if(y!==x&&y.dataset.l){y.textContent=y.dataset.l+' ↓';delete y.dataset.d;}});});});")
+      "rs.forEach(function(r){tb.appendChild(r);});b.querySelectorAll('button').forEach(function(y){y.classList.toggle('on',y===x);if(y!==x&&y.dataset.l){y.textContent=y.dataset.l+' ↓';delete y.dataset.d;}});});});"
+      # a lot picture the house has since replaced (Vaal swapped its photos the day after the harvest,
+      # 2026-10-29) or taken down leaves no empty frame: the thumbnail goes, the lot row stays
+      "function gone(i){var a=i.closest('.th');if(a)a.remove();}"
+      "document.addEventListener('error',function(ev){if(ev.target.tagName==='IMG')gone(ev.target);},true);"
+      "document.querySelectorAll('.th img').forEach(function(i){if(i.complete&&i.currentSrc&&!i.naturalWidth)gone(i);});")
 # The artists on the visitor's My List (museaal.artists in the browser, saved on an artist's page or in the
 # register): their lots are marked, and each sale says how many works it has by each of them, the most first.
 # Each name there goes to that artist's first lot in the sale as it is sorted now, opening the sale if it is closed
