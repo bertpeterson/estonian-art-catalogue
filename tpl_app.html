@@ -319,7 +319,10 @@
     const L = W.filter(w => w.a === ai && w.kind === "auction");
     if (!L.length) return T("up_rec0");
     const ps = L.filter(w => w.ao && w.ap).map(w => w.ap).sort((a, b) => a - b);
-    return auCount(L, "up_rec") + (ps.length > 1 ? ` · ${eur(ps[0])}–${eur(ps[ps.length - 1])}` : ps.length ? ` · ${eur(ps[0])}` : "");
+    const ys = L.filter(w => w.ad).map(w => String(w.ad).slice(0, 4)).sort();   // the years of those sales
+    const y = ys.length ? ` (${ys[0] === ys[ys.length - 1] ? ys[0] : ys[0] + "–" + ys[ys.length - 1]})` : "";
+    const r = ps.length ? T("up_for", {p: ps.length > 1 ? `${eur(ps[0])}–${eur(ps[ps.length - 1])}` : eur(ps[0])}) : "";
+    return auCount(L, "up_rec", {y, r});
   };
   // the artists of My List in a sale: how many works by each, each name going to that artist's first lot in it
   const SL_ICON_ON = '<svg class="up-mark" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 2h8v12l-4-3-4 3z"/></svg>';
