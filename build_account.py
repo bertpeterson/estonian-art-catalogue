@@ -24,7 +24,7 @@ PAGE = {"en": dict(file="account", other="konto", privacy="privacy", other_l="Ee
         "et": dict(file="konto", other="account", privacy="privaatsus", other_l="In English", site="Eesti Kunstikataloog", home="./#lang=et")}
 
 CSS = (":root{--paper:#0B0C0E;--field:#15171A;--ink:#F1F2F4;--ink-soft:#C7CACE;--grey:#8B9098;--rule:#2B2E34;--rule-soft:#212429;--warn:#E5484D;"
-       "--serif:'Newsreader','Iowan Old Style',Georgia,serif;--sans:'Archivo','Helvetica Neue',Arial,sans-serif;--mono:'IBM Plex Mono',ui-monospace,Menlo,monospace}"
+       "--serif:'Newsreader','Newsreader fb','Newsreader fb2',Georgia,serif;--sans:'Archivo','Archivo fb',Arial,sans-serif;--mono:'IBM Plex Mono','IBM Plex Mono fb','IBM Plex Mono fb2',ui-monospace,monospace}"
        ":root[data-theme=light]{--paper:#FFFFFF;--field:#F5F6F8;--ink:#0B0C0E;--ink-soft:#33363B;--grey:#6C7178;--rule:#DCDFE3;--rule-soft:#EBEDF0;--warn:#C62A2F}"
        "*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.5 var(--sans);-webkit-font-smoothing:antialiased}"
        ".pg{max-width:760px;margin:0 auto;padding:22px 32px 40px}a{color:inherit}"

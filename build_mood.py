@@ -153,7 +153,7 @@ def data():
 
 CSS = """
 :root{--paper:#0B0C0E;--raise:#111316;--field:#15171A;--ink:#F1F2F4;--ink-soft:#C7CACE;--grey:#8B9098;--rule:#2B2E34;--on:#F1F2F4;--on-ink:#0B0C0E;
-  --serif:"Newsreader","Iowan Old Style",Georgia,serif;--sans:"Archivo","Helvetica Neue",Arial,sans-serif;--mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;color-scheme:dark}
+  --serif:"Newsreader","Newsreader fb","Newsreader fb2",Georgia,serif;--sans:"Archivo","Archivo fb",Arial,sans-serif;--mono:"IBM Plex Mono","IBM Plex Mono fb","IBM Plex Mono fb2",ui-monospace,monospace;color-scheme:dark}
 :root[data-theme=light]{--paper:#FFFFFF;--raise:#FAFAFB;--field:#F1F2F4;--ink:#0B0C0E;--ink-soft:#33363B;--grey:#6C7178;--rule:#DCDFE3;--on:#0B0C0E;--on-ink:#FFFFFF;color-scheme:light}
 *{box-sizing:border-box}[hidden]{display:none!important}
 body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.5 var(--sans);-webkit-font-smoothing:antialiased}
