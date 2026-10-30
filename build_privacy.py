@@ -30,16 +30,14 @@ T = {
         ("Browsing", ["You can use the whole catalogue without an account. Museaal itself sets no cookies. My List, a sign-in and the light or dark "
                       "setting are kept in your browser's own storage, on your device, until you clear it or sign out.",
                       "Visits are counted with GoatCounter, without cookies. Like any server it sees your IP address and browser, but it keeps "
-                      "no personal data: which page was seen, not by whom. "
-                      "A sign-in link sent and a sign-in are counted the same way.",
+                      "no personal data: which page was seen, not by whom.",
                       "Museum pictures are shown straight from MuIS and the Art Museum of Estonia, gallery pictures from the gallery's own "
                       "server: those servers see your browser's request, as with any web page. "
                       "The site itself, fonts included, is served by GitHub Pages."]),
         ("Accounts", ["An account is only for having My List on all your devices. We keep your email address and your list in Cloudflare's "
                       "storage (Workers KV) until you delete the account, or until the list has gone unchanged for two years. "
                       "The address is used only to send you sign-in links, and the news emails below if you ask for them.",
-                      "A sign-in link works once, for 15 minutes; a sign-in lasts a year on that device, or until you sign out. "
-                      "Accounts made before 15 October 2026 kept no address; theirs is kept from the next sign-in."]),
+                      "A sign-in link works once, for 15 minutes; a sign-in lasts a year on that device, or until you sign out."]),
         ("News emails", ["Only if you ask: tick the box when you sign in and open the link we send, or turn them on from your account page. "
                          "Every one carries an unsubscribe link, and you can stop them any time, there or on your account page. "
                          "Until you stop them or delete your account we keep your address, your language and when you said yes."]),
@@ -75,16 +73,14 @@ T = {
         ("Sirvimine", ["Kogu kataloogi saab kasutada ilma kontota. Museaal ise küpsiseid ei sea. Minu nimekiri, sisselogimine ning hele või tume vaade "
                        "on sinu brauseri enda mälus, sinu seadmes, kuni selle tühjendad või välja logid.",
                        "Külastusi loeb GoatCounter, ilma küpsisteta. Nagu iga server näeb see sinu IP-aadressi ja brauserit, kuid "
-                       "isikuandmeid ei hoia: milline leht vaadati, mitte kes vaatas. "
-                       "Saadetud sisselogimislinke ja sisselogimisi loetakse samamoodi.",
+                       "isikuandmeid ei hoia: milline leht vaadati, mitte kes vaatas.",
                        "Muuseumide pildid tulevad otse MuISist ja Eesti Kunstimuuseumist, galeriide pildid galerii enda serverist: "
                        "need serverid näevad sinu brauseri päringut nagu iga veebilehe puhul. "
                        "Lehte ennast koos kirjatüüpidega serveerib GitHub Pages."]),
         ("Kontod", ["Konto on ainult selleks, et Minu nimekiri oleks kõigis sinu seadmetes. Sinu e-posti aadressi ja nimekirja hoiame "
                     "Cloudflare'i andmehoidlas (Workers KV), kuni kustutad konto või kuni nimekiri on kaks aastat muutmata. "
                     "Aadressi kasutame ainult sisselogimislinkide saatmiseks ja allpool kirjeldatud uudiskirjadeks, kui neid soovid.",
-                    "Sisselogimislink töötab üks kord ja 15 minutit; sisselogimine kehtib selles seadmes aasta või kuni välja logid. "
-                    "Enne 15. oktoobrit 2026 loodud kontod aadressi ei hoidnud; nende aadressi hoitakse alates järgmisest sisselogimisest."]),
+                    "Sisselogimislink töötab üks kord ja 15 minutit; sisselogimine kehtib selles seadmes aasta või kuni välja logid."]),
         ("Uudiskirjad", ["Ainult siis, kui soovid: tee sisselogimisel linnuke ja ava saadetud link või lülita need sisse oma konto lehel. "
                          "Igas kirjas on loobumislink ja saad need igal ajal lõpetada, seal või oma konto lehel. "
                          "Kuni lõpetad või konto kustutad, hoiame sinu aadressi, keelt ja aega, millal nõustusid."]),
