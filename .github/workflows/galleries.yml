@@ -13,8 +13,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
-  actions: write               # to start the deploy: a push by this token starts no workflow
+  contents: read               # the job that reads the sources cannot write; only the publish job below can
 
 concurrency:
   group: reharvest             # never beside the monthly or the auction run: they write the same files
@@ -27,7 +26,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          persist-credentials: false   # no write token on disk while the scrapers, pip and the image decoders run; the push step sets it
+          persist-credentials: false   # and the job's token can only read: the publish job below pushes
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: "3.12"
@@ -59,12 +58,53 @@ jobs:
           (cd data && python3 ledger.py && python3 merge.py && python3 gallery_shapes.py && python3 merge.py)
           python3 data/data_guard.py /tmp/data_before.json data/data.json
           (cd data && python3 img_small.py)
-          # the moods of new stock pictures, for Find a work (data/stock_moods.py); CLIP only in a week that has some
-          (cd data && if python3 stock_moods.py --todo; then pip install -q --index-url https://download.pytorch.org/whl/cpu torch==2.8.0 && pip install -q open_clip_torch==3.3.0 pillow==12.3.0 numpy==2.5.3 && python3 stock_moods.py; fi)
+          # the moods of new stock pictures, for Find a work (data/stock_moods.py); CLIP only in a week that has some.
+          # torch from PyTorch's CPU index, pinned; everything else hash-locked (.github/requirements/clip.txt)
+          (cd data && if python3 stock_moods.py --todo; then pip install -q --no-deps --only-binary :all: --index-url https://download.pytorch.org/whl/cpu torch==2.8.0 && pip install -q --require-hashes --no-deps --only-binary :all: -r ../.github/requirements/clip.txt && python3 stock_moods.py; fi)
           ./build_site.sh
           node check_site.js site || { echo "site check failed; once more"; sleep 20; node check_site.js site; }
           python3 data/readme_figures.py
 
+      # what the run changed in tracked files goes to the publish job as an artifact: this job has no token that can
+      # write, so nothing the scrapers, pip packages or image decoders do here reaches the repository but those files
+      - name: Hand over what changed
+        id: changed
+        run: |
+          out="$RUNNER_TEMP/changed"; mkdir -p "$out"
+          git diff --name-only --diff-filter=M -z -- data README.md | while IFS= read -r -d '' f; do
+            mkdir -p "$out/$(dirname "$f")"; cp -- "$f" "$out/$f"
+          done
+          if [ -n "$(ls -A "$out")" ]; then echo "changed=true" >> "$GITHUB_OUTPUT"; else echo "nothing changed"; fi
+      - if: steps.changed.outputs.changed == 'true'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: changed
+          path: ${{ runner.temp }}/changed
+          retention-days: 3
+          if-no-files-found: error
+    outputs:
+      changed: ${{ steps.changed.outputs.changed }}
+
+  # a fresh checkout that runs nothing the reading job touched: it takes only the data files this run may change
+  # (.github/publish.py: tracked, whole JSON, never data/mood_api.json or masterpieces.json), commits and deploys
+  publish:
+    needs: galleries
+    if: needs.galleries.outputs.changed == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+      actions: write             # to start the deploy: a push by this token starts no workflow
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: changed
+          path: ${{ runner.temp }}/changed
+      - name: Take only the data files this run may change
+        run: python3 -I .github/publish.py "$RUNNER_TEMP/changed" "data/*.json" "data/raw/*.json.gz" README.md
       - name: Commit and deploy if anything changed
         env:
           GH_TOKEN: ${{ github.token }}
@@ -73,10 +113,10 @@ jobs:
           git config user.email "actions@users.noreply.github.com"
           git add -u data README.md
           if git diff --cached --quiet; then echo "nothing changed"; exit 0; fi
-          n=$(python3 -c "import json; print(sum(1 for w in json.load(open('data/data.json'))['works'] if w.get('kind') == 'gallery'))")
-          k=$(python3 -c "import json; print(', '.join(json.load(open('data/gallery_kept.json'))))")    # galleries not read this week (data/fetch_galleries.py)
-          git commit -m "Weekly gallery stock, $(date -u +%F): $n for sale${k:+; not read, last week's kept: $k}" -m "Automated: read the galleries and NOBA afresh, ledger, merged, guarded, built and smoke-tested."
+          n=$(python3 -I -c "import json; print(sum(1 for w in json.load(open('data/data.json'))['works'] if w.get('kind') == 'gallery'))")
+          k=$(python3 -I -c "import json; print(', '.join(json.load(open('data/gallery_kept.json'))))")    # galleries not read this week (data/fetch_galleries.py)
+          git -c core.hooksPath=/dev/null commit -m "Weekly gallery stock, $(date -u +%F): $n for sale${k:+; not read, last week's kept: $k}" -m "Automated: read the galleries and NOBA afresh, ledger, merged, guarded, built and smoke-tested."
           git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
-          git pull --rebase --autostash -q origin main    # main moves while the run reads (19 Oct 2026: three pushes in its 72 min, and this push was refused)
-          git push
+          git -c core.hooksPath=/dev/null pull --rebase --autostash -q origin main    # main moves while the run reads (19 Oct 2026: three pushes in its 72 min, and this push was refused)
+          git -c core.hooksPath=/dev/null push
           gh workflow run pages.yml --ref main
