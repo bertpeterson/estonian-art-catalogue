@@ -3,7 +3,7 @@
 
 What museaal keeps about a visitor and who else sees what, in plain words. Every claim is one worker/template.js or
 list-sync.js makes true: the KV keys and their lifetimes (t: 15 minutes, s: a year, u: two years from the list's last
-change, n: until stopped or the account deleted), Resend for the emails, Turnstile before an email or a Claude call,
+change, n: until stopped or the account deleted, r: an hour, keyed), Resend for the emails, Turnstile before an email or a Claude call,
 the messages to Claude not kept. Change the page when the Worker changes. Linked from the sign-in panel, the account
 page, the footers (CONTACT in build_hubs.py and build_pages.py, "foot" in i18n.py) and so Buy Art's "Sources &
 privacy". In the sitemap. Run before csp.py, which hashes the theme stamp.
@@ -23,7 +23,7 @@ LINKS = ", ".join(f'<a href="{u}">{n}</a>' for n, u in [
 T = {
     "en": dict(file="privacy", other="privaatsus", other_l="Eesti keeles", site="Estonian Art Catalogue", home="./",
                title="Privacy", back="Back to the catalogue",
-               lede="What museaal.ee keeps about you, and who else sees what. Updated 15 October 2026.",
+               lede="What museaal.ee keeps about you, and who else sees what. Updated 30 October 2026.",
                parts=[
         ("Who runs it", [f"Museaal.ee is an independent catalogue, run privately: not by a museum, a gallery or an auction house. "
                          f"Questions, corrections and requests about your data: {MAIL}."]),
@@ -37,7 +37,9 @@ T = {
         ("Accounts", ["An account is only for having My List on all your devices. We keep your email address and your list in Cloudflare's "
                       "storage (Workers KV) until you delete the account, or until the list has gone unchanged for two years. "
                       "The address is used only to send you sign-in links, and the news emails below if you ask for them.",
-                      "A sign-in link works once, for 15 minutes; a sign-in lasts a year on that device, or until you sign out."]),
+                      "A sign-in link works once, for 15 minutes; a sign-in lasts a year on that device, or until you sign out.",
+                      "So that the sign-in form cannot be used to flood anyone's inbox, we count for one hour how many links were asked "
+                      "for each address and from each connection. Both are stored only as keyed codes that cannot be read back."]),
         ("News emails", ["Only if you ask: tick the box when you sign in and open the link we send, or turn them on from your account page. "
                          "Every one carries an unsubscribe link, and you can stop them any time, there or on your account page. "
                          "Until you stop them or delete your account we keep your address, your language and when you said yes."]),
@@ -66,7 +68,7 @@ T = {
     ]),
     "et": dict(file="privaatsus", other="privacy", other_l="In English", site="Eesti Kunstikataloog", home="./#lang=et",
                title="Privaatsus", back="Tagasi kataloogi",
-               lede="Mida museaal.ee sinu kohta hoiab ja kes mida näeb. Uuendatud 15. oktoobril 2026.",
+               lede="Mida museaal.ee sinu kohta hoiab ja kes mida näeb. Uuendatud 30. oktoobril 2026.",
                parts=[
         ("Kes seda peab", [f"Museaal.ee on sõltumatu, eraviisiliselt peetav kataloog: mitte muuseumi, galerii ega oksjonimaja oma. "
                            f"Küsimused, parandused ja soovid sinu andmete kohta: {MAIL}."]),
@@ -80,7 +82,9 @@ T = {
         ("Kontod", ["Konto on ainult selleks, et Minu nimekiri oleks kõigis sinu seadmetes. Sinu e-posti aadressi ja nimekirja hoiame "
                     "Cloudflare'i andmehoidlas (Workers KV), kuni kustutad konto või kuni nimekiri on kaks aastat muutmata. "
                     "Aadressi kasutame ainult sisselogimislinkide saatmiseks ja allpool kirjeldatud uudiskirjadeks, kui neid soovid.",
-                    "Sisselogimislink töötab üks kord ja 15 minutit; sisselogimine kehtib selles seadmes aasta või kuni välja logid."]),
+                    "Sisselogimislink töötab üks kord ja 15 minutit; sisselogimine kehtib selles seadmes aasta või kuni välja logid.",
+                    "Et sisselogimisvormiga ei saaks kellegi postkasti linkidega üle ujutada, loeme ühe tunni jooksul, mitu linki on "
+                    "igale aadressile ja igast ühendusest küsitud. Mõlemat hoiame ainult võtmega kodeeritud kujul, millest neid tagasi lugeda ei saa."]),
         ("Uudiskirjad", ["Ainult siis, kui soovid: tee sisselogimisel linnuke ja ava saadetud link või lülita need sisse oma konto lehel. "
                          "Igas kirjas on loobumislink ja saad need igal ajal lõpetada, seal või oma konto lehel. "
                          "Kuni lõpetad või konto kustutad, hoiame sinu aadressi, keelt ja aega, millal nõustusid."]),
