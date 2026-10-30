@@ -1,5 +1,5 @@
 <meta charset="utf-8">
-<script>try{if(localStorage.getItem("ekr:theme")==="light")document.documentElement.setAttribute("data-theme","light")}catch(e){}</script>
+<script>(function(){var t;try{t=localStorage.getItem("ekr:theme")}catch(e){}if(t?t==="light":matchMedia("(prefers-color-scheme: light)").matches)document.documentElement.setAttribute("data-theme","light")})()</script>
 <script>
 // An Estonian page (the link's #lang, else a choice made here, else the browser's language) is Estonian
 // from the first paint. Its labels, and the door, bars and eras baked in Estonian beside the English
@@ -82,8 +82,8 @@ document.addEventListener("DOMContentLoaded", function(){ window.__lz(); });
   --sans:"Archivo","Archivo fb",Arial,sans-serif;
   --mono:"IBM Plex Mono","IBM Plex Mono fb","IBM Plex Mono fb2",ui-monospace,monospace;
 }
-/* dark is the page's own colour; light is a choice, kept for the reader who makes it
-   (localStorage ekr:theme, stamped on <html> before the first paint) */
+/* dark unless <html> carries data-theme=light: stamped before the first paint from the reader's
+   choice (localStorage ekr:theme), else from the device's own light/dark setting */
 :root:not([data-theme="light"]){
   --paper:#141518; --raise:#1A1C1F; --field:#1E2023;
   --ink:#F1F2F4; --ink-soft:#C7CACE; --grey-6:#8B9098; --grey-4:#7A7F86;

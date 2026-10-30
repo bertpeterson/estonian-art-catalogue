@@ -117,7 +117,7 @@ def render(lang):
     HOME = "./" if lang == "en" else "./#lang=et"
     OTHER, OTHERLAB = ("stats-et", "Eesti keeles") if lang == "en" else ("stats", "In English")
     parts = []
-    parts = [f"<!doctype html><html lang=\"{lang}\"><head><meta charset=\"utf-8\">{SM.OPEN}try{{if(localStorage.getItem(\"ekr:theme\")===\"light\")document.documentElement.setAttribute(\"data-theme\",\"light\")}}catch(e){{}}</script><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">"
+    parts = [f"<!doctype html><html lang=\"{lang}\"><head><meta charset=\"utf-8\">{SM.OPEN}(function(){{var t;try{{t=localStorage.getItem(\"ekr:theme\")}}catch(e){{}}if(t?t===\"light\":matchMedia(\"(prefers-color-scheme: light)\").matches)document.documentElement.setAttribute(\"data-theme\",\"light\")}})()</script><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">"
              f"<title>The catalogue in figures — Estonian Art Catalogue</title>"
              f"<meta name=\"description\" content=\"What museaal.ee holds by kind and medium, and the Estonian auction record by house, year and artist.\">"
              f"<link rel=\"canonical\" href=\"https://museaal.ee/{OUTNAME}\"><style>{CSS}</style>{GC}</head><body>"

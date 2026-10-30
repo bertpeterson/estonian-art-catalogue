@@ -22,7 +22,7 @@ I18N = json.load(open("i18n.json", encoding="utf-8"))
 MUSEUM_EN, MEDIUM_ET, BLURB_ET = I18N["MUSEUM_EN"], I18N["MEDIUM_ET"], I18N["BLURB_ET"]
 PERIODS = [(1700, 1917, "Tsaariaeg"), (1918, 1939, "Vabariik"), (1940, 1990, "Okupatsioon"), (1991, 2099, "Taasiseseisvus")]
 GC = '<script data-goatcounter="https://museaal.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>'
-STAMP = SM.OPEN + "try{if(localStorage.getItem(\"ekr:theme\")===\"light\")document.documentElement.setAttribute(\"data-theme\",\"light\")}catch(e){}</script>"
+STAMP = SM.OPEN + "(function(){var t;try{t=localStorage.getItem(\"ekr:theme\")}catch(e){}if(t?t===\"light\":matchMedia(\"(prefers-color-scheme: light)\").matches)document.documentElement.setAttribute(\"data-theme\",\"light\")})()</script>"
 # a click through to a gallery, counted: a GoatCounter event "out-<src>" titled with the gallery (data-out on the
 # link), as Buy art counts its own as "find-out"; a middle click too, which opens the gallery just the same
 def out_js(src):

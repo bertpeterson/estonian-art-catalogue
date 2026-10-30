@@ -27,9 +27,9 @@
       if (!w.k) w.k = (w.nu || "").toUpperCase().replace(/[^A-Z0-9:]/g, "") || null;
   })();
   let LANG = "en";
-  // dark is the page's own colour; light is a choice, remembered. The head stamps a
-  // remembered light on <html> before the first paint, so the page never flashes dark.
-  let THEME = "dark";
+  // the reader's device decides (light or dark) until they choose here; the choice is remembered.
+  // The head stamps light on <html> before the first paint, so the page never flashes dark.
+  let THEME = matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
   function applyTheme(){
     document.documentElement.setAttribute("data-theme", THEME);
     for (const t of ["light","dark"])

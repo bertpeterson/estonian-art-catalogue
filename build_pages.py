@@ -319,7 +319,7 @@ POS = {"l": "100% 50%", "r": "0% 50%", "t": "50% 100%", "b": "50% 0%"}
 crop = lambda im: f' style="object-position:{POS[CHARTS[im][0]]}"' if im in CHARTS else ""
 MRANK = {"Painting": 0, "Watercolour": 1, "Sculpture": 2, "Mixed media": 3, "Installation": 3, "Drawing": 4, "Sketch": 5, "Photograph": 6, "Print": 7}
 imsrc = H.imsrc          # one rule for every page: the holder's thumbnail, a gallery's 768px copy, https only
-STAMP = SM.OPEN + "try{if(localStorage.getItem(\"ekr:theme\")===\"light\")document.documentElement.setAttribute(\"data-theme\",\"light\")}catch(e){}</script>"
+STAMP = SM.OPEN + "(function(){var t;try{t=localStorage.getItem(\"ekr:theme\")}catch(e){}if(t?t===\"light\":matchMedia(\"(prefers-color-scheme: light)\").matches)document.documentElement.setAttribute(\"data-theme\",\"light\")})()</script>"
 
 UPC = collections.defaultdict(list)
 for _u in d.get("upcoming", []): UPC[_u["a"]].append(_u)
@@ -577,7 +577,7 @@ if os.path.exists(_retired):
         osl, nsl = slug(old), live[new]
         if osl == nsl or os.path.exists(f"{OUT}/{osl}.html"): continue
         for D in ("a", "k"): open(f"site/{D}/{osl}.html", "w", encoding="utf-8").write(
-            f"<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\">{SM.OPEN}try{{if(localStorage.getItem(\"ekr:theme\")===\"light\")document.documentElement.setAttribute(\"data-theme\",\"light\")}}catch(e){{}}</script>"
+            f"<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\">{SM.OPEN}(function(){{var t;try{{t=localStorage.getItem(\"ekr:theme\")}}catch(e){{}}if(t?t===\"light\":matchMedia(\"(prefers-color-scheme: light)\").matches)document.documentElement.setAttribute(\"data-theme\",\"light\")}})()</script>"
             f"<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">"
             f"<title>{e(old)} — see {e(new)} — Estonian Art Catalogue</title>"
             f"<link rel=\"canonical\" href=\"{BASE}/{D}/{nsl}\">"
@@ -592,7 +592,7 @@ if os.path.exists(_retired):
 # GitHub Pages serves 404.html for any missing path. A stale link usually names
 # an artist, so the page offers a search prefilled from the path, and the A-Z.
 open("site/404.html", "w", encoding="utf-8").write(
-    f"<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\">{SM.OPEN}try{{if(localStorage.getItem(\"ekr:theme\")===\"light\")document.documentElement.setAttribute(\"data-theme\",\"light\")}}catch(e){{}}</script>"
+    f"<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\">{SM.OPEN}(function(){{var t;try{{t=localStorage.getItem(\"ekr:theme\")}}catch(e){{}}if(t?t===\"light\":matchMedia(\"(prefers-color-scheme: light)\").matches)document.documentElement.setAttribute(\"data-theme\",\"light\")}})()</script>"
     f"<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">"
     f"<title>Not found — Estonian Art Catalogue</title><meta name=\"robots\" content=\"noindex\">"
     f"<style>{CSS}form{{display:flex;gap:8px;max-width:520px;margin:18px 0}}"

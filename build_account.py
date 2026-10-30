@@ -14,7 +14,7 @@ import list_sync as LS
 import script_mark as SM  # the build's mark on its own inline scripts (csp.py)
 
 e = lambda s: html.escape(str(s or ""), quote=True)
-STAMP = SM.OPEN + "try{if(localStorage.getItem(\"ekr:theme\")===\"light\")document.documentElement.setAttribute(\"data-theme\",\"light\")}catch(e){}</script>"
+STAMP = SM.OPEN + "(function(){var t;try{t=localStorage.getItem(\"ekr:theme\")}catch(e){}if(t?t===\"light\":matchMedia(\"(prefers-color-scheme: light)\").matches)document.documentElement.setAttribute(\"data-theme\",\"light\")})()</script>"
 GC = '<script data-goatcounter="https://museaal.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>'
 I18N = json.load(open("i18n.json", encoding="utf-8"))
 KEYS = ["acc_h", "acc_who", "acc_signout", "acc_news_h", "acc_news_on", "acc_news_off",

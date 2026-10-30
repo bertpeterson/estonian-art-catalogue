@@ -197,7 +197,7 @@ JS = r"""
 """
 
 page = (f'<!doctype html><html lang="en"><head><meta charset="utf-8">{SM.OPEN}'
-        'try{if(localStorage.getItem("ekr:theme")==="light")document.documentElement.setAttribute("data-theme","light")}catch(e){}</script>'
+        '(function(){var t;try{t=localStorage.getItem("ekr:theme")}catch(e){}if(t?t==="light":matchMedia("(prefers-color-scheme: light)").matches)document.documentElement.setAttribute("data-theme","light")})()</script>'
         '<meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow">'
         f'<title>Backoffice — museaal.ee</title><style>{CSS}</style></head><body>'
         '<h1>Backoffice</h1><p class="m">museaal.ee, for its keeper. <a href="/">Home</a> · <a href="/stats">The catalogue in figures</a></p>'
