@@ -7,7 +7,8 @@ exec(open('build.py',encoding='utf-8').read().split('def esc_ess')[0])   # ESS/T
 # Every text field taken from one goes through plain() (boundary.py): entities decoded,
 # tags dropped, dimensions cut at their first tag. boundary.py checks the result after
 # the merge.
-from boundary import plain
+from boundary import plain, AUTHORITY, GALLERY_SITES, site
+from urllib.parse import urlparse
 
 def invkey(s):
     if not s: return None
@@ -1078,10 +1079,12 @@ try:
             SITES[v["holder"]] = v["url"]
 except FileNotFoundError:
     pass
+# a gallery's own: its address read as a browser reads it, on the site boundary.py pins it to, from any of its
+# records -- one merge drops later included, so the pin is what keeps a stray record's address off every card
 for g in GAL:
-    u = g.get("url") or ""
-    m = re.match(r'(https?://[^/?]+)', u)
-    if m and g.get("gallery"): SITES.setdefault(g["gallery"], m.group(1))
+    u, want = g.get("url") or "", GALLERY_SITES.get(g.get("gallery"))
+    m = AUTHORITY.match(u) and re.match(r"https?://[^/?#]+", u)
+    if m and want and site(urlparse(m.group(0)).hostname) == want: SITES.setdefault(g["gallery"], m.group(0))
 SITES = {k: v for k, v in SITES.items() if k in {w["mu"] for w in works if w.get("mu")}}
 print("  holders with a website:", len(SITES))
 
@@ -1173,7 +1176,7 @@ print("  flagged: dated before birth", FLAGGED["pre"], "/ after death", FLAGGED[
 # A harvested address is used only if it is a web address. The galleries' pages are
 # read by machine; a javascript: or data: address in a listing would otherwise reach
 # an href on the page. (The page checks again before it writes one.)
-_web = lambda u: isinstance(u, str) and re.match(r"^https?://", u, re.I) is not None
+_web = lambda u: isinstance(u, str) and AUTHORITY.match(u) is not None      # boundary.py's: the host as a browser reads it
 _dropped = 0
 for w in works:
     if w.get("url") and not _web(w["url"]): w["url"] = None; _dropped += 1
