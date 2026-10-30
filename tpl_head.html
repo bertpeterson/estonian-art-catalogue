@@ -836,6 +836,7 @@ footer a{border-bottom:1px solid var(--rule)}
         <button id="th-light" aria-pressed="false" data-i18n="th_light"></button>
         <button id="th-dark" aria-pressed="true" data-i18n="th_dark"></button>
       </div>
+      <script>if(document.documentElement.getAttribute("data-theme")==="light"){document.getElementById("th-light").setAttribute("aria-pressed","true");document.getElementById("th-dark").setAttribute("aria-pressed","false")}</script>
     </div>
     <div class="mast-grid">
       <div>
