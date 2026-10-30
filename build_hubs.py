@@ -104,7 +104,7 @@ L = {"en": dict(site="Estonian Art Catalogue", dec="decades", med="media", mus="
                 dec_h="Eesti kunst kümnendite kaupa", med_h="Eesti kunst liigi kaupa", mus_h="Kogud", sub_h="Eesti kunst aine kaupa",
                 works="teost", artists="kunstnikku", of="—", browse="Sirvi kataloogis →", top_art="Enim esindatud kunstnikud", pics="Pildid",
                 by_dec="Kümnendi kaupa", by_med="Liigi kaupa", by_mus="Kus teosed on", prev="←", next="→", other="In English",
-                foot="Muuseumikirjed MuISist ja EKM digikogust; galeriide laoseis galeriide endi kataloogidest. Pilte näidatakse ainult autoriõiguse alt vabade teoste ja galeriides müügil olevate teoste kohta, hoidjate endi serveritest.",
+                foot="Muuseumikirjed MuISist ja EKM digikogust; müügiteosed galeriide oma kodulehtedelt. Pilte näidatakse ainult autoriõiguse alt vabade teoste ja galeriides müügil olevate teoste kohta, hoidjate endi serveritest.",
                 before="enne 1800", dec_t="Eesti kunst {d}ndatel – {n} teost {a} kunstnikult · museaal.ee", dec_d="Eesti kunst {d}ndatel: {n} teost {a} kunstnikult Eesti avalikes kogudes ja galeriides — {media}. Enim esindatud kunstnikud, pildisein, muuseumid.",
                 med_t="{m} Eesti kogudes – {n} teost {a} kunstnikult · museaal.ee", med_d="{m} Eesti avalikes kogudes ja galeriides: {n} teost {a} kunstnikult, {span}. Enim esindatud kunstnikud, pildisein, kümnendid ja muuseumid.",
                 mus_t="{m} – {n} teost {a} kunstnikult kataloogis · museaal.ee", mus_d="{m} kunstikogu: {n} teost {a} kunstnikult MuISi ja EKM digikogu järgi, {span} — {media}. Kunstnikud, pildid, kümnendid.",

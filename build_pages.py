@@ -73,7 +73,7 @@ L = {
             contemp="Kaasaegsed kogus {h}: ", allaz="Kõik kunstnikud A&ndash;Ü",
             linh="Õpetajad, õpilased, ring", teachers="Õpetajad", pupils="Õpilased", circle="Ring", cdir="ringid", net="vorgustik", innet="Kes keda õpetas: võrgustikus →",
             au="{n} oksjonipartiid · {s} müüdud · {y}{r} — nii, nagu oksjonimajad avaldasid; mitte hinnang",
-            foot="Muuseumikirjed MuISist ja EKM digikogust; galeriide laoseis galeriide endi kataloogidest; oksjonitulemused nii, nagu Haus Galerii, Vernissage, Allee galerii, Vaal galerii, E-Kunstisalong, Eesti Kunsti Oksjonid ja Kunstikoda need avaldasid, ning Osta Noort Kunsti pakutud partiid (tulemusi see ei avalda). ",
+            foot="Muuseumikirjed MuISist ja EKM digikogust; müügiteosed galeriide oma kodulehtedelt; oksjonitulemused nii, nagu Haus Galerii, Vernissage, Allee galerii, Vaal galerii, E-Kunstisalong, Eesti Kunsti Oksjonid ja Kunstikoda need avaldasid, ning Osta Noort Kunsti pakutud partiid (tulemusi see ei avalda). ",
             full="Kogu kataloog", mt="", enonly=" <span class=\"m\">(inglise keeles)</span>",
             embed_h="Manusta oma lehele", embed_t="Pildiriba, teoste arv ja link tagasi — blogile, kursuse lehele või muuseumi kodulehele. Kleebi mõlemad read: teine on link, mis ütleb otsimootorile, kust pildid pärit on.",
             idx_title="Kunstnikud A–Ü — Eesti Kunstikataloog", idx_desc="Kõik Eesti Kunstikataloogi kunstnikud: {n} kunstnikku, kelle teoseid on Eesti avalikes kogudes ja galeriides.",
