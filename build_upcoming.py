@@ -17,6 +17,7 @@ lots were read after all is not shown twice, and its lots' heading takes the las
 """
 import json, os, re, html, datetime, collections
 import build_hubs as H
+import script_mark as SM  # the build's mark on its own inline scripts (csp.py)
 import list_sync as LS
 
 BASE, A, W, e = H.BASE, H.A, H.W, H.e
@@ -187,7 +188,7 @@ def main():
                 f'<div class="top"><a class="wm" href="{BASE}/{"" if lang == "en" else "#lang=et"}">{t["site"]}</a><span><a class="eb" href="{BASE}/{t["pf"]}">{t["past"]}</a> <a class="eb" style="margin-left:14px" href="{other}">{t["other_l"]}</a></span></div>'
                 f'<header class="mast"><h1>{t["h"]}</h1><p class="lede">{e(t["lede"])}</p></header>'
                 + (body or f'<p class="m">{e(t["none"])}</p>')
-                + f'<footer class="foot">{e(t["note"])} {H.CONTACT[lang]}</footer></div><script>{JS}</script><script>{MINE_JS % json.dumps({k: t[k] for k in ("mine", "w1", "wn", "first")}, ensure_ascii=False)}</script></body></html>')
+                + f'<footer class="foot">{e(t["note"])} {H.CONTACT[lang]}</footer></div>{SM.OPEN}{JS}</script>{SM.OPEN}{MINE_JS % json.dumps({k: t[k] for k in ("mine", "w1", "wn", "first")}, ensure_ascii=False)}</script></body></html>')
         open(f"site/{t['file']}.html", "w", encoding="utf-8").write(page)
         urls.append(me)
     sm = open("site/sitemap.xml", encoding="utf-8").read()

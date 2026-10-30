@@ -23,6 +23,7 @@ import json, os, re, hashlib, datetime, urllib.parse, collections, base64, shuti
 import build_hubs as H
 import list_sync as LS   # My List across devices (list-sync.js)
 import build_mood as BM
+import script_mark as SM  # the build's mark on its own inline scripts (csp.py)
 
 BASE, A, W, e = H.BASE, H.A, H.W, H.e
 V = BM.V
@@ -997,8 +998,8 @@ def page(lang, ver, api, labels, M, n=0, tver="", names=()):
             # in words a search engine reads ("osta kunsti", "maalide müük"): the panel above is drawn in the browser
             + f'<section class="seo"><h2>{e(t["sh"])}</h2><p>{e(t["sp"].format(n=N))}</p>{browse_links(lang)}</section>'
             + f'<footer><details class="about"><summary>{e(t["about"])}</summary><p>{e(t["note"])} {H.CONTACT[lang]}</p></details></footer></div>'
-            f'<script type="importmap">{{"imports":{{"three":"https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/"}}}}</script>'
-            f'<script type="application/json" id="t">{tj}</script><script type="application/json" id="labels">{lj}</script><script>{BM.SL_JS}{BM.HUMAN_JS}{JS}</script></body></html>')
+            f'<script type="importmap" data-built="{SM.MARK}">{{"imports":{{"three":"https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/"}}}}</script>'
+            f'<script type="application/json" id="t">{tj}</script><script type="application/json" id="labels">{lj}</script>{SM.OPEN}{BM.SL_JS}{BM.HUMAN_JS}{JS}</script></body></html>')
 
 # Pages a search engine can read: the works for sale by medium and by price, in both languages. Buy art for your
 # home draws its works in the browser, so a search for "oil paintings for sale" found nothing of them; these list

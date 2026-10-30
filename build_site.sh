@@ -2,6 +2,8 @@
 # Rebuild the self-hosted static site from data/data.json
 set -e
 cd "$(dirname "$0")"
+# a new mark for this build's own inline scripts (script_mark.py): csp.py hashes only those
+export MUSEAAL_SCRIPT_MARK="$(python3 -c 'import secrets; print(secrets.token_hex(16))')"
 # i18n.json is generated, not hand-kept. build_site.py only copies it, so edits to
 # i18n.py reached the repo but never the site until this ran here.
 python3 -u i18n.py

@@ -13,6 +13,7 @@ Run after build_upcoming.py (it borrows that page's look and adds to the sitemap
 import json, os, datetime, collections
 import build_hubs as H
 import build_upcoming as U
+import script_mark as SM  # the build's mark on its own inline scripts (csp.py)
 import list_sync as LS
 
 BASE, A, W, e = H.BASE, H.A, H.W, H.e
@@ -128,7 +129,7 @@ def main():
                     f'<section class="sale"><div class="sort" style="margin-top:18px"><span class="eb">{t["sort"]}</span><button type="button" data-s="az" class="on">{t["az"]}</button>'
                     + (f'<button type="button" data-s="p" data-l="{t["price"]}">{t["price"]} ↓</button>' if any(w.get("ap") and w.get("ao") for w in ws) else "")
                     + f'</div><table><thead><tr><th>{t["c_art"]}</th><th>{t["c_work"]}</th><th class="n">{t["c_res"]}</th></tr></thead><tbody>{rows}</tbody></table></section>'
-                    + foot(t, lang, f"<script>{U.JS}</script>"))
+                    + foot(t, lang, f"{SM.OPEN}{U.JS}</script>"))
             open(f"site/{t['file']}/{sl}.html", "w", encoding="utf-8").write(page)
             urls.append(me)
             y = str(ws[0]["ad"])[:4]
