@@ -17,6 +17,7 @@ def _v(p):
 V_INDEX, V_I18N = _v('site/data/index.json'), _v('site/data/i18n.json')
 V_BIOS = _v('site/data/bios.json')     # its own key: a biography can change while the index does not
 import json, re
+import script_mark as SM  # the build's mark on its own inline scripts (csp.py)
 _m = json.load(open('data/data.json',encoding='utf-8'))
 _meta, _ys = _m['meta'], [w['y'] for w in _m['works'] if w.get('y')]
 # Two descriptions shipped before -- one here, one in the template -- and the template's
@@ -26,8 +27,8 @@ DESC = ('<meta name="description" content="A catalogue of %s works of art by %s 
         'stock from the galleries\' own catalogues; every record links back to its source.">'
         % (f"{_meta['works']:,}", f"{_meta['artists']:,}", min(_ys), max(_ys)))
 import list_sync as LS   # My List across devices: its script, first in the head
-h=open('tpl_head.html',encoding='utf-8').read()
-a=open('tpl_app.html',encoding='utf-8').read()
+h=SM.mark(open('tpl_head.html',encoding='utf-8').read())   # the build's own scripts marked before anything goes in
+a=SM.mark(open('tpl_app.html',encoding='utf-8').read())
 miss=[]
 head='''<!doctype html>
 <html lang="en">
@@ -100,7 +101,7 @@ import json as _json, os as _os, html
 # The eras under their bars from the first paint: the app's renderEras, run on the baked bars as
 # the parser reaches them (the Estonian swap has run by then), so a reload no longer shows the
 # band empty and then filled. Hidden on a wide screen until placed (tpl_head.html .eras.baked).
-ERAS_JS=('<script>(function(){var el=document.getElementById("eras"),bars=document.getElementById("bars");'
+ERAS_JS=(SM.OPEN+'(function(){var el=document.getElementById("eras"),bars=document.getElementById("bars");'
  'if(!el||!bars||innerWidth<1001)return;var box=el.getBoundingClientRect(),cells=bars.querySelectorAll(".bar-btn[data-dec]"),early=bars.querySelector(".early-btn");'
  'el.querySelectorAll(".era").forEach(function(a){var lo=a.dataset.lo?+a.dataset.lo:null,hi=+a.dataset.hi,f=null,l=null;'
  'if(lo===null&&early)f=l=early;else cells.forEach(function(c){var m=+c.dataset.dec+5;if(m>=(lo===null?-1e9:lo)&&m<=hi){f=f||c;l=c}});'
@@ -115,7 +116,7 @@ if _os.path.exists('site/landing.json'):
     body=body.replace('<div class="eras" id="eras"></div>',_et('eras')+'<div class="eras baked" id="eras">'+_L.get('eras','')+'</div>'+ERAS_JS,1)
     body=body.replace('<div class="fs-works" id="fs-works"></div>','<div class="fs-works" id="fs-works" data-more="'+_L.get('fs_more','')+'">'+_L.get('fs_works','')+'</div>',1)
     body=body.replace('<p class="fs-lede" id="fs-lede"></p>',_L.get('fs_lede','<p class="fs-lede" id="fs-lede"></p>'),1)
-    body=body.replace('<main id="register"></main>','<main id="register">'+_L['register']+'</main>\n<script>if(location.hash&&!/^#(lang=\\w+|theme=\\w+)(&|$)/.test(location.hash)){document.getElementById("register").innerHTML="";document.getElementById("doors").hidden=true;document.getElementById("bars").innerHTML="";document.getElementById("eras").innerHTML="";document.getElementById("forsale").hidden=true}</script>',1)
+    body=body.replace('<main id="register"></main>','<main id="register">'+_L['register']+'</main>\n'+SM.OPEN+'if(location.hash&&!/^#(lang=\\w+|theme=\\w+)(&|$)/.test(location.hash)){document.getElementById("register").innerHTML="";document.getElementById("doors").hidden=true;document.getElementById("bars").innerHTML="";document.getElementById("eras").innerHTML="";document.getElementById("forsale").hidden=true}</script>',1)
 open('site/index.html','w',encoding='utf-8').write(head+body+"\n"+a+"\n</body>\n</html>\n")
 import os
 print("MISSED:",miss if miss else "none")

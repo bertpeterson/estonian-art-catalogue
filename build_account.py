@@ -11,9 +11,10 @@ Run before csp.py, which hashes the inline script.
 """
 import json, html
 import list_sync as LS
+import script_mark as SM  # the build's mark on its own inline scripts (csp.py)
 
 e = lambda s: html.escape(str(s or ""), quote=True)
-STAMP = "<script>try{if(localStorage.getItem(\"ekr:theme\")===\"light\")document.documentElement.setAttribute(\"data-theme\",\"light\")}catch(e){}</script>"
+STAMP = SM.OPEN + "try{if(localStorage.getItem(\"ekr:theme\")===\"light\")document.documentElement.setAttribute(\"data-theme\",\"light\")}catch(e){}</script>"
 GC = '<script data-goatcounter="https://museaal.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>'
 I18N = json.load(open("i18n.json", encoding="utf-8"))
 KEYS = ["acc_h", "acc_who", "acc_signout", "acc_news_h", "acc_news_on", "acc_news_off",
@@ -117,7 +118,7 @@ def main():
                 f'<header class="mast"><h1>{e(t["acc_h"])}</h1><p class="lede"></p></header><main id="acc"></main>'
                 f'<footer class="foot"><a href="{p["home"]}">{e(S["acc_back"])}</a> · <a id="acc-pv" href="{p["privacy"]}">{e(S["privacy_link"])}</a></footer></div>'
                 f'<script type="application/json" id="acc-t">{tj}</script>'
-                f'<script>{JS}</script></body></html>')
+                f'{SM.OPEN}{JS}</script></body></html>')
         open(f"site/{p['file']}.html", "w", encoding="utf-8").write(page)
     print("  account page   account.html, konto.html" + ("" if LS.TAG else " (lists off: the page says so)"))
 
