@@ -79,3 +79,6 @@ register.html
 
 # local dev helpers (the headless-browser script)
 .dev/
+
+# private letters (CLAUDE.md: keep correspondence out of commits); kept on disk, never tracked
+correspondence/
