@@ -154,7 +154,7 @@ def data():
 CSS = """
 :root{--paper:#0B0C0E;--raise:#111316;--field:#15171A;--ink:#F1F2F4;--ink-soft:#C7CACE;--grey:#8B9098;--rule:#2B2E34;--on:#F1F2F4;--on-ink:#0B0C0E;
   --serif:"Newsreader","Newsreader fb","Newsreader fb2",Georgia,serif;--sans:"Archivo","Archivo fb",Arial,sans-serif;--mono:"IBM Plex Mono","IBM Plex Mono fb","IBM Plex Mono fb2",ui-monospace,monospace;color-scheme:dark}
-:root[data-theme=light]{--paper:#FFFFFF;--raise:#FAFAFB;--field:#F1F2F4;--ink:#0B0C0E;--ink-soft:#33363B;--grey:#6C7178;--rule:#DCDFE3;--on:#0B0C0E;--on-ink:#FFFFFF;color-scheme:light}
+:root[data-theme=light]{--paper:#FBFAF7;--raise:#F7F6F2;--field:#F2F1EC;--ink:#0B0C0E;--ink-soft:#33363B;--grey:#6C7178;--rule:#DEDCD6;--on:#0B0C0E;--on-ink:#FBFAF7;color-scheme:light}
 *{box-sizing:border-box}[hidden]{display:none!important}
 body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.5 var(--sans);-webkit-font-smoothing:antialiased}
 a{color:inherit}
