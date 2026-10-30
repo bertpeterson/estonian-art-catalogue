@@ -23,6 +23,10 @@ TAG = re.compile(r"</?(?:a|b|i|u|p|br|hr|em|strong|small|big|sup|sub|span|div|fo
                  r"table|thead|tbody|tr|td|th|img|figure|figcaption|picture|source|svg|script|style|iframe|"
                  r"object|embed|link|meta|form|input|button|textarea|select|option|label|nav|section|article|"
                  r"header|footer|aside|main|blockquote|pre|code|time|mark|del|ins|wbr|noscript|template|base)\b[^<>]*>", re.I)
+# characters that show as nothing (soft hyphen, zero-width, joiners, bidi marks, BOM): in a name they made
+# "Krist\u00adjan Raud" a second artist who reads, and is addressed, like the first
+INVISIBLE = re.compile("[\u00ad\u034f\u061c\u115f\u1160\u17b4\u17b5\u180b-\u180f\u200b-\u200f\u202a-\u202e\u2060-\u206f"
+                       "\u3164\ufe00-\ufe0f\ufeff\uffa0\U0001bca0-\U0001bca3\U0001d173-\U0001d17a\U000e0000-\U000e0fff]")
 SCRIPTY = re.compile(r"javascript:|vbscript:|data:text/html|\bon[a-z]+\s*=|&#x?[0-9a-f]+;?", re.I)
 
 
@@ -32,7 +36,7 @@ def plain(s, cut=False):
     what follows one is never a measurement -- the Mägi catalogue's "66 x 59 cm</span>
     <span class='is-long'>Nathan Altmann oli..." carried a paragraph into dims."""
     if not isinstance(s, str): return s
-    s = html.unescape(s)
+    s = INVISIBLE.sub("", html.unescape(s))
     if cut:
         m = TAG.search(s)
         if m: s = s[:m.start()]

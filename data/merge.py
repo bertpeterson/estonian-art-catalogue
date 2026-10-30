@@ -397,6 +397,10 @@ print("  merged as one person under two spellings:", len(SPELLINGS))
 json.dump({small: big for small, big in SPELLINGS}, open("retired_names.json", "w", encoding="utf-8"), ensure_ascii=False, indent=0)
 for small, big in SPELLINGS: print("     %-38s -> %s" % (small, big))
 
+# a life as two years or blanks: the museums' label dates ("18–19", or markup) are no year, and a page writes them out
+def years(l):
+    return [str(v).strip() if re.fullmatch(r"\d{3,4}", str(v or "").strip()) else "" for v in (list(l or []) + ["", ""])[:2]]
+
 artists, aidx = [], {}
 for name in sorted(by_artist, key=lambda n: (n.split()[-1], n)):
     au = AU.get(name, {})
@@ -410,7 +414,7 @@ for name in sorted(by_artist, key=lambda n: (n.split()[-1], n)):
     if not bio: bio, bs = au_bio(au), "ekm"
     if not bio: bio, bs = ED_BIO.get(name), "ed"
     aidx[name] = len(artists)
-    artists.append({"n": name, "l": life or ["", ""], "ls": ls if life else "ed",
+    artists.append({"n": name, "l": years(life), "ls": ls if life else "ed",
                     "b": (bio or "")[:2400], "bs": bs if bio else "ed", "ai": au.get("aid")})
 
 def term(v, table):
@@ -1417,6 +1421,9 @@ for f in ("records.json", "oai_records.json", "dk_records.json", "dk_authors.jso
     if not os.path.exists(f): continue
     raw = (gzip.open if f.endswith(".gz") else open)(f, "rb").read()   # a .gz by its content, not its packing
     data["meta"]["sources"][f] = {"n": len(json.loads(raw)), "sha": hashlib.sha256(raw).hexdigest()[:12]}
+# the later fills (NOBA, Vaal, Wikidata) held to the same two years; data["artists"], since prune() made new dicts
+for a in data["artists"]:
+    if "l" in a: a["l"] = years(a["l"])
 json.dump(data,open("data.json", "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
 print("data.json", os.path.getsize("data.json")//1024, "KB")
 for k, v in data["meta"].items(): print(" ", k, v)

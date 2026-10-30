@@ -13,6 +13,7 @@ Pages 301-redirects the github.io address to a custom domain, so indexing done n
 carries over.
 """
 import json, os, re, html, unicodedata, datetime, collections, urllib.parse
+import build_hubs as H
 # the page's last line: where to ask for a correction or a removal
 CONTACT = {"en": 'Corrections, removals, questions: <a href="mailto:info@museaal.ee">info@museaal.ee</a> · <a href="https://museaal.ee/privacy">Privacy</a>', "et": 'Parandused, eemaldamised, küsimused: <a href="mailto:info@museaal.ee">info@museaal.ee</a> · <a href="https://museaal.ee/privaatsus">Privaatsus</a>'}
 GC = '<script data-goatcounter="https://museaal.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>'   # GoatCounter: a page-view count, no cookies
@@ -185,7 +186,7 @@ def jsonld(a, ws, sl, dates, lang="en", sale=()):
 # carry one. Contemporaries -- nearest in working period within the same
 # collection -- covers the rest.
 LIVE   = [i for i in range(len(A)) if by_artist.get(i)]
-SLUG   = {i: (slug(A[i]["n"]) or f"artist-{i}") for i in LIVE}
+SLUG   = {i: H.ARTIST_SLUG[i] for i in LIVE}     # build_hubs.py's: one address per artist, look-alike names kept apart
 NWORKS = {i: len(by_artist[i]) for i in LIVE}
 
 def period(i):
@@ -289,8 +290,7 @@ def neighbours(i, lang="en"):
 pages, index_rows = 0, []
 os.makedirs("site/k", exist_ok=True)
 # the hubs this artist belongs to -- their decades, media and museums -- as a line of links:
-# the reader's way sideways, and the crawler's; the sets and addresses are build_hubs.py's own
-import build_hubs as H
+# the reader's way sideways, and the crawler's; the sets and addresses are build_hubs.py's own (H, imported above)
 import list_sync as LS
 # Save artist: the artist onto My List (museaal.artists in the browser, slugs, as the register keeps them), where
 # they lead the front page's artwall and are marked in the coming sales. The button shows only where the script runs.
@@ -385,8 +385,9 @@ def follow(sl, lang, sale):
 
 def embed_box(lang, src, back, name, T):
     """the two lines to paste: the iframe, and the plain link that carries the credit"""
-    code = (f'<iframe src="{src}" width="100%" height="230" loading="lazy" title="{name} – museaal.ee"></iframe>\n'
-            f'<p><a href="{back}">{name}{" at museaal.ee" if lang == "en" else " museaal.ee-s"}</a></p>')
+    # the name escaped inside the code as well: the code is pasted into other people's pages as it reads
+    code = (f'<iframe src="{src}" width="100%" height="230" loading="lazy" title="{e(name)} – museaal.ee"></iframe>\n'
+            f'<p><a href="{back}">{e(name)}{" at museaal.ee" if lang == "en" else " museaal.ee-s"}</a></p>')
     return (f'<details class="emb"><summary>{T["embed_h"]}</summary><p class="m">{T["embed_t"]}</p>'
             f'<textarea readonly rows="3" spellcheck="false">{e(code)}</textarea></details>')
 
@@ -487,7 +488,7 @@ def render(i, a, ws, lang):
            f"<link rel=\"alternate\" hreflang=\"x-default\" href=\"{BASE}/a/{sl}\">"
            f"<link rel=\"alternate\" type=\"application/rss+xml\" title=\"{e(a['n'])} — for sale\" href=\"{BASE}/a/{sl}.xml\">"
            f"<meta property=\"og:type\" content=\"profile\">"
-           f"<meta property=\"og:title\" content=\"{e(a['n'])}{' (' + dates + ')' if dates else ''}\">"
+           f"<meta property=\"og:title\" content=\"{e(a['n'])}{' (' + e(dates) + ')' if dates else ''}\">"
            f"<meta property=\"og:description\" content=\"{e(desc)}\">"
            f"<meta property=\"og:url\" content=\"{me}\">"
            f"<meta property=\"og:site_name\" content=\"{T['site']}\">"
