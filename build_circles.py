@@ -160,11 +160,11 @@ def network(lang):
           "var h=decodeURIComponent(location.hash.slice(1)),t=h&&document.getElementById(h);"
           "if(t&&t.dataset.i){one(t.dataset.i);t.scrollIntoView({block:'center',inline:'center'});}})();")
     css = ("div.nw{overflow-x:auto;margin:14px 0}#net{display:block;min-width:900px;width:100%;height:auto}"
-           "#net .tk line{stroke:#2b2e34;stroke-width:1}#net .tk text{fill:#8b9098;font-size:10px}"
+           "#net .tk line{stroke:#34373D;stroke-width:1}#net .tk text{fill:#8b9098;font-size:10px}"
            ":root[data-theme=light] #net .tk line{stroke:#e3e4e6}"
            "#net .ed{fill:none;stroke:#8b9098;stroke-opacity:.45;stroke-width:1}"
            "#net .nd text{fill:#c7cace;font-size:10px}:root[data-theme=light] #net .nd text{fill:#333}#net .nd text.hid{display:none}"
-           "#net .nd circle{stroke:#0b0c0e;stroke-width:1}:root[data-theme=light] #net .nd circle{stroke:#fff}"
+           "#net .nd circle{stroke:#141518;stroke-width:1}:root[data-theme=light] #net .nd circle{stroke:#fff}"
            "#net.on .ed{stroke-opacity:.08}#net.on .nd{opacity:.25}#net.on .ed.hl{stroke-opacity:.95;stroke-width:1.6}"
            "#net.on .nd.hl{opacity:1}#net.on .nd.hl text.hid{display:inline}"
            ".lg{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:.85rem;margin:8px 0}"

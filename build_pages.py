@@ -101,8 +101,8 @@ for w in W: by_artist.setdefault(w["a"], []).append(w)
 
 CSS = ("body{margin:0;padding:28px;font:15px/1.55 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;"
        "background:#fcfcfb;color:#111;max-width:940px}"
-       ":root:not([data-theme=light]) body{background:#0b0c0e;color:#f1f2f4}:root:not([data-theme=light]) a{color:#9ec5ff}:root:not([data-theme=light]) "
-       "th,:root:not([data-theme=light]) td{border-color:#2b2e34!important}:root:not([data-theme=light]) .m{color:#8b9098!important}"
+       ":root:not([data-theme=light]) body{background:#141518;color:#f1f2f4}:root:not([data-theme=light]) a{color:#9ec5ff}:root:not([data-theme=light]) "
+       "th,:root:not([data-theme=light]) td{border-color:#34373D!important}:root:not([data-theme=light]) .m{color:#8b9098!important}"
        "h1{font-size:1.7rem;margin:0 0 4px;font-weight:600}"
        ".save{display:inline-flex;align-items:center;gap:7px;margin:2px 0 6px;padding:3px 0;background:none;border:0;border-bottom:1px solid currentColor;"
        "color:inherit;font:inherit;font-size:.85rem;cursor:pointer;opacity:.75}.save:hover{opacity:1}"
@@ -112,16 +112,16 @@ CSS = ("body{margin:0;padding:28px;font:15px/1.55 -apple-system,BlinkMacSystemFo
        "th,td{text-align:left;padding:5px 9px 5px 0;border-bottom:1px solid #e3e5e9;vertical-align:top}"
        "th{font-size:.7rem;text-transform:uppercase;letter-spacing:.09em;color:#666;font-weight:500}"
        "p.bio{max-width:66ch}a.cta{display:inline-block;margin:12px 0}nav{font-size:.85rem;margin-bottom:18px}"
-       "details.emb{margin:22px 0 6px;font-size:.85rem}details.emb summary{cursor:pointer;color:#666}details.emb textarea{width:100%;box-sizing:border-box;font:12px/1.4 ui-monospace,Menlo,monospace;padding:8px;border:1px solid #2b2e34;background:#111316;color:#c7cace}"
+       "details.emb{margin:22px 0 6px;font-size:.85rem}details.emb summary{cursor:pointer;color:#666}details.emb textarea{width:100%;box-sizing:border-box;font:12px/1.4 ui-monospace,Menlo,monospace;padding:8px;border:1px solid #34373D;background:#1A1C1F;color:#c7cace}"
        ":root[data-theme=light] details.emb textarea{border-color:#ccc;background:#f7f7f7;color:#333}"
        ".rel{font-size:.85rem;color:#666;margin:6px 0;max-width:80ch;line-height:1.7}"
        ".rel.nb{margin-top:22px;padding-top:12px;border-top:1px solid #e3e5e9}"
-       ":root:not([data-theme=light]) .rel{color:#8b9098}:root:not([data-theme=light]) .rel.nb{border-color:#2b2e34}"
+       ":root:not([data-theme=light]) .rel{color:#8b9098}:root:not([data-theme=light]) .rel.nb{border-color:#34373D}"
        "h2.sh{font-size:1.05rem;margin:22px 0 4px;font-weight:600}.wall.sale{margin-top:8px}.wt span b{font-weight:600;color:inherit}"
        ".wall{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin:14px 0 6px}"
        ".wt{display:block;background:#f1f2f4;text-decoration:none;color:inherit}.wt img{display:block;width:100%;aspect-ratio:1/1;object-fit:cover}.wt{overflow:hidden}"
        ".wt span{display:block;font-size:.72rem;line-height:1.3;padding:5px 6px 6px;color:#666}.wt span i{font-style:italic;color:#111}"
-       ":root:not([data-theme=light]) .wt{background:#15171a}:root:not([data-theme=light]) .wt span{color:#8b9098}:root:not([data-theme=light]) .wt span i{color:#f1f2f4}"
+       ":root:not([data-theme=light]) .wt{background:#1E2023}:root:not([data-theme=light]) .wt span{color:#8b9098}:root:not([data-theme=light]) .wt span i{color:#f1f2f4}"
        # The app offers this as "printable page for this artist", so make that true:
        # drop the navigation and the call to action, force black on white regardless of
        # the reader's theme, and keep table rows from splitting across pages.

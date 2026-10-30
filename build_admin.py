@@ -45,10 +45,10 @@ FLOWS = [["pages.yml", "Build and deploy", "every push"], ["stock.yml", "Stock c
          ["galleries.yml", "Galleries", "Thursdays"], ["auctions.yml", "Auctions", "Mondays"], ["reharvest.yml", "Reharvest", "1st of the month"]]
 
 CSS = ("body{margin:0;padding:28px;font:15px/1.55 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#fff;color:#111;max-width:1040px}"
-       ":root:not([data-theme=light]) body{background:#0b0c0e;color:#f1f2f4}:root:not([data-theme=light]) a{color:#9ec5ff}"
-       ":root:not([data-theme=light]) th,:root:not([data-theme=light]) td,:root:not([data-theme=light]) .card{border-color:#2b2e34!important}"
+       ":root:not([data-theme=light]) body{background:#141518;color:#f1f2f4}:root:not([data-theme=light]) a{color:#9ec5ff}"
+       ":root:not([data-theme=light]) th,:root:not([data-theme=light]) td,:root:not([data-theme=light]) .card{border-color:#34373D!important}"
        ":root:not([data-theme=light]) .m{color:#8b9098!important}:root:not([data-theme=light]) .bars i{background:#c9ccd2}"
-       ":root:not([data-theme=light]) input{background:#15171a;color:#f1f2f4;border-color:#2b2e34}"
+       ":root:not([data-theme=light]) input{background:#1E2023;color:#f1f2f4;border-color:#34373D}"
        "h1{font-weight:500;font-size:2rem;margin:0 0 4px}h2{font-weight:500;font-size:1.25rem;margin:40px 0 10px}h3{font-weight:500;font-size:1rem;margin:22px 0 6px}"
        ".m{color:#6b7078}a{color:#1a5fd0}"
        ".cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px}"

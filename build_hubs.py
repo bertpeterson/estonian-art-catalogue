@@ -75,19 +75,19 @@ CHARTS = {k: v for k, v in (json.load(open("data/chart_sides.json", encoding="ut
 POS = {"l": "100% 50%", "r": "0% 50%", "t": "50% 100%", "b": "50% 0%"}
 crop = lambda im: f' style="object-position:{POS[CHARTS[im][0]]}"' if im in CHARTS else ""
 MRANK = {"Painting": 0, "Watercolour": 1, "Sculpture": 2, "Mixed media": 3, "Installation": 3, "Drawing": 4, "Sketch": 5, "Photograph": 6, "Print": 7}
-CSS = ("body{margin:0;padding:28px;font:15px/1.55 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#0b0c0e;color:#f1f2f4;max-width:980px}"
+CSS = ("body{margin:0;padding:28px;font:15px/1.55 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#141518;color:#f1f2f4;max-width:980px}"
        ":root[data-theme=light] body{background:#fcfcfb;color:#111}"
        "h1{font-size:1.8rem;margin:0 0 4px;font-weight:600}h2{font-size:1.1rem;font-weight:500;margin:28px 0 8px}"
        ".m{color:#8b9098;font-size:.85rem;margin:0 0 12px}:root[data-theme=light] .m{color:#666}a{color:#9ec5ff}:root[data-theme=light] a{color:#1a4fa3}"
        "p.lede{max-width:70ch;font-size:1.02rem}nav{font-size:.85rem;margin-bottom:18px}"
        ".wall{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin:14px 0 6px}"
-       ".wt{display:block;background:#15171a;text-decoration:none;color:inherit;overflow:hidden}:root[data-theme=light] .wt{background:#f1f2f4}"
+       ".wt{display:block;background:#1E2023;text-decoration:none;color:inherit;overflow:hidden}:root[data-theme=light] .wt{background:#f1f2f4}"
        ".wt img{display:block;width:100%;aspect-ratio:1/1;object-fit:cover}.wt span{display:block;font-size:.72rem;line-height:1.3;padding:5px 6px 6px;color:#8b9098}.wt span i{font-style:italic;color:#f1f2f4}"
        ":root[data-theme=light] .wt span i{color:#111}"
        "ul.cols{columns:230px;list-style:none;padding:0;margin:0}ul.cols li{break-inside:avoid;padding:2px 0}ul.cols .n{color:#8b9098;font-size:.8rem;margin-left:6px}"
        "ul.row{list-style:none;padding:0;margin:0;display:flex;flex-wrap:wrap;gap:6px 14px}ul.row .n{color:#8b9098;font-size:.8rem;margin-left:4px}"
-       ".nb{margin-top:26px;padding-top:12px;border-top:1px solid #2b2e34;font-size:.9rem}"
-       "details.emb{margin:18px 0 6px;font-size:.85rem}details.emb summary{cursor:pointer;color:#8b9098}details.emb textarea{width:100%;box-sizing:border-box;font:12px/1.4 ui-monospace,Menlo,monospace;padding:8px;border:1px solid #2b2e34;background:#111316;color:#c7cace}"
+       ".nb{margin-top:26px;padding-top:12px;border-top:1px solid #34373D;font-size:.9rem}"
+       "details.emb{margin:18px 0 6px;font-size:.85rem}details.emb summary{cursor:pointer;color:#8b9098}details.emb textarea{width:100%;box-sizing:border-box;font:12px/1.4 ui-monospace,Menlo,monospace;padding:8px;border:1px solid #34373D;background:#1A1C1F;color:#c7cace}"
        ":root[data-theme=light] details.emb textarea{border-color:#ccc;background:#f7f7f7;color:#333}")
 
 L = {"en": dict(site="Estonian Art Catalogue", dec="decades", med="media", mus="museums", sub="subjects", art="a",
