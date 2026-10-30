@@ -15,7 +15,11 @@ BASE = "https://www.e-kunstisalong.ee"
 UA = "EstonianArtCatalogue/1.0 (museaal.ee; contact info@museaal.ee)"
 r = urllib.request.Request(f"{BASE}/Teosed_702", headers={"User-Agent": UA})   # one page; robots.txt disallows query strings, so no filters
 with urllib.request.urlopen(r, timeout=60) as f: h = f.read().decode("iso-8859-4", "replace")
-CARD = re.compile(r"<a href=\"([^\"]+)\"[^>]*class=autor[^>]*>\s*<b><span class='toot_hr_jn alapealkiri'>(.*?)</span><span class='toot_hr_jn'>(.*?)</span></b><span class=toot_hr_jn>(.*?)</span>", re.S)
+# each field to its own closing tag, never into the next card: three (.*?) under re.S went back over the rest of the
+# page at every card that did not close as expected (eks_auctions.py's CARD, the same)
+FIELD = r"([^<]*(?:<(?!/span>|span class='toot_hr_jn alapealkiri'>)[^<]*)*)"
+CARD = re.compile(r"<a href=\"([^\"]+)\"[^>]*class=autor[^>]*>\s*<b><span class='toot_hr_jn alapealkiri'>" + FIELD +
+                  r"</span><span class='toot_hr_jn'>" + FIELD + r"</span></b><span class=toot_hr_jn>" + FIELD + r"</span>")
 IMG = re.compile(r"data-src='(/s2/[^']+)'")
 clean = lambda s: html.unescape(re.sub(r"\s+", " ", s)).strip()
 DIMS = re.compile(r"(\d+(?:[.,]\d+)?)\s*[x×]\s*(\d+(?:[.,]\d+)?)(?:\s*[x×]\s*(\d+(?:[.,]\d+)?))?")
