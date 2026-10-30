@@ -76,7 +76,7 @@ POS = {"l": "100% 50%", "r": "0% 50%", "t": "50% 100%", "b": "50% 0%"}
 crop = lambda im: f' style="object-position:{POS[CHARTS[im][0]]}"' if im in CHARTS else ""
 MRANK = {"Painting": 0, "Watercolour": 1, "Sculpture": 2, "Mixed media": 3, "Installation": 3, "Drawing": 4, "Sketch": 5, "Photograph": 6, "Print": 7}
 CSS = ("body{margin:0;padding:28px;font:15px/1.55 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#0b0c0e;color:#f1f2f4;max-width:980px}"
-       ":root[data-theme=light] body{background:#fff;color:#111}"
+       ":root[data-theme=light] body{background:#fbfaf7;color:#111}"
        "h1{font-size:1.8rem;margin:0 0 4px;font-weight:600}h2{font-size:1.1rem;font-weight:500;margin:28px 0 8px}"
        ".m{color:#8b9098;font-size:.85rem;margin:0 0 12px}:root[data-theme=light] .m{color:#666}a{color:#9ec5ff}:root[data-theme=light] a{color:#1a4fa3}"
        "p.lede{max-width:70ch;font-size:1.02rem}nav{font-size:.85rem;margin-bottom:18px}"
