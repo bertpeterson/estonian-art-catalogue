@@ -419,13 +419,23 @@ async function ask(body, env, reply, ip) {
 // /list/delete use the session. In KV (binding LISTS), every key a hash: t:<token's hash> the address and its account
 // for 15 minutes; s:<session's hash> the account, for a year; u:<account> the list and the account's address (the
 // sign-in says so), two years from its last change, with the address, the day it began and the list's length also
-// in the key's metadata for the backoffice; r:<account> sign-in links sent this hour. The account is an HMAC of the
+// in the key's metadata for the backoffice; r:<inbox> and r:<inbox>:<visitor> sign-in links sent this hour, both HMACs. The account is an HMAC of the
 // address (LIST_SECRET); accounts from before 15 Oct 2026 kept no address and get it at their next sign-in. If the
 // visitor ticked "Email me about new features", n:<account> keeps the address, the time they confirmed it by opening the
 // link, and the unsubscribe link every such email must carry, until they stop it (/list/unsubscribe with that link's
 // token, or /list/news signed in) or delete the account. worker/README.md says how to read them out. Needs the KV
 // binding LISTS and the secrets LIST_SECRET and RESEND_API_KEY (worker/README.md); MAIL_FROM optional.
 const LINK_TTL = 15 * 60, SESSION_TTL = 365 * 86400, LIST_TTL = 2 * 365 * 86400, LIST_MAX = 1000, LINKS_PER_HOUR = 4;
+// sign-in links: 4 an hour to an inbox from one visitor, 10 an hour to it from everyone, and MAIL_PER_DAY a day in all,
+// under Resend's free 100, so neither one inbox nor the sending quota can be flooded through the door
+const LINKS_PER_INBOX = 10, MAIL_PER_DAY = 90;
+// the inbox an address lands in: a "+tag" dropped, and Gmail's dots, so name+1@ and n.a.m.e@ count as one inbox
+function inbox(email) {
+  let [l, d] = email.split("@");
+  l = l.split("+")[0];
+  if (d === "gmail.com" || d === "googlemail.com") { l = l.replace(/\./g, ""); d = "gmail.com"; }
+  return l + "@" + d;
+}
 const enc = s => new TextEncoder().encode(s);
 const b64u = b => { let s = ""; for (const x of new Uint8Array(b)) s += String.fromCharCode(x); return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, ""); };
 const token = () => b64u(crypto.getRandomValues(new Uint8Array(24)));
@@ -461,14 +471,32 @@ async function mail(env, to, m) {
 
 // the link that stops the news emails: the account and a seal on it, so nobody can stop someone else's
 const unsubLink = async (env, u, lang) => (env.SITE || "https://museaal.ee/") + "#lang=" + lang + "&unsub=" + u + "." + await mac(env.LIST_SECRET, "unsub|" + u);
-// the backoffice's day counters, c:<what>:<day> in KV for 400 days: questions to /ask (a turn, not its tool rounds),
-// readings on the mood page, new accounts. Each is a read and a write, so two at once can lose one: near enough.
+// the day counters, c:<what>:<day>: questions to /ask (a turn, not its tool rounds) and their rounds, readings on the
+// mood page, sign-in mails, new accounts. Two of them are caps on what the Anthropic key and the mail quota spend.
+// With a D1 database bound as COUNTS (worker/README.md) a count is one step in it, "add one and say how many", so a
+// burst of requests at once cannot all read the same figure and slip past a cap, and KV's writes are left to the lists.
+// Without it, KV as before: a read and a write, so requests at once can share one count; kept 400 days.
 const DAY_TTL = 400 * 86400;
 const today = () => new Date().toISOString().slice(0, 10);
-async function bump(env, what) {
-  if (!env.LISTS) return;
+let table = null;
+const ready = env => table || (table = env.COUNTS.prepare("CREATE TABLE IF NOT EXISTS counts (k TEXT PRIMARY KEY, n INTEGER NOT NULL)").run()
+  .catch(e => { table = null; throw e; }));
+async function bump(env, what, by = 1) {          // -> the day's count, this one included
   const k = "c:" + what + ":" + today();
-  await env.LISTS.put(k, String((+(await env.LISTS.get(k)) || 0) + 1), { expirationTtl: DAY_TTL });
+  if (env.COUNTS) {
+    await ready(env);
+    const r = await env.COUNTS.prepare("INSERT INTO counts (k, n) VALUES (?1, ?2) ON CONFLICT(k) DO UPDATE SET n = n + ?2 RETURNING n").bind(k, by).first();
+    return r.n;
+  }
+  if (!env.LISTS) return 0;
+  const n = (+(await env.LISTS.get(k)) || 0) + by;
+  await env.LISTS.put(k, String(n), { expirationTtl: DAY_TTL });
+  return n;
+}
+async function counted(env, what, day) {          // a day's count, for the backoffice
+  const k = "c:" + what + ":" + day;
+  if (env.COUNTS) { await ready(env); const r = await env.COUNTS.prepare("SELECT n FROM counts WHERE k = ?1").bind(k).first(); return r ? r.n : 0; }
+  return env.LISTS ? +(await env.LISTS.get(k)) || 0 : 0;
 }
 const later = (ctx, p) => { p = p.catch(e => console.log("count failed", String(e.message))); if (ctx && ctx.waitUntil) ctx.waitUntil(p); };
 
@@ -481,12 +509,15 @@ async function list(path, body, env, reply, ip) {
     if (email.length > 254 || !EMAIL.test(email)) return reply({ error: "bad email" }, 400);
     if (!env.RESEND_API_KEY && !env.SEND_MAIL) return reply({ error: "Mail is not set up." }, 503);
     if (tooMany(ip, logins, 5, 600000)) return reply({ error: "Too many requests; wait a few minutes." }, 429);
-    // each sign-in link is an email sent: like the doors that call Claude, only for a visitor who passed Turnstile
-    if (env.TURNSTILE_SECRET && await human(body, env, ip) === null) return reply({ error: "Please confirm you are not a robot.", human: true }, 401);
-    const u = await account(env, email), sent = +(await KV.get("r:" + u)) || 0;
-    if (sent >= LINKS_PER_HOUR) return reply({ error: "Too many links for this address; wait an hour." }, 429);
+    // each sign-in link is an email sent: like the doors that call Claude, only for a visitor who passed Turnstile, and
+    // here with a token of its own each time, not the half-hour pass the other doors take (the page always sends one)
+    if (env.TURNSTILE_SECRET && await human({ human: body.human }, env, ip) === null) return reply({ error: "Please confirm you are not a robot.", human: true }, 401);
+    const u = await account(env, email), box = "r:" + await mac(env.LIST_SECRET, "inbox|" + inbox(email)), mine = box + ":" + await mac(env.LIST_SECRET, "ip|" + ip);   // keyed: no address can be read back from it
+    const [sent, own] = await Promise.all([KV.get(box), KV.get(mine)]).then(v => v.map(x => +x || 0));
+    if (own >= LINKS_PER_HOUR || sent >= LINKS_PER_INBOX) return reply({ error: "Too many links for this address; wait an hour." }, 429);
+    if (await bump(env, "mail") > MAIL_PER_DAY) return reply({ error: "No more sign-in links can be sent today; try again tomorrow." }, 429);
     const t = token();
-    await KV.put("r:" + u, String(sent + 1), { expirationTtl: 3600 });
+    await Promise.all([KV.put(box, String(sent + 1), { expirationTtl: 3600 }), KV.put(mine, String(own + 1), { expirationTtl: 3600 })]);
     const news = body.news === true;
     // n: the secret the asking browser kept (list-sync.js), so verify can tell that browser from any other
     const nonce = typeof body.nonce === "string" ? body.nonce.slice(0, 64) : "";
@@ -596,7 +627,7 @@ async function admin(body, env, reply, ip) {
     const wantNews = new Set(news.map(k => k.name.slice(2)));
     out.people = accounts.map(k => { const m = k.metadata || {}; return [m.e || null, m.since || null, m.n ?? null, m.at || null, wantNews.has(k.name.slice(2))]; })
       .sort((a, b) => (b[1] || "").localeCompare(a[1] || "") || (b[3] || 0) - (a[3] || 0));
-    for (const what of ["signup", "ask", "mood"]) out[what] = await Promise.all(days.map(async d => +(await KV.get("c:" + what + ":" + d)) || 0));
+    for (const what of ["signup", "ask", "mood"]) out[what] = await Promise.all(days.map(d => counted(env, what, d)));
   }
   try { out.goat = await goat(env, days[0], end); } catch (e) { out.goat_error = String(e.message); }
   return reply(out);
@@ -657,6 +688,8 @@ export default {
       try { return await admin(body && typeof body === "object" ? body : {}, env, reply, ip); }
       catch (e) { console.log("admin failed", String(e.message)); return reply({ error: "The figures could not be read." }, 502); }
     }
+    // the two doors that call Claude, the mood page's at / and Buy Art's at /ask; any other address is no door
+    if (path !== "/" && path !== "/ask") return reply({ error: "No such thing." }, 404);
     // a turn's later tool rounds count against the wider limit only. A round is a search turn's (tools, no photo)
     // with steps to show; ask() turns it away unless those steps unseal, so a made-up trail buys nothing
     const round = path === "/ask" && !!body.tools && !body.image && Array.isArray(body.trail) && body.trail.length > 0;
@@ -668,12 +701,13 @@ export default {
       if (pass) more["X-Museaal-Pass"] = pass;
     }
     if (path === "/ask") {
-      // the per-visitor limits live in each Worker instance's memory; this one holds across them all
-      if (!round && env.LISTS && +(await env.LISTS.get("c:ask:" + today())) >= ASK_PER_DAY) return reply({ error: "The assistant has answered all it can for today; try again tomorrow." }, 429);
-      if (!round) later(ctx, bump(env, "ask"));
-      // a sealed round can be sent again for its 10 minutes: rounds have their own day's limit, ROUNDS to a question
-      if (round && env.LISTS && +(await env.LISTS.get("c:round:" + today())) >= ASK_PER_DAY * ROUNDS) return reply({ error: "The assistant has answered all it can for today; try again tomorrow." }, 429);
-      if (round) later(ctx, bump(env, "round"));
+      // the per-visitor limits live in each Worker instance's memory; this one holds across them all. Counted before
+      // Claude is called, and a day that cannot be counted is a closed one: the cap guards what the key spends. A sealed
+      // round can be sent again for its 10 minutes, so rounds have their own day's limit, ROUNDS to a question
+      if (env.LISTS || env.COUNTS) {
+        const n = await bump(env, round ? "round" : "ask").catch(e => { console.log("count failed", String(e.message)); return Infinity; });
+        if (n > (round ? ASK_PER_DAY * ROUNDS : ASK_PER_DAY)) return reply({ error: "The assistant has answered all it can for today; try again tomorrow." }, 429);
+      }
       if (body.image && tooManyPhotos(ip)) return reply({ error: "Too many photos; wait a minute." }, 429);
       return ask(body, env, reply, ip);
     }
@@ -681,7 +715,9 @@ export default {
     let q = "";
     try { q = String(body.q || "").replace(/\s+/g, " ").trim().slice(0, 200); } catch (e) {}
     if (!q) return reply({ error: "Nothing to read." }, 400);
-    later(ctx, bump(env, "mood"));
+    // a reading counted in D1, or without it in KV for one reading in ten, by ten: readings cannot spend KV's
+    // 1,000 writes a day (on the free plan) that sign-in and the lists need
+    if (env.COUNTS) later(ctx, bump(env, "mood")); else if (Math.random() < 0.1) later(ctx, bump(env, "mood", 10));
 
     let r;
     try {
