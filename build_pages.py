@@ -100,7 +100,7 @@ by_artist = {}
 for w in W: by_artist.setdefault(w["a"], []).append(w)
 
 CSS = ("body{margin:0;padding:28px;font:15px/1.55 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;"
-       "background:#fbfaf7;color:#111;max-width:940px}"
+       "background:#fcfcfb;color:#111;max-width:940px}"
        ":root:not([data-theme=light]) body{background:#0b0c0e;color:#f1f2f4}:root:not([data-theme=light]) a{color:#9ec5ff}:root:not([data-theme=light]) "
        "th,:root:not([data-theme=light]) td{border-color:#2b2e34!important}:root:not([data-theme=light]) .m{color:#8b9098!important}"
        "h1{font-size:1.7rem;margin:0 0 4px;font-weight:600}"

@@ -25,7 +25,7 @@ PAGE = {"en": dict(file="account", other="konto", privacy="privacy", other_l="Ee
 
 CSS = (":root{--paper:#0B0C0E;--field:#15171A;--ink:#F1F2F4;--ink-soft:#C7CACE;--grey:#8B9098;--rule:#2B2E34;--rule-soft:#212429;--warn:#E5484D;"
        "--serif:'Newsreader','Newsreader fb','Newsreader fb2',Georgia,serif;--sans:'Archivo','Archivo fb',Arial,sans-serif;--mono:'IBM Plex Mono','IBM Plex Mono fb','IBM Plex Mono fb2',ui-monospace,monospace}"
-       ":root[data-theme=light]{--paper:#FBFAF7;--field:#F2F1EC;--ink:#0B0C0E;--ink-soft:#33363B;--grey:#6C7178;--rule:#DEDCD6;--rule-soft:#ECEAE4;--warn:#C62A2F}"
+       ":root[data-theme=light]{--paper:#FCFCFB;--field:#F3F3F2;--ink:#0B0C0E;--ink-soft:#33363B;--grey:#6C7178;--rule:#DDDDDB;--rule-soft:#ECECEA;--warn:#C62A2F}"
        "*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.5 var(--sans);-webkit-font-smoothing:antialiased}"
        ".pg{max-width:760px;margin:0 auto;padding:22px 32px 40px}a{color:inherit}"
        ".top{display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding-bottom:14px;border-bottom:1px solid var(--rule)}"
