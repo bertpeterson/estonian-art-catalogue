@@ -81,11 +81,17 @@ def public_domain(a, year=None):
     return bool((d and d <= y - 71) or (b and not d and b <= y - 156))
 
 
+# the host as a browser reads it: letters, digits, dots and dashes up to the first / ? or #. Python's urlparse takes
+# "https://evil.example\@www.kogogallery.ee/" for kogogallery.ee, a browser for evil.example: a "\" or a "user@"
+# before the host, or anything else there, is no gallery's address
+AUTHORITY = re.compile(r"^https?://[A-Za-z0-9.-]+(?::\d+)?(?:[/?#]|$)", re.I)
+
+
 def web(u):
     p = urlparse(u or "")
     # no quote or angle bracket either: a link goes into attributes, and one that needs them is not a gallery's
     return p.scheme in ("http", "https") and bool(p.hostname) and not CONTROL.search(u) and " " not in u.strip() \
-        and not re.search(r"[\"'<>`]", u)
+        and not re.search(r"[\"'<>`]", u) and AUTHORITY.match(u) is not None
 
 
 def check(d):
@@ -145,6 +151,13 @@ def check(d):
         if src != "g" or not web(iu): bad["picture not an http(s) gallery image"].append(f"{where}: {im}")
         elif site(urlparse(iu).hostname) != site(urlparse(u["u"]).hostname):
             bad["picture from another site than the work's page"].append(f"{where}: {iu}")
+
+    # the holder's own site, linked on every card of it: a web address, and a gallery's on the gallery's own site
+    for k, u in (d.get("meta", {}).get("sites") or {}).items():
+        where = f"site of {k!r}"
+        if not web(u): bad["link not http(s)"].append(f"{where}: {u!r}")
+        elif k in GALLERY_SITES and site(urlparse(u).hostname) != GALLERY_SITES[k]:
+            bad["link off the gallery's own site"].append(f"{where}: {u!r}")
 
     for a in A:
         text(f"artist {a.get('n')!r}", "n", a.get("n"))

@@ -94,6 +94,25 @@ class Check(unittest.TestCase):
         self.assertIn("gallery with no registered site (GALLERY_SITES)", self.fails(d))
         self.assertEqual(self.fails(data(kind="auction", im=None, url="https://www.postimees.ee/lot")), set())  # lots: not pinned
 
+    def test_host_as_a_browser_reads_it(self):
+        # Python's urlparse reads the gallery's host in these; a browser goes to evil.example
+        for u in ("https://evil.example\\@www.kogogallery.ee/x", "https://evil.example\\.kogogallery.ee/x",
+                  "https://haus.ee.evil.example\\.haus.ee/x.jpg", "https://evil.example@www.kogogallery.ee/x"):
+            self.assertIn("link not http(s)", self.fails(data(url=u)), u)
+            self.assertIn("picture not an http(s) gallery image", self.fails(data(im="g:" + u)), u)
+        self.assertEqual(self.fails(data(url="HTTPS://www.kogogallery.ee:443/en/works/x/?a=1#b")), set())
+
+    def test_holder_sites(self):
+        # the venue link on every card of a gallery: from a record merge dropped, or forged
+        d = data(); d["meta"] = {"sites": {"Kogo galerii": "https://www.kogogallery.ee", "Tartu Kunstimuuseum": "https://www.tartmus.ee"}}
+        self.assertEqual(self.fails(d), set())
+        d["meta"]["sites"]["Kogo galerii"] = "https://evil.example"
+        self.assertIn("link off the gallery's own site", self.fails(d))
+        d["meta"]["sites"]["Kogo galerii"] = "https://evil.example\\@www.kogogallery.ee"
+        self.assertIn("link not http(s)", self.fails(d))
+        d["meta"]["sites"]["Kogo galerii"] = "javascript:alert(1)"
+        self.assertIn("link not http(s)", self.fails(d))
+
     def test_pictures(self):
         self.assertIn("picture from another site than the work's page",
                       self.fails(data(im="g:https://images.example.com/x.jpg")))
