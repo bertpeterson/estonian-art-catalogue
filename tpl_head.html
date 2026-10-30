@@ -1,5 +1,35 @@
 <meta charset="utf-8">
 <script>try{if(localStorage.getItem("ekr:theme")==="light")document.documentElement.setAttribute("data-theme","light")}catch(e){}</script>
+<script>
+// An Estonian page (the link's #lang, else a choice made here, else the browser's language) is Estonian
+// from the first paint. Its labels, and the door, bars and eras baked in Estonian beside the English
+// (<template id="et-…">, build_index.py), swap in as the parser closes each one; until then each stays
+// unseen (.et-wait) rather than showing its English for a moment. The strings are inline: fetched, they
+// came after the first paint, and a reload showed the English page first. The app, when it boots,
+// keeps to the same choice.
+(function(){
+  var l=(location.hash.match(/(?:^#|&)lang=(\w+)/)||[])[1],s=null;try{s=localStorage.getItem("ekr:lang")}catch(e){}
+  var et=l?l==="et":s?s==="et":[].concat(navigator.languages||[],navigator.language||[]).some(function(x){return /^et\b/i.test(x)});
+  if(!et)return;var R=document.documentElement;R.lang="et";R.classList.add("et-wait");
+  var D=__ET_STRINGS__,E=D.E,H=D.H,HREF={findlink:"leia","fs-up":"tulemas"};
+  var shut=function(n){for(;n&&n!==R;n=n.parentNode)if(n.nextSibling)return true;return false};
+  var one=function(el,all){
+    if(el.hasAttribute("data-et")||!(all||shut(el)))return;el.setAttribute("data-et","");
+    var k=el.getAttribute("data-i18n"),v,t;
+    if(k!=null){v=E[k];if(v!=null)el.textContent=v;if(k==="statslink")el.href="stats-et"}
+    else if((k=el.getAttribute("data-i18n-html"))!=null){v=H[k];if(v!=null)el.innerHTML=v}
+    if(HREF[el.id])el.href=HREF[el.id];
+    if((t=document.getElementById("et-"+el.id))&&t.tagName==="TEMPLATE")el.innerHTML=t.innerHTML;
+    else if(el.id==="fs-lede"&&el.dataset.n)el.textContent=E.fs_lede.replace("{n}",(+el.dataset.n).toLocaleString("et-EE")).replace("{g}",el.dataset.g);
+    else if(el.id==="v-wall"&&el.firstChild&&el.firstChild.nodeType===3)el.firstChild.nodeValue=E.v_wall;
+    else if(el.id==="q")el.placeholder=E.searchph;
+    else if(el.id==="lang-et"||el.id==="lang-en")el.setAttribute("aria-pressed",el.id==="lang-et")};
+  var pass=function(all){document.querySelectorAll("[data-i18n],[data-i18n-html],#doors,#bars,#eras,#fs-lede,#v-wall,#q,#lang-et,#lang-en,#findlink,#fs-up").forEach(function(el){one(el,all)})};
+  var mo=new MutationObserver(function(){pass(false)});mo.observe(R,{childList:true,subtree:true});
+  document.addEventListener("DOMContentLoaded",function(){pass(true);mo.disconnect();document.title=E.doctitle;R.classList.remove("et-wait")});
+})();
+</script>
+<style>.et-wait :is([data-i18n],[data-i18n-html],#doors,#bars,#eras,#fs-lede,#v-wall,#q):not([data-et]){visibility:hidden}</style>
 <title>Estonian Art Catalogue</title>
 <meta name="description" content="A catalogue of 52,000 artworks by 3,600 artists held in Estonian public collections and galleries, 1440–2026. Compiled from MuIS and the EKM Digital Collection; every record links back to its source.">
 <link rel="canonical" href="https://museaal.ee/">
@@ -922,23 +952,6 @@ footer a{border-bottom:1px solid var(--rule)}
     <div class="bars" id="bars"></div>
     <div class="eras" id="eras"></div>
   </section>
-  <script>
-  // a visitor whose browser asks for Estonian, and who has not chosen English here, gets the page in Estonian
-  // before the index arrives (the app, when it boots, keeps to the same choice); the link's #lang and a choice made
-  // on the page come first
-  (function(){
-    var l=(location.hash.match(/(?:^#|&)lang=(\w+)/)||[])[1],s=null;try{s=localStorage.getItem("ekr:lang")}catch(e){}
-    var et=l?l==="et":s?s==="et":[].concat(navigator.languages||[],navigator.language||[]).some(function(x){return /^et\b/i.test(x)});
-    if(!et)return;document.documentElement.lang="et";
-    var go=function(I){var E=I.ET||{},H=I.HTML_ET||{};
-      document.querySelectorAll("[data-i18n]").forEach(function(el){var v=E[el.dataset.i18n];if(v!=null)el.textContent=v});
-      document.querySelectorAll("[data-i18n-html]").forEach(function(el){var v=H[el.dataset.i18nHtml];if(v!=null)el.innerHTML=v});
-      var fl=document.getElementById("fs-lede");if(fl&&fl.dataset.n&&E.fs_lede)fl.textContent=E.fs_lede.replace("{n}",(+fl.dataset.n).toLocaleString("et-EE")).replace("{g}",fl.dataset.g);
-      var q=document.getElementById("q");if(q&&E.searchph)q.placeholder=E.searchph};
-    fetch("data/i18n.json?v=__V_I18N__").then(function(r){return r.json()}).then(function(I){
-      if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",function(){go(I)});else go(I)}).catch(function(){});
-  })();
-  </script>
 
   <div class="controls">
     <div class="search">

@@ -41,11 +41,9 @@ import unicodedata
 def slug(n):    # the same slug build_pages.py gives the artist's page
     n = unicodedata.normalize("NFKD", n or "").encode("ascii", "ignore").decode()
     return re.sub(r"^-+|-+$", "", re.sub(r"[^a-z0-9]+", "-", n.lower())) or "artist"
-num = lambda n: f"{n:,}"
-door = ('<div class="d-names"><h2>' + e(I18N["EN"]["doors_name"]) + '</h2><ul>'
-        # a link each, to the artist's own page: what a crawler follows from the landing
-        # page, and what a reader gets before the app is here; the app intercepts the click
-        + "".join(f'<li><a href="a/{slug(A[i]["n"])}" data-door="a" data-v="{i}"><span>{e(A[i]["n"])}</span><span class="n">{num(counts.get(i, 0))}</span></a></li>' for i in canon) + "</ul></div>")
+# the door, the bars and the eras are baked in both languages: an Estonian visitor's page swaps in
+# the Estonian copy while it is still arriving (tpl_head.html), so a reload never shows English first
+num = lambda n, lang="en": f"{n:,}" if lang == "en" else (f"{n:,}".replace(",", "\u00a0") if n >= 10000 else str(n))   # as toLocaleString("et-EE")
 # ...and the themes and moods beside them, read from the app's own lists
 _app = open("tpl_app.html", encoding="utf-8").read()
 WAYS = json.loads(re.search(r"const DOOR_WAYS = (\[.*?\]);", _app, re.S).group(1))
@@ -58,12 +56,19 @@ WAYS += [{"en": s[2], "et": s[3], "href": f"#sub={s[0]}", "door": "s", "v": s[0]
 _seen = {en for en, _et in MOODS}
 MOODS += [[w["en"], w["et"]] for w in json.load(open("data/moods.json", encoding="utf-8"))["words"]
           if w["g"] in ("feeling", "light", "colour", "weather") and w["en"] not in _seen]
-_head = lambda key, n: ('<div class="d-head"><h2>' + e(I18N["EN"][key]) + '</h2><button type="button" class="linkbtn d-more" aria-expanded="false">'
-                        + e(I18N["EN"]["doors_all"].replace("{n}", str(n))) + '</button></div><p>')
-door += ('<div class="d-ways"><div>' + _head("doors_theme", len(WAYS))
-         + " ".join(f'<a href="{e(x["href"])}"' + (f' data-door="{x["door"]}" data-v="{e(x["v"])}"' if x.get("door") else "") + f'>{e(x["en"])}</a>' for x in WAYS)
-         + '</p></div><div>' + _head("doors_mood", len(MOODS))
-         + " ".join(f'<a href="mood#w={en}">{e(en[:1].upper() + en[1:])}</a>' for en, _et in MOODS) + '</p></div></div>')
+def doors(lang):
+    T, et = I18N[lang.upper()], lang == "et"
+    head = lambda key, n: ('<div class="d-head"><h2>' + e(T[key]) + '</h2><button type="button" class="linkbtn d-more" aria-expanded="false">'
+                           + e(T["doors_all"].replace("{n}", str(n))) + '</button></div><p>')
+    return ('<div class="d-names"><h2>' + e(T["doors_name"]) + '</h2><ul>'
+            # a link each, to the artist's own page: what a crawler follows from the landing
+            # page, and what a reader gets before the app is here; the app intercepts the click
+            + "".join(f'<li><a href="{"k" if et else "a"}/{slug(A[i]["n"])}" data-door="a" data-v="{i}"><span>{e(A[i]["n"])}</span><span class="n">{num(counts.get(i, 0), lang)}</span></a></li>' for i in canon) + "</ul></div>"
+            + '<div class="d-ways"><div>' + head("doors_theme", len(WAYS))
+            + " ".join(f'<a href="{e(x["het"] if et and x.get("het") else x["href"])}"' + (f' data-door="{x["door"]}" data-v="{e(x["v"])}"' if x.get("door") else "") + f'>{e(x[lang])}</a>' for x in WAYS)
+            + '</p></div><div>' + head("doors_mood", len(MOODS))
+            + " ".join(f'<a href="{"meeleolu" if et else "mood"}#w={en}">{e((et_ if et else en)[:1].upper() + (et_ if et else en)[1:])}</a>' for en, et_ in MOODS) + '</p></div></div>')
+door = doors("en")
 door_lists = json.dumps({"ways": WAYS, "moods": MOODS}, ensure_ascii=False, separators=(",", ":"))
 
 # the wall: pictured works, masterpieces first (rank slipped by the seed), then the
@@ -125,7 +130,7 @@ wall = (f'<div class="wall" data-cols="6" data-seed="{SEED}" data-keys="{e(",".j
 # renderBars for the untouched page (EN), links where the app has buttons: a decade to
 # its static page, the early band to decades/before.html. The app redraws them in place.
 EN = I18N["EN"]
-ordn = lambda n: f"{n}" + ("th" if 11 <= n % 100 <= 13 else {1: "st", 2: "nd", 3: "rd"}.get(n % 10, "th"))
+_ordn = lambda n: f"{n}" + ("th" if 11 <= n % 100 <= 13 else {1: "st", 2: "nd", 3: "rd"}.get(n % 10, "th"))
 rnd = lambda x: int(x + 0.5)
 live = [w for w in W if not (w.get("ac") and not w.get("al"))]               # the app's latestLot
 ys = [w["y"] for w in live if w.get("y") is not None]
@@ -136,41 +141,49 @@ mx = max(1, max(cnt[d] for d in DEC))
 # twenty works or more that are not auction lots
 _hd = collections.Counter(w["y"] // 10 * 10 for w in W if w.get("y") and (w.get("kind") or "held") in ("held", "shown", "gallery", "known"))
 HUB = {f"{d}.html" for d, n in _hd.items() if d >= 1800 and n >= 20}
-def cell(key, lab, title, cls=""):
-    c = cnt[key]; h = rnd(6 + (min(c, mx) / mx) * 66) if c else 2
-    href = f"decades/{key}" if f"{key}.html" in HUB else f"#decade={key}"
-    tip = f"{title} — " + (EN["oneworkc"] if c == 1 else EN["nworks"].replace("{n}", str(c)))
-    return (f'<a class="bar-btn {cls}" data-dec="{key}" href="{href}" title="{e(tip)}">'
-            f'<span class="bar-n">{c or ""}</span><span class="bar-fill" style="height:{h}px"></span><span class="bar-lab">{lab}</span></a>')
-cents = []
-for d in DEC:
-    if not cents or cents[-1][0] != d // 100: cents.append((d // 100, []))
-    cents[-1][1].append(d)
-total = sum(cnt[d] for d in DEC); lead = 0
-while lead < len(cents) - 1 and (cents[lead][0] <= 17 or sum(cnt[d] for d in cents[lead][1]) < total * 0.01): lead += 1
-early, rest = (cents[:lead], cents[lead:]) if lead >= 2 else ([], cents)
-cent = lambda c, ds: (f'<div class="cent" style="flex:{len(ds)}"><div class="cent-bars">'
-                      + "".join(cell(d, str(d) if d % 100 == 0 else str(d)[2:], f"{d}s") for d in ds)
-                      + f'</div><div class="cent-lab"><span class="cl-full">{e(EN["century"].replace("{n}", ordn(c + 1)))}</span><span class="cl-abbr">{c + 1}.</span></div></div>')
-bars = ""
-if early:
-    et = sum(cnt[d] for _, ds in early for d in ds)
-    lab = EN["earlyband"].replace("{a}", ordn(early[0][0] + 1)).replace("{b}", ordn(early[-1][0] + 1))
-    eh = max(3, rnd(6 + (min(et, mx) / mx) * 66)) if et else 2
-    bars += (f'<div class="cent early" style="flex:0 0 118px"><div class="cent-bars">'
-             f'<a class="early-btn" id="early-toggle" href="decades/before" title="{e(lab)} — {e(EN["nworks"].replace("{n}", str(et)))}">'
-             f'<span class="bar-n">{et or ""}</span><span class="early-fill" style="height:{eh}px"></span><span class="early-lab"><span class="cl-full">{e(lab)}</span><span class="cl-abbr">&lt;{early[-1][0] + 1}00</span></span></a>'
-             f'</div><div class="cent-lab">&nbsp;</div></div>')
-bars += "".join(cent(c, ds) for c, ds in rest)
-bars += (f'<div class="cent nd" style="flex:1"><div class="cent-bars">{cell("und", EN["nd"], EN["undated"], "undated")}</div>'
-         f'<div class="cent-lab" title="Undated — works whose record carries no dating">&nbsp;</div></div>')
+def bake_bars(lang):
+  EN = I18N[lang.upper()]
+  ordn = (lambda n: f"{n}.") if lang == "et" else _ordn
+  dec = "kumnendid" if lang == "et" else "decades"
+  def cell(key, lab, title, cls=""):
+      c = cnt[key]; h = rnd(6 + (min(c, mx) / mx) * 66) if c else 2
+      href = f"{dec}/{key}" if f"{key}.html" in HUB else f"#decade={key}"
+      tip = f"{title} — " + (EN["oneworkc"] if c == 1 else EN["nworks"].replace("{n}", str(c)))
+      return (f'<a class="bar-btn {cls}" data-dec="{key}" href="{href}" title="{e(tip)}">'
+              f'<span class="bar-n">{c or ""}</span><span class="bar-fill" style="height:{h}px"></span><span class="bar-lab">{lab}</span></a>')
+  cents = []
+  for d in DEC:
+      if not cents or cents[-1][0] != d // 100: cents.append((d // 100, []))
+      cents[-1][1].append(d)
+  total = sum(cnt[d] for d in DEC); lead = 0
+  while lead < len(cents) - 1 and (cents[lead][0] <= 17 or sum(cnt[d] for d in cents[lead][1]) < total * 0.01): lead += 1
+  early, rest = (cents[:lead], cents[lead:]) if lead >= 2 else ([], cents)
+  cent = lambda c, ds: (f'<div class="cent" style="flex:{len(ds)}"><div class="cent-bars">'
+                        + "".join(cell(d, str(d) if d % 100 == 0 else str(d)[2:], f"{d}s") for d in ds)
+                        + f'</div><div class="cent-lab"><span class="cl-full">{e(EN["century"].replace("{n}", ordn(c + 1)))}</span><span class="cl-abbr">{c + 1}.</span></div></div>')
+  bars = ""
+  if early:
+      et = sum(cnt[d] for _, ds in early for d in ds)
+      lab = EN["earlyband"].replace("{a}", ordn(early[0][0] + 1)).replace("{b}", ordn(early[-1][0] + 1))
+      eh = max(3, rnd(6 + (min(et, mx) / mx) * 66)) if et else 2
+      bars += (f'<div class="cent early" style="flex:0 0 118px"><div class="cent-bars">'
+               f'<a class="early-btn" id="early-toggle" href="{dec}/before" title="{e(lab)} — {e(EN["nworks"].replace("{n}", str(et)))}">'
+               f'<span class="bar-n">{et or ""}</span><span class="early-fill" style="height:{eh}px"></span><span class="early-lab"><span class="cl-full">{e(lab)}</span><span class="cl-abbr">&lt;{early[-1][0] + 1}00</span></span></a>'
+               f'</div><div class="cent-lab">&nbsp;</div></div>')
+  bars += "".join(cent(c, ds) for c, ds in rest)
+  bars += (f'<div class="cent nd" style="flex:1"><div class="cent-bars">{cell("und", EN["nd"], EN["undated"], "undated")}</div>'
+           f'<div class="cent-lab" title="Undated — works whose record carries no dating">&nbsp;</div></div>')
+  return bars
+bars = bake_bars("en")
 # the eras as links to the periods (the app places them under their bars; until then a
 # phone shows them as its own wrapping row and a wider screen keeps their place empty)
 _app = open("tpl_app.html", encoding="utf-8").read()
-PER = [(None, 1699, EN["p_pre"])] + [(int(a), int(b), I18N["PERIOD_EN"][k]) for a, b, k in
-       re.findall(r'\[(\d{4}),(\d{4}),"(\w+)","[^"]+"\]', _app[_app.index("const PERIODS"):_app.index("const PERIOD_NOTE")])]
-eras = "".join(f'<a class="era" data-era="{i}" href="#{"from=" + str(lo) + "&" if lo else ""}{"to=" + str(hi) if hi != 2099 else ""}">{e(lab)}</a>'.replace("&\"", "\"")
-               for i, (lo, hi, lab) in enumerate(PER))
+_PER = re.findall(r'\[(\d{4}),(\d{4}),"(\w+)","[^"]+"\]', _app[_app.index("const PERIODS"):_app.index("const PERIOD_NOTE")])
+def bake_eras(lang):
+    PER = [(None, 1699, I18N[lang.upper()]["p_pre"])] + [(int(a), int(b), I18N["PERIOD_" + lang.upper()][k]) for a, b, k in _PER]
+    return "".join(f'<a class="era" data-era="{i}" href="#{"from=" + str(lo) + "&" if lo else ""}{"to=" + str(hi) if hi != 2099 else ""}">{e(lab)}</a>'.replace("&\"", "\"")
+                   for i, (lo, hi, lab) in enumerate(PER))
+eras = bake_eras("en")
 # Buy art, baked: thirty-six works for sale with a picture and a price, one an artist, from the sixty
 # artists the museums hold most of (the names a visitor is likeliest to know), turned by the build's seed. Six show
 # at a time and the row scrolls sideways for the rest; each page view leads with another of the six sixes (tpl_head.html,
@@ -249,5 +262,6 @@ os.makedirs("site/data", exist_ok=True)
 open("site/data/fs-more.json", "w", encoding="utf-8").write(_more)
 fs_more = "data/fs-more.json?v=" + _hashlib.sha1(_more.encode()).hexdigest()[:10]
 fs_lede = f'<p class="fs-lede" id="fs-lede" data-n="{len(_sale)}" data-g="{len(_galleries)}">' + e(EN["fs_lede"].replace("{n}", f"{len(_sale):,}").replace("{g}", str(len(_galleries)))) + "</p>"
-json.dump({"doors": door, "door_lists": door_lists, "register": wall, "bars": bars, "eras": eras, "seed": SEED, "fs_works": fs_works, "fs_more": fs_more, "fs_lede": fs_lede}, open("site/landing.json", "w", encoding="utf-8"), ensure_ascii=False)
+json.dump({"doors": door, "door_lists": door_lists, "register": wall, "bars": bars, "eras": eras, "seed": SEED, "fs_works": fs_works, "fs_more": fs_more, "fs_lede": fs_lede,
+           "doors_et": doors("et"), "bars_et": bake_bars("et"), "eras_et": bake_eras("et")}, open("site/landing.json", "w", encoding="utf-8"), ensure_ascii=False)
 print(f"  landing baked   {len(shown)} tiles, seed {SEED}, first: {shown[0]['t']} · {A[shown[0]['a']]['n']}")

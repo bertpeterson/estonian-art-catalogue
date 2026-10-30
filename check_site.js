@@ -43,8 +43,10 @@ const check = (name, ok, detail) => { console.log(`${ok ? "ok  " : "FAIL"} ${nam
   check("landing: seventy-two tiles", (await ev(`document.querySelectorAll(".wt").length`)) === 72);
   {
     // the baked histogram (build_landing.py): its decade links name pages that exist
-    const html = fs.readFileSync(path.join(DIR, "index.html"), "utf-8"), bars = (html.match(/<div class="bars" id="bars">[\s\S]*?<\/div>\s*<div class="eras/) || [""])[0];
-    const hrefs = [...bars.matchAll(/href="(decades\/[^"]+)"/g)].map(m => m[1]);
+    // ...and the Estonian copy beside it (<template id="et-bars">) to the Estonian ones
+    const html = fs.readFileSync(path.join(DIR, "index.html"), "utf-8"), bars = (html.match(/<div class="bars" id="bars">[\s\S]*?<\/div>\s*(?:<template id="et-eras">|<div class="eras)/) || [""])[0];
+    const etbars = (html.match(/<template id="et-bars">[\s\S]*?<\/template>/) || [""])[0];
+    const hrefs = [...bars.matchAll(/href="(decades\/[^"]+)"/g), ...etbars.matchAll(/href="(kumnendid\/[^"]+)"/g)].map(m => m[1]);
     const missing = hrefs.filter(h => !fs.existsSync(path.join(DIR, h + ".html")));
     check("landing: the baked histogram links to decade pages that exist", hrefs.length >= 20 && !missing.length, missing.join(" ") || `${hrefs.length} links`);
   }
@@ -77,6 +79,17 @@ const check = (name, ok, detail) => { console.log(`${ok ? "ok  " : "FAIL"} ${nam
   check("search: an opened row stays where it was", kept < 3, `${kept}px`);
   await open("#group=auction", 5000);
   check("auctions: highest hammer price first", /€\s?\d{3},?\d{3}/.test(await ev(`(document.querySelector(".row .rl-au")||{}).textContent||""`)));
+  {
+    // an Estonian reload shows no English on any frame painted before the app boots (tpl_head.html's early
+    // Estonian): each frame notes the visible text of the door's heading, the tagline and the decade bars' label
+    const probe = await send("Page.addScriptToEvaluateOnNewDocument", {source: `window.__fr=[];(function f(){var v=function(s){var e=document.querySelector(s);return e&&getComputedStyle(e).visibility!=="hidden"?e.textContent:""};
+      __fr.push([v(".d-names h2"),v(".mast-tag"),v(".cent-lab .cl-full")].join("|"));if(document.readyState==="loading"||__fr.length<5)requestAnimationFrame(f)})()`});
+    await send("Page.enable"); await open("#lang=et", 500); await send("Page.reload"); await sleep(3000);   // a reload: a new hash alone stays on the same document
+    const fr = await ev(`window.__fr`) || [];
+    const en = fr.filter(t => /Start with a name|century/.test(t));
+    check("estonian: no English on the first frames of a reload", fr.length > 0 && !en.length, en[0] || `${fr.length} frames, last: ${fr[fr.length - 1]}`);
+    await send("Page.removeScriptToEvaluateOnNewDocument", {identifier: probe.result.identifier});
+  }
   await open("#lang=et&artist=eduard-wiiralt", 5000);
   check("estonian: the page speaks Estonian", /Sarnased kunstnikud|Kõik \d[\d ]* kunstnikku/.test(await ev(`document.body.textContent`)));
   await open("#decade=1920", 5000);
