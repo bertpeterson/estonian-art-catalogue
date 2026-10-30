@@ -89,8 +89,12 @@ one step, "add one and say how many", so the caps hold under a burst and KV is l
    makes its one table itself.
 2. The Worker's Settings → Bindings → Add → D1 database, variable name `COUNTS`, database `museaal-counts` → Deploy.
 
-The free plan's 100,000 writes a day is far beyond what the counters use. The counts start again from zero in D1;
-the backoffice shows D1's once the binding is there.
+The free plan's 100,000 writes a day is far beyond what the counters use. The backoffice adds D1's figures to KV's,
+so the days counted before D1 still show. If D1 ever fails, the Worker logs "D1 count failed" and counts in KV
+instead, so the assistant stays open.
+
+When Anthropic refuses a call (an empty credit balance, a spend limit reached, a bad parameter), the page says only
+that the assistant could not be reached; the Worker's Logs carry Anthropic's own reason, as "anthropic refused".
 
 ## My List across devices (`/list/*`)
 

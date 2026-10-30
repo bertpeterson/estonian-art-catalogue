@@ -254,6 +254,12 @@ function conversation(body) {
 const SONNET = "claude-sonnet-5-5";
 // The message and its content blocks; null for a decline. After a fallback, only the blocks past the last
 // "fallback" marker are the answer. extra: tools, tool_choice, cache_control
+// Anthropic's reason for refusing a call ("credit balance is too low", a bad parameter), into the Worker's log: the
+// page is told only the status. The key is in the headers, never in the answer
+async function refused(r, where) {
+  let e = {}; try { e = (await r.json()).error || {}; } catch (x) {}
+  console.log("anthropic refused", where, r.status, String(e.type || ""), String(e.message || "").slice(0, 300));
+}
 async function call(env, system, messages, schema, max_tokens, model = MODEL, extra = {}) {
   const sonnet = model === SONNET;
   const headers = { "x-api-key": env.ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01", "content-type": "application/json" };
@@ -264,7 +270,7 @@ async function call(env, system, messages, schema, max_tokens, model = MODEL, ex
     body.output_config.effort = "low";
   }
   const r = await fetch("https://api.anthropic.com/v1/messages", { method: "POST", headers, body: JSON.stringify(body) });
-  if (!r.ok) throw new Error("The reader answered " + r.status + ".");
+  if (!r.ok) { await refused(r, model); throw new Error("The reader answered " + r.status + "."); }
   const m = await r.json();
   if (extra.tools) console.log("ask", model, m.stop_reason, JSON.stringify(m.usage || {}));
   if (m.stop_reason === "refusal") return null;
@@ -389,7 +395,7 @@ async function ask(body, env, reply, ip) {
       if (!String(out.reply || "").trim()) out = await claude(env, system.replace(SYSTEM_TOOLS, SYSTEM_ASK), messages, SCHEMA_ASK, et ? 800 : 400, et ? SONNET : MODEL);
     } else out = await claude(env, system, messages, photo ? SCHEMA_ROOM : SCHEMA_ASK, photo ? 1500 : et ? 800 : 400, photo || et ? SONNET : MODEL);
   }
-  catch (e) { return reply({ error: String(e.message || "The assistant could not be reached.") }, 502); }
+  catch (e) { console.log("ask failed", String(e.message)); return reply({ error: String(e.message || "The assistant could not be reached.") }, 502); }
   if (!out) return reply(none);
   const media = [...new Set((out.media || []).filter(m => MEDIA.includes(m)))];
   // kind: what the page before the controls read (one medium, else any)
@@ -481,12 +487,16 @@ const today = () => new Date().toISOString().slice(0, 10);
 let table = null;
 const ready = env => table || (table = env.COUNTS.prepare("CREATE TABLE IF NOT EXISTS counts (k TEXT PRIMARY KEY, n INTEGER NOT NULL)").run()
   .catch(e => { table = null; throw e; }));
+// D1 that fails is logged and the count goes to KV instead, so trouble with the database does not close the assistant
+// (that day's figure is then split between the two, and the cap counts only what each has)
 async function bump(env, what, by = 1) {          // -> the day's count, this one included
   const k = "c:" + what + ":" + today();
   if (env.COUNTS) {
-    await ready(env);
-    const r = await env.COUNTS.prepare("INSERT INTO counts (k, n) VALUES (?1, ?2) ON CONFLICT(k) DO UPDATE SET n = n + ?2 RETURNING n").bind(k, by).first();
-    return r.n;
+    try {
+      await ready(env);
+      const r = await env.COUNTS.prepare("INSERT INTO counts (k, n) VALUES (?1, ?2) ON CONFLICT(k) DO UPDATE SET n = n + ?2 RETURNING n").bind(k, by).first();
+      return r.n;
+    } catch (e) { console.log("D1 count failed, counted in KV", String(e.message)); }
   }
   if (!env.LISTS) return 0;
   const n = (+(await env.LISTS.get(k)) || 0) + by;
@@ -495,8 +505,10 @@ async function bump(env, what, by = 1) {          // -> the day's count, this on
 }
 async function counted(env, what, day) {          // a day's count, for the backoffice
   const k = "c:" + what + ":" + day;
-  if (env.COUNTS) { await ready(env); const r = await env.COUNTS.prepare("SELECT n FROM counts WHERE k = ?1").bind(k).first(); return r ? r.n : 0; }
-  return env.LISTS ? +(await env.LISTS.get(k)) || 0 : 0;
+  let d = 0;
+  if (env.COUNTS) try { await ready(env); const r = await env.COUNTS.prepare("SELECT n FROM counts WHERE k = ?1").bind(k).first(); d = r ? r.n : 0; }
+  catch (e) { console.log("D1 read failed", String(e.message)); }
+  return d + (env.LISTS ? +(await env.LISTS.get(k)) || 0 : 0);     // with D1, KV holds only what fell back to it
 }
 const later = (ctx, p) => { p = p.catch(e => console.log("count failed", String(e.message))); if (ctx && ctx.waitUntil) ctx.waitUntil(p); };
 
@@ -731,7 +743,7 @@ export default {
         }),
       });
     } catch (e) { return reply({ error: "The reader could not be reached." }, 502); }
-    if (!r.ok) return reply({ error: "The reader answered " + r.status + "." }, 502);
+    if (!r.ok) { await refused(r, "mood"); return reply({ error: "The reader answered " + r.status + "." }, 502); }
 
     const m = await r.json();
     if (m.stop_reason === "refusal") return reply({ words: [], kind: "keep" });
