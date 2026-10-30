@@ -175,14 +175,16 @@ def bake_bars(lang):
            f'<div class="cent-lab" title="Undated — works whose record carries no dating">&nbsp;</div></div>')
   return bars
 bars = bake_bars("en")
-# the eras as links to the periods (the app places them under their bars; until then a
-# phone shows them as its own wrapping row and a wider screen keeps their place empty)
+# the eras as links to the periods, placed under their bars as the parser reaches them (the
+# script after #eras, build_index.py) and again by the app; a phone shows them as its own wrapping row
 _app = open("tpl_app.html", encoding="utf-8").read()
 _PER = re.findall(r'\[(\d{4}),(\d{4}),"(\w+)","[^"]+"\]', _app[_app.index("const PERIODS"):_app.index("const PERIOD_NOTE")])
 def bake_eras(lang):
-    PER = [(None, 1699, I18N[lang.upper()]["p_pre"])] + [(int(a), int(b), I18N["PERIOD_" + lang.upper()][k]) for a, b, k in _PER]
-    return "".join(f'<a class="era" data-era="{i}" href="#{"from=" + str(lo) + "&" if lo else ""}{"to=" + str(hi) if hi != 2099 else ""}">{e(lab)}</a>'.replace("&\"", "\"")
-                   for i, (lo, hi, lab) in enumerate(PER))
+    L = I18N[lang.upper()]
+    PER = [(None, 1699, L["p_pre"], "")] + [(int(a), int(b), I18N["PERIOD_" + lang.upper()][k], L.get("era_short_" + k, "")) for a, b, k in _PER]
+    # data-lo/-hi/-short: what the inline script after them (build_index.py) needs to place them before the first paint
+    return "".join(f'<a class="era" data-era="{i}" data-lo="{lo or ""}" data-hi="{hi}" data-short="{e(sh)}" href="#{"from=" + str(lo) + "&" if lo else ""}{"to=" + str(hi) if hi != 2099 else ""}">{e(lab)}</a>'.replace("&\"", "\"")
+                   for i, (lo, hi, lab, sh) in enumerate(PER))
 eras = bake_eras("en")
 # Buy art, baked: thirty-six works for sale with a picture and a price, one an artist, from the sixty
 # artists the museums hold most of (the names a visitor is likeliest to know), turned by the build's seed. Six show

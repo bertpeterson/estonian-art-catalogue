@@ -97,12 +97,22 @@ if _top:
 # the artwall as plain HTML, cleared at once by an inline script when the address names
 # another view, and replaced by the app when it boots
 import json as _json, os as _os, html
+# The eras under their bars from the first paint: the app's renderEras, run on the baked bars as
+# the parser reaches them (the Estonian swap has run by then), so a reload no longer shows the
+# band empty and then filled. Hidden on a wide screen until placed (tpl_head.html .eras.baked).
+ERAS_JS=('<script>(function(){var el=document.getElementById("eras"),bars=document.getElementById("bars");'
+ 'if(!el||!bars||innerWidth<1001)return;var box=el.getBoundingClientRect(),cells=bars.querySelectorAll(".bar-btn[data-dec]"),early=bars.querySelector(".early-btn");'
+ 'el.querySelectorAll(".era").forEach(function(a){var lo=a.dataset.lo?+a.dataset.lo:null,hi=+a.dataset.hi,f=null,l=null;'
+ 'if(lo===null&&early)f=l=early;else cells.forEach(function(c){var m=+c.dataset.dec+5;if(m>=(lo===null?-1e9:lo)&&m<=hi){f=f||c;l=c}});'
+ 'if(!f){a.remove();return}var x=f.getBoundingClientRect().left-box.left,r=l.getBoundingClientRect().right-box.left;'
+ 'a.style.left=x.toFixed(1)+"px";a.style.width=Math.max(0,r-x-2).toFixed(1)+"px"});'
+ 'el.classList.remove("baked");el.querySelectorAll(".era").forEach(function(a){if(a.scrollWidth>a.clientWidth&&a.dataset.short)a.textContent=a.dataset.short})})()</script>')
 if _os.path.exists('site/landing.json'):
     _L=_json.load(open('site/landing.json',encoding='utf-8'))
     _et=lambda k: '<template id="et-'+k+'">'+_L[k+'_et']+'</template>' if _L.get(k+'_et') else ''
     body=body.replace('<section class="doors" id="doors" hidden></section>',_et('doors')+'<section class="doors" id="doors" data-lists="'+html.escape(_L.get('door_lists',''))+'">'+_L['doors']+'</section>',1)
     body=body.replace('<div class="bars" id="bars"></div>',_et('bars')+'<div class="bars" id="bars">'+_L.get('bars','')+'</div>',1)
-    body=body.replace('<div class="eras" id="eras"></div>',_et('eras')+'<div class="eras baked" id="eras">'+_L.get('eras','')+'</div>',1)
+    body=body.replace('<div class="eras" id="eras"></div>',_et('eras')+'<div class="eras baked" id="eras">'+_L.get('eras','')+'</div>'+ERAS_JS,1)
     body=body.replace('<div class="fs-works" id="fs-works"></div>','<div class="fs-works" id="fs-works" data-more="'+_L.get('fs_more','')+'">'+_L.get('fs_works','')+'</div>',1)
     body=body.replace('<p class="fs-lede" id="fs-lede"></p>',_L.get('fs_lede','<p class="fs-lede" id="fs-lede"></p>'),1)
     body=body.replace('<main id="register"></main>','<main id="register">'+_L['register']+'</main>\n<script>if(location.hash&&!/^#(lang=\\w+|theme=\\w+)(&|$)/.test(location.hash)){document.getElementById("register").innerHTML="";document.getElementById("doors").hidden=true;document.getElementById("bars").innerHTML="";document.getElementById("eras").innerHTML="";document.getElementById("forsale").hidden=true}</script>',1)
