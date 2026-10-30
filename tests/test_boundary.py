@@ -23,6 +23,13 @@ class Plain(unittest.TestCase):
         self.assertEqual(plain("66 x 59 cm</span><span class='is-long'>Nathan Altmann oli Venemaa juut.", cut=True),
                          "66 x 59 cm")                                                            # the Mägi catalogue
 
+    def test_invisible_characters(self):
+        # a name that reads like another but would be a second artist at the same address
+        self.assertEqual(plain("Krist\u00adja\u00adn Raud"), "Kristjan Raud")                   # soft hyphens
+        self.assertEqual(plain("Kris\u200btjan R\u2060aud\ufeff"), "Kristjan Raud")              # zero-width, word joiner, BOM
+        self.assertEqual(plain("Navigeerin/Navigati\u200bng"), "Navigeerin/Navigating")          # a NOBA title
+        self.assertEqual(plain("Pärnu Õie"), "Pärnu Õie")
+
     def test_brackets_that_are_not_markup(self):
         self.assertEqual(plain("<NO-23A>"), "<NO-23A>")                                           # an auction lot's title
         self.assertEqual(plain("a < b > c"), "a < b > c")

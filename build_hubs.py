@@ -29,9 +29,10 @@ def out_js(src):
             f"if(a&&window.goatcounter&&goatcounter.count)goatcounter.count({{path:'out-{src}',title:a.dataset.out,event:true}})}}"
             "document.addEventListener('click',c);document.addEventListener('auxclick',c)})()</script>")
 e = lambda s: html.escape(str(s or ""), quote=True)
-def slug(s):
+def bare_slug(s):
     s = unicodedata.normalize("NFKD", s or "").encode("ascii", "ignore").decode()
-    return re.sub(r"^-+|-+$", "", re.sub(r"[^a-z0-9]+", "-", s.lower())) or "x"
+    return re.sub(r"^-+|-+$", "", re.sub(r"[^a-z0-9]+", "-", s.lower()))
+def slug(s): return bare_slug(s) or "x"
 def val(w, f):
     v = w.get(f)
     if isinstance(v, int) and f in V: return V[f][v] if 0 <= v < len(V[f]) else None
@@ -39,6 +40,10 @@ def val(w, f):
 # the English blurbs live in the app; read them from the template, as build_landing.py reads the door
 _app = open("tpl_app.html", encoding="utf-8").read()
 BLURB_EN = {int(m.group(1)): m.group(2) for m in re.finditer(r'^\s+(\d{4}):"((?:[^"\\]|\\.)*)"', _app[_app.index("const BLURBS = {"):], re.M)}
+# the app's short code for a holder ("TKM"), from its MUS table, as the app's abbr(): what its #museum= reads
+_mus = _app[_app.index("const MUS = {"):]; _mus = _mus[:_mus.index("};")]
+MUS_CODE = {json.loads(f'"{k}"'): json.loads(f'"{v}"') for k, v in re.findall(r'"((?:[^"\\]|\\.)*)":"((?:[^"\\]|\\.)*)"', _mus)}
+def mus_code(m): return (MUS_CODE.get(m) or (m or "")[:4].upper()).lower()
 # the pictures and the shapes, as the app shows them
 import sys; sys.path.insert(0, "data"); from thumbs import thumbs
 SMALL = thumbs(W)   # the lighter copy for a tile: data/thumbs.py
@@ -70,7 +75,24 @@ def offer_item(title, artist, year, medium, image, price, seller, url):
     return it
 # JSON for inside a <script>: a "</" in a title off a gallery's page would end the script early
 ldjson = lambda o: json.dumps(o, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
-ARTIST_SLUG = {i: slug(a["n"]) for i, a in enumerate(A)}
+# one address per artist, for every page that names one. Two names can come out the same once accents, dots and
+# invisible characters are dropped ("Krist\u00adjan Raud" off a gallery's page and the museums' Kristjan Raud): the
+# artist with museum works keeps the address, then the one with the most works, then the earlier, and the other gets
+# its index after it -- so a look-alike name never writes over a real artist's page, whichever was harvested first
+def artist_slugs(A, W):
+    held, n = collections.Counter(), collections.Counter()
+    for w in W:
+        n[w.get("a")] += 1
+        if (w.get("kind") or "held") == "held": held[w.get("a")] += 1
+    by = collections.defaultdict(list)
+    for i, a in enumerate(A): by[bare_slug(a["n"]) or f"artist-{i}"].append(i)
+    out = {}
+    for s, ids in by.items():
+        ids.sort(key=lambda i: (-held[i], -n[i], i))
+        out[ids[0]] = s
+        for i in ids[1:]: out[i] = f"{s}-{i}"
+    return out
+ARTIST_SLUG = artist_slugs(A, W)
 CHARTS = {k: v for k, v in (json.load(open("data/chart_sides.json", encoding="utf-8")) if os.path.exists("data/chart_sides.json") else {}).items() if v}
 POS = {"l": "100% 50%", "r": "0% 50%", "t": "50% 100%", "b": "50% 0%"}
 crop = lambda im: f' style="object-position:{POS[CHARTS[im][0]]}"' if im in CHARTS else ""
@@ -195,8 +217,9 @@ def span_of(ws):
     return f"{ys[0]}–{ys[-1]}" if ys else ""
 def embed_box(lang, src, back, name):
     T = L[lang]
-    code = (f'<iframe src="{src}" width="100%" height="230" loading="lazy" title="{name} – museaal.ee"></iframe>\n'
-            f'<p><a href="{back}">{name}{" at museaal.ee" if lang == "en" else " museaal.ee-s"}</a></p>')
+    # the name escaped inside the code as well: the code is pasted into other people's pages as it reads
+    code = (f'<iframe src="{src}" width="100%" height="230" loading="lazy" title="{e(name)} – museaal.ee"></iframe>\n'
+            f'<p><a href="{back}">{e(name)}{" at museaal.ee" if lang == "en" else " museaal.ee-s"}</a></p>')
     return (f'<details class="emb"><summary>{T["embed_h"]}</summary><p class="m">{T["embed_t"]}</p>'
             f'<textarea readonly rows="3" spellcheck="false">{e(code)}</textarea></details>')
 
@@ -211,7 +234,7 @@ def page(lang, me, other, title, desc, h1, lede, ws, app_hash, facets, nb, xdefa
             f'<nav><a href="{BASE}/{T["site_link"]}">{T["site"]}</a> › {nb["crumb"]} <span class="m">· <a href="{other}">{T["other"]}</a></span></nav>'
             f'<h1>{e(h1)}</h1><p class="m">{fmt(len(ws), lang)} {T["works"]} · {fmt(a_n, lang)} {T["artists"]}{" · " + span_of(ws) if span_of(ws) else ""}</p>'
             + (f'<p class="lede">{e(lede)}</p>' if lede else "")
-            + f'<p><a href="{BASE}/#{T["hash"]}{app_hash}">{T["browse"]}</a></p>'
+            + f'<p><a href="{BASE}/#{T["hash"]}{e(app_hash)}">{T["browse"]}</a></p>'
             + wall(ws, lang)
             + f'<h2>{T["top_art"]}</h2>' + artists_list(ws, lang)
             + "".join(f'<h2>{h}</h2>{r}' for h, r in facets if r)
@@ -265,7 +288,7 @@ def main():
             lede = ""
             nb = dict(crumb=f'<a href="{BASE}/{T["mus"]}/">{T["mus_h"]}</a> › {e(lab)}',
                       links=" · ".join(x for x in [f'<a href="{BASE}/{T["mus"]}/">{T["mus_h"]}</a>', f'<a href="{e(site)}" rel="noopener">{e(lab)} ↗</a>' if site else ""] if x))
-            open(f"site/{T['mus']}/{slug(lab)}.html", "w", encoding="utf-8").write(page(lang, me, other, title, desc, lab, lede, ws, f"museum={m}",
+            open(f"site/{T['mus']}/{slug(lab)}.html", "w", encoding="utf-8").write(page(lang, me, other, title, desc, lab, lede, ws, "museum=" + urllib.parse.quote(mus_code(m), safe=""),
                 [(T["by_dec"], facet_row(ws, lang, "dec")), (T["by_med"], facet_row(ws, lang, "med"))], nb, mus_href(m, "en")))
             urls.append((me, mus_href(m, "en"), mus_href(m, "et")))
         # subjects
