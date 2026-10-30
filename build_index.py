@@ -66,7 +66,12 @@ h = _re.sub(r'<(\w+)([^>]*?)data-i18n-html="([a-z_0-9]+)"([^>]*)></\1>', _fillh,
 # the Artwall button, its count's place held until the app counts (#viewctl in tpl_head.html)
 h = h.replace('<button id="v-wall" aria-pressed="true"></button>', '<button id="v-wall" aria-pressed="true">' + _I['EN']['v_wall'] + '<span class="v-n" style="visibility:hidden">00,000</span></button>', 1)
 a=a.replace('__V_BIOS__',V_BIOS).replace('__V_INDEX__',V_INDEX).replace('__V_I18N__',V_I18N)
-h=h.replace('__V_I18N__',V_I18N)      # the head's early Estonian reads the same strings file
+# the head's early Estonian (tpl_head.html): every label on the page, inline, so it is there at the first paint
+_keys = set(_re.findall(r'data-i18n="([a-z_0-9]+)"', h + a)) | {"fs_lede", "searchph", "doctitle", "v_wall"}
+_E = {k: _I['ET'][k] for k in sorted(_keys) if k in _I['ET']}
+if 'sub' in _E: _E['sub'] = _re.sub(r'\d{4}\s*[–-]\s*\d{4}', f'{min(_ys)}–{max(_ys)}', _E['sub'])
+_H = {k: _I['HTML_ET'][k] for k in sorted(set(_re.findall(r'data-i18n-html="([a-z_0-9]+)"', h + a))) if k in _I['HTML_ET']}
+h = h.replace('__ET_STRINGS__', json.dumps({"E": _E, "H": _H}, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/"), 1)
 # the index's download starts as the head is parsed, not when the script at the foot
 # of the page runs; crossorigin matches fetch()'s default mode, so the one download
 # serves both. Not low priority any more: the wall's pictures past the first row wait
@@ -94,9 +99,10 @@ if _top:
 import json as _json, os as _os, html
 if _os.path.exists('site/landing.json'):
     _L=_json.load(open('site/landing.json',encoding='utf-8'))
-    body=body.replace('<section class="doors" id="doors" hidden></section>','<section class="doors" id="doors" data-lists="'+html.escape(_L.get('door_lists',''))+'">'+_L['doors']+'</section>',1)
-    body=body.replace('<div class="bars" id="bars"></div>','<div class="bars" id="bars">'+_L.get('bars','')+'</div>',1)
-    body=body.replace('<div class="eras" id="eras"></div>','<div class="eras baked" id="eras">'+_L.get('eras','')+'</div>',1)
+    _et=lambda k: '<template id="et-'+k+'">'+_L[k+'_et']+'</template>' if _L.get(k+'_et') else ''
+    body=body.replace('<section class="doors" id="doors" hidden></section>',_et('doors')+'<section class="doors" id="doors" data-lists="'+html.escape(_L.get('door_lists',''))+'">'+_L['doors']+'</section>',1)
+    body=body.replace('<div class="bars" id="bars"></div>',_et('bars')+'<div class="bars" id="bars">'+_L.get('bars','')+'</div>',1)
+    body=body.replace('<div class="eras" id="eras"></div>',_et('eras')+'<div class="eras baked" id="eras">'+_L.get('eras','')+'</div>',1)
     body=body.replace('<div class="fs-works" id="fs-works"></div>','<div class="fs-works" id="fs-works" data-more="'+_L.get('fs_more','')+'">'+_L.get('fs_works','')+'</div>',1)
     body=body.replace('<p class="fs-lede" id="fs-lede"></p>',_L.get('fs_lede','<p class="fs-lede" id="fs-lede"></p>'),1)
     body=body.replace('<main id="register"></main>','<main id="register">'+_L['register']+'</main>\n<script>if(location.hash&&!/^#(lang=\\w+|theme=\\w+)(&|$)/.test(location.hash)){document.getElementById("register").innerHTML="";document.getElementById("doors").hidden=true;document.getElementById("bars").innerHTML="";document.getElementById("eras").innerHTML="";document.getElementById("forsale").hidden=true}</script>',1)
