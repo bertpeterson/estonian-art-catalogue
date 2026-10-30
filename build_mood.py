@@ -152,7 +152,7 @@ def data():
              "stems": stems}, kinds)
 
 CSS = """
-:root{--paper:#0B0C0E;--raise:#111316;--field:#15171A;--ink:#F1F2F4;--ink-soft:#C7CACE;--grey:#8B9098;--rule:#2B2E34;--on:#F1F2F4;--on-ink:#0B0C0E;
+:root{--paper:#141518;--raise:#1A1C1F;--field:#1E2023;--ink:#F1F2F4;--ink-soft:#C7CACE;--grey:#8B9098;--rule:#34373D;--on:#F1F2F4;--on-ink:#0B0C0E;
   --serif:"Newsreader","Newsreader fb","Newsreader fb2",Georgia,serif;--sans:"Archivo","Archivo fb",Arial,sans-serif;--mono:"IBM Plex Mono","IBM Plex Mono fb","IBM Plex Mono fb2",ui-monospace,monospace;color-scheme:dark}
 :root[data-theme=light]{--paper:#FCFCFB;--raise:#F8F8F7;--field:#F3F3F2;--ink:#0B0C0E;--ink-soft:#33363B;--grey:#6C7178;--rule:#DDDDDB;--on:#0B0C0E;--on-ink:#FCFCFB;color-scheme:light}
 *{box-sizing:border-box}[hidden]{display:none!important}

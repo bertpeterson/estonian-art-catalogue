@@ -23,7 +23,7 @@ KEYS = ["acc_h", "acc_who", "acc_signout", "acc_news_h", "acc_news_on", "acc_new
 PAGE = {"en": dict(file="account", other="konto", privacy="privacy", other_l="Eesti keeles", site="Estonian Art Catalogue", home="./"),
         "et": dict(file="konto", other="account", privacy="privaatsus", other_l="In English", site="Eesti Kunstikataloog", home="./#lang=et")}
 
-CSS = (":root{--paper:#0B0C0E;--field:#15171A;--ink:#F1F2F4;--ink-soft:#C7CACE;--grey:#8B9098;--rule:#2B2E34;--rule-soft:#212429;--warn:#E5484D;"
+CSS = (":root{--paper:#141518;--field:#1E2023;--ink:#F1F2F4;--ink-soft:#C7CACE;--grey:#8B9098;--rule:#34373D;--rule-soft:#2A2D32;--warn:#E5484D;"
        "--serif:'Newsreader','Newsreader fb','Newsreader fb2',Georgia,serif;--sans:'Archivo','Archivo fb',Arial,sans-serif;--mono:'IBM Plex Mono','IBM Plex Mono fb','IBM Plex Mono fb2',ui-monospace,monospace}"
        ":root[data-theme=light]{--paper:#FCFCFB;--field:#F3F3F2;--ink:#0B0C0E;--ink-soft:#33363B;--grey:#6C7178;--rule:#DDDDDB;--rule-soft:#ECECEA;--warn:#C62A2F}"
        "*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.5 var(--sans);-webkit-font-smoothing:antialiased}"

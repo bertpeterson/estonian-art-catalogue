@@ -88,7 +88,7 @@ def table(head, rows):
     return f"<table><thead><tr>{th}</tr></thead><tbody>" + "".join("<tr>" + "".join(f"<td{' class=n' if i else ''}>{c}</td>" for i, c in enumerate(r)) + "</tr>" for r in rows) + "</tbody></table>"
 
 CSS = ("body{margin:0;padding:28px;font:15px/1.55 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#fcfcfb;color:#111;max-width:940px}"
-       ":root:not([data-theme=light]) body{background:#0b0c0e;color:#f1f2f4}:root:not([data-theme=light]) a{color:#9ec5ff}:root:not([data-theme=light]) th,:root:not([data-theme=light]) td{border-color:#2b2e34!important}:root:not([data-theme=light]) .m{color:#8b9098!important}"
+       ":root:not([data-theme=light]) body{background:#141518;color:#f1f2f4}:root:not([data-theme=light]) a{color:#9ec5ff}:root:not([data-theme=light]) th,:root:not([data-theme=light]) td{border-color:#34373D!important}:root:not([data-theme=light]) .m{color:#8b9098!important}"
        "h1{font-weight:500;font-size:2rem;margin:0 0 4px}h2{font-weight:500;font-size:1.25rem;margin:36px 0 8px}"
        ".m{color:#666;font-size:.9rem}nav{font-size:.9rem;margin-bottom:22px}a{color:inherit}"
        "table{border-collapse:collapse;width:100%;font-size:.9rem;margin-top:8px}th,td{text-align:left;padding:5px 8px;border-bottom:1px solid #e3e3e3;vertical-align:top}"
@@ -99,7 +99,7 @@ CSS = ("body{margin:0;padding:28px;font:15px/1.55 -apple-system,BlinkMacSystemFo
        ".hb{display:block;margin-top:8px;overflow:visible}.hb .hr{fill:#111}.hb .hl,.hb .hv{font-size:11px;fill:#666}.hb .hv{font-variant-numeric:tabular-nums}"
        ":root:not([data-theme=light]) .hb .hr{fill:#f1f2f4}:root:not([data-theme=light]) .hb .hl,:root:not([data-theme=light]) .hb .hv{fill:#8b9098}"
        ".cb{display:inline-block;width:110px;height:8px;background:#e8e8e8;vertical-align:middle}.cb i{display:block;height:100%;background:#111}"
-       ":root:not([data-theme=light]) .cb{background:#2b2e34}:root:not([data-theme=light]) .cb i{background:#f1f2f4}"
+       ":root:not([data-theme=light]) .cb{background:#34373D}:root:not([data-theme=light]) .cb i{background:#f1f2f4}"
        ".dc{display:inline-flex;align-items:flex-end;gap:1px;height:22px}.dc i{display:block;width:4px;background:#111}:root:not([data-theme=light]) .dc i{background:#f1f2f4}")
 
 today = datetime.date.today().isoformat()
