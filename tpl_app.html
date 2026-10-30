@@ -2015,7 +2015,9 @@
     const src = w => { const d = det(w);
       return d.mi ? `https://www.muis.ee/museaalview/${d.mi}`
            : d.oi ? `https://digikogu.ekm.ee/ekm/search/oid-${d.oi}/` : (d.url || ""); };
-    const q = v => `"${String(v ?? "").replace(/"/g, '""')}"`;
+    // a cell a spreadsheet would run ("=HYPERLINK(...)", "@SUM", "+cmd|...") gets an apostrophe in front, as in
+    // data/export_csv.py: the museums' text reaches this list unchecked
+    const q = v => { let s = String(v ?? ""); if (/^\s*(?:[=@\t\r]|[+-].*[|(!])/.test(s)) s = "'" + s; return `"${s.replace(/"/g, '""')}"`; };
     const head = ["artist", "title", "year", "technique", "medium", "dimensions", "holder", "inventory_no", "kind", "source"];
     const lines = [head.join(",")].concat(rows.map(w => [
       A[w.a].n, w.t, w.y ?? "", techName(w) || "", medName(w.e) || "", det(w).dm || "",

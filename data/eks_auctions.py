@@ -58,7 +58,13 @@ for m in re.finditer(r"<a href='([^']+)'[^>]*>(?:(?!</a>\s*</span>).)*?</div>\s*
 seen_urls = set(); sales = [s for s in sales if not (s[0] in seen_urls or seen_urls.add(s[0]))]
 print(f"E-KUNSTISALONG: {len(sales)} sales listed", flush=True)
 
-CARD = re.compile(r"<span class='toot_hr_jn alapealkiri'>(.*?)</span><span class='toot_hr_jn'>(.*?)</span></b><span class=toot_hr_jn>(.*?)</span><span >Alg:\s*<b>(.*?)</b></span>", re.S)
+# a card's fields, each to its own closing tag and never into the next card. Four (.*?) under re.S went back over the
+# whole rest of the page at every card that did not close as expected: hours on a 40 KB page, past the job's timeout.
+# A field may hold other tags (a <br>, the price's second <b>müüdud</b>), not its own end or the next card's start
+FIELD = r"([^<]*(?:<(?!/span>|span class='toot_hr_jn alapealkiri'>)[^<]*)*)"
+PRICE = r"([^<]*(?:<(?!/b></span>|span class='toot_hr_jn alapealkiri'>)[^<]*)*)"
+CARD = re.compile(r"<span class='toot_hr_jn alapealkiri'>" + FIELD + r"</span><span class='toot_hr_jn'>" + FIELD +
+                  r"</span></b><span class=toot_hr_jn>" + FIELD + r"</span><span >Alg:\s*<b>" + PRICE + r"</b></span>")
 today = datetime.date.today().isoformat()
 # The salon's robots.txt asks a two-minute delay of every crawler. A sale's page does not
 # change once its results are in, so the records read from it are kept in eks_sales.json
