@@ -73,8 +73,10 @@ def offer_item(title, artist, year, medium, image, price, seller, url):
                     "seller": {"@type": "Organization", "name": seller, "url": f"{p.scheme}://{p.netloc}"}}
     if price: it["offers"].update(price=price, priceCurrency="EUR")
     return it
-# JSON for inside a <script>: a "</" in a title off a gallery's page would end the script early
-ldjson = lambda o: json.dumps(o, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
+# JSON for inside a <script>: a "</" in a title off a gallery's page would end the script early, and a "<!--<script"
+# would make the browser read the rest of the page into it (an empty page). Every < > & as \u003c \u003e \u0026:
+# the same JSON to any reader, and nothing a browser reads as markup
+ldjson = lambda o: json.dumps(o, ensure_ascii=False, separators=(",", ":")).replace("<", "\\u003c").replace(">", "\\u003e").replace("&", "\\u0026")
 # one address per artist, for every page that names one. Two names can come out the same once accents, dots and
 # invisible characters are dropped ("Krist\u00adjan Raud" off a gallery's page and the museums' Kristjan Raud): the
 # artist with museum works keeps the address, then the one with the most works, then the earlier, and the other gets
