@@ -71,6 +71,27 @@ an object of known size (a door is 80 cm) and two level lines along the wall; th
 into centimetres and the wall's perspective itself (the model places things well and measures badly).
 6 photos a minute per visitor, about $0.007 a photo. The photo is not stored.
 
+A day's cap: 2,000 questions to `/ask` and 2,000 × 2 tool rounds, all visitors together, counted before Claude is
+called; past it, and on a day that cannot be counted, `/ask` answers "try again tomorrow". Only `/` (the mood page),
+`/ask`, `/list/*` and `/admin/stats` answer; any other address is a 404 and calls nothing.
+
+**The monthly spend limit on the key is required, not optional.** The caps are the Worker's own guard; the
+Console's limit is the one that holds whatever happens to the Worker.
+
+## The day counters in D1 (recommended)
+
+Without it the counters live in KV, a read and a write each: requests that arrive together can all read the same
+figure, so a burst slips past the day's caps, and every count spends one of KV's 1,000 free writes a day, which
+sign-in and the lists need too (mood readings are then counted one in ten, by ten). With a D1 database each count is
+one step, "add one and say how many", so the caps hold under a burst and KV is left to the lists.
+
+1. Cloudflare → Storage & Databases → D1 → Create → name `museaal-counts`. Nothing to set up inside: the Worker
+   makes its one table itself.
+2. The Worker's Settings → Bindings → Add → D1 database, variable name `COUNTS`, database `museaal-counts` → Deploy.
+
+The free plan's 100,000 writes a day is far beyond what the counters use. The counts start again from zero in D1;
+the backoffice shows D1's once the binding is there.
+
 ## My List across devices (`/list/*`)
 
 A visitor types their email address under My List; the Worker emails them a sign-in link, and the list is then
@@ -109,8 +130,11 @@ Setting it up (once), in this order:
 
 Optional: `MAIL_FROM` (plain variable), default `museaal.ee <list@museaal.ee>`. Replies go to info@museaal.ee.
 
-Limits: 5 sign-in requests per visitor per ten minutes, 4 links per address per hour, 30 list requests a
-minute. KV's free plan allows 1,000 writes a day: a sign-in is about four, a change to a list one.
+Limits: 5 sign-in requests per visitor per ten minutes; a fresh Turnstile token for every sign-in link (the half-hour
+pass the other doors take is not enough here); per inbox, 4 links an hour from one visitor and 10 from everyone, an
+inbox counted however it is spelled (`name+tag@`, Gmail's dots); 90 sign-in mails a day in all, under Resend's free
+100 (the `c:mail:` counter); 30 list requests a minute. KV's free plan allows 1,000 writes a day: a sign-in is about
+six, a change to a list one.
 
 ## The backoffice (`/admin/stats`, page museaal.ee/admin)
 
@@ -128,6 +152,7 @@ Setting it up (once):
    "Read statistics" ticked. Add it to the Worker as a secret named `GOATCOUNTER_TOKEN`.
 3. Paste `mood-worker.js` into the Worker again and deploy, then open museaal.ee/admin and enter the key.
 
-The day counters start when the new Worker goes live: nothing before that is known. Each question and each mood
-reading is one KV write; the free plan allows 1,000 writes a day across all keys, and a failed count never stops
-the answer. Wrong keys: five a minute per visitor.
+The day counters start when the new Worker goes live: nothing before that is known. With the D1 binding `COUNTS`
+(above) they are read from there; without it, from KV, where each question is one write and mood readings are
+counted one in ten. A failed count never stops a mood reading or a sign-in count; on `/ask` it closes the day.
+Wrong keys: five a minute per visitor.
