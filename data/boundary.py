@@ -9,10 +9,12 @@ validate.py does.
 
   text   plain: no HTML tag, no script URL, no control character, nothing a
          spreadsheet opening the CSV exports would run as a formula
-  links  http(s) with a host; a gallery's listing on that gallery's own site (GALLERY_SITES)
+  links  http(s) with a host; a gallery's listing on that gallery's own site (GALLERY_SITES);
+         a coming lot, and a past lot with a picture, on the auction house's own (HOUSE_SITES)
   images a gallery's own pictures, from the gallery's own site (or its named image
          host), and only for works on show or for sale now, or a past listing of a
-         public-domain work -- never one by a later artist, never an auction lot
+         public-domain work -- never one by a later artist; a lot's from the house's
+         own site, for every coming lot and for past lots of public-domain artists
   prices whole euros in a plausible range
 """
 import json, re, sys, collections, html, datetime
@@ -60,6 +62,15 @@ GALLERY_SITES = {
     "Veneetsia biennaal, Eesti paviljon": "cca.ee",
 }
 KIND_SITES = {"known": "konradmagi.ee"}
+# each auction house's own site, kept here by hand: a coming lot, and a past lot shown with its picture, link there and
+# nowhere else, and the picture comes from the same site (below), as CLAUDE.md has it: "embedded from the house's own
+# server". A past lot without a picture may link to the press report of a sale (postimees.ee, err.ee). A new house
+# needs its line here before its coming lots, or its past lots with pictures, ship
+HOUSE_SITES = {
+    "Allee galerii": "alleegalerii.ee", "E-Kunstisalong": "e-kunstisalong.ee", "Eesti Kunsti Oksjonid": "eestikunstioksjonid.ee",
+    "Haus Galerii": "haus.ee", "Kunstikoda": "kunstikoda.ee", "Osta Noort Kunsti": "ostanoortkunsti.ee",
+    "Vaal galerii": "vaal.ee", "Vernissage": "vernissage.ee",
+}
 PINNED = {"gallery", "shown", "sold", "known"}
 WITH_IMAGES = {"gallery", "shown", "known"}            # for sale, on show, the Mägi catalogue
 NO_IMAGES = set()
@@ -128,6 +139,11 @@ def check(d):
             want = KIND_SITES.get(kind) or GALLERY_SITES.get(mu)
             if not want: bad["gallery with no registered site (GALLERY_SITES)"].append(f"{where}: {mu!r}")
             elif site(urlparse(w["url"]).hostname) != want: bad["link off the gallery's own site"].append(f"{where}: {mu!r}")
+        elif kind == "auction" and w.get("im"):
+            house = V["mu"][w["mu"]] if isinstance(w.get("mu"), int) and 0 <= w["mu"] < len(V.get("mu", [])) else w.get("mu")
+            want = HOUSE_SITES.get(house)
+            if not want: bad["auction house with no registered site (HOUSE_SITES)"].append(f"{where}: {house!r}")
+            elif site(urlparse(w["url"]).hostname) != want: bad["lot off the auction house's own site"].append(f"{where}: {house!r}")
         im = w.get("im")
         if not im: continue
         if kind in NO_IMAGES or kind not in WITH_IMAGES | PD_ONLY or (kind in PD_ONLY and not public_domain(A[w["a"]])):
@@ -145,6 +161,9 @@ def check(d):
             if f == "pr": continue          # the lot's earlier sales, already checked as auction works
             text(where, f, v); price(where, f, v)
         if not web(u.get("u")): bad["link not http(s)"].append(f"{where}: {u.get('u')!r}"); continue
+        want = HOUSE_SITES.get(u.get("h"))
+        if not want: bad["auction house with no registered site (HOUSE_SITES)"].append(f"{where}: {u.get('h')!r}"); continue
+        if site(urlparse(u["u"]).hostname) != want: bad["lot off the auction house's own site"].append(f"{where}: {u.get('h')!r}"); continue
         im = u.get("im")
         if not im: continue
         src, _, iu = im.partition(":")
