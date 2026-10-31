@@ -92,7 +92,23 @@ class Check(unittest.TestCase):
         self.assertEqual(self.fails(data(url="https://kogogallery.ee/en/works/x/")), set())        # with or without www
         d = data(); d["vocab"]["mu"][0] = "Uus galerii"
         self.assertIn("gallery with no registered site (GALLERY_SITES)", self.fails(d))
-        self.assertEqual(self.fails(data(kind="auction", im=None, url="https://www.postimees.ee/lot")), set())  # lots: not pinned
+        self.assertEqual(self.fails(data(kind="auction", im=None, url="https://www.postimees.ee/lot")), set())  # a press report
+
+    def test_auction_house_site_pinned(self):
+        # a coming lot: its link (and so its picture) on the house's own site, whatever the house's reply says
+        d = data(); d["upcoming"][0].update(u="https://evil.example/o/paar/", im="g:https://evil.example/paar.jpg")
+        self.assertIn("lot off the auction house's own site", self.fails(d))
+        d = data(); d["upcoming"][0].update(im="g:https://eestikunstioksjonid.ee/pildid/paar.jpg")
+        self.assertEqual(self.fails(d), set())
+        d = data(); d["upcoming"][0]["h"] = "Uus oksjonimaja"
+        self.assertIn("auction house with no registered site (HOUSE_SITES)", self.fails(d))
+        # a past lot shown with its picture (a public-domain artist's): on the house's own site too
+        def past(url, im, house="Haus Galerii"):
+            d = data(kind="auction", url=url, im=im, pr=None); d["vocab"]["mu"][0] = house; d["artists"][0]["l"] = ["1882", "1925"]
+            return self.fails(d)
+        self.assertEqual(past("https://www.haus.ee/oksjon/lot-1", "g:https://www.haus.ee/pildid/1.jpg"), set())
+        self.assertIn("lot off the auction house's own site", past("https://evil.example/lot-1", "g:https://evil.example/1.jpg"))
+        self.assertIn("auction house with no registered site (HOUSE_SITES)", past("https://x.ee/1", "g:https://x.ee/1.jpg", "Balti Oksjon"))
 
     def test_host_as_a_browser_reads_it(self):
         # Python's urlparse reads the gallery's host in these; a browser goes to evil.example
