@@ -8,6 +8,7 @@ much of each house's offering finds a buyer. Every figure is computed here from
 the same data the app loads, so the page and the app never disagree.
 """
 import json, os, html, datetime, collections, re, unicodedata
+import script_mark as SM  # the build's mark on its own inline scripts (csp.py)
 GC = '<script data-goatcounter="https://museaal.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>'   # GoatCounter: a page-view count, no cookies
 
 SRC, OUT = "data/data.json", "site/stats.html"
@@ -116,7 +117,7 @@ def render(lang):
     HOME = "./" if lang == "en" else "./#lang=et"
     OTHER, OTHERLAB = ("stats-et", "Eesti keeles") if lang == "en" else ("stats", "In English")
     parts = []
-    parts = [f"<!doctype html><html lang=\"{lang}\"><head><meta charset=\"utf-8\"><script>try{{if(localStorage.getItem(\"ekr:theme\")===\"light\")document.documentElement.setAttribute(\"data-theme\",\"light\")}}catch(e){{}}</script><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">"
+    parts = [f"<!doctype html><html lang=\"{lang}\"><head><meta charset=\"utf-8\">{SM.OPEN}try{{if(localStorage.getItem(\"ekr:theme\")===\"light\")document.documentElement.setAttribute(\"data-theme\",\"light\")}}catch(e){{}}</script><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">"
              f"<title>The catalogue in figures — Estonian Art Catalogue</title>"
              f"<meta name=\"description\" content=\"What museaal.ee holds by kind and medium, and the Estonian auction record by house, year and artist.\">"
              f"<link rel=\"canonical\" href=\"https://museaal.ee/{OUTNAME}\"><style>{CSS}</style>{GC}</head><body>"

@@ -14,6 +14,7 @@ carries over.
 """
 import json, os, re, html, unicodedata, datetime, collections, urllib.parse
 import build_hubs as H
+import script_mark as SM  # the build's mark on its own inline scripts (csp.py)
 # the page's last line: where to ask for a correction or a removal
 CONTACT = {"en": 'Corrections, removals, questions: <a href="mailto:info@museaal.ee">info@museaal.ee</a> · <a href="https://museaal.ee/privacy">Privacy</a>', "et": 'Parandused, eemaldamised, küsimused: <a href="mailto:info@museaal.ee">info@museaal.ee</a> · <a href="https://museaal.ee/privaatsus">Privaatsus</a>'}
 GC = '<script data-goatcounter="https://museaal.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>'   # GoatCounter: a page-view count, no cookies
@@ -318,7 +319,7 @@ POS = {"l": "100% 50%", "r": "0% 50%", "t": "50% 100%", "b": "50% 0%"}
 crop = lambda im: f' style="object-position:{POS[CHARTS[im][0]]}"' if im in CHARTS else ""
 MRANK = {"Painting": 0, "Watercolour": 1, "Sculpture": 2, "Mixed media": 3, "Installation": 3, "Drawing": 4, "Sketch": 5, "Photograph": 6, "Print": 7}
 imsrc = H.imsrc          # one rule for every page: the holder's thumbnail, a gallery's 768px copy, https only
-STAMP = "<script>try{if(localStorage.getItem(\"ekr:theme\")===\"light\")document.documentElement.setAttribute(\"data-theme\",\"light\")}catch(e){}</script>"
+STAMP = SM.OPEN + "try{if(localStorage.getItem(\"ekr:theme\")===\"light\")document.documentElement.setAttribute(\"data-theme\",\"light\")}catch(e){}</script>"
 
 UPC = collections.defaultdict(list)
 for _u in d.get("upcoming", []): UPC[_u["a"]].append(_u)
@@ -523,7 +524,7 @@ def render(i, a, ws, lang):
            + neighbours(i, lang)
            + embed_box(lang, f"{BASE}/embed/{'' if lang == 'en' else 'et/'}{sl}", me, a["n"], T)
            + f"<p class=\"m\">{T['foot']}<a href=\"{BASE}/{'' if lang == 'en' else '#lang=et'}\">{T['full']}</a> · {CONTACT[lang]}</p>"
-           + (H.out_js("artist") if n_sale else "") + f"<script>{SAVE_JS}</script></body></html>")
+           + (H.out_js("artist") if n_sale else "") + f"{SM.OPEN}{SAVE_JS}</script></body></html>")
 
 for i, a in enumerate(A):
     ws = by_artist.get(i, [])
@@ -576,7 +577,7 @@ if os.path.exists(_retired):
         osl, nsl = slug(old), live[new]
         if osl == nsl or os.path.exists(f"{OUT}/{osl}.html"): continue
         for D in ("a", "k"): open(f"site/{D}/{osl}.html", "w", encoding="utf-8").write(
-            f"<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\"><script>try{{if(localStorage.getItem(\"ekr:theme\")===\"light\")document.documentElement.setAttribute(\"data-theme\",\"light\")}}catch(e){{}}</script>"
+            f"<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\">{SM.OPEN}try{{if(localStorage.getItem(\"ekr:theme\")===\"light\")document.documentElement.setAttribute(\"data-theme\",\"light\")}}catch(e){{}}</script>"
             f"<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">"
             f"<title>{e(old)} — see {e(new)} — Estonian Art Catalogue</title>"
             f"<link rel=\"canonical\" href=\"{BASE}/{D}/{nsl}\">"
@@ -591,7 +592,7 @@ if os.path.exists(_retired):
 # GitHub Pages serves 404.html for any missing path. A stale link usually names
 # an artist, so the page offers a search prefilled from the path, and the A-Z.
 open("site/404.html", "w", encoding="utf-8").write(
-    f"<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\"><script>try{{if(localStorage.getItem(\"ekr:theme\")===\"light\")document.documentElement.setAttribute(\"data-theme\",\"light\")}}catch(e){{}}</script>"
+    f"<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\">{SM.OPEN}try{{if(localStorage.getItem(\"ekr:theme\")===\"light\")document.documentElement.setAttribute(\"data-theme\",\"light\")}}catch(e){{}}</script>"
     f"<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">"
     f"<title>Not found — Estonian Art Catalogue</title><meta name=\"robots\" content=\"noindex\">"
     f"<style>{CSS}form{{display:flex;gap:8px;max-width:520px;margin:18px 0}}"
@@ -601,7 +602,7 @@ open("site/404.html", "w", encoding="utf-8").write(
     f"<p class=\"m\" id=\"why\">The address may be misspelt, or the page has moved.</p>"
     f"<form id=\"f\"><input id=\"q\" placeholder=\"Search the catalogue\" aria-label=\"Search\"><button>Search</button></form>"
     f"<p><a href=\"{BASE}/a/\">Artists A–Z</a> · <a href=\"{BASE}/k/\">Kunstnikud A–Ü</a> · <a href=\"{BASE}/\">Full catalogue</a></p>"
-    f"<script>"
+    f"{SM.OPEN}"
     f"var m=location.pathname.match(/\\/[ak]\\/([^\\/]+?)(?:\\.html)?$/);"
     f"if(m){{var w=decodeURIComponent(m[1]).replace(/-/g,' ');document.getElementById('q').value=w;"
     f"document.getElementById('why').textContent='No artist page at this address. The name may have been merged with another spelling — try the search.';}}"
