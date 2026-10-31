@@ -993,6 +993,25 @@ for lots in _chain.values():
             w["ac"] = _nc                                # the chain
             if k == len(g) - 1: w["al"] = 1              # the latest lot carries the work on the page
 print("  works offered more than once:", _nc, "chains over", _nl, "lots")
+# A house that also keeps stock puts an unsold lot on its shelf: Viies's plaster
+# Vilepuhuja, unsold at E-Kunstisalong's 56th sale, then in its stock at 1 900 €. The
+# listing joins the lot's chain and carries the work on the page, the lots its auction
+# history. Live stock only, at the house that ran the sale, after a lot there that did
+# not sell: a listing is now, so every lot came before it; another dealer's work of one name and size may be another cast.
+_ns = 0
+for w in works:
+    if w.get("kind") != "gallery" or not w.get("dm"): continue
+    s = _sides(w)
+    lots = [x for x in _chain.get((w["a"], "".join(fold(w["t"])).rstrip(".")), [])
+            if x["mu"] == w["mu"] and _same((x, _sides(x)), w, s)]
+    # a lot that sold left the house: a listing after it is another impression or a resale
+    if not lots or max(lots, key=lambda x: str(x.get("ad") or "")).get("ao") == 1: continue
+    c = next((x["ac"] for x in lots if x.get("ac")), None)
+    if c is None: _nc += 1; c = _nc
+    for x in works:
+        if x.get("ac") == c or x in lots: x["ac"] = c; x.pop("al", None)
+    w["ac"] = c; w["al"] = 1; _ns += 1
+print("  stock listings with the house's own earlier lots:", _ns)
 # Vaal galerii prints life dates beside every lot's artist -- "s 1960", "1936–2022" --
 # the only auction house that does. For an artist with no date from any museum,
 # Wikidata or their own biography, that is taken, tagged Vaal, under the same gate as
