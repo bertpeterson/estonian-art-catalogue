@@ -7,10 +7,12 @@ Not linked from anywhere, not in the sitemap, noindex. What it shows:
   assistant    questions to Buy Art and readings on the mood page a day  } ADMIN_KEY (worker/README.md)
   stock        works for sale by gallery, and what left since the weekly run: written in here at build time
   pipelines    each workflow's last run, read in the browser from GitHub's public API
-The key is asked for once and kept in this browser (localStorage "museaal.admin"). The page loads no
+The key is asked for once a tab and kept in that tab only (sessionStorage "museaal.admin"): never in localStorage,
+which every page of museaal.ee, and the scripts they load, could read. A copy an older version left there is wiped. The page loads no
 GoatCounter, so opening it counts nothing.
 """
 import json, os, re, statistics, collections, datetime, html
+import script_mark as SM  # the build's mark on its own inline scripts (csp.py)
 
 e = html.escape
 d = json.load(open("data/data.json", encoding="utf-8"))
@@ -86,13 +88,14 @@ JS = r"""
     return add(t, tb);
   }
   function section(title, note) { var s = el("section"); add(s, el("h2", null, title)); if (note) add(s, el("p", "m", note)); return s; }
-  function key() { try { return localStorage.getItem("museaal.admin") || ""; } catch (e) { return ""; } }
+  try { localStorage.removeItem("museaal.admin"); } catch (e) {}     // where an older version of this page kept it
+  function key() { try { return sessionStorage.getItem("museaal.admin") || ""; } catch (e) { return ""; } }
 
   function ask(msg) {
     main.textContent = "";
     var p = el("p", msg ? "bad" : "m", msg || "The admin key (ADMIN_KEY in the Worker) — kept in this browser."), i = el("input"), b = el("button", null, "Open");
     i.type = "password"; i.autocomplete = "current-password"; i.setAttribute("aria-label", "Admin key");
-    function go() { try { localStorage.setItem("museaal.admin", i.value.trim()); } catch (e) {} load(); }
+    function go() { try { sessionStorage.setItem("museaal.admin", i.value.trim()); } catch (e) {} load(); }
     b.onclick = go; i.onkeydown = function (ev) { if (ev.key === "Enter") go(); };
     add(main, p, add(el("div"), i, b)); i.focus();
   }
@@ -103,7 +106,7 @@ JS = r"""
     fetch(API, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ key: k }) })
       .then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { j.status = r.status; return j; }); })
       .then(function (j) {
-        if (j.status === 401) { try { localStorage.removeItem("museaal.admin"); } catch (e) {} return ask("Wrong key."); }
+        if (j.status === 401) { try { sessionStorage.removeItem("museaal.admin"); } catch (e) {} return ask("Wrong key."); }
         if (j.status !== 200) { main.textContent = j.error || "The Worker answered " + j.status + "."; return; }
         show(j);
       }, function () { main.textContent = "The Worker could not be reached."; });
@@ -193,8 +196,8 @@ JS = r"""
 })();
 """
 
-page = (f'<!doctype html><html lang="en"><head><meta charset="utf-8">'
-        '<script>try{if(localStorage.getItem("ekr:theme")==="light")document.documentElement.setAttribute("data-theme","light")}catch(e){}</script>'
+page = (f'<!doctype html><html lang="en"><head><meta charset="utf-8">{SM.OPEN}'
+        'try{if(localStorage.getItem("ekr:theme")==="light")document.documentElement.setAttribute("data-theme","light")}catch(e){}</script>'
         '<meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow">'
         f'<title>Backoffice — museaal.ee</title><style>{CSS}</style></head><body>'
         '<h1>Backoffice</h1><p class="m">museaal.ee, for its keeper. <a href="/">Home</a> · <a href="/stats">The catalogue in figures</a></p>'
@@ -203,6 +206,6 @@ page = (f'<!doctype html><html lang="en"><head><meta charset="utf-8">'
         '<section><h2>Pipelines</h2><p class="m">Each workflow\'s last run on GitHub.</p><div id="pipes"></div></section>'
         '<script type="application/json" id="stock">' + json.dumps(STOCK, ensure_ascii=False).replace("</", "<\\/") + '</script>'
         f'<script type="application/json" id="flows">{json.dumps(FLOWS)}</script>'
-        f'<script>{JS}</script></body></html>')
+        f'{SM.OPEN}{JS}</script></body></html>')
 open("site/admin.html", "w", encoding="utf-8").write(page)
 print(f"  backoffice     site/admin.html: {STOCK['works']:,} works for sale, {len(rows)} galleries")

@@ -3,8 +3,10 @@
 
 GitHub Pages sets no security headers, so the policy travels in a <meta> tag. It
 allows scripts only from this site, GoatCounter, and the inline scripts the build
-itself wrote -- each named by the SHA-256 of its exact text, so an inline script
-that arrived any other way does not run; pictures from any https server (the
+itself wrote -- each named by the SHA-256 of its exact text. A builder writes its own
+as <script data-built="MARK"> (script_mark.py: a random mark made for this build, which no
+scraped text can carry); only those are hashed, the mark is taken out of the page, and
+any other inline script that would run stops the build, naming the page; pictures from any https server (the
 museums' and galleries' own); styles inline (the tiles carry their shapes as
 style attributes) and from this site; fonts from this site; connections to this site (the data files)
 and to GoatCounter; no plugins, no <base>, no forms. The app's inline event
@@ -15,6 +17,8 @@ Runs last in build_site.sh, over every .html the build produced.
 import base64, hashlib, json, os, re, sys
 
 ROOT = sys.argv[1] if len(sys.argv) > 1 else "site"
+MARK = os.environ.get("MUSEAAL_SCRIPT_MARK") or sys.exit("csp: no MUSEAAL_SCRIPT_MARK (build_site.sh sets it): the build's own scripts cannot be told apart")
+MARKED = f' data-built="{MARK}"'
 # the mood page's reader of typed descriptions (build_mood.py), when one is set up
 _api = (json.load(open("data/mood_api.json", encoding="utf-8")).get("url") or "") if os.path.exists("data/mood_api.json") else ""
 API = re.match(r"https://[^/]+", _api).group(0) if re.match(r"https://[^/]+", _api) else ""
@@ -26,16 +30,21 @@ POLICY = ("default-src 'self'; script-src 'self' https://gc.zgo.at{hashes}" + TS
           "base-uri 'none'; form-action 'none'; object-src 'none'; upgrade-insecure-requests")
 INLINE = re.compile(r"<script(?![^>]*\bsrc=)([^>]*)>(.*?)</script>", re.S)
 
-def policy_for(html, more=""):
+DATA = re.compile(r'\btype="application/(?:ld\+)?json"')   # a data block: never run, so never hashed
+
+def policy_for(html, more="", unmarked=None):
     hashes = []
     for attrs, body in INLINE.findall(html):
-        if "application/ld+json" in attrs: continue            # data, never executed
+        if DATA.search(attrs): continue
+        if MARKED not in attrs:                                # not the build's own: never hashed, and the build stops
+            if unmarked is not None: unmarked.append(body.strip()[:80])
+            continue
         h = base64.b64encode(hashlib.sha256(body.encode("utf-8")).digest()).decode()
         if h not in hashes: hashes.append(h)
     p = POLICY.format(hashes="".join(f" 'sha256-{h}'" for h in hashes))
     return p.replace("connect-src 'self'", "connect-src 'self' " + more) if more else p
 
-n = 0
+n, bad = 0, []
 for d, _, files in os.walk(ROOT):
     for f in files:
         if not f.endswith(".html"): continue
@@ -44,8 +53,15 @@ for d, _, files in os.walk(ROOT):
         if 'http-equiv="Content-Security-Policy"' in html: continue
         # the backoffice (build_admin.py) also reads each workflow's last run from GitHub
         more = "https://api.github.com" if os.path.relpath(p, ROOT) == "admin.html" else ""
-        tag = f'<meta http-equiv="Content-Security-Policy" content="{policy_for(html, more)}">'
+        unmarked = []
+        tag = f'<meta http-equiv="Content-Security-Policy" content="{policy_for(html, more, unmarked)}">'
+        if unmarked: bad.append((os.path.relpath(p, ROOT), unmarked)); continue
+        html = html.replace(MARKED, "")
         html2, k = re.subn(r'(<meta charset="utf-8">)', r"\1" + tag.replace("\\", "\\\\"), html, count=1)
         if not k: print("  no charset tag, policy not written:", p); continue
         open(p, "w", encoding="utf-8").write(html2); n += 1
 print(f"CSP: policy written into {n:,} pages")
+if bad:
+    print(f"CSP FAIL: {len(bad)} page(s) carry an inline script the build did not write (script_mark.py):")
+    for p, b in bad[:20]: print(f"   {p}: {b[0]!r}")
+    sys.exit(1)

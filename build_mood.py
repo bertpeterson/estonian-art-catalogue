@@ -24,6 +24,7 @@ Run after build_stats.py (it adds to the sitemap) and before csp.py.
 """
 import json, os, re, hashlib, datetime, urllib.parse
 import build_hubs as H
+import script_mark as SM  # the build's mark on its own inline scripts (csp.py)
 import list_sync as LS   # My List across devices (list-sync.js)
 import sys; sys.path.insert(0, "data")
 from shape_of import shape_of
@@ -445,7 +446,7 @@ def page(lang, ver, api, d, kinds):
             f'<div class="wall static" id="wall" data-src="data/mood.json?v={ver}"{api_attr}>{tiles}</div>'
             f'<button type="button" class="btn more" id="more" hidden>{e(t["more"])}</button>'
             f'<footer>{e(t["note"])} {H.CONTACT[lang]}</footer></div>'
-            f'<script type="application/json" id="t">{tj}</script><script>{SL_JS}{HUMAN_JS}{JS}</script></body></html>')
+            f'<script type="application/json" id="t">{tj}</script>{SM.OPEN}{SL_JS}{HUMAN_JS}{JS}</script></body></html>')
 
 API = (json.load(open("data/mood_api.json", encoding="utf-8")).get("url") or "") if os.path.exists("data/mood_api.json") else ""
 TS = (json.load(open("data/mood_api.json", encoding="utf-8")).get("turnstile") or "") if API else ""   # Turnstile site key, public

@@ -17,6 +17,7 @@ without its script, which only lights up an artist's lines on hover or tap.
 """
 import json, os, re, datetime, collections
 import build_hubs as H
+import script_mark as SM  # the build's mark on its own inline scripts (csp.py)
 from build_hubs import BASE, A, W, e, fmt, CSS, STAMP, GC, CONTACT, ARTIST_SLUG
 
 LIN = json.load(open("data/lineage.json", encoding="utf-8"))
@@ -180,7 +181,7 @@ def network(lang):
         + f'<h1>{T["net_h"]}</h1><p class="lede">{e(lede)}</p>{legend}<div class="nw">{"".join(svg)}</div>'
         + f'<h2>{T["top"]}</h2><ul class="cols">{top}</ul>'
         + f'<p class="nb"><a href="{BASE}/{T["dir"]}/">{T["h"]}</a> · ' + " · ".join(f'<a href="{href(x, lang)}">{e(x[lang])}</a>' for x in CIRCLES) + "</p>"
-        + f'<p class="m">{CONTACT[lang]}</p><script>{js}</script></body></html>')
+        + f'<p class="m">{CONTACT[lang]}</p>{SM.OPEN}{js}</script></body></html>')
     return me
 
 def head(lang, me, other, xdefault, title, desc):

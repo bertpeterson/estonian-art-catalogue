@@ -13,6 +13,7 @@ appends to the sitemap) and before csp.py.
   ET /kumnendid/1920.html /liigid/maal.html    /muuseumid/<slug>.html /ained/maastik.html
 """
 import json, os, re, html, unicodedata, datetime, collections, urllib.parse
+import script_mark as SM  # the build's mark on its own inline scripts (csp.py)
 
 BASE = "https://museaal.ee"
 d = json.load(open("data/data.json", encoding="utf-8"))
@@ -21,11 +22,11 @@ I18N = json.load(open("i18n.json", encoding="utf-8"))
 MUSEUM_EN, MEDIUM_ET, BLURB_ET = I18N["MUSEUM_EN"], I18N["MEDIUM_ET"], I18N["BLURB_ET"]
 PERIODS = [(1700, 1917, "Tsaariaeg"), (1918, 1939, "Vabariik"), (1940, 1990, "Okupatsioon"), (1991, 2099, "Taasiseseisvus")]
 GC = '<script data-goatcounter="https://museaal.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>'
-STAMP = "<script>try{if(localStorage.getItem(\"ekr:theme\")===\"light\")document.documentElement.setAttribute(\"data-theme\",\"light\")}catch(e){}</script>"
+STAMP = SM.OPEN + "try{if(localStorage.getItem(\"ekr:theme\")===\"light\")document.documentElement.setAttribute(\"data-theme\",\"light\")}catch(e){}</script>"
 # a click through to a gallery, counted: a GoatCounter event "out-<src>" titled with the gallery (data-out on the
 # link), as Buy art counts its own as "find-out"; a middle click too, which opens the gallery just the same
 def out_js(src):
-    return ("<script>(function(){function c(v){var a=v.target.closest&&v.target.closest('a[data-out]');"
+    return (SM.OPEN + "(function(){function c(v){var a=v.target.closest&&v.target.closest('a[data-out]');"
             f"if(a&&window.goatcounter&&goatcounter.count)goatcounter.count({{path:'out-{src}',title:a.dataset.out,event:true}})}}"
             "document.addEventListener('click',c);document.addEventListener('auxclick',c)})()</script>")
 e = lambda s: html.escape(str(s or ""), quote=True)
@@ -277,7 +278,7 @@ def main():
             an = fmt(len({w["a"] for w in ws}), lang)
             title = T["med_t"].format(m=lab, n=fmt(len(ws), lang), a=an); desc = T["med_d"].format(m=lab, n=fmt(len(ws), lang), a=an, span=span_of(ws))
             nb = dict(crumb=f'<a href="{BASE}/{T["med"]}/">{T["med_h"]}</a> › {e(lab)}', links=f'<a href="{BASE}/{T["med"]}/">{T["med_h"]}</a>')
-            open(f"site/{T['med']}/{slug(lab)}.html", "w", encoding="utf-8").write(page(lang, me, other, title, desc, lab, "", ws, f"media={m}",
+            open(f"site/{T['med']}/{slug(lab)}.html", "w", encoding="utf-8").write(page(lang, me, other, title, desc, lab, "", ws, "medium=" + bare_slug(m),
                 [(T["by_dec"], facet_row(ws, lang, "dec")), (T["by_mus"], facet_row(ws, lang, "mus"))], nb, med_href(m, "en")))
             urls.append((me, med_href(m, "en"), med_href(m, "et")))
         # museums
