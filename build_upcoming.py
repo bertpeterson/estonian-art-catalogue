@@ -14,6 +14,7 @@ data/sales_by_hand.json: a list of {"house", "sale", "date": first day, "end": l
 (optional), "lots": how many (optional), "url": the house's catalogue}. Each shows as a
 sale with no lots, a link to the catalogue, until its last day has passed; a sale whose
 lots were read after all is not shown twice, and its lots' heading takes the last day from here.
+Vernissage's lots are read but carry only the sale's name; an entry here gives them their days.
 """
 import json, os, re, html, datetime, collections
 import build_hubs as H
@@ -22,10 +23,11 @@ import list_sync as LS
 
 BASE, A, W, e = H.BASE, H.A, H.W, H.e
 d = json.load(open("data/data.json", encoding="utf-8"))
-UP = d.get("upcoming", [])
 _today = datetime.date.today().isoformat()
 _hand = json.load(open("data/sales_by_hand.json", encoding="utf-8")) if os.path.exists("data/sales_by_hand.json") else []
 END = {(x["house"], x["date"]): x["end"] for x in _hand if x.get("end")}      # a sale over several days, its lots dated by the first
+# a sale whose last day has passed goes at the next build, not at the next weekly harvest; "2026-11" lasts the month
+UP = [u for u in d.get("upcoming", []) if not u.get("d") or (END.get((u["h"], u["d"])) or u["d"]) >= _today[:len(u["d"])]]
 HAND = [x for x in _hand
         if (x.get("end") or x["date"]) >= _today
         and not any(u["h"] == x["house"] and x["date"] <= (u.get("d") or "") <= (x.get("end") or x["date"]) for u in UP)]

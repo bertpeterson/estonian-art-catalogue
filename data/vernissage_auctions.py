@@ -92,8 +92,11 @@ for sale in {r["sale"] for r in recs if r["when"] == _this}:
         coming += lots; recs = [r for r in recs if r["sale"] != sale]
 recs.sort(key=lambda r: (r["when"], r["artist"], r["title"]))
 # the sales still to come: their lots, with the starting price, for upcoming.py
+# the API names the sale but not its days; data/sales_by_hand.json gives them when the house has announced them
 from upcoming import emit
-emit("Vernissage", [{"house": r["house"], "sale": r["sale"], "date": r.get("date") or r.get("when"), "artist": r["artist"], "title": r["title"],
+_hand = json.load(open("sales_by_hand.json", encoding="utf-8")) if os.path.exists("sales_by_hand.json") else []
+DAY = {x["sale"]: x["date"] for x in _hand if x["house"] == "Vernissage"}
+emit("Vernissage", [{"house": r["house"], "sale": r["sale"], "date": DAY.get(r["sale"]) or r.get("when"), "artist": r["artist"], "title": r["title"],
                   "year": r.get("year"), "yl": r.get("yl"), "tech": r.get("tech") or "", "dims": r.get("dims") or "", "start": r.get("start"), "url": r.get("url"), "img": r.get("img")}
                  for r in coming])
 # one file for every house; this script owns its own house's records in it
