@@ -78,6 +78,9 @@ def page_date(page, slug):
 
 recs, n_open, n_unparsed = [], 0, 0
 coming = []
+# a one-off sale's page drops its date in words once it is over: keep the date read while it was coming
+_seen = [r for f in ("upcoming_records.json", "auction_records.json") if os.path.exists(f) for r in json.load(open(f, encoding="utf-8"))]
+KNOWN = {r["sale"]: r["date"] for r in _seen if r.get("house") == "Vaal galerii" and len(str(r.get("date") or "")) == 10}
 for slug in slugs:
     page = fetch(f"{BASE}/oksjonid/{slug}"); time.sleep(0.5)
     tag = re.search(r"getItems\('(\d+)'\)", page)
@@ -87,7 +90,7 @@ for slug in slugs:
     except Exception: print("  bad API answer for", slug); continue
     # the books of a one-off sale ("Raamatud": one-of-a-kind copies with an artist's cover) are not art
     days = [d for d in a.get("days") or [] if not re.match(r"raamat", d.get("auction_day_description") or "", re.I)]
-    on_page = page_date(page, slug)
+    on_page = page_date(page, slug) or KNOWN.get(clean(a.get("auction_name") or slug))
     dates = [x for x in (day_date(d, slug) or on_page for d in days) if x]
     ended = a.get("auction_status") == "ended" or (dates and max(dates) < today and any(i.get("item_price_final") for d in days for i in d.get("item", [])))
     ahead = not ended and (not dates or max(dates) >= today)       # a sale still to come (or running)
