@@ -6,7 +6,7 @@
 // (<template id="et-…">, build_index.py), swap in as the parser closes each one; until then each stays
 // unseen (.et-wait) rather than showing its English for a moment. The strings are inline: fetched, they
 // came after the first paint, and a reload showed the English page first. The app, when it boots,
-// keeps to the same choice.
+// keeps to the same choice. The masthead figures, baked as "119,796", take the Estonian "119 796" the same way.
 (function(){
   var l=(location.hash.match(/(?:^#|&)lang=(\w+)/)||[])[1],s=null;try{s=localStorage.getItem("ekr:lang")}catch(e){}
   var et=l?l==="et":s?s==="et":[].concat(navigator.languages||[],navigator.language||[]).some(function(x){return /^et\b/i.test(x)});
@@ -20,16 +20,17 @@
     else if((k=el.getAttribute("data-i18n-html"))!=null){v=H[k];if(v!=null)el.innerHTML=v}
     if(HREF[el.id])el.href=HREF[el.id];
     if((t=document.getElementById("et-"+el.id))&&t.tagName==="TEMPLATE")el.innerHTML=t.innerHTML;
+    else if(/^stat-\w+$/.test(el.id)&&el.tagName==="B")el.textContent=(+el.textContent.replace(/\D/g,"")).toLocaleString("et-EE");
     else if(el.id==="fs-lede"&&el.dataset.n)el.textContent=E.fs_lede.replace("{n}",(+el.dataset.n).toLocaleString("et-EE")).replace("{g}",el.dataset.g);
     else if(el.id==="v-wall"&&el.firstChild&&el.firstChild.nodeType===3)el.firstChild.nodeValue=E.v_wall;
     else if(el.id==="q")el.placeholder=E.searchph;
     else if(el.id==="lang-et"||el.id==="lang-en")el.setAttribute("aria-pressed",el.id==="lang-et")};
-  var pass=function(all){document.querySelectorAll("[data-i18n],[data-i18n-html],#doors,#bars,#eras,#fs-lede,#v-wall,#q,#lang-et,#lang-en,#findlink,#fs-up").forEach(function(el){one(el,all)})};
+  var pass=function(all){document.querySelectorAll("[data-i18n],[data-i18n-html],#doors,#bars,#eras,#fs-lede,.mast-stats b,#v-wall,#q,#lang-et,#lang-en,#findlink,#fs-up").forEach(function(el){one(el,all)})};
   var mo=new MutationObserver(function(){pass(false)});mo.observe(R,{childList:true,subtree:true});
   document.addEventListener("DOMContentLoaded",function(){pass(true);mo.disconnect();document.title=E.doctitle;R.classList.remove("et-wait")});
 })();
 </script>
-<style>.et-wait :is([data-i18n],[data-i18n-html],#doors,#bars,#eras,#fs-lede,#v-wall,#q):not([data-et]){visibility:hidden}</style>
+<style>.et-wait :is([data-i18n],[data-i18n-html],#doors,#bars,#eras,#fs-lede,.mast-stats b,#v-wall,#q):not([data-et]){visibility:hidden}</style>
 <title>Estonian Art Catalogue</title>
 <meta name="description" content="A catalogue of 52,000 artworks by 3,600 artists held in Estonian public collections and galleries, 1440–2026. Compiled from MuIS and the EKM Digital Collection; every record links back to its source.">
 <link rel="canonical" href="https://museaal.ee/">
