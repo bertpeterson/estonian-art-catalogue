@@ -21,8 +21,16 @@ here = os.path.dirname(os.path.abspath(__file__))
 LEDGER = os.path.join(here, "gallery_seen.json")
 month = datetime.date.today().strftime("%Y-%m")
 
-now = {g["gid"]: g for g in json.load(open(os.path.join(here, "gallery_records.json"), encoding="utf-8"))}
+# galleries that asked not to be collected from (robots.txt, data/robots_check.py): their listings leave the ledger
+# with them, and are never shown as past listings -- the gallery left, its works did not sell. Lihtsad Kipskassid
+# left on 22 Oct 2026; its 451 listings came back as "sold" in the next monthly run and stopped the build
+LEFT = {"Lihtsad Kipskassid"}
+
+now = {g["gid"]: g for g in json.load(open(os.path.join(here, "gallery_records.json"), encoding="utf-8")) if g.get("gallery") not in LEFT}
 seen = json.load(open(LEDGER, encoding="utf-8")) if os.path.exists(LEDGER) else {}
+dropped = [gid for gid, e in seen.items() if (e.get("rec") or {}).get("gallery") in LEFT]
+for gid in dropped: del seen[gid]
+if dropped: print(f"ledger: {len(dropped)} listings of galleries that left ({', '.join(sorted(LEFT))}) dropped")
 
 new = returned = 0
 for gid, g in now.items():
