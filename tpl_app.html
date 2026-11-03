@@ -570,11 +570,12 @@
   // galleries and museums, and on Auctionet -- the facts and a link, never a foreign picture.
   // A print's or a cast's chain is other impressions, so the record open now stays out of it.
   const shOf = w => (detailOf(w) || {}).sh || null;
+  const shCity = m => { const c = ((DATA.meta || {}).city || {})[m]; return c ? musName(m) + ", " + c : musName(m); };
   const shRow = (x, w) => {
     if (!x.kind || x.kind === "known") return ["", musName(x.mu), T("sh_held"), `#artist=${esc(slug(A[x.a].n))}&open=${esc(x.k)}`, 9];
-    if (x.kind === "gallery") return ["", musName(x.mu), T("sh_asking", {p: x.pr ? eur(x.pr) : "—"}), x.url, 8];
-    if (x.kind === "sold") return [x.gl ? String(x.gl).slice(0, 4) : "", musName(x.mu), pastText(x), x.url, x.gl ? 0 : 7];
-    if (x.kind === "auction") return [String(x.ad).slice(0, 4), x.an.toLowerCase().includes(musName(x.mu).toLowerCase().split(" ")[0]) ? x.an : musName(x.mu) + " · " + x.an,
+    if (x.kind === "gallery") return ["", shCity(x.mu), T("sh_asking", {p: x.pr ? eur(x.pr) : "—"}), x.url, 8];
+    if (x.kind === "sold") return [x.gl ? String(x.gl).slice(0, 4) : "", shCity(x.mu), pastText(x), x.url, x.gl ? 0 : 7];
+    if (x.kind === "auction") return [String(x.ad).slice(0, 4), x.an.toLowerCase().includes(musName(x.mu).toLowerCase().split(" ")[0]) ? x.an : shCity(x.mu) + " · " + x.an,
       x.ao ? (x.ap ? eur(x.ap) : T("au_soldnp")) : T(x.anr ? "au_nores" : "au_unsold"), x.url, 0, x.ad];
     return null;
   };

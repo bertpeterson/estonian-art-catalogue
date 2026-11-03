@@ -32,8 +32,9 @@ os.makedirs(OUT, exist_ok=True)
 # works sold more than once (data/sales_history.py): per artist, each picture-matched chain of
 # one object (not a print's impressions) with two sales or more, Estonian lots and Auctionet's
 _wkey = lambda w: w.get('k') or re.sub(r'[^A-Z0-9:]', '', (w.get('nu') or '').upper())
-SALES = collections.defaultdict(list)
+SALES, CITY = collections.defaultdict(list), {}
 if os.path.exists("data/sales_history.json"):
+    CITY = json.load(open("data/sales_history.json", encoding="utf-8")).get("city", {})
     _byk = {_wkey(w): w for w in W}
     _byac = collections.defaultdict(list)
     for w in W:
@@ -501,7 +502,7 @@ def render(i, a, ws, lang):
             v = f"Auctionet · {x['h']}{', ' + x['c'] if x['c'] else ''} {x['d'][:4]}"
         else:
             p = f"€{x['ap']:,}" if x.get("ao") and x.get("ap") else T["soldnp"].lower() if x.get("ao") else T["nores"].lower() if x.get("anr") else T["unsold"].lower()
-            v = f"{val(x, 'mu')} {x['ad'][:4]}"
+            v = f"{val(x, 'mu')}{', ' + CITY[val(x, 'mu')] if CITY.get(val(x, 'mu')) else ''} {x['ad'][:4]}"
         u = x.get("u") or x.get("url")
         return (f'<a href="{e(u)}" rel="nofollow noopener">{e(v)}</a>' if u else e(v)) + f", {e(p)}"
     sh_block = (f'<h2 class="sh">{T["shh"]}</h2>' + "".join(

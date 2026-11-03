@@ -49,9 +49,10 @@ if os.path.exists("data/lookalikes.json"):
         if k in _kidx: LA[_kidx[k]] = [_kidx[x] for x in ks if x in _kidx]
 # a work's sales history (data/sales_history.py): the other records of the same picture,
 # by position, and the Auctionet lots, as facts and links -- into each member's shard
-SH = {}
+SH, CITY = {}, {}
 if os.path.exists("data/sales_history.json"):
-    for c in json.load(open("data/sales_history.json", encoding="utf-8"))["chains"]:
+    _sh = json.load(open("data/sales_history.json", encoding="utf-8")); CITY = _sh.get("city", {})
+    for c in _sh["chains"]:
         ms = [_kidx[k] for k in c["w"] if k in _kidx]
         for i in ms:
             if len(ms) + len(c["x"]) < 2: continue
@@ -143,6 +144,7 @@ meta = dict(d["meta"])
 meta["shards"] = sorted(detail.keys())
 meta["split"] = split
 meta["byyear"] = sorted(byyear)
+meta["city"] = CITY          # the houses' and galleries' cities, for a sales history's rows
 # The biographies leave the index. They are read only on an artist's own page, in an
 # opened record and in the artist-grouped list, yet every visitor downloaded all 896
 # of them -- 0.44 MB of the 3.3 MB gzipped index -- before the catalogue would answer.

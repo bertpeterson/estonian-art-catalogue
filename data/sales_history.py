@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """A work's sales history: the times one picture was sold or offered, matched by picture
--> sales_history.json  {"chains": [{"m": 0|1, "w": [work keys], "x": [Auctionet lots]}]}
+-> sales_history.json  {"chains": [{"m": 0|1, "w": [work keys], "x": [Auctionet lots]}], "city": {house: city}}
 
 Every past and coming auction lot here (the Estonian houses), every gallery listing, current
 or past, the museum records and the Konrad Mägi catalogue, and Auctionet's ended lots of our
@@ -69,6 +69,10 @@ def get(url, tries=3):
 d = json.load(open("data.json", encoding="utf-8"))
 W, A, V = d["works"], d["artists"], d["vocab"]
 alnum = lambda s: re.sub(r"[^A-Za-z0-9]", "", s)
+# the Estonian houses' and galleries' cities, as the galleries' own records give them; an
+# auction house with no gallery record and no known address (an online sale) has none
+CITY_EE = {"Vaal galerii": "Tallinn"} | {g["gallery"]: g["city"] for f in ("gallery_records.json", "gallery_past.json")
+                                         for g in json.load(open(f, encoding="utf-8")) if g.get("city")}
 AU_IMG = {"A" + alnum(r["aid"]): r.get("img") for r in json.load(open("auction_records.json", encoding="utf-8"))}
 GA_IMG = {"G" + alnum(g["gid"]): g.get("img") for f in ("gallery_records.json", "gallery_past.json")
           for g in json.load(open(f, encoding="utf-8"))}
@@ -247,7 +251,7 @@ for g in groups.values():
     if len(ws) + len(xs) < 2: continue
     chains.append(dict(a=g[0]["a"], m=int(multi), w=ws, x=xs))
 chains.sort(key=lambda c: (c["a"], c["w"]))
-json.dump({"chains": chains}, open("sales_history.json", "w", encoding="utf-8"), ensure_ascii=False, indent=0)
+json.dump({"chains": chains, "city": dict(sorted(CITY_EE.items()))}, open("sales_history.json", "w", encoding="utf-8"), ensure_ascii=False, indent=0)
 size = collections.Counter(min(len(c["w"]) + len(c["x"]), 6) for c in chains)
 print(f"sales_history.json: {len(chains)} chains ({sum(c['m'] for c in chains)} of prints or casts), "
       f"{sum(1 for c in chains if c['x'])} with an Auctionet lot; sizes {dict(sorted(size.items()))}")
