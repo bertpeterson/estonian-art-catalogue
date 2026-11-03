@@ -56,7 +56,7 @@ IMAGE_HOSTS = {"tokkoarrak.ee": {"squarespace.com"}}
 # A new gallery needs its line here before its works ship; the Mägi catalogue's works ("known") all link to it.
 GALLERY_SITES = {
     "Allee galerii": "alleegalerii.ee", "Art & Tonic": "artandtonic.art", "Artman": "artman.ee", "Artner": "artner.ee",
-    "Artisoon": "artisoon.ee", "Artrovert": "artrovert.ee", "E-Kunstisalong": "e-kunstisalong.ee", "Haus Galerii": "haus.ee",
+    "Art Keller": "artkeller.ee", "Artisoon": "artisoon.ee", "Artrovert": "artrovert.ee", "E-Kunstisalong": "e-kunstisalong.ee", "Haus Galerii": "haus.ee",
     "Kogo galerii": "kogogallery.ee", "NOBA": "noba.ac", "Ruki galerii": "rukigalerii.ee", "Tokko & Arrak": "tokkoarrak.ee",
     "Tütar galerii": "tutar.ee", "Vernissage": "vernissage.ee", "Temnikova & Kasela": "temnikova.ee",
     "Veneetsia biennaal, Eesti paviljon": "cca.ee",
