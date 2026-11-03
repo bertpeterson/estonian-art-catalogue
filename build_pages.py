@@ -29,6 +29,23 @@ if os.path.exists("data/similar.json"):
     for _i, _s in json.load(open("data/similar.json", encoding="utf-8")).items(): A[int(_i)]["sim"] = _s
 os.makedirs(OUT, exist_ok=True)
 
+# works sold more than once (data/sales_history.py): per artist, each picture-matched chain of
+# one object (not a print's impressions) with two sales or more, Estonian lots and Auctionet's
+_wkey = lambda w: w.get('k') or re.sub(r'[^A-Z0-9:]', '', (w.get('nu') or '').upper())
+SALES = collections.defaultdict(list)
+if os.path.exists("data/sales_history.json"):
+    _byk = {_wkey(w): w for w in W}
+    _byac = collections.defaultdict(list)
+    for w in W:
+        if w.get("ac") and w.get("kind") == "auction": _byac[w["ac"]].append(w)
+    for c in json.load(open("data/sales_history.json", encoding="utf-8"))["chains"]:
+        if c["m"]: continue
+        ms = [_byk[k] for k in c["w"] if k in _byk]
+        lots = {id(x): x for w in ms if w.get("kind") == "auction" for x in (_byac.get(w.get("ac")) or [w])}
+        ev = [(x["ad"], x) for x in lots.values()] + [(f["d"], f) for f in c["x"]]
+        if len(ev) < 2 or not ms: continue
+        SALES[ms[0]["a"]].append((min(ms, key=lambda w: w.get("kind") != "auction"), sorted(ev, key=lambda e_: e_[0])))
+
 def slug(s):
     s = unicodedata.normalize("NFKD", s or "").encode("ascii", "ignore").decode()
     return re.sub(r"^-+|-+$", "", re.sub(r"[^a-z0-9]+", "-", s.lower()))
@@ -57,6 +74,7 @@ L = {
             contemp="Contemporaries in {h}: ", allaz="All artists A&ndash;Z",
             linh="Teachers, pupils, circle", teachers="Teachers", pupils="Pupils", circle="Circle", cdir="circles", net="network", innet="In the network of who taught whom →",
             au="{n} auction lots · {s} sold · {y}{r} — as the auction houses published them; not a valuation",
+            shh="Sold more than once", shn="The same work at several sales, matched by picture; results as the houses published them, not a valuation.",
             foot="Museum records from MuIS and the EKM Digital Collection; gallery stock from the galleries' own catalogues; auction results as Haus Galerii, Vernissage, Allee galerii, Vaal galerii, E-Kunstisalong, Eesti Kunsti Oksjonid and Kunstikoda published them, and the lots Osta Noort Kunsti offered (it publishes no results). ",
             full="Full catalogue", mt=" <span class=\"m\">(machine translation of the holder&#39;s Estonian text, unedited)</span>", enonly="",
             embed_h="Embed on your page", embed_t="A strip of pictures, the count and a link back, for a blog, a course page or a museum's site. Paste both lines: the second is the link that tells search engines where the pictures live.",
@@ -75,6 +93,7 @@ L = {
             contemp="Kaasaegsed kogus {h}: ", allaz="Kõik kunstnikud A&ndash;Ü",
             linh="Õpetajad, õpilased, ring", teachers="Õpetajad", pupils="Õpilased", circle="Ring", cdir="ringid", net="vorgustik", innet="Kes keda õpetas: võrgustikus →",
             au="{n} oksjonipartiid · {s} müüdud · {y}{r} — nii, nagu oksjonimajad avaldasid; mitte hinnang",
+            shh="Müüdud mitu korda", shn="Sama teos mitmel müügil, pildi järgi leitud; tulemused nii, nagu majad need avaldasid, mitte hinnang.",
             foot="Muuseumikirjed MuISist ja EKM digikogust; müügiteosed galeriide oma kodulehtedelt; oksjonitulemused nii, nagu Haus Galerii, Vernissage, Allee galerii, Vaal galerii, E-Kunstisalong, Eesti Kunsti Oksjonid ja Kunstikoda need avaldasid, ning Osta Noort Kunsti pakutud partiid (tulemusi see ei avalda). ",
             full="Kogu kataloog", mt="", enonly=" <span class=\"m\">(inglise keeles)</span>",
             embed_h="Manusta oma lehele", embed_t="Pildiriba, teoste arv ja link tagasi — blogile, kursuse lehele või muuseumi kodulehele. Kleebi mõlemad read: teine on link, mis ütleb otsimootorile, kust pildid pärit on.",
@@ -476,6 +495,18 @@ def render(i, a, ws, lang):
         au_line = T["au"].format(n=len(lots) - nr, s=sum(1 for w in lots if w.get('ao')), y=(ys[0] if ys[0]==ys[-1] else f'{ys[0]}–{ys[-1]}'),
                                  r=(f" · €{ps[0]:,} – €{ps[-1]:,}" if len(ps) > 1 and ps[0] != ps[-1] else f" · €{ps[0]:,}" if ps else "") + (T["nr"].format(k=nr) if nr else ""))
     else: au_line = ""
+    def sale_ev(x):
+        if "h" in x:        # an Auctionet lot, in the house's own currency
+            p = (f"€{x['p']:,}" if x["cur"] == "EUR" else f"{x['p']:,} {x['cur']}") if x["o"] else T["unsold"].lower()
+            v = f"Auctionet · {x['h']}{', ' + x['c'] if x['c'] else ''} {x['d'][:4]}"
+        else:
+            p = f"€{x['ap']:,}" if x.get("ao") and x.get("ap") else T["soldnp"].lower() if x.get("ao") else T["nores"].lower() if x.get("anr") else T["unsold"].lower()
+            v = f"{val(x, 'mu')} {x['ad'][:4]}"
+        u = x.get("u") or x.get("url")
+        return (f'<a href="{e(u)}" rel="nofollow noopener">{e(v)}</a>' if u else e(v)) + f", {e(p)}"
+    sh_block = (f'<h2 class="sh">{T["shh"]}</h2>' + "".join(
+        f'<p class="rel"><i>{e(w.get("t") or "")}</i>: ' + " → ".join(sale_ev(x) for _, x in ev) + "</p>"
+        for w, ev in sorted(SALES.get(i, []), key=lambda t: t[1][0][0])[:12]) + f'<p class="m">{T["shn"]}</p>') if SALES.get(i) else ""
     bio = (a.get("b") or a.get("ben")) if lang == "et" else (a.get("ben") or a.get("b"))
     bio_note = (T["mt"] if (lang == "en" and a.get("bmt") and a.get("ben")) else T["enonly"] if (lang == "et" and not a.get("b") and a.get("ben")) else "")
     grp = " · ".join(T["kind"][g.split(":",1)[0]] + " " + g.split(":",1)[1] for g in a.get("grp", []))
@@ -511,6 +542,7 @@ def render(i, a, ws, lang):
            + ((f"<p class=\"bio\">{e(bio)}" + bio_note + "</p>") if bio else "")
            + (f"<p class=\"m\">{e(au_line)}</p>" if au_line else "")
            + up_line(i, lang)
+           + sh_block
            + sale
            + follow(sl, lang, bool(n_sale))
            + f"<p><a class=\"cta\" href=\"{app}\">{e(T['browse'].format(n=n))}</a></p>"

@@ -47,6 +47,15 @@ LA = {}
 if os.path.exists("data/lookalikes.json"):
     for k, ks in json.load(open("data/lookalikes.json", encoding="utf-8")).items():
         if k in _kidx: LA[_kidx[k]] = [_kidx[x] for x in ks if x in _kidx]
+# a work's sales history (data/sales_history.py): the other records of the same picture,
+# by position, and the Auctionet lots, as facts and links -- into each member's shard
+SH = {}
+if os.path.exists("data/sales_history.json"):
+    for c in json.load(open("data/sales_history.json", encoding="utf-8"))["chains"]:
+        ms = [_kidx[k] for k in c["w"] if k in _kidx]
+        for i in ms:
+            if len(ms) + len(c["x"]) < 2: continue
+            SH[i] = {"m": c["m"], "x": [j for j in ms if j != i]} | ({"f": c["x"]} if c["x"] else {})
 # ...a lighter copy where there is one (data/thumbs.py: a gallery's 768px copy, EKM's
 # 480px preview for a MuIS scan): the tile is under 300 pixels wide; the opened record
 # reads the full picture from its shard
@@ -68,6 +77,7 @@ for i, w in enumerate(W):
     if "yl" in light and str(light["yl"]) == str(light.get("y")): light.pop("yl")
     heavy = {k: v for k, v in w.items() if k in DETAIL}
     if LA.get(i): heavy["la"] = LA[i]
+    if i in SH: heavy["sh"] = SH[i]
     if heavy:
         light["h"] = 1                               # this record has detail to fetch
         # the wall needs to know which records have a picture before any shard is
