@@ -64,6 +64,14 @@ from thumbs import thumbs
 SMALL = thumbs(W)
 pics = {i: SMALL.get(w["im"], w["im"]) for i, w in enumerate(W) if w.get("im")}
 json.dump(pics, open(f"{OUT}/data/pics.json", "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
+# ...and each museum picture's taste (data/taste.py), for the landing wall's "for you" deal: the first 32 of its 48
+# bytes (the main directions come first), by position. [n: uint32][gap to each position: uint32 x n][32 bytes x n],
+# little-endian, fetched only by a browser that has saved or opened works
+import base64, struct
+TV = json.load(open("data/taste_vecs.json", encoding="utf-8")) if os.path.exists("data/taste_vecs.json") else {}
+_tw = [(i, base64.b64decode(TV[w["im"]])[:32]) for i, w in enumerate(W) if w.get("im") in TV]
+_gaps = [i - (_tw[j - 1][0] if j else 0) for j, (i, _) in enumerate(_tw)]
+open(f"{OUT}/data/taste-wall.bin", "wb").write(struct.pack(f"<I{len(_tw)}I", len(_tw), *_gaps) + b"".join(v for _, v in _tw))
 
 # the colour charts data/chart_side.py found in the museums' photographs: {picture: [side, fraction]}
 CHARTS = {k: v for k, v in (json.load(open("data/chart_sides.json", encoding="utf-8")) if os.path.exists("data/chart_sides.json") else {}).items() if v}

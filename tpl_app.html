@@ -1257,6 +1257,7 @@
   // a wall tile's placeholder until window.__lz gives it its picture
   const PH = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
   function render(){
+    noteSeen(state.open); mixCheck();
     const sel = state.open ? `.row-btn[data-id="${CSS.escape(state.open)}"]` : null;
     const was = sel && document.querySelector(sel);
     const top = was ? was.getBoundingClientRect().top : null;
@@ -1355,7 +1356,7 @@
     // its tiles are links -- and every later render draws afresh.
     if (BAKED_LIVE){
       BAKED_LIVE = false;
-      if (home && !SL.size && !SAV.size && LANG === "en" && state.wLimit === 72 && reg.querySelector(".wall[data-seed]")) return;
+      if (home && !SL.size && !SAV.size && !mixUse() && LANG === "en" && state.wLimit === 72 && reg.querySelector(".wall[data-seed]")) return;
     }
     // Artist and the wall together: the pictures artist by artist, each under their
     // name, in the artists' chosen order -- not the mixed wall, on which the grouping
@@ -1679,6 +1680,99 @@
     return [...SAV].map(k => SLUG_A.get(k)).filter(i => i !== undefined);
   };
   const isSaved = i => SAV.has(slug(A[i].n));
+  // ---- the wall, dealt for you --------------------------------------------------
+  // My List and the works this browser opened (museaal.seen, the latest twenty) say what a visitor likes, and the
+  // landing wall, after the saved works, deals a row of six as three heavyweights, two look-alikes and a wildcard:
+  // the masterpieces still hold half of it. The look-alikes are drawn by chance from the 300 museum pictures
+  // nearest what was kept or opened (taste-wall.bin: the first 32 taste bytes), an artist at most twice; the
+  // wildcards from the key works. Each visit's deal is made in the background and kept (museaal.wallmix) for the
+  // next, so the wall never re-deals under the reader; only the first deal, or one after the list changed, lands at once.
+  const SEEN_KEY = "museaal.seen", MIX_KEY = "museaal.wallmix";
+  const lsJSON = (k, d) => { try { return JSON.parse(localStorage.getItem(k) || "null") ?? d; } catch(e){ return d; } };
+  const SEEN = [].concat(lsJSON(SEEN_KEY, [])).filter(k => typeof k === "string" && KEYSET.has(k));
+  let seenLast = null;
+  const noteSeen = k => {
+    if (!k || k === seenLast) return;
+    seenLast = k; if (!KEYSET.has(k)) return;
+    const i = SEEN.indexOf(k); if (i >= 0) SEEN.splice(i, 1);
+    SEEN.unshift(k); SEEN.length = Math.min(SEEN.length, 20);
+    try { localStorage.setItem(SEEN_KEY, JSON.stringify(SEEN)); } catch(e){}
+  };
+  const mixSig = () => [...SL].sort().join(",") + "|" + [...SAV].sort().join(",");
+  const mixReady = () => SL.size > 0 || SAV.size > 0 || SEEN.length >= 3;
+  let MIX = (m => m && Array.isArray(m.f) && Array.isArray(m.w) ? m : null)(lsJSON(MIX_KEY, null));
+  const mixUse = () => !!MIX && mixReady();
+  let TW = null, mixP = null, mixFail = false, mixNext = false, BYK = null;
+  const twLoad = () => TW ? Promise.resolve(TW) : fetch("data/taste-wall.bin?v=__V_INDEX__")
+    .then(r => { if (!r.ok) throw new Error(r.status); return r.arrayBuffer(); }).then(b => {
+      const dv = new DataView(b), n = dv.getUint32(0, true), bytes = new Int8Array(b, 4 + 4 * n, 32 * n);
+      const pos = new Int32Array(n), at = new Map(), v = new Float32Array(32 * n);
+      for (let j = 0, p = 0; j < n; j++){
+        p += dv.getUint32(4 + 4 * j, true); pos[j] = p; at.set(p, j);
+        let s = 0;
+        for (let d = 0; d < 32; d++){ const x = bytes[32 * j + d]; v[32 * j + d] = x; s += x * x; }
+        s = Math.sqrt(s) || 1;
+        for (let d = 0; d < 32; d++) v[32 * j + d] /= s;
+      }
+      return TW = {n, pos, at, v};
+    });
+  function dealMix(){
+    return twLoad().then(({n, pos, at, v}) => {
+      if (!BYK) BYK = new Map(W.map(w => [w.k, w]));
+      const sig = [], skip = new Set([...SL, ...SEEN]);
+      const add = (w, wt) => { const j = w && at.get(w.i); if (j !== undefined) sig.push([j, wt]); };
+      [...SL].slice(-30).forEach(k => add(BYK.get(k), 1));
+      SEEN.forEach(k => { if (!SL.has(k)) add(BYK.get(k), .6); });
+      // a saved artist speaks through their best three pictures
+      const best = (x, y) => (x.mp || 1e9) - (y.mp || 1e9) || (x.hl ?? 1e9) - (y.hl ?? 1e9) || medRank(x) - medRank(y);
+      const arts = new Set(savedArtists()), byA = new Map();
+      if (arts.size) for (const w of W) if (arts.has(w.a) && at.has(w.i)) (byA.get(w.a) || byA.set(w.a, []).get(w.a)).push(w);
+      byA.forEach(l => l.sort(best).slice(0, 3).forEach(w => add(w, .8)));
+      // every picture scores by its nearness to the nearest signal, weighted; a near-copy of one (another
+      // impression, the same photograph) is the work itself, not one like it
+      const sc = new Float32Array(n);
+      for (let j = 0; j < n; j++){
+        let b = 0;
+        for (const [s, wt] of sig){
+          let x = 0; for (let d = 0; d < 32; d++) x += v[32 * j + d] * v[32 * s + d];
+          if (x > .95){ b = -1; break; }
+          if (x * wt > b) b = x * wt;
+        }
+        sc[j] = b;
+      }
+      const top = [];
+      for (let j = 0; j < n; j++){ const w = W[pos[j]]; if (sc[j] > 0 && !w.mp && !skip.has(w.k)) top.push(j); }
+      top.sort((x, y) => sc[y] - sc[x]); top.length = Math.min(top.length, 300);
+      // drawn by chance, the nearest likeliest: weight 1/(20 + place), an artist at most twice
+      const f = [], perA = new Map(), wts = top.map((_, r) => 1 / (20 + r));
+      let left = wts.reduce((s, x) => s + x, 0);
+      while (f.length < 40 && left > 1e-9){
+        let r = Math.random() * left, i = 0;
+        while (i < wts.length - 1 && (r -= wts[i]) > 0) i++;
+        left -= wts[i]; wts[i] = 0;
+        const w = W[pos[top[i]]];
+        if ((perA.get(w.a) || 0) >= 2) continue;
+        perA.set(w.a, (perA.get(w.a) || 0) + 1); f.push(w.k);
+      }
+      // the wildcards: key works by anyone, pictured, by chance, an artist once
+      const pick = new Set(f), hls = W.filter(w => w.hl != null && !w.mp && at.has(w.i) && !skip.has(w.k) && !pick.has(w.k));
+      const xs = [], xa = new Set();
+      while (xs.length < 20 && hls.length){
+        const w = hls.splice(Math.floor(Math.random() * hls.length), 1)[0];
+        if (!xa.has(w.a)){ xa.add(w.a); xs.push(w.k); }
+      }
+      return {sig: mixSig(), f, w: xs};
+    });
+  }
+  const mixSave = m => { try { localStorage.setItem(MIX_KEY, JSON.stringify(m)); } catch(e){} };
+  // called from render(): a first deal, or one for a changed list, lands at once (on the untouched page); otherwise
+  // one deal a visit is made quietly for the next
+  function mixCheck(){
+    if (!mixReady() || mixP || mixFail) return;
+    if (!MIX || MIX.sig !== mixSig())
+      mixP = dealMix().then(m => { MIX = m; mixSave(m); mixP = null; if (pristine() && !listKeys()) render(); }, () => { mixFail = true; mixP = null; });
+    else if (!mixNext){ mixNext = true; setTimeout(() => dealMix().then(mixSave, () => {}), 6000); }
+  }
   // What the register is restricted to: your list, a list someone shared, or nothing.
   const listKeys = () => state.shared || (state.list ? SL : null);
   // Detail fields (dimensions, source ids) live in a shard in the sharded build and on
@@ -1864,10 +1958,26 @@
       for (let r = 0; MINE_AT.size < 12 && srcs.some(l => l.length > r); r++)
         for (const l of srcs) if (l[r] && MINE_AT.size < 12) MINE_AT.set(l[r], MINE_AT.size);
     }
-    const ordered = strict ? unique : inner.map(x => [x[0], x[1], medRank(x[0]), turn(x[0]), tier(x[0]), mixed ? hash(x[0].k) : 0])
+    let ordered = strict ? unique : inner.map(x => [x[0], x[1], medRank(x[0]), turn(x[0]), tier(x[0]), mixed ? hash(x[0].k) : 0])
       .sort((a, b) => mp(a[0]) - mp(b[0]) || hl(a[0]) - hl(b[0]) || a[4] - b[4] || a[3] - b[3] || rep.get(a[0]) - rep.get(b[0]) || a[2] - b[2] || a[5] - b[5] || a[1] - b[1]).map(x => x[0]);
+    // ...and after My List, the deal for you (mixCheck): three heavyweights, two look-alikes and a wildcard a
+    // row of six, for the first page; the rest keep their places below
+    const dealt = mixed && !strict && pristine() && !listKeys() && mixUse();
+    if (dealt){
+      if (!BYK) BYK = new Map(W.map(w => [w.k, w]));
+      const inWall = new Set(ordered), take = ks => ks.map(k => BYK.get(k)).filter(w => w && inWall.has(w) && !MINE_AT.has(w));
+      const q = {F: take(MIX.f), X: take(MIX.w)}, extra = new Set([...q.F, ...q.X]);
+      q.H = ordered.slice(MINE_AT.size).filter(w => !extra.has(w));
+      const at = {H: 0, F: 0, X: 0}, out = ordered.slice(0, MINE_AT.size), PAT = "HFHXFH";
+      for (let s = 0; out.length < 72 && at.H < q.H.length; s++){
+        const c = at[PAT[s % 6]] < q[PAT[s % 6]].length ? PAT[s % 6] : "H";
+        out.push(q[c][at[c]++]);
+      }
+      const used = new Set(out);
+      ordered = out.concat(ordered.filter(w => !used.has(w)));
+    }
     // on the untouched page the baked order leads, exactly, so nothing jumps
-    if (mixed && !strict && BAKED_KEYS && pristine() && !listKeys() && !MINE_AT.size){
+    if (mixed && !strict && BAKED_KEYS && pristine() && !listKeys() && !MINE_AT.size && !dealt){
       const pos = new Map(BAKED_KEYS.map((k, i) => [k, i]));
       ordered.sort((a, b) => (pos.has(a.k) ? pos.get(a.k) : 1e9) - (pos.has(b.k) ? pos.get(b.k) : 1e9));
     }

@@ -28,7 +28,8 @@ T = {
         ("Who runs it", [f"Museaal.ee is an independent catalogue, run privately: not by a museum, a gallery or an auction house. "
                          f"Questions, corrections and requests about your data: {MAIL}."]),
         ("Browsing", ["You can use the whole catalogue without an account. Museaal itself sets no cookies. My List, a sign-in and the light or dark "
-                      "setting are kept in your browser's own storage, on your device, until you clear it or sign out.",
+                      "setting are kept in your browser's own storage, on your device, until you clear it or sign out. So are the last twenty works you "
+                      "opened, which the front page uses to show you more like them; they never leave your device.",
                       "Visits are counted with GoatCounter, without cookies. Like any server it sees your IP address and browser, but it keeps "
                       "no personal data: which page was seen, not by whom.",
                       "Museum pictures are shown straight from MuIS and the Art Museum of Estonia, gallery pictures from the gallery's own "
@@ -73,7 +74,8 @@ T = {
         ("Kes seda peab", [f"Museaal.ee on sõltumatu, eraviisiliselt peetav kataloog: mitte muuseumi, galerii ega oksjonimaja oma. "
                            f"Küsimused, parandused ja soovid sinu andmete kohta: {MAIL}."]),
         ("Sirvimine", ["Kogu kataloogi saab kasutada ilma kontota. Museaal ise küpsiseid ei sea. Minu nimekiri, sisselogimine ning hele või tume vaade "
-                       "on sinu brauseri enda mälus, sinu seadmes, kuni selle tühjendad või välja logid.",
+                       "on sinu brauseri enda mälus, sinu seadmes, kuni selle tühjendad või välja logid. Samuti viimased kakskümmend teost, mille "
+                       "avasid: esileht näitab nende järgi sarnaseid; need ei lahku sinu seadmest.",
                        "Külastusi loeb GoatCounter, ilma küpsisteta. Nagu iga server näeb see sinu IP-aadressi ja brauserit, kuid "
                        "isikuandmeid ei hoia: milline leht vaadati, mitte kes vaatas.",
                        "Muuseumide pildid tulevad otse MuISist ja Eesti Kunstimuuseumist, galeriide pildid galerii enda serverist: "
