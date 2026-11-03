@@ -11,7 +11,7 @@ import re, sys, urllib.request
 
 HOSTS = ["haus.ee", "www.kogogallery.ee", "temnikova.ee", "www.tutar.ee", "www.artrovert.ee", "rukigalerii.ee",
          "vernissage.ee", "eestikunstioksjonid.ee", "www.vaal.ee", "oksjon.vaal.ee",
-         "www.e-kunstisalong.ee", "ostanoortkunsti.ee", "kunstikoda.ee", "noba.ac", "konradmagi.ee", "artner.ee", "artandtonic.art", "tokkoarrak.ee", "www.artman.ee"]
+         "www.e-kunstisalong.ee", "ostanoortkunsti.ee", "kunstikoda.ee", "noba.ac", "konradmagi.ee", "artner.ee", "artandtonic.art", "tokkoarrak.ee", "www.artman.ee", "www.artisoon.ee"]
 # Lihtsad Kipskassid (www.lihtsadkipskassid.ee and its R2 bucket) left on 22 Oct 2026: its robots.txt
 # began to say Disallow: / to ClaudeBot. kipskassid.py is kept for the day the artist says yes.
 # Allee galerii's stock is no longer read since 29 Oct 2026, for the same reason; its records stand as
@@ -45,6 +45,7 @@ def verdict(txt):
 # open, the JSON view is not. Each is tested as this project's agent and as "*".
 PATHS = {"artner.ee": ["/wp-json/wc/store/v1/products?per_page=100&page=1"], "www.artman.ee": ["/wp-json/wc/store/v1/products?per_page=100&page=1"],
          "artandtonic.art": ["/wp-json/wc/store/v1/products?per_page=100&page=1"],
+         "www.artisoon.ee": ["/tooted", "/graafika/work", "/photos/work.webp"],
          "tokkoarrak.ee": ["/kunsti-muuk", "/kunsti-muuk?offset=200", "/kunsti-muuk/p/work"],
          "noba.ac": ["/wp-json/wc/store/v1/products?per_page=100&page=1", "/et/kunstnik/artist/", "/et/kunst/work/"],
          "vernissage.ee": ["/wp-json/wc/store/v1/products?per_page=100&page=1"]}

@@ -47,6 +47,7 @@ RULES = {
     "artman":      [(r"page=1$", 1)],
     "tokkoarrak":  [(r"/kunsti-muuk$", 1), (r"/kunsti-muuk/p/", 4)],
     "artandtonic": [(r"page=1$", 1)],
+    "artisoon":    [(r"/tooted$", 1), (r"/graafika$", 1), (r"/keraamika$", 1), (r"/fotograafia$", 1), (r"/viimati-lisatud$", 1), (r"\.ee/(tooted|graafika)/", 4)],
     "kipskassid":  [(r"/vota-kass$", 1), (r"/kassikesed$", 1), (r"/collab-kassid$", 1), (r"/api/", 2)],
     "noba":        [(r"page=[12]$", 2), (r"noba\.ac/\w\w/(kunst|artwork)/", 3)],
     "noba_artists":  [(r"/kunstnik/", 3), (r"noba\.ac/\w\w/(toode|product|kunst|artwork)/", 2)],

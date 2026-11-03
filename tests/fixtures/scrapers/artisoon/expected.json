@@ -1,0 +1,67 @@
+{
+ "gallery_records.json": [
+  {
+   "gid": "other-1",
+   "artist": "Kristjan Raud",
+   "title": "Kalevipoeg",
+   "year": "1935",
+   "tech": "",
+   "dims": "",
+   "gallery": "Another gallery",
+   "city": "Tallinn",
+   "url": "https://example.org/1"
+  },
+  {
+   "price": 5000,
+   "gid": "ats-2134671",
+   "artist": "Jaan Elken",
+   "title": "Jaapan ei ole kaugel II",
+   "year": "2021",
+   "tech": "Akrüül, kollaaž/lõuend , raamitud",
+   "dims": "70 x 60 cm",
+   "gallery": "Artisoon",
+   "city": "Tallinn",
+   "url": "https://www.artisoon.ee/tooted/jaan-elken-jaapan-ei-ole-kaugel-ii",
+   "img": "https://www.artisoon.ee/photos/hd_item_3001405_b5049faf8d.jpg"
+  },
+  {
+   "gid": "ats-3066302",
+   "artist": "Olav Maran",
+   "title": "Vaikelu pirnidega",
+   "year": "1987",
+   "tech": "Õli papil , signeeritud, raamitud",
+   "dims": "41 x 33 cm",
+   "gallery": "Artisoon",
+   "city": "Tallinn",
+   "url": "https://www.artisoon.ee/tooted/olav-maran-vaikelu-pirnidega",
+   "sold": true,
+   "img": "https://www.artisoon.ee/photos/IMG_9557_large.webp"
+  },
+  {
+   "price": 3900,
+   "gid": "ats-3304194",
+   "artist": "Paul Allik",
+   "title": "Tai rand",
+   "year": "1991",
+   "tech": "Akrüül lõuendil",
+   "dims": "75 x 70 cm",
+   "gallery": "Artisoon",
+   "city": "Tallinn",
+   "url": "https://www.artisoon.ee/tooted/paul-allik-tai-rand",
+   "img": "https://www.artisoon.ee/photos/AllikTai2_large.webp"
+  },
+  {
+   "price": 1600,
+   "gid": "ats-2886758",
+   "artist": "Rein Kelpman",
+   "title": "Oh, bumerang...",
+   "year": "1989",
+   "tech": "Pastell, segatehnika",
+   "dims": "61 x 47,5 cm",
+   "gallery": "Artisoon",
+   "city": "Tallinn",
+   "url": "https://www.artisoon.ee/tooted/rein-kelpman-oh-bumerang",
+   "img": "https://www.artisoon.ee/photos/IMG_E8118%5B1%5D_large.webp"
+  }
+ ]
+}
