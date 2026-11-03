@@ -63,8 +63,8 @@
       });
     });
   }
-  function setNews(on, why) {
-    var a = acc(); if (a && !!a.news !== on) { a.news = on; write(ACC, a); if (!why) tell("museaal:account"); }
+  function setNews(on, why, what) {
+    var f = what || "news", a = acc(); if (a && !!a[f] !== on) { a[f] = on; write(ACC, a); if (!why) tell("museaal:account"); }
     if (why) { note = why; tell("museaal:account"); }
   }
   function out(why) { write(ACC, null); note = why; tell("museaal:account"); }
@@ -82,6 +82,7 @@
       now.forEach(function (k) { if (!has(sent, k) && !has(mine, k)) mine.push(k); });
       var b = acc(); b.base = j.items; write(ACC, b);
       if (typeof j.news === "boolean") setNews(j.news);
+      if (typeof j.alerts === "boolean") setNews(j.alerts, "", "alerts");
       if (JSON.stringify(mine) !== JSON.stringify(now)) { save(mine); tell("museaal:list"); }
       if (JSON.stringify(mine) !== JSON.stringify(j.items)) again = true;
     }).catch(function () {}).then(function () { busy = null; if (again) { again = false; sync(); } });
@@ -109,19 +110,20 @@
       // another address than the one signed in here: that session ends, rather than lingering on the Worker
       var old = acc(); if (old && old.e !== j.email) post("logout", { session: old.s }).catch(function () {});
       // the first sync sends everything kept here as added: the two lists are joined, nothing lost
-      write(ACC, { s: j.session, e: j.email, base: [], news: !!j.news }); note = "in"; tell("museaal:account"); count("signed-in");
+      write(ACC, { s: j.session, e: j.email, base: [], news: !!j.news, alerts: !!j.alerts }); note = "in"; tell("museaal:account"); count("signed-in");
       return sync();
     }, function () { note = "failed"; tell("museaal:account"); });
   } else if (acc()) sync();
-  // the unsubscribe link from a news email: #unsub=<account>.<seal>, signed in or not
-  var unsub = h.get("unsub");
-  if (unsub) {
-    h.delete("unsub");
+  // the unsubscribe link from a news email, #unsub=<account>.<seal>, or from a sale alert, #unsuba=, signed in or not
+  ["unsub", "unsuba"].forEach(function (p) {
+    var unsub = h.get(p); if (!unsub) return;
+    h.delete(p);
     var left = h.toString().replace(/%2C/g, ",");
     try { history.replaceState(null, "", location.pathname + location.search + (left ? "#" + left : "")); } catch (e) {}
-    post("unsubscribe", { token: unsub }).then(function (j) { setNews(false, j.ok ? "unsub" : "unsub_bad"); },
+    var al = p === "unsuba";
+    post("unsubscribe", { token: unsub, what: al ? "alerts" : "news" }).then(function (j) { setNews(false, j.ok ? (al ? "unsuba" : "unsub") : "unsub_bad", al ? "alerts" : ""); },
       function () { note = "unsub_bad"; tell("museaal:account"); });
-  }
+  });
 
   document.addEventListener("visibilitychange", function () {
     if (document.visibilityState === "visible" && acc() && Date.now() - last > 30000) sync();
@@ -144,7 +146,15 @@
       return post("news", { session: a.s, on: true, email: a.e, lang: lang }).then(function (j) { if (j.ok) setNews(true); else { note = "failed"; tell("museaal:account"); } },
         function () { note = "failed"; tell("museaal:account"); });
     },
-    // what last happened, for the page to say: sent, busy, bad, robot, failed, in, expired, declined, gone, out, deleted, unsub, unsub_bad
+    // the sale alerts (w:<account>): an email when an artist on the list comes up for sale, at a gallery or at auction
+    alerts: function () { var a = acc(); return !!(a && a.alerts); },
+    setAlerts: function (on, lang) {
+      var a = acc(); if (!a) return Promise.resolve();
+      return post("alerts", on ? { session: a.s, on: true, email: a.e, lang: lang } : { session: a.s })
+        .then(function (j) { if (j.ok) setNews(on, on ? "" : "unsuba", "alerts"); else { note = "failed"; tell("museaal:account"); } },
+          function () { note = "failed"; tell("museaal:account"); });
+    },
+    // what last happened, for the page to say: sent, busy, bad, robot, failed, in, expired, declined, gone, out, deleted, unsub, unsuba, unsub_bad
     note: function () { return note; },
     signIn: function (email, lang, box, news) {
       return human(box).then(function (t) {

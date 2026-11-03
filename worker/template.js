@@ -429,7 +429,9 @@ async function ask(body, env, reply, ip) {
 // address (LIST_SECRET); accounts from before 15 Oct 2026 kept no address and get it at their next sign-in. If the
 // visitor ticked "Email me about new features", n:<account> keeps the address, the time they confirmed it by opening the
 // link, and the unsubscribe link every such email must carry, until they stop it (/list/unsubscribe with that link's
-// token, or /list/news signed in) or delete the account. worker/README.md says how to read them out. Needs the KV
+// token, or /list/news signed in) or delete the account. Sale alerts, the same way: w:<account> keeps the address,
+// the language and the alerts' own unsubscribe link while "Email me when my artists come up for sale" is on
+// (/list/alerts, signed in); /alerts/send mails each of them what is new by the artists on their list. worker/README.md says how to read them out. Needs the KV
 // binding LISTS and the secrets LIST_SECRET and RESEND_API_KEY (worker/README.md); MAIL_FROM optional.
 const LINK_TTL = 15 * 60, SESSION_TTL = 365 * 86400, LIST_TTL = 2 * 365 * 86400, LIST_MAX = 1000, LINKS_PER_HOUR = 4;
 // sign-in links: 4 an hour to an inbox from one visitor, 10 an hour to it from everyone, and MAIL_PER_DAY a day in all,
@@ -476,7 +478,9 @@ async function mail(env, to, m) {
 }
 
 // the link that stops the news emails: the account and a seal on it, so nobody can stop someone else's
-const unsubLink = async (env, u, lang) => (env.SITE || "https://museaal.ee/") + "#lang=" + lang + "&unsub=" + u + "." + await mac(env.LIST_SECRET, "unsub|" + u);
+// ...and the one that stops the sale alerts, sealed apart, so neither link stops the other
+const unsubLink = async (env, u, lang, alert) => (env.SITE || "https://museaal.ee/") + "#lang=" + lang + (alert ? "&unsuba=" : "&unsub=") + u + "."
+  + await mac(env.LIST_SECRET, (alert ? "unsub-alerts|" : "unsub|") + u);
 // the day counters, c:<what>:<day>: questions to /ask (a turn, not its tool rounds) and their rounds, readings on the
 // mood page, sign-in mails, new accounts. Two of them are caps on what the Anthropic key and the mail quota spend.
 // With a D1 database bound as COUNTS (worker/README.md) a count is one step in it, "add one and say how many", so a
@@ -555,12 +559,12 @@ async function list(path, body, env, reply, ip) {
     // bound: opened in the browser that asked for the link. Anywhere else the page asks the visitor first, as a link
     // sent on by someone else would otherwise sign them in to that person's account and hand it their list
     const bound = !!t.n && typeof body.nonce === "string" && t.n === await hash(body.nonce.slice(0, 64));
-    return reply({ session: s, email: t.e, items: rec ? rec.items : [], news: !!(t.news || await KV.get("n:" + t.u)), bound });
+    return reply({ session: s, email: t.e, items: rec ? rec.items : [], news: !!(t.news || await KV.get("n:" + t.u)), alerts: !!(await KV.get("w:" + t.u)), bound });
   }
   if (path === "unsubscribe") {
-    const [u, seal] = String(body.token || "").slice(0, 200).split(".");
-    if (!u || !seal || seal !== await mac(env.LIST_SECRET, "unsub|" + u)) return reply({ error: "This link is not valid." }, 400);
-    await KV.delete("n:" + u);
+    const [u, seal] = String(body.token || "").slice(0, 200).split("."), alert = body.what === "alerts";
+    if (!u || !seal || seal !== await mac(env.LIST_SECRET, (alert ? "unsub-alerts|" : "unsub|") + u)) return reply({ error: "This link is not valid." }, 400);
+    await KV.delete((alert ? "w:" : "n:") + u);
     return reply({ ok: true });
   }
   const sk = "s:" + await hash(String(body.session || "").slice(0, 64)), s = await KV.get(sk, "json");
@@ -569,7 +573,7 @@ async function list(path, body, env, reply, ip) {
   // the account as it is now: gone (deleted from another device), or begun again after this session was made, signs it out
   const rec = await KV.get("u:" + s.u, "json");
   if (!rec || rec.born && !(s.at >= rec.born)) { await KV.delete(sk); return path === "delete" ? reply({ ok: true }) : reply({ error: "Signed out." }, 401); }
-  if (path === "delete") { await KV.delete("u:" + s.u); await KV.delete("n:" + s.u); await KV.delete(sk); return reply({ ok: true }); }
+  if (path === "delete") { await Promise.all(["u:", "n:", "w:"].map(p => KV.delete(p + s.u))); await KV.delete(sk); return reply({ ok: true }); }
   // signed in: the news emails on or off. The session came from a link opened in this address's inbox, so turning
   // them on needs no second link; the address is checked against the account, so a session can't add another one
   if (path === "news") {
@@ -579,13 +583,22 @@ async function list(path, body, env, reply, ip) {
     await KV.put("n:" + s.u, JSON.stringify({ e: email, lang, at: new Date().toISOString(), v: 1, unsub: await unsubLink(env, s.u, lang) }));
     return reply({ ok: true });
   }
+  // ...and the sale alerts, on or off, the same way
+  if (path === "alerts") {
+    if (body.on !== true) { await KV.delete("w:" + s.u); return reply({ ok: true }); }
+    const email = String(body.email || "").trim().toLowerCase().slice(0, 254), lang = body.lang === "et" ? "et" : "en";
+    if (await account(env, email) !== s.u) return reply({ error: "Not this account's address." }, 403);
+    await KV.put("w:" + s.u, JSON.stringify({ e: email, lang, at: new Date().toISOString(), unsub: await unsubLink(env, s.u, lang, true) }));
+    return reply({ ok: true });
+  }
   if (path !== "sync") return reply({ error: "No such thing." }, 404);
   // the browser sends what it added and removed since the two last agreed, and takes the result back
   const was = JSON.stringify(rec.items), rem = new Set(keys(body.remove));
   const items = rec.items.filter(k => !rem.has(k));
   for (const k of keys(body.add)) if (!items.includes(k) && items.length < LIST_MAX) items.push(k);
   if (JSON.stringify(items) !== was) await putList(KV, s.u, { ...rec, items, updated: Date.now() });
-  return reply({ items, news: !!(await KV.get("n:" + s.u)) });
+  const [news, alerts] = await Promise.all([KV.get("n:" + s.u), KV.get("w:" + s.u)]);
+  return reply({ items, news: !!news, alerts: !!alerts });
 }
 
 const seen = new Map(), rounds = new Map(), syncs = new Map();   // visitor -> times of their recent searches; of all their requests; of list requests
@@ -633,8 +646,8 @@ async function admin(body, env, reply, ip) {
   for (let i = 29; i >= 0; i--) days.push(new Date(Date.now() - i * 86400000).toISOString().slice(0, 10));
   const out = { days, at: new Date().toISOString() };
   if (KV) {
-    const [accounts, news, devices, links] = await Promise.all(["u:", "n:", "s:", "t:"].map(p => allKeys(KV, p)));
-    out.keys = { accounts: accounts.length, news: news.length, devices: devices.length, links: links.length };
+    const [accounts, news, devices, links, alerts] = await Promise.all(["u:", "n:", "s:", "t:", "w:"].map(p => allKeys(KV, p)));
+    out.keys = { accounts: accounts.length, news: news.length, devices: devices.length, links: links.length, alerts: alerts.length };
     // the accounts' addresses, newest first: [address or null (from before 15 Oct 2026), began, works, last change, news]
     const wantNews = new Set(news.map(k => k.name.slice(2)));
     out.people = accounts.map(k => { const m = k.metadata || {}; return [m.e || null, m.since || null, m.n ?? null, m.at || null, wantNews.has(k.name.slice(2))]; })
@@ -642,6 +655,79 @@ async function admin(body, env, reply, ip) {
     for (const what of ["signup", "ask", "mood"]) out[what] = await Promise.all(days.map(d => counted(env, what, d)));
   }
   try { out.goat = await goat(env, days[0], end); } catch (e) { out.goat_error = String(e.message); }
+  return reply(out);
+}
+
+// /alerts/send, from the deploy (.github/workflows/pages.yml, build_alerts.py), behind ALERT_KEY: the works that came
+// up for sale since the live site was last built -- new gallery stock and new auction lots -- by artist slug, and to
+// every account with the alerts on (w:) one email with those by the artists on its list. x:alerted keeps what was
+// already announced (by its address, 120 days), so a deploy run again announces nothing twice. Alerts take at most
+// ALERTS_PER_DAY of the day's MAIL_PER_DAY, so sign-in links always have room; Resend's batch call sends them a hundred at a time.
+const ALERTS_PER_DAY = 60, ALERTED_DAYS = 120;
+const ALERT_MAIL = {
+  en: { subject: names => "For sale now: " + names, intro: "New on the market from the artists you saved on Museaal:",
+    lot: (h, d) => "auction, " + h + (d ? ", " + d : ""), start: "starting price", all: "Your artists on Museaal:",
+    why: "You get this because you turned on sale alerts for the artists on your list. To stop them:", more: n => " and " + n + " more" },
+  et: { subject: names => "Nüüd müügil: " + names, intro: "Uut turul kunstnikelt, kelle oled Museaalis salvestanud:",
+    lot: (h, d) => "oksjon, " + h + (d ? ", " + d : ""), start: "alghind", all: "Sinu kunstnikud Museaalis:",
+    why: "Saad selle kirja, sest lülitasid sisse teated oma nimekirja kunstnike müügitööde kohta. Loobumiseks:", more: n => " ja veel " + n },
+};
+const euro = n => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, " ") + " €";
+function alertMail(lang, found, site, unsub) {
+  const M = ALERT_MAIL[lang] || ALERT_MAIL.en, names = found.map(f => f.n);
+  const head = names.slice(0, 3).join(", ") + (names.length > 3 ? M.more(names.length - 3) : "");
+  const lines = [M.intro, ""];
+  for (const f of found) {
+    lines.push(f.n.toUpperCase());
+    for (const [, t, p, k, where, d, url] of f.w.slice(0, 12)) {
+      const price = p ? (k === "l" ? M.start + " " + euro(p) : euro(p)) : "";
+      lines.push("  " + [t || "?", price, k === "l" ? M.lot(where, d) : where].filter(Boolean).join(" · "), "  " + url);
+    }
+    if (f.w.length > 12) lines.push("  " + M.more(f.w.length - 12).trim());
+    lines.push("");
+  }
+  lines.push(M.all + " " + site + "#lang=" + lang + "&list=mine&lt=artists", "", M.why, unsub);
+  return { subject: M.subject(head), text: lines.join("\n") };
+}
+async function alerts(body, env, reply) {
+  if (!env.ALERT_KEY || !env.LISTS) return reply({ error: "Alerts are not set up." }, 503);
+  if (await hash(String(body.key || "")) !== await hash(env.ALERT_KEY)) return reply({ error: "Wrong key." }, 401);
+  const KV = env.LISTS, day = Math.floor(Date.now() / 864e5), site = env.SITE || "https://museaal.ee/";
+  // {slug: {n: name, w: [[address, title, price, "s"|"l", gallery or house, date, link]]}}, the addresses not yet announced
+  const done = (await KV.get("x:alerted", "json")) || {}, fresh = new Map();
+  for (const [slug, a] of Object.entries(body.items && typeof body.items === "object" ? body.items : {}).slice(0, 5000)) {
+    if (!a || typeof a.n !== "string" || !Array.isArray(a.w)) continue;
+    const w = a.w.filter(x => Array.isArray(x) && workKey(x[0]) && x[0].length <= 40 && !(x[0] in done) && /^https?:\/\//.test(String(x[6])))
+      .map(x => [x[0], String(x[1] || "").slice(0, 200), +x[2] || 0, x[3] === "l" ? "l" : "s", String(x[4] || "").slice(0, 80), String(x[5] || "").slice(0, 10), String(x[6]).slice(0, 500)]);
+    if (w.length) fresh.set(slug.slice(0, 120), { n: a.n.slice(0, 120), w });
+  }
+  const out = { new: [...fresh.values()].reduce((s, a) => s + a.w.length, 0), subscribers: 0, sent: 0, unsent: 0 };
+  if (!fresh.size) return reply(out);
+  const subs = await allKeys(KV, "w:"), mails = [];
+  out.subscribers = subs.length;
+  for (const k of subs) {
+    const [sub, rec] = await Promise.all([KV.get(k.name, "json"), KV.get("u:" + k.name.slice(2), "json")]);
+    if (!sub || !rec || !Array.isArray(rec.items)) continue;
+    const found = rec.items.filter(x => x.startsWith("@") && fresh.has(x.slice(1))).map(x => fresh.get(x.slice(1)));
+    if (found.length) mails.push({ to: sub.e, ...alertMail(sub.lang, found, site, sub.unsub) });
+  }
+  const used = await counted(env, "mail", today()), room = Math.max(0, Math.min(ALERTS_PER_DAY, MAIL_PER_DAY - used));
+  const go = mails.slice(0, room);
+  out.unsent = mails.length - go.length;
+  if (go.length) await bump(env, "mail", go.length);
+  if (env.SEND_MAIL) for (const m of go) await env.SEND_MAIL(m);
+  else for (let i = 0; i < go.length; i += 100) {
+    const r = await fetch("https://api.resend.com/emails/batch", {
+      method: "POST", headers: { Authorization: "Bearer " + env.RESEND_API_KEY, "Content-Type": "application/json" },
+      body: JSON.stringify(go.slice(i, i + 100).map(m => ({ from: env.MAIL_FROM || "museaal.ee <list@museaal.ee>", reply_to: "info@museaal.ee", ...m, to: [m.to] }))),
+    });
+    if (!r.ok) throw new Error("mail " + r.status);
+  }
+  out.sent = go.length;
+  // announced, also when nobody was listening: an alert is for what is new, not for what was new before someone saved the artist
+  for (const a of fresh.values()) for (const x of a.w) done[x[0]] = day;
+  for (const [k, d] of Object.entries(done)) if (day - d > ALERTED_DAYS) delete done[k];
+  await KV.put("x:alerted", JSON.stringify(done));
   return reply(out);
 }
 
@@ -695,6 +781,10 @@ export default {
       if (tooMany(ip, syncs, 30)) return reply({ error: "Too many requests; wait a minute." }, 429);
       try { return await list(path.slice(6), body && typeof body === "object" ? body : {}, env, reply, ip); }
       catch (e) { console.log("list failed", String(e.message)); return reply({ error: "The list could not be reached." }, 502); }
+    }
+    if (path === "/alerts/send") {
+      try { return await alerts(body && typeof body === "object" ? body : {}, env, reply); }
+      catch (e) { console.log("alerts failed", String(e.message)); return reply({ error: "The alerts could not be sent." }, 502); }
     }
     if (path === "/admin/stats") {
       try { return await admin(body && typeof body === "object" ? body : {}, env, reply, ip); }

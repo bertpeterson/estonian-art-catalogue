@@ -115,6 +115,8 @@ h1 a:hover{color:var(--grey-6)}
 /* the sign-in sits under the tagline, the one control there meant to be found */
 .acc-sw{margin-top:12px;border-color:var(--ink)}
 .acc-sw > :not([hidden]) ~ #mylist{border-left:1px solid var(--rule)}
+#mylist + #myartists{border-left:1px solid var(--rule)}
+.acc-sw button[aria-pressed="true"]{background:var(--invert-bg);color:var(--invert-fg)}
 .acc-sw button{color:var(--ink)}
 /* signed in, the same place is a link to the account page (build_account.py) */
 .acc-sw a{font-family:var(--mono);font-size:var(--fs-xs);letter-spacing:var(--ls-label);color:var(--ink);padding:5px 11px;text-decoration:none}
@@ -425,6 +427,21 @@ a.linkbtn{text-decoration:none}
 .sa-row .r-alink{font-family:var(--serif-text);font-size:var(--fs-lg);cursor:pointer;border-bottom:1px solid var(--rule)}
 .sa-row .r-alink:hover{border-bottom-color:var(--ink)}
 .sa-row .m{flex:1;font-size:.8rem;color:var(--grey-6)}
+/* My Artists: under each artist, what can be bought now -- coming lots first, then gallery stock */
+.sa-strip{display:flex;gap:12px;overflow-x:auto;padding:4px 0 14px;border-bottom:1px solid var(--rule-soft);scrollbar-width:thin}
+.sa-w{flex:none;width:132px;display:block;background:none;border:0;padding:0;text-align:left;font:inherit;color:inherit;text-decoration:none;cursor:pointer}
+.sa-w img,.sa-w .ph{display:block;width:132px;height:132px;object-fit:contain;background:var(--field)}
+.sa-w i{display:block;margin-top:6px;font-size:.8rem;line-height:1.25;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.sa-w span{display:block;font-family:var(--mono);font-size:var(--fs-xs);color:var(--grey-6);margin-top:3px}
+.sa-w b{font-weight:500;color:var(--ink)}
+.sa-w:hover i{text-decoration:underline}
+.sa-more{flex:none;align-self:center;font-family:var(--mono);font-size:var(--fs-xs);white-space:nowrap}
+.sa-row + .sa-row{border-top:0}
+.sa-alert{display:inline-flex;align-items:center;gap:8px;background:none;border:0;padding:0;cursor:pointer;font:inherit;color:var(--ink)}
+.sa-alert::before{content:'';flex:none;width:28px;height:16px;border-radius:8px;border:1px solid var(--grey-6);background:var(--field);box-sizing:border-box;
+  background-image:radial-gradient(circle at 7px 50%,var(--grey-6) 4px,transparent 4.5px)}
+.sa-alert[aria-checked="true"]::before{border-color:var(--ink);background-color:var(--ink);background-image:radial-gradient(circle at 19px 50%,var(--paper) 4px,transparent 4.5px)}
+.sa-alert:disabled{opacity:.5;cursor:default}
 .mono-save{margin-top:10px}
 /* a coming lot by an artist on My List */
 .up-row.up-mine{box-shadow:inset 2px 0 0 var(--ink);padding-left:12px}
@@ -845,7 +862,7 @@ footer a{border-bottom:1px solid var(--rule)}
         <p class="mast-tag" data-i18n="tagline"></p>
         <!-- signing in, up front: the account carries My List to every device (list-sync.js); signed in, the account page -->
         <!-- and My List beside it, the visitor's own things in one box; the list's tools open with the catalogue (#listbar) -->
-        <div class="langsw acc-sw"><button id="acc-top" aria-expanded="false" aria-controls="accpanel" data-i18n="acc_top"></button><a id="acc-link" href="account" data-i18n="acc_link" hidden></a><button id="mylist" aria-pressed="false" data-i18n="mylist"></button></div>
+        <div class="langsw acc-sw"><button id="acc-top" aria-expanded="false" aria-controls="accpanel" data-i18n="acc_top"></button><a id="acc-link" href="account" data-i18n="acc_link" hidden></a><button id="mylist" aria-pressed="false" data-i18n="mylist"></button><button id="myartists" aria-pressed="false" data-i18n="myartists"></button></div>
         <!-- shown at once, not when the page's script gets to it: the strip kept moving under the reader's eye -->
         <script>try{if((JSON.parse(localStorage.getItem("museaal.account"))||{}).s){document.getElementById("acc-top").hidden=true;document.getElementById("acc-link").hidden=false}}catch(e){}</script>
       </div>

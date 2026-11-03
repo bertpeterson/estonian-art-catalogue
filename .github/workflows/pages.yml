@@ -48,6 +48,23 @@ jobs:
       - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
           path: site
+      # sale alerts: what this build has for sale that the live site had not (build_alerts.py), handed to the
+      # alerts job below, which sends it once the build is live. No live alerts.json yet: nothing is new
+      - name: Sale alerts, what is new since the live site
+        id: alerts
+        run: |
+          curl -sSfL --retry 3 -o "$RUNNER_TEMP/live-alerts.json" https://museaal.ee/data/alerts.json || rm -f "$RUNNER_TEMP/live-alerts.json"
+          mkdir -p "$RUNNER_TEMP/alerts"
+          python3 build_alerts.py new "$RUNNER_TEMP/live-alerts.json" "$RUNNER_TEMP/alerts/new.json"
+          if [ -f "$RUNNER_TEMP/alerts/new.json" ]; then echo "new=true" >> "$GITHUB_OUTPUT"; fi
+      - if: steps.alerts.outputs.new == 'true'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: alerts
+          path: ${{ runner.temp }}/alerts
+          retention-days: 3
+    outputs:
+      alerts: ${{ steps.alerts.outputs.new }}
 
   deploy:
     needs: build
@@ -59,6 +76,26 @@ jobs:
       - uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
       - id: deployment
         uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
+
+  # Sale alerts, once the build is live: the new works go to the Worker (ALERT_KEY, a repository secret and a Worker
+  # secret alike), which mails each account with the alerts on what is new by its artists. No key: nothing is sent
+  alerts:
+    needs: [build, deploy]
+    if: needs.build.outputs.alerts == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: alerts
+          path: ${{ runner.temp }}/alerts
+      - name: Send the sale alerts
+        env:
+          ALERT_KEY: ${{ secrets.ALERT_KEY }}
+        run: python3 build_alerts.py send "$RUNNER_TEMP/alerts/new.json"
 
   # The build was opened in a browser before it shipped; this opens what the world
   # gets -- the domain, the certificate, the worker, the data the page names.

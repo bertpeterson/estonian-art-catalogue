@@ -140,10 +140,33 @@ inbox counted however it is spelled (`name+tag@`, Gmail's dots); 90 sign-in mail
 100 (the `c:mail:` counter); 30 list requests a minute. KV's free plan allows 1,000 writes a day: a sign-in is about
 six, a change to a list one.
 
+## Sale alerts (`/list/alerts`, `/alerts/send`)
+
+Signed in, a visitor can turn on "Email me when their works come up for sale" on My Artists or the account page
+(`/list/alerts`). The Worker then keeps `w:<account>` in KV: `{e, lang, at, unsub}`, until they turn it off, use the
+alert's unsubscribe link (`#unsuba=`, sealed apart from the news emails' link) or delete the account.
+
+Each deploy (`.github/workflows/pages.yml`) compares what is for sale in the new build with the live site's
+`data/alerts.json` (build_alerts.py): new gallery stock and new auction lots. Once the build is live, the `alerts` job
+posts those to `/alerts/send` with `ALERT_KEY`; the Worker mails each `w:` account one email with what is new by the
+artists on its list, through Resend's batch call. `x:alerted` keeps what was announced (120 days), so a re-run sends
+nothing twice. Alerts take at most 60 of the day's 90 mails, so sign-in links keep room; past that, the job's log
+warns, and Resend's paid plan (and a higher `MAIL_PER_DAY`) is the way on.
+
+Setting it up (once):
+
+1. **ALERT_KEY.** Make a long random key (`openssl rand -base64 24`) and add it twice: to the Worker under Settings →
+   Variables and Secrets as a secret named `ALERT_KEY`, and to GitHub under the repository's Settings → Secrets and
+   variables → Actions as a repository secret named `ALERT_KEY`.
+2. Paste `mood-worker.js` into the Worker again and deploy.
+
+Without the key on either side nothing is sent and the deploy goes on as before. The first deploy with
+`data/alerts.json` only sets the baseline: alerts start from the deploy after it.
+
 ## The backoffice (`/admin/stats`, page museaal.ee/admin)
 
 `site/admin.html` (build_admin.py) is not linked anywhere and is noindex. It asks once for a key and keeps it in
-that browser. With the key the Worker returns the KV's keys counted by kind (`u:` accounts, `n:` news opt-ins,
+that browser. With the key the Worker returns the KV's keys counted by kind (`u:` accounts, `n:` news opt-ins, `w:` sale alerts,
 `s:` signed-in devices, `t:` waiting links), every account's address with the day it began, its day counters for 30 days (`c:signup:`, `c:ask:`, `c:mood:`
 followed by the date, kept 400 days), and GoatCounter's visits, pages, referrers and events. The page itself adds
 stock by gallery (from the build) and each workflow's last run (from GitHub's public API).

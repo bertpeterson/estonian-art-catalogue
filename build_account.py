@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """The account page: /account.html and /konto.html.
 
-Signed in (list-sync.js keeps the session in this browser): the address, the news emails on or off, sign out, and
+Signed in (list-sync.js keeps the session in this browser): the address, the news emails and the sale alerts on or off, sign out, and
 at the foot, set apart, deleting the account after a second click. Signed out: the sign-in form, the same one the
 masthead strip has. Everything the page does is a call list-sync.js already makes to the Worker (login, logout,
 news, delete); signed in, turning the news emails on is immediate, since the sign-in already confirmed the
@@ -20,7 +20,8 @@ I18N = json.load(open("i18n.json", encoding="utf-8"))
 KEYS = ["acc_h", "acc_who", "acc_signout", "acc_news_h", "acc_news_on", "acc_news_off",
         "acc_del_h", "acc_del_note", "acc_delete", "acc_del_yes", "acc_del_no", "acc_del_sure", "acc_signin_h",
         "acc_signin_lede", "acc_email", "acc_send", "acc_news", "acc_off", "acc_sent", "acc_busy", "acc_bad", "acc_robot",
-        "acc_failed", "acc_expired", "acc_gone", "acc_out", "acc_deleted", "acc_unsub", "acc_unsub_bad", "privacy_link"]
+        "acc_failed", "acc_expired", "acc_gone", "acc_out", "acc_deleted", "acc_unsub", "acc_unsub_bad", "privacy_link",
+        "acc_alerts_h", "acc_alerts", "acc_unsuba"]
 PAGE = {"en": dict(file="account", other="konto", privacy="privacy", other_l="Eesti keeles", site="Estonian Art Catalogue", home="./"),
         "et": dict(file="konto", other="account", privacy="privaatsus", other_l="In English", site="Eesti Kunstikataloog", home="./#lang=et")}
 
@@ -91,6 +92,12 @@ function draw(){
     p.then(function(){busy=false;draw()})});
   app.appendChild(h("div",{"class":"row"},[h("div",{},[h("span",{"class":"eb",text:T.acc_news_h}),
     h("span",{"class":"s",id:"acc-news-l",text:on?T.acc_news_on:T.acc_news_off})]),sw]));
+  // the sale alerts: an email when an artist on My List comes up for sale (build_alerts.py, the Worker's /alerts/send)
+  var al=ML.alerts(),sa=h("button",{type:"button",role:"switch","class":"sw","aria-checked":String(al),"aria-labelledby":"acc-al-l"});
+  if(busy)sa.disabled=true;
+  sa.addEventListener("click",function(){busy=true;sa.disabled=true;ML.setAlerts(!al,LANG).then(function(){busy=false;draw()})});
+  app.appendChild(h("div",{"class":"row"},[h("div",{},[h("span",{"class":"eb",text:T.acc_alerts_h}),
+    h("span",{"class":"s",id:"acc-al-l",text:T.acc_alerts})]),sa]));
   if(m)app.appendChild(m);
   var del=h("div",{"class":"danger"},[h("h2",{text:T.acc_del_h}),h("p",{text:T.acc_del_note})]);
   if(!sure){var b=h("button",{type:"button","class":"btn warn",text:T.acc_delete});

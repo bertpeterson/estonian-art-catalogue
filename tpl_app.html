@@ -1961,14 +1961,24 @@
     let ordered = strict ? unique : inner.map(x => [x[0], x[1], medRank(x[0]), turn(x[0]), tier(x[0]), mixed ? hash(x[0].k) : 0])
       .sort((a, b) => mp(a[0]) - mp(b[0]) || hl(a[0]) - hl(b[0]) || a[4] - b[4] || a[3] - b[3] || rep.get(a[0]) - rep.get(b[0]) || a[2] - b[2] || a[5] - b[5] || a[1] - b[1]).map(x => x[0]);
     // ...and after My List, the deal for you (mixCheck): three heavyweights, two look-alikes and a wildcard a
-    // row of six, for the first page; the rest keep their places below
-    const dealt = mixed && !strict && pristine() && !listKeys() && mixUse();
+    // row of six, for the first page; the rest keep their places below. With artists saved, one look-alike a row
+    // gives way to more by those artists themselves (A): their key works first, in an order of the visit, taking turns
+    const dealt = mixed && !strict && pristine() && !listKeys() && (mixUse() || SAV.size > 0);
     if (dealt){
       if (!BYK) BYK = new Map(W.map(w => [w.k, w]));
       const inWall = new Set(ordered), take = ks => ks.map(k => BYK.get(k)).filter(w => w && inWall.has(w) && !MINE_AT.has(w));
-      const q = {F: take(MIX.f), X: take(MIX.w)}, extra = new Set([...q.F, ...q.X]);
+      const q = {F: MIX ? take(MIX.f) : [], X: MIX ? take(MIX.w) : [], A: []}, extra = new Set([...q.F, ...q.X]);
+      if (SAV.size){
+        const by = new Map(savedArtists().map(i => [i, []]));
+        for (const w of ordered) if (by.has(w.a) && !MINE_AT.has(w) && !extra.has(w)) by.get(w.a).push(w);
+        const key = w => (w.mp || w.hl != null ? 0 : 1) * 1e10 + hash(w.k + VISIT);
+        const ls = [...by.values()].filter(l => l.length).map(l => l.sort((x, y) => key(x) - key(y)))
+          .sort((x, y) => hash(x[0].k + VISIT) - hash(y[0].k + VISIT));
+        for (let r = 0; q.A.length < 24 && ls.some(l => l.length > r); r++) for (const l of ls) if (l[r] && q.A.length < 24) q.A.push(l[r]);
+        q.A.forEach(w => extra.add(w));
+      }
       q.H = ordered.slice(MINE_AT.size).filter(w => !extra.has(w));
-      const at = {H: 0, F: 0, X: 0}, out = ordered.slice(0, MINE_AT.size), PAT = "HFHXFH";
+      const at = {H: 0, F: 0, X: 0, A: 0}, out = ordered.slice(0, MINE_AT.size), PAT = SAV.size ? "HAHXFH" : "HFHXFH";
       for (let s = 0; out.length < 72 && at.H < q.H.length; s++){
         const c = at[PAT[s % 6]] < q[PAT[s % 6]].length ? PAT[s % 6] : "H";
         out.push(q[c][at[c]++]);
@@ -2049,26 +2059,38 @@
     renderListBar();
     if ((state.list && state.listTab === "a") || state.saleUp) render();
   }
-  // the artists tab of My List: each saved artist, what the catalogue holds of them, and what can be bought
+  // My Artists (My List's artists half): each saved artist, what the catalogue holds of them, and under the name
+  // what can be bought now -- their lots in sales to come, soonest first, then the galleries' stock, twelve at most
   function savedArtistsHTML(){
     const ix = savedArtists().sort((x, y) => COLL.compare(surnameOf(A[x].n), surnameOf(A[y].n)));
     if (!ix.length) return `<p class="empty">${esc(T("sa_empty"))}</p>`;
-    const nW = new Map(), nUp = new Map(), want = new Set(ix);
-    for (const w of W) if (want.has(w.a)) nW.set(w.a, (nW.get(w.a) || 0) + 1);
-    for (const u of UP) if (want.has(u.a)) nUp.set(u.a, (nUp.get(u.a) || 0) + 1);
+    const nW = new Map(), want = new Set(ix), sale = new Map(ix.map(i => [i, []])), lots = new Map(ix.map(i => [i, []]));
+    const now = new Date().toISOString().slice(0, 10);
+    for (const w of W) if (want.has(w.a)){ nW.set(w.a, (nW.get(w.a) || 0) + 1); if (w.kind === "gallery") sale.get(w.a).push(w); }
+    for (const u of UP) if (want.has(u.a) && (!u.d || String(u.d) >= now.slice(0, String(u.d).length))) lots.get(u.a).push(u);
+    lots.forEach(l => l.sort((x, y) => String(x.d || "9").localeCompare(String(y.d || "9"))));
+    const pic = (src, alt) => src ? `<img src="${esc(src)}" alt="${esc(alt)}" loading="lazy" referrerpolicy="no-referrer-when-downgrade">` : `<span class="ph"></span>`;
+    const lotCard = u => `<a class="sa-w" href="${href(u.u)}" target="_blank" rel="noopener">${pic(imgSrc(u.im || ""), u.t)}`
+      + `<i>${esc(u.t)}</i><span>${esc(T("sa_lot", {d: dmy(u.d)}))} · ${esc(musName(u.h))}</span>${u.p ? `<span>${esc(T("up_start"))} <b>${esc(eur(u.p))}</b></span>` : ""}</a>`;
+    const saleCard = w => `<button class="sa-w" data-sa-work="${esc(w.k)}" data-sa-a="${w.a}">${pic(imgSrc(picOf(w)), w.t)}`
+      + `<i>${esc(w.t)}</i><span>${esc(musName(w.mu))}</span>${+w.pr ? `<span><b>${esc(eur(+w.pr))}</b></span>` : ""}</button>`;
     return `<div class="rows sa-rows">` + ix.map(i => {
-      const ar = A[i], life = (ar.l[0] || ar.l[1]) ? `${ar.l[0]}–${ar.l[1] || ""}` : "";
+      const ar = A[i], life = (ar.l[0] || ar.l[1]) ? `${ar.l[0]}–${ar.l[1] || ""}` : "", L = lots.get(i).filter(u => href(u.u)), S = sale.get(i);
       const bits = [life, T("nworks", {n: fmt(nW.get(i) || 0)}),
-        SALE_N.get(i) ? T("nforsale", {n: fmt(SALE_N.get(i))}) : "", nUp.get(i) ? T("sa_up", {n: fmt(nUp.get(i))}) : ""].filter(Boolean);
+        S.length ? T("nforsale", {n: fmt(S.length)}) : "", L.length ? T("sa_up", {n: fmt(L.length)}) : ""].filter(Boolean);
+      const cards = L.slice(0, 12).map(lotCard).concat(S.slice(0, Math.max(0, 12 - L.length)).map(saleCard));
       return `<div class="sa-row"><a class="r-alink" href="#artist=${esc(slug(ar.n))}" data-artist="${i}">${esc(ar.n)}</a>`
-        + `<span class="m">${esc(bits.join(" · "))}</span>${saBtn(i)}</div>`;
+        + `<span class="m">${esc(bits.join(" · "))}</span>${saBtn(i)}</div>`
+        + (cards.length ? `<div class="sa-strip">${cards.join("")}${S.length > 12 - Math.min(12, L.length)
+          ? `<a class="sa-more" href="#artist=${esc(slug(ar.n))}&sale=1" data-sa-sale="${i}">${esc(T("sa_all_sale", {n: fmt(S.length)}))}</a>` : ""}</div>` : "");
     }).join("") + `</div>`;
   }
   function renderListBar(){
     const el = $("listbar"), keys = listKeys();
-    const all = SL.size + SAV.size;
-    $("mylist").textContent = all ? T("mylist_n", {n: all}) : T("mylist");
-    $("mylist").setAttribute("aria-pressed", !!state.list);
+    $("mylist").textContent = SL.size ? T("mylist_n", {n: SL.size}) : T("mylist");
+    $("mylist").setAttribute("aria-pressed", !!state.list && (!!state.shared || state.listTab !== "a"));
+    $("myartists").textContent = SAV.size ? T("myartists_n", {n: SAV.size}) : T("myartists");
+    $("myartists").setAttribute("aria-pressed", !!state.list && !state.shared && state.listTab === "a");
     if (!keys){ el.hidden = true; el.innerHTML = ""; return; }
     const n = [...keys].filter(k => KEYSET.has(k)).length;
     // your own list in two: the works, and the artists
@@ -2076,8 +2098,14 @@
       .map(([t, l]) => `<button data-sl-tab="${t}" aria-pressed="${state.listTab === t}">${esc(l)}</button>`).join("") + `</span>`;
     const acc = !state.shared && window.museaalList && $("accpanel").hidden ? accountHTML("acc-email") : "";
     if (!state.shared && state.listTab === "a"){
+      // the sale alerts: signed in, a switch; signed out, a word on them before the sign-in form
+      const ML = window.museaalList, on = !!ML && ML.alerts();
+      const alert = !ML || !savedArtists().length ? "" : ML.who()
+        ? `<button class="sa-alert" role="switch" data-sl-act="alerts" aria-checked="${on}">${esc(T("sa_alert"))}: ${esc(T(on ? "sa_alert_on" : "sa_alert_off"))}</button>`
+          + `<span class="sl-note">${esc(T("sa_alert_note"))}</span>`
+        : `<span class="sl-note">${esc(T("sa_alert_in"))}</span>`;
       el.innerHTML = tabs + `<button class="linkbtn" data-sl-act="close">${esc(T("sl_close"))}</button>`
-        + `<span class="sl-note">${esc(savedArtists().length ? T("sa_note") : T("sa_empty"))}</span>` + acc;
+        + `<span class="sl-note">${esc(savedArtists().length ? T("sa_note") : T("sa_empty"))}</span>` + alert + acc;
       el.hidden = false; return;
     }
     const count = state.shared ? T("sl_shared", {n}) : (n === 1 ? T("sl_one") : T("sl_count", {n}));
@@ -2141,7 +2169,7 @@
   // before this script was listening
   function accFromLink(){
     const n = window.museaalList ? window.museaalList.note() : "";
-    if (["in", "expired", "unsub", "unsub_bad"].includes(n) && !state.list) $("accpanel").hidden = false;
+    if (["in", "expired", "unsub", "unsuba", "unsub_bad"].includes(n) && !state.list) $("accpanel").hidden = false;
   }
   addEventListener("museaal:account", () => { accFromLink(); renderAccTop(); renderListBar(); });
   async function slCSV(){
@@ -2387,10 +2415,24 @@
   $("f-src").addEventListener("click", e => facetClick(e, "src", state.srcs));
   $("f-org").addEventListener("click", e => facetClick(e, "org", state.origins));
   $("f-grp").addEventListener("click", e => facetClick(e, "grp", state.groups));
-  $("mylist").addEventListener("click", () => {
-    state.shared = null; state.list = !state.list; state.open = null;
+  // My List opens on the works, My Artists on the artists; the one already open closes
+  const openList = tab => {
+    const on = state.list && !state.shared && state.listTab === tab;
+    state.shared = null; state.list = !on; state.listTab = tab; state.open = null;
     renderAll(); pushHash();
     if (state.list) jumpTo($("listbar"));
+  };
+  $("mylist").addEventListener("click", () => openList("w"));
+  $("myartists").addEventListener("click", () => openList("a"));
+  // a work for sale in My Artists opens on its artist's page, the record open
+  document.addEventListener("click", e => {
+    const b = e.target.closest("[data-sa-work], [data-sa-sale]"); if (!b) return;
+    e.preventDefault();
+    if (b.dataset.saSale){ selectArtist(+b.dataset.saSale); state.sale = true; state.saleUp = false; renderAll(); pushHash(true); return; }
+    selectArtist(+b.dataset.saA); state.open = b.dataset.saWork;
+    const w = W.find(x => x.k === state.open);
+    if (typeof loadShard === "function" && w && w.h && !detailOf(w)) loadShard(shardOf(w)).then(() => render());
+    render(); pushHash(true);
   });
   $("listbar").addEventListener("click", e => {
     const tb = e.target.closest("[data-sl-tab]");
@@ -2403,6 +2445,7 @@
     else if (act === "clear"){ if (!confirm(T("sl_confirm"))) return; SL.clear(); slSave(); renderAll(); pushHash(); }
     else if (act === "close"){ state.list = false; state.shared = null; renderAll(); pushHash(); }
     else if (act === "signin") accountSignIn("acc-email");
+    else if (act === "alerts" && window.museaalList){ b.disabled = true; museaalList.setAlerts(!museaalList.alerts(), LANG).then(renderListBar); }
   });
   $("listbar").addEventListener("keydown", e => { if (e.key === "Enter" && e.target.id === "acc-email") accountSignIn("acc-email"); });
   $("acc-top").addEventListener("click", () => accTop($("accpanel").hidden));

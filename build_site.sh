@@ -41,6 +41,7 @@ python3 -u build_stats.py
 python3 -u build_mood.py || exit 1
 # find a work: the assistant, and the galleries' stock it looks through
 python3 -u build_ask.py || exit 1
+python3 -u build_alerts.py || exit 1   # what is for sale now, by artist: the deploy mails sale alerts from it
 # the account page: the signed-in address, news emails, sign out, delete (list-sync.js's calls)
 python3 -u build_account.py || exit 1
 # the privacy page: what the accounts, the news emails and the assistant keep, and who else sees what (adds to the sitemap)
