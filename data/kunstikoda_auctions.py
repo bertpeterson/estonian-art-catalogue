@@ -7,7 +7,8 @@ on 28 October 2026 at 19:00. The catalogue is one page (kunstioksjon-2026/, the 
 again under eesti-graafika-oksjon-2026/): per lot its number, artist, title, then a list of
 year, technique, size, signature and "ekspertiisiakt olemas", and "Alghind 350 €". Each lot
 links to its own page (WooCommerce Simple Auctions), which gives the closing time
-("Oksjon lõpeb: 28.10.2026 19:00") and the bid history ("21.10.2026 11:48 450,00 € k***1").
+("Oksjon lõpeb: 28.10.2026 19:00"; once closed "Oksjon lõppes: 28.10.2026 19:21" and, if sold,
+"Võitnud pakkumine: 1 000,00 €") and the bid history ("21.10.2026 11:48 450,00 € k***1").
 robots.txt fences off only the shop's own paths.
 
 A sale still ahead goes to upcoming_records.json. Once it has closed, a lot with bids is
@@ -78,7 +79,7 @@ for path in cats:
         page, cached = lot_page(url)
         if page is None: failed.append(pid); continue
         txt = U(re.sub(r"<script.*?</script>|<style.*?</style>", "", page, flags=re.S))
-        em = re.search(r"Oksjon lõpeb:\s*(\d\d)\.(\d\d)\.(\d{4})\s+(\d\d:\d\d)", txt)
+        em = re.search(r"Oksjon lõp(?:eb|pes):\s*(\d\d)\.(\d\d)\.(\d{4})\s+(\d\d:\d\d)", txt)
         end = f"{em.group(3)}-{em.group(2)}-{em.group(1)} {em.group(4)}" if em else None
         if not end: failed.append(pid); continue
         r = {"aid": f"kk-{pid}", "artist": re.sub(r"\s*\([^)]*\)", "", artist).strip(), "title": title or "Pealkirjata",
@@ -88,7 +89,11 @@ for path in cats:
         hist = txt.split("Pakkumiste ajalugu")[-1].split("Arvustused")[0]
         bids = [money(b) for b in re.findall(r"\d\d\.\d\d\.\d{4} \d\d:\d\d\s+([\d\s ]+,\d\d)\s*€", hist)]
         bids = [b for b in bids if b]
-        if "Oksjon on avatud" in txt or re.search(r"reserv|ebaõnnestu", txt, re.I):
+        wm = re.search(r"Võitnud pakkumine:\s*([\d\s ]+,\d\d)\s*€", txt)            # a closed lot that sold
+        if wm: bids.append(money(wm.group(1)))
+        # a failed lot says why: "Oksjon ebaõnnestus, sest reservhinda ei saavutatud" (reserve not met: no
+        # outcome, though it still shows "Võitnud pakkumine") or "..., sest pakkumisi ei tehtud" (no bids: unsold)
+        if "Oksjon on avatud" in txt or ("ebaõnnestu" in txt.lower() and "pakkumisi ei tehtud" not in txt):
             recs.append({**r, "hammer": None, "sold": None, "nores": True})
             print(f"  lot {r['lot']} {pid}: no clear result yet, kept as offered", flush=True)
         else:
