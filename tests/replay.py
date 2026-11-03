@@ -48,6 +48,7 @@ RULES = {
     "tokkoarrak":  [(r"/kunsti-muuk$", 1), (r"/kunsti-muuk/p/", 4)],
     "artandtonic": [(r"page=1$", 1)],
     "artkeller":   [(r"page=1$", 1)],
+    "idla":        [(r"page=1&category=349$", 1)],
     "artisoon":    [(r"/tooted$", 1), (r"/graafika$", 1), (r"/keraamika$", 1), (r"/fotograafia$", 1), (r"/viimati-lisatud$", 1), (r"\.ee/(tooted|graafika)/", 4)],
     "kipskassid":  [(r"/vota-kass$", 1), (r"/kassikesed$", 1), (r"/collab-kassid$", 1), (r"/api/", 2)],
     "noba":        [(r"page=[12]$", 2), (r"noba\.ac/\w\w/(kunst|artwork)/", 3)],
@@ -55,7 +56,7 @@ RULES = {
     "noba_artworks": [(r"/(kunstnik|artist)/", 6), (r"noba\.ac/\w\w/(toode|product|kunst|artwork)/", 2)],
     "konradmagi":  [(r"/maalid/$", 1), (r"/eskiisid/$", 1), (r"/kadunud/$", 1)],
 }
-TRIM = {"allee": 20, "vernissage": 30, "artner": 25, "artman": 25, "artandtonic": 25, "artkeller": 25, "kipskassid": 12, "noba": 20}
+TRIM = {"allee": 20, "vernissage": 30, "artner": 25, "artman": 25, "artandtonic": 25, "artkeller": 25, "idla": 25, "kipskassid": 12, "noba": 20}
 # where a page's products are taken from instead, when recording: Allee's first page
 # of products is all auction lots, its stock comes later -- the saved page holds both
 SOURCES = {"allee": lambda u: [u + "&type=simple", u]}
