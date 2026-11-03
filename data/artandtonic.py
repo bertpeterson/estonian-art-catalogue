@@ -4,7 +4,8 @@
 A contemporary gallery founded in Tartu in 2019, in Tallinn since 2025 (~190 works on
 sale in September 2026: Alo Valge, Rauno Thomas Moss, Alar Tuul, Marko Mäetamm).
 Read through the WooCommerce Store API; robots.txt permits everything. The artist is
-the product's category; the short description gives size, technique and year
+the product's category (the English shop files every work under "All" too, which once
+became an artist); the short description gives size, technique and year
 ("120×80 cm, õlimaal lõuendil, 2026"). A product out of stock is sold: kept, flagged.
 The asking price of current stock is read (asking_price.py); a sold work's never.
 """
@@ -24,7 +25,7 @@ while True:
     batch = api(page)
     if not batch: break
     for p in batch:
-        cats = [U(c["name"]) for c in p.get("categories", []) if not re.match(r"(uncategorized|määramata|pood|shop)", c["name"], re.I)]
+        cats = [U(c["name"]) for c in p.get("categories", []) if not re.match(r"(uncategorized|määramata|pood|shop|all$|kõik$)", c["name"], re.I)]
         if not cats: continue
         artist = cats[0]
         if "/" in artist: continue                      # a work by two artists ("A / B"): no single maker

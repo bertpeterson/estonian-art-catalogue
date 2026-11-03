@@ -87,7 +87,9 @@ def _qual(n):
 # One person under two spellings that the rules do not join, set by hand: the spelling
 # with the life dates or most of the works stands
 SAME_PERSON = {"Herald Eelmaa": "Herald Eelma", "Maks Roosmaa": "Maks Roosma",
-               "Felix Leetve": "Felix Leetvee", "Heli Šestakov": "Heli Šestakova"}
+               "Felix Leetve": "Felix Leetvee", "Heli Šestakov": "Heli Šestakova",
+               # the same dates in MuIS, Siegmund and Sigismund a spelling apart (catalogue check, 2026-11-03)
+               "Friedrich Siegmund Stern": "Friedrich Sigismund Stern", "Carl Siegmund Walther": "Carl Sigismund Walther"}
 
 def toks(n):
     n = unicodedata.normalize('NFKD', (n or "").lower())

@@ -391,6 +391,7 @@ for small, big in SAME_PERSON.items():                      # names.py, set by h
     if small in by_artist:
         for r in by_artist.pop(small): r["artist"] = big; by_artist[big].append(r)
         if not _life_of(big) and _life_of(small): LIFE_FROM_VARIANT[big] = _life_of(small, src=True)
+        if small in MU_BIO and big not in MU_BIO: MU_BIO[big] = MU_BIO[small]    # Stern's life sat under "Siegmund"
         SPELLINGS.append((small, big))
 print("  merged as one person under two spellings:", len(SPELLINGS))
 # The retired spellings had artist pages of their own, indexed and bookmarked.
@@ -1241,6 +1242,14 @@ for w in works:
 for w in works:
     pim = w.pop("_pim", None)
     if pim and _web(pim) and _pd(artists[w["a"]]): w["im"] = "g:" + pim; IMG["past"] = IMG.get("past", 0) + 1
+# A holder's photograph that is not of the work, found by hand (the private catalogue
+# check): another record's picture filed under this one -- Orlovski's rider on Jakovlev's
+# "Mehe portree" -- or the back of a frame or an album's cover. wrong_pictures.json maps
+# the inventory number to why; the record keeps its data and loses the picture. The
+# picture is never moved to the record it seems to belong to: that is the holder's call.
+_WP = json.load(open("wrong_pictures.json", encoding="utf-8")) if os.path.exists("wrong_pictures.json") else {}
+for w in works:
+    if w.get("nu") in _WP and w.get("im"): w["im"] = None; w.pop("ir", None); IMG["wrong"] = IMG.get("wrong", 0) + 1
 # A set of different pictures the holder titled identically, told apart by hand:
 # title_fixes.json maps an inventory number to the title shown. Triik's six postcards,
 # all 'Postkaart sarjast "Vene olustik"' in MuIS, are numbered in inventory order with
@@ -1293,7 +1302,7 @@ for w in works:
     im = w.get("im") or ""
     if im.startswith("g:") and im[2:] in _galr: w["ir"] = _galr[im[2:]]
     if im.startswith("m:") and im[2:] in _muisr: w["ir"] = _muisr[im[2:]]
-print("  images: public-domain museum works", IMG["pd"], "-> MuIS", IMG["muis"], "EKM", IMG["ekm"], "· past gallery listings", IMG.get("past", 0))
+print("  images: public-domain museum works", IMG["pd"], "-> MuIS", IMG["muis"], "EKM", IMG["ekm"], "· past gallery listings", IMG.get("past", 0), "· wrong pictures dropped", IMG.get("wrong", 0))
 
 # ---------- upcoming auction lots ----------
 # The lots of sales still to come (upcoming.py): shown on the artist's page and on one
