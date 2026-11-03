@@ -80,41 +80,59 @@ def wedge_of(hsv):
     """(side, fraction) of a grey scale -- twenty steps from black to white along one
     edge, with no colour patches -- or None. A strip a few pixels thick is walked in
     from each edge; a run of unsaturated columns a fifth of the width long, whose
-    values climb or fall through six or more plateaus over a range of 140, is a wedge."""
-    H, Wd = hsv.shape[:2]
+    values climb or fall over a range of 120 through six or more plateaus, each a
+    fiftieth of the run long and together nearly all of it, is a wedge. (Counting
+    every plateau of three pixels let a drawing's hatching outscore the wedge beneath
+    it: Laigo's vignettes for Looming, cropped at the top with the scale left in,
+    2026-11-03.) The crop goes on to the wedge's inner edge, within a third of the
+    picture, since a wedge photographed beside a small sheet is deep."""
+    def row(M, r0, m):
+        blk = M[r0:r0 + 6]
+        S, V = blk[..., 1].mean(axis=0), blk[..., 2].mean(axis=0)
+        un = S < 45
+        # longest run of unsaturated columns, gaps of two allowed
+        runs, i = [], 0
+        while i < m:
+            if not un[i]: i += 1; continue
+            j = i
+            while j < m and (un[j] or (j + 2 < m and un[j + 1] and un[j + 2])): j += 1
+            runs.append((i, j)); i = j
+        if not runs: return None
+        a, b = max(runs, key=lambda r: r[1] - r[0])
+        if b - a < 0.2 * m: return None
+        v = V[a:b]
+        if v.max() - v.min() < 120: return None
+        # plateaus: stretches where the value holds within six levels
+        cuts = np.where(np.abs(np.diff(v)) > 6)[0]
+        plateaus = np.diff(np.concatenate([[0], cuts + 1, [len(v)]]))
+        long = plateaus >= max(4, 0.02 * len(v))
+        steps, cov = int(long.sum()), plateaus[long].sum() / len(v)
+        if steps < 6 or cov < 0.85: return None
+        rho = abs(np.corrcoef(np.arange(len(v)), v)[0, 1])
+        if rho < 0.88: return None
+        # each step on from the last, one way: a portrait's shading or a plinth's shadow
+        # climbs and falls back (none of the false wedges over nine in ten, the true all)
+        bd = np.concatenate([[0], cuts + 1, [len(v)]])
+        means = np.array([v[bd[i]:bd[i + 1]].mean() for i in range(len(plateaus)) if long[i]])
+        mono = (np.diff(means) * np.sign(v[-1] - v[0]) > 0).mean()
+        if mono < 0.9: return None
+        return steps * cov * rho, mono == 1 and rho >= 0.95
     best = None
     for side in "tblr":
         M = hsv if side in "tb" else hsv.transpose(1, 0, 2)          # rows along the edge
         n, m = M.shape[:2]
         if side in "br": M = M[::-1]                                   # walk in from the far edge
-        lim = max(12, round(n * 0.18))
-        for r0 in range(0, lim - 5, 3):
-            blk = M[r0:r0 + 6]
-            S, V = blk[..., 1].mean(axis=0), blk[..., 2].mean(axis=0)
-            un = S < 45
-            # longest run of unsaturated columns, gaps of two allowed
-            runs, i = [], 0
-            while i < m:
-                if not un[i]: i += 1; continue
-                j = i
-                while j < m and (un[j] or (j + 2 < m and un[j + 1] and un[j + 2])): j += 1
-                runs.append((i, j)); i = j
-            if not runs: continue
-            a, b = max(runs, key=lambda r: r[1] - r[0])
-            if b - a < 0.2 * m: continue
-            v = V[a:b]
-            if v.max() - v.min() < 140: continue
-            # plateaus: stretches where the value holds within six levels
-            cuts = np.where(np.abs(np.diff(v)) > 6)[0]
-            plateaus = np.diff(np.concatenate([[0], cuts + 1, [len(v)]]))
-            steps = int((plateaus >= 3).sum())
-            if steps < 6: continue
-            x = np.arange(len(v)); rho = abs(np.corrcoef(x, v)[0, 1])
-            if rho < 0.75: continue
-            full = n
-            frac = (r0 + 6 + 0.015 * full) / full
-            score = steps * 10 + rho * 10
-            if best is None or score > best[0]: best = (score, side, round(float(min(0.3, frac)), 3))
+        hits = [(r0, s) for r0 in range(0, round(n * 0.33) - 5, 3) if (s := row(M, r0, m))]
+        # it starts at the edge, and a wedge is a band, not a line or two -- or one
+        # faultless row: a narrow bar (Grauskala #13 on its side) is only a row or two
+        if (len(hits) < 4 and not any(s[1] for _, s in hits)) or hits[0][0] > n * 0.18: continue
+        last = hits[0][0]
+        for r0, _ in hits[1:]:                                         # the ruler's gap aside, on inwards
+            if r0 - last > 0.05 * n: break
+            last = r0
+        score = max(s[0] for _, s in hits)
+        frac = (last + 6 + 0.015 * n) / n
+        if best is None or score > best[0]: best = (score, side, round(float(min(0.35, frac)), 3))
     return best[1:] if best else None
 
 def strip_of(hsv, band=0.18, cw=12, step=3):
@@ -208,9 +226,9 @@ def chart_of(img, surplus=None):
         # (a pale grey ruler beside Kodak's strip is not card enough for the walk)
         if surplus and surplus[0] == ("x" if st[0] in "lr" else "y") and f < surplus[1] <= f + 0.12: f = surplus[1]
         return st[0], round(float(min(0.4, bound(st[0], f))), 3)
-    def wedge():                                                  # a grey scale alone
-        w = wedge_of(hsv)
-        return (w[0], round(min(w[1], surplus[1] + 0.02), 3)) if w and surplus and surplus[0] == ("x" if w[0] in "lr" else "y") else w
+    # a grey scale alone: its steps are the chart itself, so the record's dimensions do
+    # not bound it (a sheet photographed on a wider mount reads less surplus than there is)
+    wedge = lambda: wedge_of(hsv)
     win, rows, cols = chart_windows(hsv)
     if not win.any(): return wedge()
     # The windows fall into clusters (touching windows); a chart is a cluster within the
@@ -264,9 +282,13 @@ def chart_of(img, surplus=None):
         if seg(card, at(k)).mean() >= 0.6 or seg(vivid, at(k)).mean() >= 0.4: last = k + 1; miss = 0
         else: miss += 1
         k += 1
+    seen = ext                                                         # the patches themselves
     ext = last
     frac = (ext + 0.012 * full) / full
-    if surplus and surplus[0] == ("x" if side in "lr" else "y"): frac = min(frac, surplus[1] + 0.02)
+    # the record's surplus bounds the walk through the card, not the patches: Laigo's
+    # Põlevkivi kaevurid (Tartu Art Museum) lies on a white ground wider than its sheet,
+    # and the bound left half the ColorChecker in the tile
+    if surplus and surplus[0] == ("x" if side in "lr" else "y"): frac = min(frac, max(surplus[1] + 0.02, (seen + 0.012 * full) / full))
     return side, round(float(min(0.4, frac)), 3)
 
 def one(im):
