@@ -7,12 +7,13 @@ Kostabi). Read through the WooCommerce Store API (/wp-json/wc/store/v1/products)
 read-only endpoint its own pages use; robots.txt permits it. The product name carries
 artist, title and year (Valdur Ohakas “Portree”, 1992); the technique and the size sit in
 the prose description ("... valminud õlimaal ... Mõõtmed 39 × 29 cm"), the category is the
-fallback technique. The asking price of current stock is read (asking_price.py); a sold work's never. Out of stock = sold: kept, flagged, for the ledger.
+fallback technique. The asking price of current stock is read (asking_price.py). Out of stock = sold: kept, flagged, for the ledger;
+its page still shows the price ("Hind 1000,00 € Müüdud"), kept as the price it was listed at (listed()), never as what it sold for.
 About 40% of the stock is also offered at Artner (artner.py, which runs first): a work
 both dealers list stays one record, Artner's, and Artman keeps what only it has.
 """
 import json, re, ssl, time, html, urllib.request
-from asking_price import asking
+from asking_price import asking, listed
 import store_api
 UA = "EstonianArtCatalogue/1.0 (museaal.ee; contact info@museaal.ee)"
 API = "https://www.artman.ee/wp-json/wc/store/v1/products"
@@ -56,7 +57,7 @@ while True:
         recs.append({**asking(p), "gid": f"artman-{p['id']}", "artist": artist, "title": title, "year": y.group(1) if y else None,
                      "tech": tech[:80], "dims": " x ".join(g for g in dm.groups() if g) + " cm" if dm else "",
                      "gallery": "Artman", "city": "Tallinn", "url": p.get("permalink") or "https://www.artman.ee",
-                     **({"sold": True} if not p.get("is_in_stock", True) else {}),
+                     **({"sold": True, **listed(p)} if not p.get("is_in_stock", True) else {}),
                      **({"img": img} if img else {})})
     page += 1; time.sleep(1)
     if page > 10: break

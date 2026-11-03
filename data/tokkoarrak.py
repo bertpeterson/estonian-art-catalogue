@@ -9,7 +9,8 @@ next) for the works' addresses, then each work's page -- "Artist - Title" in its
 then the year, the technique and "Mõõdud: 25 × 50 cm". A listing that sells two works
 together ("müügil komplektina") is left out: one record cannot say which is which.
 A work whose stock is gone ("soldOut") is the gallery's word that it sold: kept,
-flagged. The asking price of a work for sale is read (asking_price.py); a sold work's never. Pages are cached for a day.
+flagged. The asking price of a work for sale is read (asking_price.py); a sold work's page still shows it ("€1,000.00 Müüdud"),
+kept as the price it was listed at, never as what it sold for. Pages are cached for a day.
 """
 import json, re, os, gzip, ssl, time, html, urllib.request
 from asking_price import euros
@@ -71,7 +72,8 @@ for s in slugs:
     sold = bool(re.search(r'&quot;soldOut&quot;:true|"soldOut":true', h)) and not re.search(r'&quot;soldOut&quot;:false|"soldOut":false', h)
     img = re.search(r'property="og:image" content="([^"]+)"', h)
     pm = re.search(r'property="product:price:amount" content="([\d.]+)"', h)
-    price = {} if sold or not pm else euros(pm.group(1) + " €")
+    price = {} if not pm else euros(pm.group(1) + " €")
+    if sold: price = {"listed": price["price"]} if price else {}
     recs.append({**price, "gid": f"tokko-{s}", "artist": artist, "title": title, "year": year, "tech": tech[:80],
                  "dims": re.sub(r"\s*[x×]\s*", " x ", dm.group(1)) + " cm" if dm else "",
                  "gallery": "Tokko & Arrak", "city": "Tallinn", "url": f"{BASE}/kunsti-muuk/p/{s}",
