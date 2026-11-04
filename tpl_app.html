@@ -2085,36 +2085,11 @@
           ? `<a class="sa-more" href="#artist=${esc(slug(ar.n))}&sale=1" data-sa-sale="${i}">${esc(T("sa_all_sale", {n: fmt(S.length)}))}</a>` : ""}</div>` : "");
     }).join("") + `</div>`;
   }
-  // The palette on the Works button: one bar for each of the latest three saved works, in that work's main colour
-  // (data/colours.py, in data/col/<position // 1024>.json), its most vivid. Fewer than three pictured saves, and their second and
-  // third colours fill in; none, and the bars stay grey. Colours read once are kept in this browser by key.
-  const COL_KEY = "museaal.listcol", KPOS = new Map(W.map((w, i) => [w.k, i])), colFiles = new Map();
-  // only colours found are kept: a work missing from this build's files is asked again after the next build
-  let COLS = (() => { try { return Object.fromEntries(Object.entries(JSON.parse(localStorage.getItem(COL_KEY) || "{}")).filter(([, c]) => c)); } catch(e){ return {}; } })();
-  function paintPalette(){
-    const latest = [...SL].reverse().filter(k => KPOS.has(k)).slice(0, 12);
-    const need = [...new Set(latest.filter(k => !(k in COLS)).map(k => KPOS.get(k) >> 10))].filter(s => !colFiles.has(s));
-    if (need.length){
-      need.forEach(s => colFiles.set(s, fetch(`data/col/${s}.json?v=__V_INDEX__`).then(r => r.ok ? r.json() : null).catch(() => null)));
-      Promise.all(need.map(s => colFiles.get(s))).then(files => {
-        need.forEach((s, j) => { if (files[j]) for (const k of latest) if (KPOS.get(k) >> 10 === s) COLS[k] = files[j][KPOS.get(k)] || ""; });
-        try { localStorage.setItem(COL_KEY, JSON.stringify(Object.fromEntries(latest.filter(k => COLS[k]).map(k => [k, COLS[k]])))); } catch(e){}
-        paintPalette();
-      });
-    }
-    // each work's colours, the most vivid first: a print's paper is its commonest colour, its ink the telling one
-    const chroma = h => { const v = [0, 2, 4].map(i => parseInt(h.substr(i, 2), 16)); return Math.max(...v) - Math.min(...v); };
-    const got = latest.map(k => COLS[k]).filter(Boolean).slice(0, 3)
-      .map(c => [0, 6, 12].map(i => c.substr(i, 6)).sort((a, b) => chroma(b) - chroma(a)).join("")), bars = [];
-    for (let j = 0; j < 3 && got.length; j++) for (const c of got) if (bars.length < 3 && !bars.includes(c.substr(6 * j, 6))) bars.push(c.substr(6 * j, 6));
-    document.querySelectorAll("#mylist .lpal i").forEach((el, j) => { el.style.background = bars[j] ? "#" + bars[j] : ""; });
-  }
   function renderListBar(){
     const el = $("listbar"), keys = listKeys();
-    $("mylist-t").textContent = SL.size ? T("sl_tab_w", {n: SL.size}) : T("mast_w");
+    $("mylist").textContent = SL.size ? T("sl_tab_w", {n: SL.size}) : T("mast_w");
     $("mylist").title = $("myartists").title = T("mylist");
     $("mylist").setAttribute("aria-pressed", !!state.list && (!!state.shared || state.listTab !== "a"));
-    paintPalette();
     $("myartists").textContent = SAV.size ? T("sl_tab_a", {n: SAV.size}) : T("mast_a");
     $("myartists").setAttribute("aria-pressed", !!state.list && !state.shared && state.listTab === "a");
     if (!keys){ el.hidden = true; el.innerHTML = ""; return; }

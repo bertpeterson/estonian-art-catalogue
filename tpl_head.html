@@ -116,10 +116,6 @@ h1 a:hover{color:var(--grey-6)}
 .acc-sw{margin-top:12px;border-color:var(--ink)}
 .acc-sw > :not([hidden]) ~ #mylist{border-left:1px solid var(--rule)}
 #mylist + #myartists{border-left:1px solid var(--rule)}
-/* the palette on the Works button: the main colour of each of the latest three saved works (data/colours.py), grey before any */
-#mylist{display:inline-flex;align-items:center;gap:6px}
-.lpal{display:inline-flex;gap:1px}
-.lpal i{width:5px;height:12px;background:var(--rule);transition:background .3s}
 .acc-sw button[aria-pressed="true"]{background:var(--invert-bg);color:var(--invert-fg)}
 .acc-sw button{color:var(--ink)}
 /* signed in, the same place is a link to the account page (build_account.py) */
@@ -865,7 +861,7 @@ footer a{border-bottom:1px solid var(--rule)}
         <p class="mast-tag" data-i18n="tagline"></p>
         <!-- signing in, up front: the account carries My List to every device (list-sync.js); signed in, the account page -->
         <!-- and My List beside it as Works and Artists, the visitor's own things in one box; the list's tools open with the catalogue (#listbar) -->
-        <div class="langsw acc-sw"><button id="acc-top" aria-expanded="false" aria-controls="accpanel" data-i18n="acc_top"></button><a id="acc-link" href="account" data-i18n="acc_link" hidden></a><button id="mylist" aria-pressed="false"><span class="lpal" aria-hidden="true"><i></i><i></i><i></i></span><span id="mylist-t" data-i18n="mast_w"></span></button><button id="myartists" aria-pressed="false" data-i18n="mast_a"></button></div>
+        <div class="langsw acc-sw"><button id="acc-top" aria-expanded="false" aria-controls="accpanel" data-i18n="acc_top"></button><a id="acc-link" href="account" data-i18n="acc_link" hidden></a><button id="mylist" aria-pressed="false" data-i18n="mast_w"></button><button id="myartists" aria-pressed="false" data-i18n="mast_a"></button></div>
         <!-- shown at once, not when the page's script gets to it: the strip kept moving under the reader's eye -->
         <script>try{if((JSON.parse(localStorage.getItem("museaal.account"))||{}).s){document.getElementById("acc-top").hidden=true;document.getElementById("acc-link").hidden=false}}catch(e){}</script>
       </div>
