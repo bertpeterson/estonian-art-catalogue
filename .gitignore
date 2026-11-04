@@ -82,3 +82,10 @@ register.html
 
 # private letters (CLAUDE.md: keep correspondence out of commits); kept on disk, never tracked
 correspondence/
+
+# SQL learning database, rebuilt by sql/make_db.py
+sql/*.db
+auction/state.json
+
+# private tools, never committed
+analysis/
