@@ -11,7 +11,7 @@
   var l=(location.hash.match(/(?:^#|&)lang=(\w+)/)||[])[1],s=null;try{s=localStorage.getItem("ekr:lang")}catch(e){}
   var et=l?l==="et":s?s==="et":[].concat(navigator.languages||[],navigator.language||[]).some(function(x){return /^et\b/i.test(x)});
   if(!et)return;var R=document.documentElement;R.lang="et";R.classList.add("et-wait");
-  var D=__ET_STRINGS__,E=D.E,H=D.H,HREF={findlink:"leia","fs-up":"tulemas"};
+  var D=__ET_STRINGS__,E=D.E,H=D.H,HREF={findlink:"leia","fs-up":"tulemas"};window.__etE=E;
   var shut=function(n){for(;n&&n!==R;n=n.parentNode)if(n.nextSibling)return true;return false};
   var one=function(el,all){
     if(el.hasAttribute("data-et")||!(all||shut(el)))return;el.setAttribute("data-et","");
@@ -535,7 +535,7 @@ a.linkbtn{text-decoration:none}
 @media(max-width:479px){.wall[data-seed] .wcol{flex:0 0 calc((100% - 10px) / 2)}}
 a.wt{text-decoration:none}
 /* the baked histogram's decades and eras are links until the app makes them buttons */
-a.bar-btn,a.early-btn,a.era{text-decoration:none;line-height:normal}   /* as a button has it: no shift when the app swaps them */
+a.bar-btn,a.early-btn,a.era{text-decoration:none;line-height:normal;text-align:center}   /* as a button has it: no shift when the app swaps them */
 @media(min-width:1001px){.eras.baked{visibility:hidden}}   /* placed under their bars only by the app */
 .wt{display:block;width:100%;margin:0 0 10px;padding:0;border:0;background:var(--field);text-align:left;cursor:pointer;color:inherit;font:inherit}
 .wt{overflow:hidden}
@@ -862,6 +862,18 @@ footer a{border-bottom:1px solid var(--rule)}
         <!-- signing in, up front: the account carries My List to every device (list-sync.js); signed in, the account page -->
         <!-- and My List beside it as Works and Artists, the visitor's own things in one box; the list's tools open with the catalogue (#listbar) -->
         <div class="langsw acc-sw"><button id="acc-top" aria-expanded="false" aria-controls="accpanel" data-i18n="acc_top"></button><a id="acc-link" href="account" data-i18n="acc_link" hidden></a><button id="mylist" aria-pressed="false" data-i18n="mast_w"></button><button id="myartists" aria-pressed="false" data-i18n="mast_a"></button></div>
+        <script>
+        // The masthead's My List buttons and the signed-in Account link, as the app will draw them, at the
+        // first paint: their counts and the session are in this browser already, and the app waits for the
+        // catalogue's index before it draws them (a reload showed bare "Works · Artists", then the counts).
+        (function(){var E=window.__etE,et=!!E,L=function(b,k){if(E&&E[k])b.textContent=E[k];b.setAttribute("data-et","")};
+          [["mylist","museaal.shortlist","mast_w"],["myartists","museaal.artists","mast_a"]].forEach(function(x){
+            var b=document.getElementById(x[0]),n=0;try{var v=JSON.parse(localStorage.getItem(x[1])||"[]");if(Array.isArray(v))n=v.filter(function(k){return typeof k==="string"}).length}catch(e){}
+            L(b,x[2]);if(n)b.textContent+=" ("+n+")"});
+          var M=window.museaalList,w=M&&M.who&&M.who();if(!w)return;
+          var t=document.getElementById("acc-top"),a=document.getElementById("acc-link");
+          t.hidden=true;L(a,"acc_link");a.hidden=false;a.title=w;if(et)a.href="konto"})();
+        </script>
         <!-- shown at once, not when the page's script gets to it: the strip kept moving under the reader's eye -->
         <script>try{if((JSON.parse(localStorage.getItem("museaal.account"))||{}).s){document.getElementById("acc-top").hidden=true;document.getElementById("acc-link").hidden=false}}catch(e){}</script>
       </div>
