@@ -2704,7 +2704,9 @@
   $("fs-byartist").addEventListener("click", e => {
     e.preventDefault();
     setGroup("artist"); state.sort = "forsale"; state.decOrder = "earliest"; state.gLimit = 50;
-    state.expand.clear(); renderAll(); pushHash(); jumpTo(viewTop(reg));
+    state.expand.clear(); renderAll(); pushHash();
+    // land on the register's heading (A-Z rail, featured names), not past it on the first artist
+    jumpTo($("aidx").hidden ? viewTop(reg) : $("aidx"));
   });
   $("o-asc").addEventListener("click", () => { state.decOrder = "earliest"; syncOrder(); render(); pushHash(); });
   $("o-desc").addEventListener("click", () => { state.decOrder = "latest"; syncOrder(); render(); pushHash(); });
