@@ -2089,7 +2089,8 @@
   // (data/colours.py, in data/col/<position // 1024>.json), its most vivid. Fewer than three pictured saves, and their second and
   // third colours fill in; none, and the bars stay grey. Colours read once are kept in this browser by key.
   const COL_KEY = "museaal.listcol", KPOS = new Map(W.map((w, i) => [w.k, i])), colFiles = new Map();
-  let COLS = (() => { try { return JSON.parse(localStorage.getItem(COL_KEY) || "{}"); } catch(e){ return {}; } })();
+  // only colours found are kept: a work missing from this build's files is asked again after the next build
+  let COLS = (() => { try { return Object.fromEntries(Object.entries(JSON.parse(localStorage.getItem(COL_KEY) || "{}")).filter(([, c]) => c)); } catch(e){ return {}; } })();
   function paintPalette(){
     const latest = [...SL].reverse().filter(k => KPOS.has(k)).slice(0, 12);
     const need = [...new Set(latest.filter(k => !(k in COLS)).map(k => KPOS.get(k) >> 10))].filter(s => !colFiles.has(s));
@@ -2097,7 +2098,7 @@
       need.forEach(s => colFiles.set(s, fetch(`data/col/${s}.json?v=__V_INDEX__`).then(r => r.ok ? r.json() : null).catch(() => null)));
       Promise.all(need.map(s => colFiles.get(s))).then(files => {
         need.forEach((s, j) => { if (files[j]) for (const k of latest) if (KPOS.get(k) >> 10 === s) COLS[k] = files[j][KPOS.get(k)] || ""; });
-        try { localStorage.setItem(COL_KEY, JSON.stringify(Object.fromEntries(latest.filter(k => k in COLS).map(k => [k, COLS[k]])))); } catch(e){}
+        try { localStorage.setItem(COL_KEY, JSON.stringify(Object.fromEntries(latest.filter(k => COLS[k]).map(k => [k, COLS[k]])))); } catch(e){}
         paintPalette();
       });
     }
