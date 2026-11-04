@@ -200,7 +200,6 @@ h1 a:hover{color:var(--grey-6)}
 .fs-w{scroll-snap-align:start}
 /* the two of For you that lead the row for a visitor with a list: marked on the picture */
 .fs-w{position:relative}
-.fs-you{position:absolute;top:6px;left:6px;padding:2px 6px;background:var(--raise);color:var(--ink);font-family:var(--mono);font-size:.58rem;letter-spacing:.08em;text-transform:uppercase}
 .fs-arr{display:none}
 /* every sixty works, a card that leads to all of them on Buy art */
 .fs-more{display:flex;align-items:center;justify-content:center;align-self:start;aspect-ratio:1;padding:12px;border:1px solid var(--rule);text-align:center;
@@ -943,7 +942,7 @@ footer a{border-bottom:1px solid var(--rule)}
       var d=Math.floor(Date.now()/864e5),n=Math.min(8,c.w.length),pick=[c.w[2*d%n]];if(n>1)pick.push(c.w[(2*d+1)%n]);
       pick.reverse().forEach(function(x){skip[x[0]]=1;
         Array.prototype.forEach.call(row.querySelectorAll(".fs-w"),function(b){if(b.getAttribute("href")===x[0])b.remove()});
-        var a=card(x),t=el("span","fs-you",document.documentElement.lang==="et"?"Sulle":"For you");t.dataset.i18n="fs_you";a.insertBefore(t,a.firstChild);
+        var a=card(x);
         a.addEventListener("click",function(){if(window.goatcounter&&goatcounter.count)goatcounter.count({path:"home-foryou-out",title:x[3],event:true})});
         row.insertBefore(a,row.firstChild)})})();
     var fill=function(){
