@@ -186,10 +186,11 @@ def bake_eras(lang):
     return "".join(f'<a class="era" data-era="{i}" data-lo="{lo or ""}" data-hi="{hi}" data-short="{e(sh)}" href="#{"from=" + str(lo) + "&" if lo else ""}{"to=" + str(hi) if hi != 2099 else ""}">{e(lab)}</a>'.replace("&\"", "\"")
                    for i, (lo, hi, lab, sh) in enumerate(PER))
 eras = bake_eras("en")
-# Buy art, baked: thirty-six works for sale with a picture and a price, one an artist, from the sixty
+# Buy art, baked: sixty works for sale with a picture and a price, one an artist, from the sixty
 # artists the museums hold most of (the names a visitor is likeliest to know), turned by the build's seed. Six show
-# at a time and the row scrolls sideways for the rest; each page view leads with another of the six sixes (tpl_head.html,
-# 2026-10-22: with eighteen and one build a day, a visitor saw the same six all day). In each six, four paintings and two other works, alternating
+# at a time and the row scrolls sideways for the rest; each page view deals its own six from the sixty, four paintings
+# (data-p) and two other works, leaving out what this browser was last shown first (tpl_head.html; 2026-10-22: with
+# eighteen and one build a day, a visitor saw the same six all day; 2026-11-04: six fixed sixes still came round too often). In each six, four paintings and two other works, alternating
 # (2026-10-02: the best-held names are often printmakers and the row read as a print shop; then paintings alone
 # read as too narrow)
 import random as _random
@@ -219,11 +220,12 @@ def _row(sixes=6):
         out += [p[0], p[1], o[0], p[2], o[1], p[3]] if len(p) == 4 and len(o) == 2 else p + o
     return out
 eurf = lambda n: "€" + f"{n:,}".replace(",", " ")
-# past the first six, the pictures wait until the row is scrolled near them (the page makes the six it leads with eager)
-_first = _row()
-_lazy = lambda i: ' loading="lazy"' if i >= 6 else ""
+# the pictures wait until the row is scrolled near them: the page deals its own first six and makes those eager, so
+# none baked eager is fetched for nothing
+_first = _row(10)
+_lazy = lambda i: ' loading="lazy"'
 fs_works = "".join(
-    f'<a class="fs-w" href="{e(w["url"])}" target="_blank" rel="noopener"><img src="{e(imsrc(w["im"]))}" alt="{e(w.get("t") or "")}, {e(A[w["a"]]["n"])}" decoding="async"{_lazy(i)} referrerpolicy="no-referrer-when-downgrade">'
+    f'<a class="fs-w" href="{e(w["url"])}"{" data-p" if _painting(w) else ""} target="_blank" rel="noopener"><img src="{e(imsrc(w["im"]))}" alt="{e(w.get("t") or "")}, {e(A[w["a"]]["n"])}" decoding="async"{_lazy(i)} referrerpolicy="no-referrer-when-downgrade">'
     f'<span class="fs-cap"><i>{e(w.get("t") or "")}</i>{e(A[w["a"]]["n"])}<b>{eurf(w["pr"])}</b></span>'
     # the whole picture, uncropped, while the pointer is on the card (the same file, so no second download). Both are the
     # gallery's own 768-pixel copy where it keeps one (img_small.py): the uploads ran to 1 MB, and on a phone six of them
@@ -231,7 +233,7 @@ fs_works = "".join(
     f'<span class="fs-pop"><img src="{e(imsrc(w["im"]))}" alt="" decoding="async"{_lazy(i)} referrerpolicy="no-referrer-when-downgrade"></span></a>'
     for i, w in enumerate(_first))
 # ... and past those, the row goes on without end: every other work for sale with a picture, fetched from
-# data/fs-more.json only once a visitor scrolls near the thirty-sixth. In rounds, one work an artist each: the
+# data/fs-more.json only once a visitor scrolls near the sixtieth. In rounds, one work an artist each: the
 # best-held artists first, sixty at a time in the seed's order, and within a round the same four paintings to two
 # other works
 def _rest(first):

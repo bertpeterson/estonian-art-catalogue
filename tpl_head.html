@@ -190,7 +190,7 @@ h1 a:hover{color:var(--grey-6)}
 .fs-cap i{display:block;font-family:var(--serif-text);font-size:.8rem;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .fs-cap b{font-family:var(--mono);font-weight:500;color:var(--ink);font-size:.68rem;margin-left:3px}
 .fs-w:hover .fs-cap i{text-decoration:underline}
-/* the row scrolls sideways: six cards in view, thirty-six baked in and the rest added as it nears its end; on a pointer screen, arrows at its ends (shown
+/* the row scrolls sideways: six cards in view, sixty baked in and the rest added as it nears its end; on a pointer screen, arrows at its ends (shown
    while there is more that way) and no scrollbar; on a phone, swiped, a card and a bit at a time */
 .fs-row{position:relative;min-width:0}
 .fs-works{display:grid;gap:10px;grid-auto-flow:column;grid-auto-columns:calc((100% - 50px) / 6);overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;overscroll-behavior-x:contain}
@@ -910,15 +910,21 @@ footer a{border-bottom:1px solid var(--rule)}
       if(i.complete)r();else i.addEventListener("load",r)});
     // the row's arrows: a page of cards a click, each shown while there is more that way
     var row=document.getElementById("fs-works"),prev=document.querySelector(".fs-prev"),next=document.querySelector(".fs-next");
-    // each view leads with another of the baked sixes (not the last one this browser led with); the rest follow in turn
-    (function(){var cs=row.querySelectorAll(".fs-w"),n=Math.floor(cs.length/6),last=-1,k;if(n<2)return;
-      try{last=+localStorage.getItem("museaal.fs6")}catch(e){}
-      k=Math.floor(Math.random()*(n-1));if(k>=last&&last>=0)k++;try{localStorage.setItem("museaal.fs6",k)}catch(e){}
-      for(var i=0;i<6*k;i++)row.appendChild(cs[i]);
-      Array.prototype.forEach.call(row.querySelectorAll(".fs-w img"),function(i,j){if(j<12)i.loading="eager"})})();
+    // each view deals its own six from the baked sixty: four paintings (data-p) and two other works, painting first, none
+    // this browser was shown first in its last four views where enough are left; the rest follow, shuffled, in the same order
+    (function(){var cs=Array.prototype.slice.call(row.querySelectorAll(".fs-w")),seen=[],h=function(c){return c.getAttribute("href")};
+      if(cs.length<12)return;
+      try{seen=JSON.parse(localStorage.getItem("museaal.fs6")||"[]");if(!Array.isArray(seen))seen=[]}catch(e){}
+      var mix=function(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t}return a};
+      var fresh=function(a){return a.filter(function(c){return seen.indexOf(h(c))<0}).concat(a.filter(function(c){return seen.indexOf(h(c))>=0}))};
+      var p=fresh(mix(cs.filter(function(c){return c.hasAttribute("data-p")}))),o=fresh(mix(cs.filter(function(c){return !c.hasAttribute("data-p")}))),out=[];
+      while(p.length||o.length)"ppoppo".split("").forEach(function(k){var q=(k==="p"?p:o).length?(k==="p"?p:o):(p.length?p:o);if(q.length)out.push(q.shift())});
+      try{localStorage.setItem("museaal.fs6",JSON.stringify(out.slice(0,6).map(h).concat(seen).slice(0,24)))}catch(e){}
+      out.forEach(function(c){row.appendChild(c)});
+      Array.prototype.forEach.call(row.querySelectorAll(".fs-w img"),function(i,j){i.loading=j<12?"eager":"lazy"})})();
     var ends=function(){prev.hidden=row.scrollLeft<4;next.hidden=row.scrollLeft+row.clientWidth>=row.scrollWidth-4};
     [prev,next].forEach(function(b,k){b.addEventListener("click",function(){row.scrollBy({left:(k?1:-1)*row.clientWidth,behavior:"smooth"})})});
-    // past the baked thirty-six, the row goes on: the rest of the stock, fetched once a visitor nears the end,
+    // past the baked sixty, the row goes on: the rest of the stock, fetched once a visitor nears the end,
     // twelve cards at a time, and every sixty a card for all works for sale
     var list=null,at=0,since=0,asked=false;
     var el=function(t,c,x){var e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e};
