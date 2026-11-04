@@ -26,7 +26,7 @@ anything private (keys, accounts, personal plans, correspondence) out of this fi
 - Prices: asking prices of current stock (`data/asking_price.py`). A sold gallery work keeps a price
   only when its own page still shows it (Allee: "12 000 € Müüdud."), read fresh from that page and
   shown as "sold · listed at X €" (`lp`), never as what it sold for and never from an older snapshot.
-  No picture for a sold work.
+  Pictures for sold works follow the Images rule above.
 - "The artwall" means the curated first page of the landing wall, `data/masterpieces.json`. Removing
   a work from it never removes it from the catalogue.
 - Never print or echo an API key in tool output.
@@ -36,7 +36,8 @@ anything private (keys, accounts, personal plans, correspondence) out of this fi
 
 - Art by mood: CLIP runs locally only, in `data/.venv-clip`. After new museum pictures, run
   `lookalikes.py`, `same_pictures.py`, `moods.py`, then `taste.py`, and commit `lookalikes.json` +
-  `same_pictures.json` + `moods.json` + `taste_vecs.json`;
+  `same_pictures.json` + `moods.json` + `taste_vecs.json`; `colours.py` (Pillow only) adds new pictures'
+  colours to `colours.json`, the palette on the masthead's Works button;
   CI cannot run CLIP on museum pictures. Never refit `taste_proj.npz` without redoing `stock_taste.json` too.
 - Buy art (`find.html` / `leia.html`): `build_ask.py` writes the pages and `site/data/stock.json`;
   stock moods and taste vectors come from `data/stock_moods.py`. "For you" ranks stock by My List

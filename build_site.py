@@ -64,6 +64,16 @@ from thumbs import thumbs
 SMALL = thumbs(W)
 pics = {i: SMALL.get(w["im"], w["im"]) for i, w in enumerate(W) if w.get("im")}
 json.dump(pics, open(f"{OUT}/data/pics.json", "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
+# ...and each picture's three main colours (data/colours.py), for the palette on the masthead's Works button:
+# by position, in files of 1,024 positions (col/<position // 1024>.json), so a browser with saved works reads
+# only the few files its latest saves are in
+COLS = json.load(open("data/colours.json")) if os.path.exists("data/colours.json") else {}
+os.makedirs(f"{OUT}/data/col", exist_ok=True)
+_col = {}
+for i, w in enumerate(W):
+    if COLS.get(w.get("im")): _col.setdefault(i >> 10, {})[i] = COLS[w["im"]]
+for s, m in _col.items():
+    json.dump(m, open(f"{OUT}/data/col/{s}.json", "w"), separators=(",", ":"))
 # ...and each museum picture's taste (data/taste.py), for the landing wall's "for you" deal: the first 32 of its 48
 # bytes (the main directions come first), by position. [n: uint32][gap to each position: uint32 x n][32 bytes x n],
 # little-endian, fetched only by a browser that has saved or opened works
