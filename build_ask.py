@@ -3,7 +3,7 @@
 
 A visitor sets the controls -- a price range, the medium, the size, mood words -- or says
 what they are looking for, and the page shows works the galleries have for sale now, twelve at a time.
-The assistant is Claude Haiku behind the mood page's Worker (its /ask door,
+The assistant is Claude Sonnet behind the mood page's Worker (its /ask door,
 worker/template.js): it gets the conversation and the controls as they are, and answers
 with a short, factual reply and the whole search -- mood words from the same vocabulary,
 title words, media, a size, a budget, an artist -- which the controls then show. It never

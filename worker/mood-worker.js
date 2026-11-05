@@ -31,7 +31,7 @@
 // Calls the Messages API with fetch: the dashboard's editor takes one file, no build step.
 
 const WORDS = ["solemn", "serene", "contemplative", "melancholy", "lonely", "nostalgic", "tender", "intimate", "joyful", "playful", "festive", "romantic", "dreamy", "mysterious", "eerie", "anxious", "gloomy", "dramatic", "heroic", "bright", "dark", "sunny", "golden", "twilight", "moonlit", "misty", "vivid", "muted", "warm", "cold", "stormy", "still", "wintry", "spring", "summery", "autumnal", "hopeful", "cosy", "sacred", "majestic", "fragile", "sensual", "innocent", "energetic", "proud", "elegant", "lively", "empty", "spiritual", "idyllic", "wild", "harsh", "angry", "abstract", "expressive", "decorative", "simple", "ornate", "rustic", "modern", "sea", "lake", "river", "forest", "trees", "fields", "garden", "mountains", "sky", "village", "city", "harbour", "church", "interior", "portrait", "children", "family", "work", "music", "dance", "horses", "animals", "birds", "flowers", "stilllife", "boats"];
-const MODEL = "claude-haiku-4-5";
+const MODEL = "claude-haiku-5-5";
 const ORIGINS = ["https://museaal.ee", "https://www.museaal.ee"];
 const PER_MINUTE = 20;          // searches and turns per visitor per minute, per Worker instance (both doors)
 const CALLS_PER_MINUTE = 60;    // all requests, a turn's tool rounds included
@@ -59,7 +59,7 @@ const ASK_HEAD = "You are the search desk on museaal.ee, a catalogue of Estonian
   "work to buy among the several thousand works the catalogue's galleries have for sale now, at asking prices from " +
   "tens of euros to tens of thousands (most paintings between a few hundred and a few thousand). The page also has " +
   "controls the visitor sets by hand: a price range, the medium, the size and mood words. Each turn you write a short " +
-  "reply and return the whole search; the page sets its controls to your search and shows the ten works that match it " +
+  "reply and return the whole search; the page sets its controls to your search and shows the twelve works that match it " +
   "best under your reply. ";
 const BLIND = "You do not see the works before they are shown, so never name or describe a particular work, " +
   "and never say what is available or what things cost; earlier turns note what was shown and how many works matched.\n\n";
@@ -71,8 +71,8 @@ const LOOK = "Before you answer you can look at the stock with three tools, whic
   "nothing or only poor matches, change one thing -- a wider budget, one mood word fewer, a related medium -- and " +
   "search again, keeping the title terms for what the visitor named (a season, a place, a subject): a title is the surest " +
   "sign of a subject, the mood words only a guess. When the visitor names an artist, call artist in the same round as the first search. Call similar only " +
-  "when the visitor asks for works like one they have seen. One round is usually enough; there are at most two. Then answer with up " +
-  "to five picks from the works the tools returned in this turn, best first, by id, each with why: one short factual " +
+  "when the visitor asks for works like one they have seen. One round is usually enough; there are at most two. Then answer with three " +
+  "to five picks from the works the tools returned in this turn (fewer only if fewer fit, none only if nothing fits), best first, by id, each with why: one short factual " +
   "phrase in plain words on what it shows and its mood ('two doves, quiet and hopeful', 'an oil, calm sea under a low " +
   "grey sky'), from its technique and mood words, never a list of them. The page shows the title, artist, year, size and price " +
   "beside it: never mention those in why, and never translate a title. No praise, and nothing about an artist's style or " +
@@ -134,7 +134,7 @@ const SCHEMA_ASK = {
 };
 
 // the tools: search takes the same fields as the answer's search; the answer adds the picks
-const ROUNDS = 2;                // tool rounds a turn, then Claude must answer (each Haiku round is ~4 s)
+const ROUNDS = 2;                // tool rounds a turn, then Claude must answer (each round is ~4 s)
 const FIELDS = ["words", "terms", "media", "size", "budget_min", "budget_max", "artist"];
 const obj = (properties, required = Object.keys(properties)) => ({ type: "object", properties, required, additionalProperties: false });
 const TOOLS = [
@@ -248,8 +248,9 @@ function conversation(body) {
   return out.length && out[out.length - 1].role === "user" ? out : [];
 }
 
-// Estonian replies come from Sonnet, whose Estonian is much better than Haiku's (about twice the
-// price a reply): thinking off (between_tools, Sonnet 5.5 only), low effort, and Anthropic's
+// Buy Art's replies come from Sonnet in both languages: side by side on 32 conversations (2026-11-05) Haiku 5.5 was
+// seven times cheaper but lost a budget or a "bigger" on the way, and its Estonian had invented words. The mood page's
+// word-picking stays on Haiku (MODEL). Thinking off (between_tools, Sonnet 5.5 only), low effort, and Anthropic's
 // server-side fallback, which re-runs a mistaken safety decline on another model
 const SONNET = "claude-sonnet-5-5";
 // The message and its content blocks; null for a decline. After a fallback, only the blocks past the last
@@ -267,7 +268,7 @@ async function call(env, system, messages, schema, max_tokens, model = MODEL, ex
   if (sonnet) {
     headers["anthropic-beta"] = "server-side-fallback-2026-07-01";
     Object.assign(body, { thinking: { type: "between_tools" }, fallbacks: "default" });
-    body.output_config.effort = "low";
+    body.output_config.effort = extra.tools ? "medium" : "low";    // at low it answered a quarter of the turns without searching
   }
   const r = await fetch("https://api.anthropic.com/v1/messages", { method: "POST", headers, body: JSON.stringify(body) });
   if (!r.ok) { await refused(r, model); throw new Error("The reader answered " + r.status + "."); }
@@ -385,15 +386,15 @@ async function ask(body, env, reply, ip) {
     if (trail) {
       // the same system, tools and messages every round, with the rounds appended: the cache and Sonnet's
       // thinking blocks hold. After the last round the tools stay listed but cannot be called
-      const m = await call(env, system, messages.concat(trail.t), SCHEMA_PICKS, et ? 1500 : 1000, et ? SONNET : MODEL,
+      const m = await call(env, system, messages.concat(trail.t), SCHEMA_PICKS, 1500, SONNET,
         { tools: TOOLS, tool_choice: { type: trail.t.length / 2 >= ROUNDS ? "none" : "auto" }, cache_control: { type: "ephemeral" } });
       if (!m) return reply(none);
       const calls = m.content.filter(b => b.type === "tool_use");
       if (m.stop === "tool_use" && calls.length) return reply({ calls: calls.map(b => ({ id: b.id, name: b.name, input: b.input })), content: await seal(env, ip, m.content) });
       out = answer(m.content);
       // an answer with no reply (seen once, Sonnet, no search made): the one-call answer instead
-      if (!String(out.reply || "").trim()) out = await claude(env, system.replace(SYSTEM_TOOLS, SYSTEM_ASK), messages, SCHEMA_ASK, et ? 800 : 400, et ? SONNET : MODEL);
-    } else out = await claude(env, system, messages, photo ? SCHEMA_ROOM : SCHEMA_ASK, photo ? 1500 : et ? 800 : 400, photo || et ? SONNET : MODEL);
+      if (!String(out.reply || "").trim()) out = await claude(env, system.replace(SYSTEM_TOOLS, SYSTEM_ASK), messages, SCHEMA_ASK, 800, SONNET);
+    } else out = await claude(env, system, messages, photo ? SCHEMA_ROOM : SCHEMA_ASK, photo ? 1500 : 800, SONNET);
   }
   catch (e) { console.log("ask failed", String(e.message)); return reply({ error: String(e.message || "The assistant could not be reached.") }, 502); }
   if (!out) return reply(none);
@@ -827,9 +828,9 @@ export default {
         method: "POST",
         headers: { "x-api-key": env.ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01", "content-type": "application/json" },
         body: JSON.stringify({
-          model: MODEL, max_tokens: 200, system: SYSTEM,
+          model: MODEL, max_tokens: 2000, system: SYSTEM,     // room for its thinking as well as the few words
           messages: [{ role: "user", content: q }],
-          output_config: { format: { type: "json_schema", schema: SCHEMA } },
+          output_config: { effort: "low", format: { type: "json_schema", schema: SCHEMA } },
         }),
       });
     } catch (e) { return reply({ error: "The reader could not be reached." }, 502); }
