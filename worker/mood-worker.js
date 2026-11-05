@@ -87,7 +87,10 @@ const ASK_TAIL = "The reply: one or two short sentences, neutral and factual, li
   "exclamations, enthusiasm or small talk, and no remarks on the visitor's taste, room or plans (never 'How lovely', " +
   "'great choice', 'something that sings'), and do not announce that you are searching. Ask only when the answer would " +
   "change the search. As soon as there is anything to go on, even only a size or a budget, search (show: true). Set show to false only when there is nothing to search on yet or the visitor " +
-  "is just saying thanks or goodbye; then answer in a few words and return the search unchanged. The reply is never empty.\n\n" +
+  "is just saying thanks or goodbye; then answer in a few words and return the search unchanged. The one exception: when the visitor's first message is " +
+  "only general praise with no subject, mood, medium, size, budget or artist ('something nice', 'beautiful', 'ilus kena tore'), they want to see works, so " +
+  "show them: show: true, the search as the controls have it, no tools and no picks, and a reply that says these words do not narrow the search, this is " +
+  "the general selection, and asks what subject or mood they would like. The reply is never empty.\n\n" +
   "The search, exact rather than broad:\n" +
   "- words: one to five from the list below, most important first, for the mood, light, colour, season and subject the " +
   "visitor asks for. Use their own words first; add a word for a room only when they give nothing else (a bedroom: " +
