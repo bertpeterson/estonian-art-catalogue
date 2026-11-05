@@ -2,7 +2,7 @@
 """Find a work: /find.html and /leia.html, and the stock they read, /data/stock.json.
 
 A visitor sets the controls -- a price range, the medium, the size, mood words -- or says
-what they are looking for, and the page shows ten works the galleries have for sale now.
+what they are looking for, and the page shows works the galleries have for sale now, twelve at a time.
 The assistant is Claude Haiku behind the mood page's Worker (its /ask door,
 worker/template.js): it gets the conversation and the controls as they are, and answers
 with a short, factual reply and the whole search -- mood words from the same vocabulary,
@@ -56,6 +56,30 @@ def dims_of(dm):
     L, S = max(n), min(n)
     return [round(L, 1), round(S, 1)] if 5 <= L <= 600 and S >= 2 else None
 
+def dims_show(dm):
+    """the dimensions on a card, one way for every gallery: '62.0 x 81.0 cm' -> '62 × 81 cm'. What isn't plain numbers
+    is left as the gallery wrote it; a side over 10 m is a typing slip at the source ('300 x 15000 cm') and not shown"""
+    s = (dm or "").strip()
+    m = re.fullmatch(r"(\d+(?:[.,]\d+)?(?:\s*[x×X]\s*\d+(?:[.,]\d+)?)*)\s*(cm|mm)?(\s*\([^()]*\))?", s, re.I)    # '(raamiga)' stays
+    if not m: return s
+    n = [float(x.replace(",", ".")) for x in re.findall(r"\d+(?:[.,]\d+)?", m[1])]
+    unit = (m[2] or "").lower()
+    if unit == "cm" and max(n) > 1000: return ""
+    return " × ".join(f"{x:g}" for x in n) + (" " + unit if unit else "") + (m[3] or "")
+
+# the technique on a card, one way for every gallery ('Õli lõuendil', 'Õli/papp', 'graafika', 'Painting' on the Estonian
+# page); the medium filter still reads the gallery's own words (media_of)
+TECH_ET = {"painting": "Maal", "photography": "Foto", "printmaking": "Graafika", "drawing": "Joonistus", "mixed media": "Segatehnika",
+           "sculpture": "Skulptuur", "oil on canvas": "Õli, lõuend", "muu": "", "other": ""}
+TECH_ON = {"lõuendil": "lõuend", "papil": "papp", "masoniidil": "masoniit", "kartongil": "kartong", "paberil": "paber", "vineeril": "vineer"}
+
+def tech_show(t):
+    t = (t or "").strip()
+    if t.lower() in TECH_ET: return TECH_ET[t.lower()]
+    m = re.fullmatch(r"(.+?)(?:\s+|\s*[./]\s*)(lõuendil|papil|masoniidil|kartongil|paberil|vineeril|lõuend|papp|masoniit|kartong|paber|vineer)", t, re.I)
+    if m and not m[1].endswith(","): t = m[1] + ", " + TECH_ON.get(m[2].lower(), m[2].lower())
+    return t[:1].upper() + t[1:]
+
 # the medium, from the technique as the gallery states it: a bit each, a work may have two (an oil painting is
 # also a painting). Only what the technique says: a painting that names no medium is not "oil".
 OIL = re.compile(r"õli(?!\s*pastel)|\boil\b(?!\s*pastel)|ölmal", re.I)      # oil pastel is a crayon, not paint
@@ -84,7 +108,7 @@ def media_of(kind, tech):
     return m
 
 T = {"en": dict(file="find", other="leia", other_l="Eesti keeles", site="Estonian Art Catalogue",
-                h="Buy Art", title="Buy Estonian art: {n} works for sale, with prices", lede="Art for your home from the catalogue's galleries, for sale now. Set the price, medium, size, mood and artist, or describe what you need. Each work links to the gallery that sells it.",
+                h="Buy Art", title="Buy Estonian art: {n} works for sale, with prices", lede="Art for your home from the catalogue's galleries, for sale now. Each work links to the gallery that sells it.",
                 desc="Paintings, prints and sculpture by Estonian artists for sale: {n} works from Estonian galleries, each with the gallery's asking price. Filter by price, medium, size, mood and artist; every work links to the gallery that sells it.",
                 sh="Estonian art for sale", sp="Buy paintings, prints, watercolours and sculpture by Estonian artists from the galleries that sell them: {n} works, each with its asking price and a link to the gallery. museaal.ee is a catalogue, not a shop; the sale is the gallery's.",
                 hello="Set the filters, or describe what you need: the room, size, budget, subject or mood.",
@@ -111,10 +135,10 @@ T = {"en": dict(file="find", other="leia", other_l="Eesti keeles", site="Estonia
                 sl_add="Add to My List", sl_remove="Remove from My List", fy="For you", fybtn="Similar to My List ({n})",
                 fyhint="Bookmark three works, here, on the mood wall or in the catalogue, or save an artist, and this puts first what looks like them and the artists you saved.",
                 fysee="See My List", fybit="based on My List",
-                fynone="nothing in My List to go by yet",
+                sortby="Sort", sorts=dict(best="Selection", up="Price: low to high", down="Price: high to low", new="Recently listed"),
                 hash=""),
      "et": dict(file="leia", other="find", other_l="In English", site="Eesti Kunstikataloog",
-                h="Osta kunsti", title="Osta Eesti kunsti: müügil {n} teost koos hindadega", lede="Kunst sinu koju kataloogi galeriidest, praegu müügil. Sea hind, tehnika, suurus, meeleolu ja kunstnik või kirjelda, mida vajad. Iga teos viib seda müüva galerii lehele.",
+                h="Osta kunsti", title="Osta Eesti kunsti: müügil {n} teost koos hindadega", lede="Kunst sinu koju kataloogi galeriidest, praegu müügil. Iga teos viib seda müüva galerii lehele.",
                 desc="Eesti kunstnike maalid, graafika ja skulptuurid müügil: {n} teost Eesti galeriidest, igaüks galerii küsitud hinnaga. Vali hinna, tehnika, suuruse, meeleolu ja kunstniku järgi; iga teos viib seda müüva galerii lehele.",
                 sh="Eesti kunsti müük", sp="Osta Eesti kunstnike maale, graafikat, akvarelle ja skulptuure otse neid müüvatelt galeriidelt: {n} teost, igaüks küsitud hinnaga ja lingiga galeriile. museaal.ee on kataloog, mitte pood; teose müüb galerii.",
                 hello="Sea filtrid või kirjelda, mida vajad: tuba, suurus, eelarve, teema või meeleolu.",
@@ -141,7 +165,7 @@ T = {"en": dict(file="find", other="leia", other_l="Eesti keeles", site="Estonia
                 sl_add="Lisa minu nimekirja", sl_remove="Eemalda minu nimekirjast", fy="Sulle", fybtn="Sarnased minu nimekirjaga ({n})",
                 fyhint="Märgi järjehoidjaga kolm teost, siin, meeleolu seinal või kataloogis, või salvesta kunstnik, ja ette tulevad nendega sarnased ja sinu salvestatud kunstnikud.",
                 fysee="Vaata minu nimekirja", fybit="minu nimekirja põhjal",
-                fynone="minu nimekirjas pole veel millegi järgi minna",
+                sortby="Järjesta", sorts=dict(best="Valik", up="Hind: odavamad ees", down="Hind: kallimad ees", new="Hiljuti lisatud"),
                 hash="lang=et&")}
 
 def data():
@@ -161,6 +185,10 @@ def data():
     words = [w["en"] for w in json.load(open("data/moods.json", encoding="utf-8"))["words"]]
     aidx, arts, gals, works, ims = {}, [], {}, [], []
     seen = set()
+    # the day the weekly run first saw each work, for "Recently listed" (the same dates as the feeds, rss below)
+    first = json.load(open("data/gallery_seen.json", encoding="utf-8")) if os.path.exists("data/gallery_seen.json") else {}
+    listed = {"G" + re.sub(r"[^A-Za-z0-9]", "", g): (datetime.date.fromisoformat(x.get("day") or x["first"] + "-01") - datetime.date(2020, 1, 1)).days
+              for g, x in first.items()}
     for w in W:
         if w.get("kind") != "gallery" or not (w.get("im") or "").startswith("g:"): continue
         u = re.sub(r"^http:", "https:", w["im"][2:])
@@ -175,12 +203,13 @@ def data():
         tech = H.val(w, "tce") or H.val(w, "tc") or ""                    # as the gallery states it; the English page shows field 15
         tech_en = H.val(w, "tc") or tech
         if re.search(r"\bmüüdud\b|\bsold\b", tech, re.I): continue          # a gallery's "sold" read as the technique
-        works.append([w.get("t") or "", aidx[a], w.get("y") or "", u, tech[:60], w.get("dm") or "",
+        works.append([w.get("t") or "", aidx[a], w.get("y") or "", u, tech_show(tech)[:60], dims_show(w.get("dm")),
                       size_of(w.get("dm")), kind_of(w), w.get("pr") or 0, gals[g], w["url"], k,
                       [x for j, z in S.get(w["im"], [])[:8] if z >= 1.0 for x in (j, round(z * 10))],   # word, z x 10, flat
                       dims_of(w.get("dm")) or 0,
                       media_of(kind_of(w), " ".join(filter(None, (H.val(w, "tce"), H.val(w, "tc"))))),
-                      tech_en[:60] if tech_en != tech else ""])
+                      tech_en[:60] if tech_en != tech_show(tech) else "",
+                      listed.get(k, 0)])                                    # field 16: days since 2020 it has been listed from
         ims.append(w["im"])
     return {"words": words, "artists": arts, "galleries": list(gals), "works": works, "_ims": ims, "_aidx": aidx}
 
@@ -418,6 +447,11 @@ function arButton(w,frameOf){
 function blank(){return {words:[],terms:[],media:[],min:0,max:0,size:'any',artist:'',you:false}}
 var DAY=new Date().toISOString().slice(0,10);
 var Q=blank(), MB={};             // each medium's bit in a work's field 14, from the page (build_ask.py BIT)
+var PG=12, SORT='';               // works a page (12 fills two, three, four or six columns); the visitor's sort, kept apart from the search the assistant sees
+// the order the visitor chose; works with no price come last, whichever way the prices run
+function sorted(l){if(!SORT)return l;l=l.slice();
+  if(SORT==='new')return l.sort(function(a,b){return (b[16]||0)-(a[16]||0)});
+  var up=SORT==='up'?1:-1;return l.sort(function(a,b){return !a[8]-!b[8]||up*(a[8]-b[8])})}
 function fold(s){return s.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase()}
 // a name as typed, in any case form: 'leisi' or 'leisilt' finds Malle Leis
 function hitName(af,x){return af.indexOf(x)>=0||af.split(' ').some(function(n){return n.length>=3&&x.indexOf(n)===0&&x.length-n.length<=3})}
@@ -450,9 +484,9 @@ function rank(q){
     }
     out.push([s,w])});
   out.sort(function(a,b){return b[0]-a[0]});
-  // one work per artist in each row of ten, as far as the list allows
+  // one work per artist in each page, as far as the list allows
   var picked=[],per={},rest=[];
-  out.forEach(function(p){var a=p[1][1];if(per[a]>=Math.floor(picked.length/10)+1){rest.push(p[1]);return}per[a]=(per[a]||0)+1;picked.push(p[1])});
+  out.forEach(function(p){var a=p[1][1];if(per[a]>=Math.floor(picked.length/PG)+1){rest.push(p[1]);return}per[a]=(per[a]||0)+1;picked.push(p[1])});
   return picked.concat(rest)}
 function count(n){return n===1?T.count1:T.count.replace('{n}',String(n).replace(/\B(?=(\d{3})+(?!\d))/g,' '))}
 function priceText(lo,hi){return lo&&hi?eur(lo)+' – '+eur(hi):hi?T.upto+' '+eur(hi):lo?T.from_+' '+eur(lo):T.anyprice}
@@ -579,7 +613,7 @@ function card(w,why){
   var cap=el('span','cap');cap.appendChild(el('i',null,w[0]));top.appendChild(cap);c.appendChild(top);
   var by=el('span','by'), an=el('a',null,a[0]);an.href='./#'+T.hash+'artist='+a[1]+'&open='+encodeURIComponent(w[11]);an.title=T.record;
   by.appendChild(an);if(w[2])by.appendChild(document.createTextNode(', '+w[2]));c.appendChild(by);
-  var low=out(), meta=[tech(w),w[5]].filter(Boolean).join(' · ');if(meta)low.appendChild(el('span','meta',meta));
+  var low=out(), meta=[tech(w),EN?w[5]:w[5].replace(/(\d)\.(\d)/g,'$1,$2')].filter(Boolean).join(' · ');if(meta)low.appendChild(el('span','meta',meta));
   var pr=el('span','price');pr.appendChild(el('b',null,w[8]?eur(w[8]):T.noprice));pr.appendChild(document.createTextNode(' '+(T.at?T.at+' ':'')+g+' ↗'));low.appendChild(pr);
   c.appendChild(low);
   if(why)c.appendChild(el('p','why',why));
@@ -588,29 +622,42 @@ function card(w,why){
   if(AR&&w[13])c.appendChild(arButton(w,function(){return R&&R.sel?R.sel.frame:'black'}));
   c.appendChild(slBtn(w[11],T,'list-add-find',syncYou));
   return c}
-// the search's results into box: what it was, how many answer to it, and ten at a time, leaving out works an
-// earlier turn showed
+// a search's settings as chips over its results, each with a way to drop it (the controls may be folded away or far up)
+function drop(k,v){if(k==='media'||k==='words'){var i=Q[k].indexOf(v);if(i>=0)Q[k].splice(i,1)}else if(k==='price')Q.min=Q.max=0;else if(k==='size')Q.size='any';else if(k==='terms')Q.terms=[];else if(k==='artist')Q.artist='';changed()}
+function chips(q){var box=el('div','bits'),add=function(label,k,v){var p=el('span','bit',label),x=el('button','x','×');x.type='button';x.setAttribute('aria-label',T.clear+': '+label);
+    x.addEventListener('click',function(){drop(k,v)});p.appendChild(x);box.appendChild(p)};
+  q.media.forEach(function(m){add(T.media[m],'media',m)});
+  if(q.size!=='any'&&!R)add(T.sizes[q.size],'size');
+  if(q.min||q.max)add(priceText(q.min,q.max),'price');
+  q.words.forEach(function(x){add(labels[x]||x,'words',x)});
+  if(q.terms.length)add(T.titlew+': '+q.terms.join(', '),'terms');
+  if(q.artist)add(q.artist,'artist');
+  return box.firstChild?box:null}
+// the search's results into box: how many answer to it, its settings, the sort, and a page at a time, leaving out works
+// an earlier turn showed
 function show(box,q,picks){
   var ty=q.you&&TASTE&&TASTE.n?TASTE:null, why={}, pk=(picks||[]).map(function(p){var w=byId(p.id);if(w)why[w.i]=p.why;return w}).filter(Boolean);
   var all=rank(q), list=pk.concat(all.filter(function(w){return !shownKeys[w[11]]&&!(w.i in why)})), n=0, keys=[], grid=el('div','grid'), more=el('button','btn more',T.more);more.type='button';
-  var bits=[count(all.length)].concat(q.media.map(function(m){return T.media[m]}));
-  if(R){var ws=wallCm(R,R.sel?R.sel.wall:0);bits.push(T.fits+' '+Math.round(ws[0])+' × '+Math.round(ws[1])+' cm')}else if(q.size!=='any')bits.push(T.sizes[q.size]);
-  if(q.min||q.max)bits.push(priceText(q.min,q.max));
-  bits=bits.concat(q.words.map(function(x){return labels[x]||x}));
-  if(q.terms.length)bits.push(T.titlew+': '+q.terms.join(', '));
-  if(q.you)bits.push(ty?T.fybit:T.fynone);
-  if(bits.length===1&&!q.artist)bits.push(T.daily);
-  if(q.artist)bits.push(q.artist);
-  box.appendChild(el('p','search',bits.join(' · ')));
+  var bits=[count(all.length)], set=chips(q), head=el('div','shead'), line=el('p','search');
+  if(R){var ws=wallCm(R,R.sel?R.sel.wall:0);bits.push(T.fits+' '+Math.round(ws[0])+' × '+Math.round(ws[1])+' cm')}
+  if(ty)bits.push(T.fybit);
+  var daily=bits.length===1&&!set;
+  function say(){line.textContent=bits.concat(daily&&!SORT?[T.daily]:[]).join(' · ')}
+  say();head.appendChild(line);box.appendChild(head);if(set)box.appendChild(set);
   if(!list.length){box.appendChild(el('p','none',T.none));
     // an artist with works for sale outside the other settings: say how many, and offer them
     var solo=blank();solo.artist=q.artist;var k=q.artist&&(q.media.length||q.min||q.max||q.size!=='any'||q.words.length||q.terms.length)?rank(solo).length:0;
     if(k){var p=el('p','none',T.artistonly.replace('{who}',q.artist).replace('{n}',count(k))+' '),go=el('button','linkbtn',T.showthem);go.type='button';
       go.addEventListener('click',function(){Q=solo;changed()});p.appendChild(go);box.appendChild(p)}
     return {note:k?T.artistonly.replace('{who}',q.artist).replace('{n}',count(k)):'',list:list,keys:keys}}
-  function page(){list.slice(n,n+10).forEach(function(w){grid.appendChild(card(w,why[w.i]));shownKeys[w[11]]=1;keys.push(w[11])});n+=10;more.hidden=n>=list.length}
+  var view=sorted(list);
+  function page(){view.slice(n,n+PG).forEach(function(w){grid.appendChild(card(w,why[w.i]));shownKeys[w[11]]=1;keys.push(w[11])});n+=PG;more.hidden=n>=view.length}
+  if(list.length>1){var so=el('select','sort');so.setAttribute('aria-label',T.sortby);
+    [['','best'],['up','up'],['down','down'],['new','new']].forEach(function(x){var o=el('option',null,T.sorts[x[1]]);o.value=x[0];so.appendChild(o)});so.value=SORT;
+    so.addEventListener('change',function(){SORT=so.value;gc('find-sort-'+(SORT||'best'));keys.forEach(function(k){delete shownKeys[k]});keys.length=0;grid.textContent='';n=0;view=sorted(list);page();say()});
+    head.appendChild(so)}
   page();box.appendChild(grid);box.appendChild(more);more.addEventListener('click',page);
-  return {list:list,keys:keys,note:T.shown+' '+Math.min(10,list.length)+' / '+all.length+': '+list.slice(0,10).map(function(w){return w[0]+' — '+D.artists[w[1]][0]+(w[8]?', '+eur(w[8]):'')+(w[13]?', '+cm(w[13]):'')+' ['+wid(w)+']'}).join('; ')}}
+  return {list:list,keys:keys,note:T.shown+' '+Math.min(PG,list.length)+' / '+all.length+': '+view.slice(0,PG).map(function(w){return w[0]+' — '+D.artists[w[1]][0]+(w[8]?', '+eur(w[8]):'')+(w[13]?', '+cm(w[13]):'')+' ['+wid(w)+']'}).join('; ')}}
 
 // ---- the controls: price range, medium, size, mood words ----
 var F=document.getElementById('filters'), plo=document.getElementById('plo'), phi=document.getElementById('phi'), pout=document.getElementById('pout');
@@ -631,7 +678,10 @@ function tags(){var a=+plo.value,b=+phi.value,W=dual.clientWidth;if(!W)return;
   if(gap>0){l=Math.max(0,l-gap/2);h=Math.min(W-wh,l+wl+8)}
   tlo.style.left=l+'px';thi.style.left=h+'px'}
 window.addEventListener('resize',tags)
-function tally(){fcount.textContent=D?T.show.replace('{c}',count(rank(Q).length))+' ↓':''}
+function tally(){fcount.textContent=D?T.show.replace('{c}',count(rank(Q).length))+(WIDE.matches?'':' ↓'):''}
+// the panel's foot and, on a phone, its folded line: how many settings are on; Clear only when there is something to clear
+function setN(){return Q.media.length+Q.words.length+(Q.size!=='any'?1:0)+(Q.min||Q.max?1:0)+(Q.artist?1:0)+(Q.terms.length?1:0)}
+function footing(){var c=setN();document.getElementById('fclear').hidden=!c;document.getElementById('fsum').textContent=c?String(c):''}
 // the controls as the search is
 function sync(){
   plo.value=lowAt(Q.min);phi.value=highAt(Q.max);pout.textContent=priceText(Q.min,Q.max);rail();
@@ -646,7 +696,7 @@ function sync(){
   document.getElementById('ps').textContent=Q.size&&Q.size!=='any'?T.sizes[Q.size].replace(/^./,function(c){return c.toUpperCase()}):'';
   document.getElementById('pm').textContent=Q.media.map(function(m){return T.media[m]}).join(', ');
   document.getElementById('pa').textContent=Q.artist;
-  document.getElementById('pw').textContent=Q.words.map(function(w){return labels[w]}).join(', ');syncYou();tally()}
+  document.getElementById('pw').textContent=Q.words.map(function(w){return labels[w]}).join(', ');syncYou();tally();footing()}
 // ---- the artist: a name typed, and chosen from those with work for sale (with how many) ----
 var ain=document.getElementById('artist'), alist=document.getElementById('artists'), aclr=document.getElementById('aclear'), act=-1;
 function names(s){var f=fold(s.trim());if(!D||f.length<2)return [];
@@ -671,6 +721,7 @@ var live=null;
 function refresh(quiet){
   if(!D){stock().then(refresh,function(){});return}
   if(Q.you&&!tasteFresh()){if(!tasteP)tasteP=buildTaste().then(function(){tasteP=null;if(fyAuto){fyAuto=false;gc('find-foryou-auto')}refresh(quiet)},function(){tasteP=null;Q.you=false;sync();refresh(quiet)});return}
+  if(Q.you&&TASTE&&!TASTE.n){Q.you=false;sync()}     // the list holds nothing the page can read (works long gone): the switch says so by being off
   if(!live||live.turn){var b=el('div','msg them');log.appendChild(b);live={b:b,box:el('div')};b.appendChild(live.box)}
   else live.keys.forEach(function(k){delete shownKeys[k]});
   live.box.textContent='';var s=show(live.box,Q);live.keys=s.keys;
@@ -683,6 +734,7 @@ function slid(e){var a=+plo.value,b=+phi.value;
 [plo,phi].forEach(function(x){x.addEventListener('input',slid);x.addEventListener('change',changed)});
 function toggle(a,x){var i=a.indexOf(x);if(i>=0)a.splice(i,1);else a.push(x)}
 F.addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;
+  if(b.id==='ftoggle'){var o=F.classList.toggle('open');b.setAttribute('aria-expanded',String(o));if(o)tags();return}
   if(b.dataset.m)toggle(Q.media,b.dataset.m);
   else if(b.dataset.w)toggle(Q.words,b.dataset.w);          // in the order chosen: the first weighs most
   else if(b.dataset.s)Q.size=b.dataset.s;
@@ -692,7 +744,7 @@ F.addEventListener('click',function(e){var b=e.target.closest('button');if(!b)re
   else if(b.id==='foryou'){Q.you=!Q.you;fyAuto=false;fyKeep(Q.you);gc(Q.you?'find-foryou':'find-foryou-off')}
   else if(b.id==='fclear'){Q=blank();Q.you=fyDefault()}      // the filters cleared; For you as this browser has it
   else if(b.id==='moremoods'){var o=moods.classList.toggle('open');b.textContent=o?T.fewer:T.moremoods;b.setAttribute('aria-expanded',String(o));return}
-  else if(b===fcount){if(live)live.b.scrollIntoView({block:'start',behavior:'smooth'});else refresh();return}
+  else if(b===fcount){if(!WIDE.matches){F.classList.remove('open');document.getElementById('ftoggle').setAttribute('aria-expanded','false')}if(live)live.b.scrollIntoView({block:'start',behavior:'smooth'});else refresh();return}
   else return;
   changed()});
 // the assistant's search, into the controls (a Worker from before the controls answers with one kind)
@@ -825,7 +877,18 @@ CSS = BM.CSS + """
 #chatset .bit{display:inline-flex;align-items:center;gap:4px;font-size:.85rem;border:1px solid var(--rule);padding:3px 4px 3px 9px}
 #chatset .x{background:none;border:0;color:var(--grey);font-size:1rem;line-height:1;padding:2px 5px;cursor:pointer}#chatset .x:hover{color:var(--ink)}
 .f-foot{display:flex;justify-content:space-between;align-items:center;gap:8px;border-top:1px solid var(--rule);padding-top:12px}
-.count{background:var(--ink);border:0;padding:9px 12px;font:500 .8rem/1 var(--mono);color:var(--paper);font-variant-numeric:tabular-nums;cursor:pointer}.count:empty{visibility:hidden}
+.count{background:var(--ink);border:0;padding:9px 12px;font:500 .8rem/1 var(--mono);color:var(--paper);font-variant-numeric:tabular-nums;white-space:nowrap;cursor:pointer}.count:empty{visibility:hidden}
+/* the panel on a phone: one line until asked for, so the works come first */
+.f-toggle{display:none}
+@media (max-width:979px){.f-toggle{display:flex;width:100%;margin:0;background:none;border:0;padding:0;cursor:pointer;align-items:center}
+  .f-toggle::after{content:"+";font-size:.9rem;letter-spacing:0}.filters.open .f-toggle::after{content:"−"}
+  .f-toggle .picked{flex:1;text-align:left;font:500 .8rem/1 var(--mono);letter-spacing:0;color:var(--ink)}
+  .filters:not(.open)>:not(.f-toggle){display:none}}
+.shead{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:6px 12px;margin-top:10px}.shead .search{margin:0!important}
+.sort{font:500 .72rem/1.2 var(--mono);color:var(--ink);background:var(--raise);border:1px solid var(--rule);border-radius:0;padding:6px 8px;cursor:pointer}
+.log>.msg .bits{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.log>.msg .bit{display:inline-flex;align-items:center;gap:4px;font-size:.82rem;color:var(--ink);border:1px solid var(--rule);padding:2px 3px 2px 8px}
+.log>.msg .bit .x{background:none;border:0;color:var(--grey);font-size:1rem;line-height:1;padding:2px 5px;cursor:pointer}.log>.msg .bit .x:hover{color:var(--ink)}
 .log{display:grid;gap:16px}
 .msg p{margin:0}
 .msg.you{justify-self:end;max-width:min(560px,90%);background:var(--raise);border:1px solid var(--rule);padding:10px 14px;font:400 1.05rem/1.4 var(--serif)}
@@ -834,6 +897,7 @@ CSS = BM.CSS + """
 .search{margin:10px 0 0!important;font:500 .72rem/1.4 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--grey)}
 .none{margin-top:10px!important;color:var(--grey)}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:18px 14px;margin-top:14px}
+@media (min-width:980px){.log .grid{grid-template-columns:repeat(auto-fill,minmax(205px,1fr));gap:24px 18px}}
 .card{display:grid;align-content:start;gap:4px}
 .card .out{display:grid;gap:3px;text-decoration:none}
 .card img{display:block;width:100%;aspect-ratio:1;object-fit:contain;background:var(--field)}
@@ -944,6 +1008,7 @@ def panel(t, labels, M, names=()):
     moods += f'<button type="button" class="linkbtn" id="moremoods" aria-expanded="false" aria-controls="moods">{e(t["moremoods"])}</button>'
     n = len(PRICE_STOPS) - 1
     return (f'<div class="filters" id="filters" role="group" aria-label="{e(t["filters"])}" data-bits="{e(json.dumps(BIT))}">'
+            f'<button type="button" class="f-name f-toggle" id="ftoggle" aria-expanded="false" aria-controls="filters">{e(t["filters"])} <span class="picked" id="fsum"></span></button>'
             f'<div class="f-row" id="fyou"><div class="f-name">{e(t["fy"])}</div><button type="button" class="switch" id="foryou" aria-pressed="false" disabled>{e(t["fybtn"].format(n=0))}</button>'
             f'<p class="f-hint" id="fyhint" hidden></p></div>'
             f'<div class="f-row"><div class="f-name">{e(t["price"])} <output id="pout">{e(t["anyprice"])}</output></div>'
@@ -976,7 +1041,7 @@ def page(lang, ver, api, labels, M, n=0, tver="", names=()):
                                        "media", "anyprice", "upto", "from_", "count", "count1", "show", "moremoods", "fewer", "clear", "artist", "titlew", "artistonly", "showthem", "daily",
                                        "yourroom", "looking", "photomsg", "wallw", "drag", "onwall", "fits", "roomnote", "nowall", "badphoto",
                                        "choose", "hangmore", "remove", "together", "frames", "reset", "ar", "arwait", "arfail", "arsafari",
-                                       "sl_add", "sl_remove", "fybtn", "fyhint", "fysee", "fybit", "fynone")}, ensure_ascii=False).replace("</", "<\\/")
+                                       "sl_add", "sl_remove", "fybtn", "fyhint", "fysee", "fybit", "sortby", "sorts")}, ensure_ascii=False).replace("</", "<\\/")
     lj = json.dumps(labels, ensure_ascii=False).replace("</", "<\\/")
     ask = (api.rstrip("/") + "/ask") if api else ""
     ts = f' data-ts="{e(BM.TS)}"' if ask and BM.TS else ""       # the Worker's Turnstile site key
@@ -1055,7 +1120,7 @@ def sale_pages(d):
                 f'<article class="card"><a class="out" href="{e(w[10])}" target="_blank" rel="noopener" data-out="{e(gals[w[9]])}">'
                 f'<img src="{e(w[3])}" alt="{e(w[0])}, {e(arts[w[1]][0])}" loading="lazy" decoding="async" referrerpolicy="no-referrer-when-downgrade">'
                 f'<span class="cap"><i>{e(w[0])}</i>{e(arts[w[1]][0])}{", " + e(str(w[2])) if w[2] else ""}</span>'
-                + (f'<span class="meta">{e(" · ".join(x for x in ((lang == "en" and w[15]) or w[4], w[5]) if x))}</span>' if (w[4] or w[5]) else "")
+                + (f'<span class="meta">{e(" · ".join(x for x in ((lang == "en" and w[15]) or w[4], w[5] if lang == "en" else re.sub(r"(?<=[0-9])[.](?=[0-9])", ",", w[5])) if x))}</span>' if (w[4] or w[5]) else "")
                 + f'<span class="price"><b>{eur(w[8], lang) if w[8] else e(t["noprice"])}</b> {e((t["at"] + " ") if t["at"] else "")}{e(gals[w[9]])} ↗</span></a>'
                 f'<a class="rec" href="{BASE}/{"a" if lang == "en" else "k"}/{arts[w[1]][1]}">{e(st["artist"])}</a></article>' for w in rows)
             find = f'{BASE}/{t["file"]}#{hashq}'
