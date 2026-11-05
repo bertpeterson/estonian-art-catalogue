@@ -120,7 +120,7 @@ T = {"en": dict(file="find", other="leia", other_l="Eesti keeles", site="Estonia
                 badphoto="That photo could not be read. Try a JPEG or PNG.",
                 label="Your message", ph="Describe the work you're looking for.", send="Send",
                 more="Show more", at="at", noprice="Price on request", none="No work for sale matches this search. Widen the price range or clear a filter.",
-                thinking="Thinking…", how="How it searched", like="Works like", choosing="Choosing from these", failed="The assistant could not be reached. Try again in a moment.", record="In the catalogue",
+                thinking="Thinking…", how="How it searched", like="Works like", choosing="Choosing from these", failed="The assistant could not be reached. Try again in a moment.", robot="This browser did not pass the site's robot check, so the assistant cannot answer here. The filters still work. For the assistant, try another browser or turn off content blockers.", record="In the catalogue",
                 kinds=dict(paint="paintings", paper="works on paper", sculpture="sculpture", photo="photographs"),
                 sizes=dict(small="small", medium="medium", large="large"), under="under", over="over", shown="Shown",
                 media=dict(oil="Oil", acrylic="Acrylic", watercolour="Watercolour", mixed="Mixed media", print="Print", drawing="Drawing",
@@ -150,7 +150,7 @@ T = {"en": dict(file="find", other="leia", other_l="Eesti keeles", site="Estonia
                 badphoto="Seda fotot ei õnnestunud lugeda. Proovi JPEG- või PNG-faili.",
                 label="Sinu sõnum", ph="Kirjelda teost, mida otsid.", send="Saada",
                 more="Näita rohkem", at="", noprice="Hind päringul", none="Müügil pole ühtki teost, mis sellele otsingule vastaks. Laienda hinnavahemikku või eemalda mõni filter.",
-                thinking="Mõtlen…", how="Kuidas otsisin", like="Sarnased teosele", choosing="Valin nende seast", failed="Abilist ei õnnestunud kätte saada. Proovi hetke pärast uuesti.", record="Kataloogis",
+                thinking="Mõtlen…", how="Kuidas otsisin", like="Sarnased teosele", choosing="Valin nende seast", failed="Abilist ei õnnestunud kätte saada. Proovi hetke pärast uuesti.", robot="See brauser ei läbinud saidi robotikontrolli, seega abiline ei saa siin vastata. Filtrid töötavad edasi. Abilise kasutamiseks proovi teist brauserit või lülita sisublokeerijad välja.", record="Kataloogis",
                 kinds=dict(paint="maalid", paper="tööd paberil", sculpture="skulptuur", photo="fotod"),
                 sizes=dict(small="väike", medium="keskmine", large="suur"), under="alla", over="üle", shown="Näidatud",
                 media=dict(oil="Õli", acrylic="Akrüül", watercolour="Akvarell", mixed="Segatehnika", print="Graafika", drawing="Joonistus",
@@ -792,7 +792,8 @@ function send(text,photo){
     if(R&&s.list.length){fill(R,s.list);if(photo&&R.v.parentNode===b)hang(R,R.list[0])}
     msgs.push({role:'assistant',content:(q.reply||'')+extra+(s.note?' ('+s.note+')':'')});
     gc('find-turn-'+V,photo?'photo':q.show?'search':'talk');
-  }).catch(function(){b.classList.remove('wait');b.firstChild.textContent=T.failed;msgs.pop()})
+  // what went wrong goes to the console; a browser the robot check refuses (the Worker's 401) is told so, it would fail for good
+  }).catch(function(e){console.warn('Buy Art assistant:',e&&e.error||e);b.classList.remove('wait');b.firstChild.textContent=e&&e.human?T.robot:T.failed;msgs.pop()})
   .then(function(){busy=false})}
 // a photo is shrunk to 1280 pixels and re-encoded here, which also drops its location data, before it is sent
 function shrink(f){
@@ -1037,7 +1038,7 @@ PHOTO = False
 def page(lang, ver, api, labels, M, n=0, tver="", names=()):
     t = T[lang]
     me, other = f"{BASE}/{t['file']}", f"{BASE}/{t['other']}"
-    tj = json.dumps({k: t[k] for k in ("more", "at", "noprice", "none", "thinking", "how", "like", "choosing", "failed", "record", "sizes", "shown", "hash",
+    tj = json.dumps({k: t[k] for k in ("more", "at", "noprice", "none", "thinking", "how", "like", "choosing", "failed", "robot", "record", "sizes", "shown", "hash",
                                        "media", "anyprice", "upto", "from_", "count", "count1", "show", "moremoods", "fewer", "clear", "artist", "titlew", "artistonly", "showthem", "daily",
                                        "yourroom", "looking", "photomsg", "wallw", "drag", "onwall", "fits", "roomnote", "nowall", "badphoto",
                                        "choose", "hangmore", "remove", "together", "frames", "reset", "ar", "arwait", "arfail", "arsafari",
