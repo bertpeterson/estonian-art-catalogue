@@ -20,7 +20,7 @@ with the crop walked on through its ruler and card; and a cluster of windows nee
 of them, which ended the crops of paintings that had no chart. `--all` reads every
 photograph again after such a change.
 
-Run deliberately (numpy, Pillow):  python3 chart_side.py [--all]   (from data/; monthly in the workflow)
+Run deliberately (numpy, Pillow):  python3 chart_side.py [--all | --cropped]   (from data/; monthly in the workflow)
 """
 import json, os, re, io, time, urllib.request, urllib.parse
 from concurrent.futures import ProcessPoolExecutor
@@ -45,7 +45,8 @@ for w in W:
         elif rp > rw * 1.08: SURPLUS[im] = ("y", 1 - rw / rp)    # taller
 import sys
 REDO = "--all" in sys.argv        # read every photograph again (after a change to the rules below)
-todo = sorted({w["im"] for w in W if str(w.get("im", ""))[:2] in ("m:", "e:") and (REDO or w["im"] not in sides)})
+RECROP = "--cropped" in sys.argv   # only the photographs that have a crop now
+todo = sorted({w["im"] for w in W if str(w.get("im", ""))[:2] in ("m:", "e:") and (sides.get(w["im"]) if RECROP else REDO or w["im"] not in sides)})
 print(f"{len(sides):,} photographs read before, {len(todo):,} to read", flush=True)
 
 BAND = 0.18          # how far in from an edge a chart is looked for
@@ -136,7 +137,7 @@ def wedge_of(hsv):
     return best[1:] if best else None
 
 def strip_of(hsv, band=0.18, cw=12, step=3):
-    """(side, fraction) of a strip of large colour patches along an edge -- Kodak's Color
+    """(side, fraction, start, end along the edge) of a strip of large colour patches along an edge -- Kodak's Color
     Control Patches, a Farbkarte's row -- or None. The windows above look for many hues in
     a small square, and a strip's patches are each wider than the square: a column of
     solid squares beside Mägi's Norra maastik (Tartu Art Museum) went unseen, while the
@@ -182,8 +183,9 @@ def strip_of(hsv, band=0.18, cw=12, step=3):
                 if all(min(abs(h - d), 360 - abs(h - d)) >= 25 for d in dist): dist.append(h)
             if len(dist) >= 4 and sum(1 for h in dist if 75 <= h <= 330) >= 2:
                 frac = (k + cw) / n_across                    # the strip's innermost column so far
-                if best is None: best = (side, frac)
-                elif best[0] == side: best = (side, max(best[1], frac))
+                a, b = top[0][0] / n_along, top[-1][1] / n_along   # how much of the edge it runs along
+                if best is None: best = (side, frac, a, b)
+                elif best[0] == side: best = (side, max(best[1], frac), min(best[2], a), max(best[3], b))
     return best
 
 def walk_card(hsv, side, frac, extra=0.12):
@@ -220,6 +222,23 @@ def chart_of(img, surplus=None):
     # a strip of large patches first: the surest sign
     st = strip_of(hsv)
     if st:
+        # a short strip near a corner, with the photograph's surplus on the other axis, is
+        # no strip along this edge: it is a chart standing in the corner, beside the work,
+        # and the crop goes in from that side (a ColorChecker Passport beside Adamson's
+        # Kalevipoeg: cropped from below, it cost the plinth and left half the card,
+        # 2026-11-05). A Farbkarte under a print is longer, a ruler's patches mid-edge are
+        # far from a corner, and the bars beside a bookplate run further down its side.
+        side, _, a, b = st
+        if surplus and surplus[0] != ("x" if side in "lr" else "y") and b - a < (0.3 if side in "tb" else 0.15) and min(a, 1 - b) <= 0.1:
+            near = ("r" if 1 - b < a else "l") if side in "tb" else ("b" if 1 - b < a else "t")
+            reach = 1 - a if near in "rb" else b
+            # (a ruler's colour patches start at its left end, so they are not this; the
+            # record's measure of a sheet or a bust runs short of the photograph by a
+            # little, hence the slack, and the crop still takes the whole chart)
+            if near != "l" and reach <= surplus[1] + 0.12:
+                f = surplus[1] if reach <= surplus[1] <= reach + 0.12 else reach + 0.05
+                return near, round(float(min(0.4, f)), 3)
+        st = st[:2]
         f = walk_card(hsv, *st) + 0.012
         # where the record's dimensions say how much more the photograph holds than the
         # work on that axis, that surplus is the chart and its card: the crop goes to it
