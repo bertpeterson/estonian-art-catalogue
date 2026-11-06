@@ -18,10 +18,11 @@ def euros(v):
     except ValueError: return 0
 
 def for_sale():
-    """{slug: {n: name, w: [[id, title, price, "s"|"l", gallery or house, date, link]]}}: gallery stock with an address,
-    and auction lots of sales not yet past"""
+    """{slug: {n: name, w: [[id, title, price, "s"|"l", gallery or house, date, link, picture]]}}: gallery stock with an
+    address, and auction lots of sales not yet past. The picture is the seller's own, by address, never a copy."""
     import build_hubs as H     # here, not above: the send job has only the repository, not a build
     today, out = datetime.date.today().isoformat(), {}
+    def pic(im): return H.imsrc(im) if (im or "").startswith("g:") else ""
     def add(a, row):
         k = H.bare_slug(H.A[int(a)]["n"])
         if k: out.setdefault(k, {"n": H.A[int(a)]["n"], "w": []})["w"].append(row)
@@ -30,11 +31,11 @@ def for_sale():
         if w.get("kind") != "gallery" or not u.startswith("http"): continue
         tech = H.val(w, "tce") or H.val(w, "tc") or ""
         if "müüdud" in tech.lower() or "sold" in tech.lower(): continue
-        add(w["a"], [sid(u), w.get("t") or "", euros(w.get("pr")), "s", H.val(w, "mu") or "", "", u])
+        add(w["a"], [sid(u), w.get("t") or "", euros(w.get("pr")), "s", H.val(w, "mu") or "", "", u, pic(w.get("im"))])
     for x in H.d.get("upcoming", []):
         u = x.get("u") or ""
         if not u.startswith("http") or (x.get("d") and x["d"] < today): continue
-        add(x["a"], [sid(u), x.get("t") or "", euros(x.get("p")), "l", x.get("h") or "", x.get("d") or "", u])
+        add(x["a"], [sid(u), x.get("t") or "", euros(x.get("p")), "l", x.get("h") or "", x.get("d") or "", u, pic(x.get("im"))])
     return out
 
 def main():

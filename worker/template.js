@@ -669,49 +669,90 @@ async function admin(body, env, reply, ip) {
 // ALERTS_PER_DAY of the day's MAIL_PER_DAY, so sign-in links always have room; Resend's batch call sends them a hundred at a time.
 const ALERTS_PER_DAY = 60, ALERTED_DAYS = 120;
 const ALERT_MAIL = {
-  en: { subject: names => "For sale now: " + names, intro: "New on the market from the artists you saved on Museaal:",
+  en: { brand: "Estonian Art Catalogue", eyebrow: "Sale alert", head: "New for sale from your artists", fresh: n => n + " new",
+    count: (w, a) => w + (w === 1 ? " work" : " works") + " by " + a + (a === 1 ? " artist" : " artists"),
+    subject: names => "For sale now: " + names, intro: "New on the market from the artists you saved on Museaal:",
     lot: (h, d) => "auction, " + h + (d ? ", " + d : ""), start: "starting price", all: "Your artists on Museaal:",
     why: "You get this because you turned on sale alerts for the artists on your list.", stop: "To stop them:", more: n => " and " + n + " more" },
-  et: { subject: names => "Nüüd müügil: " + names, intro: "Uut turul kunstnikelt, kelle oled Museaalis salvestanud:",
+  et: { brand: "Eesti Kunstikataloog", eyebrow: "Müügiteade", head: "Uut müügil sinu kunstnikelt", fresh: n => n + (n === 1 ? " uus" : " uut"),
+    count: (w, a) => w + (w === 1 ? " teos" : " teost") + ", " + a + (a === 1 ? " kunstnik" : " kunstnikku"),
+    subject: names => "Nüüd müügil: " + names, intro: "Uut turul kunstnikelt, kelle oled Museaalis salvestanud:",
     lot: (h, d) => "oksjon, " + h + (d ? ", " + d : ""), start: "alghind", all: "Sinu kunstnikud Museaalis:",
     why: "Saad selle kirja, sest lülitasid sisse teated oma nimekirja kunstnike müügitööde kohta.", stop: "Loobumiseks:", more: n => " ja veel " + n },
 };
 const euro = n => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, " ") + " €";
 const htm = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
-const mailLink = (url, words) => '<a href="' + htm(url) + '">' + htm(words) + "</a>";
-// Two versions of one email: HTML, where a work's title is its link, and plain text with the addresses written out.
+const mailLink = (url, words, style) => '<a href="' + htm(url) + '" style="' + style + '">' + htm(words) + "</a>";
+// The site's look, written out inline because mail apps drop most stylesheets: its colours and square corners, and its
+// fonts where the reader has them, else the nearest system ones. Nothing is loaded from anywhere, so nothing tracks an open.
+const MS = { ink: "#0B0C0E", soft: "#33363B", grey: "#6C7178", rule: "#DDDDDB", paper: "#FCFCFB", shop: "#F1F1F0",
+  serif: "font-family:Newsreader,Georgia,'Times New Roman',serif;font-weight:500;", mono: "font-family:'IBM Plex Mono',Menlo,Consolas,monospace;", sans: "font-family:Archivo,Arial,Helvetica,sans-serif;" };
+const MS_LABEL = MS.mono + "font-size:11px;line-height:1.5;letter-spacing:.1em;text-transform:uppercase;color:" + MS.grey + ";";
+const MS_LINK = "color:" + MS.ink + ";text-decoration:underline;";
+// Two versions of one email: designed HTML, where a work's title is its link, and plain text with the addresses written out.
 function alertMail(lang, found, site, unsub) {
   const M = ALERT_MAIL[lang] || ALERT_MAIL.en, names = found.map(f => f.n);
   const head = names.slice(0, 3).join(", ") + (names.length > 3 ? M.more(names.length - 3) : "");
   const mine = site + "#lang=" + lang + "&list=mine&lt=artists";
-  const lines = [M.intro, ""], html = ["<p>" + htm(M.intro) + "</p>"];
-  for (const f of found) {
-    const rows = [];
+  const lines = [M.intro, ""], cards = [];
+  // Gmail cuts an email off at about 102 KB, and with it the way to unsubscribe: at most 18 artists and 36 works a mail, the rest behind My Artists
+  const shown = found.slice(0, 18), room = Math.max(2, Math.min(12, Math.floor(36 / shown.length)));
+  for (const f of shown) {
+    let rows = "";
     lines.push(f.n.toUpperCase());
-    for (const [, t, p, k, where, d, url] of f.w.slice(0, 12)) {
-      const price = p ? (k === "l" ? M.start + " " + euro(p) : euro(p)) : "", rest = [price, k === "l" ? M.lot(where, d) : where].filter(Boolean).join(" · ");
+    f.w.slice(0, room).forEach(([, t, p, k, where, d, url, pic], i) => {
+      const price = p ? (k === "l" ? M.start + " " + euro(p) : euro(p)) : "", at = k === "l" ? M.lot(where, d) : where;
+      const rest = [price, at].filter(Boolean).join(" · "), edge = i ? "border-top:1px solid " + MS.rule + ";" : "";
       lines.push("  " + (t || "?") + (rest ? " · " + rest : ""), "  " + url);
-      rows.push(mailLink(url, t || "?") + (rest ? " · " + htm(rest) : ""));
+      // the seller's own picture by its address, uncropped, as on the site
+      rows += "<tr>" + (pic ? '<td width="96" style="' + edge + 'width:96px;padding:14px 14px 14px 0;vertical-align:top"><a href="' + htm(url) + '"><img src="' + htm(pic) + '" alt="' + htm(t) + '" width="96" style="display:block;width:96px;height:auto;border:0;background:#F3F3F2"></a></td>' : "") +
+        "<td" + (pic ? "" : ' colspan="2"') + ' style="' + edge + 'padding:12px 0 14px;vertical-align:top">' + mailLink(url, t || "?", MS.serif + "font-size:18px;line-height:1.3;" + MS_LINK) +
+        (price ? '<div style="' + MS.mono + "font-size:13px;line-height:1.4;color:" + MS.ink + ';padding-top:5px">' + htm(price.replace(/(\d) (?=[\d€])/g, "$1 ")) + "</div>" : "") +
+        (at ? '<div style="' + MS_LABEL + 'padding-top:3px">' + htm(at) + "</div>" : "") + "</td></tr>";
+    });
+    if (f.w.length > room) {
+      const more = M.more(f.w.length - room).trim();
+      lines.push("  " + more);
+      rows += '<tr><td colspan="2" style="border-top:1px solid ' + MS.rule + ';padding:12px 0 2px">' + mailLink(mine, more, MS_LABEL + "text-decoration:underline;") + "</td></tr>";
     }
-    if (f.w.length > 12) { const more = M.more(f.w.length - 12).trim(); lines.push("  " + more); rows.push(htm(more)); }
     lines.push("");
-    html.push('<p style="margin:20px 0 4px;font-weight:bold">' + htm(f.n) + '</p><p style="margin:0;line-height:1.7">' + rows.join("<br>") + "</p>");
+    cards.push('<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid ' + MS.rule + ";border-collapse:separate;margin:0 0 16px;background:" + MS.paper + '"><tr><td style="padding:20px 22px 12px">' +
+      '<table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td style="' + MS.serif + "font-size:24px;line-height:1.15;color:" + MS.ink + ';padding-bottom:8px">' + htm(f.n) + '</td><td align="right" style="' + MS_LABEL + 'white-space:nowrap;padding:6px 0 8px 12px">' + htm(M.fresh(f.w.length)) + "</td></tr></table>" +
+      '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-top:1px solid ' + MS.ink + '">' + rows + "</table></td></tr></table>");
+  }
+  if (found.length > shown.length) {
+    const more = M.more(found.length - shown.length).trim();
+    lines.push(more, "");
+    cards.push('<div style="padding:2px 0 6px">' + mailLink(mine, more, MS_LABEL + "text-decoration:underline;") + "</div>");
   }
   lines.push(M.all + " " + mine, "", M.why + " " + M.stop, unsub);
-  html.push('<p style="margin-top:24px">' + mailLink(mine, M.all.replace(/:$/, "")) + "</p>",
-    '<p style="color:#666;font-size:13px">' + htm(M.why) + " " + mailLink(unsub, M.stop.replace(/:$/, "")) + "</p>");
-  return { subject: M.subject(head), text: lines.join("\n"), html: '<div style="font-family:Arial,Helvetica,sans-serif;font-size:15px;color:#222">' + html.join("") + "</div>" };
+  const works = found.reduce((s, f) => s + f.w.length, 0), brand = site.replace(/^https?:\/\/|\/$/g, "");
+  const html = '<!doctype html><html lang="' + (lang === "et" ? "et" : "en") + '"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><meta name="supported-color-schemes" content="light"><title>' + htm(M.head) + "</title></head>" +
+    '<body style="margin:0;padding:0;background:' + MS.paper + '"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:' + MS.paper + '"><tr><td align="center" style="padding:28px 16px 36px">' +
+    '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;' + MS.sans + "color:" + MS.ink + '"><tr><td>' +
+    '<div style="padding-bottom:22px">' + mailLink(site + "#lang=" + lang, M.brand, MS.serif + "font-size:26px;line-height:1.1;letter-spacing:-.01em;color:" + MS.ink + ";text-decoration:none;") + "</div>" +
+    '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:' + MS.shop + ";border-top:2px solid " + MS.ink + ';margin:0 0 22px"><tr><td style="padding:26px 22px 24px">' +
+      '<div style="' + MS_LABEL + 'padding-bottom:10px">' + htm(M.eyebrow) + "</div>" +
+      '<div style="' + MS.serif + "font-size:36px;line-height:1.08;letter-spacing:-.015em;color:" + MS.ink + '">' + htm(M.head) + "</div>" +
+      '<div style="' + MS.mono + "font-size:12px;letter-spacing:.05em;color:" + MS.soft + ';padding-top:14px">' + htm(M.count(works, found.length)) + "</div></td></tr></table>" +
+    cards.join("") +
+    '<table role="presentation" cellpadding="0" cellspacing="0" style="margin:22px 0 28px"><tr><td style="background:' + MS.ink + '">' +
+      mailLink(mine, M.all.replace(/:$/, ""), "display:inline-block;padding:13px 20px;" + MS.mono + "font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:" + MS.paper + ";text-decoration:none;") + "</td></tr></table>" +
+    '<div style="border-top:1px solid ' + MS.rule + ";padding-top:14px;font-size:12px;line-height:1.6;color:" + MS.grey + '">' + htm(M.why) + " " + mailLink(unsub, M.stop.replace(/:$/, ""), "color:" + MS.grey + ";text-decoration:underline;") + '<div style="' + MS_LABEL + 'padding-top:10px">' + htm(brand) + "</div></div>" +
+    "</td></tr></table></td></tr></table></body></html>";
+  return { subject: M.subject(head), text: lines.join("\n"), html };
 }
 async function alerts(body, env, reply) {
   if (!env.ALERT_KEY || !env.LISTS) return reply({ error: "Alerts are not set up." }, 503);
   if (await hash(String(body.key || "")) !== await hash(env.ALERT_KEY)) return reply({ error: "Wrong key." }, 401);
   const KV = env.LISTS, day = Math.floor(Date.now() / 864e5), site = env.SITE || "https://museaal.ee/";
-  // {slug: {n: name, w: [[address, title, price, "s"|"l", gallery or house, date, link]]}}, the addresses not yet announced
+  // {slug: {n: name, w: [[address, title, price, "s"|"l", gallery or house, date, link, picture]]}}, the addresses not yet announced
   const done = (await KV.get("x:alerted", "json")) || {}, fresh = new Map();
   for (const [slug, a] of Object.entries(body.items && typeof body.items === "object" ? body.items : {}).slice(0, 5000)) {
     if (!a || typeof a.n !== "string" || !Array.isArray(a.w)) continue;
     const w = a.w.filter(x => Array.isArray(x) && workKey(x[0]) && x[0].length <= 40 && !(x[0] in done) && /^https?:\/\//.test(String(x[6])))
-      .map(x => [x[0], String(x[1] || "").slice(0, 200), +x[2] || 0, x[3] === "l" ? "l" : "s", String(x[4] || "").slice(0, 80), String(x[5] || "").slice(0, 10), String(x[6]).slice(0, 500)]);
+      .map(x => [x[0], String(x[1] || "").slice(0, 200), +x[2] || 0, x[3] === "l" ? "l" : "s", String(x[4] || "").slice(0, 80), String(x[5] || "").slice(0, 10), String(x[6]).slice(0, 500),
+        /^https:\/\//.test(String(x[7])) && String(x[7]).length <= 500 ? String(x[7]) : ""]);
     if (w.length) fresh.set(slug.slice(0, 120), { n: a.n.slice(0, 120), w });
   }
   const out = { new: [...fresh.values()].reduce((s, a) => s + a.w.length, 0), subscribers: 0, sent: 0, unsent: 0 };
