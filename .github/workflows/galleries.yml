@@ -115,7 +115,7 @@ jobs:
           if git diff --cached --quiet; then echo "nothing changed"; exit 0; fi
           n=$(python3 -I -c "import json; print(sum(1 for w in json.load(open('data/data.json'))['works'] if w.get('kind') == 'gallery'))")
           k=$(python3 -I -c "import json; print(', '.join(json.load(open('data/gallery_kept.json'))))")    # galleries not read this week (data/fetch_galleries.py)
-          git -c core.hooksPath=/dev/null commit -m "Weekly gallery stock, $(date -u +%F): $n for sale${k:+; not read, last week's kept: $k}" -m "Automated: read the galleries and NOBA afresh, ledger, merged, guarded, built and smoke-tested."
+          git -c core.hooksPath=/dev/null commit -m "Weekly gallery stock, $(date -u +%F): $n for sale${k:+; not read, kept from last week: $k}"    # no apostrophes in here: bash reads one as an opening quote (5 Nov 2026: exit 2, the run published nothing) -m "Automated: read the galleries and NOBA afresh, ledger, merged, guarded, built and smoke-tested."
           git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
           git -c core.hooksPath=/dev/null pull --rebase --autostash -q origin main    # main moves while the run reads (19 Oct 2026: three pushes in its 72 min, and this push was refused)
           git -c core.hooksPath=/dev/null push
