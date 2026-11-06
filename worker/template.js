@@ -671,27 +671,36 @@ const ALERTS_PER_DAY = 60, ALERTED_DAYS = 120;
 const ALERT_MAIL = {
   en: { subject: names => "For sale now: " + names, intro: "New on the market from the artists you saved on Museaal:",
     lot: (h, d) => "auction, " + h + (d ? ", " + d : ""), start: "starting price", all: "Your artists on Museaal:",
-    why: "You get this because you turned on sale alerts for the artists on your list. To stop them:", more: n => " and " + n + " more" },
+    why: "You get this because you turned on sale alerts for the artists on your list.", stop: "To stop them:", more: n => " and " + n + " more" },
   et: { subject: names => "Nüüd müügil: " + names, intro: "Uut turul kunstnikelt, kelle oled Museaalis salvestanud:",
     lot: (h, d) => "oksjon, " + h + (d ? ", " + d : ""), start: "alghind", all: "Sinu kunstnikud Museaalis:",
-    why: "Saad selle kirja, sest lülitasid sisse teated oma nimekirja kunstnike müügitööde kohta. Loobumiseks:", more: n => " ja veel " + n },
+    why: "Saad selle kirja, sest lülitasid sisse teated oma nimekirja kunstnike müügitööde kohta.", stop: "Loobumiseks:", more: n => " ja veel " + n },
 };
 const euro = n => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, " ") + " €";
+const htm = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+const mailLink = (url, words) => '<a href="' + htm(url) + '">' + htm(words) + "</a>";
+// Two versions of one email: HTML, where a work's title is its link, and plain text with the addresses written out.
 function alertMail(lang, found, site, unsub) {
   const M = ALERT_MAIL[lang] || ALERT_MAIL.en, names = found.map(f => f.n);
   const head = names.slice(0, 3).join(", ") + (names.length > 3 ? M.more(names.length - 3) : "");
-  const lines = [M.intro, ""];
+  const mine = site + "#lang=" + lang + "&list=mine&lt=artists";
+  const lines = [M.intro, ""], html = ["<p>" + htm(M.intro) + "</p>"];
   for (const f of found) {
+    const rows = [];
     lines.push(f.n.toUpperCase());
     for (const [, t, p, k, where, d, url] of f.w.slice(0, 12)) {
-      const price = p ? (k === "l" ? M.start + " " + euro(p) : euro(p)) : "";
-      lines.push("  " + [t || "?", price, k === "l" ? M.lot(where, d) : where].filter(Boolean).join(" · "), "  " + url);
+      const price = p ? (k === "l" ? M.start + " " + euro(p) : euro(p)) : "", rest = [price, k === "l" ? M.lot(where, d) : where].filter(Boolean).join(" · ");
+      lines.push("  " + (t || "?") + (rest ? " · " + rest : ""), "  " + url);
+      rows.push(mailLink(url, t || "?") + (rest ? " · " + htm(rest) : ""));
     }
-    if (f.w.length > 12) lines.push("  " + M.more(f.w.length - 12).trim());
+    if (f.w.length > 12) { const more = M.more(f.w.length - 12).trim(); lines.push("  " + more); rows.push(htm(more)); }
     lines.push("");
+    html.push('<p style="margin:20px 0 4px;font-weight:bold">' + htm(f.n) + '</p><p style="margin:0;line-height:1.7">' + rows.join("<br>") + "</p>");
   }
-  lines.push(M.all + " " + site + "#lang=" + lang + "&list=mine&lt=artists", "", M.why, unsub);
-  return { subject: M.subject(head), text: lines.join("\n") };
+  lines.push(M.all + " " + mine, "", M.why + " " + M.stop, unsub);
+  html.push('<p style="margin-top:24px">' + mailLink(mine, M.all.replace(/:$/, "")) + "</p>",
+    '<p style="color:#666;font-size:13px">' + htm(M.why) + " " + mailLink(unsub, M.stop.replace(/:$/, "")) + "</p>");
+  return { subject: M.subject(head), text: lines.join("\n"), html: '<div style="font-family:Arial,Helvetica,sans-serif;font-size:15px;color:#222">' + html.join("") + "</div>" };
 }
 async function alerts(body, env, reply) {
   if (!env.ALERT_KEY || !env.LISTS) return reply({ error: "Alerts are not set up." }, 503);
