@@ -56,6 +56,7 @@ while True:
         name = html.unescape(p.get("name") or "")
         cats = [html.unescape(c["name"]) for c in p.get("categories", [])]
         sale = next((c for c in cats if SALE.search(c)), None)
+        surl = next((c.get("link") or c.get("permalink") for c in p.get("categories", []) if html.unescape(c["name"]) == sale), None)
         if not sale: n_nosale += 1; continue            # a sold shop item, not a lot
         n_lots += 1
         m = SALE.search(sale)
@@ -76,7 +77,7 @@ while True:
         if aid in seen: continue
         seen.add(aid)
         (coming if ahead else recs).append({"aid": aid, "artist": artist, "title": title, "year": wyear, "yl": yl, "tech": tech, "dims": dims,
-                     "house": "Vernissage", "sale": sale, "when": f"{year}-{month:02d}",
+                     "house": "Vernissage", "sale": sale, "surl": surl, "when": f"{year}-{month:02d}",
                      "start": start, "hammer": hammer, "sold": sold, "after": after,
                      "url": p.get("permalink") or "https://vernissage.ee",
                      "img": next((i.get("thumbnail") or i.get("src") for i in p.get("images") or [] if i.get("src")), None)})

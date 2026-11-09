@@ -960,7 +960,7 @@ for r in AUC:
         "nu": None, "d": None, "c": None, "s": "auction", "mi": None, "oi": None,
         "k": "A" + re.sub(r'[^A-Za-z0-9]', '', r["aid"]), "n": 1,
         "mem": None, "kind": "auction", "url": r.get("url"),
-        "an": r["sale"], "ad": r.get("date") or r["when"], "as": r.get("start"), "ap": r.get("hammer"), "ao": None if r.get("nores") else 1 if r["sold"] else 0,
+        "an": r["sale"], "au": r.get("surl"), "ad": r.get("date") or r["when"], "as": r.get("start"), "ap": r.get("hammer"), "ao": None if r.get("nores") else 1 if r["sold"] else 0,
         "anr": 1 if r.get("nores") else None, "aa": 1 if r.get("after") else None, "apr": r.get("press"), "adb": r.get("doubt"),
         "_pim": r.get("img")})
     auc_added += 1

@@ -92,7 +92,7 @@ for url, slug in cats:
             dims = re.sub(r"\s*[x×]\s*", " x ", dm.group(1)).replace(",", ".") + " cm" if dm else ""
             r = {"aid": f"onk-{pid}", "artist": artist, "title": title or "Pealkirjata",
                  "year": ym.group(1) if ym else None, "yl": ym.group(1) if ym else None, "tech": tech[:80], "dims": dims,
-                 "house": HOUSE, "sale": sale, "when": date[:7], "date": date, "start": start, "url": tm.group(1),
+                 "house": HOUSE, "sale": sale, "surl": url, "when": date[:7], "date": date, "start": start, "url": tm.group(1),
                  "lot": int(lot.group(1)) if lot else None, "img": html.unescape(im.group(1)) if im else None}
             if ahead: coming.append(r)
             else: recs.append({**r, "hammer": None, "sold": None, "nores": True})

@@ -132,6 +132,7 @@ for aid, (sale, when) in sorted(sales.items(), key=lambda x: x[1][1]):
         (coming if ahead else recs).append({"aid": "haus-" + item.group(1), "artist": artist, "title": title,
                      "year": y4.group(1) if y4 else None, "yl": year or None, "tech": medium, "dims": dims,
                      "house": "Haus Galerii", "sale": sale, "when": when[:7], "date": when,
+                     "surl": f"{BASE}/?c=oksjon&l=et" if aid == "current" else f"{BASE}/?c=toimunud-oksjonid&l=et&id={aid}",
                      "start": start, "hammer": hammer, "sold": hammer is not None, "after": after, **({"kroon": True} if kroon else {}), "img": BASE + html.unescape(im.group(1)) if im else None,
                      "url": f"{BASE}/?c=oksjon&l=et&item={item.group(1)}" if aid == "current" else f"{BASE}/?c=toimunud-oksjonid&l=et&id={aid}&item={item.group(1)}"})
     print(f"  {when} {sale[:40]:40} lots so far {len(recs)}", flush=True)

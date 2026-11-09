@@ -118,7 +118,7 @@ for slug in slugs:
             (coming if ahead else recs).append({"aid": "vaal-" + str(it["item_id"]), "artist": artist, "title": title,
                          "year": y4.group(1) if y4 else None, "yl": yl or None,
                          "tech": clean(it.get("item_technique") or ""), "dims": dims, "life": life or None,
-                         "house": "Vaal galerii", "sale": sale, "when": when[:7], "date": when,
+                         "house": "Vaal galerii", "sale": sale, "when": when[:7], "date": when, "surl": f"{BASE}/oksjonid/{slug}",
                          "start": start, "hammer": hammer, "sold": hammer is not None,
                          # the lot page reads its id from between "?" and the first "-", so
                          # the address needs a slug after the id or it shows nothing

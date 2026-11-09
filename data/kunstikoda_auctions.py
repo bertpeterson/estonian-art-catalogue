@@ -84,7 +84,7 @@ for path in cats:
         if not end: failed.append(pid); continue
         r = {"aid": f"kk-{pid}", "artist": re.sub(r"\s*\([^)]*\)", "", artist).strip(), "title": title or "Pealkirjata",
              "year": y4.group(1) if y4 else None, "yl": yl, "tech": tech[:80], "dims": dims,
-             "house": HOUSE, "sale": sale, "when": end[:7], "date": end[:10], "start": start, "url": url, "lot": int(nr.group(1)), "img": html.unescape(im.group(1)) if im else None}
+             "house": HOUSE, "sale": sale, "surl": BASE + path, "when": end[:7], "date": end[:10], "start": start, "url": url, "lot": int(nr.group(1)), "img": html.unescape(im.group(1)) if im else None}
         if end > now: coming.append(r); n += 1; continue
         hist = txt.split("Pakkumiste ajalugu")[-1].split("Arvustused")[0]
         bids = [money(b) for b in re.findall(r"\d\d\.\d\d\.\d{4} \d\d:\d\d\s+([\d\s ]+,\d\d)\s*€", hist)]

@@ -146,7 +146,7 @@ for slug in slugs:
         if pub: months[pub.group(1)] += 1
         got.append({"aid": "eko-" + pid.group(1), "artist": artist, "title": ltitle,
                     "year": y4.group(1) if y4 else None, "yl": yl or None, "tech": clean(med.group(1)) if med else "", "dims": dims,
-                    "house": "Eesti Kunsti Oksjonid", "sale": sale,
+                    "house": "Eesti Kunsti Oksjonid", "sale": sale, "surl": f"{BASE}/k/oksjonid/{slug}/",
                     "start": int(float(st.group(1))) if st else None, "hammer": hammer, "sold": sold, "after": after, "url": url.group(1),
                     "img": html.unescape(og.group(1)) if (og := re.search(r'<meta property="og:image" content="([^"]+)"', lp or "")) else None})
     # the sale's month: when its lots were listed, moved to the day the name gives

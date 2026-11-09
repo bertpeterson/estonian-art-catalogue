@@ -42,7 +42,7 @@ CSS = U.CSS + (".yr{margin:56px 0 0;font-family:var(--serif);font-weight:500;fon
                "ul.sales{list-style:none;margin:0;padding:0}ul.sales li{display:grid;grid-template-columns:9.5em 1fr auto;gap:4px 18px;padding:12px 0;border-bottom:1px solid var(--rule-soft);align-items:baseline}"
                "ul.sales a{font-family:var(--serif);font-size:1.12rem;text-decoration:none}ul.sales a:hover{text-decoration:underline}"
                "ul.sales .n{font-family:var(--mono);font-size:.78rem;color:var(--ink-soft)}td.n .m{font-family:var(--mono);font-size:.68rem}"
-               ".top .eb+.eb{margin-left:14px}"
+               ".top .eb+.eb{margin-left:14px}h1 a.sl{color:inherit;text-decoration:none}h1 a.sl:hover{text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:.12em}"
                "@media(max-width:700px){ul.sales li{grid-template-columns:1fr}ul.sales .n{text-align:left}}")
 
 # the sales: (house, name) runs of lots, split where the dates are more than a fortnight apart
@@ -72,6 +72,13 @@ for h, an, ws in SALES:
     k, i = s, 2
     while k in seen: k, i = f"{s}-{i}", i + 1
     seen.add(k); SLUG[id(ws)] = k
+
+def sale_page(h, ws):
+    """The sale's own page at the house: recorded by its scraper; Haus and E-Kunstisalong lots carry it in their link."""
+    u = next((w["au"] for w in ws if w.get("au")), None)
+    if not u and h == "Haus Galerii": u = next((w["url"].split("&item=")[0] for w in ws if "toimunud-oksjonid" in str(w.get("url") or "")), None)
+    if not u and h == "E-Kunstisalong": u = next((w["url"] for w in ws if str(w.get("url") or "").startswith("http")), None)
+    return u if str(u or "").startswith("http") else None
 
 def result(w, t, lang):
     if w.get("anr"): return f'<span class="m">{t["nr"]}</span>'
@@ -125,7 +132,7 @@ def main():
             page = (head(lang, t, me, other, f'{nm} – {t["c_res"].lower()} · museaal.ee',
                          t["sale_d"].format(s=nm, h=house(h, lang), d=span, n=fmt(len(ws), lang)))
                     + f'<header class="mast"><span class="eb">{e(span)} · <a class="eb" href="{BASE}/{t["file"]}">{t["back"]}</a></span>'
-                    f'<h1>{e(nm)}</h1><p class="lede">{e(house(h, lang))} · {e(sub)}</p></header>'
+                    + (f'<h1><a class="sl" href="{e(su)}" rel="noopener">{e(nm)}</a></h1>' if (su := sale_page(h, ws)) else f'<h1>{e(nm)}</h1>') + f'<p class="lede">{e(house(h, lang))} · {e(sub)}</p></header>'
                     f'<section class="sale"><div class="sort" style="margin-top:18px"><span class="eb">{t["sort"]}</span><button type="button" data-s="az" class="on">{t["az"]}</button>'
                     + (f'<button type="button" data-s="p" data-l="{t["price"]}">{t["price"]} ↓</button>' if any(w.get("ap") and w.get("ao") for w in ws) else "")
                     + f'</div><table><thead><tr><th>{t["c_art"]}</th><th>{t["c_work"]}</th><th class="n">{t["c_res"]}</th></tr></thead><tbody>{rows}</tbody></table></section>'
