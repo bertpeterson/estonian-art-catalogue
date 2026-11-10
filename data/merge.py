@@ -751,6 +751,15 @@ _BOOK = re.compile(r"kataloog|catalogue|monograafia|kogumik", re.I)
 _books = sum(1 for g in GAL if _BOOK.search(" ".join(g.get(f) or "" for f in ("artist", "title", "url"))))
 GAL = [g for g in GAL if not _BOOK.search(" ".join(g.get(f) or "" for f in ("artist", "title", "url")))]
 print("  gallery listings that were books, not works:", _books)
+# A size no work for sale has. The marketplace's artists type their own: some in millimetres ("420 x 297 cm", an A3
+# sheet), some a placeholder ("999 x 999 cm"), and a gallery slips a decimal point ("70.0 × 515.0 cm"). A side of four
+# metres or more on a marketplace or a priced work is left out: no size, rather than "large" on Buy Art for a small sheet.
+# An installation a gallery lists without a price (Kogo, Temnikova & Kasela) keeps its own.
+_huge = 0
+for g in GAL:
+    if (g.get("only_known") or g.get("price")) and any(float(n.replace(",", ".")) >= 400 for n in re.findall(r"\d+(?:[.,]\d+)?", g.get("dims") or "")):
+        g["dims"] = ""; _huge += 1
+print("  gallery sizes of four metres or more left out:", _huge)
 _gone = lambda g: bool(g.get("sold") or g.get("past"))
 _seen, _dedup, _gal_dup = {}, [], 0
 for g in GAL:

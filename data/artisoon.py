@@ -70,13 +70,19 @@ for c, s in links:
     text = U(body.group(1)) if body else ""
     sold = bool(re.search(r"müüdud", head + " " + text, re.I)) or (p.get("stock") is not None and p["stock"] <= 0)
     held = bool(re.search(r"broneeritud", head + " " + text, re.I)) or (p.get("reserved_quantity") or 0) > 0
-    ym = re.search(r"\b(1[89]\d\d|20[0-2]\d)\b", text)
+    # the work's own lines end where the dealer's note on the artist begins ("Konstantin Mihhailov (1908 – 1996) oli ...",
+    # "Herman Talvik elas aastatel 1906-1984", "on sündinud aastal 1979"): a birth year there was read as the work's.
+    # A decade ("60-ndad", "1950-ndad") is not a year either
+    bio = re.search(r"\(\s*\d{4}\s*[-–]\s*\d{4}\s*\)|\belas aastatel\b|\bs\s?ündinud\b|\bsündis\b", text, re.I)
+    cut = bio.start() if bio else len(text)
+    own = text[:text.rfind(artist, 0, cut) if text.rfind(artist, 0, cut) > 0 else cut]
+    ym = re.search(r"\b(1[89]\d\d|20[0-2]\d)\b(?!\s*-?\s*ndad)", own) if not re.search(r"dateerimata", own, re.I) else None    # "dateerimata. ... valatud 2019"
     dm = re.search(r"(\d+(?:[.,]\d+)?\s*[x×]\s*\d+(?:[.,]\d+)?(?:\s*[x×]\s*\d+(?:[.,]\d+)?)?)\s*cm", text)
-    tech = re.sub(r"\b(1[89]|20)\d\d\b\.?", "", re.split(r"\.\s+(?=[A-ZÕÄÖÜ])", text)[0]) if text else ""
+    tech = re.sub(r"\b(1[89]|20)\d\d\b(?!\s*-?\s*ndad)\.?|\bAasta\s*:|\bdateerimata\b", "", re.split(r"\.\s+(?=[A-ZÕÄÖÜ])", own)[0]).replace(artist, "") if own else ""
     q = re.search(r'[„"“]([^"“”]{2,60})["“”]', tech)
     if q and not title: title, tech = q.group(1), tech.replace(q.group(0), "")    # an untitled heading, the title in the text: '"Kassnaine" õli/akrüül papil'
     tech = re.sub(r"(?:(?:ava|pildi|raami)?\s*mõõdu?d?:?\s*)?\d+(?:[.,]\d+)?\s*[x×]\s*\d+(?:[.,]\d+)?(?:\s*[x×]\s*\d+(?:[.,]\d+)?)?\s*(?:cm)?", "", tech, flags=re.I)
-    tech = re.sub(r"\s*,\s*,+|\s+", " ", tech).strip(" ,.;")
+    tech = re.sub(r"\s+,", ",", re.sub(r"\s*,\s*,+|\s+", " ", tech)).strip(" ,.;")
     img = re.search(r'property="og:image" content="(https://www\.artisoon\.ee/photos/[^"]+)"', h)
     price = {} if sold or held or p.get("currency") != "EUR" else euros(f'{round(float(p.get("effective_price") or p.get("price") or 0))} €')
     recs.append({**price, "gid": f"ats-{p['id']}", "artist": artist, "title": title.strip('“”"„') or "Nimetu",

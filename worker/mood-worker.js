@@ -688,7 +688,9 @@ async function alerts(body, env, reply, ip) {
       if (found.length) mails.push({ u: k.name.slice(2), d: day, to: sub.e, ...alertMail(sub.lang, found, site, sub.unsub) });
     }
   }
-  const used = await counted(env, "mail", today()), room = Math.max(0, Math.min(ALERTS_PER_DAY, MAIL_PER_DAY - used));
+  // the alerts have a day's count of their own: two deploys in a day each took ALERTS_PER_DAY, and left the sign-in links none
+  const used = await counted(env, "mail", today()), told = await counted(env, "alert", today());
+  const room = Math.max(0, Math.min(ALERTS_PER_DAY - told, MAIL_PER_DAY - used));
   const go = mails.slice(0, room), letter = ({ u, d, ...m }) => m;      // u and d are the queue's, not the email's
   // a batch that fails stops the sending: what went before it is sent, it and the rest wait in x:unsent
   try {
@@ -702,7 +704,7 @@ async function alerts(body, env, reply, ip) {
       out.sent += go.slice(i, i + 100).length;
     }
   } catch (e) { console.log("alert mail failed", String(e.message)); out.failed = String(e.message).slice(0, 40); }
-  if (out.sent) await bump(env, "mail", out.sent);      // counted once sent: a refused batch takes nothing from the day's sign-in links
+  if (out.sent) { await bump(env, "mail", out.sent); await bump(env, "alert", out.sent); }      // counted once sent: a refused batch takes nothing from the day's sign-in links
   const left = mails.slice(out.sent, out.sent + 300);
   out.unsent = left.length;
   if (left.length) await KV.put("x:unsent", JSON.stringify(left), { expirationTtl: 8 * 86400 });
@@ -752,6 +754,7 @@ export default {
     if (request.method !== "POST" || !ok) return reply({ error: "This service answers museaal.ee only." }, 403);
     let body = {};
     try { body = await request.json(); } catch (e) {}
+    if (!body || typeof body !== "object") body = {};      // a body of null or a bare string: the doors below read its fields
     const ip = request.headers.get("CF-Connecting-IP") || "?", path = new URL(request.url).pathname;
     if (path.startsWith("/list/")) {
       if (tooMany(ip, syncs, 30)) return reply({ error: "Too many requests; wait a minute." }, 429);

@@ -59,7 +59,9 @@ for s in slugs:
     pm = re.search(r'property="product:price:amount" content="([\d.]+)"', h)
     price = {} if not pm else euros(pm.group(1) + " €")
     if sold: price = {"listed": price["price"]} if price else {}
-    recs.append({**price, "gid": f"tokko-{s}", "artist": artist, "title": title, "year": year, "tech": tech[:80],
+    recs.append({**price, "gid": f"tokko-{s}", "artist": artist,
+                 "title": re.sub(r"\s*/\s*\d[\d\s]*€\s*$", "", title) or title,      # "Symbol D5/550€": the price is not the title
+                 "year": year, "tech": tech[:80],
                  "dims": re.sub(r"\s*[x×]\s*", " x ", dm.group(1)) + " cm" if dm else "",
                  "gallery": "Tokko & Arrak", "city": "Tallinn", "url": f"{BASE}/kunsti-muuk/p/{s}",
                  **({"sold": True} if sold else {}),
