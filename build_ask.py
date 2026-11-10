@@ -139,8 +139,8 @@ T = {"en": dict(file="find", other="leia", other_l="Eesti keeles", site="Estonia
                 hash=""),
      "et": dict(file="leia", other="find", other_l="In English", site="Eesti Kunstikataloog",
                 h="Osta kunsti", title="Osta Eesti kunsti: müügil {n} teost koos hindadega", lede="Kunst sinu koju kataloogi galeriidest, praegu müügil. Iga teos viib seda müüva galerii lehele.",
-                desc="Eesti kunstnike maalid, graafika ja skulptuurid müügil: {n} teost Eesti galeriidest, igaüks galerii küsitud hinnaga. Vali hinna, tehnika, suuruse, meeleolu ja kunstniku järgi; iga teos viib seda müüva galerii lehele.",
-                sh="Eesti kunsti müük", sp="Osta Eesti kunstnike maale, graafikat, akvarelle ja skulptuure otse neid müüvatelt galeriidelt: {n} teost, igaüks küsitud hinnaga ja lingiga galeriile. museaal.ee on kataloog, mitte pood; teose müüb galerii.",
+                desc="Eesti kunstnike maalid, graafika ja skulptuurid müügil: {n} teost Eesti galeriidest, igaüks galerii hinnaga. Vali hinna, tehnika, suuruse, meeleolu ja kunstniku järgi; iga teos viib seda müüva galerii lehele.",
+                sh="Eesti kunsti müük", sp="Osta Eesti kunstnike maale, graafikat, akvarelle ja skulptuure otse neid müüvatelt galeriidelt: {n} teost, igaüks hinnaga ja lingiga galeriile. museaal.ee on kataloog, mitte pood; teose müüb galerii.",
                 hello="Sea filtrid või kirjelda, mida vajad: tuba, suurus, eelarve, teema või meeleolu.",
                 photo="Foto seinast", yourroom="Sinu tuba", looking="Vaatan su tuba…", photomsg="(foto minu toast)",
                 wallw="Vaba seinaosa laius", drag="Lohista tuba, et ringi vaadata; keri või näpista, et lähemale astuda. Lohista teost, et seda seinal liigutada või teisele märgitud kohale viia. Kui suurused tunduvad valed, sea seina laius õigeks.", reset="Algvaade", ar="Vaata oma seinal (AR)", arsafari="Et näha teost AR-is oma päris seinal, ava see leht Safaris.", arwait="Teen mudelit…", arfail="AR-i ei õnnestunud avada", onwall="Minu seinale",
@@ -161,7 +161,7 @@ T = {"en": dict(file="find", other="leia", other_l="Eesti keeles", site="Estonia
                 artistonly="{who}: väljaspool neid seadeid müügil {n}.", showthem="Näita",
                 daily="tänane valik", fromchat="Vestlusest", artist="Kunstnik", artistph="Kirjuta nimi", artistlist="Kunstnikud, kelle teoseid on müügil", names="Alusta nimest", titlew="Pealkirjas", filters="Filtrid",
                 groups=dict(feeling="Tunne", light="Valgus", colour="Värv", weather="Aastaaeg ja ilm", subject="Aine"),
-                about="Allikad ja privaatsus", note="Teosed on galeriide praegune müügivalik ja nende küsitud hinnad, loetud iga nädal galeriide endi lehtedelt; usaldusväärne on galerii leht. Sinu sõnumeid loeb Claude, kes teeb otsingud ja valib soovitatavad teosed; neid ei salvestata. Teose all olevad oksjoniandmed on kunstniku tulemused nii, nagu oksjonimajad need avaldasid (haamrihinnad): ülevaade, mitte hinnang. Meeleolu loeb galerii fotolt pildimudel CLIP: see on juhatus, mitte hinnang teosele.",
+                about="Allikad ja privaatsus", note="Teosed on galeriide praegune müügivalik ja nende hinnad, loetud iga nädal galeriide endi lehtedelt; usaldusväärne on galerii leht. Sinu sõnumeid loeb Claude, kes teeb otsingud ja valib soovitatavad teosed; neid ei salvestata. Teose all olevad oksjoniandmed on kunstniku tulemused nii, nagu oksjonimajad need avaldasid (haamrihinnad): ülevaade, mitte hinnang. Meeleolu loeb galerii fotolt pildimudel CLIP: see on juhatus, mitte hinnang teosele.",
                 sl_add="Lisa minu nimekirja", sl_remove="Eemalda minu nimekirjast", fy="Sulle", fybtn="Sarnased minu nimekirjaga ({n})",
                 fyhint="Märgi järjehoidjaga kolm teost, siin, meeleolu seinal või kataloogis, või salvesta kunstnik, ja ette tulevad nendega sarnased ja sinu salvestatud kunstnikud.",
                 fysee="Vaata minu nimekirja", fybit="minu nimekirja põhjal",
@@ -1088,8 +1088,8 @@ SALE_DIR = {"en": "for-sale", "et": "muugil"}
 ST = {"en": dict(lede="{n} works at {g} Estonian galleries, with their asking prices. Each links to the gallery that sells it.",
                  lede1="1 work at an Estonian gallery, with its asking price.", more="Filter these in Buy Art →",
                  browse="Browse what is for sale", first="The first {k} of {n} here; all of them in Buy Art.", artist="Artist's page"),
-      "et": dict(lede="{n} teost {g} Eesti galeriis koos küsitud hindadega. Iga teos viib seda müüva galerii lehele.",
-                 lede1="1 teos Eesti galeriis koos küsitud hinnaga.", more="Vali neist lehel Osta kunsti →",
+      "et": dict(lede="{n} teost {g} Eesti galeriis koos hindadega. Iga teos viib seda müüva galerii lehele.",
+                 lede1="1 teos Eesti galeriis koos hinnaga.", more="Vali neist lehel Osta kunsti →",
                  browse="Sirvi müügil olevat", first="Siin esimesed {k} teost {n}-st; kõik lehel Osta kunsti.", artist="Kunstniku leht")}
 
 def browse_links(lang, here=None):

@@ -14,7 +14,7 @@ ET = {
  "srcsummary":"Allikad ja meetod","statslink":"Kataloog arvudes","moodlink":"Meeleolu järgi","findlink":"Osta kunsti",
  "forsalenow":"Müügil praegu","seeinbuy":"Vaata müügil olevaid teoseid","seeinbuy1":"Vaata müügil olevat teost",
  "tagline":"Vaata Eesti kunsti muuseumide kogudes ja osta teoseid galeriidest.",
- "fs_h":"Osta kunsti","fs_you":"Sulle","fs_lede":"{n} teost {g} galeriis, koos küsitud hindadega.",
+ "fs_h":"Osta kunsti","fs_you":"Sulle","fs_lede":"{n} teost {g} galeriis, koos hindadega.",
  "cat_h":"Kataloog","cat_lede":"Kõik, mida Eesti muuseumid hoiavad ja galeriid on näidanud: kümnendite, kunstnike või otsingu järgi.",
  "fs_up":"Tulemas oksjonitel →","fs_all":"Kõik müügil teosed →","fs_byartist":"Kunstnike kaupa →",
  "worksperdecade":"Teoseid kümnendite kaupa",
