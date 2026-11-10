@@ -383,7 +383,8 @@
                  aLimit:new Map(),   // artist by artist on the wall: pictures shown per artist beyond the first ten
                  decade:null, media:new Set(), museums:new Set(), cats:new Set(), srcs:new Set(),
                  artist:null, sub:null, letter:null, idxOpen:false, idxQ:"", idxLimit:120, idxSort:"az", showEarly:false, origins:new Set(), groups:new Set(), sort:"featured", onWall:false, year:null, gLimit:50, from:null, to:null, undOnly:false, open:null, expand:new Set(),
-                 auLimit:20};     // sales drawn in the auction view before "more"
+                 auLimit:20,      // artists drawn in the auction view before "more"
+                 auOpen:new Set()};   // the sales opened on their lots in the list of past sales
   const LIMIT_DEC = 50, LIMIT_ART = 18;
   const slug = s => (s||"").normalize("NFKD").replace(/[\u0300-\u036f]/g,"")
       .toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"");
@@ -1540,22 +1541,66 @@
         ? `<button class="more" id="more-sales" style="margin-top:18px">${esc(T("au_moreartists", {n: fmt(arts.length - shownA.length)}))}</button>` : "")
         + `<p class="tl-note">${esc(T("au_note"))}</p>`;
     }
-    const order = [...sales.values()].sort((x, y) => asc ? x.ad.localeCompare(y.ad) : y.ad.localeCompare(x.ad));
-    const shown = order.slice(0, state.auLimit);
-    return shown.map((g, k) => {
-      const items = g.items.slice().sort((x, y) => (y.ap || -1) - (x.ap || -1) || cmpStr(A[x.a].n, A[y.a].n));
-      const sold = items.filter(w => w.ao), total = sold.reduce((n, w) => n + (w.ap || 0), 0);
-      const top = sold.length && sold[0].ap ? sold[0] : null;
-      const when = g.ad.length > 7 ? g.ad.split("-").reverse().join(".") : (g.ad.slice(5, 7) ? `${g.ad.slice(5, 7)}.${g.ad.slice(0, 4)}` : g.ad);
-      const gutter = `<span class="g-name">${esc(g.an)}</span>
-        <div class="g-dates">${esc(musName(g.mu))} · ${esc(when)}</div>
-        <div class="g-split">${esc(auCount(items, "au_saleline"))}${total ? ` · ${esc(T("au_total", {p: eur(total)}))}` : ""}</div>
-        ${top ? `<p class="g-blurb">${esc(T("au_top"))}: ${esc(A[top.a].n)}, <em>${esc(top.t)}</em> — ${esc(eur(top.ap))}</p>` : ""}`;
-      return groupHTML("s" + k, gutter, items, true);
-    }).join("") + (order.length > shown.length
-      ? `<button class="more" id="more-sales" style="margin-top:18px">${esc(T("au_moresales", {n: fmt(order.length - shown.length)}))}</button>` : "")
-      + `<p class="tl-note">${esc(T("au_note"))}</p>`;
+    // sale by sale: the past sales as a list, a line each under its year -- date, name,
+    // house, lots, sold, hammer total -- counted over the lots the filters leave. A line
+    // opens on its lots, highest hammer first, and links to the sale's own page.
+    const by = new Map();
+    for (const w of lots){ const sl = saleOf(w); (by.get(sl) || by.set(sl, []).get(sl)).push(w); }
+    const order = [...by.keys()].sort((x, y) => (cmpStr(x.d0, y.d0) || cmpStr(x.mu, y.mu) || cmpStr(x.an, y.an)) * (asc ? 1 : -1));
+    const nYear = new Map();
+    for (const sl of order) nYear.set(sl.d0.slice(0, 4), (nYear.get(sl.d0.slice(0, 4)) || 0) + 1);
+    const day = d => d.length > 7 ? d.split("-").reverse().join(".") : (d.slice(5, 7) ? `${d.slice(5, 7)}.${d.slice(0, 4)}` : d);
+    let last = null, out = "";
+    for (const sl of order){
+      const y = sl.d0.slice(0, 4);
+      if (y !== last){ last = y; out += `<div class="yr-div sl-yr"><b>${esc(y)}</b><span>${esc(T(nYear.get(y) === 1 ? "au_sale1" : "au_nsales", {n: fmt(nYear.get(y))}))}</span></div>`; }
+      const items = by.get(sl).slice().sort((x, y) => (y.ap || -1) - (x.ap || -1) || cmpStr(A[x.a].n, A[y.a].n));
+      const total = items.reduce((n, w) => n + (w.ao && w.ap || 0), 0);
+      const open = state.auOpen.has(sl.id), gk = "s" + sl.id, exp = state.expand.has(gk);
+      out += `<button class="sl-row" data-sale="${sl.id}" aria-expanded="${open}"><span class="sl-d">${esc(day(sl.d0))}</span>
+        <span class="sl-t">${esc(sl.an)} <span class="sl-h">· ${esc(musName(sl.mu))}</span></span>
+        <span class="sl-n">${esc(auCount(items, "au_saleline"))}${total ? ` · ${esc(eur(total))}` : ""}</span><span class="sl-c" aria-hidden="true">${open ? "–" : "+"}</span></button>`;
+      if (open) out += `<div class="sl-lots">${(exp ? items : items.slice(0, 10)).map(w => rowHTML(w, true)).join("")}
+        <div class="sl-foot">${!exp && items.length > 10 ? `<button class="more" data-exp="${gk}">${esc(T("showallentries", {n: fmt(items.length)}))}</button>` : ""}
+        <a class="sl-page" href="${LANG === "et" ? "moodunud-oksjonid" : "past-sales"}/${esc(sl.slug)}">${esc(T("au_salepage"))} →</a></div></div>`;
+    }
+    const gutter = `<span class="g-name">${esc(T("au_past"))}</span>
+      <div class="g-split">${esc(T(order.length === 1 ? "au_sale1" : "au_nsales", {n: fmt(order.length)}))} · ${esc(auCount(lots, "au_saleline"))}</div>`;
+    return `<section class="group" id="grp-sales"><div class="gutter">${gutter}</div><div class="rows">${out}</div></section>
+      <p class="tl-note">${esc(T("au_note"))}</p>`;
   }
+  // The finished sales, as build_past_sales.py draws them: a house's lots of one name
+  // within a fortnight are one sale (Vaal's run over two or three days), the same name a
+  // season later another; each with the address of its page under /past-sales, by the
+  // same rule as there. Made once, over every lot, whatever the filters.
+  let SALE_OF = null;
+  function saleOf(w){
+    if (SALE_OF) return SALE_OF.get(w);
+    SALE_OF = new Map();
+    const dn = s => Date.UTC(+s.slice(0, 4), (+s.slice(5, 7) || 1) - 1, +s.slice(8, 10) || 1) / 864e5;
+    const runs = new Map(), all = [];
+    for (const x of W) if (x.kind === "auction" && x.an){ const k = x.mu + "|" + x.an; (runs.get(k) || runs.set(k, []).get(k)).push(x); }
+    for (const ws of runs.values()){
+      ws.sort((x, y) => cmpCode(String(x.ad), String(y.ad)));
+      let cur = null;
+      for (const x of ws){
+        if (!cur || dn(String(x.ad)) - dn(String(cur.dl)) > 14) all.push(cur = {mu: x.mu, an: x.an, d0: String(x.ad)});
+        cur.dl = String(x.ad); SALE_OF.set(x, cur);
+      }
+    }
+    all.sort((x, y) => cmpCode(y.d0, x.d0) || cmpCode(y.mu, x.mu) || cmpCode(y.an, x.an));
+    const seen = new Set();
+    all.forEach((sl, i) => {
+      const n = sl.an.replace(/^[ :]+|[ :]+$/g, ""), y = sl.d0.slice(0, 4), nm = n.includes(y) ? n : `${n} ${y}`;
+      const s = pySlug(nm.toLowerCase().includes(sl.mu.split(/\s+/)[0].toLowerCase()) ? nm : `${sl.mu} ${nm}`);
+      let k = s, j = 2; while (seen.has(k)) k = `${s}-${j++}`;
+      seen.add(k); sl.slug = k; sl.id = i;
+    });
+    return SALE_OF.get(w);
+  }
+  const cmpCode = (a, b) => a < b ? -1 : a > b ? 1 : 0;
+  // the builder's slug: a letter with no plain form is dropped, not turned into a hyphen
+  const pySlug = s => (s || "").normalize("NFKD").replace(/[^\x00-\x7f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "x";
   const AU_N = W.reduce((n, w) => n + (w.kind === "auction" ? 1 : 0), 0);
 
   // ---- landing doors --------------------------------------------------------
@@ -2303,6 +2348,8 @@
   reg.addEventListener("click", e => {
     if (e.target.closest("#more-artists")){ state.gLimit += 100; render(); return; }
     if (e.target.closest("#more-sales")){ state.auLimit += 20; render(); return; }
+    const sr = e.target.closest("[data-sale]");
+    if (sr){ const i = +sr.dataset.sale; state.auOpen.has(i) ? state.auOpen.delete(i) : state.auOpen.add(i); render(); return; }
     if (e.target.closest("[data-wmore]")){ state.wLimit += 72; render(); return; }
     const am = e.target.closest("[data-amore]");
     if (am){ const i = +am.dataset.amore; state.aLimit.set(i, (state.aLimit.get(i) || 10) + 30); render(); return; }

@@ -554,6 +554,20 @@ a.bar-btn,a.early-btn,a.era{text-decoration:none;line-height:normal;text-align:c
    its count says there are pictures to see */
 .more{width:100%;background:none;border:0;border-top:1px dashed var(--rule);color:var(--grey-6);font-family:var(--mono);font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;padding:11px;cursor:pointer}
 .more:hover{color:var(--ink);background:var(--field)}
+/* the past sales in the auction view: a line a sale under its year, opening on its lots */
+.sl-yr{margin-top:26px;padding-bottom:8px;border-bottom:1px solid var(--ink-soft)}
+.rows>.sl-yr:first-child{margin-top:12px}
+.sl-row{display:grid;grid-template-columns:6.2em minmax(11em,1fr) minmax(0,auto) 1em;gap:4px 16px;align-items:baseline;width:100%;padding:11px 0;background:none;border:0;border-bottom:1px solid var(--rule-soft);color:inherit;text-align:left;cursor:pointer;font:inherit}
+.sl-row:hover{background:var(--field)}
+.sl-d,.sl-n,.sl-c{font-family:var(--mono);font-size:var(--fs-sm);letter-spacing:var(--ls-data);color:var(--grey-6);font-variant-numeric:tabular-nums}
+.sl-t{font-family:var(--serif-text);font-size:1.08rem;line-height:1.25}
+.sl-n{text-align:right}
+.sl-h{font-family:var(--sans);font-size:.8rem;color:var(--grey-6)}
+.sl-lots{padding:0 0 10px 1.4em;border-bottom:1px solid var(--rule)}
+.sl-foot{display:flex;align-items:center;gap:16px}
+.sl-foot .more{width:auto;flex:1;text-align:left;padding:11px 0}
+.sl-page{margin-left:auto;font-family:var(--mono);font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;padding:11px 0;white-space:nowrap}
+@media(max-width:700px){.sl-row{grid-template-columns:minmax(0,1fr) 1em}.sl-d,.sl-n{grid-column:1;text-align:left}.sl-c{grid-column:2;grid-row:1}.sl-lots{padding-left:0}}
 
 footer{border-top:1px solid var(--ink);margin-top:10px;padding:30px 0 60px;display:grid;grid-template-columns:repeat(3,1fr);gap:34px}
 footer p{margin:0;font-size:.81rem;line-height:1.6;color:var(--grey-6);max-width:46ch}
