@@ -64,7 +64,7 @@ def main():
         req = urllib.request.Request(api, body, {"Content-Type": "application/json", "Origin": "https://museaal.ee", "User-Agent": "museaal-alerts"})
         r = json.load(urllib.request.urlopen(req, timeout=120))
         print(f"  alerts: {r.get('new')} new, {r.get('subscribers')} subscribers, {r.get('sent')} emails sent, {r.get('unsent')} over the day's cap")
-        if r.get("unsent"): print("::warning::sale alerts over the day's mail cap: " + str(r["unsent"]) + " not sent")
+        if r.get("unsent"): print("::warning::sale alerts: " + str(r["unsent"]) + " not sent (" + (r.get("failed") or "the day's mail cap") + "), kept for the next deploy that has something new")
         return
     ids = {k: [r[0] for r in a["w"]] for k, a in for_sale().items()}
     os.makedirs("site/data", exist_ok=True)

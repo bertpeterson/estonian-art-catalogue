@@ -579,7 +579,8 @@ async function admin(body, env, reply, ip) {
 // /alerts/send, from the deploy (.github/workflows/pages.yml, build_alerts.py), behind ALERT_KEY: the works that came
 // up for sale since the live site was last built -- new gallery stock and new auction lots -- by artist slug, and to
 // every account with the alerts on (w:) one email with those by the artists on its list. x:alerted keeps what was
-// already announced (by its address, 120 days), so a deploy run again announces nothing twice. Alerts take at most
+// already announced (by its address, 120 days), so a deploy run again announces nothing twice; an email that could not
+// go (the day's room, a refused batch) waits in x:unsent for the next call. Alerts take at most
 // ALERTS_PER_DAY of the day's MAIL_PER_DAY, so sign-in links always have room; Resend's batch call sends them a hundred at a time.
 const ALERTS_PER_DAY = 60, ALERTED_DAYS = 120;
 const ALERT_MAIL = {
@@ -672,29 +673,42 @@ async function alerts(body, env, reply, ip) {
     if (w.length) fresh.set(slug.slice(0, 120), { n: a.n.slice(0, 120), w });
   }
   const out = { new: [...fresh.values()].reduce((s, a) => s + a.w.length, 0), subscribers: 0, sent: 0, unsent: 0 };
-  if (!fresh.size) return reply(out);
-  const subs = await allKeys(KV, "w:"), mails = [];
-  out.subscribers = subs.length;
-  for (const k of subs) {
-    const [sub, rec] = await Promise.all([KV.get(k.name, "json"), KV.get("u:" + k.name.slice(2), "json")]);
-    if (!sub || !rec || !Array.isArray(rec.items)) continue;
-    const found = rec.items.filter(x => x.startsWith("@") && fresh.has(x.slice(1))).map(x => fresh.get(x.slice(1)));
-    if (found.length) mails.push({ to: sub.e, ...alertMail(sub.lang, found, site, sub.unsub) });
+  // x:unsent: the emails an earlier call could not send -- over the day's room, or Resend refused them -- waiting for
+  // the next call, a week at most, and only for an account that still has the alerts on. They go first.
+  const waiting = ((await KV.get("x:unsent", "json")) || []).filter(m => m && m.u && m.to && day - m.d <= 7), mails = [];
+  for (const m of waiting) if (await KV.get("w:" + m.u)) mails.push(m);
+  if (!fresh.size && !mails.length) return reply(out);
+  if (fresh.size) {
+    const subs = await allKeys(KV, "w:");
+    out.subscribers = subs.length;
+    for (const k of subs) {
+      const [sub, rec] = await Promise.all([KV.get(k.name, "json"), KV.get("u:" + k.name.slice(2), "json")]);
+      if (!sub || !rec || !Array.isArray(rec.items)) continue;
+      const found = rec.items.filter(x => x.startsWith("@") && fresh.has(x.slice(1))).map(x => fresh.get(x.slice(1)));
+      if (found.length) mails.push({ u: k.name.slice(2), d: day, to: sub.e, ...alertMail(sub.lang, found, site, sub.unsub) });
+    }
   }
   const used = await counted(env, "mail", today()), room = Math.max(0, Math.min(ALERTS_PER_DAY, MAIL_PER_DAY - used));
-  const go = mails.slice(0, room);
-  out.unsent = mails.length - go.length;
-  if (go.length) await bump(env, "mail", go.length);
-  if (env.SEND_MAIL) for (const m of go) await env.SEND_MAIL(m);
-  else for (let i = 0; i < go.length; i += 100) {
-    const r = await fetch("https://api.resend.com/emails/batch", {
-      method: "POST", headers: { Authorization: "Bearer " + env.RESEND_API_KEY, "Content-Type": "application/json" },
-      body: JSON.stringify(go.slice(i, i + 100).map(m => ({ from: env.MAIL_FROM || "museaal.ee <list@museaal.ee>", reply_to: "info@museaal.ee", ...m, to: [m.to] }))),
-    });
-    if (!r.ok) throw new Error("mail " + r.status);
-  }
-  out.sent = go.length;
-  // announced, also when nobody was listening: an alert is for what is new, not for what was new before someone saved the artist
+  const go = mails.slice(0, room), letter = ({ u, d, ...m }) => m;      // u and d are the queue's, not the email's
+  // a batch that fails stops the sending: what went before it is sent, it and the rest wait in x:unsent
+  try {
+    if (env.SEND_MAIL) for (const m of go) { await env.SEND_MAIL(letter(m)); out.sent++; }
+    else for (let i = 0; i < go.length; i += 100) {
+      const r = await fetch("https://api.resend.com/emails/batch", {
+        method: "POST", headers: { Authorization: "Bearer " + env.RESEND_API_KEY, "Content-Type": "application/json" },
+        body: JSON.stringify(go.slice(i, i + 100).map(m => ({ from: env.MAIL_FROM || "museaal.ee <list@museaal.ee>", reply_to: "info@museaal.ee", ...letter(m), to: [m.to] }))),
+      });
+      if (!r.ok) throw new Error("mail " + r.status);
+      out.sent += go.slice(i, i + 100).length;
+    }
+  } catch (e) { console.log("alert mail failed", String(e.message)); out.failed = String(e.message).slice(0, 40); }
+  if (out.sent) await bump(env, "mail", out.sent);      // counted once sent: a refused batch takes nothing from the day's sign-in links
+  const left = mails.slice(out.sent, out.sent + 300);
+  out.unsent = left.length;
+  if (left.length) await KV.put("x:unsent", JSON.stringify(left), { expirationTtl: 8 * 86400 });
+  else if (waiting.length) await KV.delete("x:unsent");
+  // announced, also when nobody was listening: an alert is for what is new, not for what was new before someone saved
+  // the artist. What could not be sent is in x:unsent, so it too is marked here and not built again.
   for (const a of fresh.values()) for (const x of a.w) done[x[0]] = day;
   for (const [k, d] of Object.entries(done)) if (day - d > ALERTED_DAYS) delete done[k];
   await KV.put("x:alerted", JSON.stringify(done));
