@@ -24,11 +24,12 @@ def listed(p):
     return {"listed": n} if n else {}
 
 
-import re
-_EUR = re.compile(r"(?:€|eur\b)\s*(\d{1,3}(?:[\s., ]\d{3})+|\d+)(?:[.,]\d{2})?|(\d{1,3}(?:[\s., ]\d{3})+|\d+)(?:[.,]\d{2})?\s*(?:€|eur\b|euro)", re.I)
+import re, html
+# a figure never starts inside a run of digits: "2019 200 €" is a year and 200 €, not 19 200 €
+_EUR = re.compile(r"(?:€|eur\b)\s*(\d{1,3}(?:[\s., ]\d{3})+|\d+)(?:[.,]\d{2})?|(?<!\d)(\d{1,3}(?:[\s., ]\d{3})+|\d+)(?:[.,]\d{2})?\s*(?:€|eur\b|euro)", re.I)
 def euros(text):
     """'Hind 1 200 €', '€1200', '850 EUR' -> {'price': 1200}; a sold, reserved or 'on request' line -> {}"""
-    text = (text or "").replace("&euro;", "€").replace("&nbsp;", " ")
+    text = html.unescape(text or "").replace("\u202f", " ")          # "1&#160;470 €" too, not only &nbsp;
     if not text or re.search(r"müüdud|sold|broneeritud|reserv|kokkuleppel|päringu|request", text, re.I): return {}
     m = _EUR.search(text)
     if not m: return {}

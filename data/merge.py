@@ -742,13 +742,27 @@ PAST = json.load(open("gallery_past.json", encoding="utf-8")) if os.path.exists(
 for r in PAST: r["past"] = True
 GAL = GAL + PAST
 # A gallery that lists one work under two product ids -- Haus does, a hundred times --
-# is one work. Same artist, same title, same size, same gallery: the first listing stays.
-_seen, _dedup, _gal_dup = set(), [], 0
+# is one work. Same artist, same title, same year, same size, same gallery, and the same
+# picture or the same price: the first listing stays, a live one before a sold or past one.
+# Two works of one name -- Hammer's "No God" at 470 € and at 5 264 €, Pehap's "Arhitektuur"
+# of 1958 and of 1969 -- differ in year, or in both picture and price, and both stay.
+# A shop's books are not works: an exhibition catalogue, a monograph, a collection of writings.
+_BOOK = re.compile(r"kataloog|catalogue|monograafia|kogumik", re.I)
+_books = sum(1 for g in GAL if _BOOK.search(" ".join(g.get(f) or "" for f in ("artist", "title", "url"))))
+GAL = [g for g in GAL if not _BOOK.search(" ".join(g.get(f) or "" for f in ("artist", "title", "url")))]
+print("  gallery listings that were books, not works:", _books)
+_gone = lambda g: bool(g.get("sold") or g.get("past"))
+_seen, _dedup, _gal_dup = {}, [], 0
 for g in GAL:
-    k = (g["gallery"], " ".join(fold(g.get("artist") or "")), "".join(fold(g.get("title") or "")),
+    k = (g["gallery"], " ".join(fold(g.get("artist") or "")), "".join(fold(g.get("title") or "")), str(g.get("year") or ""),
          re.sub(r"[^0-9x]", "", (g.get("dims") or "").lower().replace("×", "x").replace(",", ".")))
-    if k[2] and k in _seen: _gal_dup += 1; continue
-    _seen.add(k); _dedup.append(g)
+    twin = next((i for i in _seen.get(k, []) if k[2] and ((g.get("img") and _dedup[i].get("img") == g.get("img"))
+                 or (_dedup[i].get("price") or _dedup[i].get("listed") or None) == (g.get("price") or g.get("listed") or None))), None)
+    if twin is not None:
+        _gal_dup += 1
+        if _gone(_dedup[twin]) and not _gone(g): _dedup[twin] = g      # the listing still for sale is the one kept
+        continue
+    _seen.setdefault(k, []).append(len(_dedup)); _dedup.append(g)
 print("  gallery listings that were the same work twice:", _gal_dup)
 GAL = _dedup
 gal_added = gal_unknown = gal_new_est = 0

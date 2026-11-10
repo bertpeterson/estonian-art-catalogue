@@ -163,6 +163,9 @@ class Prices(unittest.TestCase):
         self.assertEqual(euros("€1200"), {"price": 1200})
         self.assertEqual(euros("850 EUR"), {"price": 850})
         self.assertEqual(euros("1&nbsp;450,00&euro;"), {"price": 1450})
+        self.assertEqual(euros("2019 200 €"), {"price": 200})          # a year before the price is not its thousands
+        self.assertEqual(euros("1&#160;470 €"), {"price": 1470})
+        self.assertEqual(euros("12 500 €"), {"price": 12500})
         for gone in ("Müüdud", "Sold – 1200 €", "Broneeritud", "Hind kokkuleppel", "Price on request", "", None):
             self.assertEqual(euros(gone), {}, gone)
 

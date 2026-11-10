@@ -8,9 +8,11 @@
 The deploy (.github/workflows/pages.yml) fetches the live alerts.json before it builds, so "new" is new since the
 last deploy, whichever run made it; with no live file yet (the first deploy) nothing is new. The Worker keeps what it
 already announced, so a deploy run twice mails nothing twice. An id is the first twelve hex of the SHA-1 of the work's
-or lot's address. Slugs are the bare name slugs the register keeps on My List (museaal.artists), not the page slugs.
+or lot's address; where several share one address (Ruki's category pages, a sale's one page for all its lots), of the
+address and the work's key or the lot's number, so a work added to such a page later is new. A work the daily stock
+check found gone (data/stock_gone.json) is not for sale, whatever data.json says outside a build. Slugs are the bare name slugs the register keeps on My List (museaal.artists), not the page slugs.
 """
-import json, os, sys, hashlib, datetime, urllib.request
+import json, os, sys, hashlib, datetime, collections, urllib.request
 
 def sid(url): return hashlib.sha1(url.encode("utf-8")).hexdigest()[:12]
 def euros(v):
@@ -22,20 +24,23 @@ def for_sale():
     address, and auction lots of sales not yet past. The picture is the seller's own, by address, never a copy."""
     import build_hubs as H     # here, not above: the send job has only the repository, not a build
     today, out = datetime.date.today().isoformat(), {}
+    gone = json.load(open("data/stock_gone.json", encoding="utf-8")) if os.path.exists("data/stock_gone.json") else {}
+    stock = [w for w in H.W if w.get("kind") == "gallery" and (w.get("url") or "").startswith("http") and w.get("k") not in gone]
+    lots = [x for x in H.d.get("upcoming", []) if (x.get("u") or "").startswith("http") and not (x.get("d") and x["d"] < today)]
+    shared = collections.Counter([w["url"] for w in stock] + [x["u"] for x in lots])
+    def ident(u, own): return sid(u if shared[u] < 2 else u + "#" + str(own))
     def pic(im): return H.imsrc(im) if (im or "").startswith("g:") else ""
     def add(a, row):
         k = H.bare_slug(H.A[int(a)]["n"])
         if k: out.setdefault(k, {"n": H.A[int(a)]["n"], "w": []})["w"].append(row)
-    for w in H.W:
-        u = w.get("url") or ""
-        if w.get("kind") != "gallery" or not u.startswith("http"): continue
+    for w in stock:
+        u = w["url"]
         tech = H.val(w, "tce") or H.val(w, "tc") or ""
         if "müüdud" in tech.lower() or "sold" in tech.lower(): continue
-        add(w["a"], [sid(u), w.get("t") or "", euros(w.get("pr")), "s", H.val(w, "mu") or "", "", u, pic(w.get("im"))])
-    for x in H.d.get("upcoming", []):
-        u = x.get("u") or ""
-        if not u.startswith("http") or (x.get("d") and x["d"] < today): continue
-        add(x["a"], [sid(u), x.get("t") or "", euros(x.get("p")), "l", x.get("h") or "", x.get("d") or "", u, pic(x.get("im"))])
+        add(w["a"], [ident(u, w.get("k")), w.get("t") or "", euros(w.get("pr")), "s", H.val(w, "mu") or "", "", u, pic(w.get("im"))])
+    for x in lots:
+        u = x["u"]
+        add(x["a"], [ident(u, x.get("n") or x.get("t") or ""), x.get("t") or "", euros(x.get("p")), "l", x.get("h") or "", x.get("d") or "", u, pic(x.get("im"))])
     return out
 
 def main():
@@ -46,7 +51,7 @@ def main():
         was = {i for ids in old.values() for i in ids}
         new = {}
         for k, a in for_sale().items():
-            w = [r for r in a["w"] if r[0] not in was]
+            w = [r for r in a["w"] if r[0] not in was and sid(r[6]) not in was]    # sid(address): the id a shared page's works had before
             if w: new[k] = {"n": a["n"], "w": w}
         if new: json.dump(new, open(dest, "w", encoding="utf-8"), ensure_ascii=False)
         print(f"  alerts: {sum(len(a['w']) for a in new.values())} new works by {len(new)} artists")
