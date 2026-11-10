@@ -742,9 +742,11 @@ function alertMail(lang, found, site, unsub) {
     "</td></tr></table></td></tr></table></body></html>";
   return { subject: M.subject(head), text: lines.join("\n"), html };
 }
-async function alerts(body, env, reply) {
+async function alerts(body, env, reply, ip) {
   if (!env.ALERT_KEY || !env.LISTS) return reply({ error: "Alerts are not set up." }, 503);
+  if (tooMany(ip, tries, 5)) return reply({ error: "Too many tries; wait a minute." }, 429);     // wrong keys, as at the backoffice's door
   if (await hash(String(body.key || "")) !== await hash(env.ALERT_KEY)) return reply({ error: "Wrong key." }, 401);
+  tries.delete(ip);
   const KV = env.LISTS, day = Math.floor(Date.now() / 864e5), site = env.SITE || "https://museaal.ee/";
   // {slug: {n: name, w: [[address, title, price, "s"|"l", gallery or house, date, link, picture]]}}, the addresses not yet announced
   const done = (await KV.get("x:alerted", "json")) || {}, fresh = new Map();
@@ -837,7 +839,7 @@ export default {
       catch (e) { console.log("list failed", String(e.message)); return reply({ error: "The list could not be reached." }, 502); }
     }
     if (path === "/alerts/send") {
-      try { return await alerts(body && typeof body === "object" ? body : {}, env, reply); }
+      try { return await alerts(body && typeof body === "object" ? body : {}, env, reply, ip); }
       catch (e) { console.log("alerts failed", String(e.message)); return reply({ error: "The alerts could not be sent." }, 502); }
     }
     if (path === "/admin/stats") {
