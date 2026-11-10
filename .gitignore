@@ -89,3 +89,6 @@ auction/state.json
 
 # private tools, never committed
 analysis/
+# data.json as it was before a build applied the daily stock check (data/stock_check.py)
+data/data.before_apply.json
+data/data.before_apply.json.sha256

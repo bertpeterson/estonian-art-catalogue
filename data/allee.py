@@ -21,7 +21,7 @@ ctx = ssl.create_default_context()   # certificate and host checked: a forged an
 def api(page, per=100):
     return store_api.page(f"{API}?per_page={per}&page={page}", UA, ctx, 45)    # a page not read stops the script (store_api.py)
 
-clean = lambda s: re.sub(r"\s+", " ", html.unescape(re.sub(r"<[^>]+>", " ", s or ""))).strip()
+from scrape_util import U as clean
 LOT = re.compile(r"^(?P<a>[^“”\"„]+?)\s*,?\s*[“”\"„]\s*(?P<t>.+?)\s*[”\"“]\s*,?\s*(?P<rest>.*)$", re.S)
 DIMS = re.compile(r"(?:\b(?:plm|km|lm|vm|ava)\s*)?(\d+(?:[.,]\d+)?\s*[x×]\s*\d+(?:[.,]\d+)?(?:\s*[x×]\s*\d+(?:[.,]\d+)?)?)\s*cm", re.I)
 SALE = re.compile(r"oksjon\s*\d{4}", re.I)

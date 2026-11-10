@@ -49,7 +49,7 @@ def get(url, key):
 def slugify(t):
     t = unicodedata.normalize('NFKD', t or '').encode('ascii', 'ignore').decode().lower()
     return re.sub(r'^-+|-+$', '', re.sub(r'[^a-z0-9]+', '-', t))[:60] or 'teos'
-clean = lambda s: re.sub(r"\s+", " ", html.unescape(re.sub(r"<[^>]+>", " ", s or ""))).strip()
+from scrape_util import U as clean
 euros = lambda s: int(re.sub(r"[^\d]", "", clean(s))) if re.search(r"\d", clean(s)) else None
 
 # the sales: the page for each carries the API tag it loads

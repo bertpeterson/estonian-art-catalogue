@@ -18,7 +18,7 @@ import store_api
 UA = "EstonianArtCatalogue/1.0 (museaal.ee; contact info@museaal.ee)"
 API = "https://www.artman.ee/wp-json/wc/store/v1/products"
 ctx = ssl.create_default_context()
-U = lambda s: re.sub(r"\s+", " ", html.unescape(re.sub(r"<[^>]+>", " ", s or ""))).strip()
+from scrape_util import U
 # first technique named in the description; whole words only ("maalikunstnik" is not one)
 TECH = re.compile(r"\b(?:värviline\s+)?(õlimaal|akrüülmaal|temperamaal|akvarell|guašš|pastell|segatehnika|söejoonistus|"
                   r"tušijoonistus|pliiatsijoonistus|joonistus|litograafia|ofort|kuivnõel|akvatinta|mezzotinto|metsotinto|"

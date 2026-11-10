@@ -42,7 +42,7 @@ def get(url, key):
     time.sleep(0.8)
     return h
 
-clean = lambda s: re.sub(r"\s+", " ", html.unescape(re.sub(r"<[^>]+>", " ", s or ""))).strip()
+from scrape_util import U as clean
 
 # The houses set sale names in capitals; that is the poster, not the name. Sentence
 # case, keeping roman numerals and the houses' own initials.

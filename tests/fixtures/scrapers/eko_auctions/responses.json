@@ -1,0 +1,51 @@
+[
+ {
+  "key": "https://eestikunstioksjonid.ee/",
+  "url": "https://eestikunstioksjonid.ee/",
+  "status": 200,
+  "final_url": null,
+  "file": "01.gz"
+ },
+ {
+  "key": "https://eestikunstioksjonid.ee/k/oksjonid/eko-sugisoksjon-2026/",
+  "url": "https://eestikunstioksjonid.ee/k/oksjonid/eko-sugisoksjon-2026/",
+  "status": 200,
+  "final_url": null,
+  "file": "02.gz"
+ },
+ {
+  "key": "https://eestikunstioksjonid.ee/o/indrek-aava-mang-2024-42x42/",
+  "url": "https://eestikunstioksjonid.ee/o/indrek-aava-mang-2024-42x42/",
+  "status": 200,
+  "final_url": null,
+  "file": "03.gz"
+ },
+ {
+  "key": "https://eestikunstioksjonid.ee/o/amandus-h-adamson-paldiski-port-baltigue-1897-25x43/",
+  "url": "https://eestikunstioksjonid.ee/o/amandus-h-adamson-paldiski-port-baltigue-1897-25x43/",
+  "status": 200,
+  "final_url": null,
+  "file": "04.gz"
+ },
+ {
+  "key": "https://eestikunstioksjonid.ee/o/arnold-alas-tallinna-vaade-1970-59x73/",
+  "url": "https://eestikunstioksjonid.ee/o/arnold-alas-tallinna-vaade-1970-59x73/",
+  "status": 200,
+  "final_url": null,
+  "file": "05.gz"
+ },
+ {
+  "key": "https://eestikunstioksjonid.ee/o/peeter-allik-ikka-veel-maalite-1992-53x39/",
+  "url": "https://eestikunstioksjonid.ee/o/peeter-allik-ikka-veel-maalite-1992-53x39/",
+  "status": 200,
+  "final_url": null,
+  "file": "06.gz"
+ },
+ {
+  "key": "https://eestikunstioksjonid.ee/k/oksjonid/ekl-1-paev-graafika/",
+  "url": "https://eestikunstioksjonid.ee/k/oksjonid/ekl-1-paev-graafika/",
+  "status": 200,
+  "final_url": null,
+  "file": "07.gz"
+ }
+]

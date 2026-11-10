@@ -19,7 +19,7 @@ import store_api
 UA = "EstonianArtCatalogue/1.0 (museaal.ee; contact info@museaal.ee)"
 API = "https://artkeller.ee/wp-json/wc/store/v1/products"
 ctx = ssl.create_default_context()
-U = lambda s: re.sub(r"\s+", " ", html.unescape(re.sub(r"<[^>]+>", " ", s or ""))).strip()
+from scrape_util import U
 DIM = r"(\d+(?:[.,]\d+)?)\s*[x×]\s*(\d+(?:[.,]\d+)?)(?:\s*[x×]\s*(\d+(?:[.,]\d+)?))?\s*cm"
 CAT = {"Õli": "õli", "Akvarell": "akvarell", "Guašš-Tempera": "guašš", "GRAAFIKA": "graafika", "SKULPTUUR": "skulptuur"}
 

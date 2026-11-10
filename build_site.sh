@@ -7,9 +7,12 @@ export MUSEAAL_SCRIPT_MARK="$(python3 -c 'import secrets; print(secrets.token_he
 # i18n.json is generated, not hand-kept. build_site.py only copies it, so edits to
 # i18n.py reached the repo but never the site until this ran here.
 python3 -u i18n.py
-# works the daily check (stock.yml) found sold or gone since the weekly run become past listings in data.json
+# works the daily check (stock.yml) found sold or gone since the weekly run become past listings in data.json --
+# for this build only: data.json is tracked and merge.py's to write, so it is put back when the build ends,
+# however it ends (stock_check.py unapply)
+trap '(cd data && python3 stock_check.py unapply)' EXIT
 (cd data && python3 stock_check.py apply) || exit 1
-(cd data && python3 similar.py) || exit 1     # a["sim"]: six nearest artists, into data.json
+(cd data && python3 similar.py) || exit 1     # six nearest artists: data/similar.json
 python3 build_site.py
 # the fonts (Newsreader, Archivo, IBM Plex Mono; OFL) come from this site, not Google: fonts/ -> site/fonts/
 cp -R fonts site/fonts

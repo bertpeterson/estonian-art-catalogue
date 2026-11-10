@@ -44,7 +44,7 @@ def get(url, key):
     time.sleep(120)     # the crawl delay e-kunstisalong.ee asks for
     return h
 
-clean = lambda s: re.sub(r"\s+", " ", html.unescape(re.sub(r"<[^>]+>", " ", s or ""))).strip()
+from scrape_util import U as clean
 euros = lambda s: int(re.sub(r"[^\d]", "", s)) if re.search(r"\d", s or "") else None
 
 # the sales, with their dates, from the list page

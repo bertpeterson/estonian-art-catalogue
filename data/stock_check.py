@@ -10,6 +10,7 @@ otherwise no longer listed.
 
     python3 stock_check.py          # read the quick galleries, update stock_gone.json
     python3 stock_check.py apply    # data.json: the works in stock_gone.json become past listings
+    python3 stock_check.py unapply  # data.json as it was before `apply`, once the site is built
 
 Removals only. A new work or a changed price waits for the weekly run, which empties
 stock_gone.json: its harvest says the same, and a work back on sale comes back. Artrovert
@@ -21,8 +22,14 @@ build_site.sh runs `apply` first, so every page built -- the artist pages, Buy a
 register -- reads the stock the same way. In data.json a work that left becomes what
 merge.py makes of a past listing: kind "sold", gs 1 (the gallery said sold) or 0 (no
 longer listed), no picture, no price.
+
+data.json is tracked, and the build is not what changes it: merge.py is. So `apply` keeps
+the file as it was (data.before_apply.json, not tracked) and build_site.sh ends with
+`unapply`, which puts it back -- unless something else has written data.json since, when
+it is left alone. A build no longer leaves the checkout modified; the next build applies
+stock_gone.json again.
 """
-import json, os, re, sys, shutil, subprocess, datetime
+import json, os, re, sys, shutil, subprocess, datetime, hashlib
 
 here = os.path.dirname(os.path.abspath(__file__))
 GONE = os.path.join(here, "stock_gone.json")
@@ -74,6 +81,24 @@ def check():
     json.dump(dict(sorted(gone.items())), open(GONE, "w", encoding="utf-8"), ensure_ascii=False, indent=0)
     print(f"stock_gone.json: {len(gone)} works no longer for sale since the weekly run")
 
+BEFORE = os.path.join(here, "data.before_apply.json")       # data.json as `apply` found it
+MARK = BEFORE + ".sha256"                                    # ...and the hash of what `apply` wrote in its place
+
+def sha(f):
+    h = hashlib.sha256()
+    with open(f, "rb") as x:
+        for b in iter(lambda: x.read(1 << 20), b""): h.update(b)
+    return h.hexdigest()
+
+def unapply():
+    """data.json as it was before `apply`, if it is still what `apply` wrote: a merge.py run since is left standing"""
+    if not os.path.exists(BEFORE): return
+    f = os.path.join(here, "data.json")
+    mine = os.path.exists(MARK) and os.path.exists(f) and open(MARK).read().strip() == sha(f)
+    if mine: os.replace(BEFORE, f)
+    else: os.remove(BEFORE)
+    if os.path.exists(MARK): os.remove(MARK)
+
 def apply():
     gone = load(GONE, {})
     if not gone: return
@@ -89,8 +114,11 @@ def apply():
     if not n: return
     m = d["meta"]
     m["gallery"] -= n; m["past"] += n; m["past_sold"] += s
-    json.dump(d, open(f, "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
+    unapply()                                   # a build that stopped midway left its copy: that one is the original
+    shutil.copy2(f, BEFORE)
+    with open(f, "w", encoding="utf-8") as out: json.dump(d, out, ensure_ascii=False, separators=(",", ":"))
+    with open(MARK, "w") as out: out.write(sha(f))
     print(f"  stock          {n} works no longer for sale since the weekly run ({s} sold), from stock_gone.json")
 
 if __name__ == "__main__":
-    apply() if sys.argv[1:] == ["apply"] else check()
+    apply() if sys.argv[1:] == ["apply"] else unapply() if sys.argv[1:] == ["unapply"] else check()

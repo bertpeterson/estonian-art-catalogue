@@ -17,6 +17,7 @@ The shop harvest is not touched: these records are a separate kind, and the
 catalogue's rule that gallery asking prices are never shown stands.
 """
 import re, json, os, time, datetime, urllib.request, ssl, html
+import store_api
 from auction_keep import merged
 from vern_parse import parse
 UA = "EstonianArtCatalogue/1.0 (museaal.ee; contact info@museaal.ee)"
@@ -24,14 +25,7 @@ API = "https://vernissage.ee/wp-json/wc/store/v1/products"
 ctx = ssl.create_default_context()   # certificate and host checked: a forged answer must not become a listing
 
 def api(page, per=100):
-    for attempt in range(3):
-        try:
-            r = urllib.request.Request(f"{API}?per_page={per}&page={page}", headers={"User-Agent": UA, "Accept": "application/json"})
-            with urllib.request.urlopen(r, timeout=45, context=ctx) as f:
-                return json.loads(f.read().decode("utf-8", "replace"))
-        except Exception as e:
-            if attempt == 2: print("ERR page", page, repr(e)[:60], flush=True); return []
-            time.sleep(3 * (attempt + 1))
+    return store_api.page(f"{API}?per_page={per}&page={page}", UA, ctx, 45)   # a page not read stops the script (store_api.py)
 
 # "Haamrihind: 2050 €" is a sale; "Haamrihind: €" an unsold lot; "Haamrihind: müüdud
 # 1200 €" a lot sold after the sale at its starting price. The 2022 sales number their

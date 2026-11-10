@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Record and replay what the gallery scrapers fetch, so each runs offline in a test.
+"""Record and replay what the gallery and auction scrapers fetch, so each runs offline in a test.
 
 The scrapers (data/haus.py, kogo.py, ...) are scripts that fetch at the top level and
 write their records into the folder they run in. Here each runs as it does in
@@ -55,14 +55,24 @@ RULES = {
     "noba_artists":  [(r"/kunstnik/", 3), (r"noba\.ac/\w\w/(toode|product|kunst|artwork)/", 2)],
     "noba_artworks": [(r"/(kunstnik|artist)/", 6), (r"noba\.ac/\w\w/(toode|product|kunst|artwork)/", 2)],
     "konradmagi":  [(r"/maalid/$", 1), (r"/eskiisid/$", 1), (r"/kadunud/$", 1)],
+    # the auction houses (auctions.yml): the list of sales, a sale or two, a few lots' own pages
+    "vernissage_auctions": [(r"page=1$", 1)],
+    "haus_auctions":       [(r"_s=1&p=$", 1), (r"c=oksjon&l=et$", 1), (r"toimunud-oksjonid&l=et&id=\d+$", 2)],
+    "eko_auctions":        [(r"\.ee/$", 1), (r"/k/oksjonid/[^/]+/$", 2), (r"\.ee/(?!k/oksjonid/)[^?]+$", 4)],
+    "vaal_auctions":       [(r"vaal\.ee/oksjonid$", 1), (r"vaal\.ee/oksjonid/[a-z0-9-]+$", 2), (r"/api/auction\?", 2), (r"/api/item\?", 4)],
+    "eks_auctions":        [(r"_oksjonid_756$", 1), (r"oksjon[^/]*_\d+$", 2)],
+    "onk_auctions":        [(r"/kataloogid/$", 1), (r"/kataloog/oksjonid/[^/]+/$", 2), (r"/page/\d+/$", 1)],
+    "kunstikoda_auctions": [(r"kunstikoda\.ee/$", 1), (r"oksjon-\d{4}/$", 1), (r"/product/", 4)],
 }
-TRIM = {"allee": 20, "vernissage": 30, "artner": 25, "artman": 25, "artandtonic": 25, "artkeller": 25, "idla": 25, "kipskassid": 12, "noba": 20}
+TRIM = {"allee": 20, "vernissage": 30, "artner": 25, "artman": 25, "artandtonic": 25, "artkeller": 25, "idla": 25, "kipskassid": 12, "noba": 20,
+        "vernissage_auctions": 100}
 # where a page's products are taken from instead, when recording: Allee's first page
 # of products is all auction lots, its stock comes later -- the saved page holds both
 SOURCES = {"allee": lambda u: [u + "&type=simple", u]}
 # the files each adapter writes that the test compares
 OUTPUTS = {"konradmagi": ["konradmagi_records.json"], "noba_artists": ["noba_artists.json"],
            "noba_artworks": ["noba_artworks.json"], "noba": ["gallery_records.json", "noba_raw.json"]}
+AUCTION = ["auction_records.json", "upcoming_records.json"]      # what every *_auctions.py writes
 
 
 def key(url, data):
@@ -158,6 +168,25 @@ def child(mode, fix, script):
         time.sleep = lambda s: sleep(min(s, 1.5)) if fetched[0] else None
     sys.path.insert(0, DATA)
     sys.argv = [script]
+    if name.endswith("_auctions"):
+        # a sale is past or still to come by today's date: the day the pages were saved stays "today" in replay,
+        # or the same pages would give other records once a coming sale's day has passed
+        day_p = os.path.join(fix, "today")
+        if mode == "replay":
+            import datetime
+            y, m, d = map(int, open(day_p).read().split("-"))
+            class Date(datetime.date):
+                @classmethod
+                def today(cls): return cls(y, m, d)
+            class DateTime(datetime.datetime):
+                @classmethod
+                def now(cls, tz=None): return cls(y, m, d, 12, 0, tzinfo=tz)
+            datetime.date, datetime.datetime = Date, DateTime
+        else:
+            open(day_p, "w").write(time.strftime("%Y-%m-%d"))
+        # upcoming.py writes beside itself, which in a run is the folder the script runs in; here it is data/
+        import upcoming
+        upcoming.OUT = os.path.join(os.getcwd(), "upcoming_records.json")
     runpy.run_path(script, run_name="__main__")
 
 
@@ -177,7 +206,8 @@ def run(name, mode="replay"):
                            cwd=d, capture_output=True, text=True, env=env, timeout=900)
         out = p.stdout + p.stderr
         if p.returncode: raise RuntimeError("%s.py exited %d:\n%s" % (name, p.returncode, out[-3000:]))
-        got = {f: json.load(open(os.path.join(d, f), encoding="utf-8")) for f in OUTPUTS.get(name, ["gallery_records.json"])}
+        got = {f: json.load(open(os.path.join(d, f), encoding="utf-8")) for f in OUTPUTS.get(name, AUCTION if name.endswith("_auctions") else ["gallery_records.json"])
+               if os.path.exists(os.path.join(d, f)) or not name.endswith("_auctions")}
         return got, out
     finally:
         shutil.rmtree(d, ignore_errors=True)
@@ -201,7 +231,7 @@ if __name__ == "__main__":
         fix = os.path.join(FIX, n)
         if cmd == "record":
             for f in os.listdir(fix) if os.path.isdir(fix) else []:
-                if f.endswith(".gz") or f == "responses.json": os.remove(os.path.join(fix, f))
+                if f.endswith(".gz") or f in ("responses.json", "today"): os.remove(os.path.join(fix, f))
             os.makedirs(fix, exist_ok=True)
             run(n, "record")
         if cmd in ("record", "expect"):

@@ -24,7 +24,7 @@ CACHE = os.path.join("gcache", "onk")
 os.makedirs(CACHE, exist_ok=True)
 MONTHS = {"jaan": 1, "veebr": 2, "märts": 3, "märtsil": 3, "apr": 4, "mai": 5, "juun": 6, "juul": 7,
           "aug": 8, "sept": 9, "okt": 10, "nov": 11, "dets": 12}
-U = lambda s: re.sub(r"\s+", " ", html.unescape(re.sub(r"<[^>]+>", " ", s or ""))).strip()
+from scrape_util import U
 today = datetime.date.today().isoformat()
 
 def fetch(u):

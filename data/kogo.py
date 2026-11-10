@@ -1,21 +1,12 @@
 # -*- coding: utf-8 -*-
 """Kogo Galerii (Tartu) -> appends to gallery_records.json. Metadata only, no prices."""
 import time, re, json, os, gzip, urllib.request, ssl
+from scrape_util import cached
 UA = "EstonianArtCatalogue/1.0 (museaal.ee; contact info@museaal.ee)"
 ctx = ssl.create_default_context()   # certificate and host checked: a forged answer must not become a listing
 os.makedirs("gcache", exist_ok=True)
 
-def get(url, key):
-    p = f"gcache/{key}.html.gz"
-    # stock changes month to month: a cached page older than a day is fetched again
-    if os.path.exists(p) and time.time() - os.path.getmtime(p) > 86400: os.remove(p)
-    if os.path.exists(p):
-        with gzip.open(p,"rt",encoding="utf-8") as f: return f.read()
-    r = urllib.request.Request(url, headers={"User-Agent": UA, "Accept-Language":"en"})
-    with urllib.request.urlopen(r, timeout=60, context=ctx) as f:
-        h = f.read().decode("utf-8","replace")
-    with gzip.open(p,"wt",encoding="utf-8") as f: f.write(h)
-    return h
+def get(url, key): return cached(url, key, lang="en")   # scrape_util.py: a page not read stops the script
 
 def txt(s):
     s = re.sub(r'<[^>]+>', ' ', s)

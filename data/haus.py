@@ -10,27 +10,13 @@ from asking_price import euros
 from concurrent.futures import ThreadPoolExecutor
 
 BASE = "https://haus.ee"
+from scrape_util import cached
 UA = "EstonianArtCatalogue/1.0 (museaal.ee; contact info@museaal.ee)"
 CACHE = "gcache"
 os.makedirs(CACHE, exist_ok=True)
 ctx = ssl.create_default_context()   # certificate and host checked: a forged answer must not become a listing
 
-def get(url, key):
-    p = os.path.join(CACHE, key + ".html.gz")
-    # stock changes month to month: a cached page older than a day is fetched again
-    if os.path.exists(p) and time.time() - os.path.getmtime(p) > 86400: os.remove(p)
-    if os.path.exists(p):
-        with gzip.open(p, "rt", encoding="utf-8") as f: return f.read()
-    for attempt in range(3):
-        try:
-            r = urllib.request.Request(url, headers={"User-Agent": UA, "Accept-Language": "et"})
-            with urllib.request.urlopen(r, timeout=45, context=ctx) as f:
-                h = f.read().decode("utf-8", "replace")
-            with gzip.open(p, "wt", encoding="utf-8") as f: f.write(h)
-            return h
-        except Exception as e:
-            if attempt == 2: print("ERR", url, repr(e)[:70], flush=True); return ""
-            time.sleep(3 * (attempt + 1))
+def get(url, key): return cached(url, key, lang="et", timeout=45)   # scrape_util.py: a page not read stops the script
 
 FIG = re.compile(r'<figure id="tid(\d+)".*?</figure>', re.S)
 def txt(s):

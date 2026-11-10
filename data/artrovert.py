@@ -3,23 +3,12 @@
 robots.txt permits product pages (only wp-admin, wc-logs and add-to-cart are disallowed)."""
 import re, json, os, gzip, time, urllib.request, ssl
 from asking_price import euros
+from scrape_util import cached
 UA="EstonianArtCatalogue/1.0 (museaal.ee; contact info@museaal.ee)"
 BASE="https://www.artrovert.ee"
 ctx=ssl.create_default_context()   # certificate and host checked: a forged answer must not become a listing
 os.makedirs("gcache",exist_ok=True)
-def get(u,key):
-    p=f"gcache/{key}.html.gz"
-    # stock changes month to month: a cached page older than a day is fetched again
-    if os.path.exists(p) and time.time() - os.path.getmtime(p) > 86400: os.remove(p)
-    if os.path.exists(p):
-        with gzip.open(p,"rt",encoding="utf-8") as f: return f.read()
-    try:
-        r=urllib.request.Request(u,headers={"User-Agent":UA,"Accept-Language":"en"})
-        with urllib.request.urlopen(r,timeout=35,context=ctx) as f: h=f.read().decode("utf-8","replace")
-    except Exception as e:
-        print("ERR",u,repr(e)[:50],flush=True); h=""
-    with gzip.open(p,"wt",encoding="utf-8") as f: f.write(h)
-    time.sleep(1.2); return h
+def get(u,key): return cached(u, key, lang="en", timeout=35, pause=1.2)   # scrape_util.py: a page not read stops the script
 def txt(s):
     s=re.sub(r'<[^>]+>',' ',s)
     for a,b in (("&amp;","&"),("&#8217;","’"),("&#8220;","“"),("&#8221;","”"),("&times;","×"),("&nbsp;"," ")): s=s.replace(a,b)

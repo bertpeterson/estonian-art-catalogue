@@ -26,7 +26,7 @@ UA = "EstonianArtCatalogue/1.0 (museaal.ee; contact info@museaal.ee)"
 CACHE = os.path.join("gcache", "kunstikoda")
 os.makedirs(CACHE, exist_ok=True)
 KNOWN = ["/kunstioksjon-2026/"]               # the sale pages so far; the menu names any new one
-U = lambda s: re.sub(r"\s+", " ", html.unescape(re.sub(r"<[^>]+>", " ", s or ""))).strip()
+from scrape_util import U
 now = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=2))).strftime("%Y-%m-%d %H:%M")   # Tallinn, near enough
 
 def fetch(u):

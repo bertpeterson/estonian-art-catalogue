@@ -1,0 +1,44 @@
+[
+ {
+  "key": "https://kunstikoda.ee/",
+  "url": "https://kunstikoda.ee/",
+  "status": 200,
+  "final_url": null,
+  "file": "01.gz"
+ },
+ {
+  "key": "https://kunstikoda.ee/kunstioksjon-2026/",
+  "url": "https://kunstikoda.ee/kunstioksjon-2026/",
+  "status": 200,
+  "final_url": null,
+  "file": "02.gz"
+ },
+ {
+  "key": "https://kunstikoda.ee/product/jaan-vahtra-konstruktiivsed-rutmid-5/",
+  "url": "https://kunstikoda.ee/product/jaan-vahtra-konstruktiivsed-rutmid-5/",
+  "status": 200,
+  "final_url": null,
+  "file": "03.gz"
+ },
+ {
+  "key": "https://kunstikoda.ee/product/eduart-wiiralt-puuloike-sund/",
+  "url": "https://kunstikoda.ee/product/eduart-wiiralt-puuloike-sund/",
+  "status": 200,
+  "final_url": null,
+  "file": "04.gz"
+ },
+ {
+  "key": "https://kunstikoda.ee/product/kangilaski-ott-linda-kivi/",
+  "url": "https://kunstikoda.ee/product/kangilaski-ott-linda-kivi/",
+  "status": 200,
+  "final_url": null,
+  "file": "05.gz"
+ },
+ {
+  "key": "https://kunstikoda.ee/product/vabbe-ado-seisev-mees-nokkmutsiga/",
+  "url": "https://kunstikoda.ee/product/vabbe-ado-seisev-mees-nokkmutsiga/",
+  "status": 200,
+  "final_url": null,
+  "file": "06.gz"
+ }
+]

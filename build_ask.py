@@ -112,12 +112,6 @@ T = {"en": dict(file="find", other="leia", other_l="Eesti keeles", site="Estonia
                 desc="Paintings, prints and sculpture by Estonian artists for sale: {n} works from Estonian galleries, each with the gallery's asking price. Filter by price, medium, size, mood and artist; every work links to the gallery that sells it.",
                 sh="Estonian art for sale", sp="Buy paintings, prints, watercolours and sculpture by Estonian artists from the galleries that sell them: {n} works, each with its asking price and a link to the gallery. museaal.ee is a catalogue, not a shop; the sale is the gallery's.",
                 hello="Set the filters, or describe what you need: the room, size, budget, subject or mood.",
-                photo="Photo of your wall", yourroom="Your room", looking="Looking at your room…", photomsg="(a photo of my room)",
-                wallw="Wall space, width", drag="Drag the room to look around it; scroll or pinch to step closer. Drag a work to move it along the wall, or onto another outlined space. If the sizes look wrong, set the wall's width.", reset="Reset view", ar="See it on your wall (AR)", arsafari="To see a work on your real wall in AR, open this page in Safari.", arwait="Making the model…", arfail="AR could not be opened", onwall="On my wall",
-                choose="Tap a work to hang it", hangmore="Hang another", remove="Take it down", together="{n} works on the wall",
-                frames=dict(none="No frame", black="Black", oak="Oak", white="White", gold="Gold"),
-                fits="fits", roomnote="Room", nowall="I couldn't find a clear stretch of wall in that photo. Try one taken straight on, with the empty wall in view.",
-                badphoto="That photo could not be read. Try a JPEG or PNG.",
                 label="Your message", ph="Describe the work you're looking for.", send="Send",
                 more="Show more", at="at", noprice="Price on request", none="No work for sale matches this search. Widen the price range or clear a filter.",
                 thinking="Thinking…", how="How it searched", like="Works like", choosing="Choosing from these", failed="The assistant could not be reached. Try again in a moment.", robot="This browser did not pass the site's robot check, so the assistant cannot answer here. The filters still work. For the assistant, try another browser or turn off content blockers.", record="In the catalogue",
@@ -142,12 +136,6 @@ T = {"en": dict(file="find", other="leia", other_l="Eesti keeles", site="Estonia
                 desc="Eesti kunstnike maalid, graafika ja skulptuurid müügil: {n} teost Eesti galeriidest, igaüks galerii hinnaga. Vali hinna, tehnika, suuruse, meeleolu ja kunstniku järgi; iga teos viib seda müüva galerii lehele.",
                 sh="Eesti kunsti müük", sp="Osta Eesti kunstnike maale, graafikat, akvarelle ja skulptuure otse neid müüvatelt galeriidelt: {n} teost, igaüks hinnaga ja lingiga galeriile. museaal.ee on kataloog, mitte pood; teose müüb galerii.",
                 hello="Sea filtrid või kirjelda, mida vajad: tuba, suurus, eelarve, teema või meeleolu.",
-                photo="Foto seinast", yourroom="Sinu tuba", looking="Vaatan su tuba…", photomsg="(foto minu toast)",
-                wallw="Vaba seinaosa laius", drag="Lohista tuba, et ringi vaadata; keri või näpista, et lähemale astuda. Lohista teost, et seda seinal liigutada või teisele märgitud kohale viia. Kui suurused tunduvad valed, sea seina laius õigeks.", reset="Algvaade", ar="Vaata oma seinal (AR)", arsafari="Et näha teost AR-is oma päris seinal, ava see leht Safaris.", arwait="Teen mudelit…", arfail="AR-i ei õnnestunud avada", onwall="Minu seinale",
-                choose="Puuduta teost, et see seinale riputada", hangmore="Riputa veel üks", remove="Võta maha", together="Seinal {n} teost",
-                frames=dict(none="Raamita", black="Must", oak="Tamm", white="Valge", gold="Kuld"),
-                fits="mahub", roomnote="Tuba", nowall="Ma ei leidnud sellelt fotolt vaba seinaosa. Proovi fotot, mis on tehtud otse seina poole ja kus tühi sein on näha.",
-                badphoto="Seda fotot ei õnnestunud lugeda. Proovi JPEG- või PNG-faili.",
                 label="Sinu sõnum", ph="Kirjelda teost, mida otsid.", send="Saada",
                 more="Näita rohkem", at="", noprice="Hind päringul", none="Müügil pole ühtki teost, mis sellele otsingule vastaks. Laienda hinnavahemikku või eemalda mõni filter.",
                 thinking="Mõtlen…", how="Kuidas otsisin", like="Sarnased teosele", choosing="Valin nende seast", failed="Abilist ei õnnestunud kätte saada. Proovi hetke pärast uuesti.", robot="See brauser ei läbinud saidi robotikontrolli, seega abiline ei saa siin vastata. Filtrid töötavad edasi. Abilise kasutamiseks proovi teist brauserit või lülita sisublokeerijad välja.", record="Kataloogis",
@@ -216,7 +204,7 @@ def data():
 JS = r"""
 (function(){
 var T=JSON.parse(document.getElementById('t').textContent), page=document.getElementById('chat');
-var EN=document.documentElement.lang==='en', api=page.dataset.api, src=page.dataset.src, log=document.getElementById('log'), form=document.getElementById('ask'), input=document.getElementById('q'), file=document.getElementById('photo');
+var EN=document.documentElement.lang==='en', api=page.dataset.api, src=page.dataset.src, log=document.getElementById('log'), form=document.getElementById('ask'), input=document.getElementById('q');
 // the A/B test of the assistant: each browser gets one version and keeps it -- 'a' looks with its tools first, 'o' answers
 // in one call -- and the counts carry it; ?v=a or ?v=o picks one (the side-by-side comparison)
 var V=(/[?&]v=([ao])(&|$)/.exec(location.search)||[])[1];
@@ -225,7 +213,6 @@ var talked=false, wentOut=false;
 HUMAN.start(page.dataset.ts,document.getElementById('human'));
 function gc(p,t){if(window.goatcounter&&goatcounter.count)goatcounter.count({path:p,title:t||p,event:true})}
 var D=null, P=null, msgs=[], shownKeys={}, busy=false, labels=JSON.parse(document.getElementById('labels').textContent);
-var R=null, rooms=[];                              // the room on view (the latest photo), and every one shown
 function stock(){ return P=P||fetch(src).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(d){
   var af=d.af=d.artists.map(function(a){return fold(a[0])});
   d.fame=d.artists.map(function(a){return Math.min(1,Math.log10(1+(a[2]||0))/3.3)});   // ~2,000 works in the museums: 1
@@ -235,213 +222,6 @@ function eur(n){return '€'+String(n).replace(/\B(?=(\d{3})+(?!\d))/g,' ')}
 function cm(d){return d?Math.round(d[0])+(d[1]!==d[0]?' × '+Math.round(d[1]):'')+' cm':''}
 function hash(s){var h=0;for(var i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))|0;return (h>>>0)/4294967296}
 function bubble(who,text){var b=el('div','msg '+who);b.appendChild(el('p',null,text));log.appendChild(b);b.scrollIntoView({block:'nearest',behavior:'smooth'});return b}
-
-// ---- perspective: the projective map between four points and four points ----
-function solve(A,b){var n=b.length,i,r,c,f,t;
-  for(i=0;i<n;i++){var p=i;for(r=i+1;r<n;r++)if(Math.abs(A[r][i])>Math.abs(A[p][i]))p=r;
-    t=A[i];A[i]=A[p];A[p]=t;t=b[i];b[i]=b[p];b[p]=t;
-    for(r=i+1;r<n;r++){f=A[r][i]/A[i][i];for(c=i;c<n;c++)A[r][c]-=f*A[i][c];b[r]-=f*b[i]}}
-  var x=[];for(i=n-1;i>=0;i--){var s=b[i];for(c=i+1;c<n;c++)s-=A[i][c]*x[c];x[i]=s/A[i][i]}return x}
-function homography(s,d){var A=[],b=[];for(var k=0;k<4;k++){var x=s[k][0],y=s[k][1],X=d[k][0],Y=d[k][1];
-  A.push([x,y,1,0,0,0,-x*X,-y*X]);b.push(X);A.push([0,0,0,x,y,1,-x*Y,-y*Y]);b.push(Y)}return solve(A,b)}
-function apply(H,p){var w=H[6]*p[0]+H[7]*p[1]+1;return [(H[0]*p[0]+H[1]*p[1]+H[2])/w,(H[3]*p[0]+H[4]*p[1]+H[5])/w]}
-var SQ=[[0,0],[1,0],[1,1],[0,1]];
-
-// ---- the room: the visitor's photo, the wall spaces found in it, and the works hung on it ----
-// A hung work is laid out at PX pixels a centimetre -- frame, mat and picture at their real sizes -- and
-// that rectangle is mapped onto the wall in the photo, so everything follows the wall's perspective.
-var PX=10, FRAMES={none:0,black:2.5,oak:3,white:2.5,gold:5};
-function inside(p,q){var c=false;for(var i=0,j=3;i<4;j=i++)if((q[i][1]>p[1])!==(q[j][1]>p[1])&&p[0]<(q[j][0]-q[i][0])*(p[1]-q[i][1])/(q[j][1]-q[i][1])+q[i][0])c=!c;return c}
-// The visitor's viewpoint: a camera turned in place sees the photo warped by K R K^-1 -- exact for
-// everything in it, so looking round needs no depth. The view stays zoomed in so no edge shows.
-function mul(A,B){var C=[];for(var i=0;i<3;i++)for(var j=0;j<3;j++){C[i*3+j]=0;for(var k=0;k<3;k++)C[i*3+j]+=A[i*3+k]*B[k*3+j]}return C}
-function viewH(r){var V=r.view,f=.8*Math.max(r.W,r.H),cx=r.W/2,cy=r.H/2,a=V.yaw,b=V.pitch,z=V.zoom;
-  var K=[f,0,cx,0,f,cy,0,0,1],Ki=[1/f,0,-cx/f,0,1/f,-cy/f,0,0,1];
-  var Ry=[Math.cos(a),0,Math.sin(a),0,1,0,-Math.sin(a),0,Math.cos(a)],Rx=[1,0,0,0,Math.cos(b),-Math.sin(b),0,Math.sin(b),Math.cos(b)];
-  var M=mul([z,0,cx*(1-z),0,z,cy*(1-z),0,0,1],mul(K,mul(mul(Ry,Rx),Ki)));
-  return [M[0]/M[8],M[1]/M[8],M[2]/M[8],M[3]/M[8],M[4]/M[8],M[5]/M[8],M[6]/M[8],M[7]/M[8]]}
-function covers(r,H){var q=[[0,0],[r.W,0],[r.W,r.H],[0,r.H]].map(function(p){return apply(H,p)}),m=.01*r.W;   // with a margin: no sliver of the edge
-  return [[-m,-m],[r.W+m,-m],[r.W+m,r.H+m],[-m,r.H+m]].every(function(p){return inside(p,q)})}
-// turn or zoom the view, unless that would show past the photo's edge
-function look(r,yaw,pitch,zoom){var o=r.view;r.view={yaw:yaw,pitch:pitch,zoom:Math.max(1.05,Math.min(3,zoom))};
-  var H=viewH(r);if(!covers(r,H)){r.view=o;return false}r.VH=H;r.VHi=homography([[0,0],[r.W,0],[r.W,r.H],[0,r.H]].map(function(p){return apply(H,p)}),[[0,0],[r.W,0],[r.W,r.H],[0,r.H]]);
-  var M=H;r.scene.style.transform='scale('+(r.stage.clientWidth/r.W)+') matrix3d('+[M[0],M[3],0,M[6],M[1],M[4],0,M[7],0,0,1,0,M[2],M[5],0,1].join(',')+')';return true}
-function wallCm(r,i){var w=r.walls[i];return [w.w_cm*r.scale,w.h_cm*r.scale]}
-// the picture to hang: the gallery's full one (NOBA's "_thumb" is a square crop of the work)
-function full(w){return w[3].replace(/_thumb(\.\w+)$/,'$1')}
-// the work's shape: the picture's, unless it disagrees with the record by over a quarter -- a crop or a
-// photograph with room round it -- when the record's sides win and the picture is cropped to them
-function shape(w,n){var d=w[13],k=n.naturalHeight/n.naturalWidth,land=k<=1,rec=d[1]/d[0],img=land?k:1/k;
-  var fit=Math.abs(Math.log(img/rec))<=Math.log(1.25);if(!fit)k=land?rec:1/rec;
-  return {aw:land?d[0]:d[0]/k,ah:land?d[0]*k:d[0],crop:!fit}}
-// outer size in cm: the work, then mat and frame
-function size(it){var sh=shape(it.w,it.pic),aw=sh.aw,ah=sh.ah,f=FRAMES[it.frame], m=f&&it.w[7]==='paper'?Math.max(4,Math.min(9,Math.max(aw,ah)*.12)):0;
-  return {f:f,m:m,W:aw+2*(m+f),H:ah+2*(m+f)}}
-// the work's four corners in the photo; dx, dy move it on the wall, in cm (its shadow)
-function quadOf(r,it,s,dx,dy){var c=wallCm(r,it.wall),H=r.walls[it.wall].H,fw=s.W/c[0],fh=s.H/c[1],u=it.u+(dx||0)/c[0],v=it.v+(dy||0)/c[1];
-  return [[u-fw/2,v-fh/2],[u+fw/2,v-fh/2],[u+fw/2,v+fh/2],[u-fw/2,v+fh/2]].map(function(p){return apply(H,p)})}
-function m3d(e,w,h,q){var M=homography([[0,0],[w,0],[w,h],[0,h]],q);e.style.width=w+'px';e.style.height=h+'px';
-  e.style.transform='matrix3d('+[M[0],M[3],0,M[6],M[1],M[4],0,M[7],0,0,1,0,M[2],M[5],0,1].join(',')+')'}
-function inPhoto(r,q){return q.every(function(p){return p[0]>=-4&&p[1]>=-4&&p[0]<=r.W+4&&p[1]<=r.H+4})}
-function layout(r,it){if(!it.pic.naturalWidth)return;var s=size(it);
-  it.el.className='hang f-'+it.frame+(it===r.sel&&r.items.length>1?' sel':'')+(shape(it.w,it.pic).crop?' crop':'');
-  it.el.style.setProperty('--f',s.f*PX+'px');it.el.style.setProperty('--m',s.m*PX+'px');
-  m3d(it.el,s.W*PX,s.H*PX,quadOf(r,it,s));m3d(it.shade,s.W*PX,s.H*PX,quadOf(r,it,s,1.2,2.5));
-  it.el.hidden=it.shade.hidden=false}
-function draw(r){
-  look(r,r.view.yaw,r.view.pitch,r.view.zoom);
-  r.polys.forEach(function(p,i){p.setAttribute('points',r.walls[i].q.map(function(x){return x.join(',')}).join(' '))});
-  var cur=r.sel?r.sel.wall:0;r.range.value=Math.round(wallCm(r,cur)[0]);r.out.textContent=r.range.value+' cm';
-  r.items.forEach(function(it){layout(r,it)});caption(r)}
-function caption(r){
-  var c=r.cap,it=r.sel;c.textContent='';
-  r.strip&&Array.prototype.forEach.call(r.strip.children,function(b){if(b.w){b.setAttribute('aria-pressed',String(!!it&&b.w===it.w));b.classList.toggle('hung',r.items.some(function(x){return x.w===b.w}))}});
-  Array.prototype.forEach.call(r.frames.children,function(b){b.setAttribute('aria-pressed',String(!!it&&b.dataset.f===it.frame))});
-  if(!it)return;var w=it.w,g=D.galleries[w[9]],p=el('p','placed');
-  p.appendChild(el('i',null,w[0]));p.appendChild(document.createTextNode(', '+D.artists[w[1]][0]+' · '+cm(w[13])+' · '));
-  var l=el('a',null,(w[8]?eur(w[8]):T.noprice)+' '+(T.at?T.at+' ':'')+g+' ↗');l.href=w[10];l.target='_blank';l.rel='noopener';
-  l.addEventListener('click',function(){if(window.goatcounter&&goatcounter.count)goatcounter.count({path:'find-out',title:g,event:true})});
-  p.appendChild(l);c.appendChild(p);
-  r.arSlot.textContent='';
-  if(AR&&w[13]){var ab=arButton(w,function(){return it.frame});ab.classList.add('arbig');r.arSlot.appendChild(ab)}
-  else if(IOS&&page.dataset.img)r.arSlot.appendChild(el('p','arhint',T.arsafari));
-  if(r.items.length>1){
-    var sum=r.items.reduce(function(a,x){return a+(x.w[8]||0)},0),all=r.items.every(function(x){return x.w[8]});
-    c.appendChild(el('p','total',T.together.replace('{n}',r.items.length)+(all?' · '+eur(sum):'')));
-    var x=el('button','btn',T.remove);x.type='button';x.addEventListener('click',function(){takeDown(r,it)});c.appendChild(x)}}
-function select(r,it){r.sel=it;draw(r)}
-function takeDown(r,it){r.items.splice(r.items.indexOf(it),1);it.el.remove();it.shade.remove();r.sel=r.items[r.items.length-1]||null;draw(r)}
-function photoPt(r,e){var b=r.stage.getBoundingClientRect(),k=b.width/r.W;return apply(r.VHi,[(e.clientX-b.left)/k,(e.clientY-b.top)/k])}
-// hang a work: in place of the selected one, or (add) as another, beside those already on the wall
-function hang(r,w,add){
-  if(!w||!w[13])return;
-  var it=!add&&r.sel, fresh=!it;
-  if(fresh){
-    it={wall:r.sel?r.sel.wall:0,u:.5,v:.5,frame:r.sel?r.sel.frame:'black'};
-    it.el=el('div','hang');var fr=el('div','fr'),mat=el('div','mat');it.pic=el('img');it.pic.draggable=false;it.pic.referrerPolicy='no-referrer-when-downgrade';
-    mat.appendChild(it.pic);fr.appendChild(mat);it.el.appendChild(fr);it.shade=el('div','shade');it.el.hidden=it.shade.hidden=true;
-    r.shades.appendChild(it.shade);r.hangs.appendChild(it.el);r.items.push(it);
-    // dragged, it slides along the wall in perspective, and onto another wall area when the pointer reaches one
-    it.el.addEventListener('pointerdown',function(e){e.preventDefault();e.stopPropagation();try{it.el.setPointerCapture(e.pointerId)}catch(x){}
-      var uv=apply(r.walls[it.wall].Hi,photoPt(r,e));it.drag=[it.u-uv[0],it.v-uv[1]];if(r.sel!==it)select(r,it)});
-    it.el.addEventListener('pointermove',function(e){if(!it.drag)return;var p=photoPt(r,e);
-      for(var i=0;i<r.walls.length;i++)if(i!==it.wall&&inside(p,r.walls[i].q)){it.wall=i;it.drag=[0,0];break}
-      var uv=apply(r.walls[it.wall].Hi,p),u=it.u,v=it.v;it.u=uv[0]+it.drag[0];it.v=uv[1]+it.drag[1];
-      if(!inPhoto(r,quadOf(r,it,size(it)))){it.u=u;it.v=v}layout(r,it)});
-    it.el.addEventListener('pointerup',function(){it.drag=null;draw(r)});it.el.addEventListener('pointercancel',function(){it.drag=null});
-  }
-  it.w=w;it.pic.alt=w[0]+', '+D.artists[w[1]][0];r.sel=it;
-  it.pic.onload=function(){
-    if(fresh&&r.items.length>1){
-      // a row, centred in the empty area, when the works fit in it side by side
-      var c=wallCm(r,it.wall),row=r.items.filter(function(x){return x.wall===it.wall&&x.pic.naturalWidth}).sort(function(a,b){return a===it?1:b===it?-1:a.u-b.u});
-      var ws=row.map(function(x){return size(x).W/c[0]}),g=12/c[0],tot=ws.reduce(function(a,b){return a+b},0)+g*(row.length-1);
-      if(tot<=.98&&row.length>1){var x0=.5-tot/2,v=row[0].v;row.forEach(function(o,i){o.u=x0+ws[i]/2;o.v=v;x0+=ws[i]+g});draw(r);return}
-      // else beside the rightmost on its wall, else the leftmost, else a little off the centre
-      var s=size(it),others=r.items.filter(function(x){return x!==it&&x.wall===it.wall&&x.pic.naturalWidth});
-      var ext=others.map(function(x){var o=size(x);return [x.u-o.W/c[0]/2,x.u+o.W/c[0]/2]}), gap=12/c[0], half=s.W/c[0]/2;
-      var right=Math.max.apply(null,ext.map(function(e){return e[1]}).concat([-1])), left=Math.min.apply(null,ext.map(function(e){return e[0]}).concat([2]));
-      var cands=[right+gap+half,left-gap-half,it.u+.08];
-      for(var i=0;i<cands.length;i++){it.u=cands[i];if(inPhoto(r,quadOf(r,it,s)))break}}
-    draw(r)};
-  it.pic.src=full(w);draw(r)}
-// the suggestions under the photo: tap one to put it on the wall
-function fill(r,list){
-  r.list=list.filter(function(w){return w[13]});r.n=0;r.strip.textContent='';
-  function more(){r.list.slice(r.n,r.n+12).forEach(function(w){
-      var b=el('button');b.type='button';b.w=w;var i=el('img');i.src=w[3];i.alt=w[0];i.loading='lazy';i.referrerPolicy='no-referrer-when-downgrade';
-      b.appendChild(i);b.appendChild(el('span',null,w[8]?eur(w[8]):cm(w[13])));b.title=w[0]+', '+D.artists[w[1]][0]+' · '+cm(w[13]);
-      b.addEventListener('click',function(){hang(r,w)});r.strip.insertBefore(b,r.moreBtn)});
-    r.n+=12;r.moreBtn.hidden=r.n>=r.list.length;caption(r)}
-  r.moreBtn=el('button','more',T.more);r.moreBtn.type='button';r.moreBtn.addEventListener('click',more);r.strip.appendChild(r.moreBtn);more()}
-function roomView(b,photo,walls){
-  var r={W:photo.w,H:photo.h,walls:walls,scale:1,items:[],sel:null,polys:[],view:{yaw:0,pitch:0,zoom:1.2}},NS='http://www.w3.org/2000/svg';
-  walls.forEach(function(w){w.H=homography(SQ,w.q);w.Hi=homography(w.q,SQ)});
-  var v=el('div','room'),st=el('div','stage'),ph=el('img','photo');ph.src=photo.url;ph.alt=T.yourroom;ph.onload=function(){draw(r)};
-  var svg=document.createElementNS(NS,'svg');svg.setAttribute('viewBox','0 0 '+r.W+' '+r.H);svg.setAttribute('preserveAspectRatio','none');svg.setAttribute('class','outline');
-  walls.forEach(function(){var p=document.createElementNS(NS,'polygon');svg.appendChild(p);r.polys.push(p)});
-  r.layer=el('div','layer');r.shades=el('div');r.hangs=el('div');r.layer.appendChild(r.shades);r.layer.appendChild(r.hangs);
-  r.scene=el('div','scene');r.scene.style.width=r.W+'px';r.scene.style.height=r.H+'px';ph.style.width=r.W+'px';ph.style.height=r.H+'px';
-  r.scene.appendChild(ph);r.scene.appendChild(svg);r.scene.appendChild(r.layer);st.appendChild(r.scene);st.style.aspectRatio=r.W+' / '+r.H;
-  r.stage=st;v.appendChild(st);
-  // drag the room to look round it; scroll, or pinch with two fingers, to step closer
-  var pts={},turn=null,pinch=null;
-  st.addEventListener('pointerdown',function(e){if(e.target.closest('.hang'))return;e.preventDefault();try{st.setPointerCapture(e.pointerId)}catch(x){}pts[e.pointerId]=[e.clientX,e.clientY];
-    var ids=Object.keys(pts);if(ids.length===2){var a=pts[ids[0]],b=pts[ids[1]];pinch={d:Math.hypot(a[0]-b[0],a[1]-b[1]),z:r.view.zoom};turn=null}
-    else turn={x:e.clientX,y:e.clientY,yaw:r.view.yaw,pitch:r.view.pitch};st.classList.add('turning')});
-  st.addEventListener('pointermove',function(e){if(!pts[e.pointerId])return;pts[e.pointerId]=[e.clientX,e.clientY];var ids=Object.keys(pts),w=st.clientWidth;
-    if(pinch&&ids.length===2){var a=pts[ids[0]],b=pts[ids[1]];look(r,r.view.yaw,r.view.pitch,pinch.z*Math.hypot(a[0]-b[0],a[1]-b[1])/pinch.d);return}
-    // the point grabbed stays under the finger: an angle of (distance / focal length), in screen pixels
-    if(turn){var s=1/(.8*Math.max(r.W,r.H)*(w/r.W)*r.view.zoom),y=turn.yaw+(e.clientX-turn.x)*s,p=turn.pitch-(e.clientY-turn.y)*s,z=r.view.zoom;
-      if(!look(r,y,p,z)&&!look(r,y,r.view.pitch,z))look(r,r.view.yaw,p,z)}});
-  function up(e){delete pts[e.pointerId];if(Object.keys(pts).length<2)pinch=null;if(!Object.keys(pts).length){turn=null;st.classList.remove('turning')}}
-  st.addEventListener('pointerup',up);st.addEventListener('pointercancel',up);
-  st.addEventListener('wheel',function(e){e.preventDefault();look(r,r.view.yaw,r.view.pitch,r.view.zoom*Math.exp(-e.deltaY*.0015))},{passive:false});
-  r.arSlot=el('div','arslot');v.appendChild(r.arSlot);
-  r.strip=el('div','strip');v.appendChild(el('p','hint',T.choose));v.appendChild(r.strip);
-  var tools=el('div','tools');
-  r.frames=el('div','seg');Object.keys(FRAMES).forEach(function(f){var x=el('button','btn',T.frames[f]);x.type='button';x.dataset.f=f;
-    x.addEventListener('click',function(){if(r.sel){r.sel.frame=f;draw(r)}});r.frames.appendChild(x)});
-  tools.appendChild(r.frames);
-  var add=el('button','btn',T.hangmore);add.type='button';
-  add.addEventListener('click',function(){var w=(r.list||[]).filter(function(x){return !r.items.some(function(i){return i.w===x})})[0];hang(r,w,true)});
-  tools.appendChild(add);
-  var reset=el('button','btn',T.reset);reset.type='button';reset.addEventListener('click',function(){r.view={yaw:0,pitch:0,zoom:1.2};draw(r)});tools.appendChild(reset);
-  // the width is an estimate from the photo: the visitor can set it right, and every size follows
-  var lab=el('label','width');lab.appendChild(document.createTextNode(T.wallw+' '));
-  r.range=el('input');r.range.type='range';r.range.min=30;r.range.max=600;r.range.step=5;
-  r.range.addEventListener('input',function(){r.scale=r.range.value/r.walls[r.sel?r.sel.wall:0].w_cm;draw(r)});
-  r.out=el('output');lab.appendChild(r.range);lab.appendChild(r.out);tools.appendChild(lab);
-  v.appendChild(tools);v.appendChild(el('p','hint',T.drag));r.cap=el('div','caption');v.appendChild(r.cap);
-  b.appendChild(v);r.v=v;rooms.push(r);draw(r);return r}
-window.addEventListener('resize',function(){rooms.forEach(draw)});
-
-// ---- AR: the work as a small 3D model at its real size, for the phone's own AR viewer to hang on a real wall ----
-// iPhone and iPad: AR Quick Look takes a USDZ file (three.js writes it here, in the browser) anchored to a wall,
-// at true scale (no pinching it bigger). The picture's pixels must be readable, so it comes through the
-// page's own origin (data-img), fetched as asked for, never kept. Built only when tapped.
-var IOS=/iP(hone|ad|od)/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
-// only where the picture can come through this origin (data-img): on the published site, without that route and with
-// three.js outside the Content-Security-Policy, the button could only fail
-var ARDEBUG=/ardebug/.test(location.hash), AR=ARDEBUG||!!page.dataset.img&&(function(){var a=document.createElement('a');return !!(a.relList&&a.relList.supports&&a.relList.supports('ar'))})();
-function viaUs(u){return page.dataset.img?page.dataset.img+encodeURIComponent(u):u}
-function loadImg(u){return new Promise(function(ok,no){var i=new Image();i.crossOrigin='anonymous';i.onload=function(){ok(i)};i.onerror=no;i.src=u})}
-var FRAME_COL={black:[0x161616,.55,0],oak:[0xb88a52,.7,0],white:[0xf0eee8,.6,0],gold:[0xc9a13b,.35,.7]};
-function usdz(w,frame){
-  return Promise.all([import('three'),import('three/addons/exporters/USDZExporter.js'),loadImg(viaUs(full(w)))]).then(function(m){
-    var THREE=m[0],img=m[2],sh=shape(w,img);
-    var aw=sh.aw/100,ah=sh.ah/100,f=FRAMES[frame]/100,mt=f&&w[7]==='paper'?Math.max(.04,Math.min(.09,Math.max(aw,ah)*.12)):0,D=.03;
-    var g=new THREE.Group(),mesh=function(geo,mat,x,y,z){var o=new THREE.Mesh(geo,mat);o.position.set(x,y,z);g.add(o);return o};
-    // a picture cropped to the record's shape is cut on a canvas (the exporter writes no texture offsets)
-    var src=img;if(sh.crop){var iw=img.naturalWidth,ih=img.naturalHeight,rw=aw/ah,cw=Math.min(iw,ih*rw),ch=cw/rw;
-      src=document.createElement('canvas');src.width=Math.round(cw);src.height=Math.round(ch);src.getContext('2d').drawImage(img,(iw-cw)/2,(ih-ch)/2,cw,ch,0,0,src.width,src.height)}
-    var tex=new THREE.Texture(src);tex.colorSpace=THREE.SRGBColorSpace;tex.needsUpdate=true;tex.userData.mimeType='image/jpeg';   // a photograph: JPEG, not a 9 MB PNG
-    // the picture on both faces of a board (the mat, or a canvas's own edge): AR Quick Look turns the side
-    // it calls the back towards the room when it hangs a model on a wall (seen 2026-10-01), and a model
-    // with no front and back looks right whichever way it is hung
-    var pm=new THREE.MeshStandardMaterial({map:tex,roughness:.9,metalness:0});
-    mesh(new THREE.PlaneGeometry(aw,ah),pm,0,0,D/2+.0015);
-    mesh(new THREE.PlaneGeometry(aw,ah),pm,0,0,-D/2-.0015).rotation.y=Math.PI;
-    mesh(new THREE.BoxGeometry(aw+2*mt,ah+2*mt,D),new THREE.MeshStandardMaterial({color:mt?0xf5f2ea:0xe8e4dc,roughness:.95}),0,0,0);
-    if(f){var c=FRAME_COL[frame],fm=new THREE.MeshStandardMaterial({color:c[0],roughness:c[1],metalness:c[2]}),W=aw+2*(mt+f),H=ah+2*(mt+f),Df=D+.012;
-      mesh(new THREE.BoxGeometry(W,f,Df),fm,0,(H-f)/2,0);mesh(new THREE.BoxGeometry(W,f,Df),fm,0,-(H-f)/2,0);
-      mesh(new THREE.BoxGeometry(f,H-2*f,Df),fm,-(W-f)/2,0,0);mesh(new THREE.BoxGeometry(f,H-2*f,Df),fm,(W-f)/2,0,0)}
-    // AR Quick Look hangs a model with its up axis (+y) out of the wall -- the first try stood out from
-    // the wall like a shelf (2026-10-01) -- so the work is tipped back to face +y, its top along -z (up the wall)
-    g.rotation.x=-Math.PI/2;
-    var scene=new THREE.Scene();scene.add(g);scene.updateMatrixWorld(true);   // the exporter writes each part's .matrix, set only by this
-    return new m[1].USDZExporter().parseAsync(scene,{ar:{anchoring:{type:'plane'},planeAnchoring:{alignment:'vertical'}},quickLookCompatible:true,maxTextureSize:2048})})
-  .then(function(buf){return new Blob([buf],{type:'model/vnd.usdz+zip'})})}
-function arButton(w,frameOf){
-  var b=el('button','btn arbtn',T.ar);b.type='button';
-  b.addEventListener('click',function(){if(b.disabled)return;b.disabled=true;b.textContent=T.arwait;
-    usdz(w,frameOf()).then(function(blob){
-      if(ARDEBUG){return fetch('/save',{method:'POST',body:blob}).then(function(){b.textContent='saved '+blob.size})}
-      var a=document.createElement('a');a.rel='ar';a.href=URL.createObjectURL(blob)+'#allowsContentScaling=0';a.appendChild(document.createElement('img'));
-      document.body.appendChild(a);a.click();setTimeout(function(){a.remove()},1000);b.textContent=T.ar;
-      if(window.goatcounter&&goatcounter.count)goatcounter.count({path:'find-ar',title:D.galleries[w[9]],event:true})})
-    .catch(function(){b.textContent=T.arfail}).then(function(){b.disabled=false})});
-  return b}
 
 // ---- the search: one state, which the controls show and set, and the assistant reads and sets ----
 function blank(){return {words:[],terms:[],media:[],min:0,max:0,size:'any',artist:'',you:false}}
@@ -458,7 +238,7 @@ function hitName(af,x){return af.indexOf(x)>=0||af.split(' ').some(function(n){r
 function esc(s){return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}
 // every work the search admits, best first; a search that names something (words, title words) admits only what answers to it
 function rank(q){
-  var wt=[1,.8,.65,.5,.4], out=[], ws=R&&wallCm(R,R.sel?R.sel.wall:0), mm=0, ty=q.you&&TASTE&&TASTE.n?TASTE:null;
+  var wt=[1,.8,.65,.5,.4], out=[], mm=0, ty=q.you&&TASTE&&TASTE.n?TASTE:null;
   q.media.forEach(function(m){mm|=MB[m]||0});
   var tr=q.terms.map(function(t){return new RegExp('(^|[^\\p{L}\\p{N}])'+esc(t),'iu')});
   var who=q.artist?fold(q.artist).split(/[\s.,-]+/).filter(function(x){return x.length>1}):[];
@@ -473,15 +253,8 @@ function rank(q){
     if(!q.words.length&&!tr.length)s=ty?ty.s[w.i]:.6*hash(w[11]+DAY)+(w[8]?.25:0)+.35*D.fame[w[1]]+(w[14]&8?.3:0);   // nothing named: the day's selection, paintings first
     else if(s<=0&&!who.length)return;
     if(ty&&(q.words.length||tr.length))s+=1.5*ty.s[w.i];   // For you with words: the words admit, the list orders
-    if(ws){                                       // a wall on view: what fits it, best near half its width
-      var d=w[13];if(!d||w[7]==='sculpture'||w[14]&4)return;
-      if(!((d[0]<=.9*ws[0]&&d[1]<=.9*ws[1])||(d[1]<=.9*ws[0]&&d[0]<=.9*ws[1])))return;
-      var share=d[0]/Math.max(ws[0],ws[1]);if(share<.25)return;   // a postcard on a big wall: not a suggestion
-      s+=2.5*(1-2*Math.abs(share-.5));
-    }else{
-      if(q.size!=='any'&&w[6]&&w[6]!==q.size)return;
-      if(q.size!=='any'&&!w[6])s-=50;             // size unknown: only after every one that fits
-    }
+    if(q.size!=='any'&&w[6]&&w[6]!==q.size)return;
+    if(q.size!=='any'&&!w[6])s-=50;             // size unknown: only after every one that fits
     out.push([s,w])});
   out.sort(function(a,b){return b[0]-a[0]});
   // one work per artist in each page, as far as the list allows
@@ -617,9 +390,6 @@ function card(w,why){
   var pr=el('span','price');pr.appendChild(el('b',null,w[8]?eur(w[8]):T.noprice));pr.appendChild(document.createTextNode(' '+(T.at?T.at+' ':'')+g+' ↗'));low.appendChild(pr);
   c.appendChild(low);
   if(why)c.appendChild(el('p','why',why));
-  if(R&&w[13]){var r=R,on=el('button','btn onwall',T.onwall);on.type='button';
-    on.addEventListener('click',function(){hang(r,w);r.v.scrollIntoView({block:'center',behavior:'smooth'})});c.appendChild(on)}
-  if(AR&&w[13])c.appendChild(arButton(w,function(){return R&&R.sel?R.sel.frame:'black'}));
   c.appendChild(slBtn(w[11],T,'list-add-find',syncYou));
   return c}
 // a search's settings as chips over its results, each with a way to drop it (the controls may be folded away or far up)
@@ -627,7 +397,7 @@ function drop(k,v){if(k==='media'||k==='words'){var i=Q[k].indexOf(v);if(i>=0)Q[
 function chips(q){var box=el('div','bits'),add=function(label,k,v){var p=el('span','bit',label),x=el('button','x','×');x.type='button';x.setAttribute('aria-label',T.clear+': '+label);
     x.addEventListener('click',function(){drop(k,v)});p.appendChild(x);box.appendChild(p)};
   q.media.forEach(function(m){add(T.media[m],'media',m)});
-  if(q.size!=='any'&&!R)add(T.sizes[q.size],'size');
+  if(q.size!=='any')add(T.sizes[q.size],'size');
   if(q.min||q.max)add(priceText(q.min,q.max),'price');
   q.words.forEach(function(x){add(labels[x]||x,'words',x)});
   if(q.terms.length)add(T.titlew+': '+q.terms.join(', '),'terms');
@@ -639,7 +409,6 @@ function show(box,q,picks){
   var ty=q.you&&TASTE&&TASTE.n?TASTE:null, why={}, pk=(picks||[]).map(function(p){var w=byId(p.id);if(w)why[w.i]=p.why;return w}).filter(Boolean);
   var all=rank(q), list=pk.concat(all.filter(function(w){return !shownKeys[w[11]]&&!(w.i in why)})), n=0, keys=[], grid=el('div','grid'), more=el('button','btn more',T.more);more.type='button';
   var bits=[count(all.length)], set=chips(q), head=el('div','shead'), line=el('p','search');
-  if(R){var ws=wallCm(R,R.sel?R.sel.wall:0);bits.push(T.fits+' '+Math.round(ws[0])+' × '+Math.round(ws[1])+' cm')}
   if(ty)bits.push(T.fybit);
   var daily=bits.length===1&&!set;
   function say(){line.textContent=bits.concat(daily&&!SORT?[T.daily]:[]).join(' · ')}
@@ -725,7 +494,6 @@ function refresh(quiet){
   if(!live||live.turn){var b=el('div','msg them');log.appendChild(b);live={b:b,box:el('div')};b.appendChild(live.box)}
   else live.keys.forEach(function(k){delete shownKeys[k]});
   live.box.textContent='';var s=show(live.box,Q);live.keys=s.keys;
-  if(R&&s.list.length)fill(R,s.list);
   if(quiet!==true&&WIDE.matches)live.b.scrollIntoView({block:'nearest',behavior:'smooth'})}
 function changed(){sync();refresh()}
 function slid(e){var a=+plo.value,b=+phi.value;
@@ -751,19 +519,17 @@ F.addEventListener('click',function(e){var b=e.target.closest('button');if(!b)re
 function take(q){var m=q.media||({paint:['painting'],paper:['print','drawing'],sculpture:['sculpture'],photo:['photo']}[q.kind]||[]);
   Q={words:(q.words||[]).slice(),terms:(q.terms||[]).slice(),media:m.filter(function(x){return MB[x]}),min:q.budget_min||0,max:q.budget_max||0,size:q.size||'any',artist:q.artist||'',you:Q.you};sync()}
 
-function send(text,photo){
-  text=text.replace(/\s+/g,' ').trim(); if((!text&&!photo)||busy)return; busy=true;
+function send(text){
+  text=text.replace(/\s+/g,' ').trim(); if(!text||busy)return; busy=true;
   var ub=bubble('you',text);
-  if(photo){var th=el('img','thumb');th.src=photo.url;th.alt=T.yourroom;ub.insertBefore(th,ub.firstChild);if(!text)ub.removeChild(ub.lastChild)}
-  var said=(photo?T.photomsg+(text?' ':''):'')+text;
-  msgs.push({role:'user',content:said}); input.value='';
-  var b=bubble('them',photo?T.looking:T.thinking); b.classList.add('wait');
+  msgs.push({role:'user',content:text}); input.value='';
+  var b=bubble('them',T.thinking); b.classList.add('wait');
   // the controls as they were when the message was sent, the same for each of its rounds
   var body={messages:msgs.slice(-12),lang:document.documentElement.lang,filters:JSON.parse(JSON.stringify(Q))}, steps=[];
   // the first search's works, shown as soon as Claude asks for it (as fast as one call) while it chooses; its answer replaces them
   var early=null;
   if(!talked){talked=true;gc('find-conv-'+V)}
-  if(photo){body.image=photo.data;body.w=photo.w;body.h=photo.h}else if(V==='a'){body.tools=1;body.trail=[]}
+  if(V==='a'){body.tools=1;body.trail=[]}
   var ml=myList();if(ml.length)body.mylist=ml;
   // a round: the Worker answers, or asks for searches, which run here on the stock and go back with the next round
   function round(){return Promise.all([HUMAN.post(api,body).then(function(r){return r.json().then(function(j){if(!r.ok)throw j;return j})}),stock()])
@@ -777,33 +543,18 @@ function send(text,photo){
         es.keys.forEach(function(k){delete shownKeys[k]});early={box:eb,s:es}}     // not yet "shown": later searches still see them
       b.firstChild.textContent=(first?T.choosing:steps[steps.length-1])+'…';
       return round()})}
-  round().then(function(res){var q=res[0], extra='', s={note:'',list:[]};
+  round().then(function(res){var q=res[0], s={note:'',list:[]};
     b.classList.remove('wait'); b.firstChild.textContent=q.reply||'…';
     if(steps.length){var how=el('details','steps');how.appendChild(el('summary',null,T.how));steps.forEach(function(x){how.appendChild(el('p',null,x))});b.insertBefore(how,b.firstChild.nextSibling)}
     if(early){early.s.keys.forEach(function(k){delete shownKeys[k]});
-      if(q.show||photo)early.box.remove();else{early.s.keys.forEach(function(k){shownKeys[k]=1});live={b:b,box:early.box,keys:early.s.keys,turn:true}}}
-    if(photo){
-      if(q.walls&&q.walls.length){R=roomView(b,photo,q.walls);
-        extra=' ('+T.roomnote+': '+(q.room||'')+'; '+q.walls.map(function(w){return w.where+' '+w.w_cm+' × '+w.h_cm+' cm'}).join('; ')+')'}
-      else b.appendChild(el('p','none',T.nowall));
-    }
-    if(q.show||photo){take(q);var box=el('div');b.appendChild(box);s=show(box,Q,q.picks);live={b:b,box:box,keys:s.keys,turn:true}}
+      if(q.show)early.box.remove();else{early.s.keys.forEach(function(k){shownKeys[k]=1});live={b:b,box:early.box,keys:early.s.keys,turn:true}}}
+    if(q.show){take(q);var box=el('div');b.appendChild(box);s=show(box,Q,q.picks);live={b:b,box:box,keys:s.keys,turn:true}}
     else if(live)live.turn=true;
-    if(R&&s.list.length){fill(R,s.list);if(photo&&R.v.parentNode===b)hang(R,R.list[0])}
-    msgs.push({role:'assistant',content:(q.reply||'')+extra+(s.note?' ('+s.note+')':'')});
-    gc('find-turn-'+V,photo?'photo':q.show?'search':'talk');
+    msgs.push({role:'assistant',content:(q.reply||'')+(s.note?' ('+s.note+')':'')});
+    gc('find-turn-'+V,q.show?'search':'talk');
   // what went wrong goes to the console; a browser the robot check refuses (the Worker's 401) is told so, it would fail for good
   }).catch(function(e){console.warn('Buy Art assistant:',e&&e.error||e);b.classList.remove('wait');b.firstChild.textContent=e&&e.human?T.robot:T.failed;msgs.pop()})
   .then(function(){busy=false})}
-// a photo is shrunk to 1280 pixels and re-encoded here, which also drops its location data, before it is sent
-function shrink(f){
-  var bmp=window.createImageBitmap?createImageBitmap(f,{imageOrientation:'from-image'}).catch(function(){return createImageBitmap(f)}):Promise.reject();
-  return bmp.catch(function(){return new Promise(function(ok,no){var fr=new FileReader();fr.onload=function(){var i=new Image();i.onload=function(){ok(i)};i.onerror=no;i.src=fr.result};fr.onerror=no;fr.readAsDataURL(f)})})
-  .then(function(im){var w=im.width,h=im.height,k=Math.min(1,1280/Math.max(w,h));w=Math.round(w*k);h=Math.round(h*k);
-    var c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(im,0,0,w,h);
-    var url=c.toDataURL('image/jpeg',.85);return {url:url,data:url.slice(url.indexOf(',')+1),w:w,h:h}})}
-if(file)file.addEventListener('change',function(){var f=file.files&&file.files[0];file.value='';if(!f||busy)return;
-  stock().catch(function(){});shrink(f).then(function(p){send(input.value,p)}).catch(function(){bubble('them',T.badphoto)})});
 form.addEventListener('submit',function(ev){ev.preventDefault();send(input.value)});
 if(!api){form.hidden=true}
 // the stock (2 MB) as the visitor first reaches for a control or the message box
@@ -925,54 +676,6 @@ form.ask label[for=q]{position:absolute;left:-9999px}
 form.ask input{flex:1 1 260px;min-width:0;font:400 1.1rem/1.2 var(--serif);color:var(--ink);background:var(--raise);border:1px solid var(--rule);padding:11px 12px}
 form.ask .human{flex-basis:100%}
 form.ask input:focus{outline:2px solid var(--ink);outline-offset:1px}
-.photobtn{display:inline-flex;align-items:center}
-.msg.you .thumb{display:block;max-width:220px;height:auto;margin-bottom:6px}
-.room{margin-top:14px;display:grid;gap:8px;max-width:860px}
-.stage{position:relative;overflow:hidden;background:var(--field);touch-action:none;cursor:grab;width:100%}
-.stage.turning{cursor:grabbing}
-.scene{position:absolute;left:0;top:0;transform-origin:0 0}
-.scene .photo{display:block;user-select:none;-webkit-user-drag:none;pointer-events:none}
-.stage svg.outline{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none}
-.outline polygon{fill:rgba(255,255,255,.05);stroke:#fff;stroke-width:2;stroke-dasharray:10 7;opacity:.75;vector-effect:non-scaling-stroke}
-.layer{position:absolute;left:0;top:0;pointer-events:none}
-.hang,.shade{position:absolute;left:0;top:0;transform-origin:0 0}
-.hang{pointer-events:auto;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none}
-.hang:active{cursor:grabbing}
-.hang .fr,.hang .mat{box-sizing:border-box;width:100%;height:100%}
-.hang .fr{padding:var(--f)}.hang .mat{padding:var(--m);background:#f5f2ea}
-.hang img{display:block;width:100%;height:100%;pointer-events:none;box-shadow:-2px -2px 4px rgba(0,0,0,.28)}
-.hang.crop img{object-fit:cover}
-.hang::after{content:"";position:absolute;left:0;top:0;right:0;bottom:0;pointer-events:none;background:linear-gradient(165deg,rgba(255,255,255,.08),rgba(0,0,0,.1))}
-.hang.sel{outline:5px solid rgba(255,255,255,.9);outline-offset:8px}
-.f-none .mat{background:none}.f-none img{box-shadow:none}
-.f-none::after{box-shadow:inset -10px -8px 12px -8px rgba(0,0,0,.5)}
-.f-black .fr{background:linear-gradient(135deg,#4a4a4a,#161616 35%,#050505);box-shadow:inset 2px 2px 3px rgba(255,255,255,.2),inset -3px -3px 5px rgba(0,0,0,.75)}
-.f-oak .fr{background:repeating-linear-gradient(95deg,rgba(95,58,22,.13) 0 3px,transparent 3px 10px),linear-gradient(135deg,#e6c18a,#bb8d55 55%,#93663a);box-shadow:inset 2px 2px 3px rgba(255,255,255,.4),inset -3px -3px 5px rgba(60,35,10,.55)}
-.f-white .fr{background:linear-gradient(135deg,#fff,#e6e2d9);box-shadow:inset 2px 2px 3px #fff,inset -3px -3px 5px rgba(0,0,0,.2)}
-.f-gold .fr{background:linear-gradient(135deg,#f7e4a3,#d4ad4d 28%,#8e6b1f 52%,#e7c970 78%,#a9842d);box-shadow:inset 3px 3px 4px rgba(255,255,255,.5),inset -4px -4px 6px rgba(70,45,5,.6)}
-.shade{background:rgba(0,0,0,.5);filter:blur(24px);pointer-events:none}
-.strip{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;scroll-snap-type:x proximity}
-.strip button{flex:0 0 auto;width:96px;padding:0;border:1px solid var(--rule);background:var(--raise);color:var(--ink);cursor:pointer;display:grid;gap:4px;text-align:left;scroll-snap-align:start}
-.strip button img{display:block;width:100%;height:76px;object-fit:cover;background:var(--field)}
-.strip button span{font:500 .68rem/1.2 var(--mono);padding:0 6px 6px;color:var(--grey)}
-.strip button.hung{border-color:var(--grey)}.strip button.hung span::before{content:"\2713  "}
-.strip button[aria-pressed=true]{border-color:var(--ink);box-shadow:0 0 0 1px var(--ink)}
-.strip .more{width:auto;padding:0 12px;font:500 .7rem/1 var(--mono);text-transform:uppercase;letter-spacing:.06em;align-content:center}
-.tools{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center}
-.tools .seg .btn{text-transform:none;letter-spacing:0;font-size:.74rem;padding:8px 10px}
-.tools .width{display:flex;align-items:center;gap:8px;font:500 .72rem/1.4 var(--mono);color:var(--grey);text-transform:uppercase;letter-spacing:.06em}
-.tools .width input{width:160px}
-.tools output{color:var(--ink);min-width:6ch}
-.room .hint{margin:0;font-size:.78rem;color:var(--grey)}
-.room .caption{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:baseline}
-.room .placed,.room .total{margin:0;font-size:.9rem;color:var(--ink-soft)}.room .placed i{font:italic 400 1.02rem var(--serif);color:var(--ink)}.room .placed a{color:var(--ink)}
-.room .total{font:500 .78rem/1.4 var(--mono);color:var(--grey)}
-.room .caption .btn{padding:6px 9px;font-size:.64rem}
-.arslot:empty{display:none}
-.btn.arbtn.arbig{width:100%;padding:13px;font-size:.78rem;background:var(--on);color:var(--on-ink);border-color:var(--on);margin:0}
-.arhint{margin:0;font-size:.85rem;color:var(--ink-soft)}
-.btn.arbtn{padding:6px 9px;font-size:.64rem;margin-top:2px;justify-self:start}
-.btn.onwall{justify-self:start;padding:6px 9px;font-size:.64rem;margin-top:2px}
 """
 
 PRICE_STOPS = [0, 50, 100, 150, 200, 250, 300, 400, 500, 600, 700, 800, 900, 1000, 1250, 1500, 1750, 2000, 2500, 3000, 3500,
@@ -1031,17 +734,11 @@ def panel(t, labels, M, names=()):
             f'<div class="f-foot"><button type="button" class="count" id="fcount"></button><button type="button" class="linkbtn" id="fclear">{e(t["clear"])}</button></div>'
             '</div>')
 
-# "Try it on your wall" (the room view): off 2026-10-02, back 2026-10-13, off again 2026-10-15. The code stays; True
-# brings the button back, and the hello, labels and note that told of it are in commit 680dff9, to be put back with it
-PHOTO = False
-
 def page(lang, ver, api, labels, M, n=0, tver="", names=()):
     t = T[lang]
     me, other = f"{BASE}/{t['file']}", f"{BASE}/{t['other']}"
     tj = json.dumps({k: t[k] for k in ("more", "at", "noprice", "none", "thinking", "how", "like", "choosing", "failed", "robot", "record", "sizes", "shown", "hash",
                                        "media", "anyprice", "upto", "from_", "count", "count1", "show", "moremoods", "fewer", "clear", "artist", "titlew", "artistonly", "showthem", "daily",
-                                       "yourroom", "looking", "photomsg", "wallw", "drag", "onwall", "fits", "roomnote", "nowall", "badphoto",
-                                       "choose", "hangmore", "remove", "together", "frames", "reset", "ar", "arwait", "arfail", "arsafari",
                                        "sl_add", "sl_remove", "fybtn", "fyhint", "fysee", "fybit", "sortby", "sorts")}, ensure_ascii=False).replace("</", "<\\/")
     lj = json.dumps(labels, ensure_ascii=False).replace("</", "<\\/")
     ask = (api.rstrip("/") + "/ask") if api else ""
@@ -1059,7 +756,6 @@ def page(lang, ver, api, labels, M, n=0, tver="", names=()):
             f'{panel(t, labels, M, names)}<div class="log" id="log" aria-live="polite"><div class="msg them"><p>{e(t["hello"])}</p></div></div>'
             f'<form class="ask" id="ask"><label for="q">{e(t["label"])}</label><input id="q" type="text" maxlength="400" autocomplete="off" placeholder="{e(t["ph"])}">'
             f'<button class="btn solid" type="submit">{e(t["send"])}</button>'
-            + (f'<input id="photo" type="file" accept="image/*" hidden><label for="photo" class="btn photobtn" role="button" tabindex="0">{e(t["photo"])}</label>' if PHOTO else '')
             + '<div class="human" id="human"></div></form></section>'
             # in words a search engine reads ("osta kunsti", "maalide müük"): the panel above is drawn in the browser
             + f'<section class="seo"><h2>{e(t["sh"])}</h2><p>{e(t["sp"].format(n=N))}</p>{browse_links(lang)}</section>'

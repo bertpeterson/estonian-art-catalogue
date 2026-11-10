@@ -65,12 +65,6 @@ results; the Worker passes Claude's turns back unchanged and accepts picks only 
 named. Each round is a call, so a message costs a few times more. 20 messages and 60 requests a minute
 per visitor.
 
-A photo (Find a work's "Photo of your wall"): the page shrinks it to 1280 px and re-encodes it, which
-drops its location data, and sends it with the message. Sonnet 5.5 marks up to three empty wall areas,
-an object of known size (a door is 80 cm) and two level lines along the wall; the Worker turns those
-into centimetres and the wall's perspective itself (the model places things well and measures badly).
-6 photos a minute per visitor, about $0.007 a photo. The photo is not stored.
-
 A day's cap: 2,000 questions to `/ask` and 2,000 × 2 tool rounds, all visitors together, counted before Claude is
 called; past it, and on a day that cannot be counted, `/ask` answers "try again tomorrow". Only `/` (the mood page),
 `/ask`, `/list/*` and `/admin/stats` answer; any other address is a 404 and calls nothing.

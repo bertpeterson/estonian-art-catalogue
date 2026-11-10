@@ -22,25 +22,9 @@ BASE = "https://www.artisoon.ee"
 CATS = ["tooted", "graafika", "keraamika", "fotograafia", "viimati-lisatud"]
 ctx = ssl.create_default_context()
 os.makedirs("gcache", exist_ok=True)
-U = lambda s: re.sub(r"\s+", " ", html.unescape(re.sub(r"<[^>]+>", " ", s or ""))).strip()
+from scrape_util import U, cached
 
-def get(u, key):
-    p = f"gcache/{key}.html.gz"
-    if os.path.exists(p) and time.time() - os.path.getmtime(p) > 86400: os.remove(p)
-    if os.path.exists(p):
-        with gzip.open(p, "rt", encoding="utf-8") as f: return f.read()
-    h = ""
-    for k in range(3):
-        try:
-            with urllib.request.urlopen(urllib.request.Request(u, headers={"User-Agent": UA}), timeout=60, context=ctx) as f:
-                h = f.read().decode("utf-8", "replace"); break
-        except Exception as e:
-            if k == 2: print("ERR", u, repr(e)[:60], flush=True)
-            time.sleep(3 * (k + 1))
-    if h:
-        with gzip.open(p, "wt", encoding="utf-8") as f: f.write(h)
-    time.sleep(1.2)
-    return h
+def get(u, key): return cached(u, key, pause=1.2)   # scrape_util.py: a page not read stops the script
 
 # the catalogue's artist names, longest first: a heading without quotes ("Hugo Lepik akvarell",
 # "Ernö Koch EKA maja ehitus") is split where a known name ends

@@ -22,7 +22,7 @@ UA = "EstonianArtCatalogue/1.0 (museaal.ee; contact info@museaal.ee)"
 API = "https://www.idla.ee/wp-json/wc/store/v1/products"
 CATEGORY = 349                                                           # Kunst > Eesti
 ctx = ssl.create_default_context()
-U = lambda s: re.sub(r"\s+", " ", html.unescape(re.sub(r"<[^>]+>", " ", s or ""))).strip()
+from scrape_util import U
 NUM = r"\d+(?:[.,]\d+)?"
 # the word between name and title: "graafika", "õlimaal", "exlibris-graafika", "pliiatsijoonistus"
 KIND = r"(?:exlibris-)?graafika|serigraafia|õlimaal|akvarell|guašš|tempera|pastell|segatehnika|(?:pliiatsi|tušši|söe)?joonistus"
