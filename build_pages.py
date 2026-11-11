@@ -395,7 +395,8 @@ def sale_block(i, a, ws, lang):
     find = f'{BASE}/{"find" if en else "leia"}#a={urllib.parse.quote(a["n"])}'
     more = (f"See {'it' if len(S) == 1 else 'them'} in Buy Art" if en else "Vaata neid lehel Osta kunsti")
     return (f'<h2 class="sh">{head}</h2><p class="m">{e(line)}</p><div class="wall sale">{tiles}</div>'
-            f'<p><a class="cta" href="{e(find)}">{more} →</a></p>'), len(S), S[:12], rng
+            f'<p><a class="cta" href="{e(find)}">{more} →</a></p>'
+            "<!--for-sale-page-->"), len(S), S[:12], rng   # build_ask.py puts the link to the artist's for-sale page here
 
 def follow(sl, lang, sale):
     """the artist's feed of works for sale (build_ask.py writes it): a new work shows in the reader's feed reader"""

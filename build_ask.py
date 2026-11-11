@@ -381,7 +381,7 @@ function card(w,why){
   // the picture and title, and the price, go to the gallery; the artist's name to the work in the catalogue
   function out(){var o=el('a','out');o.href=w[10];o.target='_blank';o.rel='noopener';
     // every click out by gallery; and per version: conversations that led to a click out, and clicks on a pick
-    o.addEventListener('click',function(){gc('find-out',g);if(talked&&!wentOut){wentOut=true;gc('find-conv-out-'+V)}if(why)gc('find-pick-'+V);if(Q.you)gc('find-foryou-out')});return o}
+    o.addEventListener('click',function(){gc('find-out',g);if(g)gc('gallery-'+g.toLowerCase().normalize('NFKD').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,''),g);if(talked&&!wentOut){wentOut=true;gc('find-conv-out-'+V)}if(why)gc('find-pick-'+V);if(Q.you)gc('find-foryou-out')});return o}
   var top=out(), img=el('img');img.src=w[3];img.alt=w[0]+', '+a[0];img.loading='lazy';img.decoding='async';img.referrerPolicy='no-referrer-when-downgrade';top.appendChild(img);
   var cap=el('span','cap');cap.appendChild(el('i',null,w[0]));top.appendChild(cap);c.appendChild(top);
   var by=el('span','by'), an=el('a',null,a[0]);an.href='./#'+T.hash+'artist='+a[1]+'&open='+encodeURIComponent(w[11]);an.title=T.record;
@@ -843,6 +843,121 @@ def sale_pages(d):
             open(f"site/{SALE_DIR[lang]}/{sl}.html", "w", encoding="utf-8").write(html_); urls.append(me)
     return urls
 
+# A for-sale page per artist with three or more works in stock: /for-sale/<artist>, /muugil/<artist>. The search
+# "<name> paintings for sale" met only the artist page, whose title and most of whose words are the museum record;
+# this page is the stock alone -- every work with its asking price and gallery -- then the record at auction, and
+# its title says so first. Fewer than three works stay on the artist page: a page of one card is a doorway.
+ARTIST_MIN, ARTIST_CAP = 3, 120
+KINDS = [  # the word for most of an artist's stock: bits of field 14, English, Estonian
+    (BIT["oil"] | BIT["acrylic"] | BIT["watercolour"] | BIT["painting"], "paintings", "maalid"),
+    (BIT["print"], "prints", "graafika"), (BIT["drawing"], "drawings", "joonistused"),
+    (BIT["sculpture"], "sculpture", "skulptuurid"), (BIT["photo"], "photographs", "fotod")]
+AT = {"en": dict(title="{name} {kind} for sale – {n} works{rng}", h="{name}: {kind} for sale", art="art",
+                 lede="{n} works by {name}{dates} for sale at {gals}{rng}. Prices are the galleries' asking prices; each work links to the gallery that sells it.",
+                 rng=", {lo}–{hi}", rng1=", {lo}", first="The {k} lowest-priced of {n} here; all of them in Buy Art.",
+                 more="Filter these in Buy Art →", page="{name}: all works, museums, biography →", feed="Follow new works for sale (RSS)",
+                 auh="{name} at auction", au="{n} lots at Estonian auction houses, {y}; {s} sold{r}.", aur=", most for {lo}–{hi}", aur0=", for {lo}–{hi}",
+                 unsold="unsold", sold="sold", link="All {n} works for sale, with prices →"),
+      "et": dict(title="{name}: {kind} müügil – {n} teost{rng}", h="{name}: {kind} müügil", art="teosed",
+                 lede="{name}{dates}: {n} teost müügil, {gals}{rng}. Hinnad on galeriide müügihinnad; iga teos viib seda müüva galerii lehele.",
+                 rng=", {lo}–{hi}", rng1=", {lo}", first="Siin {k} soodsaimat teost {n}-st; kõik lehel Osta kunsti.",
+                 more="Vali neist lehel Osta kunsti →", page="{name}: kõik teosed, muuseumid, elulugu →", feed="Jälgi uusi müügil olevaid teoseid (RSS)",
+                 auh="{name} oksjonitel", au="{n} teost Eesti oksjonitel, {y}; müüdud {s}{r}.", aur=", enamik hinnaga {lo}–{hi}", aur0=", hinnaga {lo}–{hi}",
+                 unsold="müümata", sold="müüdud", link="Kõik {n} müügil olevat teost koos hindadega →")}
+MARK = "<!--for-sale-page-->"   # build_pages.py leaves it under an artist's "For sale now"; the link to this page goes there
+
+def artist_sale_pages(d):
+    arts, gals, W_ = d["artists"], d["galleries"], d["works"]
+    money = lambda p, lang: f"€{p:,}" if lang == "en" else f"{p:,} €".replace(",", " ")
+    by = collections.defaultdict(list)
+    for w in W_: by[w[1]].append(w)
+    who = {sl: i for i, sl in H.ARTIST_SLUG.items()}
+    lots = collections.defaultdict(list)
+    for w in W:
+        if w.get("kind") == "auction" and not w.get("anr") and w.get("ad"): lots[w["a"]].append(w)
+    taken = {s[2] for s in SALE} | {s[4] for s in SALE}
+    urls, n_pages = [], 0
+    for ai, ws in by.items():
+        name, sl = arts[ai][0], arts[ai][1]
+        if len(ws) < ARTIST_MIN or sl in taken or sl not in who:
+            for p in (f"site/a/{sl}.html", f"site/k/{sl}.html"):          # no page of their own: the mark goes
+                if os.path.exists(p):
+                    s = open(p, encoding="utf-8").read()
+                    if MARK in s: open(p, "w", encoding="utf-8").write(s.replace(MARK, ""))
+            continue
+        a = A[who[sl]]
+        ws = sorted(ws, key=lambda w: (not w[8], w[8] or 0))
+        rows = ws[:ARTIST_CAP]
+        kc = [sum(1 for w in ws if w[14] & bits) for bits, _, _ in KINDS]
+        k = max(range(len(KINDS)), key=lambda j: kc[j])
+        pr = [w[8] for w in ws if w[8]]
+        life = a.get("l") or ["", ""]
+        dates = f" ({life[0]}–{life[1]})" if life[0] or life[1] else ""
+        gs = sorted({gals[w[9]] for w in ws if gals[w[9]]})
+        L = sorted(lots.get(who[sl], []), key=lambda w: w["ad"], reverse=True)
+        for lang in ("en", "et"):
+            t, st, at = T[lang], ST[lang], AT[lang]
+            ol = "et" if lang == "en" else "en"
+            me, other = f"{BASE}/{SALE_DIR[lang]}/{sl}", f"{BASE}/{SALE_DIR[ol]}/{sl}"
+            apage = f'{BASE}/{"a" if lang == "en" else "k"}/{sl}'
+            kind = KINDS[k][1 if lang == "en" else 2] if kc[k] * 2 >= len(ws) else at["art"]
+            rng = ("" if not pr else at["rng1"].format(lo=money(pr[0], lang)) if pr[0] == pr[-1] else
+                   at["rng"].format(lo=money(pr[0], lang) if lang == "en" else f"{pr[0]:,}".replace(",", " "), hi=money(pr[-1], lang)))
+            title, h = at["title"].format(name=name, kind=kind, n=len(ws), rng=rng), at["h"].format(name=name, kind=kind)
+            lede = at["lede"].format(n=len(ws), name=name, dates=dates, gals=", ".join(gs), rng=rng)
+            cards = "".join(
+                f'<article class="card"><a class="out" href="{e(w[10])}" target="_blank" rel="noopener" data-out="{e(gals[w[9]])}">'
+                f'<img src="{e(w[3])}" alt="{e(w[0])}, {e(name)}" loading="lazy" decoding="async" referrerpolicy="no-referrer-when-downgrade">'
+                f'<span class="cap"><i>{e(w[0])}</i>{e(str(w[2])) if w[2] else ""}</span>'
+                + (f'<span class="meta">{e(" · ".join(x for x in ((lang == "en" and w[15]) or w[4], w[5] if lang == "en" else re.sub(r"(?<=[0-9])[.](?=[0-9])", ",", w[5])) if x))}</span>' if (w[4] or w[5]) else "")
+                + f'<span class="price"><b>{money(w[8], lang) if w[8] else e(t["noprice"])}</b> {e((t["at"] + " ") if t["at"] else "")}{e(gals[w[9]])} ↗</span></a></article>'
+                for w in rows)
+            auction = ""
+            if L:
+                sold = sorted(w["ap"] for w in L if w.get("ao") and w.get("ap"))
+                lo, hi, q = arts[ai][5], arts[ai][6], arts[ai][7]
+                ys = sorted(w["ad"][:4] for w in L)
+                r = (at["aur" if q else "aur0"].format(lo=money(lo, lang) if lang == "en" else f"{lo:,}".replace(",", " "), hi=money(hi, lang))
+                     if sold and lo != hi else "")
+                res = lambda w: money(w["ap"], lang) if w.get("ao") and w.get("ap") else at["sold"] if w.get("ao") else at["unsold"]
+                auction = (f'<section class="seo"><h2>{e(at["auh"].format(name=name))}</h2>'
+                           f'<p>{e(at["au"].format(n=len(L), y=ys[0] if ys[0] == ys[-1] else f"{ys[0]}–{ys[-1]}", s=sum(1 for w in L if w.get("ao")), r=r))}</p>'
+                           + "".join(f'<p><i>{e(w.get("t") or "—")}</i>{", " + e(str(w["y"])) if w.get("y") else ""}: '
+                                     f'{e(H.val(w, "mu") or "")} {w["ad"][:4]}, {e(res(w))}</p>' for w in L[:8]) + "</section>")
+            ld = H.ldjson({"@context": "https://schema.org", "@type": "CollectionPage", "name": h, "url": me, "inLanguage": lang,
+                           "about": {"@type": "Person", "name": name, "url": apage},
+                           "mainEntity": {"@type": "ItemList", "numberOfItems": len(ws), "itemListElement": [
+                               {"@type": "ListItem", "position": j + 1, "item": H.offer_item(
+                                   w[0], name, w[2], (lang == "en" and w[15]) or w[4], w[3], w[8], gals[w[9]], w[10])}
+                               for j, w in enumerate(rows)]}})
+            find = f'{BASE}/{t["file"]}#a={urllib.parse.quote(name)}'
+            html_ = (f'<!doctype html><html lang="{lang}"><head><meta charset="utf-8">{H.STAMP}<meta name="viewport" content="width=device-width,initial-scale=1">'
+                     f'<title>{e(title)} · museaal.ee</title><meta name="description" content="{e(lede[:290])}">'
+                     f'<link rel="canonical" href="{me}"><link rel="alternate" hreflang="{lang}" href="{me}"><link rel="alternate" hreflang="{ol}" href="{other}">'
+                     f'<link rel="alternate" type="application/rss+xml" title="{e(name)} — for sale" href="{BASE}/a/{sl}.xml">'
+                     f'<script type="application/ld+json">{ld}</script>'
+                     '<link rel="stylesheet" href="/fonts/fonts.css">'
+                     f'<style>{CSS}</style>{H.GC}</head><body><div class="wrap">'
+                     f'<nav><a href="{BASE}/{"" if lang == "en" else "#lang=et"}">{e(t["site"])}</a> › <a href="{BASE}/{t["file"]}">{e(t["h"])}</a> › '
+                     f'<a href="{apage}">{e(name)}</a> · <a href="{other}" hreflang="{ol}">{e(t["other_l"])}</a></nav>'
+                     f'<header><h1>{e(h)}</h1><p class="lede">{e(lede)}</p><p><a class="btn solid" href="{e(find)}">{e(at["more"])}</a></p></header>'
+                     f'<div class="grid">{cards}</div>'
+                     + (f'<p class="m">{e(at["first"].format(k=len(rows), n=len(ws)))}</p>' if len(ws) > len(rows) else "")
+                     + auction
+                     + f'<section class="seo"><p><a href="{apage}">{e(at["page"].format(name=name))}</a> · <a href="{BASE}/a/{sl}.xml">{e(at["feed"])}</a></p></section>'
+                     + browse_links(lang)
+                     + f'<footer>{e(t["note"].split(". ")[0])}. {H.CONTACT[lang]}</footer></div>{H.out_js("forsale-artist")}</body></html>')
+            open(f"site/{SALE_DIR[lang]}/{sl}.html", "w", encoding="utf-8").write(html_); urls.append(me)
+            # and the way here from the artist's own page
+            p = f'site/{"a" if lang == "en" else "k"}/{sl}.html'
+            if os.path.exists(p):
+                s = open(p, encoding="utf-8").read()
+                if MARK in s:
+                    open(p, "w", encoding="utf-8").write(s.replace(MARK, f'<p><a class="cta" href="{me}">{e(at["link"].format(n=len(ws)))}</a></p>'))
+        n_pages += 1
+    print(f"  for sale       {n_pages:,} artists with a for-sale page of their own ({ARTIST_MIN} works or more), both languages")
+    return urls
+
 # a cell a spreadsheet would take for a formula gets an apostrophe in front (OWASP's CSV injection rule)
 csv_cell = lambda v: "'" + v if isinstance(v, str) and re.match(r"\s*(?:[=@\t\r]|[+-].*[|(!])", v) else v
 
@@ -887,6 +1002,8 @@ the work, its picture, mood words read off the picture, the artist's page on mus
 - [Buy Art]({BASE}/{T["en"]["file"]}): the same works, searched by price, medium, size and mood, or by describing what you \
 are after ([in Estonian]({BASE}/{T["et"]["file"]}))
 {sale}
+- By artist: {BASE}/{SALE_DIR["en"]}/<artist> for every artist with {ARTIST_MIN} or more works for sale — the works, their \
+asking prices and galleries, and the artist's results at auction (the same <artist> as in {BASE}/a/<artist>)
 
 Each of these is in Estonian too, under {BASE}/{SALE_DIR["et"]}/.
 
@@ -993,7 +1110,7 @@ def main():
     for lang in ("en", "et"):
         labels = {w["en"]: (w["et"] if lang == "et" else BM.LABEL_EN.get(w["en"], w["en"])) for w in M}
         open(f"site/{T[lang]['file']}.html", "w", encoding="utf-8").write(page(lang, ver, API, labels, M, len(d["works"]), tver, door_names(d))); urls.append(f"{BASE}/{T[lang]['file']}")
-    urls += sale_pages(d)
+    urls += sale_pages(d) + artist_sale_pages(d)
     feed(d); llms_txt(d); rss(d)
     sm = open("site/sitemap.xml", encoding="utf-8").read()
     today = datetime.date.today().isoformat()
