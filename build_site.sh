@@ -44,6 +44,8 @@ python3 -u build_stats.py
 python3 -u build_mood.py || exit 1
 # find a work: the assistant, and the galleries' stock it looks through
 python3 -u build_ask.py || exit 1
+# what each artist's works fetched at auction: a page of every published result (links from the artist and for-sale pages)
+python3 -u build_prices.py || exit 1
 python3 -u build_alerts.py || exit 1   # what is for sale now, by artist: the deploy mails sale alerts from it
 # the account page: the signed-in address, news emails, sign out, delete (list-sync.js's calls)
 python3 -u build_account.py || exit 1

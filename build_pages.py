@@ -542,7 +542,7 @@ def render(i, a, ws, lang):
            f"{'<br>' if holders else ''}{e('; '.join(holders[:6]))}</p>"
            + (f"<p class=\"m\">{e(grp)}</p>" if grp else "")
            + ((f"<p class=\"bio\">{e(bio)}" + bio_note + "</p>") if bio else "")
-           + (f"<p class=\"m\">{e(au_line)}</p>" if au_line else "")
+           + (f"<p class=\"m\">{e(au_line)}</p><!--prices-page-->" if au_line else "")   # build_prices.py puts the link to the artist's price page here
            + up_line(i, lang)
            + sh_block
            + sale

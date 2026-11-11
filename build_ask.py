@@ -923,7 +923,7 @@ def artist_sale_pages(d):
                 auction = (f'<section class="seo"><h2>{e(at["auh"].format(name=name))}</h2>'
                            f'<p>{e(at["au"].format(n=len(L), y=ys[0] if ys[0] == ys[-1] else f"{ys[0]}–{ys[-1]}", s=sum(1 for w in L if w.get("ao")), r=r))}</p>'
                            + "".join(f'<p><i>{e(w.get("t") or "—")}</i>{", " + e(str(w["y"])) if w.get("y") else ""}: '
-                                     f'{e(H.val(w, "mu") or "")} {w["ad"][:4]}, {e(res(w))}</p>' for w in L[:8]) + "</section>")
+                                     f'{e(H.val(w, "mu") or "")} {w["ad"][:4]}, {e(res(w))}</p>' for w in L[:8]) + "<!--prices-page--></section>")   # build_prices.py: the link to every result
             ld = H.ldjson({"@context": "https://schema.org", "@type": "CollectionPage", "name": h, "url": me, "inLanguage": lang,
                            "about": {"@type": "Person", "name": name, "url": apage},
                            "mainEntity": {"@type": "ItemList", "numberOfItems": len(ws), "itemListElement": [
@@ -1011,6 +1011,10 @@ Each of these is in Estonian too, under {BASE}/{SALE_DIR["et"]}/.
 
 - [Artists A–Z]({BASE}/a/): a page for each artist — dates, biography, the museums that hold their work, works for \
 sale, record at auction; in Estonian under {BASE}/k/
+
+- Prices by artist: {BASE}/prices/<artist> for every artist with four or more published results at the Estonian \
+auction houses — every lot with its sale and hammer price, and the figures by medium and by year; in Estonian under \
+{BASE}/hinnad/. A record of what was published, not a valuation
 
 ## Data
 
