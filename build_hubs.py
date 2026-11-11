@@ -24,10 +24,15 @@ PERIODS = [(1700, 1917, "Tsaariaeg"), (1918, 1939, "Vabariik"), (1940, 1990, "Ok
 GC = '<script data-goatcounter="https://museaal.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>'
 STAMP = SM.OPEN + "(function(){var t;try{t=localStorage.getItem(\"ekr:theme\")}catch(e){}if(t?t===\"light\":matchMedia(\"(prefers-color-scheme: light)\").matches)document.documentElement.setAttribute(\"data-theme\",\"light\")})()</script>"
 # a click through to a gallery, counted: a GoatCounter event "out-<src>" titled with the gallery (data-out on the
-# link), as Buy art counts its own as "find-out"; a middle click too, which opens the gallery just the same
+# link), as Buy art counts its own as "find-out"; a middle click too, which opens the gallery just the same.
+# GoatCounter keeps one title for an event name, so the gallery gets an event of its own as well, "gallery-<slug>"
+# (GALLERY_JS; one name a gallery whatever the page, so the backoffice's hundred names hold them all)
+GALLERY_JS = "'gallery-'+g.toLowerCase().normalize('NFKD').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'')"
 def out_js(src):
     return (SM.OPEN + "(function(){function c(v){var a=v.target.closest&&v.target.closest('a[data-out]');"
-            f"if(a&&window.goatcounter&&goatcounter.count)goatcounter.count({{path:'out-{src}',title:a.dataset.out,event:true}})}}"
+            "if(!a||!window.goatcounter||!goatcounter.count)return;var g=a.dataset.out;"
+            f"goatcounter.count({{path:'out-{src}',title:g,event:true}});"
+            f"if(g)goatcounter.count({{path:{GALLERY_JS},title:g,event:true}})}}"
             "document.addEventListener('click',c);document.addEventListener('auxclick',c)})()</script>")
 e = lambda s: html.escape(str(s or ""), quote=True)
 def bare_slug(s):

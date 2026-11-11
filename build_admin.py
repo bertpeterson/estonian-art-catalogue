@@ -156,7 +156,11 @@ JS = r"""
       add(two, add(el("div"), el("h3", null, "Top pages"), table(["Page", "Views"], pages, [0, 1])),
                add(el("div"), el("h3", null, "Referrers"), table(["From", "Visits"], g.refs || [], [0, 1])));
       add(s, two);
-      if ((g.events_list || []).length) add(s, el("h3", null, "Events"), table(["Event", "Count"], g.events_list.map(function (x) { return [x.path, x.count]; }), [0, 1]));
+      // each click through is counted a second time under the gallery's own name, "gallery-<slug>": the table by gallery
+      var isGal = function (x) { return /^gallery-/.test(x.path); }, evs = (g.events_list || []).filter(function (x) { return !isGal(x); });
+      var gal = (g.events_list || []).filter(isGal).map(function (x) { return [x.title || x.path.slice(8), x.count]; }).sort(function (a, b) { return b[1] - a[1]; });
+      if (gal.length) add(s, el("h3", null, "Clicks by gallery"), table(["Gallery", "Clicks"], gal, [0, 1]));
+      if (evs.length) add(s, el("h3", null, "Events"), table(["Event", "Count"], evs.map(function (x) { return [x.path, x.count]; }), [0, 1]));
     }
     add(s, add(el("p", "m"), document.createTextNode("More at "), Object.assign(el("a", null, "museaal.goatcounter.com"), { href: "https://museaal.goatcounter.com/" })));
     main.appendChild(s);
