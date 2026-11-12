@@ -62,6 +62,48 @@ CSS = P.CSS + ("h2.sec{font-family:var(--serif);font-weight:500;font-size:1.45re
                "@media(max-width:700px){.fg{grid-template-columns:1.2fr 1fr 1fr;font-size:.84rem}.fg.y{grid-template-columns:1.2fr 1fr 1fr 1fr}.fg:not(.y) span:nth-child(n+4){grid-row:2}"
                ".fg:not(.y) span:nth-child(4){grid-column:2}.fg:not(.y) span:nth-child(5){grid-column:3}}")
 
+# The index of these pages, /prices/artists and /hinnad/kunstnikud: every artist who has one, by surname (as
+# build_ask.py's index of the for-sale pages). The home page's auction view and every price page link to it.
+IX = {"en": dict(sl="artists", link="Artists A–Z", h="Prices at auction, by artist", title="Estonian art prices at auction: {n} artists, A–Z",
+                 lede="{n} artists with {m} or more published results at Estonian auction houses, by surname. Each name opens every result: the lots, what sold and the hammer prices.",
+                 row="{n} lots, {s} sold"),
+      "et": dict(sl="kunstnikud", link="Kunstnikud A–Ü", h="Hinnad oksjonitel, kunstnike kaupa", title="Eesti kunsti hinnad oksjonitel: {n} kunstnikku, A–Ü",
+                 lede="{n} kunstnikku, kellel on Eesti oksjonimajades {m} või enam avaldatud tulemust, perekonnanime järgi. Iga nimi avab kõik tulemused: teosed, mis müüdi, ja haamrihinnad.",
+                 row="{n} teost, müüdud {s}")}
+
+def index(made):
+    """made: (slug, name, lots, sold, lowest hammer price, highest) for every artist with a price page."""
+    made = sorted(made, key=lambda x: BA._az(x[1])[:2])
+    groups = collections.OrderedDict()
+    for x in made: groups.setdefault(BA._az(x[1])[2], []).append(x)
+    urls = []
+    for lang in ("en", "et"):
+        t, ix, ol = T[lang], IX[lang], "et" if lang == "en" else "en"
+        me, other = f"{BASE}/{t['dir']}/{ix['sl']}", f"{BASE}/{T[ol]['dir']}/{IX[ol]['sl']}"
+        lede = ix["lede"].format(n=fmt(len(made), lang), m=MIN)
+        rng = lambda lo, hi: "" if not lo else " · " + (eur(lo, lang) if lo == hi else f"{eur(lo, lang)}–{eur(hi, lang)}")
+        body = "".join(
+            f'<section id="az-{k}"><h2>{e(L)}</h2><ul>' + "".join(
+                f'<li><a href="{BASE}/{t["dir"]}/{sl}">{e(name)}</a><span>{e(ix["row"].format(n=fmt(n, lang), s=fmt(s, lang)))}{e(rng(lo, hi))}</span></li>'
+                for sl, name, n, s, lo, hi in xs) + "</ul></section>" for k, (L, xs) in enumerate(groups.items()))
+        nav = "".join(f'<a href="#az-{k}">{e(L)}</a>' for k, L in enumerate(groups))
+        ld = H.ldjson({"@context": "https://schema.org", "@type": "CollectionPage", "name": ix["h"], "url": me, "inLanguage": lang,
+                       "mainEntity": {"@type": "ItemList", "numberOfItems": len(made), "itemListElement": [
+                           {"@type": "ListItem", "position": j + 1, "name": x[1], "url": f"{BASE}/{t['dir']}/{x[0]}"} for j, x in enumerate(made)]}})
+        page = (f'<!doctype html><html lang="{lang}"><head><meta charset="utf-8">{H.STAMP}<meta name="viewport" content="width=device-width,initial-scale=1">'
+                f'<title>{e(ix["title"].format(n=fmt(len(made), lang)))} · museaal.ee</title><meta name="description" content="{e(lede[:290])}">'
+                f'<link rel="canonical" href="{me}"><link rel="alternate" hreflang="{lang}" href="{me}"><link rel="alternate" hreflang="{ol}" href="{other}">'
+                f'<script type="application/ld+json">{ld}</script>'
+                '<link rel="stylesheet" href="/fonts/fonts.css">'
+                f'<style>{CSS}{BA.IDX_CSS}.az-nav{{margin-top:26px}}</style>{H.GC}</head><body><div class="pg">'
+                f'<div class="top"><a class="wm" href="{BASE}/{"" if lang == "en" else "#lang=et"}">{t["site"]}</a>'
+                f'<span><a class="eb" href="{BASE}/{P.T[lang]["file"]}">{t["past"]}</a><a class="eb" href="{other}">{t["other_l"]}</a></span></div>'
+                f'<header class="mast"><h1>{e(ix["h"])}</h1><p class="lede">{e(lede)}</p></header>'
+                f'<p class="az-nav">{nav}</p><div class="az">{body}</div>'
+                f'<footer class="foot">{e(t["note"])} {H.CONTACT[lang]}</footer></div></body></html>')
+        open(f"site/{t['dir']}/{ix['sl']}.html", "w", encoding="utf-8").write(page); urls.append(me)
+    return urls
+
 def cat(w):
     m = BA.media_of(BA.kind_of(w), " ".join(filter(None, (H.val(w, "tce"), H.val(w, "tc")))))
     return next((k for k, bits in CATS if m & bits), "other")
@@ -80,10 +122,10 @@ def main():
     if os.path.exists("site/data/stock.json"):
         d = json.load(open("site/data/stock.json", encoding="utf-8"))
         for w in d["works"]: stock.setdefault(d["artists"][w[1]][1], []).append(w[8])
-    urls, n_pages = [], 0
+    urls, n_pages, made = [], 0, []
     for ai, all_ in lots.items():
         sl = H.ARTIST_SLUG.get(ai)
-        if not sl: continue
+        if not sl or sl in {x["sl"] for x in IX.values()}: continue
         L = sorted((w for w in all_ if not w.get("anr")), key=lambda w: str(w["ad"]), reverse=True)
         ok = len(L) >= MIN
         name = A[ai]["n"]
@@ -160,7 +202,7 @@ def main():
                     '<link rel="stylesheet" href="/fonts/fonts.css">'
                     f'<style>{CSS}</style>{H.GC}</head><body><div class="pg">'
                     f'<div class="top"><a class="wm" href="{BASE}/{"" if lang == "en" else "#lang=et"}">{t["site"]}</a>'
-                    f'<span><a class="eb" href="{BASE}/{P.T[lang]["file"]}">{t["past"]}</a><a class="eb" href="{other}">{t["other_l"]}</a></span></div>'
+                    f'<span><a class="eb" href="{BASE}/{t["dir"]}/{IX[lang]["sl"]}">{IX[lang]["link"]}</a><a class="eb" href="{BASE}/{P.T[lang]["file"]}">{t["past"]}</a><a class="eb" href="{other}">{t["other_l"]}</a></span></div>'
                     f'<header class="mast"><span class="eb"><a class="eb" href="{apage}">{e(t["page"].format(name=name))}</a></span>'
                     f'<h1>{e(t["h"].format(name=name))}</h1><p class="lede">{e(lede)}</p>{now}</header>'
                     + figs_m + figs_y
@@ -173,6 +215,10 @@ def main():
             open(f"site/{t['dir']}/{sl}.html", "w", encoding="utf-8").write(page)
             urls.append(me)
         n_pages += ok
+        if ok: made.append((sl, name, len(L), len(sold), ps[0] if ps else 0, ps[-1] if ps else 0))
+    urls += index(made)
+    # the slugs with such a page, for the home page's auction view to link each artist's line to it (tpl_app.html praBit)
+    json.dump(sorted(x[0] for x in made), open("site/data/price-artists.json", "w", encoding="utf-8"), separators=(",", ":"))
     sm = open("site/sitemap.xml", encoding="utf-8").read()
     today = datetime.date.today().isoformat()
     add = "".join(f'<url><loc>{u}</loc><lastmod>{today}</lastmod><changefreq>weekly</changefreq></url>' for u in urls)

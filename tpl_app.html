@@ -399,6 +399,18 @@
   const fsaBit = i => { const s = slug(A[i].n), txt = esc(T("nforsale", {n: fmt(SALE_N.get(i))}));
     if (!FSA){ fsaLoad(); return `<span data-fsa="${esc(s)}">${txt}</span>`; }
     return FSA.has(s) ? fsaLink(s, txt) : txt; };
+  // the same for the record at auction: the artists with a price page (build_prices.py), for the auction view's lines
+  let PRA = null, praP = null;
+  const praDir = () => LANG === "et" ? "hinnad" : "prices";
+  const praLink = (s, html) => `<a class="g-sale" href="${praDir()}/${esc(s)}">${html} →</a>`;
+  const praLoad = () => praP || (praP = fetch("data/price-artists.json?v=__V_INDEX__").then(r => r.ok ? r.json() : []).then(a => {
+    PRA = new Set(a);
+    document.querySelectorAll("[data-pra]").forEach(x => { if (PRA.has(x.dataset.pra)) x.outerHTML = praLink(x.dataset.pra, x.innerHTML); });
+  }).catch(() => {}));
+  const praBit = (i, html) => { const s = slug(A[i].n);
+    if (!PRA){ praLoad(); return `<span data-pra="${esc(s)}">${html}</span>`; }
+    return PRA.has(s) ? praLink(s, html) : html; };
+  const praIndex = () => `<div class="g-split"><a class="g-sale" href="${praDir()}/${LANG === "et" ? "kunstnikud" : "artists"}">${esc(T("au_az"))}</a></div>`;
   const SRCKEYS = ["muis","ekm","ekmmuis","ekkm","cca"];
   let applying = false;
 
@@ -1529,7 +1541,7 @@
       const items = sortRows(lots, state.decOrder === "earliest"), sold = lots.filter(w => w.ao && w.ap);
       const ps = sold.map(w => w.ap).sort((a, b) => a - b);
       const gutter = `<span class="g-name">${esc(T("au_byprice"))}</span>
-        <div class="g-split">${esc(auCount(lots, "au_saleline"))}${ps.length ? ` · ${eur(ps[0])} – ${eur(ps[ps.length-1])}` : ""}</div>`;
+        <div class="g-split">${esc(auCount(lots, "au_saleline"))}${ps.length ? ` · ${eur(ps[0])} – ${eur(ps[ps.length-1])}` : ""}</div>${praIndex()}`;
       return groupHTML("price", gutter, items, true) + `<p class="tl-note">${esc(T("au_note"))}</p>`;
     }
     const asc = state.decOrder === "earliest";
@@ -1546,7 +1558,7 @@
         const l = A[ai].l || [];
         const gutter = `<span class="g-name"><span class="r-alink" data-artist="${ai}">${esc(A[ai].n)}</span></span>
           ${l[0] || l[1] ? `<div class="g-dates">${esc(l[0] || "")}–${esc(l[1] || "")}</div>` : ""}
-          <div class="g-split">${esc(auCount(items, "au_saleline"))}${ps.length ? ` · ${eur(ps[0])}${ps.length > 1 ? " – " + eur(ps[ps.length - 1]) : ""}` : ""}</div>`;
+          <div class="g-split">${praBit(ai, esc(auCount(items, "au_saleline")) + (ps.length ? ` · ${eur(ps[0])}${ps.length > 1 ? " – " + eur(ps[ps.length - 1]) : ""}` : ""))}</div>`;
         return groupHTML("a" + ai, gutter, items, false);
       }).join("") + (arts.length > shownA.length
         ? `<button class="more" id="more-sales" style="margin-top:18px">${esc(T("au_moreartists", {n: fmt(arts.length - shownA.length)}))}</button>` : "")
@@ -1576,7 +1588,7 @@
         <a class="sl-page" href="${LANG === "et" ? "moodunud-oksjonid" : "past-sales"}/${esc(sl.slug)}">${esc(T("au_salepage"))} →</a></div></div>`;
     }
     const gutter = `<span class="g-name">${esc(T("au_past"))}</span>
-      <div class="g-split">${esc(T(order.length === 1 ? "au_sale1" : "au_nsales", {n: fmt(order.length)}))} · ${esc(auCount(lots, "au_saleline"))}</div>`;
+      <div class="g-split">${esc(T(order.length === 1 ? "au_sale1" : "au_nsales", {n: fmt(order.length)}))} · ${esc(auCount(lots, "au_saleline"))}</div>${praIndex()}`;
     return `<section class="group" id="grp-sales"><div class="gutter">${gutter}</div><div class="rows">${out}</div></section>
       <p class="tl-note">${esc(T("au_note"))}</p>`;
   }
