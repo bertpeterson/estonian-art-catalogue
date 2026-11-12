@@ -616,7 +616,7 @@ footer a{border-bottom:1px solid var(--rule)}
 .ai-l{font-family:var(--mono);font-size:.7rem;background:none;border:0;color:var(--grey-4);padding:3px 5px;cursor:pointer;line-height:1}
 .ai-l:hover{color:var(--ink);background:var(--field)}
 .ai-l[aria-pressed="true"]{background:var(--invert-bg);color:var(--invert-fg)}
-.ai-tools{display:flex;align-items:center;gap:12px}
+.ai-tools{display:flex;flex-wrap:wrap;align-items:center;gap:12px}
 .ai-sort{display:inline-flex;border:1px solid var(--rule)}
 .ai-sort[hidden]{display:none}
 .seg[hidden]{display:none}
@@ -914,7 +914,6 @@ footer a{border-bottom:1px solid var(--rule)}
       <p class="fs-lede" id="fs-lede"></p>
       <a class="fs-all" href="find" data-fs="" data-i18n="fs_all"></a>
       <a class="fs-all" id="fs-byartist" href="#group=artist&amp;sort=forsale" data-i18n="fs_byartist"></a>
-      <a class="fs-all" id="fs-az" href="for-sale/artists" data-i18n="fs_az"></a>
       <a class="fs-all" id="fs-up" href="upcoming" data-i18n="fs_up"></a>
     </div>
     <div class="fs-row">
@@ -1099,6 +1098,7 @@ footer a{border-bottom:1px solid var(--rule)}
           <button id="ais-sale" aria-pressed="false" data-i18n="s_forsale"></button>
         </div>
         <input id="ai-q" class="ai-search" type="search" aria-label="Filter artists">
+        <a class="linkbtn" id="fs-az" href="for-sale/artists" data-i18n="fs_az"></a>
         <button class="linkbtn" id="ai-toggle" aria-expanded="false" aria-controls="ai-body"></button>
       </div>
     </div>
