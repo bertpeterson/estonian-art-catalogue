@@ -388,6 +388,17 @@
   const LIMIT_DEC = 50, LIMIT_ART = 18;
   const slug = s => (s||"").normalize("NFKD").replace(/[\u0300-\u036f]/g,"")
       .toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"");
+  // "By artist" from the Buy Art band: an artist's "N for sale" leads to their own for-sale page, when they have one.
+  // Which do is a list of slugs (build_ask.py artist_sale_pages), fetched the first time that view is drawn
+  let FSA = null, fsaP = null;
+  const fsaLink = (s, txt) => `<a class="g-sale" href="${LANG === "et" ? "muugil" : "for-sale"}/${esc(s)}">${txt} →</a>`;
+  const fsaLoad = () => fsaP || (fsaP = fetch("data/for-sale-artists.json?v=__V_INDEX__").then(r => r.ok ? r.json() : []).then(a => {
+    FSA = new Set(a);
+    document.querySelectorAll("[data-fsa]").forEach(x => { if (FSA.has(x.dataset.fsa)) x.outerHTML = fsaLink(x.dataset.fsa, x.innerHTML); });
+  }).catch(() => {}));
+  const fsaBit = i => { const s = slug(A[i].n), txt = esc(T("nforsale", {n: fmt(SALE_N.get(i))}));
+    if (!FSA){ fsaLoad(); return `<span data-fsa="${esc(s)}">${txt}</span>`; }
+    return FSA.has(s) ? fsaLink(s, txt) : txt; };
   const SRCKEYS = ["muis","ekm","ekmmuis","ekkm","cca"];
   let applying = false;
 
@@ -1369,7 +1380,7 @@
       reg.innerHTML = shownA.map((i, k) => {
         const ar = A[i], life = (ar.l[0] || ar.l[1]) ? `${ar.l[0]}–${ar.l[1] || ""}` : "";
         const gutter = `<span class="g-name">${esc(ar.n)}</span>${life ? `<div class="g-dates">${esc(life)}</div>` : ""}
-          <div class="g-split">${esc(T("nworks", {n: fmt(nAll.get(i))}))} · ${esc(T("npics", {n: fmt(by.get(i).length)}))}${state.sort === "forsale" && SALE_N.get(i) ? ` · ${esc(T("nforsale", {n: fmt(SALE_N.get(i))}))}` : ""}</div>
+          <div class="g-split">${esc(T("nworks", {n: fmt(nAll.get(i))}))} · ${esc(T("npics", {n: fmt(by.get(i).length)}))}${state.sort === "forsale" && SALE_N.get(i) ? ` · ${fsaBit(i)}` : ""}</div>
           <button class="showartist" data-artist="${i}">${esc(T("openartist"))}</button>`;
         return `<section class="group" id="grp-a${i}"><div class="gutter">${gutter}</div><div>${wallHTML(by.get(i), -1, false, {limit: state.aLimit.get(i) || 10, more: i, cols: artCols(), lazy: k > 1})}</div></section>`;
       }).join("")

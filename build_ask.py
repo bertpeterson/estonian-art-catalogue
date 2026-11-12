@@ -886,7 +886,7 @@ def artist_sale_pages(d):
     for w in W:
         if w.get("kind") == "auction" and not w.get("anr") and w.get("ad"): lots[w["a"]].append(w)
     taken = {s[2] for s in SALE} | {s[4] for s in SALE}
-    urls, n_pages = [], 0
+    urls, n_pages, made = [], 0, []
     for ai, ws in by.items():
         name, sl = arts[ai][0], arts[ai][1]
         if len(ws) < ARTIST_MIN or sl in taken or sl not in who:
@@ -964,7 +964,9 @@ def artist_sale_pages(d):
                 s = open(p, encoding="utf-8").read()
                 if MARK in s:
                     open(p, "w", encoding="utf-8").write(s.replace(MARK, f'<p><a class="cta" href="{me}">{e(at["link"].format(n=len(ws)))}</a></p>'))
-        n_pages += 1
+        n_pages += 1; made.append(sl)
+    # the slugs with such a page, for the home page's "By artist" view to link each to its own (tpl_app.html fsaBit)
+    json.dump(sorted(made), open("site/data/for-sale-artists.json", "w", encoding="utf-8"), separators=(",", ":"))
     print(f"  for sale       {n_pages:,} artists with a for-sale page of their own ({ARTIST_MIN} works or more), both languages")
     return urls
 
