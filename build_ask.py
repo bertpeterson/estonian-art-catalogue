@@ -1097,6 +1097,7 @@ Each of these is in Estonian too, under {BASE}/{SALE_DIR["et"]}/.
 - [Artists A–Z]({BASE}/a/): a page for each artist — dates, biography, the museums that hold their work, works for \
 sale, record at auction; in Estonian under {BASE}/k/
 
+- [Prices at auction by artist, A–Z]({BASE}/prices/artists): every artist who has such a page, with their lots, lots sold and hammer price range
 - Prices by artist: {BASE}/prices/<artist> for every artist with four or more published results at the Estonian \
 auction houses — every lot with its sale and hammer price, and the figures by medium and by year; in Estonian under \
 {BASE}/hinnad/. A record of what was published, not a valuation
