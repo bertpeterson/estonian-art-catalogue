@@ -49,6 +49,7 @@ RULES = {
     "artandtonic": [(r"page=1$", 1)],
     "artkeller":   [(r"page=1$", 1)],
     "idla":        [(r"page=1&category=349$", 1)],
+    "avangard":    [(r"/e-pood$", 1), (r"/et/products/", 4)],
     "artisoon":    [(r"/tooted$", 1), (r"/graafika$", 1), (r"/keraamika$", 1), (r"/fotograafia$", 1), (r"/viimati-lisatud$", 1), (r"\.ee/(tooted|graafika)/", 4)],
     "kipskassid":  [(r"/vota-kass$", 1), (r"/kassikesed$", 1), (r"/collab-kassid$", 1), (r"/api/", 2)],
     "noba":        [(r"page=[12]$", 2), (r"noba\.ac/\w\w/(kunst|artwork)/", 3)],

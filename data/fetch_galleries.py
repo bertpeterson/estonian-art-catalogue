@@ -33,7 +33,7 @@ here = os.path.dirname(os.path.abspath(__file__))
 REC = "gallery_records.json"
 KEPT = os.path.join(here, "gallery_kept.json")    # group -> the day it was first not read
 GROUPS = [["haus"], ["kogo"], ["temnikova"], ["tutar"], ["artrovert"], ["ruki"], ["eks"], ["vernissage"],
-          ["konradmagi"], ["artner", "artman"], ["tokkoarrak"], ["artandtonic"], ["artisoon"], ["artkeller"], ["idla"],
+          ["konradmagi"], ["artner", "artman"], ["tokkoarrak"], ["artandtonic"], ["artisoon"], ["artkeller"], ["idla"], ["avangard"],
           ["noba", "noba_artists", "noba_artworks", "noba"]]
 
 def run(group):

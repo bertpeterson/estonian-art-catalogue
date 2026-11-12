@@ -1,0 +1,67 @@
+{
+ "gallery_records.json": [
+  {
+   "gid": "other-1",
+   "artist": "Kristjan Raud",
+   "title": "Kalevipoeg",
+   "year": "1935",
+   "tech": "",
+   "dims": "",
+   "gallery": "Another gallery",
+   "city": "Tallinn",
+   "url": "https://example.org/1"
+  },
+  {
+   "price": 1650,
+   "gid": "avg-2808030",
+   "artist": "Tõnis Vint",
+   "title": "Z26",
+   "year": "1996",
+   "tech": "Kõrgtrükk, tiraaž: 16/50",
+   "dims": "42 x 42 cm",
+   "gallery": "Avangard Galerii",
+   "city": "Pärnu",
+   "url": "https://avangardgallery.eu/et/products/tonis-vint-z26-1996",
+   "img": "https://media.voog.com/0000/0038/5639/photos/GRA-Par_Tonis-Vint-Z26_650A0210_block.jpg"
+  },
+  {
+   "price": 1600,
+   "gid": "avg-2732524",
+   "artist": "Tõnis Vint",
+   "title": "Z3",
+   "year": "1996",
+   "tech": "Tiraaž: 16/50",
+   "dims": "22 x 22 cm",
+   "gallery": "Avangard Galerii",
+   "city": "Pärnu",
+   "url": "https://avangardgallery.eu/et/products/tonis-vint-z3-1996",
+   "img": "https://media.voog.com/0000/0038/5639/photos/IMG_6085_block.jpg"
+  },
+  {
+   "price": 3500,
+   "gid": "avg-2808158",
+   "artist": "Mare Vint",
+   "title": "Mineviku linnad I",
+   "year": "2007",
+   "tech": "Serigraafia, tiraaž 31/32",
+   "dims": "63 x 63 cm",
+   "gallery": "Avangard Galerii",
+   "city": "Pärnu",
+   "url": "https://avangardgallery.eu/et/products/mare-vint-mineviku-linnad-i-2007",
+   "img": "https://media.voog.com/0000/0038/5639/photos/IMG_7823_block.jpg"
+  },
+  {
+   "price": 1050,
+   "gid": "avg-2403437",
+   "artist": "Mare Vint",
+   "title": "Maja",
+   "year": "1982",
+   "tech": "Litograafia, tiraaž: 38/65",
+   "dims": "65 x 60 cm",
+   "gallery": "Avangard Galerii",
+   "city": "Pärnu",
+   "url": "https://avangardgallery.eu/et/products/mare-vint-maja-1982",
+   "img": "https://media.voog.com/0000/0038/5639/photos/14_block.jpg"
+  }
+ ]
+}
