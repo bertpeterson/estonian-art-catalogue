@@ -749,7 +749,7 @@ def page(lang, ver, api, labels, M, n=0, tver="", names=()):
     tj = json.dumps({k: t[k] for k in ("more", "at", "noprice", "none", "thinking", "how", "like", "choosing", "failed", "robot", "record", "sizes", "shown", "hash",
                                        "media", "anyprice", "upto", "from_", "count", "count1", "show", "moremoods", "fewer", "clear", "artist", "titlew", "artistonly", "showthem", "daily",
                                        "sl_add", "sl_remove", "fybtn", "fyhint", "fysee", "fybit", "sortby", "sorts", "apage")}
-                    | {"apdir": SALE_DIR[lang], "apmin": ARTIST_MIN, "apskip": [x for s in SALE for x in (s[2], s[4])]}, ensure_ascii=False).replace("</", "<\\/")
+                    | {"apdir": SALE_DIR[lang], "apmin": ARTIST_MIN, "apskip": [x for s in SALE for x in (s[2], s[4])] + [x["sl"] for x in IDX.values()]}, ensure_ascii=False).replace("</", "<\\/")
     lj = json.dumps(labels, ensure_ascii=False).replace("</", "<\\/")
     ask = (api.rstrip("/") + "/ask") if api else ""
     ts = f' data-ts="{e(BM.TS)}"' if ask and BM.TS else ""       # the Worker's Turnstile site key
@@ -801,7 +801,9 @@ def browse_links(lang, here=None):
     i = 3 if lang == "en" else 5
     return (f'<p class="browse"><span class="eyebrow">{e(ST[lang]["browse"])}</span> ' + " · ".join(
         (f'<b>{e(s[i])}</b>' if s[2 if lang == "en" else 4] == here else
-         f'<a href="{BASE}/{SALE_DIR[lang]}/{s[2] if lang == "en" else s[4]}">{e(s[i])}</a>') for s in SALE) + "</p>")
+         f'<a href="{BASE}/{SALE_DIR[lang]}/{s[2] if lang == "en" else s[4]}">{e(s[i])}</a>') for s in SALE)
+        + " · " + (f'<b>{e(IDX[lang]["link"])}</b>' if here == IDX[lang]["sl"] else
+                   f'<a href="{BASE}/{SALE_DIR[lang]}/{IDX[lang]["sl"]}">{e(IDX[lang]["link"])}</a>') + "</p>")
 
 def sale_pages(d):
     eur = lambda n, lang: ("€" + f"{n:,}".replace(",", " ")) if lang == "en" else (f"{n:,}".replace(",", " ") + " €")
@@ -876,6 +878,75 @@ AT = {"en": dict(title="{name} {kind} for sale – {n} works{rng}", h="{name}: {
                  unsold="müümata", sold="müüdud", link="Kõik {n} müügil olevat teost koos hindadega →")}
 MARK = "<!--for-sale-page-->"   # build_pages.py leaves it under an artist's "For sale now"; the link to this page goes there
 
+# The index of those pages: every artist with a for-sale page, by surname, at /for-sale/artists and /muugil/kunstnikud.
+# The one page that links to all of them, for a visitor and for a crawler; the home page's Buy Art band, Buy Art
+# and every for-sale page link to it (browse_links).
+IDX = {"en": dict(sl="artists", link="Artists A–Z", h="Artists with works for sale",
+                  title="Estonian artists with works for sale: {n} artists, A–Z",
+                  lede="{n} artists with {m} or more works for sale at Estonian galleries now, by surname. Each name opens that artist's works with their asking prices.",
+                  n="{n} works"),
+       "et": dict(sl="kunstnikud", link="Kunstnikud A–Ü", h="Kunstnikud, kelle teoseid on müügil",
+                  title="Eesti kunstnikud, kelle teoseid on müügil: {n} kunstnikku, A–Ü",
+                  lede="{n} kunstnikku, kellelt on Eesti galeriides praegu müügil {m} või enam teost, perekonnanime järgi. Iga nimi avab selle kunstniku teosed koos müügihindadega.",
+                  n="{n} teost")}
+IDX_CSS = (".az-nav{margin:0;font:500 .8rem/2.2 var(--mono);letter-spacing:.08em}.az-nav a{display:inline-block;min-width:1.9em;color:var(--ink);text-decoration:none}"
+           ".az-nav a:hover{text-decoration:underline}.az h2{font-weight:500;font-size:1.3rem;margin:26px 0 8px;padding-top:10px;border-top:1px solid var(--line,rgba(128,128,128,.35))}"
+           ".az ul{list-style:none;margin:0;padding:0;columns:250px;column-gap:32px}.az li{break-inside:avoid;padding:4px 0;line-height:1.35}"
+           ".az li a{color:var(--ink);text-underline-offset:3px}.az li span{display:block;font:500 .72rem/1.5 var(--mono);color:var(--grey);font-variant-numeric:tabular-nums}")
+ABC = "abcdefghijklmnopqrsšzžtuvwõäöüxy"     # the Estonian alphabet's order
+
+def _az(name):
+    """An artist's place in the list: the surname (the name's last word), then the rest, in the Estonian alphabet."""
+    import unicodedata
+    def fold(s):
+        out = []
+        for ch in s.lower():
+            if ch not in ABC: ch = "".join(c for c in unicodedata.normalize("NFKD", ch) if not unicodedata.combining(c))
+            out += [c for c in ch if c in ABC]
+        return "".join(out)
+    parts = name.split()
+    sur, rest = fold(parts[-1]) if parts else "", fold(" ".join(parts[:-1]))
+    return [ABC.index(c) for c in sur], [ABC.index(c) for c in rest], (sur[:1] or "#").upper()
+
+def artist_index(made, money):
+    """made: (slug, name, works, lowest price, highest price) for every artist with a for-sale page."""
+    made = sorted(made, key=lambda x: _az(x[1])[:2])
+    groups = collections.OrderedDict()
+    for x in made: groups.setdefault(_az(x[1])[2], []).append(x)
+    urls = []
+    for lang in ("en", "et"):
+        t, ix = T[lang], IDX[lang]
+        ol = "et" if lang == "en" else "en"
+        me, other = f"{BASE}/{SALE_DIR[lang]}/{ix['sl']}", f"{BASE}/{SALE_DIR[ol]}/{IDX[ol]['sl']}"
+        n = f"{len(made):,}".replace(",", " " if lang == "et" else ",")
+        lede = ix["lede"].format(n=n, m=ARTIST_MIN)
+        def price(lo, hi):
+            if not lo: return ""
+            if lo == hi: return " · " + money(lo, lang)
+            return " · " + (money(lo, lang) if lang == "en" else f"{lo:,}".replace(",", " ")) + "–" + money(hi, lang)
+        body = "".join(
+            f'<section id="az-{k}"><h2>{e(L)}</h2><ul>' + "".join(
+                f'<li><a href="{BASE}/{SALE_DIR[lang]}/{sl}">{e(name)}</a><span>{e(ix["n"].format(n=c))}{e(price(lo, hi))}</span></li>'
+                for sl, name, c, lo, hi in xs) + "</ul></section>" for k, (L, xs) in enumerate(groups.items()))
+        nav_ = "".join(f'<a href="#az-{k}">{e(L)}</a>' for k, L in enumerate(groups))
+        ld = H.ldjson({"@context": "https://schema.org", "@type": "CollectionPage", "name": ix["h"], "url": me, "inLanguage": lang,
+                       "mainEntity": {"@type": "ItemList", "numberOfItems": len(made), "itemListElement": [
+                           {"@type": "ListItem", "position": j + 1, "name": x[1], "url": f"{BASE}/{SALE_DIR[lang]}/{x[0]}"} for j, x in enumerate(made)]}})
+        html_ = (f'<!doctype html><html lang="{lang}"><head><meta charset="utf-8">{H.STAMP}<meta name="viewport" content="width=device-width,initial-scale=1">'
+                 f'<title>{e(ix["title"].format(n=n))} · museaal.ee</title><meta name="description" content="{e(lede[:290])}">'
+                 f'<link rel="canonical" href="{me}"><link rel="alternate" hreflang="{lang}" href="{me}"><link rel="alternate" hreflang="{ol}" href="{other}">'
+                 f'<script type="application/ld+json">{ld}</script>'
+                 '<link rel="stylesheet" href="/fonts/fonts.css">'
+                 f'<style>{CSS}{IDX_CSS}</style>{H.GC}</head><body><div class="wrap">'
+                 f'<nav><a href="{BASE}/{"" if lang == "en" else "#lang=et"}">{e(t["site"])}</a> › <a href="{BASE}/{t["file"]}">{e(t["h"])}</a> › {e(ix["h"])} · '
+                 f'<a href="{other}" hreflang="{ol}">{e(t["other_l"])}</a></nav>'
+                 f'<header><h1>{e(ix["h"])}</h1><p class="lede">{e(lede)}</p></header>'
+                 f'<p class="az-nav">{nav_}</p><div class="az">{body}</div>'
+                 f'<section class="seo">{browse_links(lang, ix["sl"])}</section>'
+                 f'<footer>{e(t["note"].split(". ")[0])}. {H.CONTACT[lang]}</footer></div></body></html>')
+        open(f"site/{SALE_DIR[lang]}/{ix['sl']}.html", "w", encoding="utf-8").write(html_); urls.append(me)
+    return urls
+
 def artist_sale_pages(d):
     arts, gals, W_ = d["artists"], d["galleries"], d["works"]
     money = lambda p, lang: f"€{p:,}" if lang == "en" else f"{p:,} €".replace(",", " ")
@@ -885,7 +956,7 @@ def artist_sale_pages(d):
     lots = collections.defaultdict(list)
     for w in W:
         if w.get("kind") == "auction" and not w.get("anr") and w.get("ad"): lots[w["a"]].append(w)
-    taken = {s[2] for s in SALE} | {s[4] for s in SALE}
+    taken = {s[2] for s in SALE} | {s[4] for s in SALE} | {x["sl"] for x in IDX.values()}
     urls, n_pages, made = [], 0, []
     for ai, ws in by.items():
         name, sl = arts[ai][0], arts[ai][1]
@@ -964,9 +1035,10 @@ def artist_sale_pages(d):
                 s = open(p, encoding="utf-8").read()
                 if MARK in s:
                     open(p, "w", encoding="utf-8").write(s.replace(MARK, f'<p><a class="cta" href="{me}">{e(at["link"].format(n=len(ws)))}</a></p>'))
-        n_pages += 1; made.append(sl)
+        n_pages += 1; made.append((sl, name, len(ws), pr[0] if pr else 0, pr[-1] if pr else 0))
     # the slugs with such a page, for the home page's "By artist" view to link each to its own (tpl_app.html fsaBit)
-    json.dump(sorted(made), open("site/data/for-sale-artists.json", "w", encoding="utf-8"), separators=(",", ":"))
+    urls += artist_index(made, money)
+    json.dump(sorted(x[0] for x in made), open("site/data/for-sale-artists.json", "w", encoding="utf-8"), separators=(",", ":"))
     print(f"  for sale       {n_pages:,} artists with a for-sale page of their own ({ARTIST_MIN} works or more), both languages")
     return urls
 
@@ -1014,6 +1086,7 @@ the work, its picture, mood words read off the picture, the artist's page on mus
 - [Buy Art]({BASE}/{T["en"]["file"]}): the same works, searched by price, medium, size and mood, or by describing what you \
 are after ([in Estonian]({BASE}/{T["et"]["file"]}))
 {sale}
+- [Artists with works for sale, A–Z]({BASE}/{SALE_DIR["en"]}/{IDX["en"]["sl"]}): every artist who has such a page, with how many works and their price range
 - By artist: {BASE}/{SALE_DIR["en"]}/<artist> for every artist with {ARTIST_MIN} or more works for sale — the works, their \
 asking prices and galleries, and the artist's results at auction (the same <artist> as in {BASE}/a/<artist>)
 
