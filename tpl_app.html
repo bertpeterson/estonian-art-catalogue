@@ -2852,7 +2852,6 @@
     document.querySelectorAll('a[data-i18n="statslink"]').forEach(a => { a.href = LANG === "en" ? "stats" : "stats-et"; });   // the figures page exists in both languages
     $("findlink").href = LANG === "en" ? "find" : "leia";
     $("fs-up").href = LANG === "en" ? "upcoming" : "tulemas";
-    $("fs-az").href = LANG === "en" ? "for-sale/artists" : "muugil/kunstnikud";
     const fl = $("fs-lede");
     if (fl && fl.dataset.n) fl.textContent = T("fs_lede", {n: (+fl.dataset.n).toLocaleString(LANG === "en" ? "en-GB" : "et-EE"), g: fl.dataset.g});
     document.querySelectorAll("[data-i18n-html]").forEach(el => { el.innerHTML = I18N[LANG === "en" ? "HTML_EN" : "HTML_ET"][el.dataset.i18nHtml] || ""; });

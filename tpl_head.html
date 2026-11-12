@@ -11,7 +11,7 @@
   var l=(location.hash.match(/(?:^#|&)lang=(\w+)/)||[])[1],s=null;try{s=localStorage.getItem("ekr:lang")}catch(e){}
   var et=l?l==="et":s?s==="et":[].concat(navigator.languages||[],navigator.language||[]).some(function(x){return /^et\b/i.test(x)});
   if(!et)return;var R=document.documentElement;R.lang="et";R.classList.add("et-wait");
-  var D=__ET_STRINGS__,E=D.E,H=D.H,HREF={findlink:"leia","fs-up":"tulemas","fs-az":"muugil/kunstnikud"};window.__etE=E;
+  var D=__ET_STRINGS__,E=D.E,H=D.H,HREF={findlink:"leia","fs-up":"tulemas"};window.__etE=E;
   var shut=function(n){for(;n&&n!==R;n=n.parentNode)if(n.nextSibling)return true;return false};
   var one=function(el,all){
     if(el.hasAttribute("data-et")||!(all||shut(el)))return;el.setAttribute("data-et","");
@@ -25,7 +25,7 @@
     else if(el.id==="v-wall"&&el.firstChild&&el.firstChild.nodeType===3)el.firstChild.nodeValue=E.v_wall;
     else if(el.id==="q")el.placeholder=E.searchph;
     else if(el.id==="lang-et"||el.id==="lang-en")el.setAttribute("aria-pressed",el.id==="lang-et")};
-  var pass=function(all){document.querySelectorAll("[data-i18n],[data-i18n-html],#doors,#bars,#eras,#fs-lede,.mast-stats b,#v-wall,#q,#lang-et,#lang-en,#findlink,#fs-up,#fs-az").forEach(function(el){one(el,all)})};
+  var pass=function(all){document.querySelectorAll("[data-i18n],[data-i18n-html],#doors,#bars,#eras,#fs-lede,.mast-stats b,#v-wall,#q,#lang-et,#lang-en,#findlink,#fs-up").forEach(function(el){one(el,all)})};
   var mo=new MutationObserver(function(){pass(false)});mo.observe(R,{childList:true,subtree:true});
   document.addEventListener("DOMContentLoaded",function(){pass(true);mo.disconnect();document.title=E.doctitle;R.classList.remove("et-wait")});
 })();
@@ -616,7 +616,7 @@ footer a{border-bottom:1px solid var(--rule)}
 .ai-l{font-family:var(--mono);font-size:.7rem;background:none;border:0;color:var(--grey-4);padding:3px 5px;cursor:pointer;line-height:1}
 .ai-l:hover{color:var(--ink);background:var(--field)}
 .ai-l[aria-pressed="true"]{background:var(--invert-bg);color:var(--invert-fg)}
-.ai-tools{display:flex;flex-wrap:wrap;align-items:center;gap:12px}
+.ai-tools{display:flex;align-items:center;gap:12px}
 .ai-sort{display:inline-flex;border:1px solid var(--rule)}
 .ai-sort[hidden]{display:none}
 .seg[hidden]{display:none}
@@ -1098,7 +1098,6 @@ footer a{border-bottom:1px solid var(--rule)}
           <button id="ais-sale" aria-pressed="false" data-i18n="s_forsale"></button>
         </div>
         <input id="ai-q" class="ai-search" type="search" aria-label="Filter artists">
-        <a class="linkbtn" id="fs-az" href="for-sale/artists" data-i18n="fs_az"></a>
         <button class="linkbtn" id="ai-toggle" aria-expanded="false" aria-controls="ai-body"></button>
       </div>
     </div>
