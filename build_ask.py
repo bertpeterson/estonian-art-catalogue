@@ -130,6 +130,7 @@ T = {"en": dict(file="find", other="leia", other_l="Eesti keeles", site="Estonia
                 fyhint="Bookmark three works, here, on the mood wall or in the catalogue, or save an artist, and this puts first what looks like them and the artists you saved.",
                 fysee="See My List", fybit="based on My List",
                 sortby="Sort", sorts=dict(best="Selection", up="Price: low to high", down="Price: high to low", new="Recently listed"),
+                apage="All {n} works by {name} on one page, with prices →",
                 hash=""),
      "et": dict(file="leia", other="find", other_l="In English", site="Eesti Kunstikataloog",
                 h="Osta kunsti", title="Osta Eesti kunsti: müügil {n} teost koos hindadega", lede="Kunst sinu koju kataloogi galeriidest, praegu müügil. Iga teos viib seda müüva galerii lehele.",
@@ -154,6 +155,7 @@ T = {"en": dict(file="find", other="leia", other_l="Eesti keeles", site="Estonia
                 fyhint="Märgi järjehoidjaga kolm teost, siin, meeleolu seinal või kataloogis, või salvesta kunstnik, ja ette tulevad nendega sarnased ja sinu salvestatud kunstnikud.",
                 fysee="Vaata minu nimekirja", fybit="minu nimekirja põhjal",
                 sortby="Järjesta", sorts=dict(best="Valik", up="Hind: odavamad ees", down="Hind: kallimad ees", new="Hiljuti lisatud"),
+                apage="{name}: kõik {n} müügil olevat teost ühel lehel, koos hindadega →",
                 hash="lang=et&")}
 
 def data():
@@ -216,7 +218,7 @@ var D=null, P=null, msgs=[], shownKeys={}, busy=false, labels=JSON.parse(documen
 function stock(){ return P=P||fetch(src).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(d){
   var af=d.af=d.artists.map(function(a){return fold(a[0])});
   d.fame=d.artists.map(function(a){return Math.min(1,Math.log10(1+(a[2]||0))/3.3)});   // ~2,000 works in the museums: 1
-  d.byKey={};d.works.forEach(function(w,k){var m={},f=w[12];for(var i=0;i<f.length;i+=2)m[d.words[f[i]]]=f[i+1]/10;w.m=m;w.af=af[w[1]];w.i=k;d.byKey[w[11]]=w}); D=d; tally(); return d}).catch(function(e){P=null;throw e})}
+  d.byKey={};d.works.forEach(function(w,k){var m={},f=w[12];for(var i=0;i<f.length;i+=2)m[d.words[f[i]]]=f[i+1]/10;w.m=m;w.af=af[w[1]];w.i=k;d.byKey[w[11]]=w}); D=d; tally(); apage(); return d}).catch(function(e){P=null;throw e})}
 function el(tag,cls,text){var x=document.createElement(tag);if(cls)x.className=cls;if(text!=null)x.textContent=text;return x}
 function eur(n){return '€'+String(n).replace(/\B(?=(\d{3})+(?!\d))/g,' ')}
 function cm(d){return d?Math.round(d[0])+(d[1]!==d[0]?' × '+Math.round(d[1]):'')+' cm':''}
@@ -464,8 +466,13 @@ function sync(){
   chatset.hidden=!cs.firstChild;
   document.getElementById('ps').textContent=Q.size&&Q.size!=='any'?T.sizes[Q.size].replace(/^./,function(c){return c.toUpperCase()}):'';
   document.getElementById('pm').textContent=Q.media.map(function(m){return T.media[m]}).join(', ');
-  document.getElementById('pa').textContent=Q.artist;
+  document.getElementById('pa').textContent=Q.artist;apage();
   document.getElementById('pw').textContent=Q.words.map(function(w){return labels[w]}).join(', ');syncYou();tally();footing()}
+// the way to the chosen artist's own for-sale page (build_ask.py artist_sale_pages: the same count, the same slugs left out)
+function apage(){var p=document.getElementById('apage'),a=p.firstChild,i=-1,n=0,f=Q.artist&&fold(Q.artist);
+  if(D&&f){i=D.af.indexOf(f);if(i>=0)D.works.forEach(function(w){if(w[1]===i)n++})}
+  var ok=i>=0&&n>=T.apmin&&T.apskip.indexOf(D.artists[i][1])<0;p.hidden=!ok;
+  if(ok){a.href='/'+T.apdir+'/'+D.artists[i][1];a.textContent=T.apage.replace('{n}',n).replace('{name}',D.artists[i][0])}}
 // ---- the artist: a name typed, and chosen from those with work for sale (with how many) ----
 var ain=document.getElementById('artist'), alist=document.getElementById('artists'), aclr=document.getElementById('aclear'), act=-1;
 function names(s){var f=fold(s.trim());if(!D||f.length<2)return [];
@@ -604,6 +611,7 @@ CSS = BM.CSS + """
 .gname{flex-basis:100%;margin-top:8px;font:500 .62rem/1 var(--mono);letter-spacing:.13em;text-transform:uppercase;color:var(--grey)}
 .linkbtn{background:none;border:0;padding:6px 2px;font:500 .68rem/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--grey);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
 .linkbtn:hover{color:var(--ink)}
+.apage{margin:-6px 0 14px;font-size:.85rem;line-height:1.4}.apage a{color:var(--ink);text-underline-offset:3px}
 .filters .seg .btn{flex:1;padding:9px 4px;font-size:.66rem}
 .dual{position:relative;height:46px;margin:0 2px}
 .dual .tag{position:absolute;top:30px;left:0;white-space:nowrap;font:500 .7rem/1 var(--mono);color:var(--grey);font-variant-numeric:tabular-nums;pointer-events:none}.dual .tag.set{color:var(--ink)}
@@ -729,6 +737,7 @@ def panel(t, labels, M, names=()):
             f'<div class="chips scroll" id="akeys" role="group" aria-label="{e(t["names"])}">'
             + "".join(f'<button type="button" class="chip" data-a="{e(a)}" aria-pressed="false">{e(a)} <span class="n">{c}</span></button>' for a, c in names)
             + '</div></details>'
+            '<p class="apage" id="apage" hidden><a></a></p>'       # the chosen artist's own for-sale page, when there is one
             f'<details class="f-row fold"><summary class="f-name">{e(t["mood"])} <span class="picked" id="pw"></span></summary><div class="chips scroll" id="moods">{moods}</div></details>'
             f'<div class="f-row" id="chatset" hidden><div class="f-name">{e(t["fromchat"])}</div><div class="bits"></div></div>'
             f'<div class="f-foot"><button type="button" class="count" id="fcount"></button><button type="button" class="linkbtn" id="fclear">{e(t["clear"])}</button></div>'
@@ -739,7 +748,8 @@ def page(lang, ver, api, labels, M, n=0, tver="", names=()):
     me, other = f"{BASE}/{t['file']}", f"{BASE}/{t['other']}"
     tj = json.dumps({k: t[k] for k in ("more", "at", "noprice", "none", "thinking", "how", "like", "choosing", "failed", "robot", "record", "sizes", "shown", "hash",
                                        "media", "anyprice", "upto", "from_", "count", "count1", "show", "moremoods", "fewer", "clear", "artist", "titlew", "artistonly", "showthem", "daily",
-                                       "sl_add", "sl_remove", "fybtn", "fyhint", "fysee", "fybit", "sortby", "sorts")}, ensure_ascii=False).replace("</", "<\\/")
+                                       "sl_add", "sl_remove", "fybtn", "fyhint", "fysee", "fybit", "sortby", "sorts", "apage")}
+                    | {"apdir": SALE_DIR[lang], "apmin": ARTIST_MIN, "apskip": [x for s in SALE for x in (s[2], s[4])]}, ensure_ascii=False).replace("</", "<\\/")
     lj = json.dumps(labels, ensure_ascii=False).replace("</", "<\\/")
     ask = (api.rstrip("/") + "/ask") if api else ""
     ts = f' data-ts="{e(BM.TS)}"' if ask and BM.TS else ""       # the Worker's Turnstile site key
