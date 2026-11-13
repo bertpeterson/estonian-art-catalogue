@@ -26,8 +26,12 @@ API = re.match(r"https://[^/]+", _api).group(0) if re.match(r"https://[^/]+", _a
 TS = " https://challenges.cloudflare.com" if API and json.load(open("data/mood_api.json", encoding="utf-8")).get("turnstile") else ""
 POLICY = ("default-src 'self'; script-src 'self' https://gc.zgo.at{hashes}" + TS + "; " + ("frame-src" + TS + "; " if TS else "") +
           "style-src 'self' 'unsafe-inline'; font-src 'self'; "
-          "img-src https: data:; connect-src 'self' https://museaal.goatcounter.com" + (" " + API if API else "") + "; "
+          "img-src 'self' https: data:; connect-src 'self' https://museaal.goatcounter.com" + (" " + API if API else "") + "; "
           "base-uri 'none'; form-action 'none'; object-src 'none'; upgrade-insecure-requests")
+# the site's mark (static/favicon.ico, icon-192.png, apple-touch-icon.png), named in every page beside the policy:
+# a browser tab finds /favicon.ico unasked, but Google's results show an icon only when the home page links one
+ICON = ('<link rel="icon" href="/favicon.ico" sizes="48x48"><link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">'
+        '<link rel="apple-touch-icon" href="/apple-touch-icon.png">')
 INLINE = re.compile(r"<script(?![^>]*\bsrc=)([^>]*)>(.*?)</script>", re.S)
 
 DATA = re.compile(r'\btype="application/(?:ld\+)?json"')   # a data block: never run, so never hashed
@@ -57,7 +61,7 @@ for d, _, files in os.walk(ROOT):
         tag = f'<meta http-equiv="Content-Security-Policy" content="{policy_for(html, more, unmarked)}">'
         if unmarked: bad.append((os.path.relpath(p, ROOT), unmarked)); continue
         html = html.replace(MARKED, "")
-        html2, k = re.subn(r'(<meta charset="utf-8">)', r"\1" + tag.replace("\\", "\\\\"), html, count=1)
+        html2, k = re.subn(r'(<meta charset="utf-8">)', r"\1" + (tag + ('' if 'rel="icon"' in html else ICON)).replace("\\", "\\\\"), html, count=1)
         if not k: print("  no charset tag, policy not written:", p); continue
         open(p, "w", encoding="utf-8").write(html2); n += 1
 print(f"CSP: policy written into {n:,} pages")
