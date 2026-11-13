@@ -186,9 +186,11 @@ h1 a:hover{color:var(--grey-6)}
 .fs-all{display:table;margin-top:8px}   /* one link a row */
 .fs-w{display:block;text-decoration:none;color:inherit;min-width:0}
 .fs-w img{display:block;width:100%;aspect-ratio:1;object-fit:cover;background:var(--field)}
-.fs-cap{display:block;padding-top:5px;font-size:.66rem;line-height:1.3;color:var(--grey-6);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fs-cap{display:grid;grid-template-columns:minmax(0,auto) auto;justify-content:start;align-items:baseline;padding-top:5px;font-size:.66rem;line-height:1.3;color:var(--grey-6);white-space:nowrap;overflow:hidden}
+.fs-cap i{grid-column:1/-1}
+.fs-cap span{min-width:0;overflow:hidden;text-overflow:ellipsis}   /* the name gives way, never the price */
 .fs-cap i{display:block;font-family:var(--serif-text);font-size:.8rem;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.fs-cap b{font-family:var(--mono);font-weight:500;color:var(--ink);font-size:.68rem;margin-left:3px}
+.fs-cap b{font-family:var(--mono);font-weight:500;color:var(--ink);font-size:.68rem;margin-left:5px;word-spacing:-.4em}
 .fs-w:hover .fs-cap i{text-decoration:underline}
 /* the row scrolls sideways: six cards in view, sixty baked in and the rest added as it nears its end; on a pointer screen, arrows at its ends (shown
    while there is more that way) and no scrollbar; on a phone, swiped, a card and a bit at a time */
@@ -957,7 +959,7 @@ footer a{border-bottom:1px solid var(--rule)}
     var pic=function(src){var i=el("img");i.src=src;i.alt="";i.decoding="async";i.loading="lazy";i.referrerPolicy="no-referrer-when-downgrade";return i};
     var card=function(x){var a=el("a","fs-w");a.href=x[0];a.target="_blank";a.rel="noopener";
       var i=pic(x[1]);i.alt=x[2]+", "+x[3];a.appendChild(i);
-      var c=el("span","fs-cap");c.appendChild(el("i","",x[2]));c.appendChild(document.createTextNode(x[3]));if(x[4])c.appendChild(el("b","","€"+String(x[4]).replace(/\B(?=(\d{3})+(?!\d))/g," ")));a.appendChild(c);
+      var c=el("span","fs-cap");c.appendChild(el("i","",x[2]));c.appendChild(el("span","",x[3]));if(x[4])c.appendChild(el("b","","€"+String(x[4]).replace(/\B(?=(\d{3})+(?!\d))/g,"\u00a0")));a.appendChild(c);
       var p=el("span","fs-pop"),q=pic(x[1]);p.appendChild(q);a.appendChild(p);
       q.addEventListener("load",function(){if(q.naturalHeight)q.style.setProperty("--r",q.naturalWidth/q.naturalHeight)});return a};
     // with three works or an artist on My List, the row leads with two of For you's best (Buy Art keeps its twelve in

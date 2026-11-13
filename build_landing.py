@@ -219,14 +219,14 @@ def _row(sixes=6):
         p, o = ps[4 * k:4 * k + 4], os_[2 * k:2 * k + 2]
         out += [p[0], p[1], o[0], p[2], o[1], p[3]] if len(p) == 4 and len(o) == 2 else p + o
     return out
-eurf = lambda n: "€" + f"{n:,}".replace(",", " ")
+eurf = lambda n: "€" + f"{n:,}".replace(",", "\u00a0")
 # the pictures wait until the row is scrolled near them: the page deals its own first six and makes those eager, so
 # none baked eager is fetched for nothing
 _first = _row(10)
 _lazy = lambda i: ' loading="lazy"'
 fs_works = "".join(
     f'<a class="fs-w" href="{e(w["url"])}"{" data-p" if _painting(w) else ""} target="_blank" rel="noopener"><img src="{e(imsrc(w["im"]))}" alt="{e(w.get("t") or "")}, {e(A[w["a"]]["n"])}" decoding="async"{_lazy(i)} referrerpolicy="no-referrer-when-downgrade">'
-    f'<span class="fs-cap"><i>{e(w.get("t") or "")}</i>{e(A[w["a"]]["n"])}<b>{eurf(w["pr"])}</b></span>'
+    f'<span class="fs-cap"><i>{e(w.get("t") or "")}</i><span>{e(A[w["a"]]["n"])}</span><b>{eurf(w["pr"])}</b></span>'
     # the whole picture, uncropped, while the pointer is on the card (the same file, so no second download). Both are the
     # gallery's own 768-pixel copy where it keeps one (img_small.py): the uploads ran to 1 MB, and on a phone six of them
     # held back the catalogue's index behind them
