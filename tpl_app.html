@@ -2845,6 +2845,17 @@
     setTimeout(() => { btn.textContent = T("copy"); }, 2200);
   });
 
+  // A sale on today, in the masthead: the houses publish the day, not the hour, so the mark says "today" and
+  // not "live". The day is Tallinn's, whatever the visitor's clock; DATA.sales is [house, first day, last day].
+  function liveNow(){
+    const el = $("live-now"); if (!el) return;
+    let today = ""; try { today = new Date().toLocaleDateString("sv-SE", {timeZone: "Europe/Tallinn"}); } catch(e) {}
+    const on = [...new Set((DATA.sales || []).filter(s => s[1] <= today && today <= s[2]).map(s => s[0]))];
+    el.hidden = !on.length; if (!on.length) return;
+    el.href = LANG === "en" ? "upcoming" : "tulemas";
+    el.innerHTML = `<i aria-hidden="true"></i>${esc(T("live_now"))} <span>${esc(on.length === 1 ? on[0] : T("live_n", {n: on.length}))}</span>`;
+  }
+
   function applyLang(){
     document.documentElement.lang = LANG;
     document.title = T("doctitle");
@@ -2852,6 +2863,7 @@
     document.querySelectorAll('a[data-i18n="statslink"]').forEach(a => { a.href = LANG === "en" ? "stats" : "stats-et"; });   // the figures page exists in both languages
     $("findlink").href = LANG === "en" ? "find" : "leia";
     $("fs-up").href = LANG === "en" ? "upcoming" : "tulemas";
+    liveNow();
     const fl = $("fs-lede");
     if (fl && fl.dataset.n) fl.textContent = T("fs_lede", {n: (+fl.dataset.n).toLocaleString(LANG === "en" ? "en-GB" : "et-EE"), g: fl.dataset.g});
     document.querySelectorAll("[data-i18n-html]").forEach(el => { el.innerHTML = I18N[LANG === "en" ? "HTML_EN" : "HTML_ET"][el.dataset.i18nHtml] || ""; });

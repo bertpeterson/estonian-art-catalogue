@@ -176,7 +176,22 @@ def columns(rows):
         if len(at) > 0.4 * len(rows): cols[f] = [r.get(f) for r in rows]
         else: cols[f] = {"i": [b - a for a, b in zip([0] + at, at)], "v": [rows[i][f] for i in at]}
     return cols
-json.dump({"meta": meta, "artists": A_light, "vocab": d.get("vocab", {}), "n": len(index), "cols": columns(index), "upcoming": d.get("upcoming", [])},
+# The sales with a known day, first and last, for the masthead's "Auction today" (tpl_app.html, liveNow): the
+# page asks the visitor's clock which of them is on, so the mark is right on a day the site was not rebuilt.
+# A sale over several days has its last day in data/sales_by_hand.json, like the coming-sales page.
+def sale_days():
+    import os
+    hand = json.load(open("data/sales_by_hand.json", encoding="utf-8")) if os.path.exists("data/sales_by_hand.json") else []
+    days = {}
+    for u in d.get("upcoming", []):
+        if len(u.get("d") or "") == 10: days.setdefault((u["h"], u["d"]), u["d"])
+    for x in hand:
+        if len(x.get("date") or "") != 10: continue
+        end = x.get("end") or x["date"]
+        for k in [k for k in days if k[0] == x["house"] and x["date"] <= k[1] <= end]: del days[k]   # its lots, dated by the first day
+        days[(x["house"], x["date"])] = end
+    return sorted([h, a, b] for (h, a), b in days.items())
+json.dump({"meta": meta, "artists": A_light, "vocab": d.get("vocab", {}), "n": len(index), "cols": columns(index), "upcoming": d.get("upcoming", []), "sales": sale_days()},
           open(f"{OUT}/data/index.json", "w", encoding="utf-8"),
           ensure_ascii=False, separators=(",", ":"))
 json.dump(bios, open(f"{OUT}/data/bios.json", "w", encoding="utf-8"),

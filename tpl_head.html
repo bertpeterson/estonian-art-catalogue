@@ -136,6 +136,17 @@ h1 a:hover{color:var(--grey-6)}
 .mast-tag{margin:10px 0 0;font-family:var(--serif-text);font-size:1.08rem;line-height:1.4;color:var(--ink-soft);max-width:50ch}
 .mast-sub{font-family:var(--mono);font-size:var(--fs-sm);letter-spacing:var(--ls-label);text-transform:uppercase;color:var(--grey-6);margin:16px 0 0}
 /* equal columns, each as wide as the widest figure or label, so the three start at even steps */
+/* the right of the masthead: on the day of a sale, a door to it above the figures */
+.mast-right{display:flex;flex-direction:column;align-items:flex-end;gap:26px}
+.live-now{display:inline-flex;align-items:center;gap:9px;border:1px solid var(--ink);padding:6px 12px;text-decoration:none;
+  font-family:var(--mono);font-size:var(--fs-xs);letter-spacing:var(--ls-label);text-transform:uppercase;color:var(--ink)}
+.live-now[hidden]{display:none}
+.live-now:hover{background:var(--invert-bg);color:var(--invert-fg)}
+.live-now i{width:7px;height:7px;border-radius:50%;background:currentColor;flex:none;animation:live-pulse 1.8s ease-in-out infinite}
+.live-now span{color:var(--grey-6)}
+.live-now:hover span{color:inherit}
+@keyframes live-pulse{50%{opacity:.25}}
+@media (prefers-reduced-motion:reduce){.live-now i{animation:none}}
 .mast-stats{display:inline-grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:34px;font-family:var(--mono);font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:var(--grey-6)}
 .stat-btn{background:none;border:0;padding:0;
   font:inherit;letter-spacing:inherit;text-transform:inherit;color:inherit;text-align:left;cursor:pointer}
@@ -735,6 +746,7 @@ footer a{border-bottom:1px solid var(--rule)}
 @media (max-width:860px){
   .wrap{padding:0 18px}
   .mast-grid{grid-template-columns:1fr}
+  .mast-right{align-items:flex-start;gap:16px}
   .group{grid-template-columns:1fr;gap:16px}
   .mosaic{--moh:260px;--mohh:44px;--mow:42px;gap:2px}
   .mo-h b{font-size:.8rem}
@@ -894,6 +906,9 @@ footer a{border-bottom:1px solid var(--rule)}
         <!-- shown at once, not when the page's script gets to it: the strip kept moving under the reader's eye -->
         <script>try{if((JSON.parse(localStorage.getItem("museaal.account"))||{}).s){document.getElementById("acc-top").hidden=true;document.getElementById("acc-link").hidden=false}}catch(e){}</script>
       </div>
+      <div class="mast-right">
+        <!-- a sale on today (tpl_app.html, liveNow): the one day the coming sales are news. Empty on every other day -->
+        <a class="live-now" id="live-now" href="upcoming" hidden></a>
       <div class="mast-stats">
         <!-- opens the works per decade, which no longer stands open on the home page -->
         <button class="stat-btn" id="stat-wbtn" aria-controls="histo"><b id="stat-w">0</b><span data-i18n="works"></span></button>
@@ -905,6 +920,7 @@ footer a{border-bottom:1px solid var(--rule)}
         <div id="stat-gwrap" hidden><b id="stat-g">0</b><span data-i18n="galleries"></span></div>
         <!-- and the other thing a visitor can act on: what the auction record says -->
         <button class="stat-btn" id="stat-auc" hidden><b id="stat-au">0</b><span data-i18n="auctioned"></span></button>
+      </div>
       </div>
     </div>
     <div class="listbar accpanel" id="accpanel" hidden></div>
