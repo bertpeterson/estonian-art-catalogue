@@ -121,6 +121,7 @@ for slug in slugs:
             yl = clean(d.get("item_year") or "")
             y4 = re.search(r"(1[6-9]\d\d|20[0-2]\d)", yl)
             dims = clean(d.get("item_dimensions") or d.get("item_size") or "")
+            if re.search(r"\d\s*px\b|\bmin\b", dims): dims = ""                    # a video's frame, "3200 x 1800 px", is not centimetres
             dm2 = re.search(r"\d+(?:[.,]\d+)?\s*[x×]\s*\d+(?:[.,]\d+)?(?:\s*[x×]\s*\d+(?:[.,]\d+)?)?", dims)
             dims = (re.sub(r"\s*[x×]\s*", " x ", dm2.group(0)).replace(",", ".") + " cm") if dm2 else ""
             life = clean(it.get("item_author_datum") or "")
