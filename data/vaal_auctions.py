@@ -71,10 +71,16 @@ MONTHS = "jaanuar veebruar märts aprill mai juuni juuli august septemb oktoob n
 def page_date(page, slug):
     """A one-off sale's days carry no date ("Teosed", "Raamatud"); its page says it in words,
     "30. oktoobril algusega kell 18". The year is the slug's, else the coming one."""
-    m = re.search(r"(\d{1,2})\.\s*(" + "|".join(MONTHS) + r")", clean(page).lower())
-    if not m: return None
-    md = f"{MONTHS.index(m.group(2)) + 1:02d}-{int(m.group(1)):02d}"
-    return f"{slug[:4] if slug[:4].isdigit() else today[:4]}-{md}"
+    ds = page_dates(page, slug)
+    return ds[0] if ds else None
+def page_dates(page, slug):
+    """Every date the page names, in order, each once: a seasonal sale whose days come undated
+    ("1. päev", "2. päev": autumn 2026) says them in words, "reedel, 20. novembril ... ja laupäeval, 21. novembril"."""
+    out = []
+    for m in re.finditer(r"(\d{1,2})\.\s*(" + "|".join(MONTHS) + r")", clean(page).lower()):
+        d = f"{slug[:4] if slug[:4].isdigit() else today[:4]}-{MONTHS.index(m.group(2)) + 1:02d}-{int(m.group(1)):02d}"
+        if d not in out: out.append(d)
+    return out
 
 recs, n_open, n_unparsed = [], 0, 0
 coming = []
@@ -91,14 +97,17 @@ for slug in slugs:
     # the books of a one-off sale ("Raamatud": one-of-a-kind copies with an artist's cover) are not art
     days = [d for d in a.get("days") or [] if not re.match(r"raamat", d.get("auction_day_description") or "", re.I)]
     on_page = page_date(page, slug) or KNOWN.get(clean(a.get("auction_name") or slug))
-    dates = [x for x in (day_date(d, slug) or on_page for d in days) if x]
+    pds = page_dates(page, slug)
+    # an undated day takes the page's date of the same place when the page names one per day, else the sale's one date
+    for i, d in enumerate(days): d["_date"] = day_date(d, slug) or (pds[i] if len(pds) == len(days) else on_page)
+    dates = [d["_date"] for d in days if d["_date"]]
     ended = a.get("auction_status") == "ended" or (dates and max(dates) < today and any(i.get("item_price_final") for d in days for i in d.get("item", [])))
     ahead = not ended and (not dates or max(dates) >= today)       # a sale still to come (or running)
     if not ended and not ahead: n_open += 1; continue                # past its days but no results yet: wait
     sale = clean(a.get("auction_name") or slug)
     n = 0
     for day in days or [{"auction_day_description": "", "item": a.get("item", [])}]:
-        when = day_date(day, slug) or on_page or slug[:4]
+        when = day.get("_date") or day_date(day, slug) or on_page or slug[:4]
         for it in day.get("item", []):
             artist = clean(it.get("item_author"))
             lot = re.match(r"^(\d+)\.", clean(it.get("item_name")))
