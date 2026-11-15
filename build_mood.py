@@ -88,7 +88,7 @@ STEMS = {
  "simple": "simple plain minimal lihtne", "ornate": "ornate rikkali", "rustic": "rustic peasant talupoja maaläh", "modern": "modern modernis",
 }
 
-T = {"en": dict(file="mood", other="meeleolu", other_l="Eesti keeles", site="Estonian Art Catalogue",
+T = {"en": dict(file="mood", other="meeleolu", other_l="Eesti keeles", site="Museaal",
                 h="Art by mood", lede="Pick up to three words, or describe in your own words what you would like to see. The wall shows the museum works whose pictures answer to it best. An image model has looked at every picture itself, not at the records, so it finds a mood the way you would: by looking.",
                 describe="Describe what you would like to see", ph="a quiet morning after bad news", find="Find",
                 groups=dict(feeling="Feeling", light="Light", colour="Colour", weather="Season and weather", subject="Subject"), readas="Read as", reading="Reading…",
@@ -98,7 +98,7 @@ T = {"en": dict(file="mood", other="meeleolu", other_l="Eesti keeles", site="Est
                 note="The moods are read by CLIP, an image model, from the museums' own photographs of public-domain works: a guide to looking, not a judgement of the work. A typed description is read by Claude, which picks the words; the sentence is not stored. Each picture opens its record in the catalogue.",
                 sl_add="Add to My List", sl_remove="Remove from My List",
                 hash=""),
-     "et": dict(file="meeleolu", other="mood", other_l="In English", site="Eesti Kunstikataloog",
+     "et": dict(file="meeleolu", other="mood", other_l="In English", site="Museaal",
                 h="Kunst meeleolu järgi", lede="Vali kuni kolm sõna või kirjelda oma sõnadega, mida tahaksid näha. Seinal on muuseumiteosed, mille pilt sellele kõige paremini vastab. Pildimudel on iga pilti ise vaadanud, mitte kirjet, nii et ta leiab meeleolu nagu sinagi: vaadates.",
                 describe="Kirjelda, mida tahaksid näha", ph="üksildane sügisõhtu mere ääres", find="Otsi",
                 groups=dict(feeling="Tunne", light="Valgus", colour="Värv", weather="Aastaaeg ja ilm", subject="Aine"), readas="Loetud kui", reading="Loen…",

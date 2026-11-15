@@ -22,8 +22,8 @@ KEYS = ["acc_h", "acc_who", "acc_signout", "acc_news_h", "acc_news_on", "acc_new
         "acc_signin_lede", "acc_email", "acc_send", "acc_news", "acc_off", "acc_sent", "acc_busy", "acc_bad", "acc_robot",
         "acc_failed", "acc_expired", "acc_gone", "acc_out", "acc_deleted", "acc_unsub", "acc_unsub_bad", "privacy_link",
         "acc_alerts_h", "acc_alerts", "acc_unsuba"]
-PAGE = {"en": dict(file="account", other="konto", privacy="privacy", other_l="Eesti keeles", site="Estonian Art Catalogue", home="./"),
-        "et": dict(file="konto", other="account", privacy="privaatsus", other_l="In English", site="Eesti Kunstikataloog", home="./#lang=et")}
+PAGE = {"en": dict(file="account", other="konto", privacy="privacy", other_l="Eesti keeles", site="Museaal", home="./"),
+        "et": dict(file="konto", other="account", privacy="privaatsus", other_l="In English", site="Museaal", home="./#lang=et")}
 
 CSS = (":root{--paper:#141518;--field:#1E2023;--ink:#F1F2F4;--ink-soft:#C7CACE;--grey:#8B9098;--rule:#34373D;--rule-soft:#2A2D32;--warn:#E5484D;"
        "--serif:'Newsreader','Newsreader fb','Newsreader fb2',Georgia,serif;--sans:'Archivo','Archivo fb',Arial,sans-serif;--mono:'IBM Plex Mono','IBM Plex Mono fb','IBM Plex Mono fb2',ui-monospace,monospace}"

@@ -22,14 +22,14 @@ def days(a, b, lang):
     """the sale's first to last day, as the coming sales write it; a sale known only by its year (press records) by the year"""
     return a if len(a) == 4 else U.days(a, b if len(b) == len(a) else None, lang)
 
-T = {"en": dict(file="past-sales", art="a", other="moodunud-oksjonid", h="Past sales", site="Estonian Art Catalogue",
+T = {"en": dict(file="past-sales", art="a", other="moodunud-oksjonid", h="Past sales", site="Museaal",
                 lede="Every finished sale of the Estonian auction houses in the catalogue, newest first: how many lots, how many sold and the hammer total, and for each sale its lots with the hammer prices as the house published them.",
                 lots="lots", lot1="lot", sold="{s} sold", total="{t} hammer total", nores="results not published", up="Coming up at auction",
                 c_art="Artist", c_work="Work", c_res="Result", start="starting price {p}", unsold="unsold", soldnp="sold, price not published",
                 after="sold after the sale", nr="result not published", lot="Lot", sort="Sort", az="A–Z", price="Price",
                 back="All past sales", other_l="Eesti keeles", note="A record, not a valuation. Hammer prices as the houses published them, without the buyer's premium. Refreshed weekly.",
                 sale_d="{s}, {h}, {d}: {n} lots by Estonian artists with the hammer prices as the house published them."),
-     "et": dict(file="moodunud-oksjonid", art="k", other="past-sales", h="Möödunud oksjonid", site="Eesti Kunstikataloog",
+     "et": dict(file="moodunud-oksjonid", art="k", other="past-sales", h="Möödunud oksjonid", site="Museaal",
                 lede="Kõik kataloogi Eesti oksjonimajade lõppenud oksjonid, uuemad eespool: mitu partiid, mitu müüdi ja haamrihindade summa, ning iga oksjoni partiid haamrihindadega nii, nagu maja need avaldas.",
                 lots="partiid", lot1="partii", sold="{s} müüdud", total="haamrihinnad kokku {t}", nores="tulemused avaldamata", up="Tulemas oksjonil",
                 c_art="Kunstnik", c_work="Teos", c_res="Tulemus", start="alghind {p}", unsold="müümata", soldnp="müüdud, hind avaldamata",

@@ -107,7 +107,7 @@ def media_of(kind, tech):
     if kind == "paper" and not m: m |= BIT["drawing"]          # on paper, and neither printed nor painted
     return m
 
-T = {"en": dict(file="find", other="leia", other_l="Eesti keeles", site="Estonian Art Catalogue",
+T = {"en": dict(file="find", other="leia", other_l="Eesti keeles", site="Museaal",
                 h="Buy Art", title="Buy Estonian art: {n} works for sale, with prices", lede="Art for your home from the catalogue's galleries, for sale now. Each work links to the gallery that sells it.",
                 desc="Paintings, prints and sculpture by Estonian artists for sale: {n} works from Estonian galleries, each with the gallery's asking price. Filter by price, medium, size, mood and artist; every work links to the gallery that sells it.",
                 sh="Estonian art for sale", sp="Buy paintings, prints, watercolours and sculpture by Estonian artists from the galleries that sell them: {n} works, each with its asking price and a link to the gallery. museaal.ee is a catalogue, not a shop; the sale is the gallery's.",
@@ -132,7 +132,7 @@ T = {"en": dict(file="find", other="leia", other_l="Eesti keeles", site="Estonia
                 sortby="Sort", sorts=dict(best="Selection", up="Price: low to high", down="Price: high to low", new="Recently listed"),
                 apage="All {n} works by {name} on one page, with prices →",
                 hash=""),
-     "et": dict(file="leia", other="find", other_l="In English", site="Eesti Kunstikataloog",
+     "et": dict(file="leia", other="find", other_l="In English", site="Museaal",
                 h="Osta kunsti", title="Osta Eesti kunsti: müügil {n} teost koos hindadega", lede="Kunst sinu koju kataloogi galeriidest, praegu müügil. Iga teos viib seda müüva galerii lehele.",
                 desc="Eesti kunstnike maalid, graafika ja skulptuurid müügil: {n} teost Eesti galeriidest, igaüks galerii hinnaga. Vali hinna, tehnika, suuruse, meeleolu ja kunstniku järgi; iga teos viib seda müüva galerii lehele.",
                 sh="Eesti kunsti müük", sp="Osta Eesti kunstnike maale, graafikat, akvarelle ja skulptuure otse neid müüvatelt galeriidelt: {n} teost, igaüks hinnaga ja lingiga galeriile. museaal.ee on kataloog, mitte pood; teose müüb galerii.",

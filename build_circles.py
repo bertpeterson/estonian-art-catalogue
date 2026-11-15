@@ -26,14 +26,14 @@ I = {a["n"]: i for i, a in enumerate(A) if a.get("c", 0) > 0}
 by_artist = collections.defaultdict(list)
 for w in W: by_artist[w["a"]].append(w)
 
-L = {"en": dict(dir="circles", art="a", site="Estonian Art Catalogue", site_link="", other="Eesti keeles", h="Circles and lineages",
+L = {"en": dict(dir="circles", art="a", site="Museaal", site_link="", other="Eesti keeles", h="Circles and lineages",
                 lede="The schools, studios and groups Estonian artists learnt and worked in, and who taught whom — from Wikidata and the artists' biographies.",
                 net="The network", net_h="Who taught whom", net_lede="{n} artists joined by {k} teacher links. Each artist stands at their year of birth, so a line runs from a teacher to a pupil born later; the colour is the circle. Point at an artist to light up their teachers and pupils, click to open their page.",
                 net_t="Who taught whom in Estonian art – {n} artists, {k} links · museaal.ee", top="Teachers with the most pupils", none="no circle",
                 members="Members in the catalogue", teach="Teachers and pupils", born="born", artists="artists", links="teacher links",
                 t="{c} – {n} artists in the Estonian Art Catalogue · museaal.ee",
                 d="{c}: {d} {n} artists in the catalogue, with their works, pictures and who taught whom."),
-     "et": dict(dir="ringid", art="k", site="Eesti Kunstikataloog", site_link="#lang=et", other="In English", h="Ringid ja koolkonnad",
+     "et": dict(dir="ringid", art="k", site="Museaal", site_link="#lang=et", other="In English", h="Ringid ja koolkonnad",
                 lede="Koolid, ateljeed ja rühmitused, kus Eesti kunstnikud õppisid ja töötasid, ning kes keda õpetas — Wikidata ja kunstnike elulugude järgi.",
                 net="Võrgustik", net_h="Kes keda õpetas", net_lede="{n} kunstnikku, keda ühendab {k} õpetaja-õpilase seost. Iga kunstnik on oma sünniaasta kohal, nii et joon viib õpetajalt hiljem sündinud õpilaseni; värv näitab ringi. Osuta kunstnikule, et näha tema õpetajaid ja õpilasi, klõpsa, et avada tema leht.",
                 net_t="Kes keda õpetas Eesti kunstis – {n} kunstnikku, {k} seost · museaal.ee", top="Kõige rohkemate õpilastega õpetajad", none="ringita",

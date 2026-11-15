@@ -65,7 +65,7 @@ I18N = json.load(open("i18n.json", encoding="utf-8"))
 MED_ET = I18N["MEDIUM_ET"]
 L = {
  "en": dict(save_a="Save artist", saved_a="Artist saved", save_t="On My List, their best works open the front page's artwall and their lots are marked in the coming sales",
-            dir="a", site="Estonian Art Catalogue", kind=KIND, works="works", artists="Artists A–Z", art_nav="Artists",
+            dir="a", site="Museaal", kind=KIND, works="works", artists="Artists A–Z", art_nav="Artists",
             year="Year", title="Title", tech="Technique", dims="Dimensions", held="Held by", browse="Browse {n} works in the catalogue →",
             sold="sold", soldlp="sold · listed at €{p}", gone="no longer listed", soldp="Sold €{p}", soldnp="Sold", unsold="Unsold", nores="Result not published", nr=" · {k} offered, result not published",
             some="Showing {k} of {n} records, from every period — <a href=\"{u}\">see all in the catalogue</a>.",
@@ -84,7 +84,7 @@ L = {
             artist="artist", work1="work", t_sale=", {k} for sale", d_n="{name}{dates}: {n} {w} in Estonian public collections{gal}{span}.",
             d_sale="{k} for sale now{r}.", d_key="Works include {t}.", d_med="{media} at {holders}.", d_and=" and ", gal=" and galleries"),
  "et": dict(save_a="Salvesta kunstnik", saved_a="Kunstnik salvestatud", save_t="Sinu nimekirjas avavad tema parimad teosed avalehe kunstiseina ja tema partiid on tulevatel oksjonitel märgitud",
-            dir="k", site="Eesti Kunstikataloog", kind={"school": "õppinud:", "movement": "suund:", "member": "liige:"}, works="teost", artists="Kunstnikud A–Ü", art_nav="Kunstnikud",
+            dir="k", site="Museaal", kind={"school": "õppinud:", "movement": "suund:", "member": "liige:"}, works="teost", artists="Kunstnikud A–Ü", art_nav="Kunstnikud",
             year="Aasta", title="Pealkiri", tech="Tehnika", dims="Mõõdud", held="Hoidja", browse="Sirvi {n} teost kataloogis →",
             sold="müüdud", soldlp="müüdud · hinnaga €{p}", gone="enam ei pakuta", soldp="Müüdud €{p}", soldnp="Müüdud", unsold="Müümata", nores="Tulemus avaldamata", nr=" · {k} pakutud, tulemus avaldamata",
             some="{k} kirjet {n}-st, kõigist perioodidest — <a href=\"{u}\">vaata kõiki kataloogis</a>.",
@@ -617,7 +617,7 @@ if os.path.exists(_retired):
             f"<link rel=\"canonical\" href=\"{BASE}/{D}/{nsl}\">"
             f"<meta http-equiv=\"refresh\" content=\"0; url={BASE}/{D}/{nsl}\">"
             f"<meta name=\"robots\" content=\"noindex\"><style>{CSS}</style></head><body>"
-            f"<nav><a href=\"{BASE}/\">Estonian Art Catalogue</a> › {e(old)}</nav>"
+            f"<nav><a href=\"{BASE}/\">Museaal</a> › {e(old)}</nav>"
             f"<h1>{e(old)}</h1><p class=\"m\">This spelling has been merged. The artist is catalogued as "
             f"<a href=\"{BASE}/{D}/{nsl}\">{e(new)}</a> — taking you there.</p></body></html>")
         stubs += 1
@@ -631,7 +631,7 @@ open("site/404.html", "w", encoding="utf-8").write(
     f"<title>Not found — Estonian Art Catalogue</title><meta name=\"robots\" content=\"noindex\">"
     f"<style>{CSS}form{{display:flex;gap:8px;max-width:520px;margin:18px 0}}"
     f"input{{flex:1;font:inherit;padding:8px 10px;border:1px solid #bbb}}button{{font:inherit;padding:8px 14px}}</style>{GC}</head><body>"
-    f"<nav><a href=\"{BASE}/\">Estonian Art Catalogue</a> › Not found</nav>"
+    f"<nav><a href=\"{BASE}/\">Museaal</a> › Not found</nav>"
     f"<h1>There is no page here</h1>"
     f"<p class=\"m\" id=\"why\">The address may be misspelt, or the page has moved.</p>"
     f"<form id=\"f\"><input id=\"q\" placeholder=\"Search the catalogue\" aria-label=\"Search\"><button>Search</button></form>"

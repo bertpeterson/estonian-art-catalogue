@@ -120,7 +120,7 @@ CSS = ("body{margin:0;padding:28px;font:15px/1.55 -apple-system,BlinkMacSystemFo
        "details.emb{margin:18px 0 6px;font-size:.85rem}details.emb summary{cursor:pointer;color:#8b9098}details.emb textarea{width:100%;box-sizing:border-box;font:12px/1.4 ui-monospace,Menlo,monospace;padding:8px;border:1px solid #34373D;background:#1A1C1F;color:#c7cace}"
        ":root[data-theme=light] details.emb textarea{border-color:#ccc;background:#f7f7f7;color:#333}")
 
-L = {"en": dict(site="Estonian Art Catalogue", dec="decades", med="media", mus="museums", sub="subjects", art="a",
+L = {"en": dict(site="Museaal", dec="decades", med="media", mus="museums", sub="subjects", art="a",
                 dec_h="Estonian art by decade", med_h="Estonian art by medium", mus_h="The collections", sub_h="Estonian art by subject",
                 works="works", artists="artists", of="of", browse="Browse in the catalogue →", top_art="Artists most represented", pics="Pictures",
                 by_dec="By decade", by_med="By medium", by_mus="Where the works are", prev="←", next="→", other="Eesti keeles",
@@ -130,7 +130,7 @@ L = {"en": dict(site="Estonian Art Catalogue", dec="decades", med="media", mus="
                 mus_t="{m} – {n} works by {a} artists in the catalogue · museaal.ee", mus_d="The art collection of {m}: {n} works by {a} artists as catalogued in MuIS and the EKM Digital Collection, {span} — {media}. Artists, pictures, decades.",
                 sub_t="{s} in Estonian art – {n} works by {a} artists · museaal.ee", sub_d="{n} works with {sl} in the title, by {a} Estonian artists, {span} — {media}. Who painted it, when, and where the works are.",
                 site_link="", hash="", embed_h="Embed on your page", embed_t="A strip of pictures, the count and a link back. Paste both lines: the second is the link that tells search engines where the pictures live."),
-     "et": dict(site="Eesti Kunstikataloog", dec="kumnendid", med="liigid", mus="muuseumid", sub="ained", art="k",
+     "et": dict(site="Museaal", dec="kumnendid", med="liigid", mus="muuseumid", sub="ained", art="k",
                 dec_h="Eesti kunst kümnendite kaupa", med_h="Eesti kunst liigi kaupa", mus_h="Kogud", sub_h="Eesti kunst aine kaupa",
                 works="teost", artists="kunstnikku", of="—", browse="Sirvi kataloogis →", top_art="Enim esindatud kunstnikud", pics="Pildid",
                 by_dec="Kümnendi kaupa", by_med="Liigi kaupa", by_mus="Kus teosed on", prev="←", next="→", other="In English",

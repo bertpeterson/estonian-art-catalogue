@@ -27,7 +27,7 @@ B = BA.BIT
 CATS = [("photo", B["photo"]), ("sculpture", B["sculpture"]), ("print", B["print"]),
         ("paint", B["oil"] | B["acrylic"] | B["painting"] | B["mixed"]), ("paper", B["watercolour"] | B["drawing"])]
 
-T = {"en": dict(dir="prices", art="a", sale="for-sale", site="Estonian Art Catalogue", other_l="Eesti keeles", past="Past sales",
+T = {"en": dict(dir="prices", art="a", sale="for-sale", site="Museaal", other_l="Eesti keeles", past="Past sales",
                 title="{name} prices – {n} auction results, {y}", h="{name}: prices at auction",
                 lede="{n} lots by {name}{dates} at Estonian auction houses, {y}: {s} sold ({pct}%).",
                 mid=" Half of the hammer prices were between {lo} and {hi}", rng=" Hammer prices {lo}–{hi}", one=" One hammer price, {lo}",
@@ -38,7 +38,7 @@ T = {"en": dict(dir="prices", art="a", sale="for-sale", site="Estonian Art Catal
                 now="For sale now: {n} works at galleries{r} →", now1="For sale now: 1 work at a gallery{r} →", ask=", asking {r}",
                 page="{name}: all works, museums, biography", link="All auction results and prices →",
                 note="A record, not a valuation. Hammer prices as the houses published them, without the buyer's premium. Refreshed weekly."),
-     "et": dict(dir="hinnad", art="k", sale="muugil", site="Eesti Kunstikataloog", other_l="In English", past="Möödunud oksjonid",
+     "et": dict(dir="hinnad", art="k", sale="muugil", site="Museaal", other_l="In English", past="Möödunud oksjonid",
                 title="{name}: hinnad – {n} oksjonitulemust, {y}", h="{name}: hinnad oksjonitel",
                 lede="{name}{dates}: {n} teost Eesti oksjonitel, {y}; müüdud {s} ({pct}%).",
                 mid=" Pooled haamrihindadest jäid vahemikku {lo}–{hi}", rng=" Haamrihinnad {lo}–{hi}", one=" Üks haamrihind, {lo}",

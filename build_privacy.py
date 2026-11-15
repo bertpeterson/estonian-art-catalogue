@@ -21,7 +21,7 @@ LINKS = ", ".join(f'<a href="{u}">{n}</a>' for n, u in [
     ("GoatCounter", "https://www.goatcounter.com/help/privacy")])
 
 T = {
-    "en": dict(file="privacy", other="privaatsus", other_l="Eesti keeles", site="Estonian Art Catalogue", home="./",
+    "en": dict(file="privacy", other="privaatsus", other_l="Eesti keeles", site="Museaal", home="./",
                title="Privacy", back="Back to the catalogue",
                lede="What museaal.ee keeps about you, and who else sees what. Updated 3 November 2026.",
                parts=[
@@ -71,7 +71,7 @@ T = {
                          "If you think we handle your data wrongly, you can complain to the Estonian Data Protection Inspectorate "
                          '(Andmekaitse Inspektsioon, <a href="https://www.aki.ee/en">aki.ee</a>).']),
     ]),
-    "et": dict(file="privaatsus", other="privacy", other_l="In English", site="Eesti Kunstikataloog", home="./#lang=et",
+    "et": dict(file="privaatsus", other="privacy", other_l="In English", site="Museaal", home="./#lang=et",
                title="Privaatsus", back="Tagasi kataloogi",
                lede="Mida museaal.ee sinu kohta hoiab ja kes mida näeb. Uuendatud 3. novembril 2026.",
                parts=[

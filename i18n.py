@@ -32,7 +32,7 @@ ET = {
  "sort":"Järjesta","s_year":"Aasta","s_artist":"Kunstnik","s_title":"Pealkiri","s_medium":"Liik","s_museum":"Muuseum","s_price":"Haamrihind","s_sale":"Oksjon","d_catall":"Kõik teosed kategoorias „{c}“","h_museums":"Muuseumid","h_galleries":"Galeriid ja oksjonimajad","h_otherholders":"Muu","h_schools":"Õppinud","h_movements":"Suunad","h_members":"Liige","med_more":"Kõik liigid","up_ignored":"muud filtrid tulevatele partiidele ei kehti","s_featured":"Esiletõstetud","s_name":"Nimi","s_born":"Sünniaasta","s_works":"Teoste arv","most":"Enim","fewest":"Vähim","openartist":"Ava kunstnik →","npics":"{n} pildiga","art_nopics":"Veel {n} kunstnikku, kellel pole pilti — need on nimekirjas.","za":"Ü–A","au_moreartists":"Veel {n} kunstnikku","sg_artists":"Kunstnikud","sg_works":"Teosed","lowest":"Madalaim","highest":"Kõrgeim","au_byprice":"Kõik tulemused hinna järgi",
  "earliest":"Varaseim","latest":"Hiliseim","az":"A–Ü","bybirth":"Sünniaasta",
  "linkview":"Link sellele vaatele","hidelink":"Peida link",
- "doctitle":"Eesti Kunstikataloog",
+ "doctitle":"Museaal — Eesti Kunstikataloog",
  "mylist":"Minu nimekiri","mylist_n":"Minu nimekiri ({n})",
  "sl_add":"Lisa minu nimekirja","sl_remove":"Eemalda minu nimekirjast",
  "sl_tab_w":"Teosed ({n})","sl_tab_a":"Kunstnikud ({n})","sa_add":"Salvesta kunstnik","sa_on":"Kunstnik salvestatud","sa_remove":"Eemalda kunstnik minu nimekirjast",
@@ -181,7 +181,7 @@ EN = {
  "sort":"Sort","s_year":"Year","s_artist":"Artist","s_title":"Title","s_medium":"Medium","s_museum":"Museum","s_price":"Hammer price","s_sale":"Sale","d_catall":"All works in {c}","h_museums":"Museums","h_galleries":"Galleries and auction houses","h_otherholders":"Other","h_schools":"Trained at","h_movements":"Movements","h_members":"Member of","med_more":"All media","up_ignored":"other filters don't apply to coming lots","s_featured":"Featured","s_name":"Name","s_born":"Born","s_works":"Number of works","most":"Most","fewest":"Fewest","openartist":"Open artist →","npics":"{n} with a picture","art_nopics":"{n} more artists without a picture — List shows them.","za":"Z–A","au_moreartists":"{n} more artists","sg_artists":"Artists","sg_works":"Works","lowest":"Lowest","highest":"Highest","au_byprice":"All results by price",
  "earliest":"Earliest","latest":"Latest","az":"A–Z","bybirth":"By birth",
  "linkview":"Link to this view","hidelink":"Hide link",
- "doctitle":"Estonian Art Catalogue",
+ "doctitle":"Museaal — Estonian Art Catalogue",
  "mylist":"My List","mylist_n":"My List ({n})",
  "sl_add":"Add to My List","sl_remove":"Remove from My List",
  "sl_tab_w":"Works ({n})","sl_tab_a":"Artists ({n})","sa_add":"Save artist","sa_on":"Artist saved","sa_remove":"Remove the artist from My List",
@@ -313,7 +313,7 @@ HTML_ET = {
  "foot1":"<b>Kust kirjed pärinevad.</b> Muuseumid: MuIS (kõik Eesti muuseumid, metaandmed CC0) ja EKM Digitaalkogu, ühendatud tulmenumbri järgi. Galeriid: iga galerii enda kataloog ja NOBA Eestis tegutsevate kunstnike osas — pealkiri, dateering, tehnika, mõõdud, mitte kunagi hinnad. Oksjonid: kuue maja tulemused nii, nagu majad need avaldasid, alghind ja haamrihind, müüdud või müümata.",
  "foot2":"<b>Mis siin on ja mis on toimetuse oma.</b> Kataloog kirjeldab seda, mida Eesti kogud <i>hoiavad</i> — ka baltisaksa ja välismaist kunsti. Ainult omistatud teosed; autorita objektid on välja jäetud. Iga teose kirje on hoidja oma; kunstnike eluaastad ja elulood on allika järgi märgistatud, Wikidata täiendab neid, ja ainult <span class=\"tag\">ed</span> märgiga read on toimetuse kirjutatud.",
  "foot3":"<b>Mida kuju näitab.</b> Kogud ei ole ajalugu. Nõukogude aeg viis teoseid muuseumidesse massiliselt ja see lõppes 1991; galeriid hoiavad alles müümata jäänu, seega kasvab nende valik oleviku poole. Sellepärast on 2020. aastates rohkem teoseid kui 2010. aastates — kaks allikat kalduvad eri suunda, mitte väide selle kohta, kui palju kunsti tehti. Dateerimata teosed on omaette rühmas, mitte kümnendisse arvatud.",
- "wordmark":"Eesti Kunstikataloog",
+ "wordmark":"museaal <span class=\"wm-sub\">Eesti Kunstikataloog</span>",
 }
 HTML_EN = {
  "standfirst":"Every record here is a real object with a real holder, and every entry links back to its source.",
@@ -322,7 +322,7 @@ HTML_EN = {
  "foot1":"<b>Where the records come from.</b> Museums: MuIS (every Estonian museum, metadata CC0) and the EKM Digital Collection, merged on inventory number. Galleries: each gallery's own catalogue and NOBA for Estonia-based artists — title, date, technique, dimensions, never prices. Auctions: six houses' results as the houses published them, starting and hammer price, sold or unsold.",
  "foot2":"<b>What is in it, and what is editorial.</b> This catalogues what Estonian collections <i>hold</i> — Baltic German and foreign art included. Attributed work only; objects without an artist are left out. Every work record is the holder's; artists' dates and biographies are tagged by source, Wikidata fills in around them, and only lines tagged <span class=\"tag\">ed</span> are editorial.",
  "foot3":"<b>What the shape shows.</b> Holdings are not history. The Soviet system moved work into museums at scale and that ended in 1991; galleries keep what they have not sold, so their stock climbs toward the present. That is why the 2020s carry more works than the 2010s — two sources leaning opposite ways, not a statement about how much art was made. Undated works sit in their own group rather than being guessed into a decade.",
- "wordmark":"Estonian Art Catalogue",
+ "wordmark":"museaal <span class=\"wm-sub\">Estonian Art Catalogue</span>",
 }
 BLURB_ET = {
 1830:"Üksainus säilinud kirje: baltisaksa portree, maalitud mõisate jaoks.",
