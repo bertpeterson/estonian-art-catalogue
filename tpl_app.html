@@ -1291,6 +1291,27 @@
       const el = document.querySelector(sel);
       if (el){ const d = el.getBoundingClientRect().top - top; if (Math.abs(d) > 1) window.scrollBy(0, d); }
     }
+    hold(sel, top);
+  }
+  // The groups above come back as 900px placeholders and take their real heights a
+  // frame or two later, which carried the open record off the screen (a first opening
+  // renders twice: once at the click, once when its details arrive). The record is
+  // held in place until the page has stopped moving, or the reader scrolls.
+  let holdN = 0;
+  function hold(sel, top){
+    const n = ++holdN;
+    if (top == null) return;
+    const stop = () => { if (holdN === n) holdN++; };
+    ["wheel", "touchstart", "keydown", "pointerdown"].forEach(t => window.addEventListener(t, stop, {once: true, passive: true, capture: true}));
+    let still = 0, frames = 0;
+    const step = () => {
+      if (holdN !== n) return;
+      const el = document.querySelector(sel); if (!el) return;
+      const d = el.getBoundingClientRect().top - top;
+      if (Math.abs(d) > 1){ window.scrollBy(0, d); still = 0; } else still++;
+      if (still < 12 && ++frames < 90) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
   }
   function renderInner(){
     syncOrder();
