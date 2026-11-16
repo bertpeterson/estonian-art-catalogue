@@ -22,16 +22,16 @@ def days(a, b, lang):
     """the sale's first to last day, as the coming sales write it; a sale known only by its year (press records) by the year"""
     return a if len(a) == 4 else U.days(a, b if len(b) == len(a) else None, lang)
 
-T = {"en": dict(file="past-sales", art="a", other="moodunud-oksjonid", h="Past sales", site="Museaal",
+T = {"en": dict(file="past-sales", art="a", other="moodunud-oksjonid", h="Past auctions", site="Museaal",
                 lede="Every finished sale of the Estonian auction houses in the catalogue, newest first: how many lots, how many sold and the hammer total, and for each sale its lots with the hammer prices as the house published them.",
-                lots="lots", lot1="lot", sold="{s} sold", total="{t} hammer total", nores="results not published", up="Coming up at auction",
+                lots="lots", lot1="lot", sold="{s} sold", total="{t} hammer total", nores="results not published", up="Upcoming auctions",
                 c_art="Artist", c_work="Work", c_res="Result", start="starting price {p}", unsold="unsold", soldnp="sold, price not published",
                 after="sold after the sale", nr="result not published", lot="Lot", sort="Sort", az="A–Z", price="Price",
-                back="All past sales", other_l="Eesti keeles", note="A record, not a valuation. Hammer prices as the houses published them, without the buyer's premium. Refreshed weekly.",
+                back="All past auctions", other_l="Eesti keeles", note="A record, not a valuation. Hammer prices as the houses published them, without the buyer's premium. Refreshed weekly.",
                 sale_d="{s}, {h}, {d}: {n} lots by Estonian artists with the hammer prices as the house published them."),
      "et": dict(file="moodunud-oksjonid", art="k", other="past-sales", h="Möödunud oksjonid", site="Museaal",
                 lede="Kõik kataloogi Eesti oksjonimajade lõppenud oksjonid, uuemad eespool: mitu partiid, mitu müüdi ja haamrihindade summa, ning iga oksjoni partiid haamrihindadega nii, nagu maja need avaldas.",
-                lots="partiid", lot1="partii", sold="{s} müüdud", total="haamrihinnad kokku {t}", nores="tulemused avaldamata", up="Tulemas oksjonil",
+                lots="partiid", lot1="partii", sold="{s} müüdud", total="haamrihinnad kokku {t}", nores="tulemused avaldamata", up="Tulevad oksjonid",
                 c_art="Kunstnik", c_work="Teos", c_res="Tulemus", start="alghind {p}", unsold="müümata", soldnp="müüdud, hind avaldamata",
                 after="müüdud järelmüügil", nr="tulemus avaldamata", lot="Partii", sort="Järjesta", az="A–Ü", price="Hind",
                 back="Kõik möödunud oksjonid", other_l="In English", note="Ülestähendus, mitte hinnang. Haamrihinnad nii, nagu majad need avaldasid, ilma ostjatasuta. Uueneb iga nädal.",
@@ -94,14 +94,14 @@ def summary(ws, t, lang):
     tot = sum(w["ap"] for w in ws if w.get("ao") and w.get("ap"))
     return out + " · " + t["sold"].format(s=fmt(s, lang)) + (" · " + t["total"].format(t=eur(tot, lang)) if tot else "")
 
-def head(lang, t, me, other, title, desc):
+def head(lang, t, me, other, title, desc, up=True):
     return (f'<!doctype html><html lang="{lang}"><head><meta charset="utf-8">{H.STAMP}<meta name="viewport" content="width=device-width,initial-scale=1">'
             f'<title>{e(title)}</title><meta name="description" content="{e(desc[:290])}">'
             f'<link rel="canonical" href="{me}"><link rel="alternate" hreflang="{lang}" href="{me}"><link rel="alternate" hreflang="{"et" if lang == "en" else "en"}" href="{other}">'
             '<link rel="stylesheet" href="/fonts/fonts.css">'
             f'<style>{CSS}</style>{LS.TAG}{H.GC}</head><body><div class="pg">'
             f'<div class="top"><a class="wm" href="{BASE}/{"" if lang == "en" else "#lang=et"}">{t["site"].lower()}</a>'
-            f'<span><a class="eb" href="{BASE}/{U.T[lang]["file"]}">{t["up"]}</a><a class="eb" href="{other}">{t["other_l"]}</a></span></div>')
+            f'<span>' + (f'<a class="eb" href="{BASE}/{U.T[lang]["file"]}">{t["up"]}</a>' if up else "") + f'<a class="eb" href="{other}">{t["other_l"]}</a></span></div>')
 
 def foot(t, lang, js=""):
     return f'<footer class="foot">{e(t["note"])} {H.CONTACT[lang]}</footer></div>{js}</body></html>'
@@ -143,8 +143,8 @@ def main():
             if y != year: items.append(f'{"</ul>" if year else ""}<h2 class="yr">{y}</h2><ul class="sales">'); year = y
             items.append(f'<li><span class="eb">{e(span)}</span><span><a href="{me}">{e(nm)}</a><span class="m">{e(house(h, lang))}</span></span><span class="n">{e(sub)}</span></li>')
         me, other = f"{BASE}/{t['file']}", f"{BASE}/{o['file']}"
-        idx = (head(lang, t, me, other, f'{t["h"]} – {fmt(len(SALES), lang)} · museaal.ee', t["lede"])
-               + f'<header class="mast"><h1>{t["h"]}</h1><p class="lede">{e(t["lede"])}</p></header>'
+        idx = (head(lang, t, me, other, f'{t["h"]} – {fmt(len(SALES), lang)} · museaal.ee', t["lede"], up=False)
+               + f'<header class="mast tabs"><a class="alt" href="{BASE}/{U.T[lang]["file"]}">{t["up"]}</a><h1>{t["h"]}</h1><p class="lede">{e(t["lede"])}</p></header>'
                + "".join(items) + ("</ul>" if items else "") + foot(t, lang))
         open(f"site/{t['file']}.html", "w", encoding="utf-8").write(idx)
         urls.append(me)

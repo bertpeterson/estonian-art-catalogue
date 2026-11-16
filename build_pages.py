@@ -347,7 +347,7 @@ def up_line(i, lang):
     """the artist's lots in sales still to come, with a link to the page of coming sales"""
     L = UPC.get(i)
     if not L: return ""
-    lab, start, page = ("Coming up at auction", "starting price", "upcoming") if lang == "en" else ("Tulemas oksjonil", "alghind", "tulemas")
+    lab, start, page = ("Upcoming auctions", "starting price", "upcoming") if lang == "en" else ("Tulevad oksjonid", "alghind", "tulemas")
     def d(x):
         if not x: return ""
         y, m, *r = x.split("-"); return f"{int(r[0])}.{int(m)}.{y}" if r else f"{int(m)}.{y}"

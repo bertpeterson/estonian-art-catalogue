@@ -36,12 +36,12 @@ lots_of = collections.defaultdict(list)
 for w in W:
     if w.get("kind") == "auction": lots_of[w["a"]].append(w)
 
-T = {"en": dict(file="upcoming", other="tulemas", h="Coming up at auction", site="Museaal", art="a",
+T = {"en": dict(file="upcoming", other="tulemas", h="Upcoming auctions", site="Museaal", art="a",
                 lede="Every lot in the Estonian auction houses' coming sales by an artist in the catalogue, with the starting price as the house published it and the artist's record at auction beside it. Bids are not shown; the houses' own pages have them.",
                 none="No coming sale has published its lots yet. The houses put their catalogues online two to four weeks before a sale; this page is refreshed every week.",
                 start="starting price", rec="Earlier auctions{y}: {n} lots offered, {s} sold{r}", rfor=" for {p}", rec0="First time at auction in the catalogue", prior="Same title before", unsold="unsold", nores="result not published", nr=" · {k} offered, result not published", nrline="Earlier auctions{y}: {k} lots offered, results not published",
-                lots="lots", lot1="lot", mine="{w} from {a}", w1="1 work", wn="{n} works", first="Your artists first", c_art="Artist", c_work="Work", c_price="Starting price", lot="Lot", hand="The catalogue is on the house's own site; its lots are not listed here.", cat="Catalogue", sort="Sort", az="A–Z", price="Price", lotno="Lot no.", show="Show the lots ↓", hide="Hide the lots ↑", past="Past sales", pf="past-sales", other_l="Eesti keeles", note="A record, not a valuation. Refreshed weekly.", month=["January","February","March","April","May","June","July","August","September","October","November","December"]),
-     "et": dict(file="tulemas", other="upcoming", h="Tulemas oksjonil", site="Museaal", art="k",
+                lots="lots", lot1="lot", mine="{w} from {a}", w1="1 work", wn="{n} works", first="Your artists first", c_art="Artist", c_work="Work", c_price="Starting price", lot="Lot", hand="The catalogue is on the house's own site; its lots are not listed here.", cat="Catalogue", sort="Sort", az="A–Z", price="Price", lotno="Lot no.", show="Show the lots ↓", hide="Hide the lots ↑", past="Past auctions", pf="past-sales", other_l="Eesti keeles", note="A record, not a valuation. Refreshed weekly.", month=["January","February","March","April","May","June","July","August","September","October","November","December"]),
+     "et": dict(file="tulemas", other="upcoming", h="Tulevad oksjonid", site="Museaal", art="k",
                 lede="Kõik Eesti oksjonimajade tulevate oksjonite partiid kataloogi kunstnikelt, alghind nii, nagu maja selle avaldas, ja kõrval kunstniku senine oksjonitulemus. Pakkumisi ei näidata; need on majade endi lehtedel.",
                 none="Ükski tulev oksjon pole veel oma partiisid avaldanud. Majad panevad kataloogi üles kaks kuni neli nädalat enne oksjonit; see leht uueneb iga nädal.",
                 start="alghind", rec="Varasemad oksjonid{y}: pakuti {n} partiid, müüdi {s}{r}", rfor=" hinnaga {p}", rec0="Kataloogis esimest korda oksjonil", prior="Sama pealkiri varem", unsold="müümata", nores="tulemus avaldamata", nr=" · {k} pakutud, tulemus avaldamata", nrline="Varasemad oksjonid{y}: pakuti {k} partiid, tulemused avaldamata",
@@ -56,6 +56,10 @@ CSS = (":root{--paper:#141518;--field:#1E2023;--ink:#F1F2F4;--ink-soft:#C7CACE;-
        ".wm{font-family:var(--serif);font-size:1.15rem;font-weight:500;text-decoration:none}.wm:hover{text-decoration:underline}"
        ".eb{font-family:var(--mono);font-size:.68rem;letter-spacing:.13em;text-transform:uppercase;color:var(--grey)}a.eb{text-decoration:none;border-bottom:1px solid var(--rule)}a.eb:hover{color:var(--ink)}"
        ".mast{padding:34px 0 22px;border-bottom:1px solid var(--ink)}"
+       # the two lists of sales as one heading: the page's own in ink, the other beside it in grey, a link
+       ".tabs{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:4px 32px}.tabs h1{margin:0}"
+       ".tabs .alt{font-family:var(--serif);font-weight:500;font-size:2.6rem;line-height:1.05;letter-spacing:-.015em;color:var(--grey);text-decoration:none}"
+       ".tabs .alt:hover{color:var(--ink)}.tabs .lede{flex-basis:100%;margin-top:12px}@media(max-width:700px){.tabs .alt{font-size:2rem}}"
        "h1{font-family:var(--serif);font-weight:500;font-size:2.6rem;line-height:1.05;letter-spacing:-.015em;margin:0 0 12px}"
        ".lede{margin:0;max-width:68ch;color:var(--ink-soft);font-size:.95rem}"
        ".sale{margin-top:28px;border-bottom:1px solid var(--rule)}.sale-h{display:block;padding-bottom:14px}"
@@ -187,8 +191,8 @@ def main():
                 f'<link rel="canonical" href="{me}"><link rel="alternate" hreflang="{lang}" href="{me}"><link rel="alternate" hreflang="{"et" if lang == "en" else "en"}" href="{other}">'
                 '<link rel="stylesheet" href="/fonts/fonts.css">'
                 f'<style>{CSS}</style>{LS.TAG}{H.GC}</head><body><div class="pg">'
-                f'<div class="top"><a class="wm" href="{BASE}/{"" if lang == "en" else "#lang=et"}">{t["site"].lower()}</a><span><a class="eb" href="{BASE}/{t["pf"]}">{t["past"]}</a> <a class="eb" style="margin-left:14px" href="{other}">{t["other_l"]}</a></span></div>'
-                f'<header class="mast"><h1>{t["h"]}</h1></header>'
+                f'<div class="top"><a class="wm" href="{BASE}/{"" if lang == "en" else "#lang=et"}">{t["site"].lower()}</a><a class="eb" href="{other}">{t["other_l"]}</a></div>'
+                f'<header class="mast tabs"><h1>{t["h"]}</h1><a class="alt" href="{BASE}/{t["pf"]}">{t["past"]}</a></header>'
                 + (body or f'<p class="m">{e(t["none"])}</p>')
                 + f'<footer class="foot">{e(t["note"])} {H.CONTACT[lang]}</footer></div>{SM.OPEN}{JS}</script>{SM.OPEN}{MINE_JS % json.dumps({k: t[k] for k in ("mine", "w1", "wn", "first")}, ensure_ascii=False)}</script></body></html>')
         open(f"site/{t['file']}.html", "w", encoding="utf-8").write(page)

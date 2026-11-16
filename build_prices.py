@@ -27,7 +27,7 @@ B = BA.BIT
 CATS = [("photo", B["photo"]), ("sculpture", B["sculpture"]), ("print", B["print"]),
         ("paint", B["oil"] | B["acrylic"] | B["painting"] | B["mixed"]), ("paper", B["watercolour"] | B["drawing"])]
 
-T = {"en": dict(dir="prices", art="a", sale="for-sale", site="Museaal", other_l="Eesti keeles", past="Past sales",
+T = {"en": dict(dir="prices", art="a", sale="for-sale", site="Museaal", other_l="Eesti keeles", past="Past auctions",
                 title="{name} prices – {n} auction results, {y}", h="{name}: prices at auction",
                 lede="{n} lots by {name}{dates} at Estonian auction houses, {y}: {s} sold ({pct}%).",
                 mid=" Half of the hammer prices were between {lo} and {hi}", rng=" Hammer prices {lo}–{hi}", one=" One hammer price, {lo}",
