@@ -12,7 +12,8 @@ The name is 'Artist "Title" (year)'; a print pulled later from an old plate give
 and the year ('"Lõhutud ringid" VI-A (1992)') belongs to the title.
 The asking price of a work in stock is read (asking_price.py); a sold work's never.
 Anything but InStock = sold. Pictures are the site's own copies on Voog's media server
-(media.voog.com, boundary.py IMAGE_HOSTS). Pages are cached for a day.
+(media.voog.com, boundary.py IMAGE_HOSTS): the smaller "_block" copy where the page names one,
+else the upload itself. Pages are cached for a day.
 """
 import json, re, html
 from asking_price import euros
@@ -72,7 +73,11 @@ for s in slugs:
     price = {} if sold or off.get("priceCurrency") != "EUR" else euros(f"{n} €")
     img = p.get("image") or ""
     if img.startswith("//"): img = "https:" + img
-    img = re.sub(r"(?<!_block)\.(jpe?g|png|webp)$", r"_block.\1", img, flags=re.I) if re.match(r"https://media\.voog\.com/", img) else ""
+    if not re.match(r"https://media\.voog\.com/", img): img = ""
+    # Voog makes the smaller copies ("_block") only of some uploads, and answers 403 for one it never made:
+    # the smaller copy is used where the page itself names it, else the picture as the page gives it
+    small = re.sub(r"(?<!_block)\.(jpe?g|png|webp)$", r"_block.\1", img, flags=re.I)
+    if small.split(":", 1)[-1] in h: img = small
     recs.append({**price, "gid": f"avg-{p['productID']}", "artist": artist, "title": title or "Nimetu",
                  "year": ym.group(1) if ym else None, "tech": tech[:80],
                  "dims": f"{dm.group(1)} x {dm.group(2)} cm" if dm else "",
