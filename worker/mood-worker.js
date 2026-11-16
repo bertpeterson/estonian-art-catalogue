@@ -584,12 +584,12 @@ async function admin(body, env, reply, ip) {
 // ALERTS_PER_DAY of the day's MAIL_PER_DAY, so sign-in links always have room; Resend's batch call sends them a hundred at a time.
 const ALERTS_PER_DAY = 60, ALERTED_DAYS = 120;
 const ALERT_MAIL = {
-  en: { brand: "Museaal", eyebrow: "Sale alert", head: "New for sale from your artists", fresh: n => n + " new",
+  en: { brand: "museaal", eyebrow: "Sale alert", head: "New for sale from your artists", fresh: n => n + " new",
     count: (w, a) => w + (w === 1 ? " work" : " works") + " by " + a + (a === 1 ? " artist" : " artists"),
     subject: names => "For sale now: " + names, intro: "New on the market from the artists you saved on Museaal:",
     lot: (h, d) => "auction, " + h + (d ? ", " + d : ""), start: "starting price", all: "Your artists on Museaal:",
     why: "You get this because you turned on sale alerts for the artists on your list.", stop: "To stop them:", more: n => " and " + n + " more" },
-  et: { brand: "Museaal", eyebrow: "Müügiteade", head: "Uut müügil sinu kunstnikelt", fresh: n => n + (n === 1 ? " uus" : " uut"),
+  et: { brand: "museaal", eyebrow: "Müügiteade", head: "Uut müügil sinu kunstnikelt", fresh: n => n + (n === 1 ? " uus" : " uut"),
     count: (w, a) => w + (w === 1 ? " teos" : " teost") + ", " + a + (a === 1 ? " kunstnik" : " kunstnikku"),
     subject: names => "Nüüd müügil: " + names, intro: "Uut turul kunstnikelt, kelle oled Museaalis salvestanud:",
     lot: (h, d) => "oksjon, " + h + (d ? ", " + d : ""), start: "alghind", all: "Sinu kunstnikud Museaalis:",
