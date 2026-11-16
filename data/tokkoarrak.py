@@ -11,8 +11,13 @@ together ("müügil komplektina") is left out: one record cannot say which is wh
 A work whose stock is gone ("soldOut") is the gallery's word that it sold: kept,
 flagged. The asking price of a work for sale is read (asking_price.py); a sold work's page still shows it ("€1,000.00 Müüdud"),
 kept as the price it was listed at, never as what it sold for. Pages are cached for a day.
+The picture: the gallery leads each page with the work framed on a wall ("..._raam") and follows it with
+the work alone ("..._cut", "_small", "-raamita"). The work alone is the one taken (plain()), from
+the gallery's own image host (images.squarespace-cdn.com, boundary.py IMAGE_HOSTS); a page with a single
+picture, or none that says which it is, keeps its lead picture.
 """
-import json, re, os, gzip, ssl, time, html, urllib.request
+import json, re, os, gzip, ssl, time, html, unicodedata, urllib.request
+from urllib.parse import unquote
 from asking_price import euros
 from scrape_util import cached
 UA = "EstonianArtCatalogue/1.0 (museaal.ee; contact info@museaal.ee)"
@@ -21,6 +26,20 @@ ctx = ssl.create_default_context()
 os.makedirs("gcache", exist_ok=True)
 
 def get(u, key): return cached(u, key, pause=1.2)   # scrape_util.py: a page not read stops the script
+
+SHOP = re.compile(r'data-image="(https://images\.squarespace-cdn\.com/content/v1/65ad0f5e7b7f34489b5085aa/[^"?]+)"')
+ALONE = re.compile(r"cut|small|raamita|väike", re.I)
+ON_WALL = re.compile(r"raam(?!ita)|vari|seinal", re.I)
+BACK = re.compile(r"taga|tagumine", re.I)
+def plain(h):
+    """The picture of the work alone among the page's own, or None: the first one named so; failing that
+    the second, when the first is named as framed and the second is not (nor the back of the work)."""
+    pics = list(dict.fromkeys(SHOP.findall(h)))
+    name = lambda u: unicodedata.normalize("NFC", unquote(u.rsplit("/", 1)[1]).replace("+", " "))
+    for u in pics:
+        if ALONE.search(name(u)) and not ON_WALL.search(name(u)) and not BACK.search(name(u)): return u + "?format=1500w"
+    if len(pics) > 1 and ON_WALL.search(name(pics[0])) and not ON_WALL.search(name(pics[1])) and not BACK.search(name(pics[1])):
+        return pics[1] + "?format=1500w"
 
 slugs, off = [], 0
 for n in range(10):
@@ -56,6 +75,7 @@ for s in slugs:
     dm = re.search(r"(\d+(?:[.,]\d+)?\s*[x×]\s*\d+(?:[.,]\d+)?(?:\s*[x×]\s*\d+(?:[.,]\d+)?)?)\s*cm", text)
     sold = bool(re.search(r'&quot;soldOut&quot;:true|"soldOut":true', h)) and not re.search(r'&quot;soldOut&quot;:false|"soldOut":false', h)
     img = re.search(r'property="og:image" content="([^"]+)"', h)
+    img = plain(h) or (re.sub(r"^http:", "https:", img.group(1)) if img else None)
     pm = re.search(r'property="product:price:amount" content="([\d.]+)"', h)
     price = {} if not pm else euros(pm.group(1) + " €")
     if sold: price = {"listed": price["price"]} if price else {}
@@ -65,7 +85,7 @@ for s in slugs:
                  "dims": re.sub(r"\s*[x×]\s*", " x ", dm.group(1)) + " cm" if dm else "",
                  "gallery": "Tokko & Arrak", "city": "Tallinn", "url": f"{BASE}/kunsti-muuk/p/{s}",
                  **({"sold": True} if sold else {}),
-                 **({"img": re.sub(r"^http:", "https:", img.group(1))} if img else {})})
+                 **({"img": img} if img else {})})
 
 prev = json.load(open("gallery_records.json", encoding="utf-8"))
 keep = [r for r in prev if not r["gid"].startswith("tokko-")]
