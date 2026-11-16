@@ -336,7 +336,7 @@ def hub_line(ws, lang):
     return f'<p class="rel">{"<br>".join(parts)}</p>' if parts else ""
 CHARTS = {k: v for k, v in (json.load(open("data/chart_sides.json", encoding="utf-8")) if os.path.exists("data/chart_sides.json") else {}).items() if v}
 POS = {"l": "100% 50%", "r": "0% 50%", "t": "50% 100%", "b": "50% 0%"}
-crop = lambda im: f' style="object-position:{POS[CHARTS[im][0]]}"' if im in CHARTS else ""
+crop = H.crop
 MRANK = {"Painting": 0, "Watercolour": 1, "Sculpture": 2, "Mixed media": 3, "Installation": 3, "Drawing": 4, "Sketch": 5, "Photograph": 6, "Print": 7}
 imsrc = H.imsrc          # one rule for every page: the holder's thumbnail, a gallery's 768px copy, https only
 STAMP = SM.OPEN + "(function(){var t;try{t=localStorage.getItem(\"ekr:theme\")}catch(e){}if(t?t===\"light\":matchMedia(\"(prefers-color-scheme: light)\").matches)document.documentElement.setAttribute(\"data-theme\",\"light\")})()</script>"
@@ -390,7 +390,7 @@ def sale_block(i, a, ws, lang):
             if en else f"{len(S)} {'teos' if len(S) == 1 else 'teost'}: {', '.join(gals)}{rng}. Hinnad nii, nagu galeriid need avaldavad.")
     tiles = "".join(
         f'<a class="wt" href="{e(w["url"])}" target="_blank" rel="noopener" title="{e(w.get("t") or "")}" data-out="{e(val(w, "mu") or "")}">'
-        f'<img src="{e(imsrc(w["im"]))}" alt="{e(w.get("t") or "")}, {e(a["n"])}" loading="lazy" referrerpolicy="no-referrer-when-downgrade">'
+        f'<img src="{e(imsrc(w["im"]))}" alt="{e(w.get("t") or "")}, {e(a["n"])}" loading="lazy"{crop(w["im"])} referrerpolicy="no-referrer-when-downgrade">'
         f'<span><i>{e(w.get("t") or "")}</i><br><b>{price(w.get("pr"))}</b> · {e(val(w, "mu") or "")} ↗</span></a>' for w in S[:12])
     find = f'{BASE}/{"find" if en else "leia"}#a={urllib.parse.quote(a["n"])}'
     more = (f"See {'it' if len(S) == 1 else 'them'} in Buy Art" if en else "Vaata neid lehel Osta kunsti")

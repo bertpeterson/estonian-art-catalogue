@@ -253,13 +253,15 @@ eurf = lambda n: "€" + f"{n:,}".replace(",", "\u00a0")
 # none baked eager is fetched for nothing
 _first = _row(20)
 _lazy = lambda i: ' loading="lazy"'
+# a gallery's file less its empty border (data/gallery_trim.py); data-tb lets the hover picture size itself by what is left
+_tb = lambda w: f' data-tb="{w["tb"]}" style="object-view-box:inset({w["tb"]})"' if w.get("tb") else ""
 fs_works = "".join(
-    f'<a class="fs-w" href="{e(w["url"])}"{" data-p" if _painting(w) else ""} target="_blank" rel="noopener"><img src="{e(imsrc(w["im"]))}" alt="{e(w.get("t") or "")}, {e(A[w["a"]]["n"])}" decoding="async"{_lazy(i)} referrerpolicy="no-referrer-when-downgrade">'
+    f'<a class="fs-w" href="{e(w["url"])}"{" data-p" if _painting(w) else ""} target="_blank" rel="noopener"><img src="{e(imsrc(w["im"]))}" alt="{e(w.get("t") or "")}, {e(A[w["a"]]["n"])}" decoding="async"{_lazy(i)}{_tb(w)} referrerpolicy="no-referrer-when-downgrade">'
     f'<span class="fs-cap"><i>{e(w.get("t") or "")}</i><span>{e(A[w["a"]]["n"])}</span><b>{eurf(w["pr"])}</b></span>'
     # the whole picture, uncropped, while the pointer is on the card (the same file, so no second download). Both are the
     # gallery's own 768-pixel copy where it keeps one (img_small.py): the uploads ran to 1 MB, and on a phone six of them
     # held back the catalogue's index behind them
-    f'<span class="fs-pop"><img src="{e(imsrc(w["im"]))}" alt="" decoding="async"{_lazy(i)} referrerpolicy="no-referrer-when-downgrade"></span></a>'
+    f'<span class="fs-pop"><img src="{e(imsrc(w["im"]))}" alt="" decoding="async"{_lazy(i)}{_tb(w)} referrerpolicy="no-referrer-when-downgrade"></span></a>'
     for i, w in enumerate(_first))
 # ... and past those, the row goes on without end: every other work for sale with a picture, fetched from
 # data/fs-more.json only once a visitor scrolls near the last of them. In rounds, one work an artist each: the
@@ -287,7 +289,7 @@ def _rest(first):
     for w in out:
         sv = imsrc(w["im"])
         if sv and sv not in seen and w["url"] not in seen:
-            seen |= {sv, w["url"]}; res.append([w["url"], sv, w.get("t") or "", A[w["a"]]["n"], w["pr"]])
+            seen |= {sv, w["url"]}; res.append([w["url"], sv, w.get("t") or "", A[w["a"]]["n"], w["pr"]] + ([w["tb"]] if w.get("tb") else []))
     return res
 import hashlib as _hashlib
 _more = json.dumps(_rest(_first), ensure_ascii=False, separators=(",", ":"))

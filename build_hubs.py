@@ -103,7 +103,11 @@ def artist_slugs(A, W):
 ARTIST_SLUG = artist_slugs(A, W)
 CHARTS = {k: v for k, v in (json.load(open("data/chart_sides.json", encoding="utf-8")) if os.path.exists("data/chart_sides.json") else {}).items() if v}
 POS = {"l": "100% 50%", "r": "0% 50%", "t": "50% 100%", "b": "50% 0%"}
-crop = lambda im: f' style="object-position:{POS[CHARTS[im][0]]}"' if im in CHARTS else ""
+# the empty border a gallery's file carries (data/gallery_trim.py, "tb" from merge.py): the tile draws the picture without
+# it (object-view-box; a browser that does not know the property shows the file whole, as before)
+TRIM = {w["im"]: w["tb"] for w in W if w.get("tb")}
+crop = lambda im: (f' style="object-position:{POS[CHARTS[im][0]]}"' if im in CHARTS
+                   else f' style="object-view-box:inset({TRIM[im]})"' if im in TRIM else "")
 MRANK = {"Painting": 0, "Watercolour": 1, "Sculpture": 2, "Mixed media": 3, "Installation": 3, "Drawing": 4, "Sketch": 5, "Photograph": 6, "Print": 7}
 CSS = ("body{margin:0;padding:28px;font:15px/1.55 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#141518;color:#f1f2f4;max-width:980px}"
        ":root[data-theme=light] body{background:#fcfcfb;color:#111}"

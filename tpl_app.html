@@ -1170,7 +1170,7 @@
                   : esc(T("d_image", {h: musName(w.mu)})) + (im.startsWith("m:") ? " · MuIS" : " · EKM") + " · " + esc(T("d_pd", {a: ar.n, l: life || "—"}));
       // the record's picture, less its colour chart where there is one: the box takes the
       // shape without it (r), no taller than 420px, and the link still opens the whole file
-      const crop = w.rs && w.r ? ` class="crop" style="aspect-ratio:1/${(w.r / 100).toFixed(3)};width:min(100%,${Math.round(420 / (w.r / 100))}px)${cropPos(w)}"` : "";
+      const crop = w.tb ? ` style="object-view-box:inset(${esc(w.tb)})"` : w.rs && w.r ? ` class="crop" style="aspect-ratio:1/${(w.r / 100).toFixed(3)};width:min(100%,${Math.round(420 / (w.r / 100))}px)${cropPos(w)}"` : "";
       const figure = imSrc ? `<figure class="d-fig"><a href="${href(imHref)}" target="_blank" rel="noopener"><img src="${esc(imSrc)}" alt="${esc(w.t)}" loading="lazy"${crop} referrerpolicy="no-referrer-when-downgrade"></a>
           <figcaption>${imCap}</figcaption>${laHTML(w)}</figure>` : "";
       detail = `<div class="detail${imSrc ? " has-fig" : ""}">${figure}
@@ -1876,7 +1876,7 @@
   // shown less that band: the box has the shape without it, and the picture is pushed
   // to the far side so the chart is what falls off
   const POS = {l: "100% 50%", r: "0% 50%", t: "50% 100%", b: "50% 0%"};
-  const cropPos = w => w.rs ? `;object-position:${POS[w.rs]}` : "";
+  const cropPos = w => w.rs ? `;object-position:${POS[w.rs]}` : w.tb ? `;object-view-box:inset(${w.tb})` : "";   // tb: a gallery file's empty border (gallery_trim.py)
   // the static hub page for the one decade, medium or museum in the selection, if there is
   // exactly one of them and nothing else narrows the view; the addresses follow build_hubs.py
   const HUB_DIR = {en: {dec: "decades", med: "media", mus: "museums"}, et: {dec: "kumnendid", med: "liigid", mus: "muuseumid"}};

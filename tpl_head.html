@@ -959,9 +959,12 @@ footer a{border-bottom:1px solid var(--rule)}
   (function(){
     var page=function(){return document.documentElement.lang==="et"?"leia":"find"};
     document.getElementById("forsale").addEventListener("click",function(e){var a=e.target.closest("a[data-fs]");if(a)a.href=page()+a.dataset.fs});
+    // a picture drawn without its file's empty border (data-tb: "top right bottom left" in %, data/gallery_trim.py) is
+    // narrower or squatter than the file: the factor on its width/height
+    var tbk=function(tb){var v=(tb||"").split(" ").map(parseFloat);return v.length===4?(100-v[1]-v[3])/(100-v[0]-v[2]):1};
     // each hover picture's width/height, for its size (see .fs-pop img)
     document.querySelectorAll(".fs-pop img").forEach(function(i){
-      var r=function(){if(i.naturalHeight)i.style.setProperty("--r",i.naturalWidth/i.naturalHeight)};
+      var r=function(){if(i.naturalHeight)i.style.setProperty("--r",i.naturalWidth/i.naturalHeight*tbk(i.dataset.tb))};
       if(i.complete)r();else i.addEventListener("load",r)});
     // the row's arrows: a page of cards a click, each shown while there is more that way
     var row=document.getElementById("fs-works"),prev=document.querySelector(".fs-prev"),next=document.querySelector(".fs-next");
@@ -983,12 +986,12 @@ footer a{border-bottom:1px solid var(--rule)}
     // twelve cards at a time, and every sixty a card for all works for sale
     var list=null,at=0,since=0,asked=false;
     var el=function(t,c,x){var e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e};
-    var pic=function(src){var i=el("img");i.src=src;i.alt="";i.decoding="async";i.loading="lazy";i.referrerPolicy="no-referrer-when-downgrade";return i};
+    var pic=function(src,tb){var i=el("img");if(tb){i.dataset.tb=tb;i.style.objectViewBox="inset("+tb+")"}i.src=src;i.alt="";i.decoding="async";i.loading="lazy";i.referrerPolicy="no-referrer-when-downgrade";return i};
     var card=function(x){var a=el("a","fs-w");a.href=x[0];a.target="_blank";a.rel="noopener";
-      var i=pic(x[1]);i.alt=x[2]+", "+x[3];a.appendChild(i);
+      var i=pic(x[1],x[5]);i.alt=x[2]+", "+x[3];a.appendChild(i);
       var c=el("span","fs-cap");c.appendChild(el("i","",x[2]));c.appendChild(el("span","",x[3]));if(x[4])c.appendChild(el("b","","€"+String(x[4]).replace(/\B(?=(\d{3})+(?!\d))/g,"\u00a0")));a.appendChild(c);
-      var p=el("span","fs-pop"),q=pic(x[1]);p.appendChild(q);a.appendChild(p);
-      q.addEventListener("load",function(){if(q.naturalHeight)q.style.setProperty("--r",q.naturalWidth/q.naturalHeight)});return a};
+      var p=el("span","fs-pop"),q=pic(x[1],x[5]);p.appendChild(q);a.appendChild(p);
+      q.addEventListener("load",function(){if(q.naturalHeight)q.style.setProperty("--r",q.naturalWidth/q.naturalHeight*tbk(x[5]))});return a};
     // with three works or an artist on My List, the row leads with two of For you's best (Buy Art keeps its twelve in
     // this browser, three days; two a day from the first eight), marked, and not again further along. The rest is everyone's
     var skip={};

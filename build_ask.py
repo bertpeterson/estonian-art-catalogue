@@ -199,9 +199,12 @@ def data():
                       dims_of(w.get("dm")) or 0,
                       media_of(kind_of(w), " ".join(filter(None, (H.val(w, "tce"), H.val(w, "tc"))))),
                       tech_en[:60] if tech_en != tech_show(tech) else "",
-                      listed.get(k, 0)])                                    # field 16: days since 2020 it has been listed from
+                      listed.get(k, 0),                                     # field 16: days since 2020 it has been listed from
+                      w.get("tb") or ""])                                   # field 17: the file's empty border, as inset() takes it (gallery_trim.py)
         ims.append(w["im"])
     return {"words": words, "artists": arts, "galleries": list(gals), "works": works, "_ims": ims, "_aidx": aidx}
+
+vb = lambda w: f' style="object-view-box:inset({w[17]})"' if w[17] else ""    # a card's picture less its file's empty border
 
 JS = r"""
 (function(){
@@ -319,7 +322,7 @@ function buildTaste(){var keys=listNow(), need={};
 function tasteSave(t){try{if(!t.n)return localStorage.removeItem('museaal.foryou');
   var ix=[],o=[],seen={},i,w;for(i=0;i<t.s.length;i++)if(t.s[i]>0&&!t.in[D.works[i][11]]&&D.works[i][3])ix.push(i);
   ix.sort(function(a,b){return t.s[b]-t.s[a]});
-  for(i=0;i<ix.length&&o.length<12;i++){w=D.works[ix[i]];if(seen[w[1]])continue;seen[w[1]]=1;o.push([w[10],w[3],w[0],D.artists[w[1]][0],w[8]||0])}
+  for(i=0;i<ix.length&&o.length<12;i++){w=D.works[ix[i]];if(seen[w[1]])continue;seen[w[1]]=1;o.push([w[10],w[3],w[0],D.artists[w[1]][0],w[8]||0,w[17]||''])}
   localStorage.setItem('museaal.foryou',JSON.stringify({at:Date.now(),w:o}))}catch(e){}}
 // On by default from three works on the list, unless this browser turned it off (find-fy: off); the stock's bytes
 // are fetched at once, beside stock.json, so the first ten wait for little more than the ranking. Default use counts
@@ -384,7 +387,7 @@ function card(w,why){
   function out(){var o=el('a','out');o.href=w[10];o.target='_blank';o.rel='noopener';
     // every click out by gallery; and per version: conversations that led to a click out, and clicks on a pick
     o.addEventListener('click',function(){gc('find-out',g);if(g)gc('gallery-'+g.toLowerCase().normalize('NFKD').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,''),g);if(talked&&!wentOut){wentOut=true;gc('find-conv-out-'+V)}if(why)gc('find-pick-'+V);if(Q.you)gc('find-foryou-out')});return o}
-  var top=out(), img=el('img');img.src=w[3];img.alt=w[0]+', '+a[0];img.loading='lazy';img.decoding='async';img.referrerPolicy='no-referrer-when-downgrade';top.appendChild(img);
+  var top=out(), img=el('img');img.src=w[3];img.alt=w[0]+', '+a[0];img.loading='lazy';img.decoding='async';img.referrerPolicy='no-referrer-when-downgrade';if(w[17])img.style.objectViewBox='inset('+w[17]+')';top.appendChild(img);
   var cap=el('span','cap');cap.appendChild(el('i',null,w[0]));top.appendChild(cap);c.appendChild(top);
   var by=el('span','by'), an=el('a',null,a[0]);an.href='./#'+T.hash+'artist='+a[1]+'&open='+encodeURIComponent(w[11]);an.title=T.record;
   by.appendChild(an);if(w[2])by.appendChild(document.createTextNode(', '+w[2]));c.appendChild(by);
@@ -826,7 +829,7 @@ def sale_pages(d):
             lede = st["lede1"] if len(pick) == 1 else st["lede"].format(n=f"{len(pick):,}".replace(",", " " if lang == "et" else ","), g=g)
             cards = "".join(
                 f'<article class="card"><a class="out" href="{e(w[10])}" target="_blank" rel="noopener" data-out="{e(gals[w[9]])}">'
-                f'<img src="{e(w[3])}" alt="{e(w[0])}, {e(arts[w[1]][0])}" loading="lazy" decoding="async" referrerpolicy="no-referrer-when-downgrade">'
+                f'<img src="{e(w[3])}" alt="{e(w[0])}, {e(arts[w[1]][0])}" loading="lazy" decoding="async"{vb(w)} referrerpolicy="no-referrer-when-downgrade">'
                 f'<span class="cap"><i>{e(w[0])}</i>{e(arts[w[1]][0])}{", " + e(str(w[2])) if w[2] else ""}</span>'
                 + (f'<span class="meta">{e(" · ".join(x for x in ((lang == "en" and w[15]) or w[4], w[5] if lang == "en" else re.sub(r"(?<=[0-9])[.](?=[0-9])", ",", w[5])) if x))}</span>' if (w[4] or w[5]) else "")
                 + f'<span class="price"><b>{eur(w[8], lang) if w[8] else e(t["noprice"])}</b> {e((t["at"] + " ") if t["at"] else "")}{e(gals[w[9]])} ↗</span></a>'
@@ -988,7 +991,7 @@ def artist_sale_pages(d):
             lede = at["lede"].format(n=len(ws), name=name, dates=dates, gals=", ".join(gs), rng=rng)
             cards = "".join(
                 f'<article class="card"><a class="out" href="{e(w[10])}" target="_blank" rel="noopener" data-out="{e(gals[w[9]])}">'
-                f'<img src="{e(w[3])}" alt="{e(w[0])}, {e(name)}" loading="lazy" decoding="async" referrerpolicy="no-referrer-when-downgrade">'
+                f'<img src="{e(w[3])}" alt="{e(w[0])}, {e(name)}" loading="lazy" decoding="async"{vb(w)} referrerpolicy="no-referrer-when-downgrade">'
                 f'<span class="cap"><i>{e(w[0])}</i>{e(str(w[2])) if w[2] else ""}</span>'
                 + (f'<span class="meta">{e(" · ".join(x for x in ((lang == "en" and w[15]) or w[4], w[5] if lang == "en" else re.sub(r"(?<=[0-9])[.](?=[0-9])", ",", w[5])) if x))}</span>' if (w[4] or w[5]) else "")
                 + f'<span class="price"><b>{money(w[8], lang) if w[8] else e(t["noprice"])}</b> {e((t["at"] + " ") if t["at"] else "")}{e(gals[w[9]])} ↗</span></a></article>'

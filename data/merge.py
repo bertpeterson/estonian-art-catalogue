@@ -1244,6 +1244,7 @@ _ekm = json.load(open("ekm_images.json", encoding="utf-8")) if os.path.exists("e
 # size, ekm_shapes.py), so the wall can lay a tile out before the picture arrives
 _ekmr = json.load(open("ekm_shapes.json", encoding="utf-8")) if os.path.exists("ekm_shapes.json") else {}
 _galr = json.load(open("gallery_shapes.json", encoding="utf-8")) if os.path.exists("gallery_shapes.json") else {}
+_trim = json.load(open("gallery_trim.json", encoding="utf-8")) if os.path.exists("gallery_trim.json") else {}
 _muisr = json.load(open("muis_shapes.json", encoding="utf-8")) if os.path.exists("muis_shapes.json") else {}
 if os.path.exists("oai_shapes.json"): _muisr.update(json.load(open("oai_shapes.json", encoding="utf-8")))   # pixel sizes the OAI records carry
 _Y = datetime.date.today().year
@@ -1324,6 +1325,12 @@ print("  masterpieces placed at the head of the wall:", _mpn, "of", len(_MP))
 for w in works:
     im = w.get("im") or ""
     if im.startswith("g:") and im[2:] in _galr: w["ir"] = _galr[im[2:]]
+    # ...less the empty border a gallery's file carries (gallery_trim.py): "tb" is what the tiles cut away, as
+    # CSS inset() takes it (top right bottom left), and the shape becomes the shape of what is left
+    if im.startswith("g:") and _trim.get(im[2:]):
+        _l, _t, _r, _b = (x / 1000 for x in _trim[im[2:]])
+        w["tb"] = " ".join(f"{x * 100:.1f}%" for x in (_t, _r, _b, _l))
+        if w.get("ir"): w["ir"] = round(w["ir"] * (1 - _t - _b) / (1 - _l - _r), 3)
     if im.startswith("m:") and im[2:] in _muisr: w["ir"] = _muisr[im[2:]]
 print("  images: public-domain museum works", IMG["pd"], "-> MuIS", IMG["muis"], "EKM", IMG["ekm"], "· past gallery listings", IMG.get("past", 0), "· wrong pictures dropped", IMG.get("wrong", 0))
 
