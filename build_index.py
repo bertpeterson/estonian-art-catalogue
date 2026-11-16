@@ -114,8 +114,14 @@ ERAS_JS=(SM.OPEN+'(function(){var el=document.getElementById("eras"),bars=docume
 # (wallCols in tpl_app.html: six, four, three, or two on a phone -- 2026-11-16, the six baked columns wrapped two to
 # a row there, three walls one under the other), shortest next, before the first paint; the seed and the order go
 # where the app reads them (data-seed, data-keys), so its wall is this one. data-dealt takes the wrap off (tpl_head.html).
+# A reader coming back keeps the wall they left (2026-11-16): by the Back button, or by a link from another page of
+# the site (an artist's), the view takes the tab's last seed (sessionStorage museaal.deal) and so deals the same
+# wall; a reload, or an arrival from anywhere else, deals afresh.
 WALL_JS=(SM.OPEN+'(function(){try{var wall=document.querySelector("#register .wall[data-seed]"),pool=document.getElementById("wall-pool");if(!wall||!pool)return;'
- 'var seed=String(Math.random()).slice(2,8),fnv=function(s){var h=2166136261;for(var i=0;i<s.length;i++)h=Math.imul(h^s.charCodeAt(i),16777619);return h>>>0},'
+ 'var seed=null,nav=((performance.getEntriesByType&&performance.getEntriesByType("navigation")[0])||{}).type,ref=null;try{ref=new URL(document.referrer)}catch(e){}'
+ 'try{if(nav==="back_forward"||(nav!=="reload"&&ref&&ref.origin===location.origin&&ref.pathname!==location.pathname))seed=sessionStorage.getItem("museaal.deal")}catch(e){}'
+ 'if(!/^\\d{1,6}$/.test(seed||""))seed=String(Math.random()).slice(2,8);try{sessionStorage.setItem("museaal.deal",seed)}catch(e){}'
+ 'var fnv=function(s){var h=2166136261;for(var i=0;i<s.length;i++)h=Math.imul(h^s.charCodeAt(i),16777619);return h>>>0},'
  'k=function(t){return t.getAttribute("data-wt")},by=function(f){return function(a,b){return f(a)-f(b)}},'
  'ts=[].slice.call(wall.querySelectorAll(".wt")).concat([].slice.call(pool.content.querySelectorAll(".wt")));'
  'var M=ts.filter(function(t){return t.hasAttribute("data-m")}).map(function(t){return[+t.getAttribute("data-m")+fnv(k(t)+seed)%36,fnv(k(t)),t]})'
