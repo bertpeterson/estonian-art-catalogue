@@ -212,7 +212,7 @@ h1 .wm-sub{display:block;margin-top:12px;font-family:var(--mono);font-weight:400
 /* the row scrolls sideways: six cards in view, sixty baked in and the rest added as it nears its end; on a pointer screen, arrows at its ends (shown
    while there is more that way) and no scrollbar; on a phone, swiped, a card and a bit at a time */
 .fs-row{position:relative;min-width:0}
-.fs-works{display:grid;gap:10px;grid-auto-flow:column;grid-auto-columns:calc((100% - 50px) / 6);overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;overscroll-behavior-x:contain}
+.fs-works{display:grid;gap:10px;grid-auto-flow:column;grid-auto-columns:calc((100% - 40px) / 5);overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;overscroll-behavior-x:contain}
 .fs-works::-webkit-scrollbar{display:none}
 /* out of sight for the moment between the baked row and its order for this view (the script after it) */
 .fs-wait .fs-works{visibility:hidden}
