@@ -255,9 +255,9 @@ function rank(q){
     if(ty&&ty.in[w[11]])return;                   // For you: what is on the list already is not news
     var s=0;q.words.forEach(function(x,i){s+=(wt[i]||.3)*(w.m[x]||0)});
     if(tr.length&&tr.some(function(r){return r.test(w[0])}))s+=20;     // the subject the visitor named, in the title: first
-    if(!q.words.length&&!tr.length)s=ty?ty.s[w.i]:.6*hash(w[11]+DAY)+(w[8]?.25:0)+.35*D.fame[w[1]]+(w[14]&8?.3:0);   // nothing named: the day's selection, paintings first
+    if(!q.words.length&&!tr.length)s=ty?ty.s[w.i]*damp(w):.6*hash(w[11]+DAY)+(w[8]?.25:0)+.35*D.fame[w[1]]+(w[14]&8?.3:0);   // nothing named: the day's selection, paintings first
     else if(s<=0&&!who.length)return;
-    if(ty&&(q.words.length||tr.length))s+=1.5*ty.s[w.i];   // For you with words: the words admit, the list orders
+    if(ty&&(q.words.length||tr.length))s+=1.5*ty.s[w.i]*damp(w);   // For you with words: the words admit, the list orders
     if(q.size!=='any'&&w[6]&&w[6]!==q.size)return;
     if(q.size!=='any'&&!w[6])s-=50;             // size unknown: only after every one that fits
     out.push([s,w])});
@@ -266,6 +266,16 @@ function rank(q){
   var picked=[],per={},rest=[];
   out.forEach(function(p){var a=p[1][1];if(per[a]>=Math.floor(picked.length/PG)+1){rest.push(p[1]);return}per[a]=(per[a]||0)+1;picked.push(p[1])});
   return picked.concat(rest)}
+// For you does not lead with the same works day after day: what its first page, or the home page's row, has shown
+// counts against a work on later days (museaal.fyseen, in this browser: times shown and the last day), fading over
+// three weeks. The order holds for the day. The same print at another gallery is the same work
+var TODAY=Math.floor(Date.now()/864e5), SEEN={};
+try{SEEN=JSON.parse(localStorage.getItem('museaal.fyseen')||'{}')||{}}catch(e){}
+function fyK(w){return (D.artists[w[1]][0]+'|'+w[0]).toLowerCase()}
+function damp(w){var x=SEEN[fyK(w)];if(!x)return 1;return 1/(1+.5*(x[0]-(x[1]===TODAY?1:0))*Math.max(0,1-(TODAY-x[1])/21))}
+function fySaw(ws){try{var m=JSON.parse(localStorage.getItem('museaal.fyseen')||'{}')||{},k,ch=0;
+  ws.forEach(function(w){k=fyK(w);var x=m[k];if(x&&x[1]===TODAY)return;m[k]=[(x&&TODAY-x[1]<21?x[0]:0)+1,TODAY];ch=1});
+  if(ch){for(k in m)if(TODAY-m[k][1]>=21)delete m[k];localStorage.setItem('museaal.fyseen',JSON.stringify(m))}}catch(e){}}
 function count(n){return n===1?T.count1:T.count.replace('{n}',String(n).replace(/\B(?=(\d{3})+(?!\d))/g,' '))}
 function priceText(lo,hi){return lo&&hi?eur(lo)+' – '+eur(hi):hi?T.upto+' '+eur(hi):lo?T.from_+' '+eur(lo):T.anyprice}
 // ---- For you: the works for sale ranked by My List (data/taste.py) ----
@@ -320,8 +330,9 @@ function buildTaste(){var keys=listNow(), need={};
 // the home page's Buy Art row leads with two of these (tpl_head.html): For you's twelve best, an artist each, with a
 // picture, kept in this browser (museaal.foryou) and read there for three days; an empty list takes them away
 function tasteSave(t){try{if(!t.n)return localStorage.removeItem('museaal.foryou');
-  var ix=[],o=[],seen={},i,w;for(i=0;i<t.s.length;i++)if(t.s[i]>0&&!t.in[D.works[i][11]]&&D.works[i][3])ix.push(i);
-  ix.sort(function(a,b){return t.s[b]-t.s[a]});
+  var ix=[],o=[],seen={},i,w,tall=[];try{tall=JSON.parse(localStorage.getItem('museaal.tall')||'[]')||[]}catch(e){}   // too tall for the home row (tpl_head.html)
+  for(i=0;i<t.s.length;i++)if(t.s[i]>0&&!t.in[D.works[i][11]]&&D.works[i][3]&&tall.indexOf(D.works[i][10])<0)ix.push(i);
+  var ds={};ix.forEach(function(i){ds[i]=t.s[i]*damp(D.works[i])});ix.sort(function(a,b){return ds[b]-ds[a]});
   for(i=0;i<ix.length&&o.length<12;i++){w=D.works[ix[i]];if(seen[w[1]])continue;seen[w[1]]=1;o.push([w[10],w[3],w[0],D.artists[w[1]][0],w[8]||0,w[17]||''])}
   localStorage.setItem('museaal.foryou',JSON.stringify({at:Date.now(),w:o}))}catch(e){}}
 // On by default from three works on the list, unless this browser turned it off (find-fy: off); the stock's bytes
@@ -430,7 +441,7 @@ function show(box,q,picks){
     [['','best'],['up','up'],['down','down'],['new','new']].forEach(function(x){var o=el('option',null,T.sorts[x[1]]);o.value=x[0];so.appendChild(o)});so.value=SORT;
     so.addEventListener('change',function(){SORT=so.value;gc('find-sort-'+(SORT||'best'));keys.forEach(function(k){delete shownKeys[k]});keys.length=0;grid.textContent='';n=0;view=sorted(list);page();say()});
     head.appendChild(so)}
-  page();box.appendChild(grid);box.appendChild(more);more.addEventListener('click',page);
+  page();if(ty&&!SORT)fySaw(view.slice(0,PG));box.appendChild(grid);box.appendChild(more);more.addEventListener('click',page);
   return {list:list,keys:keys,note:T.shown+' '+Math.min(PG,list.length)+' / '+all.length+': '+view.slice(0,PG).map(function(w){return w[0]+' — '+D.artists[w[1]][0]+(w[8]?', '+eur(w[8]):'')+(w[13]?', '+cm(w[13]):'')+' ['+wid(w)+']'}).join('; ')}}
 
 // ---- the controls: price range, medium, size, mood words ----

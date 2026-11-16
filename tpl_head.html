@@ -968,6 +968,16 @@ footer a{border-bottom:1px solid var(--rule)}
       if(i.complete)r();else i.addEventListener("load",r)});
     // the row's arrows: a page of cards a click, each shown while there is more that way
     var row=document.getElementById("fs-works"),prev=document.querySelector(".fs-prev"),next=document.querySelector(".fs-next");
+    // a work 1.8 times as tall as wide, or more, makes a poor square tile and a sliver of a hover picture: the row leaves
+    // it out. Its shape is known only once its picture has loaded, so its card goes then, and this browser remembers it
+    // (museaal.tall, by link) and leaves it out from the start afterwards, here and among For you's twelve (build_ask.py)
+    var tall=[],ends=null;try{tall=JSON.parse(localStorage.getItem("museaal.tall")||"[]");if(!Array.isArray(tall))tall=[]}catch(e){}
+    var watch=function(a,gone){var i=a.querySelector("img");if(!i)return;
+      var f=function(){if(!i.naturalWidth||i.naturalHeight/i.naturalWidth/tbk(i.dataset.tb)<1.8)return;var h=a.getAttribute("href");
+        if(tall.indexOf(h)<0){tall.unshift(h);tall=tall.slice(0,400);try{localStorage.setItem("museaal.tall",JSON.stringify(tall))}catch(e){}}
+        if(gone)gone();else a.remove();if(ends)ends()};
+      if(i.complete)f();else i.addEventListener("load",f)};
+    Array.prototype.forEach.call(row.querySelectorAll(".fs-w"),function(a){if(tall.indexOf(a.getAttribute("href"))>=0)a.remove();else watch(a)});
     // each view deals its own six from the baked 120: four paintings (data-p) and two other works, painting first, none
     // this browser was shown first in its last ten views where enough are left; the rest follow, shuffled, in the same order
     (function(){var cs=Array.prototype.slice.call(row.querySelectorAll(".fs-w")),seen=[],h=function(c){return c.getAttribute("href")};
@@ -980,37 +990,43 @@ footer a{border-bottom:1px solid var(--rule)}
       try{localStorage.setItem("museaal.fs6",JSON.stringify(out.slice(0,6).map(h).concat(seen).slice(0,60)))}catch(e){}
       out.forEach(function(c){row.appendChild(c)});
       Array.prototype.forEach.call(row.querySelectorAll(".fs-w img"),function(i,j){i.loading=j<12?"eager":"lazy"})})();
-    var ends=function(){prev.hidden=row.scrollLeft<4;next.hidden=row.scrollLeft+row.clientWidth>=row.scrollWidth-4};
+    ends=function(){prev.hidden=row.scrollLeft<4;next.hidden=row.scrollLeft+row.clientWidth>=row.scrollWidth-4};
     [prev,next].forEach(function(b,k){b.addEventListener("click",function(){row.scrollBy({left:(k?1:-1)*row.clientWidth,behavior:"smooth"})})});
     // past the baked 120, the row goes on: the rest of the stock, fetched once a visitor nears the end,
     // twelve cards at a time, and every sixty a card for all works for sale
     var list=null,at=0,since=0,asked=false;
     var el=function(t,c,x){var e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e};
     var pic=function(src,tb){var i=el("img");if(tb){i.dataset.tb=tb;i.style.objectViewBox="inset("+tb+")"}i.src=src;i.alt="";i.decoding="async";i.loading="lazy";i.referrerPolicy="no-referrer-when-downgrade";return i};
-    var card=function(x){var a=el("a","fs-w");a.href=x[0];a.target="_blank";a.rel="noopener";
+    var card=function(x,gone){var a=el("a","fs-w");a.href=x[0];a.target="_blank";a.rel="noopener";
       var i=pic(x[1],x[5]);i.alt=x[2]+", "+x[3];a.appendChild(i);
       var c=el("span","fs-cap");c.appendChild(el("i","",x[2]));c.appendChild(el("span","",x[3]));if(x[4])c.appendChild(el("b","","€"+String(x[4]).replace(/\B(?=(\d{3})+(?!\d))/g,"\u00a0")));a.appendChild(c);
       var p=el("span","fs-pop"),q=pic(x[1],x[5]);p.appendChild(q);a.appendChild(p);
-      q.addEventListener("load",function(){if(q.naturalHeight)q.style.setProperty("--r",q.naturalWidth/q.naturalHeight*tbk(q.dataset.tb))});return a};
+      q.addEventListener("load",function(){if(q.naturalHeight)q.style.setProperty("--r",q.naturalWidth/q.naturalHeight*tbk(q.dataset.tb))});watch(a,gone);return a};
     // with three works or an artist on My List, the row leads with two of For you's best (Buy Art keeps its twelve in
-    // this browser, three days; two a day from the first eight), marked, and not again further along. The rest is everyone's
+    // this browser, three days; each day the two the row and Buy Art have shown least, museaal.fyseen), marked, and not
+    // again further along. The rest is everyone's
     var skip={};
     (function(){var c=null,sl=0,ar=0;try{if(localStorage.getItem("find-fy")==="off")return;c=JSON.parse(localStorage.getItem("museaal.foryou")||"null");
         sl=(JSON.parse(localStorage.getItem("museaal.shortlist")||"[]")||[]).length;ar=(JSON.parse(localStorage.getItem("museaal.artists")||"[]")||[]).length}catch(e){return}
       if(!c||!c.w||!c.w.length||Date.now()-c.at>3*864e5||(sl<3&&!ar))return;
-      var d=Math.floor(Date.now()/864e5),n=Math.min(8,c.w.length),pick=[c.w[2*d%n]];if(n>1)pick.push(c.w[(2*d+1)%n]);
-      pick.reverse().forEach(function(x){skip[x[0]]=1;
+      var d=Math.floor(Date.now()/864e5),m={};try{m=JSON.parse(localStorage.getItem("museaal.fyseen")||"{}")||{}}catch(e){}
+      var key=function(x){return (x[3]+"|"+x[2]).toLowerCase()},n=function(x){var s=m[key(x)];return s?(s[0]-(s[1]===d?1:0))*Math.max(0,1-(d-s[1])/21):0};
+      var cands=c.w.map(function(x,i){return [n(x),i,x]}).filter(function(p){return tall.indexOf(p[2][0])<0}).sort(function(a,b){return a[0]-b[0]||a[1]-b[1]}).map(function(p){return p[2]});
+      var saw=function(x){var k=key(x),s=m[k];if(!s||s[1]!==d)m[k]=[(s&&d-s[1]<21?s[0]:0)+1,d];try{localStorage.setItem("museaal.fyseen",JSON.stringify(m))}catch(e){}};
+      // a lead that turns out too tall gives its place to the next in line
+      var lead=function(x){skip[x[0]]=1;saw(x);
         Array.prototype.forEach.call(row.querySelectorAll(".fs-w"),function(b){if(b.getAttribute("href")===x[0])b.remove()});
-        var a=card(x);
+        var a=card(x,function(){var y=cands.shift();if(y)row.replaceChild(lead(y),a);else a.remove()});
         a.addEventListener("click",function(){if(window.goatcounter&&goatcounter.count)goatcounter.count({path:"home-foryou-out",title:x[3],event:true})});
-        row.insertBefore(a,row.firstChild)})})();
+        return a};
+      cands.splice(0,2).reverse().forEach(function(x){row.insertBefore(lead(x),row.firstChild)})})();
     var fill=function(){
       while(at<list.length&&row.scrollLeft+row.clientWidth>row.scrollWidth-2*row.clientWidth){
         for(var k=0;k<12&&at<list.length;k++){row.appendChild(card(list[at++]));
           if(++since===60){since=0;var m=el("a","fs-w fs-more",(document.querySelector(".fs-all[data-fs]")||{}).textContent||"All works for sale →");m.href="find";m.dataset.fs="";row.appendChild(m)}}}
       ends()};
     var near=function(){if(list)return fill();if(asked||!row.dataset.more||row.scrollLeft+row.clientWidth<row.scrollWidth-2*row.clientWidth)return;
-      asked=true;fetch(row.dataset.more).then(function(r){return r.json()}).then(function(l){list=l.filter(function(x){return !skip[x[0]]});fill()}).catch(function(){asked=false})};
+      asked=true;fetch(row.dataset.more).then(function(r){return r.json()}).then(function(l){list=l.filter(function(x){return !skip[x[0]]&&tall.indexOf(x[0])<0});fill()}).catch(function(){asked=false})};
     row.addEventListener("scroll",function(){ends();near()},{passive:true});addEventListener("resize",ends);ends();
     // the hover picture, placed under its card (see .fs-pop); out of sight while the row or the page moves
     var on=null,place=function(){if(!on)return;var p=on.querySelector(".fs-pop"),c=on.getBoundingClientRect();if(!p)return;
