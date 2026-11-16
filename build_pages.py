@@ -534,7 +534,7 @@ def render(i, a, ws, lang):
               f"<meta name=\"twitter:card\" content=\"summary\">")
            + f"<script type=\"application/ld+json\">{jsonld(a, ws, sl, dates, lang, sale_ws)}</script>"
            f"<style>{CSS}</style>{LS.TAG}{GC}</head><body>"
-           f"<nav><a href=\"{BASE}/{'' if lang == 'en' else '#lang=et'}\">{T['site']}</a> › <a href=\"{BASE}/{D}/\">{T['art_nav']}</a> › {e(a['n'])} <span class=\"m\">· <a href=\"{other}\" hreflang=\"{'et' if lang == 'en' else 'en'}\">{T['other_lang']}</a></span></nav>"
+           f"<nav><a href=\"{BASE}/{'' if lang == 'en' else '#lang=et'}\">{T['site'].lower()}</a> › <a href=\"{BASE}/{D}/\">{T['art_nav']}</a> › {e(a['n'])} <span class=\"m\">· <a href=\"{other}\" hreflang=\"{'et' if lang == 'en' else 'en'}\">{T['other_lang']}</a></span></nav>"
            f"<h1>{e(a['n'])}</h1>"
            f"<button class=\"save\" id=\"save-a\" data-sa=\"{sl}\" data-on=\"{T['saved_a']}\" data-off=\"{T['save_a']}\" aria-pressed=\"false\" title=\"{T['save_t']}\" hidden>"
            f"<svg viewBox=\"0 0 16 16\" aria-hidden=\"true\"><path d=\"M4 2h8v12l-4-3-4 3z\"/></svg>{T['save_a']}</button>"
@@ -595,7 +595,7 @@ for lang in ("en", "et"):
         f'<link rel="canonical" href="{BASE}/{D}/"><link rel="alternate" hreflang="{lang}" href="{BASE}/{D}/"><link rel="alternate" hreflang="{"et" if lang == "en" else "en"}" href="{BASE}/{O["dir"]}/">'
         f'<style>{CSS}ul{{columns:260px;list-style:none;padding:0}}'
         f'li{{break-inside:avoid;padding:2px 0}}</style>{GC}</head><body>'
-        f'<nav><a href="{BASE}/{"" if lang == "en" else "#lang=et"}">{T["site"]}</a> › {T["art_nav"]} <span class="m">· <a href="{BASE}/{O["dir"]}/">{T["other_lang"]}</a></span></nav>'
+        f'<nav><a href="{BASE}/{"" if lang == "en" else "#lang=et"}">{T["site"].lower()}</a> › {T["art_nav"]} <span class="m">· <a href="{BASE}/{O["dir"]}/">{T["other_lang"]}</a></span></nav>'
         f'<h1>{T["idx_h"]}</h1><p class="m">{T["idx_n"].format(n=f"{len(index_rows):,}")} · <a href="{BASE}/{T["buy_u"]}">{T["buy"]}</a></p><ul>{lst}</ul></body></html>')
 
 # ---- retired names: redirect stubs --------------------------------------------
@@ -617,7 +617,7 @@ if os.path.exists(_retired):
             f"<link rel=\"canonical\" href=\"{BASE}/{D}/{nsl}\">"
             f"<meta http-equiv=\"refresh\" content=\"0; url={BASE}/{D}/{nsl}\">"
             f"<meta name=\"robots\" content=\"noindex\"><style>{CSS}</style></head><body>"
-            f"<nav><a href=\"{BASE}/\">Museaal</a> › {e(old)}</nav>"
+            f"<nav><a href=\"{BASE}/\">museaal</a> › {e(old)}</nav>"
             f"<h1>{e(old)}</h1><p class=\"m\">This spelling has been merged. The artist is catalogued as "
             f"<a href=\"{BASE}/{D}/{nsl}\">{e(new)}</a> — taking you there.</p></body></html>")
         stubs += 1
@@ -631,7 +631,7 @@ open("site/404.html", "w", encoding="utf-8").write(
     f"<title>Not found — Estonian Art Catalogue</title><meta name=\"robots\" content=\"noindex\">"
     f"<style>{CSS}form{{display:flex;gap:8px;max-width:520px;margin:18px 0}}"
     f"input{{flex:1;font:inherit;padding:8px 10px;border:1px solid #bbb}}button{{font:inherit;padding:8px 14px}}</style>{GC}</head><body>"
-    f"<nav><a href=\"{BASE}/\">Museaal</a> › Not found</nav>"
+    f"<nav><a href=\"{BASE}/\">museaal</a> › Not found</nav>"
     f"<h1>There is no page here</h1>"
     f"<p class=\"m\" id=\"why\">The address may be misspelt, or the page has moved.</p>"
     f"<form id=\"f\"><input id=\"q\" placeholder=\"Search the catalogue\" aria-label=\"Search\"><button>Search</button></form>"

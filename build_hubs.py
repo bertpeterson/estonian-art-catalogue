@@ -239,7 +239,7 @@ def page(lang, me, other, title, desc, h1, lede, ws, app_hash, facets, nb, xdefa
             f'<link rel="canonical" href="{me}"><link rel="alternate" hreflang="{lang}" href="{me}"><link rel="alternate" hreflang="{"et" if lang == "en" else "en"}" href="{other}"><link rel="alternate" hreflang="x-default" href="{xdefault}">'
             f'<meta property="og:type" content="website"><meta property="og:title" content="{e(h1)}"><meta property="og:description" content="{e(desc[:300])}"><meta property="og:url" content="{me}"><meta property="og:site_name" content="{T["site"]}">'
             f'<style>{CSS}</style>{GC}</head><body>'
-            f'<nav><a href="{BASE}/{T["site_link"]}">{T["site"]}</a> › {nb["crumb"]} <span class="m">· <a href="{other}">{T["other"]}</a></span></nav>'
+            f'<nav><a href="{BASE}/{T["site_link"]}">{T["site"].lower()}</a> › {nb["crumb"]} <span class="m">· <a href="{other}">{T["other"]}</a></span></nav>'
             f'<h1>{e(h1)}</h1><p class="m">{fmt(len(ws), lang)} {T["works"]} · {fmt(a_n, lang)} {T["artists"]}{" · " + span_of(ws) if span_of(ws) else ""}</p>'
             + (f'<p class="lede">{e(lede)}</p>' if lede else "")
             + f'<p><a href="{BASE}/#{T["hash"]}{e(app_hash)}">{T["browse"]}</a></p>'
@@ -321,7 +321,7 @@ def main():
                 f'<!doctype html><html lang="{lang}"><head><meta charset="utf-8">{STAMP}<meta name="viewport" content="width=device-width,initial-scale=1">'
                 f'<title>{e(h)} · museaal.ee</title><meta name="description" content="{e(h)}: {len(items)} {"pages" if lang == "en" else "lehte"} · {T["site"]}">'
                 f'<link rel="canonical" href="{me}"><link rel="alternate" hreflang="{lang}" href="{me}"><link rel="alternate" hreflang="{"et" if lang == "en" else "en"}" href="{other}">'
-                f'<style>{CSS}</style>{GC}</head><body><nav><a href="{BASE}/{T["site_link"]}">{T["site"]}</a> › {e(h)} <span class="m">· <a href="{other}">{T["other"]}</a></span></nav>'
+                f'<style>{CSS}</style>{GC}</head><body><nav><a href="{BASE}/{T["site_link"]}">{T["site"].lower()}</a> › {e(h)} <span class="m">· <a href="{other}">{T["other"]}</a></span></nav>'
                 f'<h1>{e(h)}</h1>{lst}<p class="nb">' + " · ".join(f'<a href="{BASE}/{T[x]}/">{T[x + "_h"]}</a>' for x in ("dec", "med", "mus", "sub") if x != k)
                 + f' · <a href="{BASE}/{T["art"]}/">{"Artists A–Z" if lang == "en" else "Kunstnikud A–Ü"}</a></p><p class="m">{CONTACT[lang]}</p></body></html>')
             urls.append((me, f"{BASE}/{L['en'][k]}/", f"{BASE}/{L['et'][k]}/"))

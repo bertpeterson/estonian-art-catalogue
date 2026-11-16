@@ -100,7 +100,7 @@ def head(lang, t, me, other, title, desc):
             f'<link rel="canonical" href="{me}"><link rel="alternate" hreflang="{lang}" href="{me}"><link rel="alternate" hreflang="{"et" if lang == "en" else "en"}" href="{other}">'
             '<link rel="stylesheet" href="/fonts/fonts.css">'
             f'<style>{CSS}</style>{LS.TAG}{H.GC}</head><body><div class="pg">'
-            f'<div class="top"><a class="wm" href="{BASE}/{"" if lang == "en" else "#lang=et"}">{t["site"]}</a>'
+            f'<div class="top"><a class="wm" href="{BASE}/{"" if lang == "en" else "#lang=et"}">{t["site"].lower()}</a>'
             f'<span><a class="eb" href="{BASE}/{U.T[lang]["file"]}">{t["up"]}</a><a class="eb" href="{other}">{t["other_l"]}</a></span></div>')
 
 def foot(t, lang, js=""):

@@ -187,7 +187,7 @@ def main():
                 f'<link rel="canonical" href="{me}"><link rel="alternate" hreflang="{lang}" href="{me}"><link rel="alternate" hreflang="{"et" if lang == "en" else "en"}" href="{other}">'
                 '<link rel="stylesheet" href="/fonts/fonts.css">'
                 f'<style>{CSS}</style>{LS.TAG}{H.GC}</head><body><div class="pg">'
-                f'<div class="top"><a class="wm" href="{BASE}/{"" if lang == "en" else "#lang=et"}">{t["site"]}</a><span><a class="eb" href="{BASE}/{t["pf"]}">{t["past"]}</a> <a class="eb" style="margin-left:14px" href="{other}">{t["other_l"]}</a></span></div>'
+                f'<div class="top"><a class="wm" href="{BASE}/{"" if lang == "en" else "#lang=et"}">{t["site"].lower()}</a><span><a class="eb" href="{BASE}/{t["pf"]}">{t["past"]}</a> <a class="eb" style="margin-left:14px" href="{other}">{t["other_l"]}</a></span></div>'
                 f'<header class="mast"><h1>{t["h"]}</h1></header>'
                 + (body or f'<p class="m">{e(t["none"])}</p>')
                 + f'<footer class="foot">{e(t["note"])} {H.CONTACT[lang]}</footer></div>{SM.OPEN}{JS}</script>{SM.OPEN}{MINE_JS % json.dumps({k: t[k] for k in ("mine", "w1", "wn", "first")}, ensure_ascii=False)}</script></body></html>')

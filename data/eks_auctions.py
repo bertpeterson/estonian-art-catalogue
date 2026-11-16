@@ -24,8 +24,13 @@ CACHE = "gcache"
 os.makedirs(CACHE, exist_ok=True)
 ctx = ssl.create_default_context()   # certificate and host checked: a forged answer must not become a listing
 
+_last = [None]
 def fetch(url):
+    # the crawl delay e-kunstisalong.ee asks for, two minutes, before every request after the first --
+    # a coming sale's page too, which used to follow the list at once
+    if _last[0] is not None: time.sleep(max(0, 120 - (time.monotonic() - _last[0])))
     for attempt in range(3):
+        _last[0] = time.monotonic()
         try:
             r = urllib.request.Request(url, headers={"User-Agent": UA})
             with urllib.request.urlopen(r, timeout=45, context=ctx) as f:
@@ -41,7 +46,6 @@ def get(url, key):
     h = fetch(url)
     if h:
         with gzip.open(p, "wt", encoding="utf-8") as f: f.write(h)
-    time.sleep(120)     # the crawl delay e-kunstisalong.ee asks for
     return h
 
 from scrape_util import U as clean
@@ -75,13 +79,16 @@ recent = (datetime.date.today() - datetime.timedelta(days=60)).isoformat()
 recs, n_open, n_empty, n_unparsed = [], 0, 0, 0
 coming = []
 for url, sale, date in sales:
-    ahead = date > today
+    ahead = date >= today                                           # the day of the sale it is still to come
     key = "eksauc_" + re.sub(r"\W+", "_", url.rsplit("/", 1)[-1])
     if not ahead and key in KEPT and date < recent and KEPT[key] and "img" in KEPT[key][0]:
         recs.extend(KEPT[key]); continue
     if ahead: n_open += 1
-    h = fetch(url) if ahead else get(url, key)                       # a coming sale's page is not cached: its lots change
-    if ahead and not h: continue
+    # a coming sale's page is not cached: its lots change. Nor is a sale of the last sixty days: its results go up
+    # some days after it and lots sell on after the sale, and a page cached the Monday after would stay as it was then
+    fresh = ahead or date >= recent
+    h = fetch(url) if fresh else get(url, key)
+    if fresh and not h: continue
     cards = [(*m.groups(), (re.findall(r"(?:data-)?src='(/s2/[^']+)'", h[max(0, m.start() - 3000):m.start()]) or [None])[-1])
              for m in CARD.finditer(h)]
     if not cards:
@@ -89,6 +96,9 @@ for url, sale, date in sales:
         p = os.path.join(CACHE, key + ".html.gz")
         if os.path.exists(p) and date > (datetime.date.today() - datetime.timedelta(days=60)).isoformat(): os.remove(p)   # results may come later
         continue
+    if not ahead and date >= recent and not re.search(r"lõpp|müüdud", " ".join(c[3] for c in cards), re.I):
+        print(f"  {date} {sale[:36]:36} held, no results on its page yet: left for the next run", flush=True)
+        n_empty += 1; continue
     n = 0
     if not ahead: KEPT[key] = []
     for artist, lot, line, price, im in cards:
@@ -97,6 +107,8 @@ for url, sale, date in sales:
         lm = re.match(r"^(?:(\d+)\.\s*)?(.+)$", lot)
         if not lm or not re.match(r"^[^\d]{3,60}$", artist): n_unparsed += 1; continue
         lotno, title = lm.group(1) or str(n + 1), lm.group(2).strip()
+        # an empty twin of a card before the real one (the 26th sale's Horma) runs into its title: "Hurmav unelm 1937 Alg: € Paul Horma Hurmav unelm"
+        title = re.sub(r"^.*\bAlg:\s*€?\s*" + re.escape(artist) + r"\s+", "", title)
         # "1970. Õli, lõuend. 60 x 73. Signatuuriga." / "U1925. Õli, lõuend. 53,2 x 70,5. Signatuurita."
         # older sales run the line together: "1961-1964 Õli,papp 50 x 70"; the year is
         # whatever leads, the size whatever measures, the medium what sits between

@@ -136,7 +136,7 @@ def page(lang):
             f'<link rel="alternate" hreflang="{lang}" href="{BASE}/{p["file"]}"><link rel="alternate" hreflang="{"et" if lang == "en" else "en"}" href="{BASE}/{p["other"]}">'
             '<link rel="stylesheet" href="/fonts/fonts.css">'
             f'<style>{CSS}{MORE}</style>{GC}</head><body><div class="pg">'
-            f'<div class="top"><a class="wm" href="{p["home"]}">{e(p["site"])}</a><a class="eb" href="{p["other"]}" hreflang="{"et" if lang == "en" else "en"}">{p["other_l"]}</a></div>'
+            f'<div class="top"><a class="wm" href="{p["home"]}">{e(p["site"].lower())}</a><a class="eb" href="{p["other"]}" hreflang="{"et" if lang == "en" else "en"}">{p["other_l"]}</a></div>'
             f'<header class="mast"><h1>{e(p["title"])}</h1><p class="lede">{e(p["lede"])}</p></header><main>{body}</main>'
             f'<footer class="foot"><a href="{p["home"]}">{e(p["back"])}</a> · {MAIL}</footer></div></body></html>')
 

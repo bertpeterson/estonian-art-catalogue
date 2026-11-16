@@ -434,7 +434,7 @@ def page(lang, ver, api, d, kinds):
             '<link rel="stylesheet" href="/fonts/fonts.css">'
             '<link rel="preconnect" href="https://www.muis.ee"><link rel="preconnect" href="https://digikogu.ekm.ee">'
             f'<style>{CSS}</style>{H.GC}{LS.TAG}</head><body><div class="wrap">'
-            f'<nav><a href="{BASE}/{"" if lang == "en" else "#lang=et"}">{e(t["site"])}</a> › {e(t["h"])} · <a href="{other}" hreflang="{"et" if lang == "en" else "en"}">{e(t["other_l"])}</a></nav>'
+            f'<nav><a href="{BASE}/{"" if lang == "en" else "#lang=et"}">{e(t["site"].lower())}</a> › {e(t["h"])} · <a href="{other}" hreflang="{"et" if lang == "en" else "en"}">{e(t["other_l"])}</a></nav>'
             f'<header><h1>{e(t["h"])}</h1><p class="lede">{e(t["lede"])}</p></header>'
             f'<form class="describe" id="describe"><label for="feel">{e(t["describe"])}</label>'
             f'<input id="feel" type="text" autocomplete="off" placeholder="{e(t["ph"])}"><button class="btn solid" type="submit">{e(t["find"])}</button>'

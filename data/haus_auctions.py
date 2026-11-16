@@ -73,6 +73,7 @@ for pg in ("", "2", "3", "4", "5", "6"):
 print(f"HAUS: {len(sales)} sales listed", flush=True)
 
 today = datetime.date.today().isoformat()
+recent = (datetime.date.today() - datetime.timedelta(days=30)).isoformat()
 recs, n_upcoming, n_unparsed = [], 0, 0
 coming = []
 # the coming sale is not in the list of past sales but on its own page ("Käesolev"),
@@ -83,10 +84,11 @@ if CUR and '<figure class="artwork' in CUR:
     hm = re.search(r"<h[12][^>]*>([^<]*oksjon[^<]*)</h[12]>", CUR, re.I)
     sales["current"] = (sentence(clean(hm.group(1)).strip(" .-")) if hm else "Haus Galerii oksjon", tm.group(1)[:10] if tm else "9999-12-31")
 for aid, (sale, when) in sorted(sales.items(), key=lambda x: x[1][1]):
-    ahead = aid == "current" or when > today
+    ahead = aid == "current" or when >= today                       # the day of the sale it is still to come
     if ahead: n_upcoming += 1
     if aid == "current": h = CUR
-    elif ahead: h = fetch(f"{BASE}/?c=toimunud-oksjonid&l=et&id={aid}")     # a coming sale's page is not cached
+    # a coming sale's page is not cached, nor a sale of the last month: lots sell on after the sale
+    elif ahead or when >= recent: h = fetch(f"{BASE}/?c=toimunud-oksjonid&l=et&id={aid}")
     else: h = get(f"{BASE}/?c=toimunud-oksjonid&l=et&id={aid}", f"hausauc_{aid}")
     if not h: continue
     for fig in re.findall(r'<figure class="artwork.*?</figure>', h, re.S):
@@ -96,7 +98,9 @@ for aid, (sale, when) in sorted(sales.items(), key=lambda x: x[1][1]):
         tech = re.search(r'<p class="tech">(.*?)</p>', fig, re.S)
         if not (item and aut and tit): n_unparsed += 1; continue
         t = tit.group(1)
-        ym = re.search(r'<span class="year">(.*?)</span>', t)
+        # since the November 2026 redesign the year stands before the technique, not after the
+        # title; the prices are a <dl>, and the size is only on the lot's own page
+        ym = re.search(r'<span class="year">(.*?)</span>', t) or (tech and re.search(r'<span class="year">(.*?)</span>', tech.group(1)))
         year = clean(ym.group(1)) if ym else ""
         title = clean(re.sub(r'<span class="year">.*?</span>', "", t)).rstrip(" .")
         # the early catalogues were typed in capitals ("SEISEV NAINE MAASTIKUL"); that is
@@ -105,11 +109,17 @@ for aid, (sale, when) in sorted(sales.items(), key=lambda x: x[1][1]):
             title = ". ".join(p[:1].upper() + p[1:].lower() for p in title.split(". "))
         artist = clean(aut.group(1))
         if not title or not re.match(r"^[^\d]{3,60}$", artist): n_unparsed += 1; continue
-        tx = clean(tech.group(1)) if tech else ""
+        tx = clean(re.sub(r'<span class="(?:year|dot)">.*?</span>', "", tech.group(1))).strip(" .") if tech else ""
         dm = DIMS.search(tx)
+        if not dm:
+            # a lot's own page does not change once it is in the catalogue: read once, kept in the cache
+            lot = get(f"{BASE}/?c=toimunud-oksjonid&l=et&id={aid}&item={item.group(1)}" if aid != "current" else f"{BASE}/?c=oksjon&l=et&item={item.group(1)}", f"hausitem_{item.group(1)}")
+            sm = re.search(r'<span class="size">(.*?)</span>', lot or "", re.S)
+            dm = DIMS.search(clean(sm.group(1))) if sm else None
         dims = re.sub(r"\s*[×x]\s*", " x ", dm.group(1)).replace(",", ".") + " cm" if dm else ""
         medium = re.sub(r"[.,;\s]+$", "", DIMS.sub("", tx)).strip() if tx else ""
-        prices = dict((clean(k).lower(), clean(v)) for k, v in re.findall(r'<div class="price">(.*?)<strong class="price[^"]*">(.*?)</strong>', fig, re.S))
+        prices = dict((clean(k).lower(), clean(v)) for k, v in re.findall(r'<div class="price">(.*?)<strong class="price[^"]*">(.*?)</strong>', fig, re.S)
+                      + re.findall(r'<dt class="price">(.*?)</dt>\s*<dd class="price[^"]*">(.*?)</dd>', fig, re.S))
         start = euros(prices.get("alghind", ""))
         hammer = euros(prices.get("haamrihind", ""))
         # a hammer price with no bid in the room is a sale made after the sale, at the

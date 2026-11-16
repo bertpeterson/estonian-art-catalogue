@@ -58,7 +58,7 @@ RULES = {
     "konradmagi":  [(r"/maalid/$", 1), (r"/eskiisid/$", 1), (r"/kadunud/$", 1)],
     # the auction houses (auctions.yml): the list of sales, a sale or two, a few lots' own pages
     "vernissage_auctions": [(r"page=1$", 1)],
-    "haus_auctions":       [(r"_s=1&p=$", 1), (r"c=oksjon&l=et$", 1), (r"toimunud-oksjonid&l=et&id=\d+$", 2)],
+    "haus_auctions":       [(r"_s=1&p=$", 1), (r"c=oksjon&l=et$", 1), (r"toimunud-oksjonid&l=et&id=\d+$", 2), (r"&item=\d+$", 4)],
     "eko_auctions":        [(r"\.ee/$", 1), (r"/k/oksjonid/[^/]+/$", 2), (r"\.ee/(?!k/oksjonid/)[^?]+$", 4)],
     "vaal_auctions":       [(r"vaal\.ee/oksjonid$", 1), (r"vaal\.ee/oksjonid/[a-z0-9-]+$", 2), (r"/api/auction\?", 2), (r"/api/item\?", 4)],
     "eks_auctions":        [(r"_oksjonid_756$", 1), (r"oksjon[^/]*_\d+$", 2)],

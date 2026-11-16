@@ -121,7 +121,7 @@ def render(lang):
              f"<title>The catalogue in figures — Estonian Art Catalogue</title>"
              f"<meta name=\"description\" content=\"What museaal.ee holds by kind and medium, and the Estonian auction record by house, year and artist.\">"
              f"<link rel=\"canonical\" href=\"https://museaal.ee/{OUTNAME}\"><style>{CSS}</style>{GC}</head><body>"
-             f"<nav><a href=\"./\">Museaal</a> › {_('The catalogue in figures')}</nav>"
+             f"<nav><a href=\"./\">museaal</a> › {_('The catalogue in figures')}</nav>"
              f"<h1>{_('The catalogue in figures')}</h1><p class=\"m\">{_('Computed from the data as built on')} {today}. {_(PRICES_NOTE)}</p>"]
 
     parts.append('<div class="grid">' + "".join(f'<div><div class="big">{fmt(n)}</div><div class="m">{e(_(KIND.get(k, k)))}</div></div>'

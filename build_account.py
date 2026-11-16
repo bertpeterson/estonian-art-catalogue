@@ -121,7 +121,7 @@ def main():
                 f'<link rel="alternate" hreflang="{"et" if lang == "en" else "en"}" href="{p["other"]}">'
                 '<link rel="stylesheet" href="/fonts/fonts.css">'
                 f'<style>{CSS}</style>{LS.TAG}{GC}</head><body><div class="pg">'
-                f'<div class="top"><a class="wm" href="{p["home"]}">{e(p["site"])}</a><a class="eb" href="{p["other"]}">{p["other_l"]}</a></div>'
+                f'<div class="top"><a class="wm" href="{p["home"]}">{e(p["site"].lower())}</a><a class="eb" href="{p["other"]}">{p["other_l"]}</a></div>'
                 f'<header class="mast"><h1>{e(t["acc_h"])}</h1><p class="lede"></p></header><main id="acc"></main>'
                 f'<footer class="foot"><a href="{p["home"]}">{e(S["acc_back"])}</a> · <a id="acc-pv" href="{p["privacy"]}">{e(S["privacy_link"])}</a></footer></div>'
                 f'<script type="application/json" id="acc-t">{tj}</script>'

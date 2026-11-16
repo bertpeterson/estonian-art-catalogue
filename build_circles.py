@@ -177,7 +177,7 @@ def network(lang):
     lede = T["net_lede"].format(n=n, k=k)
     open(f"site/{T['dir']}/{'network' if lang == 'en' else 'vorgustik'}.html", "w", encoding="utf-8").write(
         head(lang, me, other, net_href("en"), T["net_t"].format(n=n, k=k), lede).replace("</style>", css + "</style>")
-        + f'<nav><a href="{BASE}/{T["site_link"]}">{T["site"]}</a> › <a href="{BASE}/{T["dir"]}/">{T["h"]}</a> › {T["net"]} <span class="m">· <a href="{other}">{T["other"]}</a></span></nav>'
+        + f'<nav><a href="{BASE}/{T["site_link"]}">{T["site"].lower()}</a> › <a href="{BASE}/{T["dir"]}/">{T["h"]}</a> › {T["net"]} <span class="m">· <a href="{other}">{T["other"]}</a></span></nav>'
         + f'<h1>{T["net_h"]}</h1><p class="lede">{e(lede)}</p>{legend}<div class="nw">{"".join(svg)}</div>'
         + f'<h2>{T["top"]}</h2><ul class="cols">{top}</ul>'
         + f'<p class="nb"><a href="{BASE}/{T["dir"]}/">{T["h"]}</a> · ' + " · ".join(f'<a href="{href(x, lang)}">{e(x[lang])}</a>' for x in CIRCLES) + "</p>"
@@ -208,7 +208,7 @@ def main():
             ws = [w for i in mem for w in by_artist[i]]
             others = " · ".join(f'<a href="{href(x, lang)}">{e(x[lang])}</a>' for x in CIRCLES if x is not c)
             body = (head(lang, me, other, href(c, "en"), T["t"].format(c=name, n=len(mem)), T["d"].format(c=name, d=desc_, n=len(mem)))
-                + f'<nav><a href="{BASE}/{T["site_link"]}">{T["site"]}</a> › <a href="{BASE}/{T["dir"]}/">{T["h"]}</a> › {e(name)} <span class="m">· <a href="{other}">{T["other"]}</a></span></nav>'
+                + f'<nav><a href="{BASE}/{T["site_link"]}">{T["site"].lower()}</a> › <a href="{BASE}/{T["dir"]}/">{T["h"]}</a> › {e(name)} <span class="m">· <a href="{other}">{T["other"]}</a></span></nav>'
                 + f'<h1>{e(name)}</h1><p class="m">{fmt(len(mem), lang)} {T["artists"]}'
                 + (f' · {T["born"]} {min(ys)}–{max(ys)}' if ys else "") + "</p>"
                 + f'<p class="lede">{e(desc_)}</p>'
@@ -225,7 +225,7 @@ def main():
         lst = "".join(f'<li><a href="{href(c, lang)}">{e(c[lang])}</a><span class="n">{fmt(len(c["members"]), lang)}</span><br><span class="m">{e(c["d_" + lang])}</span></li>' for c in CIRCLES)
         open(f"site/{T['dir']}/index.html", "w", encoding="utf-8").write(
             head(lang, me, other, f"{BASE}/{L['en']['dir']}/", f"{T['h']} · museaal.ee", T["lede"])
-            + f'<nav><a href="{BASE}/{T["site_link"]}">{T["site"]}</a> › {T["h"]} <span class="m">· <a href="{other}">{T["other"]}</a></span></nav>'
+            + f'<nav><a href="{BASE}/{T["site_link"]}">{T["site"].lower()}</a> › {T["h"]} <span class="m">· <a href="{other}">{T["other"]}</a></span></nav>'
             + f'<h1>{T["h"]}</h1><p class="lede">{T["lede"]}</p><p class="m"><a href="{net_href(lang)}">{fmt(len(LINKS), lang)} {T["links"]} — {T["net"].lower()} →</a></p><ul class="tl">{lst}</ul>'
             + f'<p class="nb"><a href="{BASE}/{T["art"]}/">{"Artists A–Z" if lang == "en" else "Kunstnikud A–Ü"}</a></p><p class="m">{CONTACT[lang]}</p></body></html>')
         urls.append((me, f"{BASE}/{L['en']['dir']}/", f"{BASE}/{L['et']['dir']}/"))
