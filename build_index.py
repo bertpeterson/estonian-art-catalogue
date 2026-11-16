@@ -108,6 +108,26 @@ ERAS_JS=(SM.OPEN+'(function(){var el=document.getElementById("eras"),bars=docume
  'if(!f){a.remove();return}var x=f.getBoundingClientRect().left-box.left,r=l.getBoundingClientRect().right-box.left;'
  'a.style.left=x.toFixed(1)+"px";a.style.width=Math.max(0,r-x-2).toFixed(1)+"px"});'
  'el.classList.remove("baked");el.querySelectorAll(".era").forEach(function(a){if(a.scrollWidth>a.clientWidth&&a.dataset.short)a.textContent=a.dataset.short})})()</script>')
+# Every view deals its own artwall from the baked 72 and the pool beside them (build_landing.py, the same rule):
+# the masterpieces by rank, each slipped up to 36 places, the first 36 of them and then twelve by chance; two key
+# works a row of six, their artists taking turns. Laid into the six baked columns, shortest next, before the first
+# paint; the seed and the order go where the app reads them (data-seed, data-keys), so its wall is this one.
+WALL_JS=(SM.OPEN+'(function(){try{var wall=document.querySelector("#register .wall[data-seed]"),pool=document.getElementById("wall-pool");if(!wall||!pool)return;'
+ 'var seed=String(Math.random()).slice(2,8),fnv=function(s){var h=2166136261;for(var i=0;i<s.length;i++)h=Math.imul(h^s.charCodeAt(i),16777619);return h>>>0},'
+ 'k=function(t){return t.getAttribute("data-wt")},by=function(f){return function(a,b){return f(a)-f(b)}},'
+ 'ts=[].slice.call(wall.querySelectorAll(".wt")).concat([].slice.call(pool.content.querySelectorAll(".wt")));'
+ 'var M=ts.filter(function(t){return t.hasAttribute("data-m")}).map(function(t){return[+t.getAttribute("data-m")+fnv(k(t)+seed)%36,fnv(k(t)),t]})'
+ '.sort(function(a,b){return a[0]-b[0]||a[1]-b[1]}).map(function(x){return x[2]});'
+ 'M=M.slice(0,36).concat(M.slice(36).sort(by(function(t){return fnv(k(t)+seed+"m")})));'
+ 'var ka={},kl=[],K=[];ts.forEach(function(t){var a=t.getAttribute("data-a");if(a!==null)(ka[a]||(kl.push(ka[a]=[]),ka[a])).push(t)});'
+ 'kl.forEach(function(l){l.sort(by(function(t){return fnv(k(t)+seed+"k")}))});kl.sort(by(function(l){return fnv(k(l[0])+seed)}));'
+ 'for(var r=0;r<6;r++)kl.forEach(function(l){if(l[r])K.push(l[r])});'
+ 'var out=[],m=0,q=0;for(var i=0;i<72;i++){var t=i%3===2?(K[q]?K[q++]:M[m++]):(M[m]?M[m++]:K[q++]);if(!t)break;out.push(t)}'
+ 'if(out.length<72)return;'
+ 'var cols=[].slice.call(wall.children).map(function(c){c.textContent="";return{e:c,h:0}});'
+ 'out.forEach(function(t){var c=cols.reduce(function(a,b){return b.h<a.h?b:a}),i=t.querySelector("img[data-src]");'
+ 'if(!c.h&&i){i.src=i.getAttribute("data-src");i.removeAttribute("data-src")}c.h+=(+t.getAttribute("data-r")||1)+.32;c.e.appendChild(t)});'
+ 'wall.setAttribute("data-seed",seed);wall.setAttribute("data-keys",out.map(k).join(","));pool.remove()}catch(e){}})()</script>')
 if _os.path.exists('site/landing.json'):
     _L=_json.load(open('site/landing.json',encoding='utf-8'))
     _et=lambda k: '<template id="et-'+k+'">'+_L[k+'_et']+'</template>' if _L.get(k+'_et') else ''
@@ -116,7 +136,7 @@ if _os.path.exists('site/landing.json'):
     body=body.replace('<div class="eras" id="eras"></div>',_et('eras')+'<div class="eras baked" id="eras">'+_L.get('eras','')+'</div>'+ERAS_JS,1)
     body=body.replace('<div class="fs-works" id="fs-works"></div>','<div class="fs-works" id="fs-works" data-more="'+_L.get('fs_more','')+'">'+_L.get('fs_works','')+'</div>',1)
     body=body.replace('<p class="fs-lede" id="fs-lede"></p>',_L.get('fs_lede','<p class="fs-lede" id="fs-lede"></p>'),1)
-    body=body.replace('<main id="register"></main>','<main id="register">'+_L['register']+'</main>\n'+SM.OPEN+'if(location.hash&&!/^#(lang=\\w+|theme=\\w+)(&|$)/.test(location.hash)){document.getElementById("register").innerHTML="";document.getElementById("doors").hidden=true;document.getElementById("bars").innerHTML="";document.getElementById("eras").innerHTML="";document.getElementById("forsale").hidden=true}</script>',1)
+    body=body.replace('<main id="register"></main>','<main id="register">'+_L['register']+'</main>\n'+SM.OPEN+'if(location.hash&&!/^#(lang=\\w+|theme=\\w+)(&|$)/.test(location.hash)){document.getElementById("register").innerHTML="";document.getElementById("doors").hidden=true;document.getElementById("bars").innerHTML="";document.getElementById("eras").innerHTML="";document.getElementById("forsale").hidden=true}</script>'+WALL_JS,1)
 open('site/index.html','w',encoding='utf-8').write(head+body+"\n"+a+"\n</body>\n</html>\n")
 import os
 print("MISSED:",miss if miss else "none")

@@ -1932,8 +1932,9 @@
   // sculpture, drawings and sketches, prints last; within a medium the chosen order.
   const MED_RANK = {"Painting":0, "Watercolour":1, "Sculpture":2, "Mixed media":3, "Installation":3, "Drawing":4, "Sketch":5, "Photograph":6, "Print":7};
   const medRank = w => MED_RANK[w.e] ?? 8;
-  // the deal of the masterpieces: the seed the landing page was baked with, so the
-  // app's first paint keeps the order the visitor already sees; without one, random
+  // the deal of the masterpieces: the seed this view dealt the baked wall with (WALL_JS in build_index.py; the
+  // build's own where that did not run), so the app's first paint keeps the order the visitor already sees;
+  // without one, random
   const BAKED = document.querySelector(".wall[data-seed]");
   const VISIT = BAKED ? BAKED.dataset.seed : String(Math.random()).slice(2, 8);
   let BAKED_LIVE = !!BAKED;

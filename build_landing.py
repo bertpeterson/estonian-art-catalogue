@@ -5,7 +5,9 @@ the 20 MB index has arrived. The app renders the same view when it boots and tak
 baked tile order for its first paint (data-keys), so nothing jumps. The order is the
 app's: masterpieces first, each rank slipped up to 36 places by a seed fixed at
 build time (data-seed), two key works dealt into every row of six, then the door's names
-and everyone else in turn.
+and everyone else in turn. That baked deal is what a reader without scripts gets; with them,
+every view deals its own from the same pool before the first paint (WALL_JS in build_index.py),
+and writes its seed and order where the app looks for them.
 """
 import json, re, html, time, os, collections
 
@@ -117,6 +119,9 @@ for i in range(72):
     if w is None: break
     shown.append(w)
 if len(shown) < 72: shown += [r[6] for r in rows if r[6] not in shown][:72 - len(shown)]
+# what a view's own deal draws on besides those 72 (2026-11-16: one deal a build was the same wall all day): the
+# masterpieces left over and each artist's next key works, six an artist in all, kept in a <template>
+_pool = [w for w in _M if w not in shown] + [w for l in _kl for w in l[:6] if w not in shown]
 
 import sys; sys.path.insert(0, "data"); from thumbs import thumbs
 SMALL = thumbs(W)   # the lighter copy for a tile: data/thumbs.py
@@ -131,20 +136,23 @@ for w in shown:
     lw = light.get(key(w), {}); r = (lw.get("r") or 100) / 100
     c = min(cols, key=lambda c: c["h"]); c["h"] += r + 0.32; c["t"].append((w, r, lw.get("rs")))
 POS = {"l": "100% 50%", "r": "0% 50%", "t": "50% 100%", "b": "50% 0%"}   # the chart's side is the side cropped away
-def tile(w, r, rs, j):
+def tile(w, r, rs, j=1):
     lab = f'{w.get("y") if w.get("y") else "n.d."} · {e(name("mu", w["mu"]))}'
     zm = f';object-position:{POS[rs]}' if rs else ""
-    # the first tile of each column loads at once; the rest as they come near the screen
-    # (window.__lz in tpl_head.html), so the pictures in view and the catalogue's data
-    # are not queued behind forty that are not
-    src = f'src="{e(imsrc(w["im"]))}"' if j < 1 else f'src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-src="{e(imsrc(w["im"]))}"'
-    return (f'<a class="wt" data-wt="{e(key(w))}" href="#artist={slug(A[w["a"]]["n"])}&open={e(key(w))}" title="{e(w["t"])} · {e(A[w["a"]]["n"])}">'
+    # every picture waits in data-src: the view's deal (WALL_JS) gives the first tile of each column its picture
+    # at once, and the rest get theirs as they come near the screen (window.__lz in tpl_head.html), so the
+    # pictures in view and the catalogue's data are not queued behind forty that are not -- and none is
+    # fetched for a place the deal then gives to another
+    src = f'src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-src="{e(imsrc(w["im"]))}"'
+    deal = f' data-m="{w["mp"]}"' if w.get("mp") else f' data-a="{w["a"]}"' if w.get("hl") is not None else ""
+    return (f'<a class="wt" data-wt="{e(key(w))}" data-r="{r:.3f}"{deal} href="#artist={slug(A[w["a"]]["n"])}&open={e(key(w))}" title="{e(w["t"])} · {e(A[w["a"]]["n"])}">'
             f'<img {src} alt="{e(w["t"])}, {e(A[w["a"]]["n"])}" style="aspect-ratio:1/{r:.3f}{zm}" referrerpolicy="no-referrer-when-downgrade">'
             f'<span class="wt-cap"><i>{e(w["t"])}</i><span>{e(A[w["a"]]["n"])} · {lab}</span></span></a>')
 npics = len(pics)
 bar = I18N["EN"]["wall_line_home"].replace("{p}", f"{npics:,}") + " · " + I18N["EN"]["wall_imgs"]
 wall = (f'<div class="wall" data-cols="6" data-seed="{SEED}" data-keys="{e(",".join(key(w) for w in shown))}">'
-        + "".join('<div class="wcol">' + "".join(tile(*t, j) for j, t in enumerate(c["t"])) + "</div>" for c in cols) + "</div>")
+        + "".join('<div class="wcol">' + "".join(tile(*t, j) for j, t in enumerate(c["t"])) + "</div>" for c in cols) + "</div>"
+        + '<template id="wall-pool">' + "".join(tile(w, (light.get(key(w), {}).get("r") or 100) / 100, light.get(key(w), {}).get("rs")) for w in _pool) + "</template>")
 # The histogram and the eras, baked: the app draws them from the index, so for the
 # seconds before it arrives -- five on a phone -- the page had an empty band where they
 # go, and drawing them pushed everything under it down. The same markup as the app's
@@ -289,4 +297,4 @@ fs_more = "data/fs-more.json?v=" + _hashlib.sha1(_more.encode()).hexdigest()[:10
 fs_lede = f'<p class="fs-lede" id="fs-lede" data-n="{len(_sale)}" data-g="{len(_galleries)}">' + e(EN["fs_lede"].replace("{n}", f"{len(_sale):,}").replace("{g}", str(len(_galleries)))) + "</p>"
 json.dump({"doors": door, "door_lists": door_lists, "register": wall, "bars": bars, "eras": eras, "seed": SEED, "fs_works": fs_works, "fs_more": fs_more, "fs_lede": fs_lede,
            "doors_et": doors("et"), "bars_et": bake_bars("et"), "eras_et": bake_eras("et")}, open("site/landing.json", "w", encoding="utf-8"), ensure_ascii=False)
-print(f"  landing baked   {len(shown)} tiles, seed {SEED}, first: {shown[0]['t']} · {A[shown[0]['a']]['n']}")
+print(f"  landing baked   {len(shown)} tiles + {len(_pool)} in the pool, seed {SEED}, first: {shown[0]['t']} · {A[shown[0]['a']]['n']}")
