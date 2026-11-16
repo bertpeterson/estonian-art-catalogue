@@ -377,11 +377,11 @@ const putList = (KV, u, rec) => KV.put("u:" + u, JSON.stringify(rec),
   { expirationTtl: LIST_TTL, metadata: { e: rec.e, since: rec.since, n: rec.items.length, at: rec.updated } });
 
 const MAIL = {          // no bare "museaal.ee" in the text: mail apps make it a second link next to the sign-in one
-  en: { subject: "Your sign-in link for museaal.ee", text: (link, news) => "Here is your link to sign in to Museaal:\n\n" + link +
+  en: { subject: "Your sign-in link for museaal.ee", text: (link, news) => "Here is your link to sign in to museaal:\n\n" + link +
     "\n\nIt works once, for 15 minutes. To use your list on another device, ask for a new link there.\n\n" + (news ?
     "Once you sign in, we will also email you now and then about new features. You can unsubscribe any time.\n\n" : "") +
     "If you did not ask to sign in, you can ignore this email." },
-  et: { subject: "Sinu sisselogimislink museaal.ee-sse", text: (link, news) => "Siin on sinu link, et logida sisse Museaali:\n\n" + link +
+  et: { subject: "Sinu sisselogimislink museaal.ee-sse", text: (link, news) => "Siin on sinu link, et logida sisse museaali:\n\n" + link +
     "\n\nLink töötab üks kord ja 15 minutit. Teises seadmes nimekirja kasutamiseks küsi seal uus link.\n\n" + (news ?
     "Kui oled sisse loginud, saadame sulle aeg-ajalt kirja museaal.ee uuendustest. Tellimuse saad lõpetada igal ajal.\n\n" : "") +
     "Kui sa sisselogimist ei küsinud, võid selle kirja tähelepanuta jätta." },
@@ -586,13 +586,13 @@ const ALERTS_PER_DAY = 60, ALERTED_DAYS = 120;
 const ALERT_MAIL = {
   en: { brand: "museaal", eyebrow: "Sale alert", head: "New for sale from your artists", fresh: n => n + " new",
     count: (w, a) => w + (w === 1 ? " work" : " works") + " by " + a + (a === 1 ? " artist" : " artists"),
-    subject: names => "For sale now: " + names, intro: "New on the market from the artists you saved on Museaal:",
-    lot: (h, d) => "auction, " + h + (d ? ", " + d : ""), start: "starting price", all: "Your artists on Museaal:",
+    subject: names => "For sale now: " + names, intro: "New on the market from the artists you saved on museaal:",
+    lot: (h, d) => "auction, " + h + (d ? ", " + d : ""), start: "starting price", all: "Your artists on museaal:",
     why: "You get this because you turned on sale alerts for the artists on your list.", stop: "To stop them:", more: n => " and " + n + " more" },
   et: { brand: "museaal", eyebrow: "Müügiteade", head: "Uut müügil sinu kunstnikelt", fresh: n => n + (n === 1 ? " uus" : " uut"),
     count: (w, a) => w + (w === 1 ? " teos" : " teost") + ", " + a + (a === 1 ? " kunstnik" : " kunstnikku"),
-    subject: names => "Nüüd müügil: " + names, intro: "Uut turul kunstnikelt, kelle oled Museaalis salvestanud:",
-    lot: (h, d) => "oksjon, " + h + (d ? ", " + d : ""), start: "alghind", all: "Sinu kunstnikud Museaalis:",
+    subject: names => "Nüüd müügil: " + names, intro: "Uut turul kunstnikelt, kelle oled museaalis salvestanud:",
+    lot: (h, d) => "oksjon, " + h + (d ? ", " + d : ""), start: "alghind", all: "Sinu kunstnikud museaalis:",
     why: "Saad selle kirja, sest lülitasid sisse teated oma nimekirja kunstnike müügitööde kohta.", stop: "Loobumiseks:", more: n => " ja veel " + n },
 };
 const euro = n => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, " ") + " €";

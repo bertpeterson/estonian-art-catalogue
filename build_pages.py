@@ -525,7 +525,7 @@ def render(i, a, ws, lang):
            f"<meta property=\"og:title\" content=\"{e(a['n'])}{' (' + e(dates) + ')' if dates else ''}\">"
            f"<meta property=\"og:description\" content=\"{e(desc)}\">"
            f"<meta property=\"og:url\" content=\"{me}\">"
-           f"<meta property=\"og:site_name\" content=\"{T['site']}\">"
+           f"<meta property=\"og:site_name\" content=\"{T['site'].lower()}\">"
            f"<meta property=\"og:locale\" content=\"{'en_GB' if lang == 'en' else 'et_EE'}\">"
            # a shared link shows the artist's first work -- the holder's own picture, by reference
            + (f"<meta property=\"og:image\" content=\"{e(imsrc(tiles[0]['im']))}\">"

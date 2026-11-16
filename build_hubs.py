@@ -237,7 +237,7 @@ def page(lang, me, other, title, desc, h1, lede, ws, app_hash, facets, nb, xdefa
     return (f'<!doctype html><html lang="{lang}"><head><meta charset="utf-8">{STAMP}<meta name="viewport" content="width=device-width,initial-scale=1">'
             f'<title>{e(title)}</title><meta name="description" content="{e(desc[:300])}">'
             f'<link rel="canonical" href="{me}"><link rel="alternate" hreflang="{lang}" href="{me}"><link rel="alternate" hreflang="{"et" if lang == "en" else "en"}" href="{other}"><link rel="alternate" hreflang="x-default" href="{xdefault}">'
-            f'<meta property="og:type" content="website"><meta property="og:title" content="{e(h1)}"><meta property="og:description" content="{e(desc[:300])}"><meta property="og:url" content="{me}"><meta property="og:site_name" content="{T["site"]}">'
+            f'<meta property="og:type" content="website"><meta property="og:title" content="{e(h1)}"><meta property="og:description" content="{e(desc[:300])}"><meta property="og:url" content="{me}"><meta property="og:site_name" content="{T["site"].lower()}">'
             f'<style>{CSS}</style>{GC}</head><body>'
             f'<nav><a href="{BASE}/{T["site_link"]}">{T["site"].lower()}</a> › {nb["crumb"]} <span class="m">· <a href="{other}">{T["other"]}</a></span></nav>'
             f'<h1>{e(h1)}</h1><p class="m">{fmt(len(ws), lang)} {T["works"]} · {fmt(a_n, lang)} {T["artists"]}{" · " + span_of(ws) if span_of(ws) else ""}</p>'
