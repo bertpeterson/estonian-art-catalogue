@@ -264,7 +264,7 @@ def main():
             blurb = "" if dd == "before" else (BLURB_EN.get(dd, "") if lang == "en" else BLURB_ET.get(str(dd), ""))
             per = next((p for p in PERIODS if dd != "before" and p[0] <= dd + 9 and p[1] >= dd), None)
             per_lab = (I18N["PERIOD_EN"][per[2]] if lang == "en" else I18N["PERIOD_ET"][per[2]]) if per else ""
-            title = T["dec_t"].format(d=dd if dd != "before" else lab, n=fmt(len(ws), lang), a=fmt(len({w["a"] for w in ws}), lang)) if dd != "before" else f"{T['site']} · {lab} · {fmt(len(ws), lang)} {T['works']}"
+            title = T["dec_t"].format(d=dd if dd != "before" else lab, n=fmt(len(ws), lang), a=fmt(len({w["a"] for w in ws}), lang)) if dd != "before" else f"{T['site'].lower()} · {lab} · {fmt(len(ws), lang)} {T['works']}"
             desc = T["dec_d"].format(d=dd if dd != "before" else lab, n=fmt(len(ws), lang), a=fmt(len({w["a"] for w in ws}), lang), media=media_phrase(ws, lang))
             h1 = (f"Estonian art of the {dd}s" if lang == "en" else f"Eesti kunst {dd}ndatel") if dd != "before" else (f"Estonian art {lab}" if lang == "en" else f"Eesti kunst {lab}")
             lede = (per_lab + " — " if per_lab else "") + blurb
@@ -319,7 +319,7 @@ def main():
             lst = '<ul class="cols">' + "".join(f'<li><a href="{u}">{e(lab)}</a><span class="n">{fmt(n, lang)}</span></li>' for lab, u, n in items) + "</ul>"
             open(f"site/{T[k]}/index.html", "w", encoding="utf-8").write(
                 f'<!doctype html><html lang="{lang}"><head><meta charset="utf-8">{STAMP}<meta name="viewport" content="width=device-width,initial-scale=1">'
-                f'<title>{e(h)} · museaal.ee</title><meta name="description" content="{e(h)}: {len(items)} {"pages" if lang == "en" else "lehte"} · {T["site"]}">'
+                f'<title>{e(h)} · museaal.ee</title><meta name="description" content="{e(h)}: {len(items)} {"pages" if lang == "en" else "lehte"} · {T["site"].lower()}">'
                 f'<link rel="canonical" href="{me}"><link rel="alternate" hreflang="{lang}" href="{me}"><link rel="alternate" hreflang="{"et" if lang == "en" else "en"}" href="{other}">'
                 f'<style>{CSS}</style>{GC}</head><body><nav><a href="{BASE}/{T["site_link"]}">{T["site"].lower()}</a> › {e(h)} <span class="m">· <a href="{other}">{T["other"]}</a></span></nav>'
                 f'<h1>{e(h)}</h1>{lst}<p class="nb">' + " · ".join(f'<a href="{BASE}/{T[x]}/">{T[x + "_h"]}</a>' for x in ("dec", "med", "mus", "sub") if x != k)
