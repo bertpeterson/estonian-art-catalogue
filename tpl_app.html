@@ -1093,7 +1093,7 @@
     return `<div class="la"><div class="d-k" title="${esc(T("lookalike_how"))}">${esc(T("lookalike"))}</div><div class="la-row">${la.map(x => {
       const src = imgSrc(picOf(x)), r = x.r ? x.r / 100 : 1;
       return `<a class="la-t" href="#artist=${esc(slug(A[x.a].n))}&open=${esc(x.k)}" title="${esc(x.t)} · ${esc(A[x.a].n)}"><span class="la-fr">${src
-        ? `<img src="${esc(src)}" alt="${esc(x.t)}, ${esc(A[x.a].n)}" loading="lazy" style="aspect-ratio:1/${r.toFixed(3)}${cropPos(x)}" referrerpolicy="no-referrer-when-downgrade">`
+        ? `<img src="${esc(src)}" alt="${esc(x.t)}, ${esc(A[x.a].n)}" loading="lazy" style="aspect-ratio:1/${r.toFixed(3)}${cropPos(x)}"${tbAttr(x)} referrerpolicy="no-referrer-when-downgrade">`
         : `<span class="wt-ph" style="aspect-ratio:1/${r.toFixed(3)}"></span>`}</span><span class="la-cap"><i>${esc(x.t)}</i><span>${esc(A[x.a].n)}${x.y ? " · " + x.y : ""}</span></span></a>`; }).join("")}</div></div>`;
   }
 
@@ -1170,7 +1170,7 @@
                   : esc(T("d_image", {h: musName(w.mu)})) + (im.startsWith("m:") ? " · MuIS" : " · EKM") + " · " + esc(T("d_pd", {a: ar.n, l: life || "—"}));
       // the record's picture, less its colour chart where there is one: the box takes the
       // shape without it (r), no taller than 420px, and the link still opens the whole file
-      const crop = w.tb ? ` style="object-view-box:inset(${esc(w.tb)})"` : w.rs && w.r ? ` class="crop" style="aspect-ratio:1/${(w.r / 100).toFixed(3)};width:min(100%,${Math.round(420 / (w.r / 100))}px)${cropPos(w)}"` : "";
+      const crop = w.tb ? `${tbAttr(w)} style="object-view-box:inset(${esc(w.tb)})"` : w.rs && w.r ? ` class="crop" style="aspect-ratio:1/${(w.r / 100).toFixed(3)};width:min(100%,${Math.round(420 / (w.r / 100))}px)${cropPos(w)}"` : "";
       const figure = imSrc ? `<figure class="d-fig"><a href="${href(imHref)}" target="_blank" rel="noopener"><img src="${esc(imSrc)}" alt="${esc(w.t)}" loading="lazy"${crop} referrerpolicy="no-referrer-when-downgrade"></a>
           <figcaption>${imCap}</figcaption>${laHTML(w)}</figure>` : "";
       detail = `<div class="detail${imSrc ? " has-fig" : ""}">${figure}
@@ -1876,6 +1876,7 @@
   // shown less that band: the box has the shape without it, and the picture is pushed
   // to the far side so the chart is what falls off
   const POS = {l: "100% 50%", r: "0% 50%", t: "50% 100%", b: "50% 0%"};
+  const tbAttr = w => w.tb ? ` data-tb="${esc(w.tb)}"` : "";   // for trim.js, where object-view-box is not known
   const cropPos = w => w.rs ? `;object-position:${POS[w.rs]}` : w.tb ? `;object-view-box:inset(${w.tb})` : "";   // tb: a gallery file's empty border (gallery_trim.py)
   // the static hub page for the one decade, medium or museum in the selection, if there is
   // exactly one of them and nothing else narrows the view; the addresses follow build_hubs.py
@@ -2102,7 +2103,7 @@
     const tile = (w, j) => {
       const src = imgSrc(picOf(w)), r = ratioOf(w);
       return `<button class="wt${state.open === w.k ? " on" : ""}" data-wt="${esc(w.k)}" title="${esc(w.t)} · ${esc(A[w.a].n)}">${src
-        ? `<img ${j < 2 && !opt.lazy ? `src="${esc(src)}"` : `src="${PH}" data-src="${esc(src)}"`} alt="${esc(w.t)}, ${esc(A[w.a].n)}" style="aspect-ratio:1/${r.toFixed(3)}${cropPos(w)}" referrerpolicy="no-referrer-when-downgrade">`
+        ? `<img ${j < 2 && !opt.lazy ? `src="${esc(src)}"` : `src="${PH}" data-src="${esc(src)}"`} alt="${esc(w.t)}, ${esc(A[w.a].n)}" style="aspect-ratio:1/${r.toFixed(3)}${cropPos(w)}"${tbAttr(w)} referrerpolicy="no-referrer-when-downgrade">`
         : `<span class="wt-ph" style="aspect-ratio:1/${r.toFixed(3)}"></span>`}<span class="wt-cap"><i>${esc(w.t)}${dups.has(w) ? `<span class="src-tag" title="${esc(T("wall_dup", {n: dups.get(w)}))}">×${dups.get(w)}</span>` : ""}</i><span>${showArtist ? esc(A[w.a].n) + " · " : ""}${w.y ?? esc(T("nd"))} · ${esc(abbr(w.mu))}</span></span></button>`;
     };
     const nCols = opt.cols || wallCols(), cols = Array.from({length: nCols}, () => ({h: 0, t: []}));

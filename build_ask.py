@@ -204,7 +204,7 @@ def data():
         ims.append(w["im"])
     return {"words": words, "artists": arts, "galleries": list(gals), "works": works, "_ims": ims, "_aidx": aidx}
 
-vb = lambda w: f' style="object-view-box:inset({w[17]})"' if w[17] else ""    # a card's picture less its file's empty border
+vb = lambda w: f' data-tb="{w[17]}" style="object-view-box:inset({w[17]})"' if w[17] else ""    # a card's picture less its file's empty border
 
 JS = r"""
 (function(){
@@ -387,7 +387,7 @@ function card(w,why){
   function out(){var o=el('a','out');o.href=w[10];o.target='_blank';o.rel='noopener';
     // every click out by gallery; and per version: conversations that led to a click out, and clicks on a pick
     o.addEventListener('click',function(){gc('find-out',g);if(g)gc('gallery-'+g.toLowerCase().normalize('NFKD').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,''),g);if(talked&&!wentOut){wentOut=true;gc('find-conv-out-'+V)}if(why)gc('find-pick-'+V);if(Q.you)gc('find-foryou-out')});return o}
-  var top=out(), img=el('img');img.src=w[3];img.alt=w[0]+', '+a[0];img.loading='lazy';img.decoding='async';img.referrerPolicy='no-referrer-when-downgrade';if(w[17])img.style.objectViewBox='inset('+w[17]+')';top.appendChild(img);
+  var top=out(), img=el('img');img.src=w[3];img.alt=w[0]+', '+a[0];img.loading='lazy';img.decoding='async';img.referrerPolicy='no-referrer-when-downgrade';if(w[17]){img.dataset.tb=w[17];img.style.objectViewBox='inset('+w[17]+')'}top.appendChild(img);
   var cap=el('span','cap');cap.appendChild(el('i',null,w[0]));top.appendChild(cap);c.appendChild(top);
   var by=el('span','by'), an=el('a',null,a[0]);an.href='./#'+T.hash+'artist='+a[1]+'&open='+encodeURIComponent(w[11]);an.title=T.record;
   by.appendChild(an);if(w[2])by.appendChild(document.createTextNode(', '+w[2]));c.appendChild(by);

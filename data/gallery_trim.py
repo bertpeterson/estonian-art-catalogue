@@ -16,14 +16,14 @@ once, in memory, and nothing of it is kept. Only the galleries in HOSTS are read
     .venv-clip/bin/python gallery_trim.py --sheet    also write trim_sheet.html: before and after, for the eye
 """
 import io, json, os, sys, time, urllib.request
-from urllib.parse import urlparse
+from urllib.parse import urlparse, quote
 from concurrent.futures import ThreadPoolExecutor
 import numpy as np
 from PIL import Image
 
 UA = "EstonianArtCatalogue/1.0 (museaal.ee; contact info@museaal.ee)"
 OUT = "gallery_trim.json"
-HOSTS = {"www.artrovert.ee"}
+HOSTS = {"www.artrovert.ee", "www.idla.ee"}
 WHITE, NOISE, KEEP, MIN = 250, 0.004, 0.012, 0.03
 
 
@@ -50,7 +50,7 @@ def border(img):
 def read(u):
     for k in range(3):
         try:
-            with urllib.request.urlopen(urllib.request.Request(u, headers={"User-Agent": UA}), timeout=60) as r:
+            with urllib.request.urlopen(urllib.request.Request(quote(u, safe=":/?&=%+,;@()~!*'"), headers={"User-Agent": UA}), timeout=60) as r:
                 return u, border(Image.open(io.BytesIO(r.read())))
         except Exception as e:
             err = e; time.sleep(2 + 3 * k)

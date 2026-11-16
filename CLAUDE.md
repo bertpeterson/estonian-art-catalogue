@@ -39,8 +39,9 @@ anything private (keys, accounts, personal plans, correspondence) out of this fi
   `same_pictures.json` + `moods.json` + `taste_vecs.json`;
   CI cannot run CLIP on museum pictures. Never refit `taste_proj.npz` without redoing `stock_taste.json` too.
 - Picture borders: `data/gallery_trim.py` (run locally in `data/.venv-clip`, then `merge.py`) measures the empty
-  border a gallery's file carries (Artrovert only, `HOSTS`); tiles draw the picture without it (`tb`,
-  `object-view-box`, Chromium only; other browsers show the file whole). CI does not run it: new stock stays
+  border a gallery's file carries (Artrovert and Idla Antiik, `HOSTS`); tiles draw the picture without it
+  (`tb`: `object-view-box`, and `trim.js` from `data-tb` in Safari and Firefox; `?tb=js` forces the latter).
+  CI does not run it: new stock stays
   untrimmed until the next local run. `--sheet` writes a before/after contact sheet.
 - Buy art (`find.html` / `leia.html`): `build_ask.py` writes the pages and `site/data/stock.json`;
   stock moods and taste vectors come from `data/stock_moods.py`. "For you" ranks stock by My List

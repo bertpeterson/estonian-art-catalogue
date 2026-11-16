@@ -991,7 +991,7 @@ footer a{border-bottom:1px solid var(--rule)}
       var i=pic(x[1],x[5]);i.alt=x[2]+", "+x[3];a.appendChild(i);
       var c=el("span","fs-cap");c.appendChild(el("i","",x[2]));c.appendChild(el("span","",x[3]));if(x[4])c.appendChild(el("b","","€"+String(x[4]).replace(/\B(?=(\d{3})+(?!\d))/g,"\u00a0")));a.appendChild(c);
       var p=el("span","fs-pop"),q=pic(x[1],x[5]);p.appendChild(q);a.appendChild(p);
-      q.addEventListener("load",function(){if(q.naturalHeight)q.style.setProperty("--r",q.naturalWidth/q.naturalHeight*tbk(x[5]))});return a};
+      q.addEventListener("load",function(){if(q.naturalHeight)q.style.setProperty("--r",q.naturalWidth/q.naturalHeight*tbk(q.dataset.tb))});return a};
     // with three works or an artist on My List, the row leads with two of For you's best (Buy Art keeps its twelve in
     // this browser, three days; two a day from the first eight), marked, and not again further along. The rest is everyone's
     var skip={};

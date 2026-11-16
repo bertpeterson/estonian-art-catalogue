@@ -48,6 +48,12 @@ def policy_for(html, more="", unmarked=None):
     p = POLICY.format(hashes="".join(f" 'sha256-{h}'" for h in hashes))
     return p.replace("connect-src 'self'", "connect-src 'self' " + more) if more else p
 
+# trim.js draws a gallery's picture without its file's empty border where object-view-box is not known: copied
+# into the site, and loaded by the pages that mark a picture (data-tb), in their HTML or from their scripts
+import shutil
+_trim = open("trim.js", "rb").read()
+shutil.copyfile("trim.js", os.path.join(ROOT, "trim.js"))
+TRIM = f'<script src="/trim.js?v={hashlib.sha256(_trim).hexdigest()[:10]}" defer></script>'
 n, bad = 0, []
 for d, _, files in os.walk(ROOT):
     for f in files:
@@ -61,6 +67,7 @@ for d, _, files in os.walk(ROOT):
         tag = f'<meta http-equiv="Content-Security-Policy" content="{policy_for(html, more, unmarked)}">'
         if unmarked: bad.append((os.path.relpath(p, ROOT), unmarked)); continue
         html = html.replace(MARKED, "")
+        if "data-tb" in html or "dataset.tb" in html: html = html.replace("</head>", TRIM + "</head>", 1)
         html2, k = re.subn(r'(<meta charset="utf-8">)', r"\1" + (tag + ('' if 'rel="icon"' in html else ICON)).replace("\\", "\\\\"), html, count=1)
         if not k: print("  no charset tag, policy not written:", p); continue
         open(p, "w", encoding="utf-8").write(html2); n += 1
