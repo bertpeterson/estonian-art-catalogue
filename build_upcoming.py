@@ -58,8 +58,14 @@ CSS = (":root{--paper:#141518;--field:#1E2023;--ink:#F1F2F4;--ink-soft:#C7CACE;-
        ".mast{padding:34px 0 22px;border-bottom:1px solid var(--ink)}"
        # the two lists of sales as one heading: the page's own in ink, the other beside it in grey, a link
        ".tabs{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:4px 32px}.tabs h1{margin:0}"
-       ".tabs .alt{font-family:var(--serif);font-weight:500;font-size:2.6rem;line-height:1.05;letter-spacing:-.015em;color:var(--grey);text-decoration:none}"
-       ".tabs .alt:hover{color:var(--ink)}.tabs .lede{flex-basis:100%;margin-top:12px}@media(max-width:700px){.tabs .alt{font-size:2rem}}"
+       ".tab{font-family:var(--serif);font-weight:500;font-size:2.6rem;line-height:1.05;letter-spacing:-.015em;color:var(--grey);text-decoration:none}"
+       ".tab:hover,.tab.on{color:var(--ink)}@media(max-width:700px){.tab{font-size:2rem}}"
+       # the list of finished sales, shown here too when the heading switches to it (build_past_sales.py)
+       ".yr{margin:56px 0 0;font-family:var(--serif);font-weight:500;font-size:2.2rem;line-height:1;letter-spacing:-.01em;color:var(--ink);border-bottom:2px solid var(--ink-soft);padding-bottom:10px}"
+       "ul.sales{list-style:none;margin:0;padding:0}ul.sales li{display:grid;grid-template-columns:9.5em 1fr auto;gap:4px 18px;padding:12px 0;border-bottom:1px solid var(--rule-soft);align-items:baseline}"
+       "ul.sales a{font-family:var(--serif);font-size:1.12rem;text-decoration:none}ul.sales a:hover{text-decoration:underline}"
+       "ul.sales .n{font-family:var(--mono);font-size:.78rem;color:var(--ink-soft)}"
+       "@media(max-width:700px){ul.sales li{grid-template-columns:1fr}ul.sales .n{text-align:left}}"
        "h1{font-family:var(--serif);font-weight:500;font-size:2.6rem;line-height:1.05;letter-spacing:-.015em;margin:0 0 12px}"
        ".lede{margin:0;max-width:68ch;color:var(--ink-soft);font-size:.95rem}"
        ".sale{margin-top:28px;border-bottom:1px solid var(--rule)}.sale-h{display:block;padding-bottom:14px}"
@@ -93,12 +99,12 @@ CSS = (":root{--paper:#141518;--field:#1E2023;--ink:#F1F2F4;--ink-soft:#C7CACE;-
 # price, highest first, and the other way on a second click; Lot no. by the house's own numbers,
 # where it gives them (EKO); a lot with no price or number goes last. Your artists first (added by MINE_JS where a sale
 # has artists from My List) puts their lots on top, each group in the A–Z order
-JS = ("document.querySelectorAll('.sort').forEach(function(b){b.addEventListener('click',function(ev){"
+JS = ("function upInit(){document.querySelectorAll('.sort').forEach(function(b){b.addEventListener('click',function(ev){"
       "var x=ev.target.closest('button');if(!x)return;var tb=b.nextElementSibling.tBodies[0],rs=[].slice.call(tb.rows),m=x.dataset.s,dir=-1;"
       "if(m==='p'){dir=x.classList.contains('on')&&x.dataset.d==='-1'?1:-1;x.dataset.d=dir;x.textContent=x.dataset.l+(dir<0?' ↓':' ↑');}"
       "rs.sort(function(a,c){if(m==='az')return a.dataset.i-c.dataset.i;if(m==='y')return c.classList.contains('mine')-a.classList.contains('mine')||a.dataset.i-c.dataset.i;var k=m==='n'?'n':'p';if(m==='n')dir=1;var pa=+a.dataset[k]||0,pc=+c.dataset[k]||0;"
       "if(!pa!==!pc)return pa?-1:1;return dir*(pa-pc)||a.dataset.i-c.dataset.i;});"
-      "rs.forEach(function(r){tb.appendChild(r);});b.querySelectorAll('button').forEach(function(y){y.classList.toggle('on',y===x);if(y!==x&&y.dataset.l){y.textContent=y.dataset.l+' ↓';delete y.dataset.d;}});});});"
+      "rs.forEach(function(r){tb.appendChild(r);});b.querySelectorAll('button').forEach(function(y){y.classList.toggle('on',y===x);if(y!==x&&y.dataset.l){y.textContent=y.dataset.l+' ↓';delete y.dataset.d;}});});});}upInit();"
       # a lot picture the house has since replaced (Vaal swapped its photos the day after the harvest,
       # 2026-10-29) or taken down leaves no empty frame: the thumbnail goes, the lot row stays
       "function gone(i){var a=i.closest('.th');if(a)a.remove();}"
@@ -107,7 +113,7 @@ JS = ("document.querySelectorAll('.sort').forEach(function(b){b.addEventListener
 # The artists on the visitor's My List (museaal.artists in the browser, saved on an artist's page or in the
 # register): their lots are marked, and each sale says how many works it has by each of them, the most first.
 # Each name there goes to that artist's first lot in the sale as it is sorted now, opening the sale if it is closed
-MINE_JS = ("(function(){var T=%s,S;try{S=JSON.parse(localStorage.getItem('museaal.artists')||'[]')}catch(e){S=[]}"
+MINE_JS = ("function mineInit(){var T=%s,S;try{S=JSON.parse(localStorage.getItem('museaal.artists')||'[]')}catch(e){S=[]}"
            "if(!Array.isArray(S)||!S.length)return;document.querySelectorAll('details.sale').forEach(function(d){var who=[],nw={};"
            "d.querySelectorAll('tr[data-a]').forEach(function(r){if(S.indexOf(r.dataset.a)<0)return;r.classList.add('mine');"
            "var n=r.querySelector('td.a a').textContent;if(!nw[n]){nw[n]=0;who.push(n)}nw[n]++;});"
@@ -118,7 +124,23 @@ MINE_JS = ("(function(){var T=%s,S;try{S=JSON.parse(localStorage.getItem('museaa
            "var r=[].filter.call(d.querySelectorAll('tr.mine'),function(x){return x.querySelector('td.a a').textContent===n})[0];if(!r)return;"
            "r.scrollIntoView({block:'center',behavior:matchMedia('(prefers-reduced-motion:reduce)').matches?'auto':'smooth'});"
            "r.classList.remove('flash');void r.offsetWidth;r.classList.add('flash');});"
-           "m.append((i?', ':'')+p[0],a,p[1]||'');});m.hidden=false;});})();")
+           "m.append((i?', ':'')+p[0],a,p[1]||'');});m.hidden=false;});}mineInit();")
+# The two lists of sales under one heading (2026-11-16): each name is a link to its own page, and with scripts on
+# a click fetches that page, puts its list in place of this one and takes its address, title, language link and
+# footnote, so /upcoming and /past-sales stay two pages for a search engine and one for a visitor. Back and
+# forward switch the same way; if the fetch fails the link is followed as a link.
+TOG_JS = ("(function(){var tabs=document.querySelectorAll('.tabs .tab'),box=document.getElementById('lists'),lg=document.querySelector('.top a.eb'),nt=document.getElementById('note'),C={};"
+          "if(!box||!lg||!nt||!window.fetch||!history.pushState)return;"
+          "function P(u){return new URL(u,location.href).pathname.replace(/\\.html$/,'')}var cur=P(location.href);"
+          "C[cur]={h:box.innerHTML,t:document.title,o:lg.getAttribute('href'),n:nt.innerHTML};"
+          "function show(p){var c=C[p];cur=p;box.innerHTML=c.h;document.title=c.t;lg.setAttribute('href',c.o);nt.innerHTML=c.n;"
+          "tabs.forEach(function(a){a.classList.toggle('on',P(a.href)===p)});if(window.upInit)upInit();if(window.mineInit)mineInit();}"
+          "function go(p,push){function done(){show(p);if(push)history.pushState(null,'',p)}if(C[p])return done();"
+          "fetch(p).then(function(r){if(!r.ok)throw 0;return r.text()}).then(function(s){var d=new DOMParser().parseFromString(s,'text/html'),b=d.getElementById('lists');if(!b)throw 0;"
+          "C[p]={h:b.innerHTML,t:d.title,o:d.querySelector('.top a.eb').getAttribute('href'),n:d.getElementById('note').innerHTML};done()}).catch(function(){location.href=p})}"
+          "tabs.forEach(function(a){a.addEventListener('click',function(e){if(e.metaKey||e.ctrlKey||e.shiftKey||e.altKey||e.button)return;e.preventDefault();var p=P(a.href);if(p!==cur)go(p,true)})});"
+          "addEventListener('popstate',function(){var p=P(location.href);if(p!==cur)go(p,false)});})();")
+
 fmt = lambda n, lang: f"{n:,}" if lang == "en" else f"{n:,}".replace(",", " ")
 eur = lambda n, lang: "€" + fmt(n, lang)
 surname = lambda n: (n.split()[-1].lower(), n.lower())      # Karl Alexander von Winkler under W
@@ -192,9 +214,9 @@ def main():
                 '<link rel="stylesheet" href="/fonts/fonts.css">'
                 f'<style>{CSS}</style>{LS.TAG}{H.GC}</head><body><div class="pg">'
                 f'<div class="top"><a class="wm" href="{BASE}/{"" if lang == "en" else "#lang=et"}">{t["site"].lower()}</a><a class="eb" href="{other}">{t["other_l"]}</a></div>'
-                f'<header class="mast tabs"><h1>{t["h"]}</h1><a class="alt" href="{BASE}/{t["pf"]}">{t["past"]}</a></header>'
+                f'<header class="mast tabs"><h1><a class="tab on" href="{me}">{t["h"]}</a></h1><a class="tab" href="{BASE}/{t["pf"]}">{t["past"]}</a></header><main id="lists">'
                 + (body or f'<p class="m">{e(t["none"])}</p>')
-                + f'<footer class="foot">{e(t["note"])} {H.CONTACT[lang]}</footer></div>{SM.OPEN}{JS}</script>{SM.OPEN}{MINE_JS % json.dumps({k: t[k] for k in ("mine", "w1", "wn", "first")}, ensure_ascii=False)}</script></body></html>')
+                + f'</main><footer class="foot"><span id="note">{e(t["note"])}</span> {H.CONTACT[lang]}</footer></div>{SM.OPEN}{TOG_JS}</script>{SM.OPEN}{JS}</script>{SM.OPEN}{MINE_JS % json.dumps({k: t[k] for k in ("mine", "w1", "wn", "first")}, ensure_ascii=False)}</script></body></html>')
         open(f"site/{t['file']}.html", "w", encoding="utf-8").write(page)
         urls.append(me)
     sm = open("site/sitemap.xml", encoding="utf-8").read()

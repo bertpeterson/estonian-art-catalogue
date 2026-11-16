@@ -38,12 +38,9 @@ T = {"en": dict(file="past-sales", art="a", other="moodunud-oksjonid", h="Past a
                 sale_d="{s}, {h}, {d}: {n} partiid Eesti kunstnikelt, haamrihinnad nii, nagu maja need avaldas.")}
 for lang in T: T[lang]["month"] = U.T[lang]["month"]
 
-CSS = U.CSS + (".yr{margin:56px 0 0;font-family:var(--serif);font-weight:500;font-size:2.2rem;line-height:1;letter-spacing:-.01em;color:var(--ink);border-bottom:2px solid var(--ink-soft);padding-bottom:10px}"
-               "ul.sales{list-style:none;margin:0;padding:0}ul.sales li{display:grid;grid-template-columns:9.5em 1fr auto;gap:4px 18px;padding:12px 0;border-bottom:1px solid var(--rule-soft);align-items:baseline}"
-               "ul.sales a{font-family:var(--serif);font-size:1.12rem;text-decoration:none}ul.sales a:hover{text-decoration:underline}"
-               "ul.sales .n{font-family:var(--mono);font-size:.78rem;color:var(--ink-soft)}td.n .m{font-family:var(--mono);font-size:.68rem}"
-               ".top .eb+.eb{margin-left:14px}h1 a.sl{color:inherit;text-decoration:none}h1 a.sl:hover{text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:.12em}"
-               "@media(max-width:700px){ul.sales li{grid-template-columns:1fr}ul.sales .n{text-align:left}}")
+# the list's own rules (.yr, ul.sales) are in U.CSS: the coming sales' page shows the list too
+CSS = U.CSS + ("td.n .m{font-family:var(--mono);font-size:.68rem}"
+               ".top .eb+.eb{margin-left:14px}h1 a.sl{color:inherit;text-decoration:none}h1 a.sl:hover{text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:.12em}")
 
 # the sales: (house, name) runs of lots, split where the dates are more than a fortnight apart
 def _d(s):
@@ -104,7 +101,7 @@ def head(lang, t, me, other, title, desc, up=True):
             f'<span>' + (f'<a class="eb" href="{BASE}/{U.T[lang]["file"]}">{t["up"]}</a>' if up else "") + f'<a class="eb" href="{other}">{t["other_l"]}</a></span></div>')
 
 def foot(t, lang, js=""):
-    return f'<footer class="foot">{e(t["note"])} {H.CONTACT[lang]}</footer></div>{js}</body></html>'
+    return f'<footer class="foot"><span id="note">{e(t["note"])}</span> {H.CONTACT[lang]}</footer></div>{js}</body></html>'
 
 def main():
     urls = []
@@ -144,8 +141,11 @@ def main():
             items.append(f'<li><span class="eb">{e(span)}</span><span><a href="{me}">{e(nm)}</a><span class="m">{e(house(h, lang))}</span></span><span class="n">{e(sub)}</span></li>')
         me, other = f"{BASE}/{t['file']}", f"{BASE}/{o['file']}"
         idx = (head(lang, t, me, other, f'{t["h"]} – {fmt(len(SALES), lang)} · museaal.ee', t["lede"], up=False)
-               + f'<header class="mast tabs"><a class="alt" href="{BASE}/{U.T[lang]["file"]}">{t["up"]}</a><h1>{t["h"]}</h1><p class="lede">{e(t["lede"])}</p></header>'
-               + "".join(items) + ("</ul>" if items else "") + foot(t, lang))
+               + f'<header class="mast tabs"><a class="tab" href="{BASE}/{U.T[lang]["file"]}">{t["up"]}</a><h1><a class="tab on" href="{me}">{t["h"]}</a></h1></header><main id="lists">'
+               + "".join(items) + ("</ul>" if items else "") + "</main>"
+               # the coming sales' scripts too: their list is shown here when the heading switches to it
+               + foot(t, lang, f"{SM.OPEN}{U.TOG_JS}</script>{SM.OPEN}{U.JS}</script>{SM.OPEN}"
+                               + U.MINE_JS % json.dumps({k: U.T[lang][k] for k in ("mine", "w1", "wn", "first")}, ensure_ascii=False) + "</script>"))
         open(f"site/{t['file']}.html", "w", encoding="utf-8").write(idx)
         urls.append(me)
     sm = open("site/sitemap.xml", encoding="utf-8").read()
