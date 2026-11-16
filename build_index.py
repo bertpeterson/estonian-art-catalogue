@@ -110,8 +110,10 @@ ERAS_JS=(SM.OPEN+'(function(){var el=document.getElementById("eras"),bars=docume
  'el.classList.remove("baked");el.querySelectorAll(".era").forEach(function(a){if(a.scrollWidth>a.clientWidth&&a.dataset.short)a.textContent=a.dataset.short})})()</script>')
 # Every view deals its own artwall from the baked 72 and the pool beside them (build_landing.py, the same rule):
 # the masterpieces by rank, each slipped up to 36 places, the first 36 of them and then twelve by chance; two key
-# works a row of six, their artists taking turns. Laid into the six baked columns, shortest next, before the first
-# paint; the seed and the order go where the app reads them (data-seed, data-keys), so its wall is this one.
+# works a row of six, their artists taking turns. Laid into as many columns as the app's own wall has at this width
+# (wallCols in tpl_app.html: six, four, three, or two on a phone -- 2026-11-16, the six baked columns wrapped two to
+# a row there, three walls one under the other), shortest next, before the first paint; the seed and the order go
+# where the app reads them (data-seed, data-keys), so its wall is this one. data-dealt takes the wrap off (tpl_head.html).
 WALL_JS=(SM.OPEN+'(function(){try{var wall=document.querySelector("#register .wall[data-seed]"),pool=document.getElementById("wall-pool");if(!wall||!pool)return;'
  'var seed=String(Math.random()).slice(2,8),fnv=function(s){var h=2166136261;for(var i=0;i<s.length;i++)h=Math.imul(h^s.charCodeAt(i),16777619);return h>>>0},'
  'k=function(t){return t.getAttribute("data-wt")},by=function(f){return function(a,b){return f(a)-f(b)}},'
@@ -124,10 +126,11 @@ WALL_JS=(SM.OPEN+'(function(){try{var wall=document.querySelector("#register .wa
  'for(var r=0;r<6;r++)kl.forEach(function(l){if(l[r])K.push(l[r])});'
  'var out=[],m=0,q=0;for(var i=0;i<72;i++){var t=i%3===2?(K[q]?K[q++]:M[m++]):(M[m]?M[m++]:K[q++]);if(!t)break;out.push(t)}'
  'if(out.length<72)return;'
- 'var cols=[].slice.call(wall.children).map(function(c){c.textContent="";return{e:c,h:0}});'
+ 'var w=document.getElementById("register").clientWidth||innerWidth,n=w>=1100?6:w>=720?4:w>=480?3:2,cols=[];wall.textContent="";'
+ 'for(var j=0;j<n;j++){var d=document.createElement("div");d.className="wcol";wall.appendChild(d);cols.push({e:d,h:0})}'
  'out.forEach(function(t){var c=cols.reduce(function(a,b){return b.h<a.h?b:a}),i=t.querySelector("img[data-src]");'
  'if(!c.h&&i){i.src=i.getAttribute("data-src");i.removeAttribute("data-src")}c.h+=(+t.getAttribute("data-r")||1)+.32;c.e.appendChild(t)});'
- 'wall.setAttribute("data-seed",seed);wall.setAttribute("data-keys",out.map(k).join(","));pool.remove()}catch(e){}})()</script>')
+ 'wall.setAttribute("data-cols",n);wall.setAttribute("data-dealt","");wall.setAttribute("data-seed",seed);wall.setAttribute("data-keys",out.map(k).join(","));pool.remove()}catch(e){}})()</script>')
 if _os.path.exists('site/landing.json'):
     _L=_json.load(open('site/landing.json',encoding='utf-8'))
     _et=lambda k: '<template id="et-'+k+'">'+_L[k+'_et']+'</template>' if _L.get(k+'_et') else ''

@@ -544,10 +544,11 @@ a.linkbtn{text-decoration:none}
 .cr-note{font-family:var(--sans);font-size:.82rem;letter-spacing:0;color:var(--grey-6);border-top:0;padding-top:4px}
 .wall{display:flex;gap:10px;align-items:flex-start;margin:0 0 22px}
 .wcol{flex:1 1 0;min-width:0}
-/* the landing's wall is baked in six columns; on a narrower screen they wrap, three or
-   two to a row, before the app is here to lay them out afresh */
-@media(max-width:1099px){.wall[data-seed]{flex-wrap:wrap}.wall[data-seed] .wcol{flex:0 0 calc((100% - 20px) / 3)}}
-@media(max-width:479px){.wall[data-seed] .wcol{flex:0 0 calc((100% - 10px) / 2)}}
+/* the landing's wall is baked in six columns, and each view's deal lays it out afresh in as many as fit
+   (data-dealt; WALL_JS in build_index.py). Only where that did not run do the six wrap on a narrower
+   screen, three or two to a row */
+@media(max-width:1099px){.wall[data-seed]:not([data-dealt]){flex-wrap:wrap}.wall[data-seed]:not([data-dealt]) .wcol{flex:0 0 calc((100% - 20px) / 3)}}
+@media(max-width:479px){.wall[data-seed]:not([data-dealt]) .wcol{flex:0 0 calc((100% - 10px) / 2)}}
 a.wt{text-decoration:none}
 /* the baked histogram's decades and eras are links until the app makes them buttons */
 a.bar-btn,a.early-btn,a.era{text-decoration:none;line-height:normal;text-align:center}   /* as a button has it: no shift when the app swaps them */
