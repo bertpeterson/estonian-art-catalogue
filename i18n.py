@@ -16,7 +16,7 @@ ET = {
  "tagline":"Vaata Eesti kunsti muuseumide kogudes ja osta teoseid galeriidest.",
  "fs_h":"Osta kunsti","fs_you":"Sulle","fs_lede":"{n} teost {g} galeriis, koos hindadega.",
  "cat_h":"Kataloog","cat_lede":"Kõik, mida Eesti muuseumid hoiavad ja galeriid on näidanud: kümnendite, kunstnike või otsingu järgi.",
- "live_now":"Oksjon täna","live_n":"{n} oksjonit","fs_up":"Tulemas oksjonitel →","fs_all":"Kõik müügil teosed →","fs_byartist":"Kunstnike kaupa →",
+ "live_now":"Oksjon täna","live_n":"{n} oksjonit","fs_up":"Tulevad oksjonid →","fs_all":"Kõik müügil teosed →","fs_byartist":"Kunstnike kaupa →",
  "worksperdecade":"Teoseid kümnendite kaupa",
  "selectdecade":"Vali kümnend, et filtreerida",
  "filteredto":"Filtreeritud: {x} — klõpsa uuesti, et tühistada",
