@@ -2031,9 +2031,9 @@
     // within an artist, highlights first, then the chosen order; that order decides who takes which turn
     const inner = unique.map((w, i) => [w, i]).sort((a, b) => (a[0].hl ?? 1e9) - (b[0].hl ?? 1e9) || a[1] - b[1]);
     // ...and before all of that, on a mixed wall, the masterpieces -- in their chosen
-    // order, dealt a little differently each visit (a rank slips up to a dozen places),
+    // order, dealt a little differently each visit (a rank slips up to 36 places),
     // so the wall opens on the same great works but not always the same first row
-    const mp = w => MINE_AT.has(w) ? MINE_AT.get(w) - 1e6 : (mixed && w.mp) ? w.mp + (hash(w.k + VISIT) % 12) : 1e9;
+    const mp = w => MINE_AT.has(w) ? MINE_AT.get(w) - 1e6 : (mixed && w.mp) ? w.mp + (hash(w.k + VISIT) % 36) : 1e9;
     // ...and on the untouched page, before the masterpieces, My List: the works saved and the best of the
     // artists saved (their masterpieces and key works, paintings first), taking turns, two rows at most
     const MINE_AT = new Map();

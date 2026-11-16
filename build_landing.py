@@ -3,7 +3,7 @@
 and the opening of the artwall, as plain HTML, so a visitor sees the catalogue before
 the 20 MB index has arrived. The app renders the same view when it boots and takes the
 baked tile order for its first paint (data-keys), so nothing jumps. The order is the
-app's: masterpieces first, each rank slipped up to a dozen places by a seed fixed at
+app's: masterpieces first, each rank slipped up to 36 places by a seed fixed at
 build time (data-seed), two key works dealt into every row of six, then the door's names
 and everyone else in turn.
 """
@@ -92,13 +92,13 @@ def turn(w):
 canon_set = set(canon)
 rows = []
 for i, w in enumerate(sorted(uniq, key=lambda w: (w.get("y") is None, w.get("y") or 0))):
-    mp = (w["mp"] + fnv(key(w) + SEED) % 12) if w.get("mp") else 10**9
+    mp = (w["mp"] + fnv(key(w) + SEED) % 36) if w.get("mp") else 10**9
     tier = 0 if (w.get("hl") is not None or w["a"] in canon_set) else 1
     rows.append((mp, tier, turn(w), MRANK.get(name("e", w.get("e")), 8), fnv(key(w)), i, w))
 rows.sort(key=lambda r: r[:6])
 # The first page, 72 tiles: four masterpieces and two key works a row of six (2026-11-16: the 75 masterpieces
-# alone made it the same 72 pictures at every visit). The first 36 masterpieces keep their slipped rank, so
-# the wall opens on the same great works; the other twelve places are drawn by the seed from the rest, so none
+# alone made it the same 72 pictures at every visit). The first 36 masterpieces keep their slipped rank (a slip
+# of up to 36 places, not twelve, since 2026-11-16: the top dozen no longer open every wall); the other twelve places are drawn by the seed from the rest, so none
 # is always on page two. The key works (highlights.json, studies left out) belong to thirteen artists, who take
 # turns in the seed's order, a title once and never a masterpiece's own. The app follows this order (data-keys)
 # and puts the masterpieces left over at the head of the next page.
