@@ -82,7 +82,7 @@ def sheet(works, trim):
 
 
 if __name__ == "__main__":
-    d = json.load(open("data.json", encoding="utf-8"))
+    d = json.load(open(os.environ.get("MUSEAAL_DATA", "data.json"), encoding="utf-8"))   # local_cuts.sh: the published data.json
     works = [w for w in d["works"] if str(w.get("im") or "").startswith("g:") and urlparse(w["im"][2:]).hostname in HOSTS]
     trim = json.load(open(OUT, encoding="utf-8")) if os.path.exists(OUT) else {}
     urls = sorted({w["im"][2:] for w in works})

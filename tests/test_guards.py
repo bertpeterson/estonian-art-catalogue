@@ -138,7 +138,7 @@ class DataGuard(Folder):
 
 
 class StockApply(Folder):
-    scripts = ("stock_check.py",)
+    scripts = ("stock_check.py", "picture_cuts.py")
 
     def test_gone_works_become_past_listings(self):
         works = [{"k": "Ghaus1", "kind": "gallery", "im": "g:1", "pr": 900},
@@ -166,7 +166,7 @@ class StockApply(Folder):
         self.assertEqual(load(self.path("data.json"))["works"][0]["kind"], "sold")
         self.assertEqual(run(["stock_check.py", "unapply"], self.d)[0], 0)
         with open(self.path("data.json"), "rb") as f: self.assertEqual(f.read(), before)
-        self.assertEqual(sorted(os.listdir(self.d)), ["data.json", "stock_check.py", "stock_gone.json"])
+        self.assertEqual(sorted(os.listdir(self.d)), ["data.json", "picture_cuts.py", "stock_check.py", "stock_gone.json"])
 
     def test_unapply_leaves_a_file_written_since(self):
         dump(self.path("data.json"), {"works": [{"k": "Ghaus1", "kind": "gallery"}], "meta": {"gallery": 1, "past": 0, "past_sold": 0}})
@@ -175,7 +175,7 @@ class StockApply(Folder):
         dump(self.path("data.json"), {"works": [], "meta": {"merged": "since"}})          # merge.py ran meanwhile
         self.assertEqual(run(["stock_check.py", "unapply"], self.d)[0], 0)
         self.assertEqual(load(self.path("data.json"))["meta"], {"merged": "since"})
-        self.assertEqual(sorted(os.listdir(self.d)), ["data.json", "stock_check.py", "stock_gone.json"])
+        self.assertEqual(sorted(os.listdir(self.d)), ["data.json", "picture_cuts.py", "stock_check.py", "stock_gone.json"])
 
     def test_nothing_gone_writes_nothing(self):
         dump(self.path("data.json"), {"works": [{"k": "Ghaus1", "kind": "gallery"}], "meta": {"gallery": 1, "past": 0, "past_sold": 0}})

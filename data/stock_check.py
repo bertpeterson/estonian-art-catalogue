@@ -100,8 +100,9 @@ def unapply():
     if os.path.exists(MARK): os.remove(MARK)
 
 def apply():
+    import picture_cuts
     gone = load(GONE, {})
-    if not gone: return
+    unapply()                                   # a build that stopped midway left its copy: that one is the original
     f = os.path.join(here, "data.json")
     d = json.load(open(f, encoding="utf-8"))
     n = s = 0
@@ -111,14 +112,16 @@ def apply():
         w["kind"], w["gs"], w["im"], w["gl"] = "sold", g[1], None, g[0][:7]
         w.pop("pr", None)
         n += 1; s += g[1]
-    if not n: return
+    # ...and the stock measured since the weekly run gets its border trim and its head cut (picture_cuts.py)
+    c = picture_cuts.late(d["works"])
+    if not n and not c: return
     m = d["meta"]
     m["gallery"] -= n; m["past"] += n; m["past_sold"] += s
-    unapply()                                   # a build that stopped midway left its copy: that one is the original
     shutil.copy2(f, BEFORE)
     with open(f, "w", encoding="utf-8") as out: json.dump(d, out, ensure_ascii=False, separators=(",", ":"))
     with open(MARK, "w") as out: out.write(sha(f))
-    print(f"  stock          {n} works no longer for sale since the weekly run ({s} sold), from stock_gone.json")
+    if n: print(f"  stock          {n} works no longer for sale since the weekly run ({s} sold), from stock_gone.json")
+    if c: print(f"  picture cuts   {c} works measured since the weekly run (gallery_trim.json, stock_heads.json)")
 
 if __name__ == "__main__":
     apply() if sys.argv[1:] == ["apply"] else unapply() if sys.argv[1:] == ["unapply"] else check()

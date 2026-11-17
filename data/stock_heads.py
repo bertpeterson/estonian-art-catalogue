@@ -119,7 +119,7 @@ def fetch(im):
 
 
 if __name__ == "__main__":
-    W = json.load(open(os.path.join(HERE, "data.json"), encoding="utf-8"))["works"]
+    W = json.load(open(os.environ.get("MUSEAAL_DATA", os.path.join(HERE, "data.json")), encoding="utf-8"))["works"]   # local_cuts.sh: the published data.json
     trim = json.load(open(os.path.join(HERE, "gallery_trim.json"), encoding="utf-8"))
     ims = {}
     for w in W:
