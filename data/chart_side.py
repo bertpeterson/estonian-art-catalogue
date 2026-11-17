@@ -47,6 +47,14 @@ import sys
 REDO = "--all" in sys.argv        # read every photograph again (after a change to the rules below)
 RECROP = "--cropped" in sys.argv   # only the photographs that have a crop now
 todo = sorted({w["im"] for w in W if str(w.get("im", ""))[:2] in ("m:", "e:") and (sides.get(w["im"]) if RECROP else REDO or w["im"] not in sides)})
+# Set by eye, never read again: a card standing under a sculpture's overhang, where the record gives no
+# surplus to say which side it stands on (2026-11-17). Muhu kalur: the card is left of the pole, and goes
+# with a quarter of the width. Kutuzov's bust and the Naise figuur: the card stands under an epaulette, an
+# elbow -- no cut along one edge takes it without the plinth or the arm, so the photograph is shown whole.
+FIXED = {"m:6f4fafca-707e-4ef1-bfdb-4d4eb3f4a5df": ["l", 0.256],
+         "m:965a8dfa-1cd7-411e-a477-d975960187a2": 0,
+         "m:109ca2cf-2af5-432f-8749-7cf5563f5eaf": 0}
+todo = [i for i in todo if i not in FIXED]
 print(f"{len(sides):,} photographs read before, {len(todo):,} to read", flush=True)
 
 BAND = 0.18          # how far in from an edge a chart is looked for
@@ -331,6 +339,7 @@ def run(items):
             if n % 500 == 0:
                 json.dump(sides, open(OUT + ".tmp", "w", encoding="utf-8")); os.replace(OUT + ".tmp", OUT)
                 print(f"  {n:,}/{len(items):,}  {n/(time.time()-t0):.1f}/s", flush=True)
+    sides.update(FIXED)
     json.dump(sides, open(OUT + ".tmp", "w", encoding="utf-8")); os.replace(OUT + ".tmp", OUT)
 
 if __name__ == "__main__":
