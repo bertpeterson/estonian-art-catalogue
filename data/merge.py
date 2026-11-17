@@ -1245,6 +1245,7 @@ _ekm = json.load(open("ekm_images.json", encoding="utf-8")) if os.path.exists("e
 _ekmr = json.load(open("ekm_shapes.json", encoding="utf-8")) if os.path.exists("ekm_shapes.json") else {}
 _galr = json.load(open("gallery_shapes.json", encoding="utf-8")) if os.path.exists("gallery_shapes.json") else {}
 _trim = json.load(open("gallery_trim.json", encoding="utf-8")) if os.path.exists("gallery_trim.json") else {}
+_heads = json.load(open("stock_heads.json", encoding="utf-8")) if os.path.exists("stock_heads.json") else {}
 _muisr = json.load(open("muis_shapes.json", encoding="utf-8")) if os.path.exists("muis_shapes.json") else {}
 if os.path.exists("oai_shapes.json"): _muisr.update(json.load(open("oai_shapes.json", encoding="utf-8")))   # pixel sizes the OAI records carry
 _Y = datetime.date.today().year
@@ -1331,6 +1332,10 @@ for w in works:
         _l, _t, _r, _b = (x / 1000 for x in _trim[im[2:]])
         w["tb"] = " ".join(f"{x * 100:.1f}%" for x in (_t, _r, _b, _l))
         if w.get("ir"): w["ir"] = round(w["ir"] * (1 - _t - _b) / (1 - _l - _r), 3)
+    # ...and where a square tile is cut from it so that its heads stay in (stock_heads.py): "hp", as CSS object-position
+    # takes it, along the picture's long side
+    if _heads.get(im) is not None and w.get("ir"):
+        w["hp"] = f"50% {_heads[im]}%" if w["ir"] > 1 else f"{_heads[im]}% 50%"
     if im.startswith("m:") and im[2:] in _muisr: w["ir"] = _muisr[im[2:]]
 print("  images: public-domain museum works", IMG["pd"], "-> MuIS", IMG["muis"], "EKM", IMG["ekm"], "· past gallery listings", IMG.get("past", 0), "· wrong pictures dropped", IMG.get("wrong", 0))
 

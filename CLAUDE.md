@@ -43,6 +43,9 @@ anything private (keys, accounts, personal plans, correspondence) out of this fi
   (`tb`: `object-view-box`, and `trim.js` from `data-tb` in Safari and Firefox; `?tb=js` forces the latter).
   CI does not run it: new stock stays
   untrimmed until the next local run. `--sheet` writes a before/after contact sheet.
+- Heads in the Buy Art row: `data/stock_heads.py` (locally in `data/.venv-clip`, then `merge.py`) finds the faces in
+  stock pictures that are not square; the home row's square tile is cut where they stay in (`hp`, object-position).
+  CI does not run it: new stock is cut from the middle until the next local run.
 - Buy art (`find.html` / `leia.html`): `build_ask.py` writes the pages and `site/data/stock.json`;
   stock moods and taste vectors come from `data/stock_moods.py`. "For you" ranks stock by My List
   (`museaal.shortlist` in the browser, same list as the register's bookmark).

@@ -998,7 +998,7 @@ footer a{border-bottom:1px solid var(--rule)}
     var el=function(t,c,x){var e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e};
     var pic=function(src,tb){var i=el("img");if(tb){i.dataset.tb=tb;i.style.objectViewBox="inset("+tb+")"}i.src=src;i.alt="";i.decoding="async";i.loading="lazy";i.referrerPolicy="no-referrer-when-downgrade";return i};
     var card=function(x,gone){var a=el("a","fs-w");a.href=x[0];a.target="_blank";a.rel="noopener";
-      var i=pic(x[1],x[5]);i.alt=x[2]+", "+x[3];a.appendChild(i);
+      var i=pic(x[1],x[5]);i.alt=x[2]+", "+x[3];if(x[6])i.style.objectPosition=x[6];a.appendChild(i);   // x[6]: the cut that keeps the heads in (stock_heads.py)
       var c=el("span","fs-cap");c.appendChild(el("i","",x[2]));c.appendChild(el("span","",x[3]));if(x[4])c.appendChild(el("b","","€"+String(x[4]).replace(/\B(?=(\d{3})+(?!\d))/g,"\u00a0")));a.appendChild(c);
       var p=el("span","fs-pop"),q=pic(x[1],x[5]);p.appendChild(q);a.appendChild(p);
       q.addEventListener("load",function(){if(q.naturalHeight)q.style.setProperty("--r",q.naturalWidth/q.naturalHeight*tbk(q.dataset.tb))});watch(a,gone);return a};
