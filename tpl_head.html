@@ -979,6 +979,27 @@ footer a{border-bottom:1px solid var(--rule)}
     // it out. Its shape is known only once its picture has loaded, so its card goes then, and this browser remembers it
     // (museaal.tall, by link) and leaves it out from the start afterwards, here and among For you's twelve (build_ask.py)
     var tall=[],ends=null;try{tall=JSON.parse(localStorage.getItem("museaal.tall")||"[]");if(!Array.isArray(tall))tall=[]}catch(e){}
+    // what the visitor put out of their sight in Buy Art (museaal.hidden, key: link) stays out of the row too
+    var hid={},hidT={},row0=document.getElementById("fs-works");
+    var hidGet=function(){try{return JSON.parse(localStorage.getItem("museaal.hidden")||"{}")||{}}catch(e){return {}}};
+    (function(){var hm=hidGet();Object.keys(hm).forEach(function(k){if(k.slice(0,2)==="t:")hidT[hm[k]]=1;else hid[hm[k]]=1})})();
+    var out=function(h,t){return tall.indexOf(h)>=0||hid[h]||hidT[t]};
+    // and the row has the same way out on each tile: the work by its link ("u:"), and by its title and artist ("t:", unless
+    // the title names nothing), so the same work at another gallery goes with it, here and in Buy Art. The tile's place
+    // says so until the page is left, with a way back
+    var hideL=document.documentElement.lang==="et"?["Ära näita seda mulle","Sinu eest peidetud.","Too tagasi"]:["Don't show me this","Hidden for you.","Undo"];
+    var hideb=function(a){if(a.classList.contains("fs-more"))return;var b=document.createElement("button");b.type="button";b.className="fs-hide";b.textContent="×";b.title=hideL[0];b.setAttribute("aria-label",hideL[0]);
+      b.addEventListener("click",function(e){e.preventDefault();e.stopPropagation();
+        var h=a.getAttribute("href"),t=(a.querySelector("img")||{}).alt||"",m=hidGet(),same=t&&!/^(nimeta|pealkirjata|untitled|kompositsioon|composition)/i.test(t);
+        m["u:"+h]=h;hid[h]=1;if(same){m["t:"+t]=t;hidT[t]=1}
+        try{localStorage.setItem("museaal.hidden",JSON.stringify(m))}catch(x){}
+        if(window.goatcounter&&goatcounter.count)goatcounter.count({path:"home-hide",event:true});
+        if(same)Array.prototype.forEach.call(row0.querySelectorAll(".fs-w"),function(o){if(o!==a&&(o.querySelector("img")||{}).alt===t)o.remove()});
+        var g=document.createElement("div"),u=document.createElement("button");g.className="fs-w fs-gone";g.textContent=hideL[1]+" ";u.type="button";u.textContent=hideL[2];g.appendChild(u);
+        u.addEventListener("click",function(){var m=hidGet();delete m["u:"+h];delete m["t:"+t];delete hid[h];delete hidT[t];
+          try{localStorage.setItem("museaal.hidden",JSON.stringify(m))}catch(x){}row0.replaceChild(a,g)});
+        row0.replaceChild(g,a);u.focus();if(ends)ends()});
+      a.appendChild(b)};
     var watch=function(a,gone){var i=a.querySelector("img");if(!i)return;
       var f=function(){if(!i.naturalWidth||i.naturalHeight/i.naturalWidth/tbk(i.dataset.tb)<1.8)return;var h=a.getAttribute("href");
         if(tall.indexOf(h)<0){tall.unshift(h);tall=tall.slice(0,400);try{localStorage.setItem("museaal.tall",JSON.stringify(tall))}catch(e){}}
@@ -1020,27 +1041,6 @@ footer a{border-bottom:1px solid var(--rule)}
       var key=function(x){return (x[3]+"|"+x[2]).toLowerCase()},n=function(x){var s=m[key(x)];return s?(s[0]-(s[1]===d?1:0))*Math.max(0,1-(d-s[1])/21):0};
       var cands=c.w.map(function(x,i){return [n(x),i,x]}).filter(function(p){return !out(p[2][0],p[2][2]+", "+p[2][3])}).sort(function(a,b){return a[0]-b[0]||a[1]-b[1]}).map(function(p){return p[2]});
       var saw=function(x){var k=key(x),s=m[k];if(!s||s[1]!==d)m[k]=[(s&&d-s[1]<21?s[0]:0)+1,d];try{localStorage.setItem("museaal.fyseen",JSON.stringify(m))}catch(e){}};
-    // what the visitor put out of their sight in Buy Art (museaal.hidden, key: link) stays out of the row too
-    var hid={},hidT={},row0=document.getElementById("fs-works");
-    var hidGet=function(){try{return JSON.parse(localStorage.getItem("museaal.hidden")||"{}")||{}}catch(e){return {}}};
-    (function(){var hm=hidGet();Object.keys(hm).forEach(function(k){if(k.slice(0,2)==="t:")hidT[hm[k]]=1;else hid[hm[k]]=1})})();
-    var out=function(h,t){return tall.indexOf(h)>=0||hid[h]||hidT[t]};
-    // and the row has the same way out on each tile: the work by its link ("u:"), and by its title and artist ("t:", unless
-    // the title names nothing), so the same work at another gallery goes with it, here and in Buy Art. The tile's place
-    // says so until the page is left, with a way back
-    var hideL=document.documentElement.lang==="et"?["Ära näita seda mulle","Sinu eest peidetud.","Too tagasi"]:["Don't show me this","Hidden for you.","Undo"];
-    var hideb=function(a){if(a.classList.contains("fs-more"))return;var b=document.createElement("button");b.type="button";b.className="fs-hide";b.textContent="×";b.title=hideL[0];b.setAttribute("aria-label",hideL[0]);
-      b.addEventListener("click",function(e){e.preventDefault();e.stopPropagation();
-        var h=a.getAttribute("href"),t=(a.querySelector("img")||{}).alt||"",m=hidGet(),same=t&&!/^(nimeta|pealkirjata|untitled|kompositsioon|composition)/i.test(t);
-        m["u:"+h]=h;hid[h]=1;if(same){m["t:"+t]=t;hidT[t]=1}
-        try{localStorage.setItem("museaal.hidden",JSON.stringify(m))}catch(x){}
-        if(window.goatcounter&&goatcounter.count)goatcounter.count({path:"home-hide",event:true});
-        if(same)Array.prototype.forEach.call(row0.querySelectorAll(".fs-w"),function(o){if(o!==a&&(o.querySelector("img")||{}).alt===t)o.remove()});
-        var g=document.createElement("div"),u=document.createElement("button");g.className="fs-w fs-gone";g.textContent=hideL[1]+" ";u.type="button";u.textContent=hideL[2];g.appendChild(u);
-        u.addEventListener("click",function(){var m=hidGet();delete m["u:"+h];delete m["t:"+t];delete hid[h];delete hidT[t];
-          try{localStorage.setItem("museaal.hidden",JSON.stringify(m))}catch(x){}row0.replaceChild(a,g)});
-        row0.replaceChild(g,a);u.focus();if(ends)ends()});
-      a.appendChild(b)};
       // a lead that turns out too tall gives its place to the next in line
       var lead=function(x){skip[x[0]]=1;saw(x);
         Array.prototype.forEach.call(row.querySelectorAll(".fs-w"),function(b){if(b.getAttribute("href")===x[0])b.remove()});
