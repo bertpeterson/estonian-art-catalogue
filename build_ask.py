@@ -126,6 +126,7 @@ T = {"en": dict(file="find", other="leia", other_l="Eesti keeles", site="Museaal
                 daily="today's selection", fromchat="From the chat", artist="Artist", artistph="Type a name", artistlist="Artists with works for sale", names="Start with a name", titlew="In the title", filters="Filters",
                 groups=dict(feeling="Feeling", light="Light", colour="Colour", weather="Season and weather", subject="Subject"),
                 about="Sources & privacy", note="The works are the galleries' current stock with their asking prices, read weekly from each gallery's own site; the gallery's page is the one to trust. Your messages are read by Claude, which runs the searches and picks the works it suggests; they are not stored. The auction figures under a work are its artist's record as the houses published it, hammer prices: a record, not a valuation. The moods are read from the gallery's photograph by CLIP, an image model: a guide, not a judgement of the work.",
+                hide="Don't show me this", hidden="Hidden for you.", undo="Undo",
                 sl_add="Add to My List", sl_remove="Remove from My List", fy="For you", fybtn="Similar to My List ({n})",
                 fyhint="Bookmark three works, here, on the mood wall or in the catalogue, or save an artist, and this puts first what looks like them and the artists you saved.",
                 fysee="See My List", fybit="based on My List",
@@ -151,6 +152,7 @@ T = {"en": dict(file="find", other="leia", other_l="Eesti keeles", site="Museaal
                 daily="tänane valik", fromchat="Vestlusest", artist="Kunstnik", artistph="Kirjuta nimi", artistlist="Kunstnikud, kelle teoseid on müügil", names="Alusta nimest", titlew="Pealkirjas", filters="Filtrid",
                 groups=dict(feeling="Tunne", light="Valgus", colour="Värv", weather="Aastaaeg ja ilm", subject="Aine"),
                 about="Allikad ja privaatsus", note="Teosed on galeriide praegune müügivalik ja nende hinnad, loetud iga nädal galeriide endi lehtedelt; usaldusväärne on galerii leht. Sinu sõnumeid loeb Claude, kes teeb otsingud ja valib soovitatavad teosed; neid ei salvestata. Teose all olevad oksjoniandmed on kunstniku tulemused nii, nagu oksjonimajad need avaldasid (haamrihinnad): ülevaade, mitte hinnang. Meeleolu loeb galerii fotolt pildimudel CLIP: see on juhatus, mitte hinnang teosele.",
+                hide="Ära näita seda mulle", hidden="Sinu eest peidetud.", undo="Too tagasi",
                 sl_add="Lisa minu nimekirja", sl_remove="Eemalda minu nimekirjast", fy="Sulle", fybtn="Sarnased minu nimekirjaga ({n})",
                 fyhint="Märgi järjehoidjaga kolm teost, siin, meeleolu seinal või kataloogis, või salvesta kunstnik, ja ette tulevad nendega sarnased ja sinu salvestatud kunstnikud.",
                 fysee="Vaata minu nimekirja", fybit="minu nimekirja põhjal",
@@ -222,7 +224,9 @@ var D=null, P=null, msgs=[], shownKeys={}, busy=false, labels=JSON.parse(documen
 function stock(){ return P=P||fetch(src).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(d){
   var af=d.af=d.artists.map(function(a){return fold(a[0])});
   d.fame=d.artists.map(function(a){return Math.min(1,Math.log10(1+(a[2]||0))/3.3)});   // ~2,000 works in the museums: 1
-  d.byKey={};d.works.forEach(function(w,k){var m={},f=w[12];for(var i=0;i<f.length;i+=2)m[d.words[f[i]]]=f[i+1]/10;w.m=m;w.af=af[w[1]];w.i=k;d.byKey[w[11]]=w}); D=d; tally(); apage(); return d}).catch(function(e){P=null;throw e})}
+  d.byKey={};d.works.forEach(function(w,k){var m={},f=w[12];for(var i=0;i<f.length;i+=2)m[d.words[f[i]]]=f[i+1]/10;w.m=m;w.af=af[w[1]];w.i=k;d.byKey[w[11]]=w});
+  (function(){var hu={},ht={},k;for(k in HID){if(k.slice(0,2)==='u:')hu[HID[k]]=1;else if(k.slice(0,2)==='t:')ht[HID[k]]=1}   // hidden in the home page's row: by link, or title and artist
+    d.works.forEach(function(w){if(hu[w[10]]||ht[w[0]+', '+d.artists[w[1]][0]])HID[w[11]]=w[10]})})(); D=d; tally(); apage(); return d}).catch(function(e){P=null;throw e})}
 function el(tag,cls,text){var x=document.createElement(tag);if(cls)x.className=cls;if(text!=null)x.textContent=text;return x}
 function eur(n){return '€'+String(n).replace(/\B(?=(\d{3})+(?!\d))/g,' ')}
 function cm(d){return d?Math.round(d[0])+(d[1]!==d[0]?' × '+Math.round(d[1]):'')+' cm':''}
@@ -249,6 +253,7 @@ function rank(q){
   var tr=q.terms.map(function(t){return new RegExp('(^|[^\\p{L}\\p{N}])'+esc(t),'iu')});
   var who=q.artist?fold(q.artist).split(/[\s.,-]+/).filter(function(x){return x.length>1}):[];
   D.works.forEach(function(w){
+    if(HID[w[11]])return;                          // put out of sight by this visitor
     if(mm&&!(w[14]&mm))return;
     if(q.max>0&&!(w[8]&&w[8]<=q.max))return;
     if(q.min>0&&!(w[8]&&w[8]>=q.min))return;
@@ -332,7 +337,7 @@ function buildTaste(){var keys=listNow(), need={};
 // picture, kept in this browser (museaal.foryou) and read there for three days; an empty list takes them away
 function tasteSave(t){try{if(!t.n)return localStorage.removeItem('museaal.foryou');
   var ix=[],o=[],seen={},i,w,tall=[];try{tall=JSON.parse(localStorage.getItem('museaal.tall')||'[]')||[]}catch(e){}   // too tall for the home row (tpl_head.html)
-  for(i=0;i<t.s.length;i++)if(t.s[i]>0&&!t.in[D.works[i][11]]&&D.works[i][3]&&tall.indexOf(D.works[i][10])<0)ix.push(i);
+  for(i=0;i<t.s.length;i++)if(t.s[i]>0&&!t.in[D.works[i][11]]&&!HID[D.works[i][11]]&&D.works[i][3]&&tall.indexOf(D.works[i][10])<0)ix.push(i);
   var ds={};ix.forEach(function(i){ds[i]=t.s[i]*damp(D.works[i])});ix.sort(function(a,b){return ds[b]-ds[a]});
   for(i=0;i<ix.length&&o.length<12;i++){w=D.works[ix[i]];if(seen[w[1]])continue;seen[w[1]]=1;o.push([w[10],w[3],w[0],D.artists[w[1]][0],w[8]||0,w[17]||'',w[18]||''])}
   localStorage.setItem('museaal.foryou',JSON.stringify({at:Date.now(),w:o}))}catch(e){}}
@@ -381,7 +386,7 @@ var TOOL={
       works:fresh(rank(s).filter(function(w){return w[1]===k}))}},
   similar:function(i){var w=byId(i.id);if(!w)return {error:'No work with that id.'};
     var max=Math.max(0,+i.budget_max||0),n=norm(w.m);
-    var out=D.works.filter(function(x){return x!==w&&(!max||x[8]&&x[8]<=max)}).map(function(x){var s=0;
+    var out=D.works.filter(function(x){return x!==w&&!HID[x[11]]&&(!max||x[8]&&x[8]<=max)}).map(function(x){var s=0;
       for(var k in w.m)if(x.m[k])s+=w.m[k]*x.m[k];s=s/(n*norm(x.m));if(x[14]&w[14])s+=.3;if(x[1]===w[1])s+=.1;return [s,x]});
     out.sort(function(a,b){return b[0]-a[0]});
     return {of:row(w),works:fresh(out.map(function(p){return p[1]}))}}};
@@ -393,8 +398,22 @@ function step(c,r){var i=c.input||{};
   if(c.name==='search')return describe(asQ(i))+' → '+count(r.matched||0);
   if(c.name==='artist')return T.artist+': '+(r.name||String(i.name||''))+(r.for_sale?' → '+count(r.for_sale):'');
   return T.like+' '+(r.of?r.of.title+' — '+r.of.artist:'')}
+// a visitor can put a work out of their sight (museaal.hidden, in this browser only: the work's key with its link, by
+// which the home page's row knows it). Buy Art, For you and that row then leave it out. The same title by the same
+// artist at another gallery goes with it, unless the title names nothing. The card stays for the moment, with a way back
+var HID={};try{HID=JSON.parse(localStorage.getItem('museaal.hidden')||'{}')||{}}catch(e){}
+function hidKeep(){try{localStorage.setItem('museaal.hidden',JSON.stringify(HID))}catch(e){}if(TASTE)tasteSave(TASTE);tally()}
+function twins(w){var t=w[0].toLowerCase().trim();if(!t||/^(nimeta|pealkirjata|untitled|kompositsioon|composition)/.test(t))return [w];
+  return D.works.filter(function(x){return x[1]===w[1]&&x[0].toLowerCase().trim()===t})}
+function hideBtn(w,c){var b=el('button','hide','×');b.type='button';b.title=T.hide;b.setAttribute('aria-label',T.hide);
+  b.addEventListener('click',function(){var ws=twins(w);ws.forEach(function(x){HID[x[11]]=x[10]});hidKeep();gc('find-hide');
+    document.querySelectorAll('.card[data-k]').forEach(function(o){if(o!==c&&HID[o.dataset.k])o.remove()});
+    var p=el('p','hid',T.hidden+' '),u=el('button','linkbtn',T.undo);u.type='button';
+    u.addEventListener('click',function(){ws.forEach(function(x){delete HID[x[11]]});hidKeep();p.remove();c.classList.remove('gone')});
+    p.appendChild(u);c.appendChild(p);c.classList.add('gone');u.focus()});
+  return b}
 function card(w,why){
-  var a=D.artists[w[1]], g=D.galleries[w[9]], c=el('article','card');
+  var a=D.artists[w[1]], g=D.galleries[w[9]], c=el('article','card');c.dataset.k=w[11];
   // the picture and title, and the price, go to the gallery; the artist's name to the work in the catalogue
   function out(){var o=el('a','out');o.href=w[10];o.target='_blank';o.rel='noopener';
     // every click out by gallery; and per version: conversations that led to a click out, and clicks on a pick
@@ -407,7 +426,7 @@ function card(w,why){
   var pr=el('span','price');pr.appendChild(el('b',null,w[8]?eur(w[8]):T.noprice));pr.appendChild(document.createTextNode(' '+(T.at?T.at+' ':'')+g+' ↗'));low.appendChild(pr);
   c.appendChild(low);
   if(why)c.appendChild(el('p','why',why));
-  c.appendChild(slBtn(w[11],T,'list-add-find',syncYou));
+  c.appendChild(slBtn(w[11],T,'list-add-find',syncYou));c.appendChild(hideBtn(w,c));
   return c}
 // a search's settings as chips over its results, each with a way to drop it (the controls may be folded away or far up)
 function drop(k,v){if(k==='media'||k==='words'){var i=Q[k].indexOf(v);if(i>=0)Q[k].splice(i,1)}else if(k==='price')Q.min=Q.max=0;else if(k==='size')Q.size='any';else if(k==='terms')Q.terms=[];else if(k==='artist')Q.artist='';changed()}
@@ -677,6 +696,11 @@ CSS = BM.CSS + """
 .card .out{display:grid;gap:3px;text-decoration:none}
 .card img{display:block;width:100%;aspect-ratio:1;object-fit:contain;background:var(--field)}
 .card .sl{top:2px;right:2px}
+.card .hide{position:absolute;top:2px;left:2px;width:30px;height:30px;padding:0;border:0;border-radius:50%;background:color-mix(in srgb,var(--paper) 78%,transparent);color:var(--ink);font:400 1.05rem/1 var(--mono);cursor:pointer;opacity:.8}
+.card .hide:hover,.card .hide:focus-visible{opacity:1}
+@media (hover:hover){.card .hide{opacity:0}.card:hover .hide{opacity:.8}.card .hide:hover,.card .hide:focus-visible{opacity:1}}
+.card.gone>*:not(.hid){display:none}
+.card .hid{margin:0;padding:10px 0;font-size:.78rem;color:var(--grey)}
 .card .cap{padding-top:5px;font-size:.78rem;line-height:1.3;color:var(--grey)}
 .card .cap i{display:block;font:italic 400 1rem/1.2 var(--serif);color:var(--ink)}
 .card .out:hover .cap i{text-decoration:underline}
@@ -763,7 +787,7 @@ def page(lang, ver, api, labels, M, n=0, tver="", names=()):
     me, other = f"{BASE}/{t['file']}", f"{BASE}/{t['other']}"
     tj = json.dumps({k: t[k] for k in ("more", "at", "noprice", "none", "thinking", "how", "like", "choosing", "failed", "robot", "record", "sizes", "shown", "hash",
                                        "media", "anyprice", "upto", "from_", "count", "count1", "show", "moremoods", "fewer", "clear", "artist", "titlew", "artistonly", "showthem", "daily",
-                                       "sl_add", "sl_remove", "fybtn", "fyhint", "fysee", "fybit", "sortby", "sorts", "apage")}
+                                       "hide", "hidden", "undo", "sl_add", "sl_remove", "fybtn", "fyhint", "fysee", "fybit", "sortby", "sorts", "apage")}
                     | {"apdir": SALE_DIR[lang], "apmin": ARTIST_MIN, "apskip": [x for s in SALE for x in (s[2], s[4])] + [x["sl"] for x in IDX.values()]}, ensure_ascii=False).replace("</", "<\\/")
     lj = json.dumps(labels, ensure_ascii=False).replace("</", "<\\/")
     ask = (api.rstrip("/") + "/ask") if api else ""

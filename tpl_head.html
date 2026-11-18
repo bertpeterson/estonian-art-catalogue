@@ -211,6 +211,11 @@ h1 .wm-sub{display:block;margin-top:12px;font-family:var(--mono);font-weight:400
 .fs-cap i{display:block;font-family:var(--serif-text);font-size:.8rem;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .fs-cap b{font-family:var(--mono);font-weight:500;color:var(--ink);font-size:.68rem;margin-left:5px;word-spacing:-.4em}
 .fs-w:hover .fs-cap i{text-decoration:underline}
+.fs-hide{position:absolute;top:4px;left:4px;width:28px;height:28px;padding:0;border:0;border-radius:50%;background:color-mix(in srgb,var(--paper) 78%,transparent);color:var(--ink);font:400 1rem/1 var(--mono);cursor:pointer;opacity:.8}
+.fs-hide:hover,.fs-hide:focus-visible{opacity:1}
+@media (hover:hover){.fs-hide{opacity:0}.fs-w:hover .fs-hide{opacity:.8}.fs-w .fs-hide:hover,.fs-hide:focus-visible{opacity:1}}
+.fs-gone{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:6px;aspect-ratio:1;padding:10px;font-size:.78rem;color:var(--grey);background:var(--field);border-radius:3px}
+.fs-gone button{background:none;border:0;padding:0;font:inherit;color:var(--ink);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
 /* the row scrolls sideways: six cards in view, sixty baked in and the rest added as it nears its end; on a pointer screen, arrows at its ends (shown
    while there is more that way) and no scrollbar; on a phone, swiped, a card and a bit at a time */
 .fs-row{position:relative;min-width:0}
@@ -979,7 +984,7 @@ footer a{border-bottom:1px solid var(--rule)}
         if(tall.indexOf(h)<0){tall.unshift(h);tall=tall.slice(0,400);try{localStorage.setItem("museaal.tall",JSON.stringify(tall))}catch(e){}}
         if(gone)gone();else a.remove();if(ends)ends()};
       if(i.complete)f();else i.addEventListener("load",f)};
-    Array.prototype.forEach.call(row.querySelectorAll(".fs-w"),function(a){if(tall.indexOf(a.getAttribute("href"))>=0)a.remove();else watch(a)});
+    Array.prototype.forEach.call(row.querySelectorAll(".fs-w"),function(a){if(out(a.getAttribute("href"),(a.querySelector("img")||{}).alt))a.remove();else{watch(a);hideb(a)}});
     // each view deals its own six from the baked 120: four paintings (data-p) and two other works, painting first, none
     // this browser was shown first in its last ten views where enough are left; the rest follow, shuffled, in the same order
     (function(){var cs=Array.prototype.slice.call(row.querySelectorAll(".fs-w")),seen=[],h=function(c){return c.getAttribute("href")};
@@ -1003,7 +1008,7 @@ footer a{border-bottom:1px solid var(--rule)}
       var i=pic(x[1],x[5]);i.alt=x[2]+", "+x[3];if(x[6])i.style.objectPosition=x[6];a.appendChild(i);   // x[6]: the cut that keeps the heads in (stock_heads.py)
       var c=el("span","fs-cap");c.appendChild(el("i","",x[2]));c.appendChild(el("span","",x[3]));if(x[4])c.appendChild(el("b","","€"+String(x[4]).replace(/\B(?=(\d{3})+(?!\d))/g,"\u00a0")));a.appendChild(c);
       var p=el("span","fs-pop"),q=pic(x[1],x[5]);p.appendChild(q);a.appendChild(p);
-      q.addEventListener("load",function(){if(q.naturalHeight)q.style.setProperty("--r",q.naturalWidth/q.naturalHeight*tbk(q.dataset.tb))});watch(a,gone);return a};
+      q.addEventListener("load",function(){if(q.naturalHeight)q.style.setProperty("--r",q.naturalWidth/q.naturalHeight*tbk(q.dataset.tb))});watch(a,gone);hideb(a);return a};
     // with three works or an artist on My List, the row leads with two of For you's best (Buy Art keeps its twelve in
     // this browser, three days; each day the two the row and Buy Art have shown least, museaal.fyseen), marked, and not
     // again further along. The rest is everyone's
@@ -1013,8 +1018,29 @@ footer a{border-bottom:1px solid var(--rule)}
       if(!c||!c.w||!c.w.length||Date.now()-c.at>3*864e5||(sl<3&&!ar))return;
       var d=Math.floor(Date.now()/864e5),m={};try{m=JSON.parse(localStorage.getItem("museaal.fyseen")||"{}")||{}}catch(e){}
       var key=function(x){return (x[3]+"|"+x[2]).toLowerCase()},n=function(x){var s=m[key(x)];return s?(s[0]-(s[1]===d?1:0))*Math.max(0,1-(d-s[1])/21):0};
-      var cands=c.w.map(function(x,i){return [n(x),i,x]}).filter(function(p){return tall.indexOf(p[2][0])<0}).sort(function(a,b){return a[0]-b[0]||a[1]-b[1]}).map(function(p){return p[2]});
+      var cands=c.w.map(function(x,i){return [n(x),i,x]}).filter(function(p){return !out(p[2][0],p[2][2]+", "+p[2][3])}).sort(function(a,b){return a[0]-b[0]||a[1]-b[1]}).map(function(p){return p[2]});
       var saw=function(x){var k=key(x),s=m[k];if(!s||s[1]!==d)m[k]=[(s&&d-s[1]<21?s[0]:0)+1,d];try{localStorage.setItem("museaal.fyseen",JSON.stringify(m))}catch(e){}};
+    // what the visitor put out of their sight in Buy Art (museaal.hidden, key: link) stays out of the row too
+    var hid={},hidT={},row0=document.getElementById("fs-works");
+    var hidGet=function(){try{return JSON.parse(localStorage.getItem("museaal.hidden")||"{}")||{}}catch(e){return {}}};
+    (function(){var hm=hidGet();Object.keys(hm).forEach(function(k){if(k.slice(0,2)==="t:")hidT[hm[k]]=1;else hid[hm[k]]=1})})();
+    var out=function(h,t){return tall.indexOf(h)>=0||hid[h]||hidT[t]};
+    // and the row has the same way out on each tile: the work by its link ("u:"), and by its title and artist ("t:", unless
+    // the title names nothing), so the same work at another gallery goes with it, here and in Buy Art. The tile's place
+    // says so until the page is left, with a way back
+    var hideL=document.documentElement.lang==="et"?["Ära näita seda mulle","Sinu eest peidetud.","Too tagasi"]:["Don't show me this","Hidden for you.","Undo"];
+    var hideb=function(a){if(a.classList.contains("fs-more"))return;var b=document.createElement("button");b.type="button";b.className="fs-hide";b.textContent="×";b.title=hideL[0];b.setAttribute("aria-label",hideL[0]);
+      b.addEventListener("click",function(e){e.preventDefault();e.stopPropagation();
+        var h=a.getAttribute("href"),t=(a.querySelector("img")||{}).alt||"",m=hidGet(),same=t&&!/^(nimeta|pealkirjata|untitled|kompositsioon|composition)/i.test(t);
+        m["u:"+h]=h;hid[h]=1;if(same){m["t:"+t]=t;hidT[t]=1}
+        try{localStorage.setItem("museaal.hidden",JSON.stringify(m))}catch(x){}
+        if(window.goatcounter&&goatcounter.count)goatcounter.count({path:"home-hide",event:true});
+        if(same)Array.prototype.forEach.call(row0.querySelectorAll(".fs-w"),function(o){if(o!==a&&(o.querySelector("img")||{}).alt===t)o.remove()});
+        var g=document.createElement("div"),u=document.createElement("button");g.className="fs-w fs-gone";g.textContent=hideL[1]+" ";u.type="button";u.textContent=hideL[2];g.appendChild(u);
+        u.addEventListener("click",function(){var m=hidGet();delete m["u:"+h];delete m["t:"+t];delete hid[h];delete hidT[t];
+          try{localStorage.setItem("museaal.hidden",JSON.stringify(m))}catch(x){}row0.replaceChild(a,g)});
+        row0.replaceChild(g,a);u.focus();if(ends)ends()});
+      a.appendChild(b)};
       // a lead that turns out too tall gives its place to the next in line
       var lead=function(x){skip[x[0]]=1;saw(x);
         Array.prototype.forEach.call(row.querySelectorAll(".fs-w"),function(b){if(b.getAttribute("href")===x[0])b.remove()});
@@ -1028,7 +1054,7 @@ footer a{border-bottom:1px solid var(--rule)}
           if(++since===60){since=0;var m=el("a","fs-w fs-more",(document.querySelector(".fs-all[data-fs]")||{}).textContent||"All works for sale →");m.href="find";m.dataset.fs="";row.appendChild(m)}}}
       ends()};
     var near=function(){if(list)return fill();if(asked||!row.dataset.more||row.scrollLeft+row.clientWidth<row.scrollWidth-2*row.clientWidth)return;
-      asked=true;fetch(row.dataset.more).then(function(r){return r.json()}).then(function(l){list=l.filter(function(x){return !skip[x[0]]&&tall.indexOf(x[0])<0});fill()}).catch(function(){asked=false})};
+      asked=true;fetch(row.dataset.more).then(function(r){return r.json()}).then(function(l){list=l.filter(function(x){return !skip[x[0]]&&!out(x[0],x[2]+", "+x[3])});fill()}).catch(function(){asked=false})};
     row.addEventListener("scroll",function(){ends();near()},{passive:true});addEventListener("resize",ends);ends();
     // the hover picture, placed under its card (see .fs-pop); out of sight while the row or the page moves
     var on=null,place=function(){if(!on)return;var p=on.querySelector(".fs-pop"),c=on.getBoundingClientRect();if(!p)return;
