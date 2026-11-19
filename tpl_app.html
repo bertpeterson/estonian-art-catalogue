@@ -2744,7 +2744,8 @@
   qbox.addEventListener("focus", () => { if (qbox.value.trim().length >= 2 && sugg.innerHTML) sugg.hidden = false; });
 
   // the steer bar above the wall (tpl_head.html #steer): the mood chips and the decade slider
-  const steerEl = $("steer"), steerYr = $("steer-yr"); let steerT = null;
+  // parked (2026-11-19): the bar is in the page but hidden, and wired only with ?steer=1
+  const steerEl = /[?&]steer=1/.test(location.search) ? $("steer") : null, steerYr = $("steer-yr"); let steerT = null;
   const moodName = m => { const b = steerEl && steerEl.querySelector(`[data-m="${m}"]`); return b ? b.dataset[LANG === "en" ? "en" : "et"] : m; };
   function steerSync(){
     if (!steerEl) return;
@@ -2757,6 +2758,7 @@
   const steerLabel = () => { const v = +steerYr.value; $("steer-yv").textContent = v < 1800 ? (LANG === "en" ? "All years" : "Kõik aastad") : decS(v); };
   const steerCount = p => { if (window.goatcounter && goatcounter.count) goatcounter.count({path: p, event: true}); };
   if (steerEl){
+    steerEl.hidden = false;
     steerEl.addEventListener("click", e => {
       const b = e.target.closest("[data-m]"); if (!b) return;
       state.mood = state.mood === b.dataset.m ? null : b.dataset.m; state.open = null; state.expand.clear();

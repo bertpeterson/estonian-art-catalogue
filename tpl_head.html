@@ -237,6 +237,7 @@ h1 .wm-sub{display:block;margin-top:12px;font-family:var(--mono);font-weight:400
 .fs-more:hover{color:var(--ink);border-color:var(--ink)}
 /* steer the wall (draft, 2026-11-16): mood chips and a decade slider above it */
 .steer{display:flex;flex-wrap:wrap;align-items:center;gap:10px 32px;margin:16px 0 18px}
+.steer[hidden]{display:none}
 .steer-l{font-family:var(--mono);font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;color:var(--grey-6);margin-right:4px;white-space:nowrap}
 .steer-moods{display:flex;flex-wrap:wrap;align-items:center;gap:6px;min-width:0}
 .steer-moods button{padding:5px 12px;border:1px solid var(--rule);border-radius:99px;background:none;color:var(--ink-soft);font:inherit;font-size:.76rem;line-height:1.2;cursor:pointer;white-space:nowrap}
@@ -1331,7 +1332,7 @@ footer a{border-bottom:1px solid var(--rule)}
   </div>
 
   <!-- steer the wall (draft, 2026-11-16): a mood and a decade; the app's (tpl_app.html steerSync) -->
-  <div class="steer" id="steer">
+  <div class="steer" id="steer" hidden>
     <div class="steer-moods" role="group"><span class="steer-l" id="steer-ml">Mood</span><button type="button" data-m="serene" data-en="Serene" data-et="Rahulik" aria-pressed="false">Serene</button><button type="button" data-m="melancholy" data-en="Melancholy" data-et="Melanhoolne" aria-pressed="false">Melancholy</button><button type="button" data-m="joyful" data-en="Joyful" data-et="Rõõmus" aria-pressed="false">Joyful</button><button type="button" data-m="dreamy" data-en="Dreamy" data-et="Unenäoline" aria-pressed="false">Dreamy</button><button type="button" data-m="mysterious" data-en="Mysterious" data-et="Salapärane" aria-pressed="false">Mysterious</button><button type="button" data-m="dramatic" data-en="Dramatic" data-et="Dramaatiline" aria-pressed="false">Dramatic</button><button type="button" data-m="golden" data-en="Golden" data-et="Kuldne" aria-pressed="false">Golden</button><button type="button" data-m="moonlit" data-en="Moonlit" data-et="Kuuvalge" aria-pressed="false">Moonlit</button><button type="button" data-m="stormy" data-en="Stormy" data-et="Tormine" aria-pressed="false">Stormy</button><button type="button" data-m="wintry" data-en="Wintry" data-et="Talvine" aria-pressed="false">Wintry</button><a class="steer-more" id="steer-more" href="mood">All moods →</a></div>
     <label class="steer-time"><span class="steer-l" id="steer-yl">Decade</span><input type="range" id="steer-yr" min="1790" max="2020" step="10" value="1790"><b id="steer-yv">All years</b></label>
   </div>
