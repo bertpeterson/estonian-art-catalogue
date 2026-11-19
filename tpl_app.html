@@ -2149,6 +2149,7 @@
     });
     renderListBar();
     if ((state.list && state.listTab === "a") || state.saleUp) render();
+  window.__slToggle = slToggle;   // the home page's Buy Art row (tpl_head.html, saveb) saves through the app's own list
   }
   // My Artists (My List's artists half): each saved artist, what the catalogue holds of them, and under the name
   // what can be bought now -- their lots in sales to come, soonest first, then the galleries' stock, twelve at most

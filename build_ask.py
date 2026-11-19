@@ -339,7 +339,7 @@ function tasteSave(t){try{if(!t.n)return localStorage.removeItem('museaal.foryou
   var ix=[],o=[],seen={},i,w,tall=[];try{tall=JSON.parse(localStorage.getItem('museaal.tall')||'[]')||[]}catch(e){}   // too tall for the home row (tpl_head.html)
   for(i=0;i<t.s.length;i++)if(t.s[i]>0&&!t.in[D.works[i][11]]&&!HID[D.works[i][11]]&&D.works[i][3]&&tall.indexOf(D.works[i][10])<0)ix.push(i);
   var ds={};ix.forEach(function(i){ds[i]=t.s[i]*damp(D.works[i])});ix.sort(function(a,b){return ds[b]-ds[a]});
-  for(i=0;i<ix.length&&o.length<12;i++){w=D.works[ix[i]];if(seen[w[1]])continue;seen[w[1]]=1;o.push([w[10],w[3],w[0],D.artists[w[1]][0],w[8]||0,w[17]||'',w[18]||''])}
+  for(i=0;i<ix.length&&o.length<12;i++){w=D.works[ix[i]];if(seen[w[1]])continue;seen[w[1]]=1;o.push([w[10],w[3],w[0],D.artists[w[1]][0],w[8]||0,w[17]||'',w[18]||'',w[11]])}
   localStorage.setItem('museaal.foryou',JSON.stringify({at:Date.now(),w:o}))}catch(e){}}
 // On by default from three works on the list, unless this browser turned it off (find-fy: off); the stock's bytes
 // are fetched at once, beside stock.json, so the first ten wait for little more than the ranking. Default use counts
