@@ -3,14 +3,15 @@
 
 Tartu's E-Kunstisalong, the oldest private gallery in the country (1997), has held
 two sales a year since 1999 -- fifty-seven by 2026 -- and keeps a page per sale.
-From about 2018 the page lists the lots with the outcome on each:
+The page lists the lots with the outcome on each:
     Alg: € 1 500, lõpp: € 1 700     sold, with the hammer price
     Alg: € 2 500 müüdud              sold at the starting price
     Alg: € 1 600                     unsold
 Each lot card carries the artist, the lot number and title, and a line of year,
 technique and size ("1970. Õli, lõuend. 60 x 73. Signatuuriga."). The sale's date
-is on the list of sales ("14.05.2026 Tartu galeriis kell 17"). The earlier sales
-have a page but no lots on it; there is nothing to take from those.
+is on the list of sales ("14.05.2026 Tartu galeriis kell 17"). The sales from the
+second (1999) on have their lots, the kroon years' prices shown in euro; the first
+sale's page has none, and the 2004 charity sale's is a bare list in kroons, not read.
 
 The pages are ISO-8859-4. Sale pages are cached; a past sale does not change, but a
 sale not yet held is fetched again each run until it has results.
@@ -57,7 +58,9 @@ sales = []
 # each sale is a card: <a href='56_E-kunstisalongi_oksjon_13734'>...</div>56. E-Kunstisalongi oksjon<br><span class=autor>14.05.2026 Tartu galeriis kell 17</span></a>
 for m in re.finditer(r"<a href='([^']+)'[^>]*>(?:(?!</a>\s*</span>).)*?</div>\s*([^<]{3,80}?)<br><span class=autor>(\d{2})\.(\d{2})\.(\d{4})", index, re.S):
     url, name = m.group(1), clean(m.group(2))
-    if not re.search(r"oksjon", url + name, re.I): continue
+    # a sale is named an auction or numbered: the first twenty, 1999 to 2008, carry a title of their
+    # own ("20. Meistritase", "12. Meistrite teosed") and were passed over while only the word was looked for
+    if not (re.search(r"oksjon", url + name, re.I) or re.match(r"\d+\.\s", name)): continue
     sales.append((f"{BASE}/{url.lstrip('/')}", name, f"{m.group(5)}-{m.group(4)}-{m.group(3)}"))
 seen_urls = set(); sales = [s for s in sales if not (s[0] in seen_urls or seen_urls.add(s[0]))]
 print(f"E-KUNSTISALONG: {len(sales)} sales listed", flush=True)
@@ -121,6 +124,8 @@ for url, sale, date in sales:
         tech = next((t.strip(" ,.") for t in re.split(r"\.\s*", rest) if re.search(r"[A-Za-zÕÄÖÜõäöü]", t) and not re.search(r"signatuur|signeeri|raam|dateeri|numm|nimetu", t, re.I)), "")
         tech = re.sub(r",(?=\S)", ", ", tech)
         dims = (re.sub(r"\s*[x×]\s*", " x ", dm.group(1)).replace(",", ".") + " cm") if dm else ""
+        # the 19th sale (2007) prints kroons and euros together, "17500/1118", "15000 paar/959": the euro figure is taken
+        price = re.sub(r"\d[\d ]*(?:\s*paar)?\s*/\s*(\d)", r"\1", price)
         start = euros(re.split(r",|müüdud|lõpp", price)[0])
         hm = re.search(r"lõpp\s*:?\s*€?\s*([\d\s]+)", price)
         hammer = euros(hm.group(1)) if hm else (start if "müüdud" in price else None)
