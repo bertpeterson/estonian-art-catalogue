@@ -235,6 +235,41 @@ h1 .wm-sub{display:block;margin-top:12px;font-family:var(--mono);font-weight:400
 .fs-more{display:flex;align-items:center;justify-content:center;align-self:start;aspect-ratio:1;padding:12px;border:1px solid var(--rule);text-align:center;
   font-family:var(--mono);font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;color:var(--grey-6)}
 .fs-more:hover{color:var(--ink);border-color:var(--ink)}
+/* steer the wall (draft, 2026-11-16): mood chips and a decade slider above it */
+.steer{display:flex;flex-wrap:wrap;align-items:center;gap:10px 32px;margin:16px 0 18px}
+.steer-l{font-family:var(--mono);font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;color:var(--grey-6);margin-right:4px;white-space:nowrap}
+.steer-moods{display:flex;flex-wrap:wrap;align-items:center;gap:6px;min-width:0}
+.steer-moods button{padding:5px 12px;border:1px solid var(--rule);border-radius:99px;background:none;color:var(--ink-soft);font:inherit;font-size:.76rem;line-height:1.2;cursor:pointer;white-space:nowrap}
+.steer-moods button:hover{color:var(--ink);border-color:var(--ink)}
+.steer-moods button[aria-pressed="true"]{background:var(--invert-bg);color:var(--invert-fg);border-color:var(--invert-bg)}
+.steer-more{margin-left:6px;font-size:.72rem;color:var(--grey-6);white-space:nowrap}
+.steer-time{display:flex;align-items:center;gap:10px;flex:1 1 280px;min-width:240px}
+.steer-time input{flex:1;min-width:0;accent-color:var(--ink);cursor:pointer}
+.steer-time b{min-width:11ch;font-family:var(--mono);font-size:.7rem;font-weight:500;color:var(--ink);text-align:right;white-space:nowrap}
+@media(max-width:620px){.steer-moods{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;max-width:100%}.steer-moods::-webkit-scrollbar{display:none}}
+/* this or that (draft, 2026-11-16): two works for sale in the row's place, five times, for a visitor with no list;
+   then the row again, led by the works for sale nearest what was chosen */
+.tot[hidden],.tot-done[hidden]{display:none}
+.fs-row.tot-on .fs-works,.fs-row.tot-on .fs-arr{display:none}
+.tot-head{display:flex;align-items:baseline;justify-content:center;gap:12px;margin:0 0 12px}
+.tot-head b{font-family:var(--serif-text);font-weight:500;font-size:1.15rem}
+.tot-head span{font-family:var(--mono);font-size:.66rem;letter-spacing:.1em;color:var(--grey-6)}
+.tot-pair{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.tot-c{display:block;min-width:0;padding:0;border:0;background:none;color:inherit;font:inherit;text-align:center;cursor:pointer;transition:opacity .25s,transform .25s}
+.tot-c img{display:block;width:100%;height:clamp(150px,21vw,300px);object-fit:contain;transition:filter .15s}
+.tot-c:hover img,.tot-c:focus-visible img{filter:drop-shadow(0 6px 14px rgba(0,0,0,.28))}
+.tot-cap{display:block;padding-top:8px;font-size:.68rem;line-height:1.3;color:var(--grey-6)}
+.tot-cap i{display:block;font-family:var(--serif-text);font-size:.85rem;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tot-c:hover .tot-cap i{text-decoration:underline}
+.tot-c.on{transform:scale(1.03)}
+.tot-c.off{opacity:.2}
+.tot-foot{display:flex;gap:22px;justify-content:center;margin-top:12px}
+.tot-foot button,.tot-done button{padding:0 0 2px;border:0;border-bottom:1px solid var(--rule);background:none;cursor:pointer;font-family:var(--mono);font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;color:var(--grey-6)}
+.tot-foot button:hover,.tot-done button:hover{color:var(--ink);border-bottom-color:var(--ink)}
+.tot.wait .tot-pair,.tot.wait .tot-foot,.tot.wait #tot-n{visibility:hidden}
+/* under the row, in the panel's own bottom padding, so the row's arrows stay where they were */
+.tot-done{position:absolute;left:0;top:100%;margin:5px 0 0;font-size:.7rem;color:var(--grey-6);white-space:nowrap}
+.tot-done button{margin-left:8px}
 @media(hover:hover) and (min-width:621px){
   .fs-arr{display:flex;align-items:center;justify-content:center;position:absolute;top:calc((100% - 40px) / 2);transform:translateY(-50%);z-index:5;
     width:34px;height:34px;padding:0;border-radius:50%;border:1px solid var(--rule);background:var(--raise);color:var(--ink);
@@ -963,6 +998,12 @@ footer a{border-bottom:1px solid var(--rule)}
       <div class="fs-works" id="fs-works"></div>
       <button type="button" class="fs-arr fs-prev" aria-label="Previous works" hidden>&#8592;</button>
       <button type="button" class="fs-arr fs-next" aria-label="More works" hidden>&#8594;</button>
+      <div class="tot" id="tot" hidden>
+        <p class="tot-head"><b id="tot-q"></b><span id="tot-n"></span></p>
+        <div class="tot-pair"><button type="button" class="tot-c"></button><button type="button" class="tot-c"></button></div>
+        <p class="tot-foot"><button type="button" id="tot-skip"></button><button type="button" id="tot-off"></button></p>
+      </div>
+      <p class="tot-done" id="tot-done" hidden><span></span><button type="button"></button></p>
     </div>
   </section>
   <!-- right after the row, so it is in this view's order before the page is first drawn: further down, the
@@ -1073,6 +1114,77 @@ footer a{border-bottom:1px solid var(--rule)}
         a.addEventListener("click",function(){if(window.goatcounter&&goatcounter.count)goatcounter.count({path:"home-foryou-out",title:x[3],event:true})});
         return a};
       cands.splice(0,2).reverse().forEach(function(x){row.insertBefore(lead(x),row.firstChild)})})();
+    // this or that (draft, 2026-11-16): a visitor with no list is shown two paintings for sale from the row, five times,
+    // and the row then leads with the five works for sale nearest what they chose and furthest from what they passed
+    // over (the 48 bytes a picture that For you ranks by, build_ask.py; fetched at the first choice, with stock.json).
+    // Kept in this browser only (museaal.tot, thirty days); ?tot=1 shows it whatever is on My List
+    (function(){var box=document.getElementById("tot"),done=document.getElementById("tot-done"),wrap=row.parentNode,st=null,sl=0,ar=0,
+        force=/[?&]tot=1/.test(location.search),N=5,NV=48,data=null,play;
+      if(!box)return;
+      try{st=JSON.parse(localStorage.getItem("museaal.tot")||"null");sl=(JSON.parse(localStorage.getItem("museaal.shortlist")||"[]")||[]).length;
+        ar=(JSON.parse(localStorage.getItem("museaal.artists")||"[]")||[]).length}catch(e){}
+      if(!force)return;                    // parked (2026-11-16): only with ?tot=1
+      var T=function(){return document.documentElement.lang==="et"
+        ?{q:"Kumma riputaksid seinale?",skip:"Jäta vahele",off:"Näita lihtsalt teoseid",done:"Sinu viie valiku järgi",again:"Alusta uuesti",wait:"Otsin sarnaseid teoseid…"}
+        :{q:"Which would you hang?",skip:"Skip this pair",off:"Just show me the works",done:"Picked from your five choices",again:"Start over",wait:"Finding works like these…"}};
+      var keep=function(o){st=o;try{if(o)localStorage.setItem("museaal.tot",JSON.stringify(o));else localStorage.removeItem("museaal.tot")}catch(e){}};
+      var gc=function(p){if(window.goatcounter&&goatcounter.count)goatcounter.count({path:p,event:true})};
+      var each=function(q,f){Array.prototype.forEach.call(row.querySelectorAll(q),f)};
+      var stop=function(){wrap.classList.remove("tot-on");box.classList.remove("wait");box.hidden=true;ends()};
+      var lead=function(ws){each(".tot-w",function(b){b.remove()});
+        ws.slice().reverse().forEach(function(x){skip[x[0]]=1;each(".fs-w",function(b){if(b.getAttribute("href")===x[0])b.remove()});
+          var a=card(x);a.classList.add("tot-w");a.querySelector("img").loading="eager";row.insertBefore(a,row.firstChild);
+          a.addEventListener("click",function(){gc("home-tot-out")})});
+        row.scrollLeft=0;var t=T();done.firstElementChild.textContent=t.done;done.lastElementChild.textContent=t.again;done.hidden=false;ends()};
+      var load=function(){return data=data||Promise.all([fetch("data/stock.json").then(function(r){if(!r.ok)throw 0;return r.json()}),
+          fetch("data/taste-stock.bin").then(function(r){if(!r.ok)throw 0;return r.arrayBuffer()})]).then(function(r){
+        var a=new Int8Array(r[1]),ix={};r[0].works.forEach(function(w,i){ix[w[10]]=i});
+        return {D:r[0],ix:ix,V:r[0].works.map(function(w,i){var v=new Float32Array(NV),n=0,d;for(d=0;d<NV;d++){v[d]=a[i*NV+d]||0;n+=v[d]*v[d]}
+          if(!n)return null;n=Math.sqrt(n);for(d=0;d<NV;d++)v[d]/=n;return v})}}).catch(function(e){data=null;throw e})};
+      play=function(){
+        var pool=[],liked=[],no=[],shown={},k=0,R=null,busy=false,cs=box.querySelectorAll(".tot-c"),t=T();
+        each(".fs-w[data-p]",function(c){var i=c.querySelector("img"),n=c.querySelector(".fs-cap i"),a=c.querySelector(".fs-cap span");
+          if(i&&n&&a)pool.push({h:c.getAttribute("href"),src:i.getAttribute("src"),tb:i.dataset.tb||"",t:n.textContent,a:a.textContent})});
+        if(pool.length<2*N)return;
+        for(var i=pool.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),x=pool[i];pool[i]=pool[j];pool[j]=x}
+        var need=function(){load().then(function(r){R=r},function(){})};
+        var sim=function(x,y){var u=R.V[R.ix[x.h]],v=R.V[R.ix[y.h]],s=0,d;if(!u||!v)return 0;for(d=0;d<NV;d++)s+=u[d]*v[d];return s};
+        // the second of a pair is the least like the first among the next eight, once the bytes are here: a choice
+        // between two alike says little
+        var deal=function(){var a=pool.shift(),j=0,best=2;if(R)pool.slice(0,8).forEach(function(y,i){var s=sim(a,y);if(s<best){best=s;j=i}});
+          [a,pool.splice(j,1)[0]].forEach(function(x,i){var c=cs[i],im=pic(x.src,x.tb),cap=el("span","tot-cap");c.className="tot-c";c.textContent="";c._x=x;shown[x.h]=1;
+            im.loading="eager";im.alt=x.t+", "+x.a;c.appendChild(im);cap.appendChild(el("i","",x.t));cap.appendChild(el("span","",x.a));c.appendChild(cap)});
+          document.getElementById("tot-n").textContent=(k+1)+" / "+N;busy=false};
+        var finish=function(){if(!liked.length){keep({off:1,at:Date.now()});return stop()}
+          box.classList.add("wait");document.getElementById("tot-q").textContent=T().wait;
+          load().then(function(r){var W=r.D.works,n=W.length,s=new Float32Array(n),i,o=[],ws=[],seen={};
+            // the answers come from where the questions did: paintings by artists the museums hold (the pairs are the
+            // most-held names; the whole stock's nearest were mostly new names from one gallery, 2026-11-16). A work
+            // scores by its nearness to the chosen pictures (the nearest, and half the next), less half its nearness
+            // to the ones passed over, and a little by how much of the artist the museums hold
+            var vs=function(l){return l.map(function(x){return r.V[r.ix[x.h]]}).filter(Boolean)},lv=vs(liked),nv=vs(no),A=r.D.artists;
+            var cos=function(u,v){var y=0,d;for(d=0;d<NV;d++)y+=u[d]*v[d];return y};
+            if(!lv.length)throw 0;
+            for(i=0;i<n;i++){var v=r.V[i],w0=W[i],h=A[w0[1]][2]||0;
+              if(!v||h<3||w0[7]!=="paint"||!w0[3]||w0[8]<150||w0[8]>20000||shown[w0[10]]||tall.indexOf(w0[10])>=0)continue;
+              var b1=-1,b2=-1,m=0;lv.forEach(function(u){var c=cos(u,v);if(c>b1){b2=b1;b1=c}else if(c>b2)b2=c});nv.forEach(function(u){m+=cos(u,v)/nv.length});
+              s[i]=(b1+(b2>-1?.5*b2:.5*b1))/1.5-.5*m+.04*Math.min(1,Math.log(1+h)/Math.log(101));o.push(i)}
+            o.sort(function(a,b){return s[b]-s[a]});
+            for(i=0;i<o.length&&ws.length<N;i++){var w=W[o[i]];if(seen[w[1]])continue;seen[w[1]]=1;ws.push([w[10],w[3],w[0],r.D.artists[w[1]][0],w[8],w[17]||""])}
+            keep({at:Date.now(),w:ws});gc("home-tot-done");stop();lead(ws)}).catch(function(){stop()})};
+        var next=function(){if(++k>=N||pool.length<2)return finish();deal()};
+        box.onclick=function(e){var c=e.target.closest(".tot-c");
+          if(c){if(busy)return;busy=true;var i=c===cs[0]?0:1;if(!liked.length)gc("home-tot-start");liked.push(cs[i]._x);no.push(cs[1-i]._x);
+            cs[i].classList.add("on");cs[1-i].classList.add("off");need();setTimeout(next,380)}
+          else if(e.target.id==="tot-skip"){if(busy)return;if(pool.length<2)finish();else deal()}
+          else if(e.target.id==="tot-off"){keep({off:1,at:Date.now()});gc("home-tot-off");stop()}};
+        document.getElementById("tot-q").textContent=t.q;document.getElementById("tot-skip").textContent=t.skip;document.getElementById("tot-off").textContent=t.off;
+        done.hidden=true;wrap.classList.add("tot-on");box.hidden=false;deal()};
+      done.lastElementChild.addEventListener("click",function(){keep(null);done.hidden=true;each(".tot-w",function(b){b.remove()});gc("home-tot-again");play()});
+      var live=st&&Date.now()-st.at<30*864e5;
+      if(live&&st.w&&st.w.length)return lead(st.w);
+      if(live&&st.off&&!force)return;
+      play()})();
     var fill=function(){
       while(at<list.length&&row.scrollLeft+row.clientWidth>row.scrollWidth-2*row.clientWidth){
         for(var k=0;k<12&&at<list.length;k++){row.appendChild(card(list[at++]));
@@ -1216,6 +1328,12 @@ footer a{border-bottom:1px solid var(--rule)}
   <div class="salesw" id="salesw" role="group" hidden>
     <button id="su-gal" aria-pressed="true"><b id="su-gal-n">0</b><span class="su-k" data-i18n="sale_gal"></span><span class="su-v" data-i18n="sale_gal_v"></span></button>
     <button id="su-up" aria-pressed="false"><b id="su-up-n">0</b><span class="su-k" data-i18n="up_head"></span><span class="su-v" id="su-up-v"></span></button>
+  </div>
+
+  <!-- steer the wall (draft, 2026-11-16): a mood and a decade; the app's (tpl_app.html steerSync) -->
+  <div class="steer" id="steer">
+    <div class="steer-moods" role="group"><span class="steer-l" id="steer-ml">Mood</span><button type="button" data-m="serene" data-en="Serene" data-et="Rahulik" aria-pressed="false">Serene</button><button type="button" data-m="melancholy" data-en="Melancholy" data-et="Melanhoolne" aria-pressed="false">Melancholy</button><button type="button" data-m="joyful" data-en="Joyful" data-et="Rõõmus" aria-pressed="false">Joyful</button><button type="button" data-m="dreamy" data-en="Dreamy" data-et="Unenäoline" aria-pressed="false">Dreamy</button><button type="button" data-m="mysterious" data-en="Mysterious" data-et="Salapärane" aria-pressed="false">Mysterious</button><button type="button" data-m="dramatic" data-en="Dramatic" data-et="Dramaatiline" aria-pressed="false">Dramatic</button><button type="button" data-m="golden" data-en="Golden" data-et="Kuldne" aria-pressed="false">Golden</button><button type="button" data-m="moonlit" data-en="Moonlit" data-et="Kuuvalge" aria-pressed="false">Moonlit</button><button type="button" data-m="stormy" data-en="Stormy" data-et="Tormine" aria-pressed="false">Stormy</button><button type="button" data-m="wintry" data-en="Wintry" data-et="Talvine" aria-pressed="false">Wintry</button><a class="steer-more" id="steer-more" href="mood">All moods →</a></div>
+    <label class="steer-time"><span class="steer-l" id="steer-yl">Decade</span><input type="range" id="steer-yr" min="1790" max="2020" step="10" value="1790"><b id="steer-yv">All years</b></label>
   </div>
 
   <main id="register"></main>

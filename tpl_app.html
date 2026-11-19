@@ -379,7 +379,7 @@
                   : s==="cca" ? '<span class="tag">CCA</span>' : '<span class="tag">MuIS</span>';
 
   const state = {group:"decade", decOrder:"earliest", q:"", list:false, listTab:"w", shared:null, sale:false,
-                 view:null, viewKey:"", wLimit:72,   // the artwall: chosen for one view (viewKey), or null for the rule
+                 mood:null, view:null, viewKey:"", wLimit:72,   // the artwall: chosen for one view (viewKey), or null for the rule
                  aLimit:new Map(),   // artist by artist on the wall: pictures shown per artist beyond the first ten
                  decade:null, media:new Set(), museums:new Set(), cats:new Set(), srcs:new Set(),
                  artist:null, sub:null, letter:null, idxOpen:false, idxQ:"", idxLimit:120, idxSort:"az", showEarly:false, origins:new Set(), groups:new Set(), sort:"featured", onWall:false, year:null, gLimit:50, from:null, to:null, undOnly:false, open:null, expand:new Set(),
@@ -431,6 +431,7 @@
     if (state.sub) p.set("sub", state.sub);
     if (state.year !== null) p.set("year", state.year);
     if (state.from !== null) p.set("from", state.from);
+    if (state.mood) p.set("mood", state.mood);
     if (state.to !== null) p.set("to", state.to);
     if (state.undOnly) p.set("undated", "1");
     state.media.forEach(v => p.append("medium", slug(v)));
@@ -483,6 +484,7 @@
     state.year = yr && isFinite(+yr) ? +yr : null;
     const nOrNull = v => (v && isFinite(+v)) ? +v : null;
     state.from = nOrNull(p.get("from"));
+    state.mood = /^[a-z]{2,20}$/.test(p.get("mood") || "") ? p.get("mood") : null; if (state.mood) loadMoods();
     state.to   = nOrNull(p.get("to"));
     state.undOnly = p.get("undated") === "1";
     state.sub = I18N.SUBJECTS.some(s => s[0] === p.get("sub")) ? p.get("sub") : null;
@@ -577,7 +579,18 @@
     return !_subSet || _subSet.has(w);
   };
   const subName = sl => { const s = I18N.SUBJECTS.find(s => s[0] === sl); return s ? (LANG === "et" ? s[3] : s[2]) : sl; };
-  const inList = w => { const k = listKeys(); return (!k || k.has(w.k)) && (!state.sale || w.kind === "gallery") && subOk(w); };
+  // steer the wall (draft, 2026-11-16): a mood from art by mood's lists (the 400 museum paintings that answer to a word
+  // most, data/moods.py), fetched at the first choice; the wall then holds those, the nearest first. With a decade
+  // from the slider beside it, the two together
+  let MOODS = null, moodP = null, moodC = [null, null];
+  const loadMoods = () => moodP = moodP || fetch("data/mood-paint.json").then(r => { if (!r.ok) throw 0; return r.json(); })
+    .then(d => { MOODS = d; renderAll(); }).catch(() => { moodP = null; state.mood = null; renderAll(); });
+  const moodKeys = () => {
+    if (!state.mood || !MOODS) return null;
+    if (moodC[0] !== state.mood) moodC = [state.mood, new Map((MOODS.lists[state.mood] || []).map((x, i) => [MOODS.works[x[0]][6], i]))];
+    return moodC[1];
+  };
+  const inList = w => { const k = listKeys(), mk = moodKeys(); return (!k || k.has(w.k)) && (!mk || mk.has(w.k)) && (!state.sale || w.kind === "gallery") && subOk(w); };
   // a work offered at auction more than once is one row: the latest lot, with the
   // earlier results in its detail (the stats page still counts every lot)
   // an auction lot's sales of the same work, chained when a record first asks (not at start)
@@ -768,6 +781,7 @@
     const chips = [];
     const add = (label, clear) => chips.push({label, clear});
     if (state.artist !== null) add(A[state.artist].n, () => state.artist = null);
+    if (state.mood) add(moodName(state.mood), () => state.mood = null);
     if (state.decade !== null) add(state.decade === "und" ? T("undated") : decS(state.decade),
                                    () => { state.decade = null; state.year = null; });
     if (state.year !== null) add(String(state.year), () => state.year = null);
@@ -1281,7 +1295,7 @@
   // a wall tile's placeholder until window.__lz gives it its picture
   const PH = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
   function render(){
-    noteSeen(state.open); mixCheck();
+    noteSeen(state.open); mixCheck(); steerSync();
     const sel = state.open ? `.row-btn[data-id="${CSS.escape(state.open)}"]` : null;
     const was = sel && document.querySelector(sel);
     const top = was ? was.getBoundingClientRect().top : null;
@@ -1709,7 +1723,7 @@
   const PCOUNT = DOOR_PERIODS.map(([lo, hi]) => W.reduce((n, w) =>
     n + (w.y != null && (lo === null || w.y >= lo) && w.y <= hi ? 1 : 0), 0));
 
-  const pristine = () => !state.q && !listKeys() && !state.sale && state.decade === null && state.artist === null && !state.sub
+  const pristine = () => !state.q && !state.mood && !listKeys() && !state.sale && state.decade === null && state.artist === null && !state.sub
     && state.letter === null && state.from === null && state.to === null && state.year === null
     && !state.undOnly && !state.media.size && !state.museums.size && !state.cats.size
     && !state.srcs.size && !state.origins.size && !state.groups.size;
@@ -1921,7 +1935,7 @@
   // with the List / Wall buttons, the choice holds and travels in the link.
   // A List / Artwall choice belongs to the view it was made on: change the artist,
   // the decade, the search or a filter and the rule decides again.
-  const scopeKey = () => JSON.stringify([state.group, state.artist, state.decade, state.year, state.q, state.sub, state.from, state.to, state.undOnly,
+  const scopeKey = () => JSON.stringify([state.mood, state.group, state.artist, state.decade, state.year, state.q, state.sub, state.from, state.to, state.undOnly,
     state.sale, state.saleUp, state.list, [...state.media], [...state.museums], [...state.cats], [...state.srcs], [...state.origins], [...state.groups]]);
   function wallMode(set, nPics){
     if (state.group === "auction" || !nPics) return false;
@@ -2051,6 +2065,7 @@
     }
     let ordered = strict ? unique : inner.map(x => [x[0], x[1], medRank(x[0]), turn(x[0]), tier(x[0]), mixed ? hash(x[0].k) : 0])
       .sort((a, b) => mp(a[0]) - mp(b[0]) || hl(a[0]) - hl(b[0]) || a[4] - b[4] || a[3] - b[3] || rep.get(a[0]) - rep.get(b[0]) || a[2] - b[2] || a[5] - b[5] || a[1] - b[1]).map(x => x[0]);
+    { const mk = moodKeys(); if (mk && !strict && !opt.cols) ordered = [...unique].sort((x, y) => mk.get(x.k) - mk.get(y.k)); }   // a mood: the nearest to the word first
     // ...and after My List, the deal for you (mixCheck): three heavyweights, two look-alikes and a wildcard a
     // row of six, for the first page; the rest keep their places below. With artists saved, one look-alike a row
     // gives way to more by those artists themselves (A): their key works first, in an order of the visit, taking turns
@@ -2728,6 +2743,36 @@
   document.addEventListener("click", e => { if (!e.target.closest(".search")) { sugg.hidden = true; qbox.setAttribute("aria-expanded", "false"); } });
   qbox.addEventListener("focus", () => { if (qbox.value.trim().length >= 2 && sugg.innerHTML) sugg.hidden = false; });
 
+  // the steer bar above the wall (tpl_head.html #steer): the mood chips and the decade slider
+  const steerEl = $("steer"), steerYr = $("steer-yr"); let steerT = null;
+  const moodName = m => { const b = steerEl && steerEl.querySelector(`[data-m="${m}"]`); return b ? b.dataset[LANG === "en" ? "en" : "et"] : m; };
+  function steerSync(){
+    if (!steerEl) return;
+    steerEl.querySelectorAll("[data-m]").forEach(b => { b.textContent = b.dataset[LANG === "en" ? "en" : "et"]; b.setAttribute("aria-pressed", state.mood === b.dataset.m); });
+    const more = $("steer-more"); more.textContent = LANG === "en" ? "All moods →" : "Kõik meeleolud →"; more.href = LANG === "en" ? "mood" : "meeleolu";
+    $("steer-ml").textContent = LANG === "en" ? "Mood" : "Meeleolu"; $("steer-yl").textContent = LANG === "en" ? "Decade" : "Kümnend";
+    if (steerT === null) steerYr.value = typeof state.decade === "number" ? Math.max(1800, Math.min(2020, state.decade)) : 1790;
+    steerLabel();
+  }
+  const steerLabel = () => { const v = +steerYr.value; $("steer-yv").textContent = v < 1800 ? (LANG === "en" ? "All years" : "Kõik aastad") : decS(v); };
+  const steerCount = p => { if (window.goatcounter && goatcounter.count) goatcounter.count({path: p, event: true}); };
+  if (steerEl){
+    steerEl.addEventListener("click", e => {
+      const b = e.target.closest("[data-m]"); if (!b) return;
+      state.mood = state.mood === b.dataset.m ? null : b.dataset.m; state.open = null; state.expand.clear();
+      if (state.mood){ steerCount("home-mood-" + state.mood); if (!MOODS){ steerSync(); loadMoods(); pushHash(); return; } }
+      renderAll(); pushHash();
+    });
+    // the wall follows the thumb, a moment behind; the link is written when it is let go
+    const steerApply = () => {
+      steerT = null; const v = +steerYr.value, d = v < 1800 ? null : v; if (d === state.decade) return;
+      state.decade = d; state.year = null; state.open = null; state.expand.clear();
+      if (d !== null){ state.from = state.to = null; state.undOnly = false; setGroup("decade"); }
+      renderAll();
+    };
+    steerYr.addEventListener("input", () => { steerLabel(); clearTimeout(steerT); steerT = setTimeout(steerApply, 140); });
+    steerYr.addEventListener("change", () => { clearTimeout(steerT); steerApply(); pushHash(); steerCount("home-decade-slide"); });
+  }
   function setGroup(g){
     // the ledger opens by hammer price, highest first; leaving it goes back to the
     // decade view's own default, earliest first by year
@@ -2812,7 +2857,7 @@
   });
   $("reset").addEventListener("click", () => {
     state.q=""; state.decade=null; state.sub=null; state.media.clear(); state.museums.clear(); state.cats.clear(); state.srcs.clear(); state.origins.clear(); state.groups.clear();
-    state.artist=null; state.letter=null; state.idxOpen=false; state.sort="featured"; state.year=null; state.from=null; state.to=null; state.undOnly=false; $("sortby").value="year";
+    state.artist=null; state.mood=null; state.letter=null; state.idxOpen=false; state.sort="featured"; state.year=null; state.from=null; state.to=null; state.undOnly=false; $("sortby").value="year";
     state.open=null; state.expand.clear(); state.decOrder="earliest";
     state.list=false; state.shared=null; state.sale=false; state.saleUp=false; state.view=null; state.wLimit=72; state.aLimit.clear();
     $("q").value=""; setGroup("decade"); renderAll(); pushHash(); window.scrollTo({top:0,behavior:"auto"});
