@@ -85,6 +85,10 @@ for s, txt in re.findall(r'href="(?:' + BASE + r')?/k/oksjonid/([^/"]+)/"[^>]*>(
     if s not in slugs: slugs.append(s)
     d = re.match(r"\s*(\d{1,2})\.(\d{1,2})", txt)                  # the home page names a coming day: "08.10 — Graafika"
     if d: HOME_DAY[s] = (int(d.group(1)), int(d.group(2)))
+# a sale of November 2023 keeps its page and results but is linked from the home page no longer. (So is the charity
+# sale for ELL of that October, five lots whose titles name no artist: not read.)
+for s in ("viimsi-kunstnike-oksjon",):
+    if s not in slugs: slugs.append(s)
 print(f"EKO: {len(slugs)} sales linked", flush=True)
 
 # the day a coming sale was given (from the home page) is gone once the sale is over; the last
