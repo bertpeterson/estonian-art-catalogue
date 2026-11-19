@@ -1,0 +1,37 @@
+#!/bin/bash
+# Before a push to main: build the commit being pushed and open it in headless Chrome,
+# the same two steps pages.yml runs before it deploys. A commit that would stop the
+# deploy stops here instead (twice in November 2026 a function set below its first use
+# got as far as CI). About three minutes.
+#
+#   turn on, once per clone:   git config core.hooksPath .githooks
+#   push without it:           git push --no-verify
+#
+# The commit is built in a checkout of its own (.git/prepush-wt), so drafts in the
+# working tree are not what is tested and a build running in site/ is not disturbed.
+while read -r local_ref local_sha remote_ref remote_sha; do
+  [ "$remote_ref" = "refs/heads/main" ] || continue
+  case "$local_sha" in *[!0]*) ;; *) continue ;; esac   # all zeros: a delete
+  sha="$local_sha"
+done
+[ -n "$sha" ] || exit 0
+
+root="$(git rev-parse --show-toplevel)"
+wt="$(cd "$(git rev-parse --git-common-dir)" && pwd)/prepush-wt"
+log="$wt.log"
+unset GIT_DIR GIT_WORK_TREE GIT_INDEX_FILE
+cd "$root" || exit 1
+git worktree remove --force "$wt" 2>/dev/null; rm -rf "$wt"
+git worktree add -q --detach "$wt" "$sha" || { echo "pre-push: no checkout of $sha"; exit 1; }
+trap 'cd "$root"; git worktree remove --force "$wt" 2>/dev/null; rm -rf "$wt"' EXIT
+
+echo "pre-push: building ${sha:0:7} and opening it in headless Chrome (about 3 min; --no-verify skips)"
+cd "$wt" || exit 1
+if ! ./build_site.sh > "$log" 2>&1; then
+  tail -15 "$log"; echo "pre-push: the build of ${sha:0:7} failed, nothing pushed. Full log: $log"; exit 1
+fi
+if ! node check_site.js site >> "$log" 2>&1; then
+  grep -E "^FAIL|rror" "$log" | tail -20
+  echo "pre-push: the smoke test of ${sha:0:7} failed, nothing pushed. Full log: $log"; exit 1
+fi
+echo "pre-push: ${sha:0:7} builds and renders"
