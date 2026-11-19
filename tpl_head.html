@@ -1004,6 +1004,25 @@ footer a{border-bottom:1px solid var(--rule)}
           try{localStorage.setItem("museaal.hidden",JSON.stringify(m))}catch(x){}row0.replaceChild(a,g)});
         row0.replaceChild(g,a);u.focus();if(ends)ends()});
       a.appendChild(b)};
+    // and My List's bookmark on each tile (k: the work's key, as in Buy Art and the register): through the app's own list
+    // once the app is here (tpl_app.html slToggle, which marks every bookmark of the work), and straight into this
+    // browser's list before that, where the app will read it
+    var slGet=function(){try{var l=JSON.parse(localStorage.getItem("museaal.shortlist")||"[]");return Array.isArray(l)?l.filter(function(k){return typeof k==="string"}):[]}catch(e){return []}};
+    var slMark=function(b,on){var l=document.documentElement.lang==="et"?["Lisa minu nimekirja","Eemalda minu nimekirjast"]:["Add to My List","Remove from My List"];
+      b.setAttribute("aria-pressed",String(on));b.title=l[on?1:0];b.setAttribute("aria-label",l[on?1:0])};
+    var slAll=function(){var l=slGet();Array.prototype.forEach.call(row0.querySelectorAll(".fs-save"),function(b){slMark(b,l.indexOf(b.dataset.sl)>=0)})};
+    var saveb=function(a,k){if(!k||a.classList.contains("fs-more"))return;var b=document.createElement("button");b.type="button";b.className="sl fs-save";b.dataset.sl=k;
+      b.innerHTML='<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 2h8v12l-4-3-4 3z"/></svg>';slMark(b,slGet().indexOf(k)>=0);
+      b.addEventListener("click",function(e){e.preventDefault();e.stopPropagation();
+        if(window.__slToggle)window.__slToggle(k);
+        else{var l=slGet(),i=l.indexOf(k);if(i>=0)l.splice(i,1);else l.push(k);
+          try{localStorage.setItem("museaal.shortlist",JSON.stringify(l))}catch(x){}
+          if(window.museaalList)museaalList.changed();
+          var m=document.getElementById("mylist");if(m)m.textContent=m.textContent.replace(/ \(\d+\)$/,"")+(l.length?" ("+l.length+")":"")}
+        slAll();
+        if(slGet().indexOf(k)>=0&&window.goatcounter&&goatcounter.count)goatcounter.count({path:"list-add-home",title:"list-add-home",event:true})});
+      a.appendChild(b)};
+    addEventListener("museaal:list",slAll);
     var watch=function(a,gone){var i=a.querySelector("img");if(!i)return;
       var f=function(){if(!i.naturalWidth||i.naturalHeight/i.naturalWidth/tbk(i.dataset.tb)<1.8)return;var h=a.getAttribute("href");
         if(tall.indexOf(h)<0){tall.unshift(h);tall=tall.slice(0,400);try{localStorage.setItem("museaal.tall",JSON.stringify(tall))}catch(e){}}
@@ -1045,25 +1064,6 @@ footer a{border-bottom:1px solid var(--rule)}
       var key=function(x){return (x[3]+"|"+x[2]).toLowerCase()},n=function(x){var s=m[key(x)];return s?(s[0]-(s[1]===d?1:0))*Math.max(0,1-(d-s[1])/21):0};
       var cands=c.w.map(function(x,i){return [n(x),i,x]}).filter(function(p){return !out(p[2][0],p[2][2]+", "+p[2][3])}).sort(function(a,b){return a[0]-b[0]||a[1]-b[1]}).map(function(p){return p[2]});
       var saw=function(x){var k=key(x),s=m[k];if(!s||s[1]!==d)m[k]=[(s&&d-s[1]<21?s[0]:0)+1,d];try{localStorage.setItem("museaal.fyseen",JSON.stringify(m))}catch(e){}};
-    // and My List's bookmark on each tile (k: the work's key, as in Buy Art and the register): through the app's own list
-    // once the app is here (tpl_app.html slToggle, which marks every bookmark of the work), and straight into this
-    // browser's list before that, where the app will read it
-    var slGet=function(){try{var l=JSON.parse(localStorage.getItem("museaal.shortlist")||"[]");return Array.isArray(l)?l.filter(function(k){return typeof k==="string"}):[]}catch(e){return []}};
-    var slMark=function(b,on){var l=document.documentElement.lang==="et"?["Lisa minu nimekirja","Eemalda minu nimekirjast"]:["Add to My List","Remove from My List"];
-      b.setAttribute("aria-pressed",String(on));b.title=l[on?1:0];b.setAttribute("aria-label",l[on?1:0])};
-    var slAll=function(){var l=slGet();Array.prototype.forEach.call(row0.querySelectorAll(".fs-save"),function(b){slMark(b,l.indexOf(b.dataset.sl)>=0)})};
-    var saveb=function(a,k){if(!k||a.classList.contains("fs-more"))return;var b=document.createElement("button");b.type="button";b.className="sl fs-save";b.dataset.sl=k;
-      b.innerHTML='<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 2h8v12l-4-3-4 3z"/></svg>';slMark(b,slGet().indexOf(k)>=0);
-      b.addEventListener("click",function(e){e.preventDefault();e.stopPropagation();
-        if(window.__slToggle)window.__slToggle(k);
-        else{var l=slGet(),i=l.indexOf(k);if(i>=0)l.splice(i,1);else l.push(k);
-          try{localStorage.setItem("museaal.shortlist",JSON.stringify(l))}catch(x){}
-          if(window.museaalList)museaalList.changed();
-          var m=document.getElementById("mylist");if(m)m.textContent=m.textContent.replace(/ \(\d+\)$/,"")+(l.length?" ("+l.length+")":"")}
-        slAll();
-        if(slGet().indexOf(k)>=0&&window.goatcounter&&goatcounter.count)goatcounter.count({path:"list-add-home",title:"list-add-home",event:true})});
-      a.appendChild(b)};
-    addEventListener("museaal:list",slAll);
       // a lead that turns out too tall gives its place to the next in line
       var lead=function(x){skip[x[0]]=1;saw(x);
         Array.prototype.forEach.call(row.querySelectorAll(".fs-w"),function(b){if(b.getAttribute("href")===x[0])b.remove()});
