@@ -7,7 +7,7 @@
 #   turn on, once per clone:   git config core.hooksPath .githooks
 #   push without it:           git push --no-verify
 #
-# The commit is built in a checkout of its own (.git/prepush-wt), so drafts in the
+# The commit is built in a checkout of its own (.git/prepush-wt.*), so drafts in the
 # working tree are not what is tested and a build running in site/ is not disturbed.
 while read -r local_ref local_sha remote_ref remote_sha; do
   [ "$remote_ref" = "refs/heads/main" ] || continue
@@ -17,11 +17,13 @@ done
 [ -n "$sha" ] || exit 0
 
 root="$(git rev-parse --show-toplevel)"
-wt="$(cd "$(git rev-parse --git-common-dir)" && pwd)/prepush-wt"
+# a folder of this run's own: two pushes at once (two sessions, or the app's button and a shell) each keep theirs
+gd="$(cd "$(git rev-parse --git-common-dir)" && pwd)"
+wt="$(mktemp -d "$gd/prepush-wt.XXXXXX")" || exit 1
 log="$wt.log"
 unset GIT_DIR GIT_WORK_TREE GIT_INDEX_FILE
 cd "$root" || exit 1
-git worktree remove --force "$wt" 2>/dev/null; rm -rf "$wt"
+rmdir "$wt"
 git worktree add -q --detach "$wt" "$sha" || { echo "pre-push: no checkout of $sha"; exit 1; }
 trap 'cd "$root"; git worktree remove --force "$wt" 2>/dev/null; rm -rf "$wt"' EXIT
 
